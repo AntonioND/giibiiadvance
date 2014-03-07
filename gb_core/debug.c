@@ -142,7 +142,7 @@ void GB_DebugClearBreakpointAll(void)
 //----------------------------------------------------------------------------------
 
 // 3 = jump relative (1 byte)
-const int debug_command_param_size[256] = {
+static const int debug_command_param_size[256] = {
     0, 2, 0, 0, 0, 0, 1, 0, 2, 0, 0, 0, 0, 0, 1, 0,
     1, 2, 0, 0, 0, 0, 1, 0, 3, 0, 0, 0, 0, 0, 1, 0,
     3, 2, 0, 0, 0, 0, 1, 0, 3, 0, 0, 0, 0, 0, 1, 0,
@@ -159,9 +159,9 @@ const int debug_command_param_size[256] = {
     0, 0, 2, 0, 2, 0, 1, 0, 0, 0, 2, 0, 2, 0, 1, 0,
     1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 2, 0, 0, 0, 1, 0,
     1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 2, 0, 0, 0, 1, 0
-    };
+};
 
-const char * debug_commands[256] = {
+static const char * debug_commands[256] = {
     "nop", "ld bc,#0x%04X", "ld [bc],a", "inc bc", "inc b", "dec b", "ld b,#0x%02X", "rlca",
     "ld [#0x%04X],sp", "add hl,bc", "ld a,[bc]", "dec bc", "inc c", "dec c", "ld c,#0x%02X", "rrca",
     NULL, "ld de,#0x%04X", "ld [de],a", "inc de", "inc d", "dec d", "ld d,#0x%02X", "rla",
@@ -198,7 +198,7 @@ const char * debug_commands[256] = {
     "[!] Undefined opcode", "[!] Undefined opcode", "cp a,#0x%02X", "rst #0x38"
 };
 
-const char * debug_commands_cb[256] = {
+static const char * debug_commands_cb[256] = {
     "rlc b", "rlc c", "rlc d", "rlc e", "rlc h", "rlc l", "rlc [hl]", "rlc a",
     "rrc b", "rrc c", "rrc d", "rrc e", "rrc h", "rrc l", "rrc [hl]", "rrc a",
     "rl b", "rl c", "rl d", "rl e", "rl h", "rl l", "rl [hl]", "rl a",
@@ -251,7 +251,7 @@ const char * debug_commands_cb[256] = {
 #define COND_NC    (3<<16)
 #define COND_C     (4<<16)
 
-const int debug_commands_info[256] = {
+static const int debug_commands_info[256] = {
     OP_NONE, OP_NONE, RW_BC, OP_NONE, OP_NONE, OP_NONE, OP_NONE, OP_NONE,
     RW_INST, OP_NONE, RW_BC, OP_NONE, OP_NONE, OP_NONE, OP_NONE, OP_NONE,
     OP_NONE, OP_NONE, RW_DE, OP_NONE, OP_NONE, OP_NONE, OP_NONE, OP_NONE,
@@ -286,7 +286,7 @@ const int debug_commands_info[256] = {
     OP_NONE, OP_NONE, RW_INST, OP_NONE, OP_NONE, OP_NONE, OP_NONE, OP_CALL
 };
 
-const int debug_commands_cb_info[256] = {
+static const int debug_commands_cb_info[256] = {
     OP_NONE, OP_NONE, OP_NONE, OP_NONE, OP_NONE, OP_NONE, RW_HL, OP_NONE,
     OP_NONE, OP_NONE, OP_NONE, OP_NONE, OP_NONE, OP_NONE, RW_HL, OP_NONE,
     OP_NONE, OP_NONE, OP_NONE, OP_NONE, OP_NONE, OP_NONE, RW_HL, OP_NONE,

@@ -38,6 +38,7 @@
 #include "../gb_core/debug.h"
 #include "../gb_core/gb_main.h"
 #include "../gb_core/interrupts.h"
+#include "../gb_core/video.h"
 
 #include "../gba_core/gba.h"
 #include "../gba_core/bios.h"
@@ -323,7 +324,7 @@ int LoadROMAutodetect(char * path)
     }
     else if(type == RUNNING_GB)
     {
-        if(GB_MainLoad(path))
+        if(GB_ROMLoad(path))
         {
             if(GB_IsEnabledSGB()) SetGameScreen(SCREEN_SGB);
             else SetGameScreen(SCREEN_GB);
@@ -354,7 +355,7 @@ int LoadROMAutodetect(char * path)
         unsigned int bios_size;
         s_snprintf(bios_path,sizeof(bios_path),"%s"GBA_BIOS_FILENAME,DirGetBiosFolderPath());
 
-        FileLoad(bios_path,&bios_buffer,&bios_size);
+        FileLoad_NoError(bios_path,&bios_buffer,&bios_size); // don't show error messages...
 
         if(bios_size == 0) GBA_BiosLoaded(0);
         else GBA_BiosLoaded(1);

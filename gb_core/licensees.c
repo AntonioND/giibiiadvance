@@ -25,7 +25,7 @@ typedef struct {
     const char * name;  // (new licensees only) use other ascii characters.
 } _licensee_t;
 
-const _licensee_t licensee[] = {
+static const _licensee_t gb_licensee[] = {
     {"00","None"},
     {"01","Nintendo"},
     {"08","Capcom"},
@@ -197,10 +197,10 @@ const _licensee_t licensee[] = {
 const char * GB_GetLicenseeName(char byte1, char byte2)
 {
     int i;
-    for(i = 0; i < (sizeof(licensee) / sizeof(_licensee_t)); i++)
+    for(i = 0; i < (sizeof(gb_licensee) / sizeof(_licensee_t)); i++)
     {
-        if(licensee[i].code[0] == byte1 && licensee[i].code[1] == byte2)
-            return licensee[i].name;
+        if(gb_licensee[i].code[0] == byte1 && gb_licensee[i].code[1] == byte2)
+            return gb_licensee[i].name;
     }
 
     return "Unknown";

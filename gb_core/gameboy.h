@@ -29,61 +29,61 @@
 //--                                                                          --
 //------------------------------------------------------------------------------
 
-#define P1_REG      (0xFF00) /* Joystick: 1.1.P15.P14.P13.P12.P11.P10 */
-#define SB_REG      (0xFF01) /* Serial IO data buffer */
-#define SC_REG      (0xFF02) /* Serial IO control register */
-#define DIV_REG     (0xFF04) /* Divider register */
-#define TIMA_REG    (0xFF05) /* Timer counter */
-#define TMA_REG     (0xFF06) /* Timer modulo */
-#define TAC_REG     (0xFF07) /* Timer control */
-#define IF_REG      (0xFF0F) /* Interrupt flags: 0.0.0.JOY.SIO.TIM.LCD.VBL */
-#define NR10_REG    (0xFF10) /* Sound register */
-#define NR11_REG    (0xFF11) /* Sound register */
-#define NR12_REG    (0xFF12) /* Sound register */
-#define NR13_REG    (0xFF13) /* Sound register */
-#define NR14_REG    (0xFF14) /* Sound register */
-#define NR21_REG    (0xFF16) /* Sound register */
-#define NR22_REG    (0xFF17) /* Sound register */
-#define NR23_REG    (0xFF18) /* Sound register */
-#define NR24_REG    (0xFF19) /* Sound register */
-#define NR30_REG    (0xFF1A) /* Sound register */
-#define NR31_REG    (0xFF1B) /* Sound register */
-#define NR32_REG    (0xFF1C) /* Sound register */
-#define NR33_REG    (0xFF1D) /* Sound register */
-#define NR34_REG    (0xFF1E) /* Sound register */
-#define NR41_REG    (0xFF20) /* Sound register */
-#define NR42_REG    (0xFF21) /* Sound register */
-#define NR43_REG    (0xFF22) /* Sound register */
-#define NR44_REG    (0xFF23) /* Sound register */
-#define NR50_REG    (0xFF24) /* Sound register */
-#define NR51_REG    (0xFF25) /* Sound register */
-#define NR52_REG    (0xFF26) /* Sound register */
-#define LCDC_REG    (0xFF40) /* LCD control */
-#define STAT_REG    (0xFF41) /* LCD status */
-#define SCY_REG     (0xFF42) /* Scroll Y */
-#define SCX_REG     (0xFF43) /* Scroll X */
-#define LY_REG      (0xFF44) /* LCDC Y-coordinate */
-#define LYC_REG     (0xFF45) /* LY compare */
-#define DMA_REG     (0xFF46) /* DMA transfer */
-#define BGP_REG     (0xFF47) /* BG palette data */
-#define OBP0_REG    (0xFF48) /* OBJ palette 0 data */
-#define OBP1_REG    (0xFF49) /* OBJ palette 1 data */
-#define WY_REG      (0xFF4A) /* Window Y coordinate */
-#define WX_REG      (0xFF4B) /* Window X coordinate */
-#define KEY1_REG    (0xFF4D) /* CPU speed */
-#define VBK_REG     (0xFF4F) /* VRAM bank */
-#define HDMA1_REG   (0xFF51) /* DMA control 1 */
-#define HDMA2_REG   (0xFF52) /* DMA control 2 */
-#define HDMA3_REG   (0xFF53) /* DMA control 3 */
-#define HDMA4_REG   (0xFF54) /* DMA control 4 */
-#define HDMA5_REG   (0xFF55) /* DMA control 5 */
-#define RP_REG      (0xFF56) /* IR port */
-#define BCPS_REG    (0xFF68) /* BG color palette specification */
-#define BCPD_REG    (0xFF69) /* BG color palette data */
-#define OCPS_REG    (0xFF6A) /* OBJ color palette specification */
-#define OCPD_REG    (0xFF6B) /* OBJ color palette data */
-#define SVBK_REG    (0xFF70) /* WRAM bank */
-#define IE_REG      (0xFFFF) /* Interrupt enable */
+#define P1_REG      (0xFF00) // Joystick: 1.1.P15.P14.P13.P12.P11.P10
+#define SB_REG      (0xFF01) // Serial IO data buffer
+#define SC_REG      (0xFF02) // Serial IO control register
+#define DIV_REG     (0xFF04) // Divider register
+#define TIMA_REG    (0xFF05) // Timer counter
+#define TMA_REG     (0xFF06) // Timer modulo
+#define TAC_REG     (0xFF07) // Timer control
+#define IF_REG      (0xFF0F) // Interrupt flags: 0.0.0.JOY.SIO.TIM.LCD.VBL
+#define NR10_REG    (0xFF10) // Sound register
+#define NR11_REG    (0xFF11) // Sound register
+#define NR12_REG    (0xFF12) // Sound register
+#define NR13_REG    (0xFF13) // Sound register
+#define NR14_REG    (0xFF14) // Sound register
+#define NR21_REG    (0xFF16) // Sound register
+#define NR22_REG    (0xFF17) // Sound register
+#define NR23_REG    (0xFF18) // Sound register
+#define NR24_REG    (0xFF19) // Sound register
+#define NR30_REG    (0xFF1A) // Sound register
+#define NR31_REG    (0xFF1B) // Sound register
+#define NR32_REG    (0xFF1C) // Sound register
+#define NR33_REG    (0xFF1D) // Sound register
+#define NR34_REG    (0xFF1E) // Sound register
+#define NR41_REG    (0xFF20) // Sound register
+#define NR42_REG    (0xFF21) // Sound register
+#define NR43_REG    (0xFF22) // Sound register
+#define NR44_REG    (0xFF23) // Sound register
+#define NR50_REG    (0xFF24) // Sound register
+#define NR51_REG    (0xFF25) // Sound register
+#define NR52_REG    (0xFF26) // Sound register
+#define LCDC_REG    (0xFF40) // LCD control
+#define STAT_REG    (0xFF41) // LCD status
+#define SCY_REG     (0xFF42) // Scroll Y
+#define SCX_REG     (0xFF43) // Scroll X
+#define LY_REG      (0xFF44) // LCDC Y-coordinate
+#define LYC_REG     (0xFF45) // LY compare
+#define DMA_REG     (0xFF46) // DMA transfer
+#define BGP_REG     (0xFF47) // BG palette data
+#define OBP0_REG    (0xFF48) // OBJ palette 0 data
+#define OBP1_REG    (0xFF49) // OBJ palette 1 data
+#define WY_REG      (0xFF4A) // Window Y coordinate
+#define WX_REG      (0xFF4B) // Window X coordinate
+#define KEY1_REG    (0xFF4D) // CPU speed
+#define VBK_REG     (0xFF4F) // VRAM bank
+#define HDMA1_REG   (0xFF51) // DMA control 1
+#define HDMA2_REG   (0xFF52) // DMA control 2
+#define HDMA3_REG   (0xFF53) // DMA control 3
+#define HDMA4_REG   (0xFF54) // DMA control 4
+#define HDMA5_REG   (0xFF55) // DMA control 5
+#define RP_REG      (0xFF56) // IR port
+#define BCPS_REG    (0xFF68) // BG color palette specification
+#define BCPD_REG    (0xFF69) // BG color palette data
+#define OCPS_REG    (0xFF6A) // OBJ color palette specification
+#define OCPD_REG    (0xFF6B) // OBJ color palette data
+#define SVBK_REG    (0xFF70) // WRAM bank
+#define IE_REG      (0xFFFF) // Interrupt enable
 
 //------------------------------------------------------------------------------
 //--                                                                          --
@@ -131,7 +131,7 @@ typedef struct PACKED {
     u8 SPL, SPH;
     u8 dummy5[2];
     u8 PCL, PCH;
-    } _GB_CPU_8BIT_;
+} _GB_CPU_8BIT_;
 
 typedef struct PACKED {
     u32 AF;
@@ -140,7 +140,7 @@ typedef struct PACKED {
     u32 HL;
     u32 SP; //Stack Pointer
     u32 PC; //Program Counter
-    } _GB_CPU_16BIT_;
+} _GB_CPU_16BIT_;
 
 typedef struct {
     u8   allwayszero  :4;
@@ -149,14 +149,14 @@ typedef struct {
     bool Substract    :1;
     bool Zero         :1;
     u8 dummy[21];
-    } _GB_CPU_FLAGS_;
+} _GB_CPU_FLAGS_;
 
 
 typedef union {
     _GB_CPU_8BIT_  Reg8;
     _GB_CPU_16BIT_ Reg16;
     _GB_CPU_FLAGS_ Flags;
-    } _GB_CPU_;
+} _GB_CPU_;
 
 //------------------------------------------------------------------------------
 //--                                                                          --
@@ -169,11 +169,11 @@ typedef struct PACKED {
     u8 X;
     u8 Tile;
     u8 Info;
-    } _GB_OAM_ENTRY_;
+} _GB_OAM_ENTRY_;
 
 typedef struct PACKED {
     _GB_OAM_ENTRY_ Sprite[40];
-    } _GB_OAM_ ;
+} _GB_OAM_ ;
 
 typedef void (*mapper_write_fn)(u32,u32);
 typedef u32 (*mapper_read_fn)(u32);
@@ -208,7 +208,7 @@ typedef struct {
 
     mapper_write_fn MapperWrite;
     mapper_read_fn MapperRead;
-    } _GB_MEMORY_;
+} _GB_MEMORY_;
 
 //------------------------------------------------------------------------------
 //--                                                                          --
@@ -267,7 +267,7 @@ typedef struct {
     u32 days;
     u32 carry;
     u32 halt;
-    } _GB_MB3_TIMER_;
+} _GB_MB3_TIMER_;
 
 typedef struct {
     u32 cs; // chip select
@@ -283,16 +283,16 @@ typedef struct {
 
     u32 sensorX;
     u32 sensorY;
-    } _GB_MB7_CART_;
+} _GB_MB7_CART_;
 
 typedef struct {
     u32 mask;
     u32 offset;
-    } _GB_MMM01_CART_;
+} _GB_MMM01_CART_;
 
 typedef struct {
     u8 reg[0x36];
-    } _GB_CAMERA_CART_;
+} _GB_CAMERA_CART_;
 
 typedef struct {
     u32 selected_hardware; //HW_*** defines, -1 = auto

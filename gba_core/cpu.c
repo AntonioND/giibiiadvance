@@ -213,28 +213,28 @@ void GBA_CPUChangeMode(u32 value)
     return;
 }
 
-static s32 halt;
+static s32 gba_halt;
 
 inline void GBA_CPUSetHalted(s32 value)
 {
-    if(REG_IE) halt = 1+(value>>7); //don't halt if IE = 0 or it will never exit from halt
+    if(REG_IE) gba_halt = 1+(value>>7); //don't halt if IE = 0 or it will never exit from halt
     //else
     //{
     //    Debug_DebugMsgArg("STOP/HALT mode with IE=0: infinite loop.\nSTOP/HALT ignored.");
     //    GBA_ExecutionBreak();
     //}
-    //halt = 1 => halt
-    //halt = 2 => stop
+    //gba_halt = 1 => halt
+    //gba_halt = 2 => stop
 }
 
 inline s32 GBA_CPUGetHalted(void)
 {
-    return halt;
+    return gba_halt;
 }
 
 inline void GBA_CPUClearHalted(void)
 {
-    halt = 0;
+    gba_halt = 0;
 }
 
 inline s32 GBA_Execute(s32 clocks) // returns total clocks not executed

@@ -53,7 +53,7 @@ typedef struct {
     u32 special;
 } _dma_channel_;
 
-_dma_channel_ DMA[4];
+static _dma_channel_ DMA[4];
 
 //--------------------------------------------------------------------------
 
@@ -61,11 +61,11 @@ static inline s32 min(s32 a, s32 b) { return ((a < b) ? a : b); }
 
 //--------------------------------------------------------------------------
 
-static s32 dma_src_add[4] = { 2, -2, 0, 0 }; //dma_src_add[3] = prohibited
-static s32 dma_dst_add[4] = { 2, -2, 0, 2 };
+static s32 gba_dma_src_add[4] = { 2, -2, 0, 0 }; //gba_dma_src_add[3] = prohibited
+static s32 gba_dma_dst_add[4] = { 2, -2, 0, 2 };
 
-static int dmaworking = 0;
-static s32 dma_extra_clocks_elapsed = 0;
+static int gba_dmaworking = 0;
+static s32 gba_dma_extra_clocks_elapsed = 0;
 
 void GBA_DMA0Setup(void)
 {
@@ -105,14 +105,14 @@ void GBA_DMA0Setup(void)
             2; //2I
     }
     DMA[0].clocksremaining = DMA[0].clockstotal;
-    DMA[0].srcadd = dma_src_add[(REG_DMA0CNT_H>>7)&3];
-    DMA[0].dstadd = dma_dst_add[(REG_DMA0CNT_H>>5)&3];
+    DMA[0].srcadd = gba_dma_src_add[(REG_DMA0CNT_H>>7)&3];
+    DMA[0].dstadd = gba_dma_dst_add[(REG_DMA0CNT_H>>5)&3];
     if(DMA[0].copywords) { DMA[0].srcadd <<= 1; DMA[0].dstadd <<= 1; }
     DMA[0].dst_reload = (((REG_DMA0CNT_H>>5)&3) == 3) ;
     DMA[0].starttime = (REG_DMA0CNT_H>>12)&3;
     DMA[0].repeat = REG_DMA0CNT_H & BIT(9);
 
-    if(DMA[0].starttime == START_NOW) { dmaworking = 1; GBA_ExecutionBreak(); }
+    if(DMA[0].starttime == START_NOW) { gba_dmaworking = 1; GBA_ExecutionBreak(); }
     else if(DMA[0].starttime == START_SPECIAL) //PROHIBITED
     {
         Debug_DebugMsgArg("DMA 0 in mode 3 - prohibited");
@@ -168,8 +168,8 @@ void GBA_DMA1Setup(void)
             2; //2I
     }
     DMA[1].clocksremaining = DMA[1].clockstotal;
-    DMA[1].srcadd = dma_src_add[(REG_DMA1CNT_H>>7)&3];
-    DMA[1].dstadd = dma_dst_add[(REG_DMA1CNT_H>>5)&3];
+    DMA[1].srcadd = gba_dma_src_add[(REG_DMA1CNT_H>>7)&3];
+    DMA[1].dstadd = gba_dma_dst_add[(REG_DMA1CNT_H>>5)&3];
     if(DMA[1].copywords || (DMA[1].starttime == START_SPECIAL)) { DMA[1].srcadd <<= 1; DMA[1].dstadd <<= 1; }
     DMA[1].dst_reload = (((REG_DMA1CNT_H>>5)&3) == 3) ;
     DMA[1].starttime = (REG_DMA1CNT_H>>12)&3;
@@ -216,8 +216,8 @@ void GBA_DMA2Setup(void)
             2; //2I
     }
     DMA[2].clocksremaining = DMA[2].clockstotal;
-    DMA[2].srcadd = dma_src_add[(REG_DMA2CNT_H>>7)&3];
-    DMA[2].dstadd = dma_dst_add[(REG_DMA2CNT_H>>5)&3];
+    DMA[2].srcadd = gba_dma_src_add[(REG_DMA2CNT_H>>7)&3];
+    DMA[2].dstadd = gba_dma_dst_add[(REG_DMA2CNT_H>>5)&3];
     if(DMA[2].copywords || (DMA[2].starttime == START_SPECIAL)) { DMA[2].srcadd <<= 1; DMA[2].dstadd <<= 1; }
     DMA[2].dst_reload = (((REG_DMA2CNT_H>>5)&3) == 3) ;
     DMA[2].starttime = (REG_DMA2CNT_H>>12)&3;
@@ -267,8 +267,8 @@ void GBA_DMA3Setup(void)
         DMA[3].clockstotal += 2; //PROCESSING 4I
 
     DMA[3].clocksremaining = DMA[3].clockstotal;
-    DMA[3].srcadd = dma_src_add[(REG_DMA3CNT_H>>7)&3];
-    DMA[3].dstadd = dma_dst_add[(REG_DMA3CNT_H>>5)&3];
+    DMA[3].srcadd = gba_dma_src_add[(REG_DMA3CNT_H>>7)&3];
+    DMA[3].dstadd = gba_dma_dst_add[(REG_DMA3CNT_H>>5)&3];
     if(DMA[3].copywords) { DMA[3].srcadd <<= 1; DMA[3].dstadd <<= 1; }
     DMA[3].dst_reload = (((REG_DMA3CNT_H>>5)&3) == 3) ;
     DMA[3].starttime = (REG_DMA3CNT_H>>12)&3;
@@ -279,7 +279,7 @@ void GBA_DMA3Setup(void)
     //  BIT 11: Game Pak DRQ  - DMA3 only -  (0=Normal, 1=DRQ <from> Game Pak, DMA3)
     //  [9     DMA Repeat                   (0=Off, 1=On) (Must be zero if Bit 11 set)]
 
-    if(DMA[3].starttime == START_NOW) { dmaworking = 1; GBA_ExecutionBreak(); }
+    if(DMA[3].starttime == START_NOW) { gba_dmaworking = 1; GBA_ExecutionBreak(); }
 /*
     char text[64]; sprintf(text,"DMA3 SETUP\nMODE: %d\nSRC: %08X (%d)\nDST: %08X (%d)\n"
         "CHUNK: %08X"
@@ -360,7 +360,7 @@ static inline s32 GBA_DMA0Update(s32 clocks) //return clocks to finish transfer
 
     if(DMA[0].clocksremaining <= 0)
     {
-        dma_extra_clocks_elapsed = -DMA[0].clocksremaining;
+        gba_dma_extra_clocks_elapsed = -DMA[0].clocksremaining;
 
         if(DMA[0].dst_reload) DMA[0].dstaddr = REG_DMA0DAD & (DMA[0].copywords ? ~3 : ~1);
 
@@ -388,7 +388,7 @@ static inline s32 GBA_DMA0Update(s32 clocks) //return clocks to finish transfer
         return 0x7FFFFFFF;
     }
 
-    dmaworking = 1;
+    gba_dmaworking = 1;
     return DMA[0].clocksremaining;
 }
 
@@ -461,7 +461,7 @@ static inline s32 GBA_DMA1Update(s32 clocks) //return clocks to finish transfer
 
     if(DMA[1].clocksremaining <= 0)
     {
-        dma_extra_clocks_elapsed = -DMA[1].clocksremaining;
+        gba_dma_extra_clocks_elapsed = -DMA[1].clocksremaining;
 
         if(DMA[1].dst_reload) DMA[1].dstaddr = REG_DMA0DAD & (DMA[1].copywords ? ~3 : ~1);
 
@@ -489,7 +489,7 @@ static inline s32 GBA_DMA1Update(s32 clocks) //return clocks to finish transfer
         return 0x7FFFFFFF;
     }
 
-    dmaworking = 1;
+    gba_dmaworking = 1;
     return DMA[1].clocksremaining;
 
     /*
@@ -572,7 +572,7 @@ static inline s32 GBA_DMA2Update(s32 clocks) //return clocks to finish transfer
 
     if(DMA[2].clocksremaining <= 0)
     {
-        dma_extra_clocks_elapsed = -DMA[2].clocksremaining;
+        gba_dma_extra_clocks_elapsed = -DMA[2].clocksremaining;
 
         if(DMA[2].dst_reload) DMA[2].dstaddr = REG_DMA0DAD & (DMA[2].copywords ? ~3 : ~1);
 
@@ -600,7 +600,7 @@ static inline s32 GBA_DMA2Update(s32 clocks) //return clocks to finish transfer
         return 0x7FFFFFFF;
     }
 
-    dmaworking = 1;
+    gba_dmaworking = 1;
     return DMA[2].clocksremaining;
     /*
     if(DMA[2].enabled == 0) return 0x7FFFFFFF;
@@ -689,7 +689,7 @@ static inline s32 GBA_DMA3Update(s32 clocks) //return clocks to finish transfer
 
     if(DMA[3].clocksremaining <= 0)
     {
-        dma_extra_clocks_elapsed = -DMA[3].clocksremaining;
+        gba_dma_extra_clocks_elapsed = -DMA[3].clocksremaining;
 
         if(DMA[3].dst_reload) DMA[3].dstaddr = REG_DMA3DAD & (DMA[3].copywords ? ~3 : ~1);
 
@@ -719,7 +719,7 @@ static inline s32 GBA_DMA3Update(s32 clocks) //return clocks to finish transfer
         return 0x7FFFFFFF;
     }
 
-    dmaworking = 1;
+    gba_dmaworking = 1;
     return DMA[3].clocksremaining;
 }
 
@@ -727,35 +727,35 @@ static inline s32 GBA_DMA3Update(s32 clocks) //return clocks to finish transfer
 
 s32 GBA_DMAUpdate(s32 clocks)
 {
-    dma_extra_clocks_elapsed = 0;
-    dmaworking = 0;
+    gba_dma_extra_clocks_elapsed = 0;
+    gba_dmaworking = 0;
 
     s32 tempclocks;
 
     if(DMA[0].enabled)
     {
         tempclocks = GBA_DMA0Update(clocks);
-        if(dmaworking) return tempclocks;
+        if(gba_dmaworking) return tempclocks;
     }
 
     if(DMA[1].enabled)
     {
         tempclocks = GBA_DMA1Update(clocks);
-        if(dmaworking) return tempclocks;
+        if(gba_dmaworking) return tempclocks;
     }
 
     if(DMA[2].enabled)
     {
         tempclocks = GBA_DMA2Update(clocks);
-        if(dmaworking) return tempclocks;
+        if(gba_dmaworking) return tempclocks;
     }
 
     //if(DMA[3].enabled) tempclocks = GBA_DMA3Update(clocks);
-    //if(dmaworking) return tempclocks;
+    //if(gba_dmaworking) return tempclocks;
     if(DMA[3].enabled)
     {
         tempclocks = GBA_DMA3Update(clocks);
-        if(dmaworking) return tempclocks;
+        if(gba_dmaworking) return tempclocks;
     }
 
     return 0x7FFFFFFF;
@@ -763,13 +763,14 @@ s32 GBA_DMAUpdate(s32 clocks)
 
 inline int GBA_DMAisWorking(void)
 {
-    return dmaworking;
+    return gba_dmaworking;
 }
 
 inline int gba_dma3numchunks(void)
 {
     return DMA[3].num_chunks;
 }
+
 inline int gba_dma3enabled(void)
 {
     return DMA[3].enabled;
@@ -777,7 +778,7 @@ inline int gba_dma3enabled(void)
 
 inline s32 GBA_DMAGetExtraClocksElapsed(void)
 {
-    return dma_extra_clocks_elapsed;
+    return gba_dma_extra_clocks_elapsed;
 }
 
 //---------------------------------------------------------

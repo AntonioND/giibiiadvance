@@ -238,7 +238,7 @@ static struct {
     {NULL, 0}
 };
 
-int gba_dissasemble_add_io_register_name(int reg_address, char * dest, int add_comment)
+static int gba_dissasemble_add_io_register_name(int reg_address, char * dest, int add_comment)
 {
     int i = 0;
     while(1)
@@ -263,7 +263,7 @@ int gba_dissasemble_add_io_register_name(int reg_address, char * dest, int add_c
     return 0;
 }
 
-struct {
+static struct {
     int code;
     char * name;
 } swi_name_struct[] = {
@@ -280,7 +280,7 @@ struct {
   {0,NULL}
 };
 
-int gba_disassemble_swi_name(int swi_code, char * dest, int add_comment) // swi code = 1 byte
+static int gba_disassemble_swi_name(int swi_code, char * dest, int add_comment) // swi code = 1 byte
 {
     int i = 0;
     while(1)
@@ -313,13 +313,13 @@ int gba_disassemble_swi_name(int swi_code, char * dest, int add_comment) // swi 
 
 // ldr      r0, [r1, r2]    @ Pre-indexed.             r0= *(u32*)(r1+r2)
 // ldr      r0, [r1, r2]!   @ Pre-indexed,  writeback. r0= *(u32*)(r1 += r2)
-//ldr      r0, [r1], r2    @ Post-indexed, writeback. r0= *(u32*)r1; r1 += r2;
+// ldr      r0, [r1], r2    @ Post-indexed, writeback. r0= *(u32*)r1; r1 += r2;
 
-const char arm_cond[16][6] = {
+static const char arm_cond[16][6] = {
     "eq","ne","cs","cc","mi","pl","vs","vc","hi","ls","ge","lt","gt","le","","nv[!]"
 };
 
-const char arm_shift_type[4][4] = { "lsl","lsr","asr","ror" };
+static const char arm_shift_type[4][4] = { "lsl","lsr","asr","ror" };
 
 void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
 {
@@ -1065,7 +1065,7 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
 
 //--------------------------------------------------------------------------------------------------------
 
-const char thumb_alu_operation[16][4] = {
+static const char thumb_alu_operation[16][4] = {
     "and", "eor", "lsl", "lsr", "asr", "adc", "sbc", "ror", "tst", "neg", "cmp", "cmn", "orr", "mul", "bic", "mvn"
 };
 
@@ -1679,4 +1679,4 @@ void GBA_DisassembleTHUMB(u16 opcode, u32 address, char * dest)
     return;
 }
 
-
+//--------------------------------------------------------------------------------------------------------

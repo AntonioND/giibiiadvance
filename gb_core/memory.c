@@ -33,7 +33,6 @@
 #include "sound.h"
 #include "sgb.h"
 #include "video.h"
-
 #include "gb_main.h"
 
 extern _GB_CONTEXT_ GameBoy;

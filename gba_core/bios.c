@@ -30,14 +30,15 @@
 
 //-------------------------------------------------------------------------------------------
 
-int LOADED;
+static int gba_bios_loaded_from_file;
+
 void GBA_BiosLoaded(int loaded)
 {
-    LOADED = loaded;
+    gba_bios_loaded_from_file = loaded;
 }
 inline int GBA_BiosIsLoaded(void)
 {
-    return LOADED;
+    return gba_bios_loaded_from_file;
 }
 
 //-------------------------------------------------------------------------------------------
@@ -63,7 +64,7 @@ void GBA_BiosEmulatedLoad(void)
 
 //--------------------------------------------------------------------------------------------------
 
-void GBA_SWI_SoftReset(void)
+static void GBA_SWI_SoftReset(void)
 {
     u8 ret_flag = GBA_MemoryRead8(0x3007FFA);
 
@@ -93,7 +94,7 @@ void GBA_SWI_SoftReset(void)
     }
 }
 
-void GBA_SWI_RegisterRamReset(void)
+static void GBA_SWI_RegisterRamReset(void)
 {
     u32 r0 = CPU.R[0];
 
@@ -163,7 +164,7 @@ void GBA_SWI_RegisterRamReset(void)
     GBA_MemoryWrite16(DISPCNT,0x0080);
 }
 
-void GBA_SWI_CpuSet(void)
+static void GBA_SWI_CpuSet(void)
 {
     int count = CPU.R[2]&0x001FFFFF;
     CPU.R[2] &= ~0x001FFFFF;
@@ -209,7 +210,7 @@ void GBA_SWI_CpuSet(void)
     return;
 }
 
-void GBA_SWI_CpuFastSet(void)
+static void GBA_SWI_CpuFastSet(void)
 {
     int count = CPU.R[2]&0x001FFFF8; //must be a multiple of 8 words
     CPU.R[2] &= ~0x001FFFFF;
@@ -233,7 +234,7 @@ void GBA_SWI_CpuFastSet(void)
     return;
 }
 
-void GBA_SWI_BgAffineSet(void)
+static void GBA_SWI_BgAffineSet(void)
 {
     int count = CPU.R[2];
     int src = CPU.R[0];
@@ -269,7 +270,7 @@ void GBA_SWI_BgAffineSet(void)
     return;
 }
 
-void GBA_SWI_ObjAffineSet(void)
+static void GBA_SWI_ObjAffineSet(void)
 {
     int addressadd = CPU.R[3];
     int count = CPU.R[2];
@@ -297,7 +298,7 @@ void GBA_SWI_ObjAffineSet(void)
     return;
 }
 
-void GBA_SWI_BitUnPack(void)
+static void GBA_SWI_BitUnPack(void)
 {
     int src = CPU.R[0]; int dst = CPU.R[1]&~3;
     int infoaddr = CPU.R[2]&~3; //aligned to 32 bit?
@@ -360,7 +361,7 @@ void GBA_SWI_BitUnPack(void)
     return;
 }
 
-void GBA_SWI_LZ77UnCompWram(void)
+static void GBA_SWI_LZ77UnCompWram(void)
 {
     int src = CPU.R[0]; int dst = CPU.R[1];
     u32 header = GBA_MemoryRead32(src); src+=4;
@@ -412,7 +413,7 @@ void GBA_SWI_LZ77UnCompWram(void)
     return;
 }
 
-void GBA_SWI_LZ77UnCompVram(void)
+static void GBA_SWI_LZ77UnCompVram(void)
 {
     int src = CPU.R[0]; int dst = CPU.R[1];
 
@@ -465,7 +466,7 @@ void GBA_SWI_LZ77UnCompVram(void)
     return;
 }
 
-void GBA_SWI_HuffUnComp(void)
+static void GBA_SWI_HuffUnComp(void)
 {
     int src = CPU.R[0]&~3; int dst = CPU.R[1];
     u32 header = GBA_MemoryRead32(src); src+=4;
@@ -535,7 +536,7 @@ void GBA_SWI_HuffUnComp(void)
     return;
 }
 
-void GBA_SWI_RLUnCompWram(void)
+static void GBA_SWI_RLUnCompWram(void)
 {
     int src = CPU.R[0]; int dst = CPU.R[1];
     u32 header = GBA_MemoryRead32(src); src+=4;
@@ -568,7 +569,7 @@ void GBA_SWI_RLUnCompWram(void)
     return;
 }
 
-void GBA_SWI_RLUnCompVram(void)
+static void GBA_SWI_RLUnCompVram(void)
 {
     int src = CPU.R[0]; int dst = CPU.R[1];
     u32 header = GBA_MemoryRead32(src); src+=4;
@@ -625,7 +626,7 @@ void GBA_SWI_RLUnCompVram(void)
     return;
 }
 
-void GBA_SWI_Diff8bitUnFilterWram(void)
+static void GBA_SWI_Diff8bitUnFilterWram(void)
 {
     u32 src = CPU.R[0]; u32 dst = CPU.R[1];
     u32 header = GBA_MemoryRead32(src); src+=4;
@@ -645,7 +646,7 @@ void GBA_SWI_Diff8bitUnFilterWram(void)
     return;
 }
 
-void GBA_SWI_Diff8bitUnFilterVram(void)
+static void GBA_SWI_Diff8bitUnFilterVram(void)
 {
     u32 src = CPU.R[0]; u32 dst = CPU.R[1];
     u32 header = GBA_MemoryRead32(src); src+=4;
@@ -674,7 +675,7 @@ void GBA_SWI_Diff8bitUnFilterVram(void)
     return;
 }
 
-void GBA_SWI_Diff16bitUnFilter(void)
+static void GBA_SWI_Diff16bitUnFilter(void)
 {
     u32 src = CPU.R[0]; u32 dst = CPU.R[1];
     u32 header = GBA_MemoryRead32(src); src+=4;

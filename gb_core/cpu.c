@@ -21,8 +21,6 @@
 #include "../general_utils.h"
 #include "../debug_utils.h"
 
-#include "../gui/win_gb_disassembler.h"
-
 #include "gameboy.h"
 #include "cpu.h"
 #include "debug.h"
@@ -32,8 +30,9 @@
 #include "general.h"
 #include "sgb.h"
 #include "serial.h"
-
 #include "gb_main.h"
+
+#include "../gui/win_gb_disassembler.h"
 
 extern _GB_CONTEXT_ GameBoy;
 
@@ -138,14 +137,10 @@ inline void GB_CPUClock(int clocks) // the lower the number of clocks, the bette
 
 int gb_break_execution = 0;
 
-inline void __gb_break_to_debugger(void)
+inline void _gb_break_to_debugger(void)
 {
     gb_break_execution = 1;
     GameBoy.Emulator.FrameDrawn = 1; // This is a hack, but it works...
-    /*
-    gb_set_pause();
-    GB_UpdateDebugger();
-    PresentMainWindow();*/
 }
 
 // Single Speed
@@ -159,7 +154,7 @@ inline void __gb_break_to_debugger(void)
 // Screen refresh:
 // 59.73 Hz
 
-void GB_CPU_MicroinstructionStep(void); // in this file, the last function
+void GB_CPUMicroinstructionStep(void); // in this file, the last function
 
 void GB_CPUExecuteOscillatorClock(void)
 {
@@ -171,7 +166,7 @@ void GB_CPUExecuteOscillatorClock(void)
     {
         if(GB_DebugCPUIsBreakpoint(cpu->Reg16.PC))
         {
-            __gb_break_to_debugger();
+            _gb_break_to_debugger();
             Win_GBDisassemblerSetFocus();
             return;
         }
@@ -302,7 +297,7 @@ void GB_CPUExecuteOscillatorClock(void)
 
             if(GameBoy.Emulator.CPUHalt == 0)
             {
-                GB_CPU_MicroinstructionStep(); //Execute microinstructions
+                GB_CPUMicroinstructionStep(); //Execute microinstructions
             }
         }
     }
@@ -336,7 +331,7 @@ void GB_RunForInstruction(void)
     while(GameBoy.Emulator.cpu_microinstruction != 0);
 }
 
-static const u32 clocks_table[256] = {
+static const u32 gb_clocks_table[256] = {
     1, 3, 2, 2, 1, 1, 2, 1,  5, 2, 2, 2, 1, 1, 2, 1,
     2, 3, 2, 2, 1, 1, 2, 1,  3, 2, 2, 2, 1, 1, 2, 1,
     3, 3, 2, 2, 1, 1, 2, 1,  3, 2, 2, 2, 1, 1, 2, 1,
@@ -358,7 +353,7 @@ static const u32 clocks_table[256] = {
     3, 3, 2, 1, 0, 4, 2, 4,  3, 2, 4, 1, 0, 0, 2, 4
 };
 
-static const u32 clocks_table_cb[256] = {
+static const u32 gb_clocks_table_cb[256] = {
     2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
     2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
     2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
@@ -382,7 +377,7 @@ static const u32 clocks_table_cb[256] = {
 
 //this can only execute one microinstruction at a time = 4 oscillator cycles (2 in dual speed mode)
 //trying something strange with this will break conditional instructions
-void GB_CPU_MicroinstructionStep(void)
+void GB_CPUMicroinstructionStep(void)
 {
     _GB_CPU_ * cpu = &GameBoy.CPU;
     _GB_MEMORY_ * mem = &GameBoy.Memory;
@@ -3240,7 +3235,7 @@ void GB_CPU_MicroinstructionStep(void)
 
                 default:
                     // ...wtf??
-                    __gb_break_to_debugger();
+                    _gb_break_to_debugger();
                     Debug_ErrorMsgArg("Unidentified opcode. CB %x\nPC: %04x\nROM: %d",
                         emu->cb_opcode,GameBoy.CPU.Reg16.PC,GameBoy.Memory.selected_rom);
                     break;
@@ -3400,7 +3395,7 @@ void GB_CPU_MicroinstructionStep(void)
                 cpu->Reg16.PC = emu->cpu_temp_16;
             break;
         case 0xD3:
-            __gb_break_to_debugger();
+            _gb_break_to_debugger();
             Debug_ErrorMsgArg("Unidentified opcode. D3\nPC: %04x\nROM: %d",
                         GameBoy.CPU.Reg16.PC,GameBoy.Memory.selected_rom);
             break;
@@ -3551,7 +3546,7 @@ void GB_CPU_MicroinstructionStep(void)
                 cpu->Reg16.PC = emu->cpu_temp_16;
             break;
         case 0xDB:
-            __gb_break_to_debugger();
+            _gb_break_to_debugger();
             Debug_ErrorMsgArg("Unidentified opcode. DB\nPC: %04x\nROM: %d",
                         GameBoy.CPU.Reg16.PC,GameBoy.Memory.selected_rom);
             break;
@@ -3593,7 +3588,7 @@ void GB_CPU_MicroinstructionStep(void)
                 cpu->Reg16.PC = emu->cpu_temp_16;
             break;
         case 0xDD:
-            __gb_break_to_debugger();
+            _gb_break_to_debugger();
             Debug_ErrorMsgArg("Unidentified opcode. DD\nPC: %04x\nROM: %d",
                         GameBoy.CPU.Reg16.PC,GameBoy.Memory.selected_rom);
             break;
@@ -3646,12 +3641,12 @@ void GB_CPU_MicroinstructionStep(void)
                 GB_MemWrite8(0xFF00 + (u32)cpu->Reg8.C,cpu->Reg8.A);
             break;
         case 0xE3:
-            __gb_break_to_debugger();
+            _gb_break_to_debugger();
             Debug_ErrorMsgArg("Unidentified opcode. E3\nPC: %04x\nROM: %d",
                         GameBoy.CPU.Reg16.PC,GameBoy.Memory.selected_rom);
             break;
         case 0xE4:
-            __gb_break_to_debugger();
+            _gb_break_to_debugger();
             Debug_ErrorMsgArg("Unidentified opcode. E4\nPC: %04x\nROM: %d",
                         GameBoy.CPU.Reg16.PC,GameBoy.Memory.selected_rom);
             break;
@@ -3730,17 +3725,17 @@ void GB_CPU_MicroinstructionStep(void)
                 GB_MemWrite8(emu->cpu_temp_16,cpu->Reg8.A);
             break;
         case 0xEB:
-            __gb_break_to_debugger();
+            _gb_break_to_debugger();
             Debug_ErrorMsgArg("Unidentified opcode. EB\nPC: %04x\nROM: %d",
                         GameBoy.CPU.Reg16.PC,GameBoy.Memory.selected_rom);
             break;
         case 0xEC:
-            __gb_break_to_debugger();
+            _gb_break_to_debugger();
             Debug_ErrorMsgArg("Unidentified opcode. EC\nPC: %04x\nROM: %d",
                         GameBoy.CPU.Reg16.PC,GameBoy.Memory.selected_rom);
             break;
         case 0xED:
-            __gb_break_to_debugger();
+            _gb_break_to_debugger();
             Debug_ErrorMsgArg("Unidentified opcode. ED\nPC: %04x\nROM: %d",
                         GameBoy.CPU.Reg16.PC,GameBoy.Memory.selected_rom);
             break;
@@ -3797,7 +3792,7 @@ void GB_CPU_MicroinstructionStep(void)
             GameBoy.Memory.interrupts_enable_count = 0;
             break;
         case 0xF4:
-            __gb_break_to_debugger();
+            _gb_break_to_debugger();
             Debug_ErrorMsgArg("Unidentified opcode. F4\nPC: %04x\nROM: %d",
                         GameBoy.CPU.Reg16.PC,GameBoy.Memory.selected_rom);
             break;
@@ -3881,12 +3876,12 @@ void GB_CPU_MicroinstructionStep(void)
         //    GameBoy.Memory.InterruptMasterEnable = 1;
             break;
         case 0xFC:
-            __gb_break_to_debugger();
+            _gb_break_to_debugger();
             Debug_ErrorMsgArg("Unidentified opcode. FC\nPC: %04x\nROM: %d",
                         GameBoy.CPU.Reg16.PC,GameBoy.Memory.selected_rom);
             break;
         case 0xFD:
-            __gb_break_to_debugger();
+            _gb_break_to_debugger();
             Debug_ErrorMsgArg("Unidentified opcode. FD\nPC: %04x\nROM: %d",
                         GameBoy.CPU.Reg16.PC,GameBoy.Memory.selected_rom);
             break;
@@ -3919,7 +3914,7 @@ void GB_CPU_MicroinstructionStep(void)
             break;
 
         default: //wtf...?
-            __gb_break_to_debugger();
+            _gb_break_to_debugger();
             Debug_ErrorMsgArg("Unidentified opcode. %x\nPC: %04x\nROM: %d",
                         emu->opcode,GameBoy.CPU.Reg16.PC,GameBoy.Memory.selected_rom);
             break;
@@ -3932,12 +3927,12 @@ void GB_CPU_MicroinstructionStep(void)
     if(emu->cb_opcode == -1) // check if instruction completely executed
     {
         //normal instruction
-        if(clocks_table[emu->opcode] <= emu->cpu_microinstruction)
+        if(gb_clocks_table[emu->opcode] <= emu->cpu_microinstruction)
             emu->cpu_microinstruction = 0;
     }
     else // CB instruction
     {
-        if(clocks_table_cb[emu->cb_opcode] <= emu->cpu_microinstruction)
+        if(gb_clocks_table_cb[emu->cb_opcode] <= emu->cpu_microinstruction)
             emu->cpu_microinstruction = 0;
     }
 }

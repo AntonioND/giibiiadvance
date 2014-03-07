@@ -21,6 +21,7 @@
 #include "../build_options.h"
 #include "../general_utils.h"
 #include "../debug_utils.h"
+#include "../config.h"
 
 #include "gameboy.h"
 #include "cpu.h"
@@ -31,8 +32,6 @@
 #include "serial.h"
 #include "video.h"
 #include "gb_main.h"
-
-#include "../config.h"
 
 _GB_CONTEXT_ GameBoy;
 

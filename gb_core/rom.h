@@ -79,7 +79,7 @@ typedef struct PACKED {
 } _GB_ROM_HEADER_ ;
 
 
-int Cartridge_Load(const u8 * pointer, const u32 rom_size);
+int GB_CartridgeLoad(const u8 * pointer, const u32 rom_size);
 void Cartridge_Unload(void);
 
 void Cardridge_Set_Filename(char * filename);

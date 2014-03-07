@@ -23,13 +23,12 @@
 #include "../build_options.h"
 #include "../general_utils.h"
 #include "../debug_utils.h"
+#include "../config.h"
 
 #include "gameboy.h"
 #include "debug.h"
 #include "general.h"
 #include "memory.h"
-
-#include "../config.h"
 
 #define GB_BUFFER_SIZE (16384) //Yeah... quite a lot, but it works fine this way.
                                //The bigger, the less possibilities to underflow,
@@ -40,7 +39,7 @@
 
 extern _GB_CONTEXT_ GameBoy;
 
-static const s8 SquareWave[4][32] = {
+static const s8 GB_SquareWave[4][32] = {
     { -128,-128,-128,-128, -128,-128,-128,-128, 127,127,-128,-128, -128,-128,-128,-128,
       -128,-128,-128,-128, -128,-128,-128,-128, 127,127,-128,-128, -128,-128,-128,-128 },
 
@@ -52,16 +51,15 @@ static const s8 SquareWave[4][32] = {
 
     { 127,127,127,127, 127,127,127,127, -128,-128,-128,-128, 127,127,127,127,
       127,127,127,127, 127,127,127,127, -128,-128,-128,-128, 127,127,127,127}
-    };
+};
 
-static s8 WavePattern[32];
+static s8 GB_WavePattern[32];
 
-extern const u8 noise_7[16]; // In file noise.c
-extern const u8 noise_15[4096]; // In file noise.c
+extern const u8 gb_noise_7[16]; // In file noise.c
+extern const u8 gb_noise_15[4096]; // In file noise.c
 
 
-typedef struct
-    {
+typedef struct {
     struct { //Tone & Sweep
         u8 reg[5];
 
@@ -184,7 +182,7 @@ typedef struct
     int leftvol_4, rightvol_4;
 
     u32 master_enable;
-    } _GB_SOUND_HARDWARE_;
+} _GB_SOUND_HARDWARE_;
 
 static _GB_SOUND_HARDWARE_ Sound;
 
@@ -373,7 +371,7 @@ void GB_SoundLoadWave(void)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
-    s8 * bufferptr = WavePattern;
+    s8 * bufferptr = GB_WavePattern;
 
     u32 count;
     for(count = 0x30; count < 0x40; count ++)
@@ -422,19 +420,19 @@ void GB_SoundMix(void)
 
     if(Sound.Chn1.running && (EmulatorConfig.chn_flags&0x1))
     {
-        int out_1 = (int)SquareWave[Sound.Chn1.duty][(((Sound.Chn1.samplecount++)*((Sound.Chn1.outfreq) * (32/2)))/ 22050)&31];
+        int out_1 = (int)GB_SquareWave[Sound.Chn1.duty][(((Sound.Chn1.samplecount++)*((Sound.Chn1.outfreq) * (32/2)))/ 22050)&31];
         outvalue_left += out_1 * Sound.leftvol_1;
         outvalue_right += out_1 * Sound.rightvol_1;
     }
     if(Sound.Chn2.running && (EmulatorConfig.chn_flags&0x2))
     {
-        int out_2 = (int)SquareWave[Sound.Chn2.duty][(((Sound.Chn2.samplecount++)*((Sound.Chn2.outfreq) * (32/2)))/ 22050)&31];
+        int out_2 = (int)GB_SquareWave[Sound.Chn2.duty][(((Sound.Chn2.samplecount++)*((Sound.Chn2.outfreq) * (32/2)))/ 22050)&31];
         outvalue_left += out_2 * Sound.leftvol_2;
         outvalue_right += out_2 * Sound.rightvol_2;
     }
     if(Sound.Chn3.running && (EmulatorConfig.chn_flags&0x4))
     {
-        int out_3 = (int)WavePattern[(((Sound.Chn3.samplecount++)*((Sound.Chn3.outfreq) * (32/2)))/ 22050)&31];
+        int out_3 = (int)GB_WavePattern[(((Sound.Chn3.samplecount++)*((Sound.Chn3.outfreq) * (32/2)))/ 22050)&31];
         outvalue_left += out_3 * Sound.leftvol_3;
         outvalue_right += out_3 * Sound.rightvol_3;
     }
@@ -445,11 +443,11 @@ void GB_SoundMix(void)
 
         if(Sound.Chn4.width_7) // 7 bit
         {
-            out_4 = noise_7[(value/8)&15] >> (7-(value&7));
+            out_4 = gb_noise_7[(value/8)&15] >> (7-(value&7));
         }
         else // 15 bit
         {
-            out_4 = noise_15[(value/8)&4095] >> (7-(value&7));
+            out_4 = gb_noise_15[(value/8)&4095] >> (7-(value&7));
         }
 
         out_4 &= 1;
@@ -1026,6 +1024,7 @@ void GB_SoundRegWrite(u32 address, u32 value)
 
 void GB_SoundEnd(void)
 {
+
 }
 
 //-----------------------------------------------

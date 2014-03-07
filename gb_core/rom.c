@@ -28,7 +28,6 @@
 #include "../general_utils.h"
 #include "../debug_utils.h"
 #include "../file_utils.h"
-
 #include "../config.h"
 
 #include "gameboy.h"
@@ -50,7 +49,7 @@ Others are bad dumps (in fact, some of those are bad dumps or strange roms...).
 
 //If a cart type is in parenthesis, I haven't seen any game that uses it, but it should use that
 //controller. Cartridges with "???" have been seen, but there is not much documentation about it...
-const char * memorycontrollers[256] = {
+static const char * gb_memorycontrollers[256] = {
     "ROM ONLY", "MBC1", "MBC1+RAM", "MBC1+RAM+BATTERY", "Unknown", "(MBC2)", "MBC2+BATTERY", "Unknown",
     "(ROM+RAM) ", "(ROM+RAM+BATTERY)", "Unknown", "MMM01", "(MMM01+RAM)", "MMM01+RAM+BATTERY", "Unknown", "(MBC3+TIMER+BATTERY)",
     "MBC3+TIMER+RAM+BATTERY", "MBC3", "(MBC3+RAM)", "MBC3+RAM+BATTERY", "Unknown", "(MBC4)", "(MBC4+RAM)", "(MBC4+RAM+BATTERY)",
@@ -88,7 +87,7 @@ const char * memorycontrollers[256] = {
     "Unknown", "Unknown", "Unknown", "Unknown", "CAMERA", "BANDAI TAMA5", "HuC3", "HuC1+RAM+BATTERY"
 } ;
 
-const u8 nintendo_logo[48] = {
+static const u8 gb_nintendo_logo[48] = {
     0xCE,0xED,0x66,0x66,0xCC,0x0D,0x00,0x0B,0x03,0x73,0x00,0x83,0x00,0x0C,0x00,0x0D,
     0x00,0x08,0x11,0x1F,0x88,0x89,0x00,0x0E,0xDC,0xCC,0x6E,0xE6,0xDD,0xDD,0xD9,0x99,
     0xBB,0xBB,0x67,0x63,0x6E,0x0E,0xEC,0xCC,0xDD,0xDC,0x99,0x9F,0xBB,0xB9,0x33,0x3E
@@ -97,7 +96,7 @@ const u8 nintendo_logo[48] = {
 extern _GB_CONTEXT_ GameBoy;
 
 
-int Cartridge_Load(const u8 * pointer, const u32 rom_size)
+int GB_CartridgeLoad(const u8 * pointer, const u32 rom_size)
 {
     int showconsole = 0; //if at the end this is 1, show console window
 
@@ -221,7 +220,7 @@ int Cartridge_Load(const u8 * pointer, const u32 rom_size)
             ConsolePrint("Loading in SGB2 mode...\n");
             break;
         default: //Should never happen
-            Debug_ErrorMsgArg("Cartridge_Load(): Trying to load in an undefined mode, should never happen.");
+            Debug_ErrorMsgArg("GB_CartridgeLoad(): Trying to load in an undefined mode, should never happen.");
             return 0;
             break;
     }
@@ -302,7 +301,7 @@ int Cartridge_Load(const u8 * pointer, const u32 rom_size)
     GameBoy.Emulator.HasBattery = 0;
     GameBoy.Emulator.HasTimer = 0;
 
-    ConsolePrint("Cartridge type: %02X - %s\n",GB_Header->cartridge_type,memorycontrollers[GB_Header->cartridge_type]);
+    ConsolePrint("Cartridge type: %02X - %s\n",GB_Header->cartridge_type,gb_memorycontrollers[GB_Header->cartridge_type]);
 
     GameBoy.Emulator.EnableBank0Switch = 0;
     GameBoy.Memory.mbc_mode = 0;
@@ -532,7 +531,7 @@ int Cartridge_Load(const u8 * pointer, const u32 rom_size)
 
     ConsolePrint("Checking Nintendo logo... ");
 
-    if(memcmp(GB_Header->nintendologo,nintendo_logo,sizeof(nintendo_logo)) == 0)
+    if(memcmp(GB_Header->nintendologo,gb_nintendo_logo,sizeof(gb_nintendo_logo)) == 0)
         ConsolePrint("Correct!\n");
     else
     {
@@ -604,7 +603,7 @@ int Cartridge_Load(const u8 * pointer, const u32 rom_size)
     mem->WorkRAM_Curr = mem->WorkRAM_Switch[0];
 
     if(GameBoy.Emulator.HardwareType == HW_GB)
-        menu_load_gb_palete_from_config();
+        GB_ConfigLoadPalette();
     else if(GameBoy.Emulator.HardwareType == HW_GBP)
         GB_SetPalette(0xFF,0xFF,0xFF);
 

@@ -37,7 +37,7 @@
 #define GBA_BUFFER_SAMPLES (GBA_BUFFER_SIZE/2)
 
 
-static const s8 SquareWave[4][32] = {
+static const s8 GBA_SquareWave[4][32] = {
     { -128,-128,-128,-128, -128,-128,-128,-128, 127,127,-128,-128, -128,-128,-128,-128,
       -128,-128,-128,-128, -128,-128,-128,-128, 127,127,-128,-128, -128,-128,-128,-128 },
 
@@ -49,15 +49,14 @@ static const s8 SquareWave[4][32] = {
 
     { 127,127,127,127, 127,127,127,127, -128,-128,-128,-128, 127,127,127,127,
       127,127,127,127, 127,127,127,127, -128,-128,-128,-128, 127,127,127,127}
-    };
+};
 
-static s8 WavePattern[64];
+static s8 GBA_WavePattern[64];
 
-extern const u8 noise_7[16]; //See gb_core/noise.c
-extern const u8 noise_15[4096];
+extern const u8 gb_noise_7[16]; //See gb_core/noise.c
+extern const u8 gb_noise_15[4096];
 
-typedef struct
-    {
+typedef struct {
     struct { //Tone & Sweep
         u16 reg[3];
 
@@ -225,7 +224,7 @@ typedef struct
     int leftvol_B, rightvol_B;
 
     u32 master_enable;
-    } _GBA_SOUND_HARDWARE_;
+} _GBA_SOUND_HARDWARE_;
 
 static _GBA_SOUND_HARDWARE_ Sound;
 
@@ -411,7 +410,7 @@ void GBA_SoundInit(void)
 
 void GBA_SoundLoadWave(void)
 {
-    s8 * bufferptr = WavePattern;
+    s8 * bufferptr = GBA_WavePattern;
 
     if(Sound.Chn3.doublesize)
     {
@@ -519,19 +518,19 @@ When not using sound output, power consumption can be reduced by setting both
 
     if(Sound.Chn1.running && (EmulatorConfig.chn_flags&0x1))
     {
-        int out_1 = (int)SquareWave[Sound.Chn1.duty][(((Sound.Chn1.samplecount++)*((Sound.Chn1.outfreq) * (32/2)))/ 22050)&31];
+        int out_1 = (int)GBA_SquareWave[Sound.Chn1.duty][(((Sound.Chn1.samplecount++)*((Sound.Chn1.outfreq) * (32/2)))/ 22050)&31];
         outvalue_left += out_1 * Sound.leftvol_1;
         outvalue_right += out_1 * Sound.rightvol_1;
     }
     if(Sound.Chn2.running && (EmulatorConfig.chn_flags&0x2))
     {
-        int out_2 = (int)SquareWave[Sound.Chn2.duty][(((Sound.Chn2.samplecount++)*((Sound.Chn2.outfreq) * (32/2)))/ 22050)&31];
+        int out_2 = (int)GBA_SquareWave[Sound.Chn2.duty][(((Sound.Chn2.samplecount++)*((Sound.Chn2.outfreq) * (32/2)))/ 22050)&31];
         outvalue_left += out_2 * Sound.leftvol_2;
         outvalue_right += out_2 * Sound.rightvol_2;
     }
     if(Sound.Chn3.running && (EmulatorConfig.chn_flags&0x4))
     {
-        int out_3 = (int)WavePattern[(((Sound.Chn3.samplecount++)*((Sound.Chn3.outfreq) * (32/2)))/ 22050)&63];
+        int out_3 = (int)GBA_WavePattern[(((Sound.Chn3.samplecount++)*((Sound.Chn3.outfreq) * (32/2)))/ 22050)&63];
         outvalue_left += out_3 * Sound.leftvol_3;
         outvalue_right += out_3 * Sound.rightvol_3;
     }
@@ -542,11 +541,11 @@ When not using sound output, power consumption can be reduced by setting both
 
         if(Sound.Chn4.width_7) // 7 bit
         {
-            out_4 = noise_7[(value/8)&15] >> (7-(value&7));
+            out_4 = gb_noise_7[(value/8)&15] >> (7-(value&7));
         }
         else // 15 bit
         {
-            out_4 = noise_15[(value/8)&4095] >> (7-(value&7));
+            out_4 = gb_noise_15[(value/8)&4095] >> (7-(value&7));
         }
 
         out_4 &= 1;

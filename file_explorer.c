@@ -28,7 +28,7 @@
 
 //----------------------------------------------------------------------------
 
-static int IsValidROMType(char * name)
+static int _file_explorer_is_valid_rom_type(char * name)
 {
     char extension[4];
     int len = strlen(name);
@@ -132,7 +132,7 @@ void FileExplorer_ListAdd(char * name, int isdir)
     {
         if(isdir == 0)
         {
-            if(IsValidROMType(name) == 0)
+            if(_file_explorer_is_valid_rom_type(name) == 0)
                 return;
         }
 

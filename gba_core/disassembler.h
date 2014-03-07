@@ -23,8 +23,8 @@
 
 void GBA_DebugAddBreakpoint(u32 addr);
 void GBA_DebugClearBreakpoint(u32 addr);
-int GBA_DebugIsBreakpoint(u32 addr);
-int GBA_DebugCPUIsBreakpoint(u32 addr);
+int GBA_DebugIsBreakpoint(u32 addr); // used in debugger
+int GBA_DebugCPUIsBreakpoint(u32 addr); // used in CPU loop
 void GBA_DebugClearBreakpointAll(void);
 
 void GBA_DisassembleARM(u32 opcode, u32 address, char * dest);

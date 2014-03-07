@@ -29,14 +29,13 @@
 #include "debug.h"
 #include "sgb.h"
 #include "video.h"
-
 #include "gb_main.h"
 
 extern _GB_CONTEXT_ GameBoy;
 
 _SGB_INFO_ SGBInfo;
 
-u32 sgb_screenbuffer[4 * 1024];
+static u32 sgb_screenbuffer[4 * 1024];
 /*
 const u32 sgb_defaultpalettes[32][16] = {
     {0x330a,0x5684,0x6d32,0x7ef3,0x330a,0x5684,0x6d32,0x7ef3,0x330a,0x5684,0x6d32,0x7ef3,0x330a,0x5684,0x6d32,0x7ef3},
@@ -114,7 +113,6 @@ void SGB_RenderScreenBuffer(void)
     }
 }
 
-
 void SGB_Init(void)
 {
     GameBoy.Emulator.wait_cycles = 0;
@@ -182,7 +180,7 @@ void SGB_SetBackdrop(u32 rgb)
     SGB_ScreenDrawBorder();
 }
 
-void SGB_PALNN(u32 pal1, u32 pal2)
+static void SGB_PALNN(u32 pal1, u32 pal2)
 {
     SGB_SetBackdrop(SGBInfo.data[0][1] | (SGBInfo.data[0][2]<<8));
 
@@ -195,7 +193,7 @@ void SGB_PALNN(u32 pal1, u32 pal2)
     SGBInfo.palette[pal2][3] = SGBInfo.data[0][13] | (SGBInfo.data[0][14]<<8);
 }
 
-void SGB_ATTR_BLK(void)
+static void SGB_ATTR_BLK(void)
 {
     u32 sets = SGBInfo.data[0][1];
     if(sets > 0x12) sets = 0x12;
@@ -274,7 +272,7 @@ void SGB_ATTR_BLK(void)
     }
 }
 
-void SGB_ATTR_LIN(void)
+static void SGB_ATTR_LIN(void)
 {
     u32 sets = SGBInfo.data[0][1];
     if(sets > 0x6E) sets = 0x6E;
@@ -320,7 +318,7 @@ void SGB_ATTR_LIN(void)
     }
 }
 
-void SGB_ATTR_DIV(void)
+static void SGB_ATTR_DIV(void)
 {
     u32 pal_line = (SGBInfo.data[0][1] >> 4) & 3;
 
@@ -360,7 +358,7 @@ void SGB_ATTR_DIV(void)
     }
 }
 
-void SGB_ATTR_CHR(void)
+static void SGB_ATTR_CHR(void)
 {
     u32 x = SGBInfo.data[0][1];
     u32 y = SGBInfo.data[0][2];
@@ -419,7 +417,7 @@ void SGB_ATTR_CHR(void)
     }
 }
 
-void SGB_PAL_SET(void)
+static void SGB_PAL_SET(void)
 {
     u32 pal0 = SGBInfo.data[0][1] | (SGBInfo.data[0][2]<<8);
     u32 pal1 = SGBInfo.data[0][3] | (SGBInfo.data[0][4]<<8);
@@ -448,7 +446,7 @@ void SGB_PAL_SET(void)
     }
 }
 
-void SGB_PAL_TRN(void)
+static void SGB_PAL_TRN(void)
 {
     SGB_RenderScreenBuffer();
 
@@ -457,7 +455,7 @@ void SGB_PAL_TRN(void)
         SGBInfo.snes_palette[i][j>>1] = (u32)sgb_screenbuffer[(i*8)+j] | ((u32)sgb_screenbuffer[(i*8)+j+1] << 8);
 }
 
-void SGB_DATA_SND(void)
+static void SGB_DATA_SND(void)
 {
     u32 numbytes = SGBInfo.data[0][4];
     if(numbytes > 0xB) numbytes = 0xB;
@@ -489,14 +487,14 @@ void SGB_DATA_SND(void)
     }
 }
 
-void SGB_DATA_TRN(void)
+static void SGB_DATA_TRN(void)
 {
     Debug_DebugMsgArg("SGB DATA_TRN warning - Wrote to %04x, bank %02xh",
         SGBInfo.data[0][1] | (SGBInfo.data[0][2]<<8), SGBInfo.data[0][3]);
     return;
 }
 
-void SGB_CHR_TRN(void)
+static void SGB_CHR_TRN(void)
 {
     //if(SGBInfo.data[0][1] & (1<<1)) //obj tiles - no difference?
     SGB_RenderScreenBuffer();
@@ -510,7 +508,7 @@ void SGB_CHR_TRN(void)
     SGB_ScreenDrawBorder();
 }
 
-void SGB_PCT_TRN(void)
+static void SGB_PCT_TRN(void)
 {
     u32 * dest = SGBInfo.tile_map;
 
@@ -530,7 +528,7 @@ void SGB_PCT_TRN(void)
     SGB_ScreenDrawBorder();
 }
 
-void SGB_ATTR_TRN(void)
+static void SGB_ATTR_TRN(void)
 {
     SGB_RenderScreenBuffer();
 
@@ -544,7 +542,7 @@ void SGB_ATTR_TRN(void)
     }
 }
 
-void SGB_OBJ_TRN(void)
+static void SGB_OBJ_TRN(void)
 {
     if(SGBInfo.data[0][1] & (1<<0)) //Enable OBJ MODE
     {
@@ -569,7 +567,7 @@ void SGB_OBJ_TRN(void)
     }
 }
 
-void SGB_ExecuteCommand(void)
+static void SGB_ExecuteCommand(void)
 {
     //Debug_DebugMsgArg("SGB Command: %02x",SGBInfo.data[0][0] >> 3);
 

@@ -135,7 +135,7 @@ void Config_Save(void)
     fprintf(ini_file,CFG_SERIAL_DEVICE "=%s\r\n",serialdevice[EmulatorConfig.serial_device]);
     fprintf(ini_file,CFG_ENABLE_BLUR "=%s\r\n",EmulatorConfig.enableblur?"true":"false");
     fprintf(ini_file,CFG_REAL_GB_COLORS "=%s\r\n",EmulatorConfig.realcolors?"true":"false");
-    u8 r,g,b; menu_get_gb_palette(&r,&g,&b);
+    u8 r,g,b; GB_ConfigGetPalette(&r,&g,&b);
     fprintf(ini_file,CFG_GB_PALETTE "=#%02X%02X%02X\r\n",r,g,b);
     fprintf(ini_file,"\r\n");
 
@@ -159,7 +159,7 @@ void Config_Save(void)
 
 void Config_Load(void)
 {
-    menu_set_gb_palette(0xB0,0xFF,0xB0);
+    GB_ConfigSetPalette(0xB0,0xFF,0xB0);
 
     char path[MAX_PATHLEN];
     if(DirGetRunningPath()) sprintf(path,"%sGiiBiiAdvance.ini",DirGetRunningPath());
@@ -360,7 +360,7 @@ void Config_Load(void)
 
             //Debug_DebugMsgArg("%02x %02x %02x",r,g,b);
 
-            menu_set_gb_palette(r,g,b);
+            GB_ConfigSetPalette(r,g,b);
         }
     }
 

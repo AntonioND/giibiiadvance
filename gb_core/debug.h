@@ -21,8 +21,8 @@
 
 void GB_DebugAddBreakpoint(u32 addr);
 void GB_DebugClearBreakpoint(u32 addr);
-int GB_DebugIsBreakpoint(u32 addr);
-int GB_DebugCPUIsBreakpoint(u32 addr);
+int GB_DebugIsBreakpoint(u32 addr); // used in debugger
+int GB_DebugCPUIsBreakpoint(u32 addr); // used in CPU loop
 void GB_DebugClearBreakpointAll(void);
 
 inline int gb_debug_get_address_increment(u32 address);

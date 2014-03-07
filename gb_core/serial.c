@@ -26,6 +26,7 @@
 #include "../general_utils.h"
 #include "../file_utils.h"
 #include "../debug_utils.h"
+#include "../config.h"
 
 #include "general.h"
 #include "gameboy.h"
@@ -33,7 +34,7 @@
 #include "serial.h"
 #include "debug.h"
 
-#include "../config.h"
+#include "../png/png_utils.h"
 
 extern _GB_CONTEXT_ GameBoy;
 
@@ -80,9 +81,9 @@ inline void GB_SerialClocks(int _clocks)
 //--------------------------------------------------------------------------------
 //                                NO DEVICE
 
-void GB_SendNone(u32 data) { return; }
+static void GB_SendNone(u32 data) { return; }
 
-u32 GB_RecvNone(void) { return 0xFF; }
+static u32 GB_RecvNone(void) { return 0xFF; }
 
 //--------------------------------------------------------------------------------
 
@@ -112,8 +113,7 @@ _GB_PRINTER_ GB_Printer;
 
 int printer_file_number = 0;
 
-#include "../png/png_utils.h"
-void GB_PrinterPrint(void)
+static void GB_PrinterPrint(void)
 {
     char * endbuffer = malloc(20 * 18 * 16);
     memset(endbuffer,0,20 * 18 * 16);
@@ -199,7 +199,7 @@ void GB_PrinterPrint(void)
     printer_file_number ++;
 }
 
-void GB_PrinterReset(void)
+static void GB_PrinterReset(void)
 {
     if(GB_Printer.data != NULL)
     {
@@ -226,7 +226,7 @@ void GB_PrinterReset(void)
     GB_Printer.output = 0;
 }
 
-bool GB_PrinterChecksumIsCorrect(void)
+static int GB_PrinterChecksumIsCorrect(void)
 {
     //Checksum
     u32 checksum = (GB_Printer.end[0] & 0xFF) | ((GB_Printer.end[1] & 0xFF) << 8);
@@ -247,7 +247,7 @@ bool GB_PrinterChecksumIsCorrect(void)
     return (result == checksum);
 }
 
-void GB_PrinterExecute(void)
+static void GB_PrinterExecute(void)
 {
     switch(GB_Printer.cmd)
     {
@@ -278,7 +278,7 @@ void GB_PrinterExecute(void)
     }
 }
 
-void GB_SendPrinter(u32 data)
+static void GB_SendPrinter(u32 data)
 {
     switch(GB_Printer.state)
     {
@@ -355,10 +355,11 @@ void GB_SendPrinter(u32 data)
     return;
 }
 
-u32 GB_RecvPrinter(void)
+static u32 GB_RecvPrinter(void)
 {
     return GB_Printer.output;
 }
+
 //--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------
@@ -395,6 +396,7 @@ void GB_SerialEnd(void)
 
     if(GameBoy.Emulator.serial_device == SERIAL_GAMEBOY) //TODO
     {
+
     }
 
 //    fclose(debug);

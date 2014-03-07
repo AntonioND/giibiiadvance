@@ -34,7 +34,6 @@
 #include "sound.h"
 #include "sgb.h"
 #include "video.h"
-
 #include "gb_main.h"
 
 extern _GB_CONTEXT_ GameBoy;
@@ -82,10 +81,10 @@ As far as I rememeber, somewhat 10-25 codes can be used simultaneously.
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 
-CvCapture * capture;
-//int gbcamwindow = 0;
-int gbcamenabled = 0;
-int gbcamerafactor = 1;
+static CvCapture * capture;
+//static int gbcamwindow = 0;
+static int gbcamenabled = 0;
+static int gbcamerafactor = 1;
 #endif
 
 void GB_CameraEnd(void)
@@ -149,7 +148,7 @@ int GB_CameraInit(int createwindow)
 #endif
 }
 
-void GB_CameraTakePicture(u32 brightness)
+static void GB_CameraTakePicture(u32 brightness)
 {
     u8 inbuffer[16*8][14*8];
     u8 readybuffer[14][16][16];
@@ -233,14 +232,14 @@ void GB_CameraTakePicture(u32 brightness)
 
 //------------------------------------------------------------------------------
 
-void GB_NoMapperWrite(u32 address, u32 value)
+static void GB_NoMapperWrite(u32 address, u32 value)
 {
     //Debug_DebugMsgArg("NO MAPPER WROTE - %02x to %04x",value,address);
     return;
 }
 
 //Used by MBC1 and HuC-1
-void GB_MBC1Write(u32 address, u32 value)
+static void GB_MBC1Write(u32 address, u32 value)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
@@ -296,7 +295,7 @@ void GB_MBC1Write(u32 address, u32 value)
     }
 }
 
-void GB_MBC2Write(u32 address, u32 value)
+static void GB_MBC2Write(u32 address, u32 value)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
@@ -336,7 +335,7 @@ void GB_MBC2Write(u32 address, u32 value)
     }
 }
 
-void GB_MBC3Write(u32 address, u32 value)
+static void GB_MBC3Write(u32 address, u32 value)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
@@ -427,7 +426,7 @@ void GB_MBC3Write(u32 address, u32 value)
 }
 
 //Used by MBC5 (and rumble)
-void GB_MBC5Write(u32 address, u32 value)
+static void GB_MBC5Write(u32 address, u32 value)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
@@ -476,7 +475,7 @@ void GB_MBC5Write(u32 address, u32 value)
 }
 
 //Doesn't work... or I've only tested damaged roms... I don't know.
-void GB_MBC6Write(u32 address, u32 value) // some things copied from MESS
+static void GB_MBC6Write(u32 address, u32 value) // some things copied from MESS
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
@@ -538,7 +537,7 @@ void GB_MBC6Write(u32 address, u32 value) // some things copied from MESS
     }
 }
 
-void GB_MBC7Write(u32 address, u32 value) // copied from VisualBoy Advance (and modified)
+static void GB_MBC7Write(u32 address, u32 value) // copied from VisualBoy Advance (and modified)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
@@ -751,7 +750,7 @@ void GB_MBC7Write(u32 address, u32 value) // copied from VisualBoy Advance (and 
 }
 
 //"Taito Variety Pack" works, but "Momotarou Collection 2" is more strange...
-void GB_MMM01Write(u32 address, u32 value)
+static void GB_MMM01Write(u32 address, u32 value)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
@@ -830,7 +829,7 @@ void GB_MMM01Write(u32 address, u32 value)
     }
 }
 
-void GB_CameraWrite(u32 address, u32 value)
+static void GB_CameraWrite(u32 address, u32 value)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
@@ -915,28 +914,28 @@ void GB_CameraWrite(u32 address, u32 value)
 
 //------------------------------------------------------------------------------
 
-u32 GB_NoMapperRead(u32 address)
+static u32 GB_NoMapperRead(u32 address)
 {
     //Debug_DebugMsgArg("NO MAPPER READ - %04x",address);
     return 0xFF;
 }
 
 //Used by MBC1, HuC-1, MBC5 (and rumble), MBC6, MMM01
-u32 GB_MBC1Read(u32 address)
+static u32 GB_MBC1Read(u32 address)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
     if(GameBoy.Emulator.RAM_Banks == 0 || mem->RAMEnabled == 0) return 0xFF;
     return mem->RAM_Curr[address-0xA000];
 }
 
-u32 GB_MBC2Read(u32 address)
+static u32 GB_MBC2Read(u32 address)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
     if(GameBoy.Emulator.RAM_Banks == 0 || mem->RAMEnabled == 0) return 0xFF;
     return ( (mem->RAM_Curr[address-0xA000]) & 0x0F );
 }
 
-u32 GB_MBC3Read(u32 address)
+static u32 GB_MBC3Read(u32 address)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
@@ -971,7 +970,7 @@ u32 GB_MBC3Read(u32 address)
     return 0xFF;
 }
 
-u32 GB_MBC7Read(u32 address)
+static u32 GB_MBC7Read(u32 address)
 {
     switch(address & 0xa0f0)
     {
@@ -1000,7 +999,7 @@ u32 GB_MBC7Read(u32 address)
     return 0xFF;
 }
 
-u32 GB_CameraRead(u32 address)
+static u32 GB_CameraRead(u32 address)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 

@@ -28,7 +28,6 @@
 #include "general.h"
 #include "video.h"
 #include "interrupts.h"
-
 #include "gb_main.h"
 
 extern _GB_CONTEXT_ GameBoy;
@@ -113,6 +112,7 @@ void GB_CPUInterruptsInit(void)
 
 void GB_CPUInterruptsEnd(void)
 {
+
 }
 
 void GB_TimersUpdate(int clocks)

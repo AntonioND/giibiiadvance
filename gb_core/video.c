@@ -23,6 +23,7 @@
 #include <stdarg.h>
 
 #include "../build_options.h"
+#include "../file_utils.h"
 
 #include "gameboy.h"
 #include "general.h"
@@ -33,50 +34,73 @@
 #include "sound.h"
 #include "video.h"
 
+#include "../png/png_utils.h"
+
 extern _GB_CONTEXT_ GameBoy;
 extern _SGB_INFO_ SGBInfo;
 
 //GAMEBOY framebuffer-related
-u32 blur;
-u32 realcolors;
-u32 cur_fb;
-u16 framebuffer[2][256 * 224];
+static u32 gb_blur;
+static u32 gb_realcolors;
+static u32 gb_cur_fb;
+static u16 gb_framebuffer[2][256 * 224];
 
-u32 frames_skipped;
-u32 frames_to_skip;
+static u32 gb_frames_skipped;
+static u32 gb_frames_to_skip;
 
 inline void GB_FrameskipUpdate(void)
 {
-    if(frames_to_skip)
+    if(gb_frames_to_skip)
     {
-        frames_skipped++;
-        if(frames_skipped >= frames_to_skip)
+        gb_frames_skipped++;
+        if(gb_frames_skipped >= gb_frames_to_skip)
         {
-            frames_skipped = 0;
+            gb_frames_skipped = 0;
         }
     }
 }
 
 inline void GB_Frameskip(int _frames_to_skip)
 {
-    if(frames_to_skip == _frames_to_skip) return;
-    frames_skipped = 0;
-    frames_to_skip = _frames_to_skip;
+    if(gb_frames_to_skip == _frames_to_skip) return;
+    gb_frames_skipped = 0;
+    gb_frames_to_skip = _frames_to_skip;
 }
 
 inline int GB_HaveToFrameskip(void)
 {
-     return (frames_skipped != 0);
+     return (gb_frames_skipped != 0);
 }
 
-inline void GB_EnableBlur(bool enable)
+inline void GB_EnableBlur(int enable)
 {
-    blur = enable;
+    gb_blur = enable;
 }
 
-inline void GB_EnableRealColors(bool enable)
+inline void GB_EnableRealColors(int enable)
 {
-    realcolors = enable;
+    gb_realcolors = enable;
+}
+
+static u32 pal_red,pal_green,pal_blue;
+
+void GB_ConfigGetPalette(u8 * red, u8 * green, u8 * blue)
+{
+    *red = pal_red;
+    *green = pal_green;
+    *blue = pal_blue;
+}
+
+void GB_ConfigSetPalette(u8 red, u8 green, u8 blue)
+{
+    pal_red = red;
+    pal_green = green;
+    pal_blue = blue;
+}
+
+void GB_ConfigLoadPalette(void)
+{
+    GB_SetPalette(pal_red,pal_green,pal_blue);
 }
 
 //-------------------------------------------------------------
@@ -85,14 +109,12 @@ inline void GB_EnableRealColors(bool enable)
 //-------------------------------------------------------------
 //-------------------------------------------------------------
 
-u32 framebuffer_bgcolor0[256];
-u32 framebuffer_bgpriority[256]; //FOR GBC
+static u32 gb_framebuffer_bgcolor0[256];
+static u32 gb_framebuffer_bgpriority[256]; //FOR GBC
 
-u32 window_current_line;
+static u32 window_current_line;
 
-u32 frame;
-
-u32 gbpalettes[4] = {GB_RGB(31,31,31),GB_RGB(21,21,21),GB_RGB(10,10,10),GB_RGB(0,0,0)};
+static u32 gbpalettes[4] = {GB_RGB(31,31,31),GB_RGB(21,21,21),GB_RGB(10,10,10),GB_RGB(0,0,0)};
 
 void GB_SetPalette(u32 red, u32 green, u32 blue)
 {
@@ -133,8 +155,8 @@ void GB_ScreenDrawScanline(s32 y)
     {
         if(GameBoy.Emulator.CPUHalt == 2)
         {
-            for(x = 0; x < 160; x++) framebuffer[cur_fb][base_index + x] = GB_RGB(31,31,31);
-            if(y == 143) cur_fb ^= 1;
+            for(x = 0; x < 160; x++) gb_framebuffer[gb_cur_fb][base_index + x] = GB_RGB(31,31,31);
+            if(y == 143) gb_cur_fb ^= 1;
             return;
         }
 
@@ -240,8 +262,8 @@ void GB_ScreenDrawScanline(s32 y)
                 color = bg_pal[color];
             }
 
-            framebuffer[cur_fb][base_index + x] = color;
-            framebuffer_bgcolor0[x] = bg_color0;
+            gb_framebuffer[gb_cur_fb][base_index + x] = color;
+            gb_framebuffer_bgcolor0[x] = bg_color0;
         }
 
         if(increase_win) window_current_line ++;
@@ -320,10 +342,10 @@ void GB_ScreenDrawScanline(s32 y)
                                 //If Bg has priority and it is enabled...
                                 if( (GB_Sprite->Info & (1<<7)) && (lcd_reg & (1<<0)) )
                                 {
-                                    if(framebuffer_bgcolor0[x_])
-                                        framebuffer[cur_fb][base_index + x_] = color;
+                                    if(gb_framebuffer_bgcolor0[x_])
+                                        gb_framebuffer[gb_cur_fb][base_index + x_] = color;
                                 }
-                                else framebuffer[cur_fb][base_index + x_] = color;
+                                else gb_framebuffer[gb_cur_fb][base_index + x_] = color;
                             }
                         }
                     }
@@ -333,10 +355,10 @@ void GB_ScreenDrawScanline(s32 y)
     }
     else
     {
-        for(x = 0; x < 160; x++) framebuffer[cur_fb][base_index + x] = GB_RGB(31,31,31);
+        for(x = 0; x < 160; x++) gb_framebuffer[gb_cur_fb][base_index + x] = GB_RGB(31,31,31);
     }
 
-    if(y == 143) cur_fb ^= 1;
+    if(y == 143) gb_cur_fb ^= 1;
 }
 
 //*********************************************************************************************
@@ -383,8 +405,8 @@ void GBC_ScreenDrawScanline(s32 y)
             //Believe it or not, it behaves this way... or at least my tests say so.
             //IR port doesn't seem to matter.
             u32 color_ = GB_SoundHardwareIsOn() ? GB_RGB(31,31,31) : GB_RGB(0,0,0);
-            for(x = 0; x < 160; x++) framebuffer[cur_fb][base_index + x] = color_;
-            if(y == 143) cur_fb ^= 1;
+            for(x = 0; x < 160; x++) gb_framebuffer[gb_cur_fb][base_index + x] = color_;
+            if(y == 143) gb_cur_fb ^= 1;
             return;
         }
 
@@ -487,9 +509,9 @@ void GBC_ScreenDrawScanline(s32 y)
             }
 
 
-            framebuffer[cur_fb][base_index + x] = color;
-            framebuffer_bgcolor0[x] = color0;
-            framebuffer_bgpriority[x] = ( (tileinfo & (1<<7)) != 0 );
+            gb_framebuffer[gb_cur_fb][base_index + x] = color;
+            gb_framebuffer_bgcolor0[x] = color0;
+            gb_framebuffer_bgpriority[x] = ( (tileinfo & (1<<7)) != 0 );
         }
 
         if(increase_win) window_current_line ++;
@@ -569,22 +591,22 @@ void GBC_ScreenDrawScanline(s32 y)
                                 //Priorities...
                                 if((lcd_reg & (1<<0)) == 0) //Master priority
                                 {
-                                    framebuffer[cur_fb][base_index + x_] = color;
+                                    gb_framebuffer[gb_cur_fb][base_index + x_] = color;
                                 }
-                                else if(framebuffer_bgpriority[x_]) //BG priority
+                                else if(gb_framebuffer_bgpriority[x_]) //BG priority
                                 {
-                                    if(framebuffer_bgcolor0[x_])
-                                        framebuffer[cur_fb][base_index + x_] = color;
+                                    if(gb_framebuffer_bgcolor0[x_])
+                                        gb_framebuffer[gb_cur_fb][base_index + x_] = color;
                                 }
                                 else //OAM priority
                                 {
                                     if(GB_Sprite->Info & (1<<7))
                                     {
-                                        if(framebuffer_bgcolor0[x_])
-                                            framebuffer[cur_fb][base_index + x_] = color;
+                                        if(gb_framebuffer_bgcolor0[x_])
+                                            gb_framebuffer[gb_cur_fb][base_index + x_] = color;
                                     }
                                     else
-                                        framebuffer[cur_fb][base_index + x_] = color;
+                                        gb_framebuffer[gb_cur_fb][base_index + x_] = color;
                                 }
                             }
                         }
@@ -595,10 +617,10 @@ void GBC_ScreenDrawScanline(s32 y)
     }
     else
     {
-        for(x = 0; x < 160; x++) framebuffer[cur_fb][base_index + x] = GB_RGB(31,31,31);
+        for(x = 0; x < 160; x++) gb_framebuffer[gb_cur_fb][base_index + x] = GB_RGB(31,31,31);
     }
 
-    if(y == 143) cur_fb ^= 1;
+    if(y == 143) gb_cur_fb ^= 1;
 }
 
 void GBC_GB_ScreenDrawScanline(s32 y)
@@ -627,8 +649,8 @@ void GBC_GB_ScreenDrawScanline(s32 y)
     {
         if(GameBoy.Emulator.CPUHalt == 2)
         {
-            for(x = 0; x < 160; x++) framebuffer[cur_fb][base_index + x] = GB_RGB(0,0,0);
-            if(y == 143) cur_fb ^= 1;
+            for(x = 0; x < 160; x++) gb_framebuffer[gb_cur_fb][base_index + x] = GB_RGB(0,0,0);
+            if(y == 143) gb_cur_fb ^= 1;
             return;
         }
 
@@ -736,13 +758,13 @@ void GBC_GB_ScreenDrawScanline(s32 y)
                     color = bg_pal[color];
                 }
 
-                framebuffer[cur_fb][base_index + x] = color;
-                framebuffer_bgcolor0[x] = bg_color0;
+                gb_framebuffer[gb_cur_fb][base_index + x] = color;
+                gb_framebuffer_bgcolor0[x] = bg_color0;
             }
             else
             {
-                framebuffer[cur_fb][base_index + x] = GB_RGB(31,31,31);
-                framebuffer_bgcolor0[x] = 1;
+                gb_framebuffer[gb_cur_fb][base_index + x] = GB_RGB(31,31,31);
+                gb_framebuffer_bgcolor0[x] = 1;
             }
         }
 
@@ -822,10 +844,10 @@ void GBC_GB_ScreenDrawScanline(s32 y)
                                 //If Bg has priority and it is enabled...
                                 if( (GB_Sprite->Info & (1<<7)) && (lcd_reg & (1<<0)) )
                                 {
-                                    if(framebuffer_bgcolor0[x_])
-                                        framebuffer[cur_fb][base_index + x_] = color;
+                                    if(gb_framebuffer_bgcolor0[x_])
+                                        gb_framebuffer[gb_cur_fb][base_index + x_] = color;
                                 }
-                                else framebuffer[cur_fb][base_index + x_] = color;
+                                else gb_framebuffer[gb_cur_fb][base_index + x_] = color;
                             }
                         }
                     }
@@ -835,12 +857,11 @@ void GBC_GB_ScreenDrawScanline(s32 y)
     }
     else
     {
-        for(x = 0; x < 160; x++) framebuffer[cur_fb][base_index + x] = GB_RGB(31,31,31);
+        for(x = 0; x < 160; x++) gb_framebuffer[gb_cur_fb][base_index + x] = GB_RGB(31,31,31);
     }
 
-    if(y == 143) cur_fb ^= 1;
+    if(y == 143) gb_cur_fb ^= 1;
 }
-
 
 //*********************************************************************************************
 
@@ -848,7 +869,6 @@ inline u32 SGB_GetPixelColor(u32 x, u32 y, u32 palindex)
 {
     return SGBInfo.palette[SGBInfo.ATF_list[SGBInfo.curr_ATF][ (20*(y>>3)) + (x>>3)]][palindex];
 }
-
 
 void SGB_ScreenDrawBorder(void)
 {
@@ -900,13 +920,12 @@ void SGB_ScreenDrawBorder(void)
                 color = SGBInfo.palette[pal][color];
 
                 int temp = ((y+(j<<3))*256) + (x+(i<<3));
-                framebuffer[0][temp] = color;
-                framebuffer[1][temp] = color;
+                gb_framebuffer[0][temp] = color;
+                gb_framebuffer[1][temp] = color;
             }
         }
     }
 }
-
 
 void SGB_ScreenDrawBorderInside(void)
 {
@@ -960,8 +979,8 @@ void SGB_ScreenDrawBorderInside(void)
                         color = SGBInfo.palette[pal][color];
 
                         int temp = ((y+(j<<3))*256) + (x+(i<<3));
-                        framebuffer[0][temp] = color;
-                        framebuffer[1][temp] = color;
+                        gb_framebuffer[0][temp] = color;
+                        gb_framebuffer[1][temp] = color;
                     }
                 }
             //}
@@ -995,28 +1014,28 @@ void SGB_ScreenDrawScanline(s32 y)
         if(y == 143)
         {
             SGB_ScreenDrawBorderInside();
-            cur_fb ^= 1;
+            gb_cur_fb ^= 1;
         }
         return;
     }
     else if(SGBInfo.freeze_screen == SGB_SCREEN_BLACK)
     {
-        for(x = 48; x < 160 + 48; x++) framebuffer[cur_fb][base_index + x] = GB_RGB(0,0,0);
+        for(x = 48; x < 160 + 48; x++) gb_framebuffer[gb_cur_fb][base_index + x] = GB_RGB(0,0,0);
         if(y == 143)
         {
             SGB_ScreenDrawBorderInside();
-            cur_fb ^= 1;
+            gb_cur_fb ^= 1;
         }
         return;
     }
     else if(SGBInfo.freeze_screen == SGB_SCREEN_BACKDROP)
     {
         u32 color_ = SGBInfo.palette[0][0];
-        for(x = 48; x < 160 + 48; x++) framebuffer[cur_fb][base_index + x] = color_;
+        for(x = 48; x < 160 + 48; x++) gb_framebuffer[gb_cur_fb][base_index + x] = color_;
         if(y == 143)
         {
             SGB_ScreenDrawBorderInside();
-            cur_fb ^= 1;
+            gb_cur_fb ^= 1;
         }
         return;
     }
@@ -1027,11 +1046,11 @@ void SGB_ScreenDrawScanline(s32 y)
     {
         if(GameBoy.Emulator.CPUHalt == 2)
         {
-            for(x = 0; x < 160; x++) framebuffer[cur_fb][base_index + x + 48] = GB_RGB(31,31,31);
+            for(x = 0; x < 160; x++) gb_framebuffer[gb_cur_fb][base_index + x + 48] = GB_RGB(31,31,31);
             if(y == 143)
             {
                 SGB_ScreenDrawBorderInside();
-                cur_fb ^= 1;
+                gb_cur_fb ^= 1;
             }
             return;
         }
@@ -1138,8 +1157,8 @@ void SGB_ScreenDrawScanline(s32 y)
                 color = SGB_GetPixelColor(x,y,bg_pal[color]);
             }
 
-            framebuffer[cur_fb][base_index + x + 48] = color;
-            framebuffer_bgcolor0[x] = bg_color0;
+            gb_framebuffer[gb_cur_fb][base_index + x + 48] = color;
+            gb_framebuffer_bgcolor0[x] = bg_color0;
         }
 
         if(increase_win) window_current_line ++;
@@ -1218,10 +1237,10 @@ void SGB_ScreenDrawScanline(s32 y)
                                 //If Bg has priority and it is enabled...
                                 if( (GB_Sprite->Info & (1<<7)) && (lcd_reg & (1<<0)) )
                                 {
-                                    if(framebuffer_bgcolor0[x_])
-                                        framebuffer[cur_fb][base_index + x_ + 48] = color;
+                                    if(gb_framebuffer_bgcolor0[x_])
+                                        gb_framebuffer[gb_cur_fb][base_index + x_ + 48] = color;
                                 }
-                                else framebuffer[cur_fb][base_index + x_ + 48] = color;
+                                else gb_framebuffer[gb_cur_fb][base_index + x_ + 48] = color;
                             }
                         }
                     }
@@ -1231,12 +1250,188 @@ void SGB_ScreenDrawScanline(s32 y)
     }
     else
     {
-        for(x = 0; x < 160; x++) framebuffer[cur_fb][base_index + x + 48] = GB_RGB(31,31,31);
+        for(x = 0; x < 160; x++) gb_framebuffer[gb_cur_fb][base_index + x + 48] = GB_RGB(31,31,31);
     }
 
     if(y == 143)
     {
         SGB_ScreenDrawBorderInside();
-        cur_fb ^= 1;
+        gb_cur_fb ^= 1;
     }
 }
+
+//-------------------------------------------------------------
+//-------------------------------------------------------------
+//                     DRAW TO FRAMEBUFFER
+//-------------------------------------------------------------
+//-------------------------------------------------------------
+
+int GB_Screen_Init(void)
+{
+    memset(gb_framebuffer[0],0,sizeof(gb_framebuffer[0]));
+    memset(gb_framebuffer[1],0,sizeof(gb_framebuffer[1]));
+    return 0;
+}
+
+inline void GB_Screen_WritePixel(char * buffer, int x, int y, int r, int g, int b)
+{
+    u8 * p = (u8*)buffer + (y*160 + x) * 3;
+    *p++ = r; *p++ = g; *p = b;
+}
+
+inline void GB_Screen_WritePixelSGB(char * buffer, int x, int y, int r, int g, int b)
+{
+    u8 * p = (u8*)buffer + (y*(160+96) + x) * 3;
+    *p++ = r; *p++ = g; *p = b;
+}
+
+void gb_scr_writebuffer_sgb(char * buffer)
+{
+    int last_fb = gb_cur_fb ^ 1;
+    int i,j;
+    for(i = 0; i < 256; i++) for(j = 0; j < 224; j++)
+    {
+        int data = gb_framebuffer[last_fb][j*256 + i];
+        int r = data & 0x1F; int g = (data>>5) & 0x1F; int b = (data>>10) & 0x1F;
+        GB_Screen_WritePixelSGB(buffer, i,j, r<<3,g<<3,b<<3);
+    }
+}
+
+void gb_scr_writebuffer_dmg_cgb(char * buffer)
+{
+    int last_fb = gb_cur_fb ^ 1;
+    int i,j;
+    for(i = 0; i < 160; i++) for(j = 0; j < 144; j++)
+    {
+        int data = gb_framebuffer[last_fb][j*256 + i];
+        int r = data & 0x1F; int g = (data>>5) & 0x1F; int b = (data>>10) & 0x1F;
+        GB_Screen_WritePixel(buffer, i,j, r<<3,g<<3,b<<3);
+    }
+}
+
+void gb_scr_writebuffer_dmg_cgb_blur(char * buffer)
+{
+    int i,j;
+    for(i = 0; i < 160; i++) for(j = 0; j < 144; j++)
+    {
+        int data1 = gb_framebuffer[0][j*256 + i];
+        int r1 = data1 & 0x1F; int g1 = (data1>>5) & 0x1F; int b1 = (data1>>10) & 0x1F;
+        int data2 = gb_framebuffer[1][j*256 + i];
+        int r2 = data2 & 0x1F; int g2 = (data2>>5) & 0x1F; int b2 = (data2>>10) & 0x1F;
+        int r = (r1+r2)<<2; int g = (g1+g2)<<2; int b = (b1+b2)<<2;
+        GB_Screen_WritePixel(buffer, i,j, r,g,b);
+    }
+}
+
+//Real colors:
+// R = ((r * 13 + g * 2 + b) >> 1)
+// G = ((g * 3 + b) << 1)
+// B = ((r * 3 + g * 2 + b * 11) >> 1)
+
+void gb_scr_writebuffer_dmg_cgb_realcolors(char * buffer)
+{
+    int last_fb = gb_cur_fb ^ 1;
+    int i,j;
+    for(i = 0; i < 160; i++) for(j = 0; j < 144; j++)
+    {
+        int data = gb_framebuffer[last_fb][j*256 + i];
+        int r = data & 0x1F; int g = (data>>5) & 0x1F; int b = (data>>10) & 0x1F;
+        int _r =  ((r * 13 + g * 2 + b) >> 1);
+        int _g = (g * 3 + b) << 1;
+        int _b = ((r * 3 + g * 2 + b * 11) >> 1);
+        GB_Screen_WritePixel(buffer, i,j, _r,_g,_b);
+    }
+}
+
+void gb_scr_writebuffer_dmg_cgb_blur_realcolors(char * buffer)
+{
+    int i,j;
+    for(i = 0; i < 160; i++) for(j = 0; j < 144; j++)
+    {
+        int data1 = gb_framebuffer[0][j*256 + i];
+        int r1 = data1 & 0x1F; int g1 = (data1>>5) & 0x1F; int b1 = (data1>>10) & 0x1F;
+        int data2 = gb_framebuffer[1][j*256 + i];
+        int r2 = data2 & 0x1F; int g2 = (data2>>5) & 0x1F; int b2 = (data2>>10) & 0x1F;
+        int r = (r1+r2)>>1; int g = (g1+g2)>>1; int b = (b1+b2)>>1;
+        int _r =  ((r * 13 + g * 2 + b) >> 1);
+        int _g = (g * 3 + b) << 1;
+        int _b = ((r * 3 + g * 2 + b * 11) >> 1);
+        GB_Screen_WritePixel(buffer, i,j, _r,_g,_b);
+    }
+}
+
+void GB_Screen_WriteBuffer_24RGB(char * buffer)
+{
+    if( (GameBoy.Emulator.HardwareType == HW_SGB) || (GameBoy.Emulator.HardwareType == HW_SGB2) )
+    {
+        gb_scr_writebuffer_sgb(buffer);
+    }
+    else if(GameBoy.Emulator.HardwareType == HW_GBA)
+    {
+        if(gb_blur) gb_scr_writebuffer_dmg_cgb_blur(buffer);
+        else gb_scr_writebuffer_dmg_cgb(buffer);
+    }
+    else
+    {
+        if(gb_blur)
+        {
+            if(gb_realcolors) gb_scr_writebuffer_dmg_cgb_blur_realcolors(buffer);
+            else gb_scr_writebuffer_dmg_cgb_blur(buffer);
+        }
+        else
+        {
+            if(gb_realcolors) gb_scr_writebuffer_dmg_cgb_realcolors(buffer);
+            else gb_scr_writebuffer_dmg_cgb(buffer);
+        }
+    }
+}
+
+//-------------------------------------------------------------
+//-------------------------------------------------------------
+//                     SCREENSHOTS
+//-------------------------------------------------------------
+//-------------------------------------------------------------
+
+static int screenshot_file_number = 0;
+
+void GB_Screenshot(void)
+{
+    char filename[MAX_PATHLEN];
+
+    while(1)
+    {
+        s_snprintf(filename,sizeof(filename),"%sgb_screenshot%d.png",DirGetScreenshotFolderPath(),
+             screenshot_file_number);
+
+        FILE * file = fopen(filename, "rb");
+        if(file == NULL) break; //Ok
+        screenshot_file_number ++; //look for next free number
+        fclose(file);
+    }
+
+    int width, height;
+
+    if(GameBoy.Emulator.SGBEnabled)
+    {
+        width = 256; height = 224;
+    }
+    else
+    {
+        width = 160; height = 144;
+    }
+
+    u32 * buf_temp = calloc(width*height*4,1);
+    int last_fb = gb_cur_fb ^ 1;
+    int x, y;
+    for(y = 0; y < height; y ++) for(x = 0; x < width; x ++)
+    {
+        u32 data = gb_framebuffer[last_fb][y*256 + x];
+        buf_temp[y*width + x] = ((data&0x1F)<<3)|((((data>>5)&0x1F)<<3)<<8)|
+            ((((data>>10)&0x1F)<<3)<<16);
+    }
+
+    Save_PNG(filename,width,height,buf_temp,0);
+    free(buf_temp);
+}
+
+

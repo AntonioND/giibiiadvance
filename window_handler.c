@@ -153,7 +153,7 @@ int WH_Create(int width, int height, int texw, int texh, int scale) // returns -
             if( w->mTexture == NULL )
             {
                 Debug_LogMsgArg("Couldn't create texture! SDL Error: %s\n", SDL_GetError());
-                SDL_DestroyWindow( w->mWindow );
+                SDL_DestroyWindow( w->mWindow ); // this message shows even if everything is correct... weird...
                 SDL_GL_DeleteContext(w->GLContext);
                 w->mWindow = NULL;
             }

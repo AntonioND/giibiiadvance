@@ -20,7 +20,6 @@
 #define __SERIAL__
 
 void GB_SerialInit(void);
-
 void GB_SerialEnd(void);
 
 inline void GB_SerialClocks(int _clocks);

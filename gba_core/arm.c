@@ -18,7 +18,6 @@
 
 #include "../build_options.h"
 #include "../debug_utils.h"
-#include "../gui/win_gba_disassembler.h"
 
 #include "gba.h"
 #include "bios.h"
@@ -27,6 +26,8 @@
 #include "memory.h"
 #include "interrupts.h"
 #include "disassembler.h"
+
+#include "../gui/win_gba_disassembler.h"
 
 //-----------------------------------------------------------------------------------------------
 
@@ -114,37 +115,6 @@ static inline void arm_stm(u32 address, u32 reg)
 //---------------------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------------------------
-/*
-#define CASE_16(base) \
-    case ((base)+0x0): case ((base)+0x1): case ((base)+0x2): case ((base)+0x3): \
-    case ((base)+0x4): case ((base)+0x5): case ((base)+0x6): case ((base)+0x7): \
-    case ((base)+0x8): case ((base)+0x9): case ((base)+0xA): case ((base)+0xB): \
-    case ((base)+0xC): case ((base)+0xD): case ((base)+0xE): case ((base)+0xF):
-
-#define CASE_256(base) \
-    CASE_16(base+0x00) CASE_16((base)+0x10) CASE_16(base+0x20) CASE_16((base)+0x30) \
-    CASE_16(base+0x40) CASE_16((base)+0x50) CASE_16(base+0x60) CASE_16((base)+0x70) \
-    CASE_16(base+0x80) CASE_16((base)+0x90) CASE_16(base+0xA0) CASE_16((base)+0xB0) \
-    CASE_16(base+0xC0) CASE_16((base)+0xD0) CASE_16(base+0xE0) CASE_16((base)+0xF0)
-
-#define CASE_16_FN(base,fn,fnbase) \
-    case ((base)+0x0): fn((fnbase)+0x0); \
-    case ((base)+0x1): fn((fnbase)+0x1); \
-    case ((base)+0x2): fn((fnbase)+0x2); \
-    case ((base)+0x3): fn((fnbase)+0x3); \
-    case ((base)+0x4): fn((fnbase)+0x4); \
-    case ((base)+0x5): fn((fnbase)+0x5); \
-    case ((base)+0x6): fn((fnbase)+0x6); \
-    case ((base)+0x7): fn((fnbase)+0x7); \
-    case ((base)+0x8): fn((fnbase)+0x8); \
-    case ((base)+0x9): fn((fnbase)+0x9); \
-    case ((base)+0xA): fn((fnbase)+0xA); \
-    case ((base)+0xB): fn((fnbase)+0xB); \
-    case ((base)+0xC): fn((fnbase)+0xC); \
-    case ((base)+0xD): fn((fnbase)+0xD); \
-    case ((base)+0xE): fn((fnbase)+0xE); \
-    case ((base)+0xF): fn((fnbase)+0xF);
-*/
 
 extern u32 cpu_loop_break;
 inline s32 GBA_ExecuteARM(s32 clocks) //returns residual clocks

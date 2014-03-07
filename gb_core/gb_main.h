@@ -21,12 +21,10 @@
 
 void GB_Input_Update(void);
 
-int GB_MainLoad(const char * rom_path);
+int GB_ROMLoad(const char * rom_path);
 void GB_End(int save);
 
 int GB_Screen_Init(void);
-
-void GB_Screen_WriteBuffer_24RGB(char * buffer); // write to buffer in 24 bit format
 
 void GB_RunForOneFrame(void);
 
@@ -38,10 +36,5 @@ void GB_InputSetMBC7Buttons(int up, int down, int right, int left);
 
 int GB_Input_Get(int player);
 
-void GB_Screenshot(void);
-
-void menu_get_gb_palette(u8 * red, u8 * green, u8 * blue);
-void menu_set_gb_palette(u8 red, u8 green, u8 blue);
-void menu_load_gb_palete_from_config(void);
 
 #endif //__GB_MAIN__

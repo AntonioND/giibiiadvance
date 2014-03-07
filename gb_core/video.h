@@ -21,11 +21,18 @@
 
 #include "gameboy.h"
 
+//----------------------------------------------------
+
 inline void GB_FrameskipUpdate(void);
 inline void GB_Frameskip(int _frames_to_skip);
-inline void GB_EnableBlur(bool enable);
-inline void GB_EnableRealColors(bool enable);
+inline void GB_EnableBlur(int enable);
+inline void GB_EnableRealColors(int enable);
 inline int GB_HaveToFrameskip(void);
+void GB_ConfigGetPalette(u8 * red, u8 * green, u8 * blue);
+void GB_ConfigSetPalette(u8 red, u8 green, u8 blue);
+void GB_ConfigLoadPalette(void);
+
+//----------------------------------------------------
 
 #define GB_RGB(r,g,b) ((r)|((g)<<5)|((b)<<10))
 void GB_SetPalette(u32 red, u32 green, u32 blue);
@@ -40,6 +47,13 @@ void GBC_GB_ScreenDrawScanline(s32 y); //gbc when switched to gb mode.
 
 void SGB_ScreenDrawBorder(void);
 void SGB_ScreenDrawScanline(s32 y);
+
+//----------------------------------------------------
+
+void GB_Screen_WriteBuffer_24RGB(char * buffer); // write to buffer in 24 bit format
+void GB_Screenshot(void);
+
+//----------------------------------------------------
 
 #endif //__VIDEO__
 

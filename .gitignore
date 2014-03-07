@@ -3,6 +3,17 @@
 _*
 obj/
 _todo/
+bios/
+screenshots/
+*.gb
+*.gbc
+*.gba
+*.sav
+*.rtc
+*.bin
+log.txt
+*.depend
+*.layout
 
 # Compiled source #
 ###################

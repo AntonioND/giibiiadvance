@@ -228,8 +228,8 @@ void GB_SoundCallback(void * buffer, long len)
     }
 
     //Should print: (GB_BUFFER_SAMPLES / 3 * 2) - (GB_BUFFER_SAMPLES / 3)
-    Debug_LogMsgArg("%d, %d - %d %s",len, Sound.samples_left_to_input,Sound.samples_left_to_output,
-        Sound.samples_left_to_output > Sound.samples_left_to_input-(GB_BUFFER_SAMPLES/2)?"SLOW":"FAST");
+    //Debug_LogMsgArg("%d, %d - %d %s",len, Sound.samples_left_to_input,Sound.samples_left_to_output,
+    //    Sound.samples_left_to_output > Sound.samples_left_to_input-(GB_BUFFER_SAMPLES/2)?"SLOW":"FAST");
 
     s16 * writebuffer = (s16*)buffer;
 

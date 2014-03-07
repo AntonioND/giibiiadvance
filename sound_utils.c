@@ -23,7 +23,7 @@
 #include "sound_utils.h"
 #include "debug_utils.h"
 #include "config.h"
-#define SDL_BUFFER_SAMPLES (4*1024);
+#define SDL_BUFFER_SAMPLES (1*1024);
 
 static Sound_CallbackPointer * _sound_callback;
 static int _sound_enabled = 0;

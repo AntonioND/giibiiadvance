@@ -806,6 +806,11 @@ int Win_MainEventCallback(SDL_Event * e)
     }
     else if(e->type == SDL_WINDOWEVENT)
     {
+        if(e->window.event == SDL_WINDOWEVENT_FOCUS_LOST)
+        {
+            SwitchToMenu();
+            MENU_HAS_TO_UPDATE = 1;
+        }
         if(e->window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
         {
             MENU_HAS_TO_UPDATE = 1;
@@ -822,7 +827,7 @@ int Win_MainEventCallback(SDL_Event * e)
     else if(e->type == SDL_DROPFILE)
     {
         LoadROMAutodetect(e->drop.file);
-        Debug_LogMsgArg("Drag file: %s",e->drop.file);
+        //Debug_LogMsgArg("Drag file: %s",e->drop.file);
         SDL_free(e->drop.file);
     }
     if(has_to_switch_to_game)

@@ -319,10 +319,8 @@ void GBA_SoundCallback(void * buffer, long len)
     }
 
     //Should print: (GBA_BUFFER_SAMPLES / 3 * 2) - (GBA_BUFFER_SAMPLES / 3)
-    //char strrrrr[204];
-    //sprintf(strrrrr,"%d, %d - %d %s",len, Sound.samples_left_to_input,Sound.samples_left_to_output,
-    //Sound.samples_left_to_output > Sound.samples_left_to_input-(GBA_BUFFER_SAMPLES/2)?"SLOW":"FAST");
-    //GLWindow_SetCaption((const char*)strrrrr);
+    Debug_LogMsgArg("%d, %d - %d %s",len, Sound.samples_left_to_input,Sound.samples_left_to_output,
+        Sound.samples_left_to_output > Sound.samples_left_to_input-(GBA_BUFFER_SAMPLES/2)?"SLOW":"FAST");
 
     s16 * writebuffer = (s16*)buffer;
 

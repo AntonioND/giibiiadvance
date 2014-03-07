@@ -23,6 +23,7 @@
 
 #include "win_main.h"
 #include "win_utils.h"
+
 #include "../config.h"
 #include "../file_explorer.h"
 #include "../sound_utils.h"
@@ -32,16 +33,20 @@
 #include "../build_options.h"
 #include "../general_utils.h"
 #include "../file_utils.h"
+
 #include "../gb_core/sound.h"
 #include "../gb_core/debug.h"
-#include "../gba_core/gba.h"
 #include "../gb_core/gb_main.h"
 #include "../gb_core/interrupts.h"
+
+#include "../gba_core/gba.h"
 #include "../gba_core/bios.h"
 #include "../gba_core/disassembler.h"
 #include "../gba_core/save.h"
 #include "../gba_core/video.h"
+#include "../gba_core/rom.h"
 #include "../gba_core/sound.h"
+
 #include "win_gba_disassembler.h"
 #include "win_gb_disassembler.h"
 #include "win_gba_memviewer.h"
@@ -85,6 +90,7 @@ void FPS_TimerInit(void)
     if(FPS_timer == 0)
     {
         Debug_LogMsgArg("FPS_TimerInit(): SDL_AddTimer() failed: %s",SDL_GetError());
+        Debug_DebugMsgArg("FPS_TimerInit(): SDL_AddTimer() failed: %s",SDL_GetError());
     }
 }
 
@@ -99,6 +105,10 @@ int CONFIG_ZOOM = 2;
 
 #define CONFIG_ZOOM_MIN 2
 #define CONFIG_ZOOM_MAX 4
+
+//------------------------------------------------------------------
+
+void Win_MainClearMessage(void);
 
 //------------------------------------------------------------------
 
@@ -263,6 +273,8 @@ static unsigned int rom_size;
 
 void UnloadROM(int save_data)
 {
+    Win_MainClearMessage();
+
     if(RUNNING == RUNNING_GBA)
     {
         GBA_EndRom(save_data);
@@ -282,6 +294,7 @@ void UnloadROM(int save_data)
 
     memset(GAME_SCREEN_BUFFER,0,sizeof(GAME_SCREEN_BUFFER)); //clear screen buffer
     WH_Render( WinIDMain, GAME_SCREEN_BUFFER); // clear screen
+    GetGameScreenTextureDump();
 
     RUNNING = RUNNING_NONE;
 
@@ -296,6 +309,8 @@ int LoadROMAutodetect(char * path)
 {
     if(path == NULL) return 0;
     if(strlen(path) == 0) return 0;
+
+    Win_MainClearMessage();
 
     if(RUNNING != RUNNING_NONE)
         UnloadROM(1);
@@ -496,13 +511,18 @@ void Win_MainClose(void)
 {
     Win_MainFileExplorerClose();
     UnloadROM(1);
-    WH_CloseAll();
 }
 
 void Win_MainCloseNoSave(void)
 {
     Win_MainFileExplorerClose();
     UnloadROM(0);
+}
+
+void Win_MainExit(void)
+{
+    Win_MainFileExplorerClose();
+    UnloadROM(1);
     WH_CloseAll();
 }
 
@@ -531,12 +551,16 @@ static _gui_menu_entry mmfile_open = {"Open" , Win_MainFileExplorerOpen};
 static _gui_menu_entry mmfile_separator = {" " , NULL};
 static _gui_menu_entry mmfile_close = {"Close" , Win_MainClose};
 static _gui_menu_entry mmfile_closenosav = {"Close without saving", Win_MainCloseNoSave};
+static _gui_menu_entry mmfile_exit = {"Exit", Win_MainExit};
+
 
 static _gui_menu_entry * mmfile_elements[] = {
     &mmfile_open,
     &mmfile_separator,
     &mmfile_close,
     &mmfile_closenosav,
+    &mmfile_separator,
+    &mmfile_exit,
     NULL
 };
 
@@ -594,12 +618,16 @@ static _gui mainwindow_subwindow_config_gui = {
 
 //MAIN WINDOW GUI
 
+static _gui_console mainwindow_show_message_con;
+static _gui_element mainwindow_show_message_win;
+
 static _gui_element mainwindow_bg;
 static _gui_element mainwindow_btn;
 static _gui_element mainwindow_configwin;
 
 static _gui_element * mainwindow_gui_elements[] = {
     &mainwindow_bg,
+    &mainwindow_show_message_win,
     &mainwindow_configwin,
     &mainwindow_fileexplorer_win,
     NULL
@@ -614,6 +642,34 @@ static _gui mainwindow_window_gui = {
 void mainbtncallback_openwin(void)
 {
     GUI_WindowSetEnabled(&mainwindow_configwin,1);
+}
+
+//------------------------------------------------------------------
+
+void Win_MainShowMessage(int type, const char * text) // 0 = error, 1 = debug, 2 = console
+{
+    SwitchToMenu();
+
+    if(type == 0)
+        GUI_SetMessageBox(&mainwindow_show_message_win,&mainwindow_show_message_con,
+                      100,100,256*2-200,224*2-200,"Error Message");
+    else if(type == 1)
+        GUI_SetMessageBox(&mainwindow_show_message_win,&mainwindow_show_message_con,
+                      100,100,256*2-200,224*2-200,"Debug Message");
+    else if(type == 2)
+        GUI_SetMessageBox(&mainwindow_show_message_win,&mainwindow_show_message_con,
+                      50,50,256*2-100,224*2-100,"Console");
+    else return;
+
+
+    GUI_MessageBoxSetEnabled(&mainwindow_show_message_win,1);
+
+    GUI_ConsoleModePrintf(&mainwindow_show_message_con,0,0,text);
+}
+
+void Win_MainClearMessage(void)
+{
+    memset(&mainwindow_show_message_win,0,sizeof(mainwindow_show_message_win));
 }
 
 //------------------------------------------------------------------
@@ -811,6 +867,8 @@ int Win_MainCreate(char * rom_path)
     GUI_SetWindow(&mainwindow_fileexplorer_win,25,25,256*2-50,224*2-50,&mainwindow_subwindow_fileexplorer_gui,
                   "File Explorer");
 
+    Win_MainClearMessage();
+
     WinIDMain = WH_Create(256*CONFIG_ZOOM,224*CONFIG_ZOOM, 0,0, 0);
 
     MENU_ENABLED = 1;
@@ -919,6 +977,12 @@ void Win_MainLoopHandle(void)
 
         if(RUNNING == RUNNING_GBA)
         {
+            if(GBA_ShowConsoleRequested())
+            {
+                ConsoleShow();
+                return;
+            }
+
             Win_GBADisassemblerStartAddressSetDefault();
 
             GBA_KeyboardGamepadGetInput();

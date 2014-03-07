@@ -56,26 +56,26 @@ Only sprites 1 & 2 ($FE00 & $FE04) are not affected by these instructions.
 
 void GB_CPUInit(void)
 {
-	GB_CPUInterruptsInit();
+    GB_CPUInterruptsInit();
 
     GameBoy.Emulator.cpu_microinstruction = 0;
-	GameBoy.Emulator.ScreenMode = 2;
-	GameBoy.Memory.IO_Ports[STAT_REG-0xFF00] = 0x02;
-	GameBoy.Emulator.CurrentScanLine = 0;
-	GameBoy.Emulator.CPUHalt = 0;
-	GameBoy.Emulator.DoubleSpeed = 0;
-	GameBoy.Emulator.halt_not_executed = 0;
+    GameBoy.Emulator.ScreenMode = 2;
+    GameBoy.Memory.IO_Ports[STAT_REG-0xFF00] = 0x02;
+    GameBoy.Emulator.CurrentScanLine = 0;
+    GameBoy.Emulator.CPUHalt = 0;
+    GameBoy.Emulator.DoubleSpeed = 0;
+    GameBoy.Emulator.halt_not_executed = 0;
 
-	if(GameBoy.Emulator.CGBEnabled == 1)
-	{
-		GameBoy.Emulator.ScreenMode = 1;
-		GameBoy.Memory.IO_Ports[STAT_REG-0xFF00] = 0x01;
-		GameBoy.Emulator.CurrentScanLine = 0x90;
-	}
+    if(GameBoy.Emulator.CGBEnabled == 1)
+    {
+        GameBoy.Emulator.ScreenMode = 1;
+        GameBoy.Memory.IO_Ports[STAT_REG-0xFF00] = 0x01;
+        GameBoy.Emulator.CurrentScanLine = 0x90;
+    }
 
-	//Registers
-	if(GameBoy.Emulator.boot_rom_loaded == 0)
-	{
+    //Registers
+    if(GameBoy.Emulator.boot_rom_loaded == 0)
+    {
         GameBoy.CPU.Reg8.F = 0xB0;
 
         if(GameBoy.Emulator.CGBEnabled)
@@ -111,29 +111,29 @@ void GB_CPUInit(void)
                 GameBoy.CPU.Reg8.A = 0x11; // CGB or GBA
                 break;
         }
-	}
-	else
-	{
-	    // No idea of the real initial values (except the PC one, it must be 0x0000).
-	    // Maybe they are random?
-		GameBoy.CPU.Reg16.AF = 0x0000;
-		GameBoy.CPU.Reg16.BC = 0x0000;
-		GameBoy.CPU.Reg16.DE = 0x0000;
-		GameBoy.CPU.Reg16.HL = 0x0000;
-		GameBoy.CPU.Reg16.PC = 0x0000;
-		GameBoy.CPU.Reg16.SP = 0x0000;
-	}
+    }
+    else
+    {
+        // No idea of the real initial values (except the PC one, it must be 0x0000).
+        // Maybe they are random?
+        GameBoy.CPU.Reg16.AF = 0x0000;
+        GameBoy.CPU.Reg16.BC = 0x0000;
+        GameBoy.CPU.Reg16.DE = 0x0000;
+        GameBoy.CPU.Reg16.HL = 0x0000;
+        GameBoy.CPU.Reg16.PC = 0x0000;
+        GameBoy.CPU.Reg16.SP = 0x0000;
+    }
 }
 
 inline void GB_CPUClock(int clocks) // the lower the number of clocks, the better
 {
     GB_LCDUpdate(clocks);
-	GB_TimersUpdate(clocks);
-	GB_SoundUpdate(clocks);
-	GB_SerialClocks(clocks);
-	SGB_Clock(clocks);
+    GB_TimersUpdate(clocks);
+    GB_SoundUpdate(clocks);
+    GB_SerialClocks(clocks);
+    SGB_Clock(clocks);
 
-	GB_CPUHandleClockEvents();
+    GB_CPUHandleClockEvents();
 }
 
 int gb_break_execution = 0;
@@ -164,8 +164,8 @@ void GB_CPU_MicroinstructionStep(void); // in this file, the last function
 void GB_CPUExecuteOscillatorClock(void)
 {
     _GB_CPU_ * cpu = &GameBoy.CPU;
-	_GB_MEMORY_ * mem = &GameBoy.Memory;
-	_EMULATOR_INFO_ * emu = &GameBoy.Emulator;
+    _GB_MEMORY_ * mem = &GameBoy.Memory;
+    _EMULATOR_INFO_ * emu = &GameBoy.Emulator;
 
     if(emu->cpu_microinstruction == 0)
     {
@@ -286,10 +286,10 @@ void GB_CPUExecuteOscillatorClock(void)
 
                 //if((i & 0x30) == 0x30)
                 //{
-                //	Debug_DebugMsgArg("STOP with no possible exit, ignored.\nPC: %04x\nROM: %d",
+                //    Debug_DebugMsgArg("STOP with no possible exit, ignored.\nPC: %04x\nROM: %d",
                 //           GameBoy.CPU.Reg16.PC,GameBoy.Memory.selected_rom);
-                //	GameBoy.Emulator.CPUHalt = 0;
-                //	return;
+                //    GameBoy.Emulator.CPUHalt = 0;
+                //    return;
                 //}
                 int Keys = GB_Input_Get(0);
                 if((i & (1<<5)) == 0) //A-B-SEL-STA
@@ -305,7 +305,7 @@ void GB_CPUExecuteOscillatorClock(void)
                 GB_CPU_MicroinstructionStep(); //Execute microinstructions
             }
         }
-	}
+    }
 
     GB_CPUClock(1); // update everything
 }
@@ -337,47 +337,47 @@ void GB_RunForInstruction(void)
 }
 
 static const u32 clocks_table[256] = {
-	1, 3, 2, 2, 1, 1, 2, 1,  5, 2, 2, 2, 1, 1, 2, 1,
-	2, 3, 2, 2, 1, 1, 2, 1,  3, 2, 2, 2, 1, 1, 2, 1,
-	3, 3, 2, 2, 1, 1, 2, 1,  3, 2, 2, 2, 1, 1, 2, 1,
-	3, 3, 2, 2, 3, 3, 3, 1,  3, 2, 2, 2, 1, 1, 2, 1,
+    1, 3, 2, 2, 1, 1, 2, 1,  5, 2, 2, 2, 1, 1, 2, 1,
+    2, 3, 2, 2, 1, 1, 2, 1,  3, 2, 2, 2, 1, 1, 2, 1,
+    3, 3, 2, 2, 1, 1, 2, 1,  3, 2, 2, 2, 1, 1, 2, 1,
+    3, 3, 2, 2, 3, 3, 3, 1,  3, 2, 2, 2, 1, 1, 2, 1,
 
-	1, 1, 1, 1, 1, 1, 2, 1,  1, 1, 1, 1, 1, 1, 2, 1,
-	1, 1, 1, 1, 1, 1, 2, 1,  1, 1, 1, 1, 1, 1, 2, 1,
-	1, 1, 1, 1, 1, 1, 2, 1,  1, 1, 1, 1, 1, 1, 2, 1,
-	2, 2, 2, 2, 2, 2, 1, 2,  1, 1, 1, 1, 1, 1, 2, 1,
+    1, 1, 1, 1, 1, 1, 2, 1,  1, 1, 1, 1, 1, 1, 2, 1,
+    1, 1, 1, 1, 1, 1, 2, 1,  1, 1, 1, 1, 1, 1, 2, 1,
+    1, 1, 1, 1, 1, 1, 2, 1,  1, 1, 1, 1, 1, 1, 2, 1,
+    2, 2, 2, 2, 2, 2, 1, 2,  1, 1, 1, 1, 1, 1, 2, 1,
 
-	1, 1, 1, 1, 1, 1, 2, 1,  1, 1, 1, 1, 1, 1, 2, 1,
-	1, 1, 1, 1, 1, 1, 2, 1,  1, 1, 1, 1, 1, 1, 2, 1,
-	1, 1, 1, 1, 1, 1, 2, 1,  1, 1, 1, 1, 1, 1, 2, 1,
-	1, 1, 1, 1, 1, 1, 2, 1,  1, 1, 1, 1, 1, 1, 2, 1,
+    1, 1, 1, 1, 1, 1, 2, 1,  1, 1, 1, 1, 1, 1, 2, 1,
+    1, 1, 1, 1, 1, 1, 2, 1,  1, 1, 1, 1, 1, 1, 2, 1,
+    1, 1, 1, 1, 1, 1, 2, 1,  1, 1, 1, 1, 1, 1, 2, 1,
+    1, 1, 1, 1, 1, 1, 2, 1,  1, 1, 1, 1, 1, 1, 2, 1,
 
     5, 3, 4, 4, 6, 4, 2, 4,  5, 4, 4, 2, 6, 6, 2, 4, // CB = 2 at least
-	5, 3, 4, 0, 6, 4, 2, 4,  5, 4, 4, 0, 6, 0, 2, 4,
-	3, 3, 2, 0, 0, 4, 2, 4,  4, 1, 4, 0, 0, 0, 2, 4,
-	3, 3, 2, 1, 0, 4, 2, 4,  3, 2, 4, 1, 0, 0, 2, 4
+    5, 3, 4, 0, 6, 4, 2, 4,  5, 4, 4, 0, 6, 0, 2, 4,
+    3, 3, 2, 0, 0, 4, 2, 4,  4, 1, 4, 0, 0, 0, 2, 4,
+    3, 3, 2, 1, 0, 4, 2, 4,  3, 2, 4, 1, 0, 0, 2, 4
 };
 
 static const u32 clocks_table_cb[256] = {
-	2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
-	2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
-	2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
-	2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
+    2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
+    2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
+    2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
+    2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
 
-	2, 2, 2, 2, 2, 2,  3, 2, 2, 2, 2, 2, 2, 2,  3, 2,
-	2, 2, 2, 2, 2, 2,  3, 2, 2, 2, 2, 2, 2, 2,  3, 2,
-	2, 2, 2, 2, 2, 2,  3, 2, 2, 2, 2, 2, 2, 2,  3, 2,
-	2, 2, 2, 2, 2, 2,  3, 2, 2, 2, 2, 2, 2, 2,  3, 2,
+    2, 2, 2, 2, 2, 2,  3, 2, 2, 2, 2, 2, 2, 2,  3, 2,
+    2, 2, 2, 2, 2, 2,  3, 2, 2, 2, 2, 2, 2, 2,  3, 2,
+    2, 2, 2, 2, 2, 2,  3, 2, 2, 2, 2, 2, 2, 2,  3, 2,
+    2, 2, 2, 2, 2, 2,  3, 2, 2, 2, 2, 2, 2, 2,  3, 2,
 
-	2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
-	2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
-	2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
-	2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
+    2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
+    2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
+    2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
+    2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
 
-	2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
-	2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
-	2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
-	2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2
+    2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
+    2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
+    2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
+    2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2
 };
 
 //this can only execute one microinstruction at a time = 4 oscillator cycles (2 in dual speed mode)
@@ -385,8 +385,8 @@ static const u32 clocks_table_cb[256] = {
 void GB_CPU_MicroinstructionStep(void)
 {
     _GB_CPU_ * cpu = &GameBoy.CPU;
-	_GB_MEMORY_ * mem = &GameBoy.Memory;
-	_EMULATOR_INFO_ * emu = &GameBoy.Emulator;
+    _GB_MEMORY_ * mem = &GameBoy.Memory;
+    _EMULATOR_INFO_ * emu = &GameBoy.Emulator;
 
     if(emu->cpu_microinstruction == 0)
     {
@@ -1021,14 +1021,14 @@ void GB_CPU_MicroinstructionStep(void)
         case 0x76: //HALT
             if(GameBoy.Memory.InterruptMasterEnable == 1)
             {
-            //	if(GameBoy.Emulator.HDMAenabled == HDMA_NONE)
-            //	{
+            //    if(GameBoy.Emulator.HDMAenabled == HDMA_NONE)
+            //    {
                     GameBoy.Emulator.CPUHalt = 1;
-            //	}
+            //    }
             }
             else
             {
-        /*		if(mem->IO_Ports[IF_REG-0xFF00] & mem->HighRAM[IE_REG-0xFF80] & 0x1F)
+        /*        if(mem->IO_Ports[IF_REG-0xFF00] & mem->HighRAM[IE_REG-0xFF80] & 0x1F)
                 {
 
                     The first byte of the next instruction
@@ -3878,7 +3878,7 @@ void GB_CPU_MicroinstructionStep(void)
             break;
         case 0xFB: //EI
             GameBoy.Memory.interrupts_enable_count = 1;
-        //	GameBoy.Memory.InterruptMasterEnable = 1;
+        //    GameBoy.Memory.InterruptMasterEnable = 1;
             break;
         case 0xFC:
             __gb_break_to_debugger();
@@ -3925,7 +3925,7 @@ void GB_CPU_MicroinstructionStep(void)
             break;
     } //end switch
 
-	//cpu->Reg16.PC &= 0xFFFF;
+    //cpu->Reg16.PC &= 0xFFFF;
 
     emu->cpu_microinstruction++;
 

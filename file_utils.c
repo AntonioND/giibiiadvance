@@ -58,7 +58,11 @@ void DirSetRunningPath(char * path)
     }
 
     if(l == 0)
-        running_path[0] = '\0'; //Problems here...
+    {
+        running_path[0] = '.'; //Problems here...
+        running_path[1] = '/';
+        running_path[2] = '\0';
+    }
 
     s_snprintf(bios_path,sizeof(bios_path),"%s%s%c",running_path,BIOS_FOLDER,slash_char);
     s_snprintf(screenshot_path,sizeof(screenshot_path),"%s%s%c",running_path,SCREENSHOT_FOLDER,slash_char);
@@ -83,79 +87,79 @@ char * DirGetScreenshotFolderPath(void)
 
 void FileLoad_NoError(const char * filename, void ** buffer, unsigned int * size_)
 {
-	FILE * datafile = fopen(filename, "rb");
-	unsigned int size;
-	*buffer = NULL;
-	if(size_) *size_ = 0;
+    FILE * datafile = fopen(filename, "rb");
+    unsigned int size;
+    *buffer = NULL;
+    if(size_) *size_ = 0;
 
-	if(datafile == NULL) return;
+    if(datafile == NULL) return;
 
     fseek(datafile, 0, SEEK_END);
-	size = ftell(datafile);
-	if(size_) *size_ = size;
+    size = ftell(datafile);
+    if(size_) *size_ = size;
 
-	if(size == 0)
+    if(size == 0)
     {
         fclose(datafile);
         return;
     }
 
-	rewind(datafile);
-	*buffer = malloc(size);
+    rewind(datafile);
+    *buffer = malloc(size);
 
-	if(*buffer == NULL)
-	{
+    if(*buffer == NULL)
+    {
         fclose(datafile);
         return;
     }
 
-	if(fread(*buffer,size,1,datafile) != 1)
-	{
+    if(fread(*buffer,size,1,datafile) != 1)
+    {
         fclose(datafile);
         return;
     }
 
-	fclose(datafile);
+    fclose(datafile);
 }
 
 void FileLoad(const char * filename, void ** buffer, unsigned int * size_)
 {
-	FILE * datafile = fopen(filename, "rb");
-	unsigned int size;
-	*buffer = NULL;
-	if(size_) *size_ = 0;
+    FILE * datafile = fopen(filename, "rb");
+    unsigned int size;
+    *buffer = NULL;
+    if(size_) *size_ = 0;
 
-	if(datafile == NULL)
-	{
-	    Debug_ErrorMsgArg("%s couldn't be opened!",filename);
+    if(datafile == NULL)
+    {
+        Debug_ErrorMsgArg("%s couldn't be opened!",filename);
         return;
     }
 
     fseek(datafile, 0, SEEK_END);
-	size = ftell(datafile);
-	if(size_) *size_ = size;
-	if(size == 0)
-	{
-	    Debug_ErrorMsgArg("Size of %s is 0!",filename);
-	    fclose(datafile);
-        return;
-    }
-	rewind(datafile);
-	*buffer = malloc(size);
-	if(*buffer == NULL)
-	{
-	    Debug_ErrorMsgArg("Not enought memory to load %s!",filename);
+    size = ftell(datafile);
+    if(size_) *size_ = size;
+    if(size == 0)
+    {
+        Debug_ErrorMsgArg("Size of %s is 0!",filename);
         fclose(datafile);
         return;
     }
-	if(fread(*buffer,size,1,datafile) != 1)
-	{
-	    Debug_ErrorMsgArg("Error while reading: %s",filename);
+    rewind(datafile);
+    *buffer = malloc(size);
+    if(*buffer == NULL)
+    {
+        Debug_ErrorMsgArg("Not enought memory to load %s!",filename);
+        fclose(datafile);
+        return;
+    }
+    if(fread(*buffer,size,1,datafile) != 1)
+    {
+        Debug_ErrorMsgArg("Error while reading: %s",filename);
         fclose(datafile);
         return;
     }
 
-	fclose(datafile);
+    fclose(datafile);
 }
 
 //-------------------------------------------------

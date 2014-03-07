@@ -38,18 +38,18 @@
 
 
 static const s8 SquareWave[4][32] = {
-	{ -128,-128,-128,-128, -128,-128,-128,-128, 127,127,-128,-128, -128,-128,-128,-128,
-	  -128,-128,-128,-128, -128,-128,-128,-128, 127,127,-128,-128, -128,-128,-128,-128 },
+    { -128,-128,-128,-128, -128,-128,-128,-128, 127,127,-128,-128, -128,-128,-128,-128,
+      -128,-128,-128,-128, -128,-128,-128,-128, 127,127,-128,-128, -128,-128,-128,-128 },
 
-	{ -128,-128,-128,-128, -128,-128,-128,-128, 127,127,127,127, -128,-128,-128,-128,
-	  -128,-128,-128,-128, -128,-128,-128,-128, 127,127,127,127, -128,-128,-128,-128 },
+    { -128,-128,-128,-128, -128,-128,-128,-128, 127,127,127,127, -128,-128,-128,-128,
+      -128,-128,-128,-128, -128,-128,-128,-128, 127,127,127,127, -128,-128,-128,-128 },
 
-	{ -128,-128,-128,-128, 127,127,127,127, 127,127,127,127, -128,-128,-128,-128,
-	  -128,-128,-128,-128, 127,127,127,127, 127,127,127,127, -128,-128,-128,-128 },
+    { -128,-128,-128,-128, 127,127,127,127, 127,127,127,127, -128,-128,-128,-128,
+      -128,-128,-128,-128, 127,127,127,127, 127,127,127,127, -128,-128,-128,-128 },
 
-	{ 127,127,127,127, 127,127,127,127, -128,-128,-128,-128, 127,127,127,127,
-	  127,127,127,127, 127,127,127,127, -128,-128,-128,-128, 127,127,127,127}
-	};
+    { 127,127,127,127, 127,127,127,127, -128,-128,-128,-128, 127,127,127,127,
+      127,127,127,127, 127,127,127,127, -128,-128,-128,-128, 127,127,127,127}
+    };
 
 static s8 WavePattern[64];
 
@@ -57,111 +57,111 @@ extern const u8 noise_7[16]; //See gb_core/noise.c
 extern const u8 noise_15[4096];
 
 typedef struct
-	{
-	struct { //Tone & Sweep
-	    u16 reg[3];
+    {
+    struct { //Tone & Sweep
+        u16 reg[3];
 
-		s32 freq;
+        s32 freq;
 
-		u32 sweepstepsleft;
-		u32 sweeptime; // if 0, not active
-		u32 sweepinc;
-		u32 sweepshift;
+        u32 sweepstepsleft;
+        u32 sweeptime; // if 0, not active
+        u32 sweepinc;
+        u32 sweepshift;
         u32 sweepfreq;
 
-		u32 duty;
+        u32 duty;
 
-		u32 vol;
-		u32 envactive; // if != 0, activate
-		u32 envelope;
-		u32 envincrease;
-		u32 envstepstochange;
+        u32 vol;
+        u32 envactive; // if != 0, activate
+        u32 envelope;
+        u32 envincrease;
+        u32 envstepstochange;
 
-		u32 stepsleft; //Each step is 1/256 sec
-		u32 limittime; //Activates "stepsleft"
+        u32 stepsleft; //Each step is 1/256 sec
+        u32 limittime; //Activates "stepsleft"
 
-		u32 speakerright;
-		u32 speakerleft;
+        u32 speakerright;
+        u32 speakerleft;
 
 
         u32 running;
         u32 outfreq;
-		u32 samplecount;
+        u32 samplecount;
     } Chn1;
 
-	struct { //Tone
-	    u16 reg[3];
+    struct { //Tone
+        u16 reg[3];
 
-		s32 freq;
-		u32 duty;
+        s32 freq;
+        u32 duty;
 
-		u32 vol;
-		u32 envactive; // if != 0, activate
-		u32 envelope;
-		u32 envincrease;
-		u32 envstepstochange;
+        u32 vol;
+        u32 envactive; // if != 0, activate
+        u32 envelope;
+        u32 envincrease;
+        u32 envstepstochange;
 
-		u32 stepsleft; //Each step is 1/256 sec
-		u32 limittime; //Activates "stepsleft"
+        u32 stepsleft; //Each step is 1/256 sec
+        u32 limittime; //Activates "stepsleft"
 
-		u32 speakerright;
-		u32 speakerleft;
+        u32 speakerright;
+        u32 speakerleft;
 
 
         u32 running;
         u32 outfreq;
-		u32 samplecount;
+        u32 samplecount;
     } Chn2;
 
-	struct { //Wave Output
-	    u16 reg[5];
+    struct { //Wave Output
+        u16 reg[5];
 
-		u32 playing;
+        u32 playing;
 
-		s32 freq;
+        s32 freq;
 
-		u32 vol;
+        u32 vol;
 
-		u32 stepsleft; //Each step is 1/256 sec
-		u32 limittime; //Activates "stepsleft"
+        u32 stepsleft; //Each step is 1/256 sec
+        u32 limittime; //Activates "stepsleft"
 
-		u32 speakerright;
-		u32 speakerleft;
+        u32 speakerright;
+        u32 speakerleft;
 
         int doublesize; //0 - 1
         int buffer_playing; // 0 - 1
         u8 wave_ram_buffer[2][16];
 
-		u32 running;
-		u32 outfreq;
-		u32 samplecount;
+        u32 running;
+        u32 outfreq;
+        u32 samplecount;
     } Chn3;
 
-	struct { //Noise
-	    u16 reg[5];
+    struct { //Noise
+        u16 reg[5];
 
-		u32 shift;
-		u32 width_7;
-		s32 freq_ratio;
+        u32 shift;
+        u32 width_7;
+        s32 freq_ratio;
 
-		u32 vol;
-		u32 envactive; // if != 0, activate
-		u32 envelope;
-		u32 envincrease;
-		u32 envstepstochange;
+        u32 vol;
+        u32 envactive; // if != 0, activate
+        u32 envelope;
+        u32 envincrease;
+        u32 envstepstochange;
 
-		u32 stepsleft; //Each step is 1/256 sec
-		u32 limittime; //Activates "stepsleft"
+        u32 stepsleft; //Each step is 1/256 sec
+        u32 limittime; //Activates "stepsleft"
 
-		u32 speakerright;
-		u32 speakerleft;
+        u32 speakerright;
+        u32 speakerleft;
 
 
         int seed;
 
-		u32 running;
+        u32 running;
         u32 outfreq;
-		u32 samplecount;
+        u32 samplecount;
     } Chn4;
 
     #define FIFO_BUFFER_SIZE 128
@@ -169,9 +169,9 @@ typedef struct
         int vol;
 
         u32 speakerright;
-		u32 speakerleft;
+        u32 speakerleft;
 
-		u32 timer; //timer 0 - 1
+        u32 timer; //timer 0 - 1
 
         int cursample;
         int cursamplewrite;
@@ -187,9 +187,9 @@ typedef struct
         int vol;
 
         u32 speakerright;
-		u32 speakerleft;
+        u32 speakerleft;
 
-		u32 timer; //timer 0 - 1
+        u32 timer; //timer 0 - 1
 
         int cursample;
         int cursamplewrite;
@@ -201,11 +201,11 @@ typedef struct
         u32 running;
     } FifoB;
 
-	u32 leftvol;
-	u32 rightvol;
-	u32 clocks;
+    u32 leftvol;
+    u32 rightvol;
+    u32 clocks;
 
-	int PSG_master_volume;
+    int PSG_master_volume;
 
     u32 nextsample_clocks;
     s16 buffer[GBA_BUFFER_SIZE/2];
@@ -224,8 +224,8 @@ typedef struct
     int leftvol_A, rightvol_A;
     int leftvol_B, rightvol_B;
 
-	u32 master_enable;
-	} _GBA_SOUND_HARDWARE_;
+    u32 master_enable;
+    } _GBA_SOUND_HARDWARE_;
 
 static _GBA_SOUND_HARDWARE_ Sound;
 
@@ -264,28 +264,28 @@ void GBA_SoundPowerOff(void)
 void GBA_SoundPowerOn(void)
 {
     //reset this values...
-	Sound.Chn1.sweeptime = 0;
-	Sound.Chn1.envactive = 0;
-	Sound.Chn1.limittime = 0;
+    Sound.Chn1.sweeptime = 0;
+    Sound.Chn1.envactive = 0;
+    Sound.Chn1.limittime = 0;
 
-	Sound.Chn2.envactive = 0;
-	Sound.Chn2.limittime = 0;
+    Sound.Chn2.envactive = 0;
+    Sound.Chn2.limittime = 0;
 
-	Sound.Chn3.playing = 0;
-	Sound.Chn3.limittime = 0;
+    Sound.Chn3.playing = 0;
+    Sound.Chn3.limittime = 0;
 
-	Sound.Chn4.envactive = 0;
-	Sound.Chn4.limittime = 0;
-	Sound.Chn4.seed = 0xFF;
+    Sound.Chn4.envactive = 0;
+    Sound.Chn4.limittime = 0;
+    Sound.Chn4.seed = 0xFF;
 
-	Sound.FifoA.out_sample = 0;
-	Sound.FifoA.cursample = 0;
+    Sound.FifoA.out_sample = 0;
+    Sound.FifoA.cursample = 0;
     Sound.FifoA.cursamplewrite = 0;
     memset(Sound.FifoA.buffer,0,sizeof(Sound.FifoA.buffer));
     Sound.FifoA.datalen = 0;
 
     Sound.FifoB.out_sample = 0;
-	Sound.FifoB.cursample = 0;
+    Sound.FifoB.cursample = 0;
     Sound.FifoB.cursamplewrite = 0;
     memset(Sound.FifoB.buffer,0,sizeof(Sound.FifoB.buffer));
     Sound.FifoB.datalen = 0;
@@ -388,7 +388,7 @@ void GBA_SoundInit(void)
 
     GBA_SoundRegWrite16(SOUNDBIAS,0);
 
-	GBA_SoundPowerOn();
+    GBA_SoundPowerOn();
 
     Sound.Chn1.running = 0;
     Sound.Chn2.running = 0;
@@ -411,7 +411,7 @@ void GBA_SoundInit(void)
 
 void GBA_SoundLoadWave(void)
 {
-	s8 * bufferptr = WavePattern;
+    s8 * bufferptr = WavePattern;
 
     if(Sound.Chn3.doublesize)
     {
@@ -596,7 +596,7 @@ When not using sound output, power consumption can be reduced by setting both
 
 u32 GBA_SoundUpdate(u32 clocks) //Every 65535 clocks update hardware, every ~512 generate output
 {
-	Sound.clocks += clocks;
+    Sound.clocks += clocks;
 
     if(output_enabled)
     {
@@ -625,12 +625,12 @@ u32 GBA_SoundUpdate(u32 clocks) //Every 65535 clocks update hardware, every ~512
     }
 
     //16.78 MHz CPU / 256 Steps per second (aprox)
-	if(Sound.clocks > 65535) Sound.clocks -= 65536;
-	else return 65536-Sound.clocks;
+    if(Sound.clocks > 65535) Sound.clocks -= 65536;
+    else return 65536-Sound.clocks;
 
-	if(Sound.master_enable == 0) return 65536-Sound.clocks;
+    if(Sound.master_enable == 0) return 65536-Sound.clocks;
 
-	//Channel 1
+    //Channel 1
     if(Sound.Chn1.running)
     {
         if(Sound.Chn1.limittime)
@@ -693,9 +693,9 @@ u32 GBA_SoundUpdate(u32 clocks) //Every 65535 clocks update hardware, every ~512
         }
     }
 
-	//Channel 2
-	if(Sound.Chn2.running)
-	{
+    //Channel 2
+    if(Sound.Chn2.running)
+    {
         if(Sound.Chn2.limittime)
         {
             if(Sound.Chn2.stepsleft > 0) Sound.Chn2.stepsleft --;
@@ -735,22 +735,22 @@ u32 GBA_SoundUpdate(u32 clocks) //Every 65535 clocks update hardware, every ~512
             }
             else Sound.Chn2.envstepstochange --;
         }
-	}
+    }
 
-	//Channel 3
-	if(Sound.Chn3.running)
-	{
+    //Channel 3
+    if(Sound.Chn3.running)
+    {
         if(Sound.Chn3.stepsleft > 0) Sound.Chn3.stepsleft --;
         else if(Sound.Chn3.limittime)
         {
             Sound.Chn3.running = 0;
             REG_SOUNDCNT_X &= ~(1<<2);
         }
-	}
+    }
 
-	//Channel 4
-	if(Sound.Chn4.running)
-	{
+    //Channel 4
+    if(Sound.Chn4.running)
+    {
         if(Sound.Chn4.limittime)
         {
             if(Sound.Chn4.stepsleft > 0) Sound.Chn4.stepsleft --;
@@ -790,9 +790,9 @@ u32 GBA_SoundUpdate(u32 clocks) //Every 65535 clocks update hardware, every ~512
             }
             else Sound.Chn4.envstepstochange --;
         }
-	}
+    }
 
-	return 65536-Sound.clocks;
+    return 65536-Sound.clocks;
 }
 
 void GBA_SoundRegWrite16(u32 address, u16 value)
@@ -817,14 +817,14 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
             return;
     }
 
-	switch(address)
-	{
-		//Voice 1
-		case SOUND1CNT_L:
+    switch(address)
+    {
+        //Voice 1
+        case SOUND1CNT_L:
             Sound.Chn1.reg[0] = value;
             //don't update sweep yet...
-			return;
-		case SOUND1CNT_H:
+            return;
+        case SOUND1CNT_H:
             Sound.Chn1.reg[1] = value;
 
             Sound.Chn1.stepsleft = (64-(value &0x3F)) << 2;
@@ -841,17 +841,17 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
                 Sound.leftvol_1 = Sound.Chn1.speakerleft ? (Sound.Chn1.vol * Sound.leftvol) : 0;
                 Sound.rightvol_1 = Sound.Chn1.speakerright ? (Sound.Chn1.vol * Sound.rightvol) : 0;
             }
-			return;
-		case SOUND1CNT_X:
-			Sound.Chn1.freq = value & 0x07FF;
-			Sound.Chn1.outfreq = 131072/(2048-Sound.Chn1.freq);
-			Sound.Chn1.limittime = (value & (1<<14));
-			if(value & (1<<15))
-			{
-			    Sound.Chn1.running = 1;
+            return;
+        case SOUND1CNT_X:
+            Sound.Chn1.freq = value & 0x07FF;
+            Sound.Chn1.outfreq = 131072/(2048-Sound.Chn1.freq);
+            Sound.Chn1.limittime = (value & (1<<14));
+            if(value & (1<<15))
+            {
+                Sound.Chn1.running = 1;
 
                 //update sweep
-			    Sound.Chn1.sweeptime = (Sound.Chn1.reg[0] >> 4) & 0x07;
+                Sound.Chn1.sweeptime = (Sound.Chn1.reg[0] >> 4) & 0x07;
                 Sound.Chn1.sweepstepsleft = Sound.Chn1.sweeptime << 1;
                 Sound.Chn1.sweepinc = ( (Sound.Chn1.reg[0] & (1<<3)) == 0 );
                 Sound.Chn1.sweepshift = Sound.Chn1.reg[0] & 0x07;
@@ -866,16 +866,16 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
                 Sound.leftvol_1 = Sound.Chn1.speakerleft ? (Sound.Chn1.vol * Sound.leftvol) : 0;
                 Sound.rightvol_1 = Sound.Chn1.speakerright ? (Sound.Chn1.vol * Sound.rightvol) : 0;
 
-				REG_SOUNDCNT_X |= (1<<0);
-			}
-			else
-			{
-			//	REG_SOUNDCNT_X &= ~(1<<0);
-			}
-			return;
+                REG_SOUNDCNT_X |= (1<<0);
+            }
+            else
+            {
+            //    REG_SOUNDCNT_X &= ~(1<<0);
+            }
+            return;
 
-		//Voice 2
-		case SOUND2CNT_L:
+        //Voice 2
+        case SOUND2CNT_L:
             Sound.Chn2.reg[1] = value;
 
             Sound.Chn2.stepsleft = (64-(value &0x3F)) << 2;
@@ -892,14 +892,14 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
                 Sound.leftvol_2 = Sound.Chn2.speakerleft ? (Sound.Chn2.vol * Sound.leftvol) : 0;
                 Sound.rightvol_2 = Sound.Chn2.speakerright ? (Sound.Chn2.vol * Sound.rightvol) : 0;
             }
-			return;
-		case SOUND2CNT_H:
-			Sound.Chn2.freq = value & 0x07FF;
-			Sound.Chn2.outfreq = 131072/(2048-Sound.Chn2.freq);
-			Sound.Chn2.limittime = (value & (1<<14));
-			if(value & (1<<15))
-			{
-			    Sound.Chn2.running = 1;
+            return;
+        case SOUND2CNT_H:
+            Sound.Chn2.freq = value & 0x07FF;
+            Sound.Chn2.outfreq = 131072/(2048-Sound.Chn2.freq);
+            Sound.Chn2.limittime = (value & (1<<14));
+            if(value & (1<<15))
+            {
+                Sound.Chn2.running = 1;
 
                 //update envelope
                 Sound.Chn2.vol = (Sound.Chn2.reg[1] >> 12);
@@ -910,40 +910,40 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
                 Sound.leftvol_2 = Sound.Chn2.speakerleft ? (Sound.Chn2.vol * Sound.leftvol) : 0;
                 Sound.rightvol_2 = Sound.Chn2.speakerright ? (Sound.Chn2.vol * Sound.rightvol) : 0;
 
-				REG_SOUNDCNT_X |= (1<<1);
-			}
-			else
-			{
-			//	REG_SOUNDCNT_X &= ~(1<<1);
-			}
-			return;
+                REG_SOUNDCNT_X |= (1<<1);
+            }
+            else
+            {
+            //    REG_SOUNDCNT_X &= ~(1<<1);
+            }
+            return;
 
-		//Voice 3
-		case SOUND3CNT_L:
+        //Voice 3
+        case SOUND3CNT_L:
             Sound.Chn3.reg[0] = value;
 
             Sound.Chn3.doublesize = (value & BIT(5)) ? 1 : 0;
             Sound.Chn3.buffer_playing = (value & BIT(6)) ? 1 : 0;
 
-			if(value & (1<<7))
-			{
-				REG_SOUNDCNT_X |= (1<<2);
-				GBA_SoundLoadWave();
+            if(value & (1<<7))
+            {
+                REG_SOUNDCNT_X |= (1<<2);
+                GBA_SoundLoadWave();
                 Sound.Chn3.samplecount = 0;
-				Sound.Chn3.outfreq = 131072/(2048-Sound.Chn3.freq);
-				Sound.Chn3.playing = 1;
-			}
-			else
-			{
-				Sound.Chn3.playing = 0;
-				REG_SOUNDCNT_X &= ~(1<<2);
+                Sound.Chn3.outfreq = 131072/(2048-Sound.Chn3.freq);
+                Sound.Chn3.playing = 1;
+            }
+            else
+            {
+                Sound.Chn3.playing = 0;
+                REG_SOUNDCNT_X &= ~(1<<2);
                 Sound.Chn3.running = 0;
-			}
-			return;
-		case SOUND3CNT_H:
+            }
+            return;
+        case SOUND3CNT_H:
             Sound.Chn3.reg[1] = value;
 
-			Sound.Chn3.stepsleft = (256-value) << 2;
+            Sound.Chn3.stepsleft = (256-value) << 2;
 
             if(value & BIT(15)) Sound.Chn3.vol = 0xC;
             else
@@ -957,20 +957,20 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
                 }
             }
 
-			Sound.leftvol_3 = Sound.Chn3.speakerleft ? (Sound.Chn3.vol * Sound.leftvol) : 0;
+            Sound.leftvol_3 = Sound.Chn3.speakerleft ? (Sound.Chn3.vol * Sound.leftvol) : 0;
             Sound.rightvol_3 = Sound.Chn3.speakerright ? (Sound.Chn3.vol * Sound.rightvol) : 0;
-			return;
-		case SOUND3CNT_X:
+            return;
+        case SOUND3CNT_X:
             Sound.Chn3.reg[2] = value;
 
-			Sound.Chn3.freq = value&0x07FF;
+            Sound.Chn3.freq = value&0x07FF;
 
-			if(Sound.Chn3.playing)
-			{
-				Sound.Chn3.outfreq = 131072/(2048-Sound.Chn3.freq);
-			}
+            if(Sound.Chn3.playing)
+            {
+                Sound.Chn3.outfreq = 131072/(2048-Sound.Chn3.freq);
+            }
 
-			Sound.Chn3.limittime = (value & (1<<6));
+            Sound.Chn3.limittime = (value & (1<<6));
 
             if(Sound.Chn3.playing) // ?
             {
@@ -983,13 +983,13 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
                     Sound.Chn3.running = 1;
                 }
             }
-			return;
+            return;
 
-		//Voice 4
-		case SOUND4CNT_L:
+        //Voice 4
+        case SOUND4CNT_L:
             Sound.Chn4.reg[1] = value;
 
-			Sound.Chn4.stepsleft = (64-(value &0x3F)) << 2;
+            Sound.Chn4.stepsleft = (64-(value &0x3F)) << 2;
 
             //don't update envelope yet...
 
@@ -1004,19 +1004,19 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
             //    Sound.leftvol_4 = Sound.Chn4.speakerleft ? (Sound.Chn4.vol * Sound.leftvol) : 0;
             //    Sound.rightvol_4 = Sound.Chn4.speakerright ? (Sound.Chn4.vol * Sound.rightvol) : 0;
             //}
-			return;
-		case SOUND4CNT_H:
+            return;
+        case SOUND4CNT_H:
             Sound.Chn4.reg[2] = value;
 
-			Sound.Chn4.shift = ( value >> 4 ) & 0x0F;
-			Sound.Chn4.width_7 = value & (1<<3);
-			Sound.Chn4.freq_ratio = value & 0x07;
+            Sound.Chn4.shift = ( value >> 4 ) & 0x0F;
+            Sound.Chn4.width_7 = value & (1<<3);
+            Sound.Chn4.freq_ratio = value & 0x07;
 
-			if(Sound.Chn4.shift > 13)
-			{
-			    Sound.Chn4.outfreq = 0;
-			    return;
-			}
+            if(Sound.Chn4.shift > 13)
+            {
+                Sound.Chn4.outfreq = 0;
+                return;
+            }
 
             //const s32 NoiseFreqRatio[8] = {1048576,524288,370728,262144,220436,185364,155872,131072 };
             const s32 NoiseFreqRatio[8] = {1048576,524288,262144,174763,131072,104858,87381,74898 };
@@ -1024,10 +1024,10 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
             Sound.Chn4.outfreq = NoiseFreqRatio[Sound.Chn4.freq_ratio] >> (Sound.Chn4.shift + 1);
             if(Sound.Chn4.outfreq > (1<<18)) Sound.Chn4.outfreq = 1<<18;
 
-			Sound.Chn4.limittime = (value & (1<<14));
+            Sound.Chn4.limittime = (value & (1<<14));
 
-			if(value & (1<<15))
-			{
+            if(value & (1<<15))
+            {
                 Sound.Chn4.running = 1;
 
                 //update envelope
@@ -1039,19 +1039,19 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
                 Sound.leftvol_4 = Sound.Chn4.speakerleft ? (Sound.Chn4.vol * Sound.leftvol) : 0;
                 Sound.rightvol_4 = Sound.Chn4.speakerright ? (Sound.Chn4.vol * Sound.rightvol) : 0;
 
-				REG_SOUNDCNT_X |= (1<<3);
-			}
-			else
-			{
-				//REG_SOUNDCNT_X &= ~(1<<3);
-			}
-			return;
+                REG_SOUNDCNT_X |= (1<<3);
+            }
+            else
+            {
+                //REG_SOUNDCNT_X &= ~(1<<3);
+            }
+            return;
 
 
-		//Control
-		case SOUNDCNT_L:
-			Sound.rightvol = value & 0x7;
-			Sound.leftvol = (value>>4) & 0x7;
+        //Control
+        case SOUNDCNT_L:
+            Sound.rightvol = value & 0x7;
+            Sound.leftvol = (value>>4) & 0x7;
             Sound.leftvol_1 = Sound.Chn1.speakerleft ? (Sound.Chn1.vol * Sound.leftvol) : 0;
             Sound.rightvol_1 = Sound.Chn1.speakerright ? (Sound.Chn1.vol * Sound.rightvol) : 0;
             Sound.leftvol_2 = Sound.Chn2.speakerleft ? (Sound.Chn2.vol * Sound.leftvol) : 0;
@@ -1060,15 +1060,15 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
             Sound.rightvol_3 = Sound.Chn3.speakerright ? (Sound.Chn3.vol * Sound.rightvol) : 0;
             Sound.leftvol_4 = Sound.Chn4.speakerleft ? (Sound.Chn4.vol * Sound.leftvol) : 0;
             Sound.rightvol_4 = Sound.Chn4.speakerright ? (Sound.Chn4.vol * Sound.rightvol) : 0;
-			Sound.Chn1.speakerright = (value & (1<<8));
-			Sound.Chn1.speakerleft = (value & (1<<12));
-			Sound.Chn2.speakerright = (value & (1<<9));
-			Sound.Chn2.speakerleft = (value & (1<<13));
-			Sound.Chn3.speakerright = (value & (1<<10));
-			Sound.Chn3.speakerleft = (value & (1<<14));
-			Sound.Chn4.speakerright = (value & (1<<11));
-			Sound.Chn4.speakerleft = (value & (1<<15));
-			Sound.leftvol_1 = Sound.Chn1.speakerleft ? (Sound.Chn1.vol * Sound.leftvol) : 0;
+            Sound.Chn1.speakerright = (value & (1<<8));
+            Sound.Chn1.speakerleft = (value & (1<<12));
+            Sound.Chn2.speakerright = (value & (1<<9));
+            Sound.Chn2.speakerleft = (value & (1<<13));
+            Sound.Chn3.speakerright = (value & (1<<10));
+            Sound.Chn3.speakerleft = (value & (1<<14));
+            Sound.Chn4.speakerright = (value & (1<<11));
+            Sound.Chn4.speakerleft = (value & (1<<15));
+            Sound.leftvol_1 = Sound.Chn1.speakerleft ? (Sound.Chn1.vol * Sound.leftvol) : 0;
             Sound.rightvol_1 = Sound.Chn1.speakerright ? (Sound.Chn1.vol * Sound.rightvol) : 0;
             Sound.leftvol_2 = Sound.Chn2.speakerleft ? (Sound.Chn2.vol * Sound.leftvol) : 0;
             Sound.rightvol_2 = Sound.Chn2.speakerright ? (Sound.Chn2.vol * Sound.rightvol) : 0;
@@ -1076,16 +1076,16 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
             Sound.rightvol_3 = Sound.Chn3.speakerright ? (Sound.Chn3.vol * Sound.rightvol) : 0;
             Sound.leftvol_4 = Sound.Chn4.speakerleft ? (Sound.Chn4.vol * Sound.leftvol) : 0;
             Sound.rightvol_4 = Sound.Chn4.speakerright ? (Sound.Chn4.vol * Sound.rightvol) : 0;
-			return;
+            return;
         case SOUNDCNT_H:
         {
             static const int vol[4] = { 0, 1, 2, 0 };
             Sound.PSG_master_volume = vol[value&3];
 
             Sound.FifoA.speakerright = (value & BIT(8));
-			Sound.FifoA.speakerleft = (value & BIT(9));
-			Sound.FifoB.speakerright = (value & BIT(12));
-			Sound.FifoB.speakerleft = (value & BIT(13));
+            Sound.FifoA.speakerleft = (value & BIT(9));
+            Sound.FifoB.speakerright = (value & BIT(12));
+            Sound.FifoB.speakerleft = (value & BIT(13));
 
             Sound.FifoA.vol = (value&BIT(2)) ? 1 : 2;
             Sound.leftvol_A = Sound.FifoA.speakerleft ? Sound.FifoA.vol : 0;
@@ -1115,12 +1115,12 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
             }
             return;
         }
-		case SOUNDCNT_X:
-			if((value & (1<<7)) == 0)
-			{
-				GBA_SoundPowerOff();
-				Sound.master_enable = 0;
-			}
+        case SOUNDCNT_X:
+            if((value & (1<<7)) == 0)
+            {
+                GBA_SoundPowerOff();
+                Sound.master_enable = 0;
+            }
             return;
 
         case WAVE_RAM+0:
@@ -1187,7 +1187,7 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
             Debug_DebugMsgArg("GBA Sound: [%08x]=%04x (?)\n",address,value);
             GBA_ExecutionBreak();
             return;
-	}
+    }
 }
 
 void GBA_SoundTimerCheck(int number)

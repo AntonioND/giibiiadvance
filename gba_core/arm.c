@@ -95,7 +95,7 @@ static inline void arm_stm(u32 address, u32 reg)
 
 #define ARM_UNDEFINED_INSTRUCTION() \
 { \
-    Debug_DebugMsgArg("Undefined instruction.\r\nARM: [0x%08X]=0x%08X",CPU.R[R_PC],GBA_MemoryRead32(CPU.R[R_PC]));\
+    Debug_DebugMsgArg("Undefined instruction.\nARM: [0x%08X]=0x%08X",CPU.R[R_PC],GBA_MemoryRead32(CPU.R[R_PC]));\
     GBA_CPUChangeMode(M_UNDEFINED); \
     CPU.R[14] = CPU.R[R_PC]+4; \
     CPU.SPSR = CPU.CPSR; \

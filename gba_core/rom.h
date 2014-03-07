@@ -20,6 +20,7 @@
 #define __GBA_ROM__
 
 void  GBA_HeaderCheck(void * rom);
+int GBA_ShowConsoleRequested(void);
 
 #endif //__GBA_ROM__
 

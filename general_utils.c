@@ -29,22 +29,22 @@
 int s_snprintf(char * dest, int _size, const char * msg, ...)
 {
     va_list args;
-	va_start(args,msg);
-	int ret = vsnprintf(dest, _size, msg, args);
-	va_end(args);
+    va_start(args,msg);
+    int ret = vsnprintf(dest, _size, msg, args);
+    va_end(args);
     dest[_size-1] = '\0';
     return ret;
 }
 
 void s_strncpy(char * dest, const char * src, int _size)
 {
-	strncpy(dest,src,_size);
+    strncpy(dest,src,_size);
     dest[_size-1] = '\0';
 }
 
 void s_strncat(char * dest, const char * src, int _size)
 {
-	strncat(dest,src,_size);
+    strncat(dest,src,_size);
     dest[_size-1] = '\0';
 }
 
@@ -52,7 +52,7 @@ void s_strncat(char * dest, const char * src, int _size)
 
 void memset_rand(u8 * start, u32 _size)
 {
-	while(_size--) *start++ = rand();
+    while(_size--) *start++ = rand();
 }
 
 //----------------------------------------------------------------------------------

@@ -104,7 +104,7 @@ static inline void thumb_stm(u32 address, u32 reg)
 
 #define THUMB_UNDEFINED_INSTRUCTION() \
 { \
-    Debug_DebugMsgArg("Undefined instruction.\r\nTHUMB: [0x%08X]=0x%04X",CPU.R[R_PC],GBA_MemoryRead16(CPU.R[R_PC]));\
+    Debug_DebugMsgArg("Undefined instruction.\nTHUMB: [0x%08X]=0x%04X",CPU.R[R_PC],GBA_MemoryRead16(CPU.R[R_PC]));\
     GBA_CPUChangeMode(M_UNDEFINED); \
     CPU.R[14] = CPU.R[R_PC]+2; \
     CPU.SPSR = CPU.CPSR; \

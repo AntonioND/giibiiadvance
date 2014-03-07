@@ -313,39 +313,39 @@ static int screenshot_file_number = 0;
 
 void GB_Screenshot(void)
 {
-	char filename[MAX_PATHLEN];
+    char filename[MAX_PATHLEN];
 
-	while(1)
-	{
-		s_snprintf(filename,sizeof(filename),"%sgb_screenshot%d.png",DirGetScreenshotFolderPath(),
+    while(1)
+    {
+        s_snprintf(filename,sizeof(filename),"%sgb_screenshot%d.png",DirGetScreenshotFolderPath(),
              screenshot_file_number);
 
-		FILE * file = fopen(filename, "rb");
-		if(file == NULL) break; //Ok
-		screenshot_file_number ++; //look for next free number
-		fclose(file);
-	}
+        FILE * file = fopen(filename, "rb");
+        if(file == NULL) break; //Ok
+        screenshot_file_number ++; //look for next free number
+        fclose(file);
+    }
 
-	int width, height;
+    int width, height;
 
-	if(GameBoy.Emulator.SGBEnabled)
-	{
-	    width = 256; height = 224;
-	}
-	else
-	{
-	    width = 160; height = 144;
-	}
+    if(GameBoy.Emulator.SGBEnabled)
+    {
+        width = 256; height = 224;
+    }
+    else
+    {
+        width = 160; height = 144;
+    }
 
     u32 * buf_temp = calloc(width*height*4,1);
     int last_fb = cur_fb ^ 1;
-	int x, y;
-	for(y = 0; y < height; y ++) for(x = 0; x < width; x ++)
-	{
-	    u32 data = framebuffer[last_fb][y*256 + x];
-	    buf_temp[y*width + x] = ((data&0x1F)<<3)|((((data>>5)&0x1F)<<3)<<8)|
+    int x, y;
+    for(y = 0; y < height; y ++) for(x = 0; x < width; x ++)
+    {
+        u32 data = framebuffer[last_fb][y*256 + x];
+        buf_temp[y*width + x] = ((data&0x1F)<<3)|((((data>>5)&0x1F)<<3)<<8)|
             ((((data>>10)&0x1F)<<3)<<16);
-	}
+    }
 
     Save_PNG(filename,width,height,buf_temp,0);
     free(buf_temp);

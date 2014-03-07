@@ -312,7 +312,7 @@ void GB_MBC2Write(u32 address, u32 value)
             break;
         case 0x2:
         case 0x3: //ROM Bank Number
-        //	if(address & 0x0100)
+        //  if(address & 0x0100)
             {
                 if(value == 0) value = 1;
                 mem->selected_rom = value & (GameBoy.Emulator.ROM_Banks - 1);

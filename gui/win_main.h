@@ -25,4 +25,6 @@ int Win_MainRunningGBA(void);
 int Win_MainRunningGB(void);
 void Win_MainLoopHandle(void);
 
+void Win_MainShowMessage(int type, const char * text); // 0 = error, 1 = debug, 2 = console
+
 #endif // __WIN_MAIN__

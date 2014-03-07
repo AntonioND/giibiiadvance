@@ -156,28 +156,37 @@ probably rarely used), ignore this entry.
 
 //----------------------------------------------------------------------------------------
 
+static int showconsole = 0;
+
+int GBA_ShowConsoleRequested(void)
+{
+    int ret = showconsole;
+    showconsole = 0;
+    return ret;
+}
+
 void  GBA_HeaderCheck(void * rom)
 {
-    int showconsole = 0; //if at the end this is 1, show console window
+    showconsole = 0; //if at the end this is 1, show console window
 
     _gba_header_ * header = (_gba_header_*)rom;
 
     ConsoleReset();
 
-	ConsolePrint("Checking cartridge...\n");
+    ConsolePrint("Checking cartridge...\n");
 
     char text[13];
     memcpy(text,header->game_title,12);
     text[12] = '\0';
-	ConsolePrint("Game title: %s\n",text);
+    ConsolePrint("Game title: %s\n",text);
 
-	memcpy(text,header->game_code,4);
-	text[4] = '\0';
-	ConsolePrint("Game code: %s\n",text);
+    memcpy(text,header->game_code,4);
+    text[4] = '\0';
+    ConsolePrint("Game code: %s\n",text);
 
-	memcpy(text,header->maker_code,2);
-	text[2] = '\0';
-	ConsolePrint("Maker code: %s\n",text);
+    memcpy(text,header->maker_code,2);
+    text[2] = '\0';
+    ConsolePrint("Maker code: %s\n",text);
 
     const u8 nintendo_logo[156] = {
         0x24,0xFF,0xAE,0x51,0x69,0x9A,0xA2,0x21,0x3D,0x84,0x82,0x0A,0x84,0xE4,0x09,0xAD,
@@ -237,7 +246,7 @@ checksum across header bytes 09Dh..0B7h (bytewise XORed, divided by 40h).
         ConsolePrint("[!]Cartridge Key Number LSBs (byte 0x9E) = 0x%02X\n",cartridge_key_number_LSBs);
     }
 
-	ConsolePrint("Fixed 0x96... %s\n",header->fixed_96h == 0x96 ? "OK" : "BAD [!]");
+    ConsolePrint("Fixed 0x96... %s\n",header->fixed_96h == 0x96 ? "OK" : "BAD [!]");
     if(header->fixed_96h != 0x96) if(EmulatorConfig.debug_msg_enable) showconsole = 1;
 
     ConsolePrint("Main unit code: 0x%02X\n",header->main_unit_code);
@@ -263,8 +272,6 @@ checksum across header bytes 09Dh..0B7h (bytewise XORed, divided by 40h).
     if(header->complement_check != check) if(EmulatorConfig.debug_msg_enable) showconsole = 1;
 
     ConsolePrint("Save type: %s", GBA_GetSaveTypeString());
-
-    if(showconsole) ConsoleShow();
 }
 
 

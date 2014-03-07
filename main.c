@@ -35,12 +35,12 @@ int Init(void)
 
     WH_Init();
 
-	//Initialize SDL
-	if( SDL_Init(SDL_INIT_EVERYTHING) != 0 )
-	{
-		Debug_LogMsgArg( "SDL could not initialize! SDL Error: %s\n", SDL_GetError() );
-		return 1;
-	}
+    //Initialize SDL
+    if( SDL_Init(SDL_INIT_EVERYTHING) != 0 )
+    {
+        Debug_LogMsgArg( "SDL could not initialize! SDL Error: %s\n", SDL_GetError() );
+        return 1;
+    }
     atexit(SDL_Quit);
 
     //Enable VSync
@@ -49,7 +49,7 @@ int Init(void)
     //    DU_Log("Warning: VSync not enabled!");
     //}
 
-	if(FU_Init())
+    if(FU_Init())
         return 1;
 
     atexit(FU_End);
@@ -78,7 +78,7 @@ int main( int argc, char * argv[] )
     if(argc > 0)
         DirSetRunningPath(argv[0]); // whatever...
 
-	if(Init() != 0)
+    if(Init() != 0)
         return 1;
 
     Win_MainCreate( (argc > 1) ? argv[1] : NULL );
@@ -112,6 +112,6 @@ int main( int argc, char * argv[] )
             waitforticks += FLOAT_MS_PER_FRAME;
     }
 
-	return 0;
+    return 0;
 }
 

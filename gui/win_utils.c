@@ -54,7 +54,7 @@ void GUI_ConsoleClear(_gui_console * con)
     memset(con->__console_buffer_color,0xFF,sizeof(con->__console_buffer_color));
 }
 
-int GUI_ConsoleModePrintf(_gui_console * con, int x, int y, char * txt, ...)
+int GUI_ConsoleModePrintf(_gui_console * con, int x, int y, const char * txt, ...)
 {
     char txtbuffer[1000];
     va_list args;
@@ -580,7 +580,7 @@ void GUI_SetWindow(_gui_element * e, int x, int y, int w, int h, void * gui, cha
     e->h = h;
     e->info.window.gui = gui;
     e->info.window.enabled = 0;
-    strcpy(e->info.window.text,caption);
+    strcpy(e->info.window.caption,caption);
 
     _gui * relative_gui = gui;
 
@@ -599,10 +599,31 @@ void GUI_SetWindow(_gui_element * e, int x, int y, int w, int h, void * gui, cha
     }
 }
 
+void GUI_SetMessageBox(_gui_element * e, _gui_console * con, int x, int y, int w, int h, char * caption)
+{
+    e->element_type = GUI_TYPE_MESSAGEBOX;
+
+    e->info.messagebox.enabled = 0;
+    e->info.messagebox.con = con;
+    e->x = x;
+    e->y = y;
+    e->w = w;
+    e->h = h;
+    s_strncpy(e->info.messagebox.caption,caption,sizeof(e->info.messagebox.caption));
+
+    GUI_ConsoleReset(con, w, h-FONT_12_WIDTH-1);
+}
+
 //----------------------------------------------------------------------------------------------
 
 void GUI_WindowSetEnabled(_gui_element * e, int enabled)
 {
+    if(e == NULL)
+        return;
+
+    if(e->element_type != GUI_TYPE_WINDOW)
+        return;
+
     e->info.window.enabled = enabled;
 
     _gui * wingui = e->info.window.gui;
@@ -630,6 +651,27 @@ int GUI_WindowGetEnabled(_gui_element * e)
 
     if(e->element_type == GUI_TYPE_WINDOW)
         return e->info.window.enabled;
+
+    return 0;
+}
+
+void GUI_MessageBoxSetEnabled(_gui_element * e, int enabled)
+{
+    if(e == NULL) return;
+
+    if(e->element_type != GUI_TYPE_MESSAGEBOX) return;
+
+    e->info.messagebox.enabled = enabled;
+}
+
+int GUI_MessageBoxGetEnabled(_gui_element * e)
+{
+    if(e == NULL)
+        return 0;
+
+    if(e->element_type == GUI_TYPE_MESSAGEBOX)
+        return e->info.messagebox.enabled;
+
     return 0;
 }
 
@@ -647,6 +689,8 @@ static int _gui_get_first_window_enabled(_gui * gui)
     {
         if( (*gui_elements)->element_type == GUI_TYPE_WINDOW)
             if( (*gui_elements)->info.window.enabled ) return i;
+        if( (*gui_elements)->element_type == GUI_TYPE_MESSAGEBOX)
+            if( (*gui_elements)->info.messagebox.enabled ) return i;
         i++;
         gui_elements++;
     }
@@ -789,13 +833,45 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
                           e->x,e->x+e->w-1,
                           e->y+FONT_12_HEIGHT+2,e->y+e->h-1);
 
-        int text_width = strlen(e->info.window.text) * FONT_12_WIDTH;
+        int text_width = strlen(e->info.window.caption) * FONT_12_WIDTH;
         int x_off = ( e->w - text_width ) / 2;
 
-        FU_Print12Color(buffer,w,h,e->x+x_off,e->y,0xFFE0E0E0,e->info.window.text);
+        FU_Print12Color(buffer,w,h,e->x+x_off,e->y,0xFFE0E0E0,e->info.window.caption);
 
         if(e->info.window.gui)
             GUI_Draw(e->info.window.gui,buffer,w,h,0);
+    }
+    else if(e->element_type == GUI_TYPE_MESSAGEBOX)
+    {
+        if(e->info.messagebox.enabled == 0)
+            return;
+
+        _gui_set_drawing_color(224,224,224);
+        _gui_draw_fill_rect(buffer,w,h,
+                          e->x,e->x+e->w-1,
+                          e->y,e->y+FONT_12_HEIGHT+1);
+
+        _gui_set_drawing_color(0,0,0);
+        _gui_draw_rect(buffer,w,h,
+                          e->x-1,e->x+e->w-1+1,
+                          e->y-1,e->y+e->h-1+1);
+        _gui_draw_horizontal_line(buffer,w,h, e->x-1,e->x+e->w-1+1,
+                                  e->y+FONT_12_HEIGHT+1);
+
+        _gui_set_drawing_color(255, 255,255);
+        _gui_draw_fill_rect(buffer,w,h,
+                          e->x,e->x+e->w-1,
+                          e->y+FONT_12_HEIGHT+2,e->y+e->h-1);
+
+        int text_width = strlen(e->info.messagebox.caption) * FONT_12_WIDTH;
+        int x_off = ( e->w - text_width ) / 2;
+
+        FU_Print12Color(buffer,w,h,e->x+x_off,e->y,0xFFE0E0E0,e->info.messagebox.caption);
+
+        GUI_ConsoleDrawAt(e->info.messagebox.con,
+                            buffer,w,h,
+                            e->x,e->y+FONT_12_HEIGHT+2,
+                            e->x+e->w-1,e->y+e->h-1);
     }
 }
 
@@ -939,6 +1015,22 @@ int __gui_send_event_element(_gui_element ** complete_gui, _gui_element * gui, S
 
         _gui * relative_gui = gui->info.window.gui;
         return GUI_SendEvent(relative_gui,e);
+    }
+    else if(gui->element_type == GUI_TYPE_MESSAGEBOX)
+    {
+        if(e->type == SDL_MOUSEBUTTONDOWN)
+        {
+            if(e->button.button == SDL_BUTTON_LEFT)
+            {
+                if(__gui_coord_is_inside_rect(e->button.x,e->button.y,
+                                              gui->x,gui->w,
+                                              gui->y,gui->h))
+                {
+                    gui->info.messagebox.enabled = 0;
+                    return 1;
+                }
+            }
+        }
     }
 
     return 0;

@@ -134,18 +134,18 @@ static int screenshot_file_number = 0;
 
 void GBA_Screenshot(void)
 {
-	char filename[MAX_PATHLEN];
+    char filename[MAX_PATHLEN];
 
-	while(1)
-	{
-		s_snprintf(filename,sizeof(filename),"%sgba_screenshot%d.png",DirGetScreenshotFolderPath(),
+    while(1)
+    {
+        s_snprintf(filename,sizeof(filename),"%sgba_screenshot%d.png",DirGetScreenshotFolderPath(),
              screenshot_file_number);
 
-		FILE * file=fopen(filename, "rb");
-		if(file == NULL) break; //Ok
-		screenshot_file_number ++; //look for next free number
-		fclose(file);
-	}
+        FILE * file=fopen(filename, "rb");
+        if(file == NULL) break; //Ok
+        screenshot_file_number ++; //look for next free number
+        fclose(file);
+    }
 
     u32 * buffer = malloc(240*160*4);
     GBA_ConvertScreenBufferTo32RGB(buffer);

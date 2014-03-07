@@ -23,7 +23,7 @@
 #include "sound_utils.h"
 #include "debug_utils.h"
 #include "config.h"
-#define SDL_BUFFER_SAMPLES (2*1024);
+#define SDL_BUFFER_SAMPLES (4*1024);
 
 static Sound_CallbackPointer * _sound_callback;
 static int _sound_enabled = 0;
@@ -53,19 +53,19 @@ void Sound_Init(void)
 
     SDL_AudioSpec desired_spec;
 
-	desired_spec.freq = 22050;
-	desired_spec.format = AUDIO_S16SYS;
-	desired_spec.channels = 2;
-	desired_spec.samples = SDL_BUFFER_SAMPLES;
-	desired_spec.callback = __sound_callback;
-	desired_spec.userdata = NULL;
+    desired_spec.freq = 22050;
+    desired_spec.format = AUDIO_S16SYS;
+    desired_spec.channels = 2;
+    desired_spec.samples = SDL_BUFFER_SAMPLES;
+    desired_spec.callback = __sound_callback;
+    desired_spec.userdata = NULL;
 
-	if(SDL_OpenAudio(&desired_spec, &obtained_spec) < 0)
-	{
+    if(SDL_OpenAudio(&desired_spec, &obtained_spec) < 0)
+    {
         Debug_ErrorMsgArg("Couldn't open audio: %s\n", SDL_GetError());
         _sound_enabled = 0;
         return;
-	}
+    }
 
     //Debug_DebugMsgArg("Freq: %d\nChannels: %d\nSamples: %d",
     //               obtained_spec.freq,obtained_spec.channels,obtained_spec.samples);

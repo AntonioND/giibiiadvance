@@ -99,29 +99,29 @@ int WH_Create(int width, int height, int texw, int texh, int scale) // returns -
     if(texh == 0) texh = height;
 
     //Initialize non-existant window
-	w->mWindow = NULL;
-	w->mRenderer = NULL;
+    w->mWindow = NULL;
+    w->mRenderer = NULL;
     w->mEventCallback = NULL;
-	w->mMouseFocus = 0;
-	w->mKeyboardFocus = 0;
-	w->mShown = 0;
-	w->mWindowID = -1;
-	w->mTexScale = scale;
+    w->mMouseFocus = 0;
+    w->mKeyboardFocus = 0;
+    w->mShown = 0;
+    w->mWindowID = -1;
+    w->mTexScale = scale;
 
     SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
     SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 0 );
 
-	//Create window
-	w->mWindow = SDL_CreateWindow( "Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+    //Create window
+    w->mWindow = SDL_CreateWindow( "Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
                                width, height, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
-	if( w->mWindow != NULL )
-	{
-		w->mMouseFocus = 1;
-		w->mKeyboardFocus = 1;
-		w->mWidth = width;
-		w->mHeight = height;
-		w->mTexWidth = texw;
-		w->mTexHeight = texh;
+    if( w->mWindow != NULL )
+    {
+        w->mMouseFocus = 1;
+        w->mKeyboardFocus = 1;
+        w->mWidth = width;
+        w->mHeight = height;
+        w->mTexWidth = texw;
+        w->mTexHeight = texh;
         w->GLContext = SDL_GL_CreateContext(w->mWindow);
 
         int oglIdx = -1;
@@ -134,22 +134,22 @@ int WH_Create(int width, int height, int texw, int texh, int scale) // returns -
                 oglIdx = i;
         }
 
-		//Create renderer for window
-		w->mRenderer = SDL_CreateRenderer( w->mWindow, oglIdx,
+        //Create renderer for window
+        w->mRenderer = SDL_CreateRenderer( w->mWindow, oglIdx,
                                     SDL_RENDERER_ACCELERATED  /*| SDL_RENDERER_PRESENTVSYNC*/);
         //SDL_SetWindowFullscreen(w->mWindow,SDL_WINDOW_FULLSCREEN);
-		if( w->mRenderer == NULL )
-		{
-			Debug_LogMsgArg("Renderer could not be created! SDL Error: %s\n", SDL_GetError());
-			SDL_DestroyWindow(w->mWindow);
-			w->mWindow = NULL;
-		}
-		else
-		{
-			w->mWindowID = SDL_GetWindowID( w->mWindow ); //Grab window identifier
-			w->mShown = 1; //Flag as opened
+        if( w->mRenderer == NULL )
+        {
+            Debug_LogMsgArg("Renderer could not be created! SDL Error: %s\n", SDL_GetError());
+            SDL_DestroyWindow(w->mWindow);
+            w->mWindow = NULL;
+        }
+        else
+        {
+            w->mWindowID = SDL_GetWindowID( w->mWindow ); //Grab window identifier
+            w->mShown = 1; //Flag as opened
 
-			w->mTexture = SDL_CreateTexture(w->mRenderer,SDL_PIXELFORMAT_RGB24,SDL_TEXTUREACCESS_STREAMING,texw,texh);
+            w->mTexture = SDL_CreateTexture(w->mRenderer,SDL_PIXELFORMAT_RGB24,SDL_TEXTUREACCESS_STREAMING,texw,texh);
             if( w->mTexture == NULL )
             {
                 Debug_LogMsgArg("Couldn't create texture! SDL Error: %s\n", SDL_GetError());
@@ -161,14 +161,14 @@ int WH_Create(int width, int height, int texw, int texh, int scale) // returns -
             {
                 return WindowHandleIndex;
             }
-		}
-	}
-	else
-	{
-		Debug_LogMsgArg("Window could not be created! SDL Error: %s\n", SDL_GetError());
-	}
+        }
+    }
+    else
+    {
+        Debug_LogMsgArg("Window could not be created! SDL Error: %s\n", SDL_GetError());
+    }
 
-	return -1;
+    return -1;
 }
 
 void WH_SetSize(int index, int width, int height, int texw, int texh, int scale)
@@ -205,20 +205,20 @@ static void _wh_free_from_handle(WindowHandle * w)
     if(w == gMainWindow) gMainWindow = NULL;
 
     if( w->mWindow != NULL )
-	{
-	    SDL_DestroyTexture(w->mTexture);
-		SDL_GL_DeleteContext(w->GLContext);
+    {
+        SDL_DestroyTexture(w->mTexture);
+        SDL_GL_DeleteContext(w->GLContext);
         SDL_DestroyWindow(w->mWindow);
-	}
+    }
 
-	w->mWindow = NULL;
-	w->mWindowID = -1;
+    w->mWindow = NULL;
+    w->mWindowID = -1;
 
-	w->mMouseFocus = 0;
-	w->mKeyboardFocus = 0;
-	w->mShown = 0;
-	w->mWidth = 0;
-	w->mHeight = 0;
+    w->mMouseFocus = 0;
+    w->mKeyboardFocus = 0;
+    w->mShown = 0;
+    w->mWidth = 0;
+    w->mHeight = 0;
 }
 
 int WH_SetEventCallback(int index, WH_CallbackFn fn)
@@ -250,68 +250,68 @@ static int _wh_handle_event(SDL_Event * e) // returns 1 if handled, 0 if not (se
     //All those events are specific for a window. If not handled, ignore them. Always return 1 from this function
     //Exception : The second switch in this function
 
-	//If an event was detected for this window
-	if( e->type == SDL_WINDOWEVENT )
-	{
-	    int windowID = e->window.windowID;
-	    WindowHandle *  w = _wh_get_from_windowID(windowID);
+    //If an event was detected for this window
+    if( e->type == SDL_WINDOWEVENT )
+    {
+        int windowID = e->window.windowID;
+        WindowHandle *  w = _wh_get_from_windowID(windowID);
         if(w == NULL) return 1;
 
-		switch( e->window.event )
-		{
-			//Window appeared
-			case SDL_WINDOWEVENT_SHOWN:
+        switch( e->window.event )
+        {
+            //Window appeared
+            case SDL_WINDOWEVENT_SHOWN:
                 w->mShown = 1;
                 break;
 
-			//Window disappeared
-			case SDL_WINDOWEVENT_HIDDEN:
+            //Window disappeared
+            case SDL_WINDOWEVENT_HIDDEN:
                 w->mShown = 0;
                 break;
 
-			//Get new dimensions and repaint
-			//case SDL_WINDOWEVENT_SIZE_CHANGED:
+            //Get new dimensions and repaint
+            //case SDL_WINDOWEVENT_SIZE_CHANGED:
             //    w->mWidth = e->window.data1;
             //    w->mHeight = e->window.data2;
             //    SDL_RenderPresent( w->mRenderer );
             //    break;
 
-			//Repaint on expose
-			case SDL_WINDOWEVENT_EXPOSED:
+            //Repaint on expose
+            case SDL_WINDOWEVENT_EXPOSED:
                 SDL_RenderPresent( w->mRenderer );
                 break;
 
-			//Mouse enter
-			case SDL_WINDOWEVENT_ENTER:
+            //Mouse enter
+            case SDL_WINDOWEVENT_ENTER:
                 w->mMouseFocus = 1;
                 break;
 
-			//Mouse exit
-			case SDL_WINDOWEVENT_LEAVE:
+            //Mouse exit
+            case SDL_WINDOWEVENT_LEAVE:
                 w->mMouseFocus = 0;
                 break;
 
-			//Keyboard focus gained
-			case SDL_WINDOWEVENT_FOCUS_GAINED:
+            //Keyboard focus gained
+            case SDL_WINDOWEVENT_FOCUS_GAINED:
                 w->mKeyboardFocus = 1;
                 break;
 
-			//Keyboard focus lost
-			case SDL_WINDOWEVENT_FOCUS_LOST:
+            //Keyboard focus lost
+            case SDL_WINDOWEVENT_FOCUS_LOST:
                 w->mKeyboardFocus = 0;
                 break;
 
-			//Hide on close
-			case SDL_WINDOWEVENT_CLOSE:
-			    if(w->mWindow) if(w->mEventCallback) w->mEventCallback(e);
-			    _wh_free_from_handle(w);
+            //Hide on close
+            case SDL_WINDOWEVENT_CLOSE:
+                if(w->mWindow) if(w->mEventCallback) w->mEventCallback(e);
+                _wh_free_from_handle(w);
                 //SDL_HideWindow( w->mWindow );
                 return 1;
 
             default:
                 break;
-		}
-	}
+        }
+    }
 
     int windowID = 0;
     switch(e->type)
@@ -347,9 +347,9 @@ static int _wh_handle_event(SDL_Event * e) // returns 1 if handled, 0 if not (se
     WindowHandle * w = _wh_get_from_windowID(windowID);
     if(w == NULL) return 1;
 
-	if(w->mWindow) if(w->mEventCallback) w->mEventCallback(e);
+    if(w->mWindow) if(w->mEventCallback) w->mEventCallback(e);
 
-	return 1;
+    return 1;
 }
 
 void WH_HandleEvents(void)
@@ -387,7 +387,7 @@ void WH_Render(int index, const char * buffer)
     glEnable(GL_TEXTURE_2D);
     glDisable(GL_DEPTH_TEST);
 
-	glClearColor(0,0,0, 0);
+    glClearColor(0,0,0, 0);
     glViewport(0,0, w->mWidth,w->mHeight);
 
     glMatrixMode( GL_PROJECTION );
@@ -462,7 +462,7 @@ void WH_Render(int index, const char * buffer)
 
 #endif // OPENGL_BLIT
 
-	SDL_RenderPresent(w->mRenderer);
+    SDL_RenderPresent(w->mRenderer);
 }
 
 int WH_AreAllWindowsClosed(void)
@@ -514,48 +514,48 @@ void WH_Focus(int index)
     WindowHandle * w = _wh_get_from_index(index);
     if(w == NULL) return;
 
-	//Restore window if needed
-	if( !w->mShown )
-	{
-		SDL_ShowWindow( w->mWindow );
-	}
+    //Restore window if needed
+    if( !w->mShown )
+    {
+        SDL_ShowWindow( w->mWindow );
+    }
 
-	//Move window forward
-	SDL_RaiseWindow( w->mWindow );
+    //Move window forward
+    SDL_RaiseWindow( w->mWindow );
 }
 
 int WH_GetWidth(int index)
 {
     WindowHandle * w = _wh_get_from_index(index);
     if(w == NULL) return 0;
-	return w->mWidth;
+    return w->mWidth;
 }
 
 int WH_GetHeight(int index)
 {
     WindowHandle * w = _wh_get_from_index(index);
     if(w == NULL) return 0;
-	return w->mHeight;
+    return w->mHeight;
 }
 
 int WH_HasMouseFocus(int index)
 {
     WindowHandle * w = _wh_get_from_index(index);
     if(w == NULL) return 0;
-	return w->mMouseFocus;
+    return w->mMouseFocus;
 }
 
 int WH_HasKeyboardFocus(int index)
 {
     WindowHandle * w = _wh_get_from_index(index);
     if(w == NULL) return 0;
-	return w->mKeyboardFocus;
+    return w->mKeyboardFocus;
 }
 
 int WH_IsShown(int index)
 {
     WindowHandle * w = _wh_get_from_index(index);
     if(w == NULL) return 0;
-	return w->mShown;
+    return w->mShown;
 }
 

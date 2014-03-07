@@ -24,6 +24,7 @@
 #include <string.h>
 
 #include "general_utils.h"
+#include "gui/win_main.h"
 
 //----------------------------------------------------------------------------------
 
@@ -43,10 +44,10 @@ void Debug_Init(void)
 void Debug_LogMsgArg(const char * msg, ...)
 {
     va_list args;
-	va_start(args,msg);
-	vfprintf(f_log, msg, args);
-	va_end(args);
-	fputc('\n',f_log);
+    va_start(args,msg);
+    vfprintf(f_log, msg, args);
+    va_end(args);
+    fputc('\n',f_log);
     return;
 }
 
@@ -54,12 +55,13 @@ void Debug_DebugMsgArg(const char * msg, ...)
 {
     char dest[2000];
     va_list args;
-	va_start(args,msg);
-	vsnprintf(dest, sizeof(dest), msg, args);
-	va_end(args);
+    va_start(args,msg);
+    vsnprintf(dest, sizeof(dest), msg, args);
+    va_end(args);
     dest[sizeof(dest)-1] = '\0';
 
-	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "GiiBiiAdvance - Debug", dest, NULL);
+    //SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "GiiBiiAdvance - Debug", dest, NULL);
+    Win_MainShowMessage(1,dest);
 
     return;
 }
@@ -68,26 +70,29 @@ void Debug_ErrorMsgArg(const char * msg, ...)
 {
     char dest[2000];
     va_list args;
-	va_start(args,msg);
-	vsnprintf(dest, sizeof(dest), msg, args);
-	va_end(args);
+    va_start(args,msg);
+    vsnprintf(dest, sizeof(dest), msg, args);
+    va_end(args);
     dest[sizeof(dest)-1] = '\0';
 
-	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "GiiBiiAdvance - Error", dest, NULL);
+    //SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "GiiBiiAdvance - Error", dest, NULL);
+    Win_MainShowMessage(0,dest);
 
     return;
 }
 
 void Debug_DebugMsg(const char * msg)
 {
-	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "GiiBiiAdvance - Debug", msg, NULL);
+    //SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "GiiBiiAdvance - Debug", msg, NULL);
+    Win_MainShowMessage(1,msg);
 
     return;
 }
 
 void Debug_ErrorMsg(const char * msg)
 {
-	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "GiiBiiAdvance - Error", msg, NULL);
+    //SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "GiiBiiAdvance - Error", msg, NULL);
+    Win_MainShowMessage(0,msg);
 
     return;
 }
@@ -104,18 +109,19 @@ void ConsoleReset(void)
 void ConsolePrint(const char * msg, ...)
 {
     va_list args;
-	char buffer[1024];
+    char buffer[1024];
 
-	va_start(args,msg);
-	vsnprintf(buffer, sizeof(buffer), msg, args);
-	va_end(args);
+    va_start(args,msg);
+    vsnprintf(buffer, sizeof(buffer), msg, args);
+    va_end(args);
 
     s_strncat(console_buffer,buffer,sizeof(console_buffer));
 }
 
 void ConsoleShow(void)
 {
-	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "GiiBiiAdvance - Console", console_buffer, NULL);
+    Win_MainShowMessage(2,console_buffer);
+    //SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "GiiBiiAdvance - Console", console_buffer, NULL);
 }
 
 //----------------------------------------------------------------------------------

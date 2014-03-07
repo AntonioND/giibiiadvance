@@ -38,30 +38,30 @@ _GB_CONTEXT_ GameBoy;
 
 void GB_PowerOn(void)
 {
-	GB_CPUInit();
-	GB_MemInit();
-	GB_SoundInit();
-	GB_Screen_Init();
-	GB_SerialInit();
+    GB_CPUInit();
+    GB_MemInit();
+    GB_SoundInit();
+    GB_Screen_Init();
+    GB_SerialInit();
 
-	if(GameBoy.Emulator.SGBEnabled) SGB_Init();
+    if(GameBoy.Emulator.SGBEnabled) SGB_Init();
 
-	if(GameBoy.Emulator.MemoryController == MEM_CAMERA)
-	{
-	    if(GB_CameraInit(EmulatorConfig.debug_msg_enable) == 0)
+    if(GameBoy.Emulator.MemoryController == MEM_CAMERA)
+    {
+        if(GB_CameraInit(EmulatorConfig.debug_msg_enable) == 0)
             Debug_DebugMsgArg("Camera functions won't be emulated... How about some screen noise instead? :)");
-	}
+    }
 }
 
 void GB_PowerOff(void)
 {
     if(GameBoy.Emulator.MemoryController == MEM_CAMERA) GB_CameraEnd();
 
-	if(GameBoy.Emulator.SGBEnabled) SGB_End();
+    if(GameBoy.Emulator.SGBEnabled) SGB_End();
 
-	GB_SerialEnd();
-	GB_SoundEnd();
-	GB_CPUInterruptsEnd();
+    GB_SerialEnd();
+    GB_SoundEnd();
+    GB_CPUInterruptsEnd();
 }
 
 void GB_HardReset(void)
@@ -70,7 +70,7 @@ void GB_HardReset(void)
 
     GameBoy.Emulator.FrameDrawn = 1;
 
-	GB_Screen_Init();
+    GB_Screen_Init();
 
     if(GameBoy.Emulator.boot_rom_loaded)
     {

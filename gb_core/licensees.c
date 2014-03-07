@@ -23,7 +23,7 @@
 typedef struct {
     const char code[2]; // An hexadecimal value would work for most codes, but some of them
     const char * name;  // (new licensees only) use other ascii characters.
-    } _licensee_t;
+} _licensee_t;
 
 const _licensee_t licensee[] = {
     {"00","None"},
@@ -192,7 +192,7 @@ const _licensee_t licensee[] = {
     {"F3","Extreme Entertainment/Malibu int."}, //?
     {"FB","Psycnosis"}, //?
     {"FF","LJN"} //?
-    };
+};
 
 const char * GB_GetLicenseeName(char byte1, char byte2)
 {

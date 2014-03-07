@@ -1,0 +1,61 @@
+/*
+    GiiBiiAdvance - GBA/GB  emulator
+    Copyright (C) 2011-2014 Antonio Niño Díaz (AntonioND)
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+//#if defined(_WIN32) || defined(WIN32)
+
+#include <windows.h>
+
+#include "build_options.h"
+
+#define MY_ICON  101
+
+//Setup the .exe icon
+MY_ICON ICON "icon.ico"
+
+//include version information in .exe
+1 VERSIONINFO
+FILEVERSION GIIBIIADVANCE_VERSION_MAJOR,GIIBIIADVANCE_VERSION_MINOR,GIIBIIADVANCE_VERSION_PATCH,0
+PRODUCTVERSION GIIBIIADVANCE_VERSION_MAJOR,GIIBIIADVANCE_VERSION_MINOR,GIIBIIADVANCE_VERSION_PATCH,0
+FILETYPE VFT_APP
+{
+    BLOCK "StringFileInfo"
+    {
+        BLOCK "040904E4"
+        {
+            VALUE "Comments", "This program comes with ABSOLUTELY NO WARRANTY."
+            VALUE "CompanyName", " " //required
+            VALUE "FileDescription", "GiiBiiAdvance emulator" //required
+            VALUE "FileVersion", GIIBIIADVANCE_VERSION_STRING //required
+            VALUE "InternalName", "GiiBiiAdvance" //required
+            VALUE "LegalCopyright", GIIBIIADVANCE_COPYRIGHT_STRING
+            VALUE "LegalTrademarks", " "
+            VALUE "OriginalFilename", "GiiBiiAdvance.exe" //required
+            VALUE "ProductName", "GiiBiiAdvance" //required
+            VALUE "ProductVersion", GIIBIIADVANCE_VERSION_STRING //required
+            VALUE "SpecialBuild", " "
+        }
+    }
+    BLOCK "VarFileInfo"
+    {
+        VALUE "Translation", 0x0809, 1252 //language codes
+        //0x0809 = MAKELANGID(LANG_ENGLISH,SUBLANG_ENGLISH_UK) -- in <winnt.h>
+        //0x0409 = MAKELANGID(LANG_ENGLISH,SUBLANG_ENGLISH_US)
+    }
+}
+
+//-------------------------------------------------------------------------------------------

@@ -1,0 +1,393 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="GiiBiiAdvance" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug_Windows">
+				<Option platforms="Windows;" />
+				<Option output="./GiiBiiAdvance" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Windows/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add directory="C:/CodeBlocks/MinGW/include" />
+				</Compiler>
+				<Linker>
+					<Add option="-lmingw32 -lopengl32 -lSDL2main -lSDL2 -mwindows" />
+				</Linker>
+			</Target>
+			<Target title="Release_Windows">
+				<Option platforms="Windows;" />
+				<Option output="./GiiBiiAdvance" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Windows/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+				<Compiler>
+					<Add option="-fexpensive-optimizations" />
+					<Add option="-O3" />
+					<Add option="-ffast-math" />
+					<Add directory="C:/CodeBlocks/MinGW/include" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add option="-lmingw32 -lopengl32 -lSDL2main -lSDL2 -mwindows" />
+				</Linker>
+			</Target>
+			<Target title="Debug_Linux">
+				<Option platforms="Unix;" />
+				<Option output="./GiiBiiAdvance" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Linux/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+				<Linker>
+					<Add option="-lSDL2" />
+				</Linker>
+			</Target>
+			<Target title="Release_Linux">
+				<Option platforms="Unix;" />
+				<Option output="./GiiBiiAdvance" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Linux/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+				<Compiler>
+					<Add option="-fexpensive-optimizations" />
+					<Add option="-O3" />
+					<Add option="-ffast-math" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add option="-lSDL2" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wshadow" />
+			<Add option="-Wunreachable-code" />
+			<Add option="-Wall" />
+			<Add option="-fno-strict-aliasing" />
+			<Add directory="png/libpng-1.6.9" />
+			<Add directory="png/zlib-1.2.8" />
+		</Compiler>
+		<Linker>
+			<Add directory="C:/CodeBlocks/MinGW/lib" />
+		</Linker>
+		<Unit filename="build_options.h" />
+		<Unit filename="config.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="config.h" />
+		<Unit filename="debug_utils.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="debug_utils.h" />
+		<Unit filename="file_explorer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="file_explorer.h" />
+		<Unit filename="file_utils.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="file_utils.h" />
+		<Unit filename="font_utils.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="font_utils.h" />
+		<Unit filename="gb_core/cpu.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gb_core/cpu.h" />
+		<Unit filename="gb_core/daa_table.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gb_core/debug.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gb_core/debug.h" />
+		<Unit filename="gb_core/gameboy.h" />
+		<Unit filename="gb_core/gb_main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gb_core/gb_main.h" />
+		<Unit filename="gb_core/general.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gb_core/general.h" />
+		<Unit filename="gb_core/interrupts.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gb_core/interrupts.h" />
+		<Unit filename="gb_core/licensees.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gb_core/licensees.h" />
+		<Unit filename="gb_core/mbc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gb_core/mbc.h" />
+		<Unit filename="gb_core/memory.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gb_core/memory.h" />
+		<Unit filename="gb_core/noise.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gb_core/rom.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gb_core/rom.h" />
+		<Unit filename="gb_core/serial.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gb_core/serial.h" />
+		<Unit filename="gb_core/sgb.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gb_core/sgb.h" />
+		<Unit filename="gb_core/sound.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gb_core/sound.h" />
+		<Unit filename="gb_core/video.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gb_core/video.h" />
+		<Unit filename="gba_core/arm.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gba_core/arm_alu.h" />
+		<Unit filename="gba_core/bios.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gba_core/bios.h" />
+		<Unit filename="gba_core/cpu.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gba_core/cpu.h" />
+		<Unit filename="gba_core/disassembler.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gba_core/disassembler.h" />
+		<Unit filename="gba_core/dma.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gba_core/dma.h" />
+		<Unit filename="gba_core/gba.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gba_core/gba.h" />
+		<Unit filename="gba_core/interrupts.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gba_core/interrupts.h" />
+		<Unit filename="gba_core/memory.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gba_core/memory.h" />
+		<Unit filename="gba_core/rom.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gba_core/rom.h" />
+		<Unit filename="gba_core/save.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gba_core/save.h" />
+		<Unit filename="gba_core/shifts.h" />
+		<Unit filename="gba_core/sound.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gba_core/sound.h" />
+		<Unit filename="gba_core/thumb.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gba_core/timers.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gba_core/timers.h" />
+		<Unit filename="gba_core/video.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gba_core/video.h" />
+		<Unit filename="general_utils.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="general_utils.h" />
+		<Unit filename="gui/win_gb_disassembler.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gui/win_gb_disassembler.h" />
+		<Unit filename="gui/win_gb_ioviewer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gui/win_gb_ioviewer.h" />
+		<Unit filename="gui/win_gb_memviewer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gui/win_gb_memviewer.h" />
+		<Unit filename="gui/win_gba_disassembler.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gui/win_gba_disassembler.h" />
+		<Unit filename="gui/win_gba_memviewer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gui/win_gba_memviewer.h" />
+		<Unit filename="gui/win_main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gui/win_main.h" />
+		<Unit filename="gui/win_utils.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gui/win_utils.h" />
+		<Unit filename="icon.ico" />
+		<Unit filename="input_utils.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="input_utils.h" />
+		<Unit filename="main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="png/libpng-1.6.9/png.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="png/libpng-1.6.9/png.h" />
+		<Unit filename="png/libpng-1.6.9/pngconf.h" />
+		<Unit filename="png/libpng-1.6.9/pngdebug.h" />
+		<Unit filename="png/libpng-1.6.9/pngerror.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="png/libpng-1.6.9/pngget.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="png/libpng-1.6.9/pnginfo.h" />
+		<Unit filename="png/libpng-1.6.9/pnglibconf.h" />
+		<Unit filename="png/libpng-1.6.9/pngmem.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="png/libpng-1.6.9/pngpread.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="png/libpng-1.6.9/pngpriv.h" />
+		<Unit filename="png/libpng-1.6.9/pngread.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="png/libpng-1.6.9/pngrio.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="png/libpng-1.6.9/pngrtran.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="png/libpng-1.6.9/pngrutil.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="png/libpng-1.6.9/pngset.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="png/libpng-1.6.9/pngstruct.h" />
+		<Unit filename="png/libpng-1.6.9/pngtrans.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="png/libpng-1.6.9/pngwio.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="png/libpng-1.6.9/pngwrite.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="png/libpng-1.6.9/pngwtran.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="png/libpng-1.6.9/pngwutil.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="png/png_utils.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="png/png_utils.h" />
+		<Unit filename="png/zlib-1.2.8/adler32.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="png/zlib-1.2.8/compress.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="png/zlib-1.2.8/crc32.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="png/zlib-1.2.8/crc32.h" />
+		<Unit filename="png/zlib-1.2.8/deflate.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="png/zlib-1.2.8/deflate.h" />
+		<Unit filename="png/zlib-1.2.8/gzclose.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="png/zlib-1.2.8/gzguts.h" />
+		<Unit filename="png/zlib-1.2.8/gzlib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="png/zlib-1.2.8/gzread.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="png/zlib-1.2.8/gzwrite.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="png/zlib-1.2.8/infback.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="png/zlib-1.2.8/inffast.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="png/zlib-1.2.8/inffast.h" />
+		<Unit filename="png/zlib-1.2.8/inffixed.h" />
+		<Unit filename="png/zlib-1.2.8/inflate.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="png/zlib-1.2.8/inflate.h" />
+		<Unit filename="png/zlib-1.2.8/inftrees.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="png/zlib-1.2.8/inftrees.h" />
+		<Unit filename="png/zlib-1.2.8/trees.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="png/zlib-1.2.8/trees.h" />
+		<Unit filename="png/zlib-1.2.8/uncompr.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="png/zlib-1.2.8/zconf.h" />
+		<Unit filename="png/zlib-1.2.8/zlib.h" />
+		<Unit filename="png/zlib-1.2.8/zutil.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="png/zlib-1.2.8/zutil.h" />
+		<Unit filename="resource.rc">
+			<Option compilerVar="WINDRES" />
+			<Option target="Debug_Windows" />
+			<Option target="Release_Windows" />
+		</Unit>
+		<Unit filename="sound_utils.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="sound_utils.h" />
+		<Unit filename="text_data.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="window_handler.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="window_handler.h" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

@@ -31,19 +31,19 @@
 #define FONT_CHARS_IN_ROW    (32)
 #define FONT_CHARS_IN_COLUMN (8)
 
-char * fnt12;
-char * fnt14;
+static char * fnt12;
+static char * fnt14;
 
 int FU_Init(void)
 {
     char path[MAX_PATHLEN];
-    s_snprintf(path,sizeof(path),"%slucida_12.png",DirGetRunningPath());
+    s_snprintf(path,sizeof(path),"%sfont12.png",DirGetRunningPath());
     int w,h;
     if(Read_PNG(path,&fnt12,&w,&h))
     {
         return 1;
     }
-    s_snprintf(path,sizeof(path),"%slucida_14.png",DirGetRunningPath());
+    s_snprintf(path,sizeof(path),"%sfont14.png",DirGetRunningPath());
     if(Read_PNG(path,&fnt14,&w,&h))
     {
         free(fnt12);

@@ -54,9 +54,9 @@ typedef struct {
 } WindowHandle;
 
 //Windows
-WindowHandle gWindows[MAX_WINDOWS];
+static WindowHandle gWindows[MAX_WINDOWS];
 
-WindowHandle * gMainWindow = NULL; // all unhandled events will be sent to this
+static WindowHandle * gMainWindow = NULL; // all unhandled events will be sent to this
 
 static WindowHandle * _wh_get_from_index(int index)
 {

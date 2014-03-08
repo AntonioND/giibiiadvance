@@ -22,15 +22,14 @@
 
 #include "build_options.h"
 #include "file_utils.h"
+#include "config.h"
 
 #include "gb_core/gameboy.h"
 #include "gb_core/sound.h"
 #include "gb_core/gb_main.h"
 #include "gb_core/video.h"
+
 #include "gba_core/sound.h"
-#include "config.h"
-
-
 
 t_config EmulatorConfig = { //Default options...
     0, //debug_msg_enable

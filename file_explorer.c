@@ -66,14 +66,14 @@ char GetFolderSeparator(char * path)
 
 //----------------------------------------------------------------------------
 
-int filenum;
-char fileselected[MAX_PATHLEN]; // this holds the last file selected even after FileExplorer_ListFree()
-char ** filename = NULL;
-int * list_isdir = NULL;
-int maxfiles; // allocated space for files
-int is_root = 0;
-char exploring_path[MAX_PATHLEN];
-int list_inited = 0;
+static int filenum;
+static char fileselected[MAX_PATHLEN]; // this holds the last file selected even after FileExplorer_ListFree()
+static char ** filename = NULL;
+static int * list_isdir = NULL;
+static int maxfiles; // allocated space for files
+static int is_root = 0;
+static char exploring_path[MAX_PATHLEN];
+static int list_inited = 0;
 
 int FileExplorer_GetNumFiles(void)
 {

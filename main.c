@@ -28,7 +28,7 @@
 #include "config.h"
 #include "gui/win_main.h"
 
-int Init(void)
+static int Init(void)
 {
     Config_Load();
     atexit(Config_Save);

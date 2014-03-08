@@ -85,7 +85,7 @@ static Uint32 _fps_callback_function(Uint32 interval, void *param)
     return interval;
 }
 
-void FPS_TimerInit(void)
+static void FPS_TimerInit(void)
 {
     FPS_timer = SDL_AddTimer(1000, _fps_callback_function, NULL);
     if(FPS_timer == 0)
@@ -95,14 +95,14 @@ void FPS_TimerInit(void)
     }
 }
 
-void FPS_TimerEnd(void)
+static void FPS_TimerEnd(void)
 {
     SDL_RemoveTimer(FPS_timer);
 }
 
 //------------------------------------------------------------------
 
-int CONFIG_ZOOM = 2;
+static int CONFIG_ZOOM = 2;
 
 #define CONFIG_ZOOM_MIN 2
 #define CONFIG_ZOOM_MAX 4
@@ -132,7 +132,7 @@ static char GAME_MENU_BUFFER[256*CONFIG_ZOOM_MAX * 224*CONFIG_ZOOM_MAX * 4];
 
 static char GAME_SCREEN_BUFFER[256*224*3]; // max possible size = SGB
 
-int GetGameScreenTextureWidth(void)
+static int GetGameScreenTextureWidth(void)
 {
     if(SCREEN_TYPE == SCREEN_GB)
         return 160;
@@ -143,7 +143,7 @@ int GetGameScreenTextureWidth(void)
     return 0;
 }
 
-int GetGameScreenTextureHeight(void)
+static int GetGameScreenTextureHeight(void)
 {
     if(SCREEN_TYPE == SCREEN_GB)
         return 144;
@@ -154,17 +154,17 @@ int GetGameScreenTextureHeight(void)
     return 0;
 }
 
-int GetMenuTextureWidth(void)
+static int GetMenuTextureWidth(void)
 {
     return 256*CONFIG_ZOOM;
 }
 
-int GetMenuTextureHeight(void)
+static int GetMenuTextureHeight(void)
 {
     return 224*CONFIG_ZOOM;
 }
 
-void GetGameScreenTextureDump(void)
+static void GetGameScreenTextureDump(void)
 {
     memset(GAME_MENU_BUFFER,0,sizeof(GAME_MENU_BUFFER));
 
@@ -198,14 +198,14 @@ void GetGameScreenTextureDump(void)
     }
 }
 
-void SetGameScreen(int type)
+static void SetGameScreen(int type)
 {
     SCREEN_TYPE = type;
     WH_SetSize(WinIDMain,256*CONFIG_ZOOM,224*CONFIG_ZOOM,
                GetGameScreenTextureWidth(),GetGameScreenTextureHeight(), CONFIG_ZOOM);
 }
 
-void SwitchToGame(void)
+static void SwitchToGame(void)
 {
     if(MENU_ENABLED == 0) return;
 
@@ -216,7 +216,7 @@ void SwitchToGame(void)
     SetGameScreen(SCREEN_TYPE);
 }
 
-void SwitchToMenu(void)
+static void SwitchToMenu(void)
 {
     if(MENU_ENABLED == 1) return;
 
@@ -231,12 +231,12 @@ void SwitchToMenu(void)
 static int has_to_switch_to_game = 0;
 static int has_to_switch_to_menu = 0;
 
-void SwitchToGameDelayed(void)
+static void SwitchToGameDelayed(void)
 {
     has_to_switch_to_game = 1;
 }
 
-void SwitchToMenuDelayed(void)
+static void SwitchToMenuDelayed(void)
 {
     has_to_switch_to_menu = 1;
 }
@@ -244,7 +244,7 @@ void SwitchToMenuDelayed(void)
 //------------------------------------------------------------------
 
 
-int GetRomType(char * name)
+static int GetRomType(char * name)
 {
     char extension[4];
     int len = strlen(name);
@@ -272,7 +272,7 @@ static void * bios_buffer = NULL;
 static void * rom_buffer = NULL;
 static unsigned int rom_size;
 
-void UnloadROM(int save_data)
+static void UnloadROM(int save_data)
 {
     Win_MainClearMessage();
 
@@ -306,7 +306,7 @@ void UnloadROM(int save_data)
     MENU_HAS_TO_UPDATE = 1;
 }
 
-int LoadROMAutodetect(char * path)
+static int LoadROMAutodetect(char * path)
 {
     if(path == NULL) return 0;
     if(strlen(path) == 0) return 0;
@@ -415,7 +415,7 @@ static _gui mainwindow_subwindow_fileexplorer_gui = {
 
 static int file_explorer_windows_selection = 0;
 
-void Win_MainFileExplorerRefresh(void)
+static void Win_MainFileExplorerRefresh(void)
 {
     if(GUI_WindowGetEnabled(&mainwindow_fileexplorer_win) == 0) return;
 
@@ -451,19 +451,19 @@ void Win_MainFileExplorerRefresh(void)
     }
 }
 
-void Win_MainFileExplorerClose(void)
+static void Win_MainFileExplorerClose(void)
 {
     FileExplorer_ListFree();
     GUI_WindowSetEnabled(&mainwindow_fileexplorer_win,0);
 }
 
-void Win_MainFileExplorerUp(void)
+static void Win_MainFileExplorerUp(void)
 {
     FileExplorer_SelectEntry("..");
     Win_MainFileExplorerRefresh();
 }
 
-void Win_MainFileExplorerOpenIndex(int i)
+static void Win_MainFileExplorerOpenIndex(int i)
 {
     file_explorer_windows_selection = 0;
 
@@ -479,20 +479,20 @@ void Win_MainFileExplorerOpenIndex(int i)
     }
 }
 
-void Win_MainFileExplorerTextBoxCallback(int x, int y)
+static void Win_MainFileExplorerTextBoxCallback(int x, int y)
 {
     int i = y / FONT_12_HEIGHT;
     Win_MainFileExplorerOpenIndex(i);
 }
 
-void Win_MainFileExplorerOpen(void)
+static void Win_MainFileExplorerOpen(void)
 {
     GUI_WindowSetEnabled(&mainwindow_fileexplorer_win,1);
     FileExplorer_SetPath(DirGetRunningPath());
     Win_MainFileExplorerRefresh();
 }
 
-void Win_MainFileExplorerCreate(void)
+static void Win_MainFileExplorerCreate(void)
 {
     GUI_SetTextBox(&win_main_fileexpoler_textbox,&win_main_fileexpoler_con,
                    7,7,
@@ -508,38 +508,38 @@ void Win_MainFileExplorerCreate(void)
 
 //------------------------------------------------------------------
 
-void Win_MainClose(void)
+static void Win_MainClose(void)
 {
     Win_MainFileExplorerClose();
     UnloadROM(1);
 }
 
-void Win_MainCloseNoSave(void)
+static void Win_MainCloseNoSave(void)
 {
     Win_MainFileExplorerClose();
     UnloadROM(0);
 }
 
-void Win_MainExit(void)
+static void Win_MainExit(void)
 {
     Win_MainFileExplorerClose();
     UnloadROM(1);
     WH_CloseAll();
 }
 
-void Win_MainOpenDisassembler(void)
+static void Win_MainOpenDisassembler(void)
 {
     Win_GBADisassemblerCreate();
     Win_GBDisassemblerCreate();
 }
 
-void Win_MainOpenMemViewer(void)
+static void Win_MainOpenMemViewer(void)
 {
     Win_GBAMemViewerCreate();
     Win_GBMemViewerCreate();
 }
 
-void Win_MainOpenIOViewer(void)
+static void Win_MainOpenIOViewer(void)
 {
     Win_GBIOViewerCreate();
 }
@@ -675,7 +675,7 @@ void Win_MainClearMessage(void)
 
 //------------------------------------------------------------------
 
-void ChangeZoom(int newzoom)
+static void ChangeZoom(int newzoom)
 {
     if( (newzoom < 2) && (newzoom > 4) )
     {
@@ -708,7 +708,7 @@ void ChangeZoom(int newzoom)
 
 //------------------------------------------------------------------
 
-int Win_MainEventCallback(SDL_Event * e)
+static int Win_MainEventCallback(SDL_Event * e)
 {
     if(MENU_ENABLED)
         MENU_HAS_TO_UPDATE |= GUI_SendEvent(&mainwindow_window_gui,e);
@@ -854,7 +854,7 @@ int Win_MainEventCallback(SDL_Event * e)
     return 0;
 }
 
-void Win_close(void)
+void Win_ConfigWindowClose(void)
 {
     GUI_WindowSetEnabled(&mainwindow_configwin,0);
 }
@@ -863,7 +863,7 @@ int Win_MainCreate(char * rom_path)
 {
     ChangeZoom(EmulatorConfig.screen_size);
 
-    GUI_SetButton(&mainwindow_subwindow_btn,10,50,7*FONT_12_WIDTH,FONT_12_HEIGHT,"CLOSE",Win_close);
+    GUI_SetButton(&mainwindow_subwindow_btn,10,50,7*FONT_12_WIDTH,FONT_12_HEIGHT,"CLOSE",Win_ConfigWindowClose);
     GUI_SetButton(&mainwindow_subwindow_btn2,10,70,7*FONT_12_WIDTH,FONT_12_HEIGHT,"TEST",NULL);
 
     GUI_SetButton(&mainwindow_btn,0,0,30*FONT_12_WIDTH,15*FONT_12_HEIGHT,"MAIN GUI",mainbtncallback_openwin);
@@ -892,6 +892,7 @@ int Win_MainCreate(char * rom_path)
     WH_SetEventMainWindow(WinIDMain);
 
     FPS_TimerInit();
+    atexit(FPS_TimerEnd);
 
     RUNNING = RUNNING_NONE;
 
@@ -931,7 +932,7 @@ void Win_MainRender(void)
     }
 }
 
-void GBA_KeyboardGamepadGetInput(void)
+static void GBA_KeyboardGamepadGetInput(void)
 {
     const Uint8 * state = SDL_GetKeyboardState(NULL);
 
@@ -949,7 +950,7 @@ void GBA_KeyboardGamepadGetInput(void)
     GBA_HandleInput(a, b, l, r, st, se, dr, dl, du, dd);
 }
 
-void GB_KeyboardGamepadGetInput(void)
+static void GB_KeyboardGamepadGetInput(void)
 {
     const Uint8 * state = SDL_GetKeyboardState(NULL);
 

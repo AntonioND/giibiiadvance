@@ -24,6 +24,8 @@
 #include <string.h>
 
 #include "general_utils.h"
+#include "config.h"
+
 #include "gui/win_main.h"
 
 //----------------------------------------------------------------------------------
@@ -60,6 +62,8 @@ void Debug_DebugMsgArg(const char * msg, ...)
     va_end(args);
     dest[sizeof(dest)-1] = '\0';
 
+    if(EmulatorConfig.debug_msg_enable == 0) return;
+
     //SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "GiiBiiAdvance - Debug", dest, NULL);
     Win_MainShowMessage(1,dest);
 
@@ -83,6 +87,8 @@ void Debug_ErrorMsgArg(const char * msg, ...)
 
 void Debug_DebugMsg(const char * msg)
 {
+    if(EmulatorConfig.debug_msg_enable == 0) return;
+
     //SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "GiiBiiAdvance - Debug", msg, NULL);
     Win_MainShowMessage(1,msg);
 

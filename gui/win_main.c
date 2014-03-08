@@ -539,10 +539,11 @@ static void _win_main_menu_open_io_viewer(void)
 
 //------------------------------------------------------------------
 
+static _gui_menu_entry mm_separator = {" " , NULL};
+
 //Window Menu
 
 static _gui_menu_entry mmfile_open = {"Open" , _win_main_file_explorer_open};
-static _gui_menu_entry mmfile_separator = {" " , NULL};
 static _gui_menu_entry mmfile_close = {"Close" , _win_main_menu_close};
 static _gui_menu_entry mmfile_closenosav = {"Close without saving", _win_main_menu_close_no_save};
 static _gui_menu_entry mmfile_exit = {"Exit", _win_main_menu_exit};
@@ -550,10 +551,10 @@ static _gui_menu_entry mmfile_exit = {"Exit", _win_main_menu_exit};
 
 static _gui_menu_entry * mmfile_elements[] = {
     &mmfile_open,
-    &mmfile_separator,
+    &mm_separator,
     &mmfile_close,
     &mmfile_closenosav,
-    &mmfile_separator,
+    &mm_separator,
     &mmfile_exit,
     NULL
 };
@@ -561,6 +562,19 @@ static _gui_menu_entry * mmfile_elements[] = {
 static _gui_menu_list main_menu_file = {
     "File",
     mmfile_elements,
+};
+
+static _gui_menu_entry mmoptions_configuration = {"Configuration" , NULL};
+
+static _gui_menu_entry * mmoptions_elements[] = {
+    &mmoptions_configuration,
+    &mm_separator,
+    NULL
+};
+
+static _gui_menu_list main_menu_options = {
+    "Options",
+    mmoptions_elements,
 };
 
 static _gui_menu_entry mmdebug_disas = {"Disassembler (F5)" , _win_main_menu_open_disassembler};
@@ -571,6 +585,7 @@ static _gui_menu_entry * mmdisas_elements[] = {
     &mmdebug_disas,
     &mmdebug_memview,
     &mmdebug_ioview,
+    &mm_separator,
     NULL
 };
 
@@ -579,9 +594,23 @@ static _gui_menu_list main_menu_debug = {
     mmdisas_elements,
 };
 
+static _gui_menu_entry mmhelp_about = {"About" , NULL};
+
+static _gui_menu_entry * mmhelp_elements[] = {
+    &mmhelp_about,
+    NULL
+};
+
+static _gui_menu_list main_menu_help = {
+    "Help",
+    mmhelp_elements,
+};
+
 static _gui_menu_list * mmenu_lists[] = {
     &main_menu_file,
+    &main_menu_options,
     &main_menu_debug,
+    &main_menu_help,
     NULL
 };
 
@@ -640,7 +669,7 @@ void mainbtncallback_openwin(void)
 
 //------------------------------------------------------------------
 
-//global function
+//@global function
 void Win_MainShowMessage(int type, const char * text) // 0 = error, 1 = debug, 2 = console
 {
     _win_main_switch_to_menu();
@@ -856,6 +885,7 @@ static int Win_MainEventCallback(SDL_Event * e)
 }
 
 
+//@global function
 int Win_MainCreate(char * rom_path)
 {
     _win_main_change_zoom(EmulatorConfig.screen_size);
@@ -908,6 +938,7 @@ int Win_MainCreate(char * rom_path)
 
 static char _win_main_buffer_when_menu[256*4*224*4*3];
 
+//@global function
 void Win_MainRender(void)
 {
     if(WIN_MAIN_MENU_ENABLED == 0)
@@ -966,16 +997,19 @@ static void GB_KeyboardGamepadGetInput(void)
     GB_InputSet(0, a, b, st, se, dr, dl, du, dd);
 }
 
+//@global function
 int Win_MainRunningGBA(void)
 {
     return WIN_MAIN_RUNNING == RUNNING_GBA;
 }
 
+//@global function
 int Win_MainRunningGB(void)
 {
     return WIN_MAIN_RUNNING == RUNNING_GB;
 }
 
+//@global function
 void Win_MainLoopHandle(void)
 {
     if(WH_HasKeyboardFocus(WinIDMain) && (WIN_MAIN_MENU_ENABLED == 0))

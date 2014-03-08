@@ -50,14 +50,15 @@ void GUI_ConsoleDrawAt(_gui_console * con, char * buffer, int buf_w, int buf_h, 
 
 //----------------------------------------------------------------------------------------------
 
-#define GUI_TYPE_NONE        0
-#define GUI_TYPE_TEXTBOX     1
-#define GUI_TYPE_BUTTON      2
-#define GUI_TYPE_RADIOBUTTON 3
-#define GUI_TYPE_LABEL       4
-#define GUI_TYPE_BITMAP      5
-#define GUI_TYPE_WINDOW      6
-#define GUI_TYPE_MESSAGEBOX  7
+#define GUI_TYPE_NONE                 0
+#define GUI_TYPE_TEXTBOX              1
+#define GUI_TYPE_BUTTON               2
+#define GUI_TYPE_RADIOBUTTON          3
+#define GUI_TYPE_LABEL                4
+#define GUI_TYPE_BITMAP               5
+#define GUI_TYPE_WINDOW               6
+#define GUI_TYPE_MESSAGEBOX           7
+#define GUI_TYPE_SCROLLABLETEXTWINDOW 8
 
 typedef void (*_gui_void_arg_void_fn)(void);
 typedef void (*_gui_void_arg_int_fn)(int);

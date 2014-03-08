@@ -1,5 +1,3 @@
-Known bugs
-==========
 
 General
 -------
@@ -59,6 +57,7 @@ Game Boy Advance
 Random things
 -------------
 
+- Add a Makefile.
 - Final Fantasy Tactics Advance. Mateus Totema LY effect is wrong.
 - Reading a 32 bit value in ROM from EWRAM: 10 cycles (wait, wait, read instruction, compute address, wait, wait, wait, read low bits, wait, read high bits)
 - Reading a 32 bit value in EWRAM from EWRAM: 10 cycles (wait, wait, read instruction, compute address, wait, wait, read low bits, wait, wait, read high bits)

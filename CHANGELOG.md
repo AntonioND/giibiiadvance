@@ -16,10 +16,11 @@ General
 - Memory can be edited in memory viewers. ASCII characters shown. [GB/GBA]
 - Disassembly shows "true" or "false" to know if the next instruction will be executed (if it is conditional). [GB/GBA]
 - Disassembly shows little arrows in branches to know where they go (up/down). [GB/GBA]
+- Some fixes by looking at the commits of a fork of GiiBiiAdvance wowzaman12 (and lioncash). Thanks!
 
 GBA emulation
 
-- Barrel shifter fixes.
+- Barrel shifter fixes (thanks, Normmat!).
 - Undefined instructions in THUMB emulated (except that ones using r15 as operand).
 - ldm/stm with writeback with base included in rlist hopefully fixed.
 - Fixed DMA sound IRQ.

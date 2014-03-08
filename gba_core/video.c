@@ -25,19 +25,19 @@
 #include "memory.h"
 
 extern _mem_t Mem;
-int curr_screen_buffer = 0;
-u16 screen_buffer_array[2][240*160]; //doble buffer
-u16 * screen_buffer = screen_buffer_array[0];
+static int curr_screen_buffer = 0;
+static u16 screen_buffer_array[2][240*160]; //doble buffer
+static u16 * screen_buffer = screen_buffer_array[0];
 
 typedef void (*draw_scanline_fn)(s32);
-draw_scanline_fn DrawScanlineFn;
+static draw_scanline_fn DrawScanlineFn;
 
-void GBA_DrawScanlineMode0(s32 y);
-void GBA_DrawScanlineMode1(s32 y);
-void GBA_DrawScanlineMode2(s32 y);
-void GBA_DrawScanlineMode3(s32 y);
-void GBA_DrawScanlineMode4(s32 y);
-void GBA_DrawScanlineMode5(s32 y);
+static void GBA_DrawScanlineMode0(s32 y);
+static void GBA_DrawScanlineMode1(s32 y);
+static void GBA_DrawScanlineMode2(s32 y);
+static void GBA_DrawScanlineMode3(s32 y);
+static void GBA_DrawScanlineMode4(s32 y);
+static void GBA_DrawScanlineMode5(s32 y);
 inline void GBA_DrawScanlineWhite(s32 y);
 
 static s32 BG2lastx,BG2lasty; //for affine transformation
@@ -1226,7 +1226,7 @@ static inline u32 se_index_affine(u32 tx, u32 ty, u32 tpitch)
 
 static const u32 affine_bg_size[4] = { 128, 256, 512, 1024 };
 
-s32 mosBG2lastx, mosBG2lasty, mos2A, mos2C;
+static s32 mosBG2lastx, mosBG2lasty, mos2A, mos2C;
 static void gba_bg2drawaffine(s32 y)
 {
     u16 control = REG_BG2CNT;
@@ -1310,7 +1310,7 @@ static void gba_bg2drawaffine(s32 y)
     }
 }
 
-s32 mosBG3lastx, mosBG3lasty, mos3A, mos3C;
+static s32 mosBG3lastx, mosBG3lasty, mos3A, mos3C;
 static void gba_bg3drawaffine(s32 y)
 {
     u16 control = REG_BG3CNT;
@@ -1510,10 +1510,10 @@ static inline void gba_video_all_buffers_clear(void)
 
 typedef enum { BG0 = 0,BG1,BG2,BG3,  SPR0,SPR1,SPR2,SPR3,   BD } _layer_type_;
 
-int * layer_vis[9]; // layer_fb[0] goes at the bottom, layer_fb[layer_active_num-1] at the top
-u16 * layer_fb[9];
-_layer_type_ layer_id[9];
-int layer_active_num;
+static int * layer_vis[9]; // layer_fb[0] goes at the bottom, layer_fb[layer_active_num-1] at the top
+static u16 * layer_fb[9];
+static _layer_type_ layer_id[9];
+static int layer_active_num;
 
 static inline void gba_sort_layers(int video_mode)
 {
@@ -1602,7 +1602,7 @@ static inline void gba_blit_layers(int y)
 
 int win_coloreffect_enable[240]; // color effect is enabled / disabled by windows
 
-static inline void gba_window_apply(int y, int win0, int win1, int winobj)
+static inline void gba_window_apply(int y, int win0, int win1, int winobj) // bits 13-15 of DISPCNT
 {
     if(!(winobj||win1||win0))
     {
@@ -1804,8 +1804,8 @@ static inline void gba_window_apply(int y, int win0, int win1, int winobj)
     }
 }
 
-u16 white_table[32][17]; //color, evy
-u16 black_table[32][17]; //color, evy
+static u16 white_table[32][17]; //color, evy
+static u16 black_table[32][17]; //color, evy
 
 void GBA_FillFadeTables(void)
 {
@@ -1952,7 +1952,10 @@ static inline void gba_effects_apply(void)
     {
         int sprlayer = layer_is_sprite[l] - 1;
 
-        for(i = 0; i < 240; i++) if(win_coloreffect_enable[i]) if(sprblend[sprlayer][i])
+        // Transparent sprites are always affected by blending even if window disables special effects!!!
+        // Tested on hardware
+        for(i = 0; i < 240; i++) //if(win_coloreffect_enable[i])
+            if(sprblend[sprlayer][i])
         {
             //search a non-transparent second target pixel
             int k = l - 1;
@@ -2071,7 +2074,7 @@ static inline void gba_greenswap_apply(int y)
 
 //--------------------------------------------------------------------------------------
 
-void GBA_DrawScanlineMode0(s32 y)
+static void GBA_DrawScanlineMode0(s32 y)
 {
     if(GBA_HasToSkipFrame()) return;
 
@@ -2094,7 +2097,7 @@ void GBA_DrawScanlineMode0(s32 y)
     return;
 }
 
-void GBA_DrawScanlineMode1(s32 y)
+static void GBA_DrawScanlineMode1(s32 y)
 {
     if(GBA_HasToSkipFrame()) return;
 
@@ -2116,7 +2119,7 @@ void GBA_DrawScanlineMode1(s32 y)
     return;
 }
 
-void GBA_DrawScanlineMode2(s32 y)
+static void GBA_DrawScanlineMode2(s32 y)
 {
     if(GBA_HasToSkipFrame()) return;
 
@@ -2137,7 +2140,7 @@ void GBA_DrawScanlineMode2(s32 y)
     return;
 }
 
-void GBA_DrawScanlineMode3(s32 y)
+static void GBA_DrawScanlineMode3(s32 y)
 {
     if(GBA_HasToSkipFrame()) return;
 
@@ -2157,7 +2160,7 @@ void GBA_DrawScanlineMode3(s32 y)
     return;
 }
 
-void GBA_DrawScanlineMode4(s32 y)
+static void GBA_DrawScanlineMode4(s32 y)
 {
     if(GBA_HasToSkipFrame()) return;
 
@@ -2177,7 +2180,7 @@ void GBA_DrawScanlineMode4(s32 y)
     return;
 }
 
-void GBA_DrawScanlineMode5(s32 y)
+static void GBA_DrawScanlineMode5(s32 y)
 {
     if(GBA_HasToSkipFrame()) return;
 

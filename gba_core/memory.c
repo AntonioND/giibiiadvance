@@ -517,8 +517,8 @@ void GBA_RegisterWrite16(u32 address, u16 data)
         case WIN0V-REG_BASE: REG_WIN0V = data; GBA_VideoUpdateRegister(WIN0V); return;
         case WIN1H-REG_BASE: REG_WIN1H = data; GBA_VideoUpdateRegister(WIN1H); return;
         case WIN1V-REG_BASE: REG_WIN1V = data; GBA_VideoUpdateRegister(WIN1V); return;
-        case WININ-REG_BASE: REG_WININ = data; return;
-        case WINOUT-REG_BASE: REG_WINOUT = data; return;
+        case WININ-REG_BASE: REG_WININ = data; GBA_VideoUpdateRegister(WININ); return;
+        case WINOUT-REG_BASE: REG_WINOUT = data; GBA_VideoUpdateRegister(WINOUT); return;
         case MOSAIC-REG_BASE: REG_MOSAIC = data; GBA_VideoUpdateRegister(MOSAIC); return;
 
 //        extern s32 scrclocks;

@@ -1,12 +1,4 @@
 
-Known bugs
-==========
-
-- Sound glitches. (Buffer underflow or something?)
-- Affine sprites/bgs(mode 7) + mosaic = bad
-- GBA_MemoryWrite8() will enter halt mode when writing to REG_POSTFLG
-- GBA CPU timings bad.
-
 Version changelog
 =================
 

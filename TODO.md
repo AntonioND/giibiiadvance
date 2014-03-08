@@ -1,3 +1,5 @@
+Known bugs
+==========
 
 General
 -------
@@ -32,8 +34,11 @@ Game Boy
 Game Boy Advance
 ----------------
 
+- Sound glitches. (Buffer underflow or something?)
 - What happens with video modes 6 and 7?
 - Emulate weird things with invalid window coordinates.
+- Affine sprites/bgs(mode 7) + mosaic = bad
+- Emulate mosaic effect correctly.
 - Fix sound.
 - Serial port.
 - RTC. I/O registers for external hardware.
@@ -49,6 +54,7 @@ Game Boy Advance
 - Video Capture Mode (DMA3 only): Intended to copy a bitmap from memory (or from external hardware/camera) to VRAM. When using this transfer mode, set the repeat bit, and write the number of data units (per scanline) to the word count register. Capture works similar like HBlank DMA, however, the transfer is started when VCOUNT=2, it is then repeated each scanline, and it gets stopped when VCOUNT=162.
 - Rumble.
 - Fix simulated SWI 11h and 12h (offset). (?)
+- GBA_MemoryWrite8() will enter halt mode when writing to REG_POSTFLG. Fix it.
 
 Random things
 -------------

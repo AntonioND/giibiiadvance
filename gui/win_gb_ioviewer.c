@@ -20,13 +20,15 @@
 
 #include <string.h>
 
-#include "win_gb_ioviewer.h"
-#include "win_main.h"
 #include "../debug_utils.h"
 #include "../window_handler.h"
 #include "../font_utils.h"
 #include "../general_utils.h"
+
+#include "win_gb_ioviewer.h"
+#include "win_main.h"
 #include "win_utils.h"
+
 #include "../gb_core/memory.h"
 #include "../gb_core/gameboy.h"
 

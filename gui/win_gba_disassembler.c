@@ -20,14 +20,17 @@
 
 #include <string.h>
 
-#include "win_gba_disassembler.h"
-#include "win_main.h"
 #include "../debug_utils.h"
 #include "../window_handler.h"
 #include "../font_utils.h"
 #include "../general_utils.h"
+
+#include "win_gba_disassembler.h"
+#include "win_main.h"
 #include "win_utils.h"
+
 #include "../gba_core/gba.h"
+#include "../gba_core/cpu.h"
 #include "../gba_core/disassembler.h"
 #include "../gba_core/memory.h"
 
@@ -375,7 +378,14 @@ void Win_GBADisassemblyInputWindowCallback(char * text, int is_valid)
         if(gba_debugger_register_to_change < 16)
             cpu->R[gba_debugger_register_to_change] = newvalue;
         else if(gba_debugger_register_to_change == 16)
+        {
             cpu->CPSR = newvalue;
+            if(cpu->CPSR&F_T)
+                cpu->EXECUTION_MODE = EXEC_THUMB;
+            else
+                cpu->EXECUTION_MODE = EXEC_ARM;
+            GBA_CPUChangeMode(newvalue&0x1F);
+        }
         else if(gba_debugger_register_to_change == 17)
             cpu->SPSR = newvalue;
         else if(gba_debugger_register_to_change == 100)

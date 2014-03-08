@@ -20,13 +20,15 @@
 
 #include <string.h>
 
-#include "win_gba_memviewer.h"
-#include "win_main.h"
 #include "../debug_utils.h"
 #include "../window_handler.h"
 #include "../font_utils.h"
 #include "../general_utils.h"
+
+#include "win_gba_memviewer.h"
+#include "win_main.h"
 #include "win_utils.h"
+
 #include "../gba_core/memory.h"
 
 //-----------------------------------------------------------------------------------

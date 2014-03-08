@@ -452,6 +452,7 @@ static void _win_main_file_explorer_close(void)
 static void _win_main_file_explorer_up(void)
 {
     FileExplorer_SelectEntry("..");
+    _win_main_file_explorer_windows_selection = 0;
     _win_main_file_explorer_refresh();
 }
 

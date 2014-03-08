@@ -16,7 +16,7 @@ General
 - Memory can be edited in memory viewers. ASCII characters shown. [GB/GBA]
 - Disassembly shows "true" or "false" to know if the next instruction will be executed (if it is conditional). [GB/GBA]
 - Disassembly shows little arrows in branches to know where they go (up/down). [GB/GBA]
-- Some fixes by looking at the commits of a fork of GiiBiiAdvance wowzaman12 (and lioncash). Thanks!
+- Some fixes by looking at the commits of a fork of GiiBiiAdvance by wowzaman12 (and lioncash). Thanks!
 
 GBA emulation
 

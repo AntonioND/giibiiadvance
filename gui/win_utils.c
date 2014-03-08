@@ -69,23 +69,28 @@ int GUI_ConsoleModePrintf(_gui_console * con, int x, int y, const char * txt, ..
     int i = 0;
     while(1)
     {
-        unsigned char c = txtbuffer[i];
+        unsigned char c = txtbuffer[i++];
         if(c == '\0')
+        {
             break;
-        if(c == '\n')
-        {
-            x = 0;
-            y++;
-            if(y > con->__console_chars_h) break;
         }
-        con->__console_buffer[y*con->__console_chars_w+x] = c;
-        i++;
-        x++;
-        if(x > con->__console_chars_w)
+        else if(c == '\n')
         {
             x = 0;
             y++;
-            if(y > con->__console_chars_h) break;
+            if(y >= con->__console_chars_h) break;
+        }
+        else
+        {
+            con->__console_buffer[y*con->__console_chars_w+x] = c;
+            x++;
+        }
+
+        if(x >= con->__console_chars_w)
+        {
+            x = 0;
+            y++;
+            if(y >= con->__console_chars_h) break;
         }
     }
 

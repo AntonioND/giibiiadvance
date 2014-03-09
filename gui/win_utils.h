@@ -195,9 +195,9 @@ typedef struct {
 
 //----------------------------------------------------------------------------------------------
 
-void GUI_Draw(_gui * gui, char * buffer, int w, int h, int clean);
+#include "win_utils_draw.h"
 
-int GUI_SendEvent(_gui * gui, SDL_Event * e); // returns 1 if needed to redraw
+#include "win_utils_events.h"
 
 //----------------------------------------------------------------------------------------------
 

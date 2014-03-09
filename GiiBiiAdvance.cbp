@@ -248,6 +248,14 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="gui/win_utils.h" />
+		<Unit filename="gui/win_utils_draw.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gui/win_utils_draw.h" />
+		<Unit filename="gui/win_utils_events.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gui/win_utils_events.h" />
 		<Unit filename="icon.ico" />
 		<Unit filename="input_utils.c">
 			<Option compilerVar="CC" />

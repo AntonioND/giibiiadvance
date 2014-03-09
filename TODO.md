@@ -14,6 +14,7 @@ General
 - Better sprite viewer.
 - Detect ROM (GB/GBA) checking the headers?.
 - Custom controls. Game controllers.
+- Change all strcpy by s_strncpy, strcat by s_strncat and sprintf by s_snprintf.
 
 Game Boy
 --------
@@ -27,7 +28,7 @@ Game Boy
 - Put wave RAM in the I/O viewer?
 - Rumble.
 - GB Camera.
-- ATTRACTION MODE (SGB). Maybe it is the thing that the system borders can animate in a real SGB.
+- ATTRACTION MODE (SGB). Maybe it is the thing that the system borders can animate in a real SGB. (?)
 
 Game Boy Advance
 ----------------

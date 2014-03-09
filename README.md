@@ -1,13 +1,15 @@
 GiiBiiAdvance
 =============
 
-Another GB, GBC and GBA emulator.
+Another GB, GBC and GBA emulator writen in C.
 
 This is an emulator I started a few years ago. I haven't released any version since 0.1.0, but I've done some changes that have improved compatibility anyway.
 
 I'm currently porting the Win32 GUI to SDL2.
 
 This has been compiled in Linux Mint 16 and Windows 7 succesfuly.
+
+When the current goals are done, the version 0.2.0 will be released.
 
 Current goals
 -------------
@@ -28,8 +30,8 @@ Current goals
 
 - Obviously, improve emulation.
  - Implement mosaic correctly.
- - Correct GBA CPU timings.
- - Rewrite a lot of GB core to speed up emulation.
+ - Correct GBA CPU timings. Maybe not for version 0.2.0.
+ - Rewrite a lot of GB core to speed up emulation. NOT for version 0.2.0.
 
 Dependencies
 ------------

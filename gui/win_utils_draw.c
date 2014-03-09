@@ -14,14 +14,14 @@ int _gui_word_fits(const char * text, int x_start, int x_end); // in win_utils.h
 
 static int _gui_r, _gui_g, _gui_b;
 
-static void _gui_set_drawing_color(int r, int g, int b)
+void GUI_Draw_SetDrawingColor(int r, int g, int b)
 {
     _gui_r = r;
     _gui_g = g;
     _gui_b = b;
 }
 
-static void _gui_draw_horizontal_line(char * buffer, int w, int h, int x1, int x2, int y)
+void GUI_Draw_HorizontalLine(char * buffer, int w, int h, int x1, int x2, int y)
 {
     if(y > h) return;
     if(y < 0) return;
@@ -41,7 +41,7 @@ static void _gui_draw_horizontal_line(char * buffer, int w, int h, int x1, int x
     }
 }
 
-static void _gui_draw_vertical_line(char * buffer, int w, int h, int x, int y1, int y2)
+void GUI_Draw_VerticalLine(char * buffer, int w, int h, int x, int y1, int y2)
 {
     if(x > w) return;
     if(x < 0) return;
@@ -62,19 +62,19 @@ static void _gui_draw_vertical_line(char * buffer, int w, int h, int x, int y1, 
     }
 }
 
-static void _gui_draw_rect(char * buffer, int w, int h, int x1, int x2, int y1, int y2)
+void GUI_Draw_Rect(char * buffer, int w, int h, int x1, int x2, int y1, int y2)
 {
-    _gui_draw_horizontal_line(buffer,w,h, x1,x2, y1);
-    _gui_draw_vertical_line(buffer,w,h, x1, y1,y2);
-    _gui_draw_horizontal_line(buffer,w,h, x1,x2, y2);
-    _gui_draw_vertical_line(buffer,w,h, x2, y1,y2);
+    GUI_Draw_HorizontalLine(buffer,w,h, x1,x2, y1);
+    GUI_Draw_VerticalLine(buffer,w,h, x1, y1,y2);
+    GUI_Draw_HorizontalLine(buffer,w,h, x1,x2, y2);
+    GUI_Draw_VerticalLine(buffer,w,h, x2, y1,y2);
 }
 
-static void _gui_draw_fill_rect(char * buffer, int w, int h, int x1, int x2, int y1, int y2)
+void GUI_Draw_FillRect(char * buffer, int w, int h, int x1, int x2, int y1, int y2)
 {
     int y;
     for(y = y1; y <= y2; y++)
-        _gui_draw_horizontal_line(buffer,w,h, x1,x2, y);
+        GUI_Draw_HorizontalLine(buffer,w,h, x1,x2, y);
 }
 
 //-------------------------------------------------------------------------------------------
@@ -114,16 +114,16 @@ static void _gui_draw_menu(_gui_menu * menu, char * buffer, int w, int h)
         i++;
     }
 
-    _gui_set_drawing_color(224,224,224);
-    _gui_draw_fill_rect(buffer,w,h,
+    GUI_Draw_SetDrawingColor(224,224,224);
+    GUI_Draw_FillRect(buffer,w,h,
                         0,x,
                         FONT_12_HEIGHT, FONT_12_HEIGHT + (FONT_12_HEIGHT/2) - 1);
 
-    _gui_set_drawing_color(0,0,0);
-    _gui_draw_horizontal_line(buffer,w,h,
+    GUI_Draw_SetDrawingColor(0,0,0);
+    GUI_Draw_HorizontalLine(buffer,w,h,
                               0,x,
                               FONT_12_HEIGHT+FONT_12_HEIGHT/2);
-    _gui_draw_vertical_line(buffer,w,h,
+    GUI_Draw_VerticalLine(buffer,w,h,
                               x,
                               0,FONT_12_HEIGHT+FONT_12_HEIGHT/2);
 
@@ -155,13 +155,13 @@ static void _gui_draw_menu(_gui_menu * menu, char * buffer, int w, int h)
         i++;
     }
 
-    _gui_set_drawing_color(224,224,224);
-    _gui_draw_fill_rect(buffer,w,h,
+    GUI_Draw_SetDrawingColor(224,224,224);
+    GUI_Draw_FillRect(buffer,w,h,
                         selected_element_x - FONT_12_WIDTH, selected_element_x + FONT_12_WIDTH*(longest_string+1),
                         FONT_12_HEIGHT+FONT_12_HEIGHT/2, FONT_12_HEIGHT+FONT_12_HEIGHT/2 + (i+1)*FONT_12_HEIGHT);
 
-    _gui_set_drawing_color(0,0,0);
-    _gui_draw_rect(buffer,w,h,
+    GUI_Draw_SetDrawingColor(0,0,0);
+    GUI_Draw_Rect(buffer,w,h,
                     selected_element_x - FONT_12_WIDTH - 1, selected_element_x + FONT_12_WIDTH*(longest_string+1) + 1,
                     FONT_12_HEIGHT + FONT_12_HEIGHT/2 - 1, FONT_12_HEIGHT+FONT_12_HEIGHT/2 + (i+1)*FONT_12_HEIGHT + 1);
 
@@ -192,19 +192,19 @@ static void _gui_draw_inputwindow(_gui_inputwindow * win, char * buffer, int w, 
     int x = (w - GUI_INPUTWINDOW_WIDTH) / 2;
     int y = (h - GUI_INPUTWINDOW_HEIGHT) / 2;
 
-    _gui_set_drawing_color(224,224,224);
-    _gui_draw_fill_rect(buffer,w,h,
+    GUI_Draw_SetDrawingColor(224,224,224);
+    GUI_Draw_FillRect(buffer,w,h,
                       x,x+GUI_INPUTWINDOW_WIDTH-1,
                       y,y+FONT_12_HEIGHT+1);
 
-    _gui_set_drawing_color(0,0,0);
-    _gui_draw_rect(buffer,w,h,
+    GUI_Draw_SetDrawingColor(0,0,0);
+    GUI_Draw_Rect(buffer,w,h,
                       x-1,x+GUI_INPUTWINDOW_WIDTH-1+1,
                       y-1,y+GUI_INPUTWINDOW_HEIGHT-1+1);
-    _gui_draw_horizontal_line(buffer,w,h, x-1,x+GUI_INPUTWINDOW_WIDTH-1+1, y+FONT_12_HEIGHT+1);
+    GUI_Draw_HorizontalLine(buffer,w,h, x-1,x+GUI_INPUTWINDOW_WIDTH-1+1, y+FONT_12_HEIGHT+1);
 
-    _gui_set_drawing_color(255, 255,255);
-    _gui_draw_fill_rect(buffer,w,h,
+    GUI_Draw_SetDrawingColor(255, 255,255);
+    GUI_Draw_FillRect(buffer,w,h,
                       x,x+GUI_INPUTWINDOW_WIDTH-1,
                       y+FONT_12_HEIGHT+2,y+GUI_INPUTWINDOW_HEIGHT-1);
 
@@ -221,24 +221,24 @@ static void _gui_draw_inputwindow(_gui_inputwindow * win, char * buffer, int w, 
 
 static void __gui_draw_init_buffer(char * buffer, int w, int h)
 {
-    _gui_set_drawing_color(192,192,192);
-    _gui_draw_fill_rect(buffer,w,h,  0,w-1,  0,h-1);
+    GUI_Draw_SetDrawingColor(192,192,192);
+    GUI_Draw_FillRect(buffer,w,h,  0,w-1,  0,h-1);
 }
 
 static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
 {
     if(e->element_type == GUI_TYPE_TEXTBOX)
     {
-        _gui_set_drawing_color(255,255,255);
+        GUI_Draw_SetDrawingColor(255,255,255);
 
-        _gui_draw_fill_rect(buffer,w,h,
+        GUI_Draw_FillRect(buffer,w,h,
                       e->x,e->x+e->w-1,
                       e->y,e->y+e->h-1);
         int i;
         for(i = 1; i < 2; i++)
         {
-            _gui_set_drawing_color(i*(256/4),i*(256/4),i*(256/4));
-            _gui_draw_rect(buffer,w,h,
+            GUI_Draw_SetDrawingColor(i*(256/4),i*(256/4),i*(256/4));
+            GUI_Draw_Rect(buffer,w,h,
                       e->x-i,e->x+e->w+i-1,
                       e->y-i,e->y+e->h+i-1);
         }
@@ -251,19 +251,19 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
     else if(e->element_type == GUI_TYPE_BUTTON)
     {
         if(e->info.button.is_pressed)
-            _gui_set_drawing_color(255,255,255);
+            GUI_Draw_SetDrawingColor(255,255,255);
         else
-            _gui_set_drawing_color(224,224,224);
+            GUI_Draw_SetDrawingColor(224,224,224);
 
-        _gui_draw_fill_rect(buffer,w,h,
+        GUI_Draw_FillRect(buffer,w,h,
                       e->x,e->x+e->w-1,
                       e->y,e->y+e->h-1);
 
         int i;
         for(i = 1; i < 4; i++)
         {
-            _gui_set_drawing_color(224-i*(224/4),224-i*(224/4),224-i*(224/4));
-            _gui_draw_rect(buffer,w,h,
+            GUI_Draw_SetDrawingColor(224-i*(224/4),224-i*(224/4),224-i*(224/4));
+            GUI_Draw_Rect(buffer,w,h,
                       e->x-i,e->x+e->w+i-1,
                       e->y-i,e->y+e->h+i-1);
         }
@@ -282,19 +282,19 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
     else if(e->element_type == GUI_TYPE_RADIOBUTTON)
     {
         if(e->info.radiobutton.is_pressed)
-            _gui_set_drawing_color(255,255,255);
+            GUI_Draw_SetDrawingColor(255,255,255);
         else
-            _gui_set_drawing_color(224,224,224);
+            GUI_Draw_SetDrawingColor(224,224,224);
 
-        _gui_draw_fill_rect(buffer,w,h,
+        GUI_Draw_FillRect(buffer,w,h,
                       e->x,e->x+e->w-1,
                       e->y,e->y+e->h-1);
 /*
         int i;
         for(i = 1; i < 4; i++)
         {
-            _gui_set_drawing_color(224-i*(224/4),224-i*(224/4),224-i*(224/4));
-            _gui_draw_rect(buffer,w,h,
+            GUI_Draw_SetDrawingColor(224-i*(224/4),224-i*(224/4),224-i*(224/4));
+            GUI_Draw_Rect(buffer,w,h,
                       e->x-i,e->x+e->w+i-1,
                       e->y-i,e->y+e->h+i-1);
         }
@@ -333,20 +333,20 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
         if(e->info.window.enabled == 0)
             return;
 
-        _gui_set_drawing_color(224,224,224);
-        _gui_draw_fill_rect(buffer,w,h,
+        GUI_Draw_SetDrawingColor(224,224,224);
+        GUI_Draw_FillRect(buffer,w,h,
                           e->x,e->x+e->w-1,
                           e->y,e->y+FONT_12_HEIGHT+1);
 
-        _gui_set_drawing_color(0,0,0);
-        _gui_draw_rect(buffer,w,h,
+        GUI_Draw_SetDrawingColor(0,0,0);
+        GUI_Draw_Rect(buffer,w,h,
                           e->x-1,e->x+e->w-1+1,
                           e->y-1,e->y+e->h-1+1);
-        _gui_draw_horizontal_line(buffer,w,h, e->x-1,e->x+e->w-1+1,
+        GUI_Draw_HorizontalLine(buffer,w,h, e->x-1,e->x+e->w-1+1,
                                   e->y+FONT_12_HEIGHT+1);
 
-        _gui_set_drawing_color(255, 255,255);
-        _gui_draw_fill_rect(buffer,w,h,
+        GUI_Draw_SetDrawingColor(255, 255,255);
+        GUI_Draw_FillRect(buffer,w,h,
                           e->x,e->x+e->w-1,
                           e->y+FONT_12_HEIGHT+2,e->y+e->h-1);
 
@@ -363,20 +363,20 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
         if(e->info.messagebox.enabled == 0)
             return;
 
-        _gui_set_drawing_color(224,224,224);
-        _gui_draw_fill_rect(buffer,w,h,
+        GUI_Draw_SetDrawingColor(224,224,224);
+        GUI_Draw_FillRect(buffer,w,h,
                           e->x,e->x+e->w-1,
                           e->y,e->y+FONT_12_HEIGHT+1);
 
-        _gui_set_drawing_color(0,0,0);
-        _gui_draw_rect(buffer,w,h,
+        GUI_Draw_SetDrawingColor(0,0,0);
+        GUI_Draw_Rect(buffer,w,h,
                           e->x-1,e->x+e->w-1+1,
                           e->y-1,e->y+e->h-1+1);
-        _gui_draw_horizontal_line(buffer,w,h, e->x-1,e->x+e->w-1+1,
+        GUI_Draw_HorizontalLine(buffer,w,h, e->x-1,e->x+e->w-1+1,
                                   e->y+FONT_12_HEIGHT+1);
 
-        _gui_set_drawing_color(255, 255,255);
-        _gui_draw_fill_rect(buffer,w,h,
+        GUI_Draw_SetDrawingColor(255, 255,255);
+        GUI_Draw_FillRect(buffer,w,h,
                           e->x,e->x+e->w-1,
                           e->y+FONT_12_HEIGHT+2,e->y+e->h-1);
 
@@ -395,20 +395,20 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
         if(e->info.scrollabletextwindow.enabled == 0)
             return;
 
-        _gui_set_drawing_color(224,224,224);
-        _gui_draw_fill_rect(buffer,w,h,
+        GUI_Draw_SetDrawingColor(224,224,224);
+        GUI_Draw_FillRect(buffer,w,h,
                           e->x,e->x+e->w-1,
                           e->y,e->y+FONT_12_HEIGHT+1);
 
-        _gui_set_drawing_color(0,0,0);
-        _gui_draw_rect(buffer,w,h,
+        GUI_Draw_SetDrawingColor(0,0,0);
+        GUI_Draw_Rect(buffer,w,h,
                           e->x-1,e->x+e->w-1+1,
                           e->y-1,e->y+e->h-1+1);
-        _gui_draw_horizontal_line(buffer,w,h, e->x-1,e->x+e->w-1+1,
+        GUI_Draw_HorizontalLine(buffer,w,h, e->x-1,e->x+e->w-1+1,
                                   e->y+FONT_12_HEIGHT+1);
 
-        _gui_set_drawing_color(255, 255,255);
-        _gui_draw_fill_rect(buffer,w,h,
+        GUI_Draw_SetDrawingColor(255, 255,255);
+        GUI_Draw_FillRect(buffer,w,h,
                           e->x,e->x+e->w-1,
                           e->y+FONT_12_HEIGHT+2,e->y+e->h-1);
 

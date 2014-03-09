@@ -315,7 +315,7 @@ int __gui_send_event_element(_gui_element ** complete_gui, _gui_element * gui, S
                                               gui->y,gui->h))
                 {
                     if(gui->info.bitmap.callback)
-                            gui->info.bitmap.callback();
+                            return gui->info.bitmap.callback(e->button.x-gui->x,e->button.y-gui->y);
 
                     return 0;
                 }

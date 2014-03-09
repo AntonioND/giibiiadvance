@@ -49,11 +49,14 @@
 #include "../gba_core/rom.h"
 #include "../gba_core/sound.h"
 
-#include "win_gba_disassembler.h"
 #include "win_gb_disassembler.h"
-#include "win_gba_memviewer.h"
 #include "win_gb_memviewer.h"
 #include "win_gb_ioviewer.h"
+
+#include "win_gba_disassembler.h"
+#include "win_gba_memviewer.h"
+
+#include "win_gba_palviewer.h"
 
 //------------------------------------------------------------------
 
@@ -479,13 +482,6 @@ static void _win_main_file_explorer_text_box_callback(int x, int y)
     _win_main_file_explorer_open_index(i);
 }
 
-static void _win_main_file_explorer_open(void)
-{
-    GUI_WindowSetEnabled(&mainwindow_fileexplorer_win,1);
-    FileExplorer_SetPath(DirGetRunningPath());
-    _win_main_file_explorer_refresh();
-}
-
 static void _win_main_file_explorer_create(void)
 {
     GUI_SetTextBox(&win_main_fileexpoler_textbox,&win_main_fileexpoler_con,
@@ -501,6 +497,13 @@ static void _win_main_file_explorer_create(void)
 //------------------------------------------------------------------
 
 //------------------------------------------------------------------
+
+static void _win_main_file_explorer_load(void)
+{
+    GUI_WindowSetEnabled(&mainwindow_fileexplorer_win,1);
+    FileExplorer_SetPath(DirGetRunningPath());
+    _win_main_file_explorer_refresh();
+}
 
 static void _win_main_menu_close(void)
 {
@@ -538,6 +541,11 @@ static void _win_main_menu_open_io_viewer(void)
     Win_GBIOViewerCreate();
 }
 
+static void _win_main_menu_open_pal_viewer(void)
+{
+    Win_GBAPalViewerCreate();
+}
+
 //------------------------------------------------------------------
 
 static _gui_element mainwindow_scrollable_text_window;
@@ -569,30 +577,37 @@ static void _win_main_scrollable_text_window_show_readme(void)
     GUI_ScrollableTextWindowSetEnabled(&mainwindow_scrollable_text_window,1);
 }
 
-
 static void _win_main_scrollable_text_window_close(void)
 {
     memset(&mainwindow_scrollable_text_window,0,sizeof(mainwindow_scrollable_text_window));
 }
 
-
 //------------------------------------------------------------------
-
-static _gui_menu_entry mm_separator = {" " , NULL};
 
 //Window Menu
 
-static _gui_menu_entry mmfile_open = {"Open" , _win_main_file_explorer_open};
-static _gui_menu_entry mmfile_close = {"Close" , _win_main_menu_close};
+static _gui_menu_entry mm_separator = {" " , NULL};
+
+static _gui_menu_entry mmfile_open = {"Load (CTRL+L)" , _win_main_file_explorer_load};
+static _gui_menu_entry mmfile_close = {"Close (CTRL+C)" , _win_main_menu_close};
 static _gui_menu_entry mmfile_closenosav = {"Close without saving", _win_main_menu_close_no_save};
-static _gui_menu_entry mmfile_exit = {"Exit", _win_main_menu_exit};
+static _gui_menu_entry mmfile_reset = {"Reset (CTRL+R)", NULL};
+static _gui_menu_entry mmfile_pause = {"Pause (CTRL+P)", NULL};
+static _gui_menu_entry mmfile_rominfo = {"Rom Information", NULL};
+static _gui_menu_entry mmfile_screenshot = {"Screenshot (F12)", NULL};
+static _gui_menu_entry mmfile_exit = {"Exit (CTRL+E)", _win_main_menu_exit};
 
 
 static _gui_menu_entry * mmfile_elements[] = {
     &mmfile_open,
-    &mm_separator,
     &mmfile_close,
     &mmfile_closenosav,
+    &mm_separator,
+    &mmfile_reset,
+    &mmfile_pause,
+    &mm_separator,
+    &mmfile_rominfo,
+    &mmfile_screenshot,
     &mm_separator,
     &mmfile_exit,
     NULL
@@ -604,10 +619,14 @@ static _gui_menu_list main_menu_file = {
 };
 
 static _gui_menu_entry mmoptions_configuration = {"Configuration" , NULL};
+static _gui_menu_entry mmoptions_mutesound = {"Mute Sound (CTRL+M)" , NULL};
+static _gui_menu_entry mmoptions_sysinfo = {"System Information" , NULL};
 
 static _gui_menu_entry * mmoptions_elements[] = {
     &mmoptions_configuration,
+    &mmoptions_mutesound,
     &mm_separator,
+    &mmoptions_sysinfo,
     NULL
 };
 
@@ -620,11 +639,24 @@ static _gui_menu_entry mmdebug_disas = {"Disassembler (F5)" , _win_main_menu_ope
 static _gui_menu_entry mmdebug_memview = {"Memory Viewer (F6)" , _win_main_menu_open_mem_viewer};
 static _gui_menu_entry mmdebug_ioview = {"I/O Viewer (F7)" , _win_main_menu_open_io_viewer};
 
+static _gui_menu_entry mmdebug_tileview = {"Tile Viewer" , NULL};
+static _gui_menu_entry mmdebug_mapview = {"Map Viewer" , NULL};
+static _gui_menu_entry mmdebug_sprview = {"Sprite Viewer" , NULL};
+static _gui_menu_entry mmdebug_palview = {"Palette Viewer" , _win_main_menu_open_pal_viewer};
+
+static _gui_menu_entry mmdebug_sgbview = {"SGB Viewer" , NULL};
+
 static _gui_menu_entry * mmdisas_elements[] = {
     &mmdebug_disas,
     &mmdebug_memview,
     &mmdebug_ioview,
     &mm_separator,
+    &mmdebug_tileview,
+    &mmdebug_mapview,
+    &mmdebug_sprview,
+    &mmdebug_palview,
+    &mm_separator,
+    &mmdebug_sgbview,
     NULL
 };
 
@@ -633,7 +665,7 @@ static _gui_menu_list main_menu_debug = {
     mmdisas_elements,
 };
 
-static _gui_menu_entry mmhelp_readme = {"Readme" , _win_main_scrollable_text_window_show_readme};
+static _gui_menu_entry mmhelp_readme = {"Readme (F1)" , _win_main_scrollable_text_window_show_readme};
 static _gui_menu_entry mmhelp_license = {"License" , _win_main_scrollable_text_window_show_license};
 static _gui_menu_entry mmhelp_about = {"About" , _win_main_scrollable_text_window_show_about};
 
@@ -752,6 +784,19 @@ static void _win_main_clear_message(void)
 
 //------------------------------------------------------------------
 
+int _win_main_background_image_callback(int x, int y)
+{
+    _win_main_switch_to_game_delayed();
+    return 1;
+}
+
+void _win_main_config_window_close(void)
+{
+    GUI_WindowSetEnabled(&mainwindow_configwin,0);
+}
+
+//------------------------------------------------------------------
+
 static void _win_main_change_zoom(int newzoom)
 {
     if( (newzoom < 2) && (newzoom > 4) )
@@ -780,14 +825,7 @@ static void _win_main_change_zoom(int newzoom)
 
     GUI_SetBitmap(&mainwindow_bg,0,0,
                   _win_main_get_menu_texture_width(),_win_main_get_menu_texture_height(),WIN_MAIN_GAME_MENU_BUFFER,
-                  _win_main_switch_to_game_delayed);
-}
-
-//------------------------------------------------------------------
-
-void _win_main_config_window_close(void)
-{
-    GUI_WindowSetEnabled(&mainwindow_configwin,0);
+                  _win_main_background_image_callback);
 }
 
 //------------------------------------------------------------------

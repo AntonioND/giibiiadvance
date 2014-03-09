@@ -213,7 +213,7 @@ void GUI_SetLabel(_gui_element * e, int x, int y, int w, int h, const char * lab
     strcpy(e->info.label.text,label);
 }
 
-void GUI_SetBitmap(_gui_element * e, int x, int y, int w, int h, char * bitmap, _gui_void_arg_void_fn callback) // 24 bit
+void GUI_SetBitmap(_gui_element * e, int x, int y, int w, int h, char * bitmap, _gui_int_arg_int_int_fn callback) // 24 bit
 {
     e->element_type = GUI_TYPE_BITMAP;
 

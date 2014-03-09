@@ -63,6 +63,7 @@ void GUI_ConsoleDrawAt(_gui_console * con, char * buffer, int buf_w, int buf_h, 
 typedef void (*_gui_void_arg_void_fn)(void);
 typedef void (*_gui_void_arg_int_fn)(int);
 typedef void (*_gui_void_arg_int_int_fn)(int,int);
+typedef int (*_gui_int_arg_int_int_fn)(int,int);
 typedef void (*_gui_void_arg_pchar_int_fn)(char*,int);
 
 typedef struct {
@@ -90,7 +91,7 @@ typedef struct {
         } label;
         struct {
             char * bitmap;
-            _gui_void_arg_void_fn callback;
+            _gui_int_arg_int_int_fn callback;
         } bitmap;
         struct {
             int enabled;
@@ -121,7 +122,10 @@ void GUI_SetButton(_gui_element * e, int x, int y, int w, int h, const char * la
 void GUI_SetRadioButton(_gui_element * e, int x, int y, int w, int h, const char * label, int group_id, int btn_id,
                         int start_pressed, _gui_void_arg_int_fn callback);
 void GUI_SetLabel(_gui_element * e, int x, int y, int w, int h, const char * label);
-void GUI_SetBitmap(_gui_element * e, int x, int y, int w, int h, char * bitmap, _gui_void_arg_void_fn callback); // 24 bit
+
+// bitmap is 24 bit. return 1 from callback to redraw GUI
+void GUI_SetBitmap(_gui_element * e, int x, int y, int w, int h, char * bitmap, _gui_int_arg_int_int_fn callback);
+
 void GUI_SetWindow(_gui_element * e, int x, int y, int w, int h, void * gui, const char * caption); // gui is a _gui pointer
 void GUI_SetMessageBox(_gui_element * e, _gui_console * con, int x, int y, int w, int h, const char * caption);
 void GUI_SetScrollableTextWindow(_gui_element * e, int x, int y, int w, int h, const char * text, const char * caption);

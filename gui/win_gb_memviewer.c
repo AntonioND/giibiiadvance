@@ -59,13 +59,13 @@ static u16 gb_memviewer_clicked_address;
 static _gui_console gb_memview_con;
 static _gui_element gb_memview_textbox;
 
-static _gui_element gb_disassembler_goto_btn;
+static _gui_element gb_memview_goto_btn;
 
 static _gui_element gb_memview_mode_8_radbtn, gb_memview_mode_16_radbtn;
 
 static _gui_element * gb_memviwer_window_gui_elements[] = {
     &gb_memview_textbox,
-    &gb_disassembler_goto_btn,
+    &gb_memview_goto_btn,
     &gb_memview_mode_8_radbtn,
     &gb_memview_mode_16_radbtn,
     NULL
@@ -379,7 +379,7 @@ int Win_GBMemViewerCreate(void)
     GUI_SetRadioButton(&gb_memview_mode_16_radbtn,  6+9*FONT_12_WIDTH+12,6,9*FONT_12_WIDTH,24,
                   "16 bits", 0,GB_MEMVIEWER_16, 0,Win_GBMemViewerModeRadioButtonsCallback);
 
-    GUI_SetButton(&gb_disassembler_goto_btn,66+39*FONT_12_WIDTH+36,6,16*FONT_12_WIDTH,24,
+    GUI_SetButton(&gb_memview_goto_btn,66+39*FONT_12_WIDTH+36,6,16*FONT_12_WIDTH,24,
                   "Goto (F8)",Win_GBMemViewerGoto);
 
     GUI_SetTextBox(&gb_memview_textbox,&gb_memview_con,

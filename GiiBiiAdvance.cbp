@@ -240,6 +240,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="gui/win_gba_memviewer.h" />
+		<Unit filename="gui/win_gba_palviewer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gui/win_gba_palviewer.h" />
 		<Unit filename="gui/win_main.c">
 			<Option compilerVar="CC" />
 		</Unit>

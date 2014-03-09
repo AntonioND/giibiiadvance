@@ -13,23 +13,23 @@ Current goals
 -------------
 
 - Finish GUI:
--- GBA I/O viewer
--- GB and GBA sprite viewer.
--- GB and GBA tile viewer.
--- GB and GBA palette viewer.
--- GB and GBA background viewer.
--- SGB viewer.
--- Configuration window.
--- Complete main window menu.
--- Export images from debugger windows.
+ - GBA I/O viewer
+ - GB and GBA sprite viewer.
+ - GB and GBA tile viewer.
+ - GB and GBA palette viewer.
+ - GB and GBA background viewer.
+ - SGB viewer.
+ - Configuration window.
+ - Complete main window menu.
+ - Export images from debugger windows.
 
 - Customize controls.
--- Support for game controllers.
+ - Support for game controllers.
 
 - Obviously, improve emulation.
--- Implement mosaic correctly.
--- Correct GBA CPU timings.
--- Rewrite a lot of GB core to speed up emulation.
+ - Implement mosaic correctly.
+ - Correct GBA CPU timings.
+ - Rewrite a lot of GB core to speed up emulation.
 
 Dependencies
 ------------

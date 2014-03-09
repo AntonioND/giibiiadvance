@@ -60,6 +60,13 @@ void FU_End(void);
 #define CHR_NTILDE_MAYUS    165
 #define STR_NTILDE_MAYUS    "\xA5"
 
+#define CHR_SHADED_LIGHT    176
+#define STR_SHADED_LIGHT    "\xB0"
+#define CHR_SHADED_MEDIUM   177
+#define STRR_SHADED_MEDIUM  "\xB1"
+#define CHR_SHADED_DARK     178
+#define STR_SHADED_DARK     "\xB2"
+
 #define CHR_DBLBARS_UDL     185
 #define STR_DBLBARS_UDL     "\xB9"
 #define CHR_DBLBARS_UD      186

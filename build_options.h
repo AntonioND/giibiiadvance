@@ -40,6 +40,8 @@
 #define GIIBIIADVANCE_VERSION_STRING "0.2.0"
 
 #define GIIBIIADVANCE_COPYRIGHT_STRING "Copyright (C) 2011-2014 Antonio Niño Díaz (AntonioND)"
+#define GIIBIIADVANCE_COPYRIGHT_STRING_ASCII "Copyright (C) 2011-2014 Antonio Ni" STR_NTILDE_MINUS "o D" \
+                                                STR_IACUTE_MINUS "az (AntonioND)"
 
 //---------------------------------------------------------------
 //----------------------- EMULATOR DEFINES ----------------------

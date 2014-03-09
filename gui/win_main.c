@@ -539,6 +539,44 @@ static void _win_main_menu_open_io_viewer(void)
 
 //------------------------------------------------------------------
 
+static _gui_element mainwindow_scrollable_text_window;
+
+static void _win_main_scrollable_text_window_show_about(void)
+{
+    extern const char * about_text;
+    GUI_SetScrollableTextWindow(&mainwindow_scrollable_text_window,25,25,
+                                _win_main_get_menu_texture_width()-50,_win_main_get_menu_texture_height()-50,
+                                about_text, "About");
+    GUI_ScrollableTextWindowSetEnabled(&mainwindow_scrollable_text_window,1);
+}
+
+static void _win_main_scrollable_text_window_show_license(void)
+{
+    extern const char * license_text;
+    GUI_SetScrollableTextWindow(&mainwindow_scrollable_text_window,25,25,
+                                _win_main_get_menu_texture_width()-50,_win_main_get_menu_texture_height()-50,
+                                license_text, "License");
+    GUI_ScrollableTextWindowSetEnabled(&mainwindow_scrollable_text_window,1);
+}
+
+static void _win_main_scrollable_text_window_show_readme(void)
+{
+    extern const char * readme_text;
+    GUI_SetScrollableTextWindow(&mainwindow_scrollable_text_window,25,25,
+                                _win_main_get_menu_texture_width()-50,_win_main_get_menu_texture_height()-50,
+                                readme_text, "Readme");
+    GUI_ScrollableTextWindowSetEnabled(&mainwindow_scrollable_text_window,1);
+}
+
+
+static void _win_main_scrollable_text_window_close(void)
+{
+    memset(&mainwindow_scrollable_text_window,0,sizeof(mainwindow_scrollable_text_window));
+}
+
+
+//------------------------------------------------------------------
+
 static _gui_menu_entry mm_separator = {" " , NULL};
 
 //Window Menu
@@ -594,9 +632,14 @@ static _gui_menu_list main_menu_debug = {
     mmdisas_elements,
 };
 
-static _gui_menu_entry mmhelp_about = {"About" , NULL};
+static _gui_menu_entry mmhelp_readme = {"Readme" , _win_main_scrollable_text_window_show_readme};
+static _gui_menu_entry mmhelp_license = {"License" , _win_main_scrollable_text_window_show_license};
+static _gui_menu_entry mmhelp_about = {"About" , _win_main_scrollable_text_window_show_about};
 
 static _gui_menu_entry * mmhelp_elements[] = {
+    &mmhelp_readme,
+    &mmhelp_license,
+    &mm_separator,
     &mmhelp_about,
     NULL
 };
@@ -653,6 +696,7 @@ static _gui_element * mainwindow_gui_elements[] = {
     &mainwindow_show_message_win,
     &mainwindow_configwin,
     &mainwindow_fileexplorer_win,
+    &mainwindow_scrollable_text_window,
     NULL
 };
 
@@ -900,6 +944,7 @@ int Win_MainCreate(char * rom_path)
     GUI_SetWindow(&mainwindow_fileexplorer_win,25,25,256*2-50,224*2-50,&mainwindow_subwindow_fileexplorer_gui,
                   "File Explorer");
 
+    _win_main_scrollable_text_window_close();
     _win_main_clear_message();
 
     WinIDMain = WH_Create(256*WIN_MAIN_CONFIG_ZOOM,224*WIN_MAIN_CONFIG_ZOOM, 0,0, 0);

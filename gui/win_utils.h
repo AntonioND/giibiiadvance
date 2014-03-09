@@ -102,6 +102,14 @@ typedef struct {
             _gui_console * con;
             char caption[100];
         } messagebox;
+        struct {
+            int enabled;
+            const char * text;
+            char caption[100];
+            int currentline; // top line of the window
+            int numlines; // counted number of lines
+            int max_drawn_lines;
+        } scrollabletextwindow;
     } info ;
 } _gui_element;
 
@@ -109,13 +117,14 @@ typedef struct {
 
 void GUI_SetTextBox(_gui_element * e, _gui_console * con, int x, int y, int w, int h,
                      _gui_void_arg_int_int_fn callback);
-void GUI_SetButton(_gui_element * e, int x, int y, int w, int h, char * label, _gui_void_arg_void_fn callback);
-void GUI_SetRadioButton(_gui_element * e, int x, int y, int w, int h, char * label, int group_id, int btn_id,
+void GUI_SetButton(_gui_element * e, int x, int y, int w, int h, const char * label, _gui_void_arg_void_fn callback);
+void GUI_SetRadioButton(_gui_element * e, int x, int y, int w, int h, const char * label, int group_id, int btn_id,
                         int start_pressed, _gui_void_arg_int_fn callback);
-void GUI_SetLabel(_gui_element * e, int x, int y, int w, int h, char * label);
+void GUI_SetLabel(_gui_element * e, int x, int y, int w, int h, const char * label);
 void GUI_SetBitmap(_gui_element * e, int x, int y, int w, int h, char * bitmap, _gui_void_arg_void_fn callback); // 24 bit
-void GUI_SetWindow(_gui_element * e, int x, int y, int w, int h, void * gui, char * caption); // gui is a _gui pointer
-void GUI_SetMessageBox(_gui_element * e, _gui_console * con, int x, int y, int w, int h, char * caption);
+void GUI_SetWindow(_gui_element * e, int x, int y, int w, int h, void * gui, const char * caption); // gui is a _gui pointer
+void GUI_SetMessageBox(_gui_element * e, _gui_console * con, int x, int y, int w, int h, const char * caption);
+void GUI_SetScrollableTextWindow(_gui_element * e, int x, int y, int w, int h, const char * text, const char * caption);
 
 //----------------------------------------------------------------------------------------------
 
@@ -124,6 +133,9 @@ int GUI_WindowGetEnabled(_gui_element * e);
 
 void GUI_MessageBoxSetEnabled(_gui_element * e, int enabled);
 int GUI_MessageBoxGetEnabled(_gui_element * e);
+
+void GUI_ScrollableTextWindowSetEnabled(_gui_element * e, int enabled);
+int GUI_ScrollableTextWindowGetEnabled(_gui_element * e);
 
 //----------------------------------------------------------------------------------------------
 

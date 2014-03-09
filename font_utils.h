@@ -44,6 +44,9 @@ void FU_End(void);
 #define CHR_ARROW_DOWN      31
 #define STR_ARROW_DOWN      "\x1F"
 
+#define CHR_ARING_MINUS     134
+#define STR_ARING_MINUS     "\x86"
+
 #define CHR_AACUTE_MINUS    160
 #define STR_AACUTE_MINUS    "\xA0"
 #define CHR_IACUTE_MINUS    161

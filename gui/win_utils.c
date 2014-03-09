@@ -524,7 +524,7 @@ void GUI_SetTextBox(_gui_element * e, _gui_console * con, int x, int y, int w, i
     GUI_ConsoleReset(con, w, h);
 }
 
-void GUI_SetButton(_gui_element * e, int x, int y, int w, int h, char * label, _gui_void_arg_void_fn callback)
+void GUI_SetButton(_gui_element * e, int x, int y, int w, int h, const char * label, _gui_void_arg_void_fn callback)
 {
     e->element_type = GUI_TYPE_BUTTON;
 
@@ -536,7 +536,7 @@ void GUI_SetButton(_gui_element * e, int x, int y, int w, int h, char * label, _
     strcpy(e->info.button.name,label);
 }
 
-void GUI_SetRadioButton(_gui_element * e, int x, int y, int w, int h, char * label, int group_id, int btn_id,
+void GUI_SetRadioButton(_gui_element * e, int x, int y, int w, int h, const char * label, int group_id, int btn_id,
                         int start_pressed, _gui_void_arg_int_fn callback)
 {
     e->element_type = GUI_TYPE_RADIOBUTTON;
@@ -552,7 +552,7 @@ void GUI_SetRadioButton(_gui_element * e, int x, int y, int w, int h, char * lab
     strcpy(e->info.radiobutton.name,label);
 }
 
-void GUI_SetLabel(_gui_element * e, int x, int y, int w, int h, char * label)
+void GUI_SetLabel(_gui_element * e, int x, int y, int w, int h, const char * label)
 {
     e->element_type = GUI_TYPE_LABEL;
 
@@ -575,7 +575,7 @@ void GUI_SetBitmap(_gui_element * e, int x, int y, int w, int h, char * bitmap, 
     e->info.bitmap.callback = callback;
 }
 
-void GUI_SetWindow(_gui_element * e, int x, int y, int w, int h, void * gui, char * caption)
+void GUI_SetWindow(_gui_element * e, int x, int y, int w, int h, void * gui, const char * caption)
 {
     e->element_type = GUI_TYPE_WINDOW;
 
@@ -604,7 +604,7 @@ void GUI_SetWindow(_gui_element * e, int x, int y, int w, int h, void * gui, cha
     }
 }
 
-void GUI_SetMessageBox(_gui_element * e, _gui_console * con, int x, int y, int w, int h, char * caption)
+void GUI_SetMessageBox(_gui_element * e, _gui_console * con, int x, int y, int w, int h, const char * caption)
 {
     e->element_type = GUI_TYPE_MESSAGEBOX;
 
@@ -617,6 +617,94 @@ void GUI_SetMessageBox(_gui_element * e, _gui_console * con, int x, int y, int w
     s_strncpy(e->info.messagebox.caption,caption,sizeof(e->info.messagebox.caption));
 
     GUI_ConsoleReset(con, w, h-FONT_12_WIDTH-1);
+}
+
+static int _gui_word_fits(const char * text, int x_start, int x_end)
+{
+    while(1)
+    {
+        char c = *text++;
+        if(c == '\0') break;
+        else if(c == '\n')  break;
+        else if(c == ' ')  break;
+        else if(c == '\t')  break;
+        else x_start ++;
+    }
+
+    return (x_start <= x_end);
+}
+
+void GUI_SetScrollableTextWindow(_gui_element * e, int x, int y, int w, int h, const char * text, const char * caption)
+{
+    e->element_type = GUI_TYPE_SCROLLABLETEXTWINDOW;
+
+    e->x = x;
+    e->y = y;
+    e->w = w;
+    e->h = h;
+    e->info.scrollabletextwindow.text = text;
+    e->info.scrollabletextwindow.enabled = 0;
+    strcpy(e->info.scrollabletextwindow.caption,caption);
+    e->info.scrollabletextwindow.numlines = 0;
+    e->info.scrollabletextwindow.currentline = 0;
+
+    e->info.scrollabletextwindow.max_drawn_lines = (e->h - (FONT_12_HEIGHT+1)) / FONT_12_HEIGHT;
+
+    //count number of text lines
+
+    int textwidth = e->w / FONT_12_WIDTH;
+
+    int skipspaces = 0;
+
+    int i = 0;
+    int curx = 0;
+    while(1)
+    {
+        char c = text[i++];
+        if(skipspaces)
+        {
+            while(1)
+            {
+                if( ! ( (c == ' ') || (c == '\0') ) )
+                   break;
+                c = text[i++];
+            }
+            skipspaces = 0;
+        }
+
+        if(c == '\0')
+        {
+            break;
+        }
+        else if(c == '\n')
+        {
+            curx = 0;
+            e->info.scrollabletextwindow.numlines ++;
+        }
+        else
+        {
+            if(_gui_word_fits(&(text[i-1]),curx,textwidth) == 0)
+            {
+                curx = 0;
+                e->info.scrollabletextwindow.numlines ++;
+                i--;
+                skipspaces = 1;
+            }
+            else
+            {
+                curx ++;
+                if(curx == textwidth)
+                {
+                    if(text[i] == '\n') i++;
+                    e->info.scrollabletextwindow.numlines ++;
+                    curx = 0;
+                    skipspaces = 1;
+                }
+            }
+        }
+    }
+
+    e->info.scrollabletextwindow.numlines ++;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -680,6 +768,26 @@ int GUI_MessageBoxGetEnabled(_gui_element * e)
     return 0;
 }
 
+void GUI_ScrollableTextWindowSetEnabled(_gui_element * e, int enabled)
+{
+    if(e == NULL) return;
+
+    if(e->element_type != GUI_TYPE_SCROLLABLETEXTWINDOW) return;
+
+    e->info.scrollabletextwindow.enabled = enabled;
+}
+
+int GUI_ScrollableTextWindowGetEnabled(_gui_element * e)
+{
+    if(e == NULL)
+        return 0;
+
+    if(e->element_type == GUI_TYPE_SCROLLABLETEXTWINDOW)
+        return e->info.scrollabletextwindow.enabled;
+
+    return 0;
+}
+
 static int _gui_get_first_window_enabled(_gui * gui)
 {
     if(gui == NULL)
@@ -696,6 +804,8 @@ static int _gui_get_first_window_enabled(_gui * gui)
             if( (*gui_elements)->info.window.enabled ) return i;
         if( (*gui_elements)->element_type == GUI_TYPE_MESSAGEBOX)
             if( (*gui_elements)->info.messagebox.enabled ) return i;
+        if( (*gui_elements)->element_type == GUI_TYPE_SCROLLABLETEXTWINDOW)
+            if( (*gui_elements)->info.scrollabletextwindow.enabled ) return i;
         i++;
         gui_elements++;
     }
@@ -878,6 +988,157 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
                             e->x,e->y+FONT_12_HEIGHT+2,
                             e->x+e->w-1,e->y+e->h-1);
     }
+    else if(e->element_type == GUI_TYPE_SCROLLABLETEXTWINDOW)
+    {
+        if(e->info.scrollabletextwindow.enabled == 0)
+            return;
+
+        _gui_set_drawing_color(224,224,224);
+        _gui_draw_fill_rect(buffer,w,h,
+                          e->x,e->x+e->w-1,
+                          e->y,e->y+FONT_12_HEIGHT+1);
+
+        _gui_set_drawing_color(0,0,0);
+        _gui_draw_rect(buffer,w,h,
+                          e->x-1,e->x+e->w-1+1,
+                          e->y-1,e->y+e->h-1+1);
+        _gui_draw_horizontal_line(buffer,w,h, e->x-1,e->x+e->w-1+1,
+                                  e->y+FONT_12_HEIGHT+1);
+
+        _gui_set_drawing_color(255, 255,255);
+        _gui_draw_fill_rect(buffer,w,h,
+                          e->x,e->x+e->w-1,
+                          e->y+FONT_12_HEIGHT+2,e->y+e->h-1);
+
+        int text_width = strlen(e->info.scrollabletextwindow.caption) * FONT_12_WIDTH;
+        int x_off = ( e->w - text_width ) / 2;
+
+        int skipspaces = 0;
+
+        FU_Print12Color(buffer,w,h,e->x+x_off,e->y,0xFFE0E0E0,e->info.scrollabletextwindow.caption);
+
+        if(e->info.scrollabletextwindow.text)
+        {
+            int countlines = 0;
+
+            int textwidth = e->w / FONT_12_WIDTH;
+
+            int i = 0;
+            int curx = 0;
+            while(1) // search start of printed text
+            {
+                if(countlines == e->info.scrollabletextwindow.currentline)
+                    break;
+
+                char c = e->info.scrollabletextwindow.text[i++];
+                if(skipspaces)
+                {
+                    while(1)
+                    {
+                        if( ! ( (c == ' ') || (c == '\0') ) )
+                           break;
+                        c = e->info.scrollabletextwindow.text[i++];
+                    }
+                    skipspaces = 0;
+                }
+
+                if(c == '\0')
+                {
+                    return;
+                }
+                else if(c == '\n')
+                {
+                    curx = 0;
+                    countlines ++;
+                }
+                else
+                {
+                    if(_gui_word_fits(&(e->info.scrollabletextwindow.text[i-1]),curx,textwidth) == 0)
+                    {
+                        curx = 0;
+                        countlines ++;
+                        i--;
+                        skipspaces = 1;
+                    }
+                    else
+                    {
+                        curx ++;
+                        if(curx == textwidth)
+                        {
+                            if(e->info.scrollabletextwindow.text[i] == '\n') i++;
+                            countlines ++;
+                            curx = 0;
+                            skipspaces = 1;
+                        }
+                    }
+                }
+            }
+
+            int cury = 0;
+
+            int basexcoord = e->x;
+            int baseycoord = e->y+FONT_12_HEIGHT+2;
+
+            countlines = 0;
+
+            skipspaces = 0;
+
+            while(1) // print text
+            {
+                char c = e->info.scrollabletextwindow.text[i++];
+                if(skipspaces)
+                {
+                    while(1)
+                    {
+                        if( ! ( (c == ' ') || (c == '\0') ) )
+                           break;
+                        c = e->info.scrollabletextwindow.text[i++];
+                    }
+                    skipspaces = 0;
+                }
+
+                if(c == '\0')
+                {
+                    break;
+                }
+                else if(c == '\n')
+                {
+                    curx = 0;
+                    cury ++;
+                    countlines ++;
+                }
+                else
+                {
+                    if(_gui_word_fits(&(e->info.scrollabletextwindow.text[i-1]),curx,textwidth) == 0)
+                    {
+                        curx = 0;
+                        cury ++;
+                        countlines ++;
+                        i--;
+                        skipspaces = 1;
+                    }
+                    else
+                    {
+                        FU_PrintChar12(buffer,w,h, basexcoord+curx*FONT_12_WIDTH, baseycoord+cury*FONT_12_HEIGHT,
+                                   c, 0xFFFFFFFF);
+                        curx ++;
+                        if(curx == textwidth)
+                        {
+                            if(e->info.scrollabletextwindow.text[i] == '\n') i++;
+                            cury ++;
+                            countlines++;
+                            curx = 0;
+                            skipspaces = 1;
+                        }
+                    }
+
+                }
+
+                if(e->info.scrollabletextwindow.max_drawn_lines == countlines)
+                    break;
+            }
+        }
+    }
 }
 
 void GUI_Draw(_gui * gui, char * buffer, int w, int h, int clean)
@@ -1034,6 +1295,57 @@ int __gui_send_event_element(_gui_element ** complete_gui, _gui_element * gui, S
                     gui->info.messagebox.enabled = 0;
                     return 1;
                 }
+            }
+        }
+    }
+    else if(gui->element_type == GUI_TYPE_SCROLLABLETEXTWINDOW)
+    {
+        if(gui->info.scrollabletextwindow.enabled == 0)
+            return 0;
+
+        if(e->type == SDL_MOUSEBUTTONDOWN)
+        {
+            if(e->button.button == SDL_BUTTON_LEFT)
+            {
+                if(__gui_coord_is_inside_rect(e->button.x,e->button.y,gui->x,gui->w,
+                                              gui->y,gui->h))
+                {
+                    gui->info.scrollabletextwindow.enabled = 0;
+                    return 1;
+                }
+            }
+        }
+        else if(e->type == SDL_MOUSEWHEEL)
+        {
+            gui->info.scrollabletextwindow.currentline -= e->wheel.y*3;
+
+            if(gui->info.scrollabletextwindow.currentline >=
+                    gui->info.scrollabletextwindow.numlines - gui->info.scrollabletextwindow.max_drawn_lines)
+                gui->info.scrollabletextwindow.currentline =
+                        gui->info.scrollabletextwindow.numlines - gui->info.scrollabletextwindow.max_drawn_lines;
+            if(gui->info.scrollabletextwindow.currentline < 0)
+                gui->info.scrollabletextwindow.currentline = 0;
+            return 1;
+        }
+        else if( e->type == SDL_KEYDOWN )
+        {
+            if(e->key.keysym.sym == SDLK_UP)
+            {
+                gui->info.scrollabletextwindow.currentline --;
+                if(gui->info.scrollabletextwindow.currentline < 0)
+                    gui->info.scrollabletextwindow.currentline = 0;
+                return 1;
+            }
+            else if(e->key.keysym.sym == SDLK_DOWN)
+            {
+                gui->info.scrollabletextwindow.currentline ++;
+                if(gui->info.scrollabletextwindow.currentline >=
+                        gui->info.scrollabletextwindow.numlines - gui->info.scrollabletextwindow.max_drawn_lines)
+                    gui->info.scrollabletextwindow.currentline =
+                        gui->info.scrollabletextwindow.numlines - gui->info.scrollabletextwindow.max_drawn_lines;
+                if(gui->info.scrollabletextwindow.currentline < 0)
+                    gui->info.scrollabletextwindow.currentline = 0;
+                return 1;
             }
         }
     }

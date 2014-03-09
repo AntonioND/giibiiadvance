@@ -18,11 +18,11 @@ Current goals
  - GBA I/O viewer
  - GB and GBA sprite viewer.
  - GB and GBA tile viewer.
- - GB and GBA palette viewer.
+ - GB palette viewer.
  - GB and GBA background viewer.
  - SGB viewer.
  - Configuration window.
- - Complete main window menu.
+ - Complete main window menu. Accelerators (F1, CTRL+R, ...)
  - Export images from debugger windows.
 
 - Customize controls.

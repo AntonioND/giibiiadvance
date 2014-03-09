@@ -39,6 +39,7 @@
 #include "../gb_core/gb_main.h"
 #include "../gb_core/interrupts.h"
 #include "../gb_core/video.h"
+#include "../gb_core/rom.h"
 
 #include "../gba_core/gba.h"
 #include "../gba_core/bios.h"
@@ -693,10 +694,10 @@ static _gui_element mainwindow_configwin;
 
 static _gui_element * mainwindow_gui_elements[] = {
     &mainwindow_bg,
-    &mainwindow_show_message_win,
     &mainwindow_configwin,
     &mainwindow_fileexplorer_win,
     &mainwindow_scrollable_text_window,
+    &mainwindow_show_message_win, // least priority = always drawn
     NULL
 };
 
@@ -719,20 +720,29 @@ void Win_MainShowMessage(int type, const char * text) // 0 = error, 1 = debug, 2
     _win_main_switch_to_menu();
 
     if(type == 0)
+    {
         GUI_SetMessageBox(&mainwindow_show_message_win,&mainwindow_show_message_con,
                       100,100,256*2-200,224*2-200,"Error Message");
+        GUI_MessageBoxSetEnabled(&mainwindow_show_message_win,1);
+        GUI_ConsoleModePrintf(&mainwindow_show_message_con,0,0,text);
+    }
     else if(type == 1)
+    {
         GUI_SetMessageBox(&mainwindow_show_message_win,&mainwindow_show_message_con,
                       100,100,256*2-200,224*2-200,"Debug Message");
+        GUI_MessageBoxSetEnabled(&mainwindow_show_message_win,1);
+        GUI_ConsoleModePrintf(&mainwindow_show_message_con,0,0,text);
+    }
     else if(type == 2)
-        GUI_SetMessageBox(&mainwindow_show_message_win,&mainwindow_show_message_con,
-                      50,50,256*2-100,224*2-100,"Console");
+    {
+    //    GUI_SetMessageBox(&mainwindow_show_message_win,&mainwindow_show_message_con,
+    //                  50,50,256*2-100,224*2-100,"Console");
+        GUI_SetScrollableTextWindow(&mainwindow_scrollable_text_window,25,25,
+                                _win_main_get_menu_texture_width()-50,_win_main_get_menu_texture_height()-50,
+                                text, "Console");
+        GUI_ScrollableTextWindowSetEnabled(&mainwindow_scrollable_text_window,1);
+    }
     else return;
-
-
-    GUI_MessageBoxSetEnabled(&mainwindow_show_message_win,1);
-
-    GUI_ConsoleModePrintf(&mainwindow_show_message_con,0,0,text);
 }
 
 static void _win_main_clear_message(void)
@@ -1078,6 +1088,12 @@ void Win_MainLoopHandle(void)
         }
         else if(WIN_MAIN_RUNNING == RUNNING_GB)
         {
+            if(GB_ShowConsoleRequested())
+            {
+                ConsoleShow();
+                return;
+            }
+
             GB_KeyboardGamepadGetInput();
             GB_RunForOneFrame();
             GB_Screen_WriteBuffer_24RGB(WIN_MAIN_GAME_SCREEN_BUFFER);

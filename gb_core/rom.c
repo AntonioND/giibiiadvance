@@ -95,10 +95,18 @@ static const u8 gb_nintendo_logo[48] = {
 
 extern _GB_CONTEXT_ GameBoy;
 
+static int showconsole = 0;
+
+int GB_ShowConsoleRequested(void)
+{
+    int ret = showconsole;
+    showconsole = 0;
+    return ret;
+}
 
 int GB_CartridgeLoad(const u8 * pointer, const u32 rom_size)
 {
-    int showconsole = 0; //if at the end this is 1, show console window
+    showconsole = 0; //if at the end this is 1, show console window
 
     ConsoleReset();
 
@@ -424,7 +432,7 @@ int GB_CartridgeLoad(const u8 * pointer, const u32 rom_size)
             break;
         default:
             ConsolePrint("[!]UNSUPPORTED CARTRIDGE\n");
-            ConsoleShow();
+            showconsole = 1;
             return 0;
     }
 
@@ -440,7 +448,7 @@ int GB_CartridgeLoad(const u8 * pointer, const u32 rom_size)
         case 0x04: GameBoy.Emulator.RAM_Banks = 16; break; //16 * 8KB
         default:
              ConsolePrint("[!]RAM SIZE UNKNOWN: %02X\n",GB_Header->ram_size);
-             ConsoleShow();
+             showconsole = 1;
              return 0;
     }
 
@@ -470,7 +478,7 @@ int GB_CartridgeLoad(const u8 * pointer, const u32 rom_size)
     //    I've never seen a game with 0x52, 0x53 or 0x54 in its header.
         default:
              ConsolePrint("[!]ROM SIZE UNKNOWN: %02X\n",GB_Header->rom_size);
-             ConsoleShow();
+             showconsole = 1;
              return 0;
     }
 
@@ -486,7 +494,7 @@ int GB_CartridgeLoad(const u8 * pointer, const u32 rom_size)
         if(rom_size < (GameBoy.Emulator.ROM_Banks * 16 * (1024)))
         {
             ConsolePrint("[!]File is smaller than the size the header says.\nAborting...");
-            ConsoleShow();
+            showconsole = 1;
             return 0;
         }
     }
@@ -608,8 +616,6 @@ int GB_CartridgeLoad(const u8 * pointer, const u32 rom_size)
         GB_SetPalette(0xFF,0xFF,0xFF);
 
     ConsolePrint("Done!\n");
-
-    if(showconsole) ConsoleShow();
 
     return 1;
 }

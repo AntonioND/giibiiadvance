@@ -805,10 +805,29 @@ static int _gui_get_first_window_enabled(_gui * gui)
     {
         if( (*gui_elements)->element_type == GUI_TYPE_WINDOW)
             if( (*gui_elements)->info.window.enabled ) return i;
-        if( (*gui_elements)->element_type == GUI_TYPE_MESSAGEBOX)
-            if( (*gui_elements)->info.messagebox.enabled ) return i;
         if( (*gui_elements)->element_type == GUI_TYPE_SCROLLABLETEXTWINDOW)
             if( (*gui_elements)->info.scrollabletextwindow.enabled ) return i;
+        i++;
+        gui_elements++;
+    }
+
+    return -1;
+}
+
+static int _gui_get_first_messagebox_enabled(_gui * gui)
+{
+    if(gui == NULL)
+        return -1;
+
+    _gui_element ** gui_elements = gui->elements;
+
+    if(gui_elements == NULL) return -1;
+
+    int i = 0;
+    while(*gui_elements != NULL)
+    {
+        if( (*gui_elements)->element_type == GUI_TYPE_MESSAGEBOX)
+            if( (*gui_elements)->info.messagebox.enabled ) return i;
         i++;
         gui_elements++;
     }
@@ -1441,35 +1460,42 @@ int __gui_send_event_element(_gui_element ** complete_gui, _gui_element * gui, S
 
 int GUI_SendEvent(_gui * gui, SDL_Event * e)
 {
-    int has_to_redraw = 0;
-
+    //highest priority = input window
     if(GUI_InputWindowIsEnabled(gui->inputwindow))
     {
-        has_to_redraw = _gui_inputwindow_send_event(gui->inputwindow,e);
-        return has_to_redraw;
+        return _gui_inputwindow_send_event(gui->inputwindow,e);
     }
 
+    //higher priority = menu
     if(_gui_menu_send_event(gui->menu,e))
         return 1;
 
     _gui_element ** elements = gui->elements;
-
     if(elements == NULL)
-        return has_to_redraw;
+        return 0;
 
+    //high priority = message box
+    int messagebox_enabled = _gui_get_first_messagebox_enabled(gui); //
+    if(messagebox_enabled >= 0)
+    {
+        return __gui_send_event_element(gui->elements,elements[messagebox_enabled],e);
+    }
+
+    //normal priority = other windows
     int window_enabled = _gui_get_first_window_enabled(gui);
     if(window_enabled >= 0)
     {
         return __gui_send_event_element(gui->elements,elements[window_enabled],e);
     }
 
+    //low priority = the rest
     while(*elements != NULL)
     {
         if(__gui_send_event_element(gui->elements,*elements++,e))
             return 1;
     }
 
-    return has_to_redraw;
+    return 0;
 }
 
 //-------------------------------------------------------------------------------------------

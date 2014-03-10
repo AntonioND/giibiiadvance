@@ -517,6 +517,14 @@ static void _win_main_menu_close_no_save(void)
     _win_main_unload_rom(0);
 }
 
+static void _win_main_screenshot(void)
+{
+    if(Win_MainRunningGBA())
+        GBA_Screenshot();
+    if(Win_MainRunningGB())
+        GB_Screenshot();
+}
+
 static void _win_main_menu_exit(void)
 {
     _win_main_file_explorer_close();
@@ -594,7 +602,7 @@ static _gui_menu_entry mmfile_closenosav = {"Close without saving", _win_main_me
 static _gui_menu_entry mmfile_reset = {"Reset (CTRL+R)", NULL};
 static _gui_menu_entry mmfile_pause = {"Pause (CTRL+P)", NULL};
 static _gui_menu_entry mmfile_rominfo = {"Rom Information", NULL};
-static _gui_menu_entry mmfile_screenshot = {"Screenshot (F12)", NULL};
+static _gui_menu_entry mmfile_screenshot = {"Screenshot (F12)", _win_main_screenshot};
 static _gui_menu_entry mmfile_exit = {"Exit (CTRL+E)", _win_main_menu_exit};
 
 
@@ -849,6 +857,9 @@ static int Win_MainEventCallback(SDL_Event * e)
                 break;
             case SDLK_F7:
                 _win_main_menu_open_io_viewer();
+                break;
+            case SDLK_F12:
+                _win_main_screenshot();
                 break;
 
             case SDLK_UP:

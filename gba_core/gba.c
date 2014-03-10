@@ -129,27 +129,12 @@ void GBA_HandleInput(int a, int b, int l, int r, int st, int se, int dr, int dl,
     REG_KEYINPUT = input;
 }
 
-
-static int screenshot_file_number = 0;
-
 void GBA_Screenshot(void)
 {
-    char filename[MAX_PATHLEN];
-
-    while(1)
-    {
-        s_snprintf(filename,sizeof(filename),"%sgba_screenshot%d.png",DirGetScreenshotFolderPath(),
-             screenshot_file_number);
-
-        FILE * file=fopen(filename, "rb");
-        if(file == NULL) break; //Ok
-        screenshot_file_number ++; //look for next free number
-        fclose(file);
-    }
-
+    char * name = FU_GetNewTimestampFilename("gba_screenshot");
     u32 * buffer = malloc(240*160*4);
     GBA_ConvertScreenBufferTo32RGB(buffer);
-    Save_PNG(filename,240,160,buffer,0);
+    Save_PNG(name,240,160,buffer,0);
     free(buffer);
 }
 

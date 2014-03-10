@@ -30,5 +30,7 @@ void FileLoad(const char * filename, void ** buffer, unsigned int * size_);
 int DirCheckExistence(char * path);
 int DirCreate(char * path);
 
+char * FU_GetNewTimestampFilename(const char * basename);
+
 #endif // __FILE_UTILS__
 

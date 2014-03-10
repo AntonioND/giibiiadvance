@@ -1392,22 +1392,9 @@ void GB_Screen_WriteBuffer_24RGB(char * buffer)
 //-------------------------------------------------------------
 //-------------------------------------------------------------
 
-static int screenshot_file_number = 0;
-
 void GB_Screenshot(void)
 {
-    char filename[MAX_PATHLEN];
-
-    while(1)
-    {
-        s_snprintf(filename,sizeof(filename),"%sgb_screenshot%d.png",DirGetScreenshotFolderPath(),
-             screenshot_file_number);
-
-        FILE * file = fopen(filename, "rb");
-        if(file == NULL) break; //Ok
-        screenshot_file_number ++; //look for next free number
-        fclose(file);
-    }
+    char * name = FU_GetNewTimestampFilename("gb_screenshot");
 
     int width, height;
 
@@ -1430,8 +1417,9 @@ void GB_Screenshot(void)
             ((((data>>10)&0x1F)<<3)<<16);
     }
 
-    Save_PNG(filename,width,height,buf_temp,0);
+    Save_PNG(name,width,height,buf_temp,0);
     free(buf_temp);
 }
 
+//-------------------------------------------------------------
 

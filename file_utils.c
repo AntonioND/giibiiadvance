@@ -23,6 +23,7 @@
 #include <malloc.h>
 #include <errno.h>
 #include <string.h>
+#include <time.h>
 
 #include "general_utils.h"
 #include "debug_utils.h"
@@ -212,6 +213,36 @@ int DirCreate(char * path)
         //Debug_ErrorMsgArg("Couldn't create directory: %s",path);
         return 0;
     }
+}
+
+//-------------------------------------------------
+
+static char _fu_filename[MAX_PATHLEN];
+
+char * FU_GetNewTimestampFilename(const char * basename)
+{
+    int number = 0;
+
+    time_t rawtime;
+    time(&rawtime);
+    struct tm * ptm = gmtime(&rawtime);
+
+    char timestamp[50];
+    s_snprintf(timestamp,sizeof(timestamp),"%04d%02d%02d_%02d%02d%02d",1900+ptm->tm_year,1+ptm->tm_mon,ptm->tm_mday,
+               1+ptm->tm_hour,ptm->tm_min,ptm->tm_sec);
+
+    while(1)
+    {
+        s_snprintf(_fu_filename,sizeof(_fu_filename),"%s%s_%s_%d.png",DirGetScreenshotFolderPath(),basename,
+                   timestamp,number);
+
+        FILE * file=fopen(_fu_filename, "rb");
+        if(file == NULL) break; //Ok
+        number ++; //look for next free number
+        fclose(file);
+    }
+
+    return _fu_filename;
 }
 
 //-------------------------------------------------

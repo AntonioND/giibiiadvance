@@ -7,6 +7,7 @@ General
 - All missing things from version 0.1.0 Win32 GUI.
 - Update README file.
 - Update memory, I/O viewers... with F7.
+- Autoclose debugger windows according to configuration.
 - Save tilesets, maps, memory dumps...
 - Allow to execute one frame.
 - Pause/unpause.

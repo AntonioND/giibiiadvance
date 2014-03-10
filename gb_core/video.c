@@ -1398,14 +1398,8 @@ void GB_Screenshot(void)
 
     int width, height;
 
-    if(GameBoy.Emulator.SGBEnabled)
-    {
-        width = 256; height = 224;
-    }
-    else
-    {
-        width = 160; height = 144;
-    }
+    if(GameBoy.Emulator.SGBEnabled) { width = 256; height = 224; }
+    else { width = 160; height = 144; }
 
     u32 * buf_temp = calloc(width*height*4,1);
     int last_fb = gb_cur_fb ^ 1;
@@ -1416,7 +1410,6 @@ void GB_Screenshot(void)
         buf_temp[y*width + x] = ((data&0x1F)<<3)|((((data>>5)&0x1F)<<3)<<8)|
             ((((data>>10)&0x1F)<<3)<<16);
     }
-
     Save_PNG(name,width,height,buf_temp,0);
     free(buf_temp);
 }

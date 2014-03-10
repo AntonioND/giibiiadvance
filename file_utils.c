@@ -203,6 +203,7 @@ int DirCreate(char * path)
 #elif defined _WIN32
     if(mkdir(path) == 0) // seriously??
 #else
+#warning "This hasn't been tested!"
     if(mkdir(path, S_IRWXU|S_IRGRP|S_IXGRP) == 0) // try with this
 #endif
     {

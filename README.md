@@ -9,20 +9,19 @@ I'm currently porting the Win32 GUI to SDL2.
 
 This has been compiled in Linux Mint 16 and Windows 7 succesfuly.
 
-When the current goals are done, the version 0.2.0 will be released.
+When the current goals are done, the version 0.2.0 will be released. Until then even though the files say that it is version 0.2.0, it really isn't. It's 0.1.X.
 
 Current goals
 -------------
 
-- Finish GUI:
+- Finish porting the GUI:
  - GBA I/O viewer
  - GB and GBA sprite viewer.
  - GB and GBA tile viewer.
- - GB palette viewer.
  - GB and GBA background viewer.
  - SGB viewer.
  - Configuration window.
- - Complete main window menu. Accelerators (F1, CTRL+R, ...)
+ - Complete main window menu. Accelerators (F12, CTRL+R, ...)
  - Export images from debugger windows.
 
 - Customize controls.
@@ -31,7 +30,7 @@ Current goals
 - Obviously, improve emulation.
  - Implement mosaic correctly.
  - Correct GBA CPU timings. Maybe not for version 0.2.0.
- - Rewrite a lot of GB core to speed up emulation. NOT for version 0.2.0.
+ - Rewrite a lot of GB core to speed up emulation. NOT for version 0.2.0, maybe 0.3.0.
 
 Dependencies
 ------------

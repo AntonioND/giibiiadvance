@@ -24,12 +24,15 @@
 #include "../window_handler.h"
 #include "../font_utils.h"
 #include "../general_utils.h"
+#include "../file_utils.h"
 
 #include "win_gba_palviewer.h"
 #include "win_main.h"
 #include "win_utils.h"
 
 #include "../gba_core/memory.h"
+
+#include "../png/png_utils.h"
 
 //-----------------------------------------------------------------------------------
 
@@ -55,6 +58,8 @@ static char gba_pal_spr_buffer[GBA_PAL_BUFFER_SIDE*GBA_PAL_BUFFER_SIDE*3];
 static _gui_console gba_palview_con;
 static _gui_element gba_palview_textbox;
 
+static _gui_element gba_palview_dumpbtn;
+
 static _gui_element gba_palview_bgpal_bmp, gba_palview_sprpal_bmp;
 static _gui_element gba_palview_bgpal_label, gba_palview_sprpal_label;
 
@@ -64,6 +69,7 @@ static _gui_element * gba_memviwer_window_gui_elements[] = {
     &gba_palview_bgpal_bmp,
     &gba_palview_sprpal_bmp,
     &gba_palview_textbox,
+    &gba_palview_dumpbtn,
     NULL
 };
 
@@ -72,6 +78,15 @@ static _gui gba_palviewer_window_gui = {
     NULL,
     NULL
 };
+
+//----------------------------------------------------------------
+
+static inline void rgb16to32(u16 color, u8 * r, u8 * g, u8 * b)
+{
+    *r = (color & 31)<<3;
+    *g = ((color >> 5) & 31)<<3;
+    *b = ((color >> 10) & 31)<<3;
+}
 
 //----------------------------------------------------------------
 
@@ -90,13 +105,6 @@ static int _win_gba_palviewer_spr_bmp_callback(int x, int y)
 }
 
 //----------------------------------------------------------------
-
-static inline void rgb16to32(u16 color, u8 * r, u8 * g, u8 * b)
-{
-    *r = (color & 31)<<3;
-    *g = ((color >> 5) & 31)<<3;
-    *b = ((color >> 10) & 31)<<3;
-}
 
 void Win_GBAPalViewerUpdate(void)
 {
@@ -215,6 +223,63 @@ int Win_GBAPalViewerCallback(SDL_Event * e)
     return 0;
 }
 
+//----------------------------------------------------------------
+
+static void _win_gba_palviewer_dump_btn_callback(void)
+{
+    memset(gba_pal_bg_buffer,192,sizeof(gba_pal_bg_buffer));
+    memset(gba_pal_spr_buffer,192,sizeof(gba_pal_spr_buffer));
+
+    int i;
+    for(i = 0; i < 256; i++)
+    {
+        //BG
+        u8 r,g,b;
+        rgb16to32(((u16*)Mem.pal_ram)[i],&r,&g,&b);
+        GUI_Draw_SetDrawingColor(r,g,b);
+        GUI_Draw_FillRect(gba_pal_bg_buffer,GBA_PAL_BUFFER_SIDE,GBA_PAL_BUFFER_SIDE,
+                          1 + ((i%16)*10), 9 + ((i%16)*10), 1 + ((i/16)*10), 9 + ((i/16)*10));
+        //SPR
+        rgb16to32(((u16*)Mem.pal_ram)[i+256],&r,&g,&b);
+        GUI_Draw_SetDrawingColor(r,g,b);
+        GUI_Draw_FillRect(gba_pal_spr_buffer,GBA_PAL_BUFFER_SIDE,GBA_PAL_BUFFER_SIDE,
+                        1 + ((i%16)*10), 9 + ((i%16)*10), 1 + ((i/16)*10), 9 + ((i/16)*10));
+    }
+
+    char buffer_temp[GBA_PAL_BUFFER_SIDE * GBA_PAL_BUFFER_SIDE * 4];
+
+    char * src = gba_pal_bg_buffer;
+    char * dst = buffer_temp;
+    for(i = 0; i < GBA_PAL_BUFFER_SIDE * GBA_PAL_BUFFER_SIDE; i++)
+    {
+        *dst++ = *src++;
+        *dst++ = *src++;
+        *dst++ = *src++;
+        *dst++ = 0xFF;
+    }
+
+    char * name_bg = FU_GetNewTimestampFilename("gba_palette_bg");
+    Save_PNG(name_bg,GBA_PAL_BUFFER_SIDE,GBA_PAL_BUFFER_SIDE,buffer_temp,0);
+
+
+    src = gba_pal_bg_buffer;
+    dst = buffer_temp;
+    for(i = 0; i < GBA_PAL_BUFFER_SIDE * GBA_PAL_BUFFER_SIDE; i++)
+    {
+        *dst++ = *src++;
+        *dst++ = *src++;
+        *dst++ = *src++;
+        *dst++ = 0xFF;
+    }
+
+    char * name_spr = FU_GetNewTimestampFilename("gba_palette_spr");
+    Save_PNG(name_spr,GBA_PAL_BUFFER_SIDE,GBA_PAL_BUFFER_SIDE,buffer_temp,0);
+
+    Win_GBAPalViewerUpdate();
+}
+
+//----------------------------------------------------------------
+
 int Win_GBAPalViewerCreate(void)
 {
     if(GBAPalViewerCreated == 1)
@@ -226,12 +291,15 @@ int Win_GBAPalViewerCreate(void)
     GUI_SetLabel(&gba_palview_sprpal_label,188,6,GBA_PAL_BUFFER_SIDE,FONT_12_HEIGHT,"Sprites");
 
     GUI_SetTextBox(&gba_palview_textbox,&gba_palview_con,
-                   6,192, 49*FONT_12_WIDTH,2*FONT_12_HEIGHT, NULL);
+                   6,192, 42*FONT_12_WIDTH,2*FONT_12_HEIGHT, NULL);
 
     GUI_SetBitmap(&gba_palview_bgpal_bmp,6,24,GBA_PAL_BUFFER_SIDE,GBA_PAL_BUFFER_SIDE,gba_pal_bg_buffer,
                   _win_gba_palviewer_bg_bmp_callback);
     GUI_SetBitmap(&gba_palview_sprpal_bmp,188,24,GBA_PAL_BUFFER_SIDE,GBA_PAL_BUFFER_SIDE,gba_pal_spr_buffer,
                   _win_gba_palviewer_spr_bmp_callback);
+
+    GUI_SetButton(&gba_palview_dumpbtn,308,192,FONT_12_WIDTH*6,FONT_12_HEIGHT*2,"Dump",
+                  _win_gba_palviewer_dump_btn_callback);
 
     GBAPalViewerCreated = 1;
 

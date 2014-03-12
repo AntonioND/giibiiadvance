@@ -1,0 +1,315 @@
+/*
+    GiiBiiAdvance - GBA/GB  emulator
+    Copyright (C) 2011-2014 Antonio Niño Díaz (AntonioND)
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#include <SDL2/SDL.h>
+
+#include <string.h>
+
+#include "../debug_utils.h"
+#include "../window_handler.h"
+#include "../font_utils.h"
+#include "../general_utils.h"
+#include "../file_utils.h"
+
+#include "win_gb_palviewer.h"
+#include "win_main.h"
+#include "win_utils.h"
+
+#include "../gb_core/gameboy.h"
+#include "../gb_core/debug.h"
+
+#include "../png/png_utils.h"
+
+//-----------------------------------------------------------------------------------
+
+static int WinIDGBPalViewer;
+
+#define WIN_GB_MEMVIEWER_WIDTH  286
+#define WIN_GB_MEMVIEWER_HEIGHT 222
+
+static int GBPalViewerCreated = 0;
+
+//-----------------------------------------------------------------------------------
+
+static u32 gb_palview_sprpal = 0; // 1 if selected a color from sprite palettes
+static u32 gb_palview_selectedindex = 0;
+
+#define GB_PAL_BUFFER_WIDTH ((20*4)+1)
+#define GB_PAL_BUFFER_HEIGHT ((20*8)+1)
+
+static char gb_pal_bg_buffer[GB_PAL_BUFFER_WIDTH*GB_PAL_BUFFER_HEIGHT*3];
+static char gb_pal_spr_buffer[GB_PAL_BUFFER_WIDTH*GB_PAL_BUFFER_HEIGHT*3];
+
+//-----------------------------------------------------------------------------------
+
+static _gui_console gb_palview_con;
+static _gui_element gb_palview_textbox;
+
+static _gui_element gb_palview_dumpbtn;
+
+static _gui_element gb_palview_bgpal_bmp, gb_palview_sprpal_bmp;
+static _gui_element gb_palview_bgpal_label, gb_palview_sprpal_label;
+
+static _gui_element * gb_memviwer_window_gui_elements[] = {
+    &gb_palview_bgpal_label,
+    &gb_palview_sprpal_label,
+    &gb_palview_bgpal_bmp,
+    &gb_palview_sprpal_bmp,
+    &gb_palview_textbox,
+    &gb_palview_dumpbtn,
+    NULL
+};
+
+static _gui gb_palviewer_window_gui = {
+    gb_memviwer_window_gui_elements,
+    NULL,
+    NULL
+};
+
+//----------------------------------------------------------------
+
+static inline void rgb16to32(u16 color, u8 * r, u8 * g, u8 * b)
+{
+    *r = (color & 31)<<3;
+    *g = ((color >> 5) & 31)<<3;
+    *b = ((color >> 10) & 31)<<3;
+}
+
+//----------------------------------------------------------------
+
+static int _win_gb_palviewer_bg_bmp_callback(int x, int y)
+{
+    gb_palview_sprpal = 0; // bg
+    gb_palview_selectedindex = (x/20) + ((y/20)*4);
+    return 1;
+}
+
+static int _win_gb_palviewer_spr_bmp_callback(int x, int y)
+{
+    gb_palview_sprpal = 1; // spr
+    gb_palview_selectedindex = (x/20) + ((y/20)*4);
+    return 1;
+}
+
+//----------------------------------------------------------------
+
+void Win_GBPalViewerUpdate(void)
+{
+    if(GBPalViewerCreated == 0) return;
+
+    if(Win_MainRunningGB() == 0) return;
+
+    GUI_ConsoleClear(&gb_palview_con);
+
+    u32 r,g,b;
+    GB_Debug_Get_Palette(gb_palview_sprpal,gb_palview_selectedindex/4,gb_palview_selectedindex%4,&r,&g,&b);
+    u16 value = ((r>>3)&0x1F)|(((g>>3)&0x1F)<<5)|(((b>>3)&0x1F)<<10);
+
+    GUI_ConsoleModePrintf(&gb_palview_con,0,1,"Value: 0x%04X",value);
+
+    GUI_ConsoleModePrintf(&gb_palview_con,16,0,"RGB: (%d,%d,%d)",r>>3,g>>3,b>>3);
+
+    GUI_ConsoleModePrintf(&gb_palview_con,16,1,"Index: %d[%d]",
+                          gb_palview_selectedindex/4,gb_palview_selectedindex%4);
+
+    memset(gb_pal_bg_buffer,192,sizeof(gb_pal_bg_buffer));
+    memset(gb_pal_spr_buffer,192,sizeof(gb_pal_spr_buffer));
+
+    int i;
+    for(i = 0; i < 32; i++)
+    {
+        //BG
+        GB_Debug_Get_Palette(0,i/4,i%4,&r,&g,&b);
+        GUI_Draw_SetDrawingColor(r,g,b);
+        GUI_Draw_FillRect(gb_pal_bg_buffer,GB_PAL_BUFFER_WIDTH,GB_PAL_BUFFER_HEIGHT,
+                          1 + ((i%4)*20), 19 + ((i%4)*20), 1 + ((i/4)*20), 19 + ((i/4)*20));
+        //SPR
+        GB_Debug_Get_Palette(1,i/4,i%4,&r,&g,&b);
+        GUI_Draw_SetDrawingColor(r,g,b);
+        GUI_Draw_FillRect(gb_pal_spr_buffer,GB_PAL_BUFFER_WIDTH,GB_PAL_BUFFER_HEIGHT,
+                        1 + ((i%4)*20), 19 + ((i%4)*20), 1 + ((i/4)*20), 19 + ((i/4)*20));
+    }
+
+    GUI_Draw_SetDrawingColor(255,0,0);
+
+    char * buf;
+    if(gb_palview_sprpal == 0)
+        buf = gb_pal_bg_buffer;
+    else
+        buf = gb_pal_spr_buffer;
+
+    int ll = ((gb_palview_selectedindex%4)*20); //left
+    int tt = ((gb_palview_selectedindex/4)*20); // top
+    int rr = ll + 20; // right
+    int bb = tt + 20; // bottom
+    GUI_Draw_Rect(buf,GB_PAL_BUFFER_WIDTH,GB_PAL_BUFFER_HEIGHT,ll,rr,tt,bb);
+    ll++; tt++; rr--; bb--;
+    GUI_Draw_Rect(buf,GB_PAL_BUFFER_WIDTH,GB_PAL_BUFFER_HEIGHT,ll,rr,tt,bb);
+}
+
+//----------------------------------------------------------------
+
+void Win_GBPalViewerRender(void)
+{
+    if(GBPalViewerCreated == 0) return;
+
+    char buffer[WIN_GB_MEMVIEWER_WIDTH*WIN_GB_MEMVIEWER_HEIGHT*3];
+    GUI_Draw(&gb_palviewer_window_gui,buffer,WIN_GB_MEMVIEWER_WIDTH,WIN_GB_MEMVIEWER_HEIGHT,1);
+
+    WH_Render(WinIDGBPalViewer, buffer);
+}
+
+int Win_GBPalViewerCallback(SDL_Event * e)
+{
+    if(GBPalViewerCreated == 0) return 1;
+
+    int redraw = GUI_SendEvent(&gb_palviewer_window_gui,e);
+
+    int close_this = 0;
+
+    if(e->type == SDL_WINDOWEVENT)
+    {
+        if(e->window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
+        {
+            redraw = 1;
+        }
+        else if(e->window.event == SDL_WINDOWEVENT_EXPOSED)
+        {
+            redraw = 1;
+        }
+        else if(e->window.event == SDL_WINDOWEVENT_CLOSE)
+        {
+            close_this = 1;
+        }
+    }
+    else if( e->type == SDL_KEYDOWN)
+    {
+        if( e->key.keysym.sym == SDLK_ESCAPE )
+        {
+            close_this = 1;
+        }
+    }
+
+    if(close_this)
+    {
+        GBPalViewerCreated = 0;
+        WH_Close(WinIDGBPalViewer);
+        return 1;
+    }
+
+    if(redraw)
+    {
+        Win_GBPalViewerUpdate();
+        Win_GBPalViewerRender();
+        return 1;
+    }
+
+    return 0;
+}
+
+//----------------------------------------------------------------
+
+static void _win_gb_palviewer_dump_btn_callback(void)
+{
+    memset(gb_pal_bg_buffer,192,sizeof(gb_pal_bg_buffer));
+    memset(gb_pal_spr_buffer,192,sizeof(gb_pal_spr_buffer));
+
+    u32 r,g,b;
+
+    int i;
+    for(i = 0; i < 32; i++)
+    {
+        //BG
+        GB_Debug_Get_Palette(0,i/4,i%4,&r,&g,&b);
+        GUI_Draw_SetDrawingColor(r,g,b);
+        GUI_Draw_FillRect(gb_pal_bg_buffer,GB_PAL_BUFFER_WIDTH,GB_PAL_BUFFER_HEIGHT,
+                          1 + ((i%4)*20), 19 + ((i%4)*20), 1 + ((i/4)*20), 19 + ((i/4)*20));
+        //SPR
+        GB_Debug_Get_Palette(1,i/4,i%4,&r,&g,&b);
+        GUI_Draw_SetDrawingColor(r,g,b);
+        GUI_Draw_FillRect(gb_pal_spr_buffer,GB_PAL_BUFFER_WIDTH,GB_PAL_BUFFER_HEIGHT,
+                        1 + ((i%4)*20), 19 + ((i%4)*20), 1 + ((i/4)*20), 19 + ((i/4)*20));
+    }
+
+    char buffer_temp[GB_PAL_BUFFER_WIDTH*GB_PAL_BUFFER_HEIGHT * 4];
+
+    char * src = gb_pal_bg_buffer;
+    char * dst = buffer_temp;
+    for(i = 0; i < GB_PAL_BUFFER_WIDTH*GB_PAL_BUFFER_HEIGHT; i++)
+    {
+        *dst++ = *src++;
+        *dst++ = *src++;
+        *dst++ = *src++;
+        *dst++ = 0xFF;
+    }
+
+    char * name_bg = FU_GetNewTimestampFilename("gb_palette_bg");
+    Save_PNG(name_bg,GB_PAL_BUFFER_WIDTH,GB_PAL_BUFFER_HEIGHT,buffer_temp,0);
+
+
+    src = gb_pal_spr_buffer;
+    dst = buffer_temp;
+    for(i = 0; i < GB_PAL_BUFFER_WIDTH*GB_PAL_BUFFER_HEIGHT; i++)
+    {
+        *dst++ = *src++;
+        *dst++ = *src++;
+        *dst++ = *src++;
+        *dst++ = 0xFF;
+    }
+
+    char * name_spr = FU_GetNewTimestampFilename("gb_palette_spr");
+    Save_PNG(name_spr,GB_PAL_BUFFER_WIDTH,GB_PAL_BUFFER_HEIGHT,buffer_temp,0);
+
+    Win_GBPalViewerUpdate();
+}
+
+//----------------------------------------------------------------
+
+int Win_GBPalViewerCreate(void)
+{
+    if(GBPalViewerCreated == 1)
+        return 0;
+
+    if(Win_MainRunningGB() == 0) return 0;
+
+    GUI_SetLabel(&gb_palview_bgpal_label,40,6,GB_PAL_BUFFER_WIDTH,FONT_12_HEIGHT,"Background");
+    GUI_SetLabel(&gb_palview_sprpal_label,162,6,GB_PAL_BUFFER_WIDTH,FONT_12_HEIGHT,"Sprites");
+
+    GUI_SetTextBox(&gb_palview_textbox,&gb_palview_con,
+                   6,192, 32*FONT_12_WIDTH,2*FONT_12_HEIGHT, NULL);
+
+    GUI_SetBitmap(&gb_palview_bgpal_bmp,40,24,GB_PAL_BUFFER_WIDTH,GB_PAL_BUFFER_HEIGHT,gb_pal_bg_buffer,
+                  _win_gb_palviewer_bg_bmp_callback);
+    GUI_SetBitmap(&gb_palview_sprpal_bmp,162,24,GB_PAL_BUFFER_WIDTH,GB_PAL_BUFFER_HEIGHT,gb_pal_spr_buffer,
+                  _win_gb_palviewer_spr_bmp_callback);
+
+    GUI_SetButton(&gb_palview_dumpbtn,238,192,FONT_12_WIDTH*6,FONT_12_HEIGHT*2,"Dump",
+                  _win_gb_palviewer_dump_btn_callback);
+
+    GBPalViewerCreated = 1;
+
+    WinIDGBPalViewer = WH_Create(WIN_GB_MEMVIEWER_WIDTH,WIN_GB_MEMVIEWER_HEIGHT, 0,0, 0);
+    WH_SetCaption(WinIDGBPalViewer,"GB Palette Viewer");
+
+    WH_SetEventCallback(WinIDGBPalViewer,Win_GBPalViewerCallback);
+
+    Win_GBPalViewerUpdate();
+    Win_GBPalViewerRender();
+
+    return 1;
+}

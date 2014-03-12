@@ -232,6 +232,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="gui/win_gb_memviewer.h" />
+		<Unit filename="gui/win_gb_palviewer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gui/win_gb_palviewer.h" />
 		<Unit filename="gui/win_gba_disassembler.c">
 			<Option compilerVar="CC" />
 		</Unit>

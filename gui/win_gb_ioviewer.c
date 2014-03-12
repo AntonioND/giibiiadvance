@@ -400,7 +400,7 @@ int Win_GBIOViewerCreate(void)
     GBIOViewerCreated = 1;
 
     WinIDGBIOViewer = WH_Create(WIN_GB_IOVIEWER_WIDTH,WIN_GB_IOVIEWER_HEIGHT, 0,0, 0);
-    WH_SetCaption(WinIDGBIOViewer,"GiiBiiAdvance - GB I/O Viewer");
+    WH_SetCaption(WinIDGBIOViewer,"GB I/O Viewer");
 
     WH_SetEventCallback(WinIDGBIOViewer,Win_GBIOViewerCallback);
 

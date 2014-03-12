@@ -455,7 +455,7 @@ int Win_GBAMemViewerCreate(void)
     gba_memviewer_mode = GBA_MEMVIEWER_32;
 
     WinIDGBAMemViewer = WH_Create(WIN_GBA_MEMVIEWER_WIDTH,WIN_GBA_MEMVIEWER_HEIGHT, 0,0, 0);
-    WH_SetCaption(WinIDGBAMemViewer,"GiiBiiAdvance - GBA Memory Viewer");
+    WH_SetCaption(WinIDGBAMemViewer,"GBA Memory Viewer");
 
     WH_SetEventCallback(WinIDGBAMemViewer,Win_GBAMemViewerCallback);
 

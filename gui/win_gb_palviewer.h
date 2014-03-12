@@ -16,12 +16,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __WIN_UTILS_EVENTS__
-#define __WIN_UTILS_EVENTS__
+#ifndef __WIN_GB_PALVIEWER__
+#define __WIN_GB_PALVIEWER__
 
-#include "win_utils.h"
+int Win_GBPalViewerCreate(void); // returns 1 if error
 
-int GUI_SendEvent(_gui * gui, SDL_Event * e); // returns 1 if needed to redraw
+#endif // __WIN_GB_PALVIEWER__
 
-#endif // __WIN_UTILS_EVENTS__
 

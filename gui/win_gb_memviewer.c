@@ -395,7 +395,7 @@ int Win_GBMemViewerCreate(void)
     gb_memviewer_start_address = 0;
 
     WinIDGBMemViewer = WH_Create(WIN_GB_MEMVIEWER_WIDTH,WIN_GB_MEMVIEWER_HEIGHT, 0,0, 0);
-    WH_SetCaption(WinIDGBMemViewer,"GiiBiiAdvance - GB Memory Viewer");
+    WH_SetCaption(WinIDGBMemViewer,"GB Memory Viewer");
 
     WH_SetEventCallback(WinIDGBMemViewer,Win_GBMemViewerCallback);
 

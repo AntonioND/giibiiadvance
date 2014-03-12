@@ -403,7 +403,7 @@ int Win_GBDisassemblerCreate(void)
     GBDisassemblerCreated = 1;
 
     WinIDGBDis = WH_Create(WIN_GB_DISASSEMBLER_WIDTH,WIN_GB_DISASSEMBLER_HEIGHT, 0,0, 0);
-    WH_SetCaption(WinIDGBDis,"GiiBiiAdvance - GB CPU Disassembly");
+    WH_SetCaption(WinIDGBDis,"GB CPU Disassembly");
 
     WH_SetEventCallback(WinIDGBDis,Win_GBDisassemblerCallback);
 

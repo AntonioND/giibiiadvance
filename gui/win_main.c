@@ -52,10 +52,12 @@
 #include "win_gb_disassembler.h"
 #include "win_gb_memviewer.h"
 #include "win_gb_ioviewer.h"
+//-
+#include "win_gb_palviewer.h"
 
 #include "win_gba_disassembler.h"
 #include "win_gba_memviewer.h"
-
+//-
 #include "win_gba_palviewer.h"
 
 //------------------------------------------------------------------
@@ -552,6 +554,7 @@ static void _win_main_menu_open_io_viewer(void)
 static void _win_main_menu_open_pal_viewer(void)
 {
     Win_GBAPalViewerCreate();
+    Win_GBPalViewerCreate();
 }
 
 //------------------------------------------------------------------
@@ -849,6 +852,10 @@ static int Win_MainEventCallback(SDL_Event * e)
     {
         switch( e->key.keysym.sym )
         {
+            case SDLK_F1:
+                _win_main_scrollable_text_window_show_readme();
+                break;
+
             case SDLK_F5:
                 _win_main_menu_open_disassembler();
                 break;

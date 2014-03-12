@@ -262,7 +262,7 @@ static void _win_gba_palviewer_dump_btn_callback(void)
     Save_PNG(name_bg,GBA_PAL_BUFFER_SIDE,GBA_PAL_BUFFER_SIDE,buffer_temp,0);
 
 
-    src = gba_pal_bg_buffer;
+    src = gba_pal_spr_buffer;
     dst = buffer_temp;
     for(i = 0; i < GBA_PAL_BUFFER_SIDE * GBA_PAL_BUFFER_SIDE; i++)
     {
@@ -304,7 +304,7 @@ int Win_GBAPalViewerCreate(void)
     GBAPalViewerCreated = 1;
 
     WinIDGBAPalViewer = WH_Create(WIN_GBA_MEMVIEWER_WIDTH,WIN_GBA_MEMVIEWER_HEIGHT, 0,0, 0);
-    WH_SetCaption(WinIDGBAPalViewer,"GiiBiiAdvance - GBA Palette Viewer");
+    WH_SetCaption(WinIDGBAPalViewer,"GBA Palette Viewer");
 
     WH_SetEventCallback(WinIDGBAPalViewer,Win_GBAPalViewerCallback);
 

@@ -31,6 +31,12 @@
 #include "memory.h"
 #include "video.h"
 
+//------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------
+
+extern _GB_CONTEXT_ GameBoy;
+
 //----------------------------------------------------------------------------------
 
 #define GB_MAX_BREAKPOINTS 20
@@ -325,12 +331,6 @@ static const int debug_commands_cb_info[256] = {
 
 //------------------------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------------------------
-
-extern _GB_CONTEXT_ GameBoy;
-
-//------------------------------------------------------------------------------------------------
-
 inline int gb_debug_get_address_increment(u32 address)
 {
     int temp;
@@ -609,120 +609,3 @@ char * GB_Dissasemble(u16 addr, int * step)
 //------------------------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------------------------
-
-u32 gb_pal_colors[4][3] = { {255,255,255}, {168,168,168}, {80,80,80}, {0,0,0} };
-
-void GB_Debug_Get_Palette(int is_sprite, int num, int color, u32 * red, u32 * green, u32 * blue)
-{
-    _GB_MEMORY_ * mem = &GameBoy.Memory;
-
-    if(GameBoy.Emulator.CGBEnabled)
-    {
-        u32 color_;
-
-        if(is_sprite)
-        {
-            color_ = GameBoy.Emulator.spr_pal[(num*8)+(color*2)] |
-                     GameBoy.Emulator.spr_pal[(num*8)+(color*2)+1]<<8;
-        }
-        else
-        {
-            color_ = GameBoy.Emulator.bg_pal[(num*8)+(color*2)] |
-                     GameBoy.Emulator.bg_pal[(num*8)+(color*2)+1]<<8;
-        }
-
-        *red = (color_ & 0x1F) << 3;
-        *green = ((color_>>5) & 0x1F) << 3;
-        *blue = ((color_>>10) & 0x1F) << 3;
-    }
-    else if(GameBoy.Emulator.gbc_in_gb_mode)
-    {
-        if(is_sprite)
-        {
-            if(num == 0)
-            {
-                u32 obp0_reg = mem->IO_Ports[OBP0_REG-0xFF00];
-                u32 out_color = (obp0_reg>>(color*2))&0x3;
-                out_color = gbc_getsprpalcolor(0,out_color);
-                *red = (out_color & 0x1F) << 3;
-                *green = ((out_color>>5) & 0x1F) << 3;
-                *blue = ((out_color>>10) & 0x1F) << 3;
-            }
-            else if(num == 1)
-            {
-                u32 obp1_reg = mem->IO_Ports[OBP1_REG-0xFF00];
-                u32 out_color = (obp1_reg>>(color*2))&0x3;
-                out_color = gbc_getsprpalcolor(1,out_color);
-                *red = (out_color & 0x1F) << 3;
-                *green = ((out_color>>5) & 0x1F) << 3;
-                *blue = ((out_color>>10) & 0x1F) << 3;
-            }
-            else
-            {
-                *red = *green = *blue = 0;
-            }
-        }
-        else
-        {
-            if(num == 0)
-            {
-                u32 bgp_reg = mem->IO_Ports[BGP_REG-0xFF00];
-                u32 out_color = (bgp_reg>>(color*2))&0x3;
-                out_color = gbc_getbgpalcolor(0,out_color);
-                *red = (out_color & 0x1F) << 3;
-                *green = ((out_color>>5) & 0x1F) << 3;
-                *blue = ((out_color>>10) & 0x1F) << 3;
-            }
-            else
-            {
-                *red = *green = *blue = 0;
-            }
-        }
-    }
-    else
-    {
-        if(is_sprite)
-        {
-            if(num == 0)
-            {
-                u32 obp0_reg = mem->IO_Ports[OBP0_REG-0xFF00];
-                u32 out_color = (obp0_reg>>(color*2))&0x3;
-                *red = gb_pal_colors[out_color][0];
-                *green = gb_pal_colors[out_color][1];
-                *blue = gb_pal_colors[out_color][2];
-            }
-            else if(num == 1)
-            {
-                u32 obp1_reg = mem->IO_Ports[OBP1_REG-0xFF00];
-                u32 pal = (obp1_reg>>(color*2))&0x3;
-                *red = gb_pal_colors[pal][0];
-                *green = gb_pal_colors[pal][1];
-                *blue = gb_pal_colors[pal][2];
-            }
-            else
-            {
-                *red = *green = *blue = 0;
-            }
-        }
-        else
-        {
-            if(num == 0)
-            {
-                u32 bgp_reg = mem->IO_Ports[BGP_REG-0xFF00];
-                u32 out_color = (bgp_reg>>(color*2))&0x3;
-                *red = gb_pal_colors[out_color][0];
-                *green = gb_pal_colors[out_color][1];
-                *blue = gb_pal_colors[out_color][2];
-            }
-            else
-            {
-                *red = *green = *blue = 0;
-            }
-        }
-    }
-}
-
-//------------------------------------------------------------------------------------------------
-
-
-

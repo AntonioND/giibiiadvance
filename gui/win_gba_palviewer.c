@@ -63,7 +63,7 @@ static _gui_element gba_palview_dumpbtn;
 static _gui_element gba_palview_bgpal_bmp, gba_palview_sprpal_bmp;
 static _gui_element gba_palview_bgpal_label, gba_palview_sprpal_label;
 
-static _gui_element * gba_memviwer_window_gui_elements[] = {
+static _gui_element * gba_palviwer_window_gui_elements[] = {
     &gba_palview_bgpal_label,
     &gba_palview_sprpal_label,
     &gba_palview_bgpal_bmp,
@@ -74,7 +74,7 @@ static _gui_element * gba_memviwer_window_gui_elements[] = {
 };
 
 static _gui gba_palviewer_window_gui = {
-    gba_memviwer_window_gui_elements,
+    gba_palviwer_window_gui_elements,
     NULL,
     NULL
 };

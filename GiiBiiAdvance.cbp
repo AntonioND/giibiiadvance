@@ -112,6 +112,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="gb_core/debug.h" />
+		<Unit filename="gb_core/debug_video.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gb_core/debug_video.h" />
 		<Unit filename="gb_core/gameboy.h" />
 		<Unit filename="gb_core/gb_main.c">
 			<Option compilerVar="CC" />
@@ -236,6 +240,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="gui/win_gb_palviewer.h" />
+		<Unit filename="gui/win_gb_sprviewer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gui/win_gb_sprviewer.h" />
 		<Unit filename="gui/win_gba_disassembler.c">
 			<Option compilerVar="CC" />
 		</Unit>

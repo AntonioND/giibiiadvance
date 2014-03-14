@@ -16,24 +16,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __DEBUG__
-#define __DEBUG__
+#ifndef __WIN_GB_SPRVIEWER__
+#define __WIN_GB_SPRVIEWER__
 
-//---------------------------------------------------------------------------------
+int Win_GBSprViewerCreate(void); // returns 1 if error
 
-void GB_DebugAddBreakpoint(u32 addr);
-void GB_DebugClearBreakpoint(u32 addr);
-int GB_DebugIsBreakpoint(u32 addr); // used in debugger
-int GB_DebugCPUIsBreakpoint(u32 addr); // used in CPU loop
-void GB_DebugClearBreakpointAll(void);
+#endif // __WIN_GB_SPRVIEWER__
 
-//---------------------------------------------------------------------------------
-
-inline int gb_debug_get_address_increment(u32 address);
-inline int gb_debug_get_address_is_code(u32 address);
-char * GB_Dissasemble(u16 addr, int * step);
-
-//---------------------------------------------------------------------------------
-
-#endif //__DEBUG__
 

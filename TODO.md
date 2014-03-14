@@ -16,6 +16,8 @@ General
 - Detect ROM (GB/GBA) checking the headers?.
 - Custom controls. Game controllers.
 - Change all strcpy by s_strncpy, strcat by s_strncat and sprintf by s_snprintf.
+- Fix F1.
+- Enable/disable debug messages based on configuration.
 
 Game Boy
 --------

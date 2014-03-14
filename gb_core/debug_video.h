@@ -16,24 +16,25 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __DEBUG__
-#define __DEBUG__
+#ifndef __DEBUG_VIDEO__
+#define __DEBUG_VIDEO__
 
 //---------------------------------------------------------------------------------
 
-void GB_DebugAddBreakpoint(u32 addr);
-void GB_DebugClearBreakpoint(u32 addr);
-int GB_DebugIsBreakpoint(u32 addr); // used in debugger
-int GB_DebugCPUIsBreakpoint(u32 addr); // used in CPU loop
-void GB_DebugClearBreakpointAll(void);
+//buffer is 24 bit
+void GB_Debug_GetSpriteInfo(int sprnum, u8 * x, u8 * y, u8 * tile, u8 * info);
+void GB_Debug_PrintSprites(char * buf);
+void GB_Debug_PrintZoomedSprite(char * buf, int sprite);
+
+//buffer is 32 bit
+void GB_Debug_PrintSpritesAlpha(char * buf);
+void GB_Debug_PrintSpriteAlpha(char * buf, int sprite);
 
 //---------------------------------------------------------------------------------
 
-inline int gb_debug_get_address_increment(u32 address);
-inline int gb_debug_get_address_is_code(u32 address);
-char * GB_Dissasemble(u16 addr, int * step);
+void GB_Debug_GetPalette(int is_sprite, int num, int color, u32 * red, u32 * green, u32 * blue);
 
 //---------------------------------------------------------------------------------
 
-#endif //__DEBUG__
+#endif //__DEBUG_VIDEO__
 

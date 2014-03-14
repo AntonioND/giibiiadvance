@@ -31,7 +31,7 @@
 #include "win_utils.h"
 
 #include "../gb_core/gameboy.h"
-#include "../gb_core/debug.h"
+#include "../gb_core/debug_video.h"
 
 #include "../png/png_utils.h"
 
@@ -39,8 +39,8 @@
 
 static int WinIDGBPalViewer;
 
-#define WIN_GB_MEMVIEWER_WIDTH  286
-#define WIN_GB_MEMVIEWER_HEIGHT 222
+#define WIN_GB_PALVIEWER_WIDTH  258
+#define WIN_GB_PALVIEWER_HEIGHT 222
 
 static int GBPalViewerCreated = 0;
 
@@ -65,7 +65,7 @@ static _gui_element gb_palview_dumpbtn;
 static _gui_element gb_palview_bgpal_bmp, gb_palview_sprpal_bmp;
 static _gui_element gb_palview_bgpal_label, gb_palview_sprpal_label;
 
-static _gui_element * gb_memviwer_window_gui_elements[] = {
+static _gui_element * gb_palviwer_window_gui_elements[] = {
     &gb_palview_bgpal_label,
     &gb_palview_sprpal_label,
     &gb_palview_bgpal_bmp,
@@ -76,7 +76,7 @@ static _gui_element * gb_memviwer_window_gui_elements[] = {
 };
 
 static _gui gb_palviewer_window_gui = {
-    gb_memviwer_window_gui_elements,
+    gb_palviwer_window_gui_elements,
     NULL,
     NULL
 };
@@ -117,14 +117,14 @@ void Win_GBPalViewerUpdate(void)
     GUI_ConsoleClear(&gb_palview_con);
 
     u32 r,g,b;
-    GB_Debug_Get_Palette(gb_palview_sprpal,gb_palview_selectedindex/4,gb_palview_selectedindex%4,&r,&g,&b);
+    GB_Debug_GetPalette(gb_palview_sprpal,gb_palview_selectedindex/4,gb_palview_selectedindex%4,&r,&g,&b);
     u16 value = ((r>>3)&0x1F)|(((g>>3)&0x1F)<<5)|(((b>>3)&0x1F)<<10);
 
-    GUI_ConsoleModePrintf(&gb_palview_con,0,1,"Value: 0x%04X",value);
+    GUI_ConsoleModePrintf(&gb_palview_con,0,0,"Value: 0x%04X",value);
 
-    GUI_ConsoleModePrintf(&gb_palview_con,16,0,"RGB: (%d,%d,%d)",r>>3,g>>3,b>>3);
+    GUI_ConsoleModePrintf(&gb_palview_con,0,1,"RGB: (%d,%d,%d)",r>>3,g>>3,b>>3);
 
-    GUI_ConsoleModePrintf(&gb_palview_con,16,1,"Index: %d[%d]",
+    GUI_ConsoleModePrintf(&gb_palview_con,16,0,"Index: %d[%d]",
                           gb_palview_selectedindex/4,gb_palview_selectedindex%4);
 
     memset(gb_pal_bg_buffer,192,sizeof(gb_pal_bg_buffer));
@@ -134,12 +134,12 @@ void Win_GBPalViewerUpdate(void)
     for(i = 0; i < 32; i++)
     {
         //BG
-        GB_Debug_Get_Palette(0,i/4,i%4,&r,&g,&b);
+        GB_Debug_GetPalette(0,i/4,i%4,&r,&g,&b);
         GUI_Draw_SetDrawingColor(r,g,b);
         GUI_Draw_FillRect(gb_pal_bg_buffer,GB_PAL_BUFFER_WIDTH,GB_PAL_BUFFER_HEIGHT,
                           1 + ((i%4)*20), 19 + ((i%4)*20), 1 + ((i/4)*20), 19 + ((i/4)*20));
         //SPR
-        GB_Debug_Get_Palette(1,i/4,i%4,&r,&g,&b);
+        GB_Debug_GetPalette(1,i/4,i%4,&r,&g,&b);
         GUI_Draw_SetDrawingColor(r,g,b);
         GUI_Draw_FillRect(gb_pal_spr_buffer,GB_PAL_BUFFER_WIDTH,GB_PAL_BUFFER_HEIGHT,
                         1 + ((i%4)*20), 19 + ((i%4)*20), 1 + ((i/4)*20), 19 + ((i/4)*20));
@@ -168,8 +168,8 @@ void Win_GBPalViewerRender(void)
 {
     if(GBPalViewerCreated == 0) return;
 
-    char buffer[WIN_GB_MEMVIEWER_WIDTH*WIN_GB_MEMVIEWER_HEIGHT*3];
-    GUI_Draw(&gb_palviewer_window_gui,buffer,WIN_GB_MEMVIEWER_WIDTH,WIN_GB_MEMVIEWER_HEIGHT,1);
+    char buffer[WIN_GB_PALVIEWER_WIDTH*WIN_GB_PALVIEWER_HEIGHT*3];
+    GUI_Draw(&gb_palviewer_window_gui,buffer,WIN_GB_PALVIEWER_WIDTH,WIN_GB_PALVIEWER_HEIGHT,1);
 
     WH_Render(WinIDGBPalViewer, buffer);
 }
@@ -235,12 +235,12 @@ static void _win_gb_palviewer_dump_btn_callback(void)
     for(i = 0; i < 32; i++)
     {
         //BG
-        GB_Debug_Get_Palette(0,i/4,i%4,&r,&g,&b);
+        GB_Debug_GetPalette(0,i/4,i%4,&r,&g,&b);
         GUI_Draw_SetDrawingColor(r,g,b);
         GUI_Draw_FillRect(gb_pal_bg_buffer,GB_PAL_BUFFER_WIDTH,GB_PAL_BUFFER_HEIGHT,
                           1 + ((i%4)*20), 19 + ((i%4)*20), 1 + ((i/4)*20), 19 + ((i/4)*20));
         //SPR
-        GB_Debug_Get_Palette(1,i/4,i%4,&r,&g,&b);
+        GB_Debug_GetPalette(1,i/4,i%4,&r,&g,&b);
         GUI_Draw_SetDrawingColor(r,g,b);
         GUI_Draw_FillRect(gb_pal_spr_buffer,GB_PAL_BUFFER_WIDTH,GB_PAL_BUFFER_HEIGHT,
                         1 + ((i%4)*20), 19 + ((i%4)*20), 1 + ((i/4)*20), 19 + ((i/4)*20));
@@ -287,23 +287,23 @@ int Win_GBPalViewerCreate(void)
 
     if(Win_MainRunningGB() == 0) return 0;
 
-    GUI_SetLabel(&gb_palview_bgpal_label,40,6,GB_PAL_BUFFER_WIDTH,FONT_12_HEIGHT,"Background");
-    GUI_SetLabel(&gb_palview_sprpal_label,162,6,GB_PAL_BUFFER_WIDTH,FONT_12_HEIGHT,"Sprites");
+    GUI_SetLabel(&gb_palview_bgpal_label,32,6,GB_PAL_BUFFER_WIDTH,FONT_12_HEIGHT,"Background");
+    GUI_SetLabel(&gb_palview_sprpal_label,145,6,GB_PAL_BUFFER_WIDTH,FONT_12_HEIGHT,"Sprites");
 
     GUI_SetTextBox(&gb_palview_textbox,&gb_palview_con,
-                   6,192, 32*FONT_12_WIDTH,2*FONT_12_HEIGHT, NULL);
+                   6,192, 28*FONT_12_WIDTH,2*FONT_12_HEIGHT, NULL);
 
-    GUI_SetBitmap(&gb_palview_bgpal_bmp,40,24,GB_PAL_BUFFER_WIDTH,GB_PAL_BUFFER_HEIGHT,gb_pal_bg_buffer,
+    GUI_SetBitmap(&gb_palview_bgpal_bmp,32,24,GB_PAL_BUFFER_WIDTH,GB_PAL_BUFFER_HEIGHT,gb_pal_bg_buffer,
                   _win_gb_palviewer_bg_bmp_callback);
-    GUI_SetBitmap(&gb_palview_sprpal_bmp,162,24,GB_PAL_BUFFER_WIDTH,GB_PAL_BUFFER_HEIGHT,gb_pal_spr_buffer,
+    GUI_SetBitmap(&gb_palview_sprpal_bmp,145,24,GB_PAL_BUFFER_WIDTH,GB_PAL_BUFFER_HEIGHT,gb_pal_spr_buffer,
                   _win_gb_palviewer_spr_bmp_callback);
 
-    GUI_SetButton(&gb_palview_dumpbtn,238,192,FONT_12_WIDTH*6,FONT_12_HEIGHT*2,"Dump",
+    GUI_SetButton(&gb_palview_dumpbtn,210,192,FONT_12_WIDTH*6,FONT_12_HEIGHT*2,"Dump",
                   _win_gb_palviewer_dump_btn_callback);
 
     GBPalViewerCreated = 1;
 
-    WinIDGBPalViewer = WH_Create(WIN_GB_MEMVIEWER_WIDTH,WIN_GB_MEMVIEWER_HEIGHT, 0,0, 0);
+    WinIDGBPalViewer = WH_Create(WIN_GB_PALVIEWER_WIDTH,WIN_GB_PALVIEWER_HEIGHT, 0,0, 0);
     WH_SetCaption(WinIDGBPalViewer,"GB Palette Viewer");
 
     WH_SetEventCallback(WinIDGBPalViewer,Win_GBPalViewerCallback);

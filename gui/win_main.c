@@ -53,6 +53,7 @@
 #include "win_gb_memviewer.h"
 #include "win_gb_ioviewer.h"
 //-
+#include "win_gb_sprviewer.h"
 #include "win_gb_palviewer.h"
 
 #include "win_gba_disassembler.h"
@@ -551,6 +552,12 @@ static void _win_main_menu_open_io_viewer(void)
     Win_GBIOViewerCreate();
 }
 
+static void _win_main_menu_open_spr_viewer(void)
+{
+    //Win_GBASprViewerCreate();
+    Win_GBSprViewerCreate();
+}
+
 static void _win_main_menu_open_pal_viewer(void)
 {
     Win_GBAPalViewerCreate();
@@ -652,7 +659,7 @@ static _gui_menu_entry mmdebug_ioview = {"I/O Viewer (F7)" , _win_main_menu_open
 
 static _gui_menu_entry mmdebug_tileview = {"Tile Viewer" , NULL};
 static _gui_menu_entry mmdebug_mapview = {"Map Viewer" , NULL};
-static _gui_menu_entry mmdebug_sprview = {"Sprite Viewer" , NULL};
+static _gui_menu_entry mmdebug_sprview = {"Sprite Viewer" , _win_main_menu_open_spr_viewer};
 static _gui_menu_entry mmdebug_palview = {"Palette Viewer" , _win_main_menu_open_pal_viewer};
 
 static _gui_menu_entry mmdebug_sgbview = {"SGB Viewer" , NULL};

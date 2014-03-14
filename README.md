@@ -7,7 +7,7 @@ This is an emulator I started a few years ago. I haven't released any version si
 
 I'm currently porting the Win32 GUI to SDL2.
 
-This has been compiled in Linux Mint 16 and Windows 7 succesfuly. Compiling with OpenCV hasn't been tested in Linux, but it should work.
+This has been compiled in Linux Mint 16 and Windows 7 succesfuly. Compiling with OpenCV in Linux is a bit tricky, and the emulator can't close nicely, but camera works.
 
 When the current goals are done, the version 0.2.0 will be released. Until then even though the files say that it is version 0.2.0, it really isn't. It's 0.1.X.
 

@@ -878,11 +878,11 @@ static void GB_CameraWrite(u32 address, u32 value)
                 if(reg < 0x36)
                 {
                     //Registers:
-                    //0 - execute command/take picture?
+                    //0 - execute command/take picture when writing 03h
                     //1,2 - brightness (1 MSB, 2 LSB)
                     //3 - counter?
-                    //4 - ? (fixed)
-                    //5 - ? (fixed)
+                    //4 - ?
+                    //5 - ?
                     //6..35h - individual tile filter? 48 = 8*6
                     //         Contrast seems to change all 48 registers...
                     cam->reg[reg] = value;
@@ -892,7 +892,7 @@ static void GB_CameraWrite(u32 address, u32 value)
                     {
                         if(value == 0x3) //execute command? take picture?
                         {
-                            u32 brightness = cam->reg[1] + (cam->reg[2]<<8);
+                            u32 brightness = cam->reg[1] | (cam->reg[2]<<8);
                             GB_CameraTakePicture(brightness);
                         }
                         //else Debug_DebugMsgArg("CAMERA WROTE - %02x to %04x",value,address);

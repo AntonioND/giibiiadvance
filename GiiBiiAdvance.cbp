@@ -84,12 +84,12 @@
 					<Add option="-fexpensive-optimizations" />
 					<Add option="-O3" />
 					<Add option="-ffast-math" />
-					<Add option="-DNO_CAMERA_EMULATION" />
 					<Add directory="C:/CodeBlocks/MinGW/include" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add option="-lmingw32 -lopengl32 -lSDL2main -lSDL2 -mwindows" />
+					<Add option="-lSDL2" />
+					<Add option="`pkg-config --libs opencv`" />
 				</Linker>
 			</Target>
 			<Target title="Debug_Linux_NoCamera">
@@ -121,7 +121,7 @@
 				<Linker>
 					<Add option="-s" />
 					<Add option="-lSDL2" />
-					<Add option="-lcv200 -lcvaux200 -lcxcore200 -lcxts200 -lhighgui200 -lml200" />
+					<Add option="`pkg-config --libs opencv`" />
 				</Linker>
 			</Target>
 			<Target title="Release_Linux_NoCamera">

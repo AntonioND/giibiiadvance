@@ -181,7 +181,7 @@ static void GB_CameraTakePicture(u32 brightness)
                     u8 * data = &( ((u8*)frame->imageData)
                             [((j*gbcamerafactor)*frame->widthStep)+((i*gbcamerafactor)*3)] );
                     s16 value = ((u32)data[0]+(u32)data[1]+(u32)data[2])/3;
-                    value += (rand()&0x7)-0x03; // a bit of noise :)
+                    value += (rand()&0x15)-0x07; // a bit of noise :)
                     if(value < 0) value = 0;
                     else if(value > 255) value = 255;
                     inbuffer[i][j] = (u8)value;

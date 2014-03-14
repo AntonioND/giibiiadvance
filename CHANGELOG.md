@@ -40,6 +40,7 @@ GB emulation
 - '4x4 World Trophy (Europe) (En,Fr,De,Es,It)' works.
 - Disassembly improved
 - Disassembly shows I/O register names that are accesed by memory instructions.
+- Added targets for compiling with GB Camera.
 
 
 Version 0.1.0

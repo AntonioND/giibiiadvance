@@ -109,7 +109,7 @@ int GB_CameraInit(int createwindow)
     capture = cvCaptureFromCAM(CV_CAP_ANY);
     if(!capture)
     {
-        ErrorDialog("OpenCV ERROR: capture is NULL\nNo camera detected?");
+        Debug_ErrorMsgArg("OpenCV ERROR: capture is NULL\nNo camera detected?");
         return 0;
     }
 
@@ -122,7 +122,7 @@ int GB_CameraInit(int createwindow)
     IplImage * frame = cvQueryFrame(capture);
     if(!frame)
     {
-        ErrorDialog("OpenCV ERROR: frame is NULL");
+        Debug_ErrorMsgArg("OpenCV ERROR: frame is NULL");
         GB_CameraEnd();
         return 0;
     }
@@ -130,7 +130,7 @@ int GB_CameraInit(int createwindow)
     {
         if( (frame->width < 16*8) || (frame->height < 14*8) )
         {
-            ErrorDialog("Camera resolution too small..");
+            Debug_ErrorMsgArg("Camera resolution too small..");
             GB_CameraEnd();
             return 0;
         }
@@ -150,7 +150,7 @@ int GB_CameraInit(int createwindow)
 
 static void GB_CameraTakePicture(u32 brightness)
 {
-    u8 inbuffer[16*8][14*8];
+    int inbuffer[16*8][14*8];
     u8 readybuffer[14][16][16];
     int i, j;
 
@@ -170,7 +170,7 @@ static void GB_CameraTakePicture(u32 brightness)
         if(!frame)
         {
             GB_CameraEnd();
-            ErrorDialog("OpenCV ERROR: frame is null...\n");
+            Debug_ErrorMsgArg("OpenCV ERROR: frame is null...\n");
         }
         else
         {
@@ -883,8 +883,8 @@ static void GB_CameraWrite(u32 address, u32 value)
                     //3 - counter?
                     //4 - ? (fixed)
                     //5 - ? (fixed)
-                    //6..35h - individual tile filter? 48 = 8*6 contrast seems to change all
-                    //         registers...
+                    //6..35h - individual tile filter? 48 = 8*6
+                    //         Contrast seems to change all 48 registers...
                     cam->reg[reg] = value;
 
                     //Take picture...

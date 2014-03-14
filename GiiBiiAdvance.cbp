@@ -18,6 +18,22 @@
 				</Compiler>
 				<Linker>
 					<Add option="-lmingw32 -lopengl32 -lSDL2main -lSDL2 -mwindows" />
+					<Add option="-lcv200 -lcvaux200 -lcxcore200 -lcxts200 -lhighgui200 -lml200" />
+				</Linker>
+			</Target>
+			<Target title="Debug_Windows_NoCamera">
+				<Option platforms="Windows;" />
+				<Option output="./GiiBiiAdvance" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Windows/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-DNO_CAMERA_EMULATION" />
+					<Add directory="C:/CodeBlocks/MinGW/include" />
+				</Compiler>
+				<Linker>
+					<Add option="-lmingw32 -lopengl32 -lSDL2main -lSDL2 -mwindows" />
 				</Linker>
 			</Target>
 			<Target title="Release_Windows">
@@ -36,6 +52,26 @@
 				<Linker>
 					<Add option="-s" />
 					<Add option="-lmingw32 -lopengl32 -lSDL2main -lSDL2 -mwindows" />
+					<Add option="-lcv200 -lcvaux200 -lcxcore200 -lcxts200 -lhighgui200 -lml200" />
+				</Linker>
+			</Target>
+			<Target title="Release_Windows_NoCamera">
+				<Option platforms="Windows;" />
+				<Option output="./GiiBiiAdvance" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Windows/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+				<Compiler>
+					<Add option="-fexpensive-optimizations" />
+					<Add option="-O3" />
+					<Add option="-ffast-math" />
+					<Add option="-DNO_CAMERA_EMULATION" />
+					<Add directory="C:/CodeBlocks/MinGW/include" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add option="-lmingw32 -lopengl32 -lSDL2main -lSDL2 -mwindows" />
 				</Linker>
 			</Target>
 			<Target title="Debug_Linux">
@@ -45,7 +81,26 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
+					<Add option="-fexpensive-optimizations" />
+					<Add option="-O3" />
+					<Add option="-ffast-math" />
+					<Add option="-DNO_CAMERA_EMULATION" />
+					<Add directory="C:/CodeBlocks/MinGW/include" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add option="-lmingw32 -lopengl32 -lSDL2main -lSDL2 -mwindows" />
+				</Linker>
+			</Target>
+			<Target title="Debug_Linux_NoCamera">
+				<Option platforms="Unix;" />
+				<Option output="./GiiBiiAdvance" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Linux/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
 					<Add option="-g" />
+					<Add option="-DNO_CAMERA_EMULATION" />
 				</Compiler>
 				<Linker>
 					<Add option="-lSDL2" />
@@ -62,6 +117,25 @@
 					<Add option="-fexpensive-optimizations" />
 					<Add option="-O3" />
 					<Add option="-ffast-math" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add option="-lSDL2" />
+					<Add option="-lcv200 -lcvaux200 -lcxcore200 -lcxts200 -lhighgui200 -lml200" />
+				</Linker>
+			</Target>
+			<Target title="Release_Linux_NoCamera">
+				<Option platforms="Unix;" />
+				<Option output="./GiiBiiAdvance" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Linux/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+				<Compiler>
+					<Add option="-fexpensive-optimizations" />
+					<Add option="-O3" />
+					<Add option="-ffast-math" />
+					<Add option="-DNO_CAMERA_EMULATION" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -396,6 +470,8 @@
 			<Option compilerVar="WINDRES" />
 			<Option target="Debug_Windows" />
 			<Option target="Release_Windows" />
+			<Option target="Debug_Windows_NoCamera" />
+			<Option target="Release_Windows_NoCamera" />
 		</Unit>
 		<Unit filename="sound_utils.c">
 			<Option compilerVar="CC" />

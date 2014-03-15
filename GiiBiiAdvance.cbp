@@ -191,6 +191,10 @@
 		</Unit>
 		<Unit filename="gb_core/debug_video.h" />
 		<Unit filename="gb_core/gameboy.h" />
+		<Unit filename="gb_core/gb_camera.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gb_core/gb_camera.h" />
 		<Unit filename="gb_core/gb_main.c">
 			<Option compilerVar="CC" />
 		</Unit>

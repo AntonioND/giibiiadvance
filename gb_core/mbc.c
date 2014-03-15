@@ -35,8 +35,13 @@
 #include "sgb.h"
 #include "video.h"
 #include "gb_main.h"
+#include "gb_camera.h"
+
+//------------------------------------------------------------------------------
 
 extern _GB_CONTEXT_ GameBoy;
+
+//------------------------------------------------------------------------------
 
 /*
 Gamegenie/Shark Cheats
@@ -75,158 +80,6 @@ this method steals some CPU time, also, it cannot be used to patch program
 code in ROM.
 As far as I rememeber, somewhat 10-25 codes can be used simultaneously.
 */
-
-#ifndef NO_CAMERA_EMULATION
-
-#include <opencv/cv.h>
-#include <opencv/highgui.h>
-
-static CvCapture * capture;
-//static int gbcamwindow = 0;
-static int gbcamenabled = 0;
-static int gbcamerafactor = 1;
-#endif
-
-void GB_CameraEnd(void)
-{
-#ifndef NO_CAMERA_EMULATION
-    if(gbcamenabled == 0) return;
-
-    //if(gbcamwindow) cvDestroyWindow("GiiBii - Webcam Output");
-
-    cvReleaseCapture(&capture);
-
-    //gbcamwindow = 0;
-    gbcamenabled = 0;
-#endif
-}
-
-int GB_CameraInit(int createwindow)
-{
-#ifndef NO_CAMERA_EMULATION
-    if(gbcamenabled) return 1;
-
-    capture = cvCaptureFromCAM(CV_CAP_ANY);
-    if(!capture)
-    {
-        Debug_ErrorMsgArg("OpenCV ERROR: capture is NULL\nNo camera detected?");
-        return 0;
-    }
-
-    gbcamenabled = 1;
-
-    //gbcamwindow = createwindow;
-
-    //if(gbcamwindow) cvNamedWindow("GiiBii - Webcam Output",CV_WINDOW_AUTOSIZE);
-
-    IplImage * frame = cvQueryFrame(capture);
-    if(!frame)
-    {
-        Debug_ErrorMsgArg("OpenCV ERROR: frame is NULL");
-        GB_CameraEnd();
-        return 0;
-    }
-    else
-    {
-        if( (frame->width < 16*8) || (frame->height < 14*8) )
-        {
-            Debug_ErrorMsgArg("Camera resolution too small..");
-            GB_CameraEnd();
-            return 0;
-        }
-
-        int xfactor = frame->width / (16*8);
-        int yfactor = frame->height / (14*8);
-
-        gbcamerafactor = (xfactor > yfactor) ? yfactor : xfactor; //min
-    }
-
-    return 1;
-#else
-    Debug_ErrorMsgArg("GiiBiiAdvance was compiled without camera features.");
-    return 0;
-#endif
-}
-
-static void GB_CameraTakePicture(u32 brightness)
-{
-    int inbuffer[16*8][14*8];
-    u8 readybuffer[14][16][16];
-    int i, j;
-
-#ifndef NO_CAMERA_EMULATION
-    //Get image
-    if(gbcamenabled == 0)
-    {
-#endif
-        //just some random output...
-        for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++) inbuffer[i][j] = rand();
-#ifndef NO_CAMERA_EMULATION
-    }
-    else
-    {
-        //get image from webcam
-        IplImage * frame = cvQueryFrame(capture);
-        if(!frame)
-        {
-            GB_CameraEnd();
-            Debug_ErrorMsgArg("OpenCV ERROR: frame is null...\n");
-        }
-        else
-        {
-            if(frame->depth == 8 && frame->nChannels == 3)
-            {
-                for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
-                {
-                    u8 * data = &( ((u8*)frame->imageData)
-                            [((j*gbcamerafactor)*frame->widthStep)+((i*gbcamerafactor)*3)] );
-                    s16 value = ((u32)data[0]+(u32)data[1]+(u32)data[2])/3;
-                    value += (rand()&0x15)-0x07; // a bit of noise :)
-                    if(value < 0) value = 0;
-                    else if(value > 255) value = 255;
-                    inbuffer[i][j] = (u8)value;
-                    //if(gbcamwindow) { data[0] = ~data[0]; data[1] = ~data[1]; data[2] = ~data[2]; }
-                }
-            }
-
-            //if(gbcamwindow) cvShowImage("GiiBii - Webcam Output", frame );
-        }
-    }
-#endif
-
-    //Apply brightness
-    u32 br = brightness >= 0x8000;
-    for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
-    {
-        if(br == 0)
-        {
-            inbuffer[i][j] = (inbuffer[i][j] * brightness) / (0x8000);
-        }
-        else
-        {
-            //when brightness is very high (in gb camera, the bar must be at the top position) it
-            //will start changing brightness like crazy... i don't have any idea of why does it happen.
-            inbuffer[i][j] = 255 - ((255-inbuffer[i][j]) * (0xFFFF - brightness)) / (0x8000);
-        }
-    }
-
-    //Convert to tiles
-    memset(readybuffer,0,sizeof(readybuffer));
-    for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
-    {
-        u8 outcolor = 3 - (inbuffer[i][j] >> 6);
-
-        u8 * tile_base = readybuffer[j>>3][i>>3];
-
-        tile_base = &tile_base[(j&7)*2];
-
-        if(outcolor & 1) tile_base[0] |= 1<<(7-(7&i));
-        if(outcolor & 2) tile_base[1] |= 1<<(7-(7&i));
-    }
-
-    //Copy to cart ram...
-    memcpy(&(GameBoy.Memory.ExternRAM[0][0xA100-0xA000]),readybuffer,sizeof(readybuffer));
-}
 
 //------------------------------------------------------------------------------
 
@@ -749,7 +602,7 @@ static void GB_MBC7Write(u32 address, u32 value) // copied from VisualBoy Advanc
     }
 }
 
-//"Taito Variety Pack" works, but "Momotarou Collection 2" is more strange...
+//"Taito Variety Pack" works, but "Momotarou Collection 2" is very strange...
 static void GB_MMM01Write(u32 address, u32 value)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
@@ -869,36 +722,8 @@ static void GB_CameraWrite(u32 address, u32 value)
         case 0xB:
             if(mem->mbc_mode == 1)
             {
-                _GB_CAMERA_CART_ * cam = &GameBoy.Emulator.CAM;
-
-                u32 reg = address-0xA000;
-
-                //printf("[%04X]=%02X\n",(u32)(u16)address,(u32)(u8)value);
-
-                if(reg < 0x36)
-                {
-                    //Registers:
-                    //0 - execute command/take picture when writing 03h
-                    //1,2 - brightness (1 MSB, 2 LSB)
-                    //3 - counter?
-                    //4 - ?
-                    //5 - ?
-                    //6..35h - individual tile filter? 48 = 8*6
-                    //         Contrast seems to change all 48 registers...
-                    cam->reg[reg] = value;
-
-                    //Take picture...
-                    if(reg == 0)
-                    {
-                        if(value == 0x3) //execute command? take picture?
-                        {
-                            u32 brightness = cam->reg[1] | (cam->reg[2]<<8);
-                            GB_CameraTakePicture(brightness);
-                        }
-                        //else Debug_DebugMsgArg("CAMERA WROTE - %02x to %04x",value,address);
-                    }
-                }
-                //Debug_DebugMsgArg("CAMERA WROTE - %02x to %04x",value,address);
+                GB_CameraWriteRegister(address,value);
+                break;
             }
 
             if(mem->RAMEnabled == 0) return;
@@ -1005,8 +830,7 @@ static u32 GB_CameraRead(u32 address)
 
     if(mem->mbc_mode == 1) //CAM registers
     {
-        if(address == 0xA000) return 0; //'ready' register -- always ready
-        return 0xFF; //others are write-only? they are never read so the value doesn't matter...
+        return GB_CameraReadRegister(address);
     }
     else //RAM -- image captured by camera goes to bank 0
     {

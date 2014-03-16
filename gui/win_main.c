@@ -63,7 +63,7 @@
 
 //------------------------------------------------------------------
 
-static int WinIDMain;
+static int WinIDMain = -1;
 
 //------------------------------------------------------------------
 
@@ -201,7 +201,8 @@ static void _win_main_get_game_screen_texture_dump(void)
 static void _win_main_set_game_screen(int type)
 {
     WIN_MAIN_SCREEN_TYPE = type;
-    WH_SetSize(WinIDMain,256*WIN_MAIN_CONFIG_ZOOM,224*WIN_MAIN_CONFIG_ZOOM,
+    if(WinIDMain != -1)
+        WH_SetSize(WinIDMain,256*WIN_MAIN_CONFIG_ZOOM,224*WIN_MAIN_CONFIG_ZOOM,
                _win_main_get_game_screen_texture_width(),_win_main_get_game_screen_texture_height(), WIN_MAIN_CONFIG_ZOOM);
 }
 
@@ -830,7 +831,8 @@ static void _win_main_change_zoom(int newzoom)
     {
         WIN_MAIN_MENU_HAS_TO_UPDATE = 1;
 
-        WH_SetSize(WinIDMain,256*WIN_MAIN_CONFIG_ZOOM,224*WIN_MAIN_CONFIG_ZOOM, 0,0, 0);
+        if(WinIDMain != -1)
+            WH_SetSize(WinIDMain,256*WIN_MAIN_CONFIG_ZOOM,224*WIN_MAIN_CONFIG_ZOOM, 0,0, 0);
     }
     else
     {
@@ -1005,8 +1007,6 @@ static int Win_MainEventCallback(SDL_Event * e)
 //@global function
 int Win_MainCreate(char * rom_path)
 {
-    _win_main_change_zoom(EmulatorConfig.screen_size);
-
     GUI_SetButton(&mainwindow_subwindow_btn,10,50,7*FONT_12_WIDTH,FONT_12_HEIGHT,"CLOSE",_win_main_config_window_close);
     GUI_SetButton(&mainwindow_subwindow_btn2,10,70,7*FONT_12_WIDTH,FONT_12_HEIGHT,"TEST",NULL);
 
@@ -1020,18 +1020,19 @@ int Win_MainCreate(char * rom_path)
     _win_main_scrollable_text_window_close();
     _win_main_clear_message();
 
+    _win_main_change_zoom(EmulatorConfig.screen_size);
+
     WinIDMain = WH_Create(256*WIN_MAIN_CONFIG_ZOOM,224*WIN_MAIN_CONFIG_ZOOM, 0,0, 0);
-
-    WIN_MAIN_MENU_ENABLED = 1;
-    WIN_MAIN_MENU_HAS_TO_UPDATE = 1;
-
-    WH_SetCaption(WinIDMain,"GiiBiiAdvance");
-
     if( WinIDMain == -1 )
     {
         Debug_LogMsgArg( "Win_MainCreate(): Window could not be created!" );
         return 1;
     }
+
+    WIN_MAIN_MENU_ENABLED = 1;
+    WIN_MAIN_MENU_HAS_TO_UPDATE = 1;
+
+    WH_SetCaption(WinIDMain,"GiiBiiAdvance");
 
     WH_SetEventCallback(WinIDMain,Win_MainEventCallback);
     WH_SetEventMainWindow(WinIDMain);

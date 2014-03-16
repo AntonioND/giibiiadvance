@@ -72,7 +72,7 @@ int GB_CameraInit(int createwindow)
 #ifndef NO_CAMERA_EMULATION
     if(gbcamenabled) return 1;
 
-    capture = cvCaptureFromCAM(CV_CAP_ANY);
+    capture = cvCaptureFromCAM(CV_CAP_ANY); // TODO : Select camera from configuration file?
     if(!capture)
     {
         Debug_ErrorMsgArg("OpenCV ERROR: capture is NULL\nNo camera detected?");
@@ -85,6 +85,31 @@ int GB_CameraInit(int createwindow)
 
     //if(gbcamwindow) cvNamedWindow("GiiBii - Webcam Output",CV_WINDOW_AUTOSIZE);
 
+    // TODO : Select resolution from configuration file?
+    int w = 160; //This is the minimum standard resolution that works with GB Camera (128x112)
+    int h = 120;
+    while(1) // Get the smaller valid resolution
+    {
+        cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, w);
+        cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, h);
+
+        w = cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH);
+        h = cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT);
+
+        if( (w >= 128) && (h >= 112) )
+        {
+            break;
+        }
+        else
+        {
+            w *= 2;
+            h *= 2;
+        }
+
+        if(w >= 1024) // too big, stop now.
+            break;
+    }
+
     IplImage * frame = cvQueryFrame(capture);
     if(!frame)
     {
@@ -94,9 +119,10 @@ int GB_CameraInit(int createwindow)
     }
     else
     {
+        Debug_LogMsgArg("Camera resolution is: %dx%d",frame->width,frame->height);
         if( (frame->width < 16*8) || (frame->height < 14*8) )
         {
-            Debug_ErrorMsgArg("Camera resolution too small..");
+            Debug_ErrorMsgArg("Camera resolution is too small..");
             GB_CameraEnd();
             return 0;
         }
@@ -213,6 +239,7 @@ static void GB_CameraTakePicture(u32 exposure_time, int offset, int dithering_en
     }
 
     //Apply exposure time
+#if 0
     //exposure_time = (exposure_time * 16) / 10;
     if(exposure_time >= 0x8000)
     {
@@ -232,6 +259,14 @@ static void GB_CameraTakePicture(u32 exposure_time, int offset, int dithering_en
             gb_cam_shoot_buf[i][j] = gb_clamp_int(0,result,255);
         }
     }
+#else
+    for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
+    {
+        int result = gb_cam_shoot_buf[i][j];
+        result = ( ( result * exposure_time ) / 0x6000 );
+        gb_cam_shoot_buf[i][j] = gb_clamp_int(0,result,255);
+    }
+#endif
 
 #if 0
     //Apply offset
@@ -291,6 +326,7 @@ static void GB_CameraTakePicture(u32 exposure_time, int offset, int dithering_en
 
     if(dithering_enabled)
     {
+#if 0
         // Floyd–Steinberg dithering - Wikipedia
         for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
         {
@@ -314,12 +350,40 @@ static void GB_CameraTakePicture(u32 exposure_time, int offset, int dithering_en
                 if(i > 0)
                     gb_cam_shoot_buf[i-1][j+1] = gb_clamp_int(0,gb_cam_shoot_buf[i-1][j+1] + (3*error)/16,255);
             }
+        }
+#else
+        // Standard ordered dithering. Bayer threshold matrix - http://bisqwit.iki.fi/story/howto/dither/jy/
 
-            //value += (rand()&0x15)-0x07; // a bit of noise :)
-            //if((i^j)&2) value += (rand()&0x15)-0x07; // a bit of noise :)
+        //const int matrix[64] =  { // divided by 64
+        //    0, 48, 12, 60,  3, 51, 15, 63,
+        //    32, 16, 44, 28, 35, 19, 47, 31,
+        //     8, 56,  4, 52, 11, 59,  7, 55,
+        //    40, 24, 36, 20, 43, 27, 39, 23,
+        //     2, 50, 14, 62,  1, 49, 13, 61,
+        //    34, 18, 46, 30, 33, 17, 45, 29,
+        //    10, 58,  6, 54,  9, 57,  5, 53,
+        //    42, 26, 38, 22, 41, 25, 37, 21,
+        //};
+        //const int matrix_div = 64;
 
+        const int matrix[16] =  { // divided by 256
+             15, 135,  45, 165,
+            195,  75, 225, 105,
+             60, 180,  30, 150,
+            240, 120, 210,  90
+        };
+        const int matrix_div = 256;
+
+        int treshold = 256/4;
+        for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
+        {
+            int oldpixel = gb_cam_shoot_buf[i][j];
+            //int matrix_value = matrix[(i & 7) + ((j & 7) << 3)];
+            int matrix_value = matrix[(i & 3) + ((j & 3) << 2)];
+            int newpixel = gb_clamp_int(0, oldpixel + ( (matrix_value * treshold) / matrix_div), 255 ) & 0xC0;
             inbuffer[i][j] = (u8)newpixel;
         }
+#endif
     }
     else
     {

@@ -163,7 +163,8 @@ static void GB_PrinterPrint(void)
 
     char * filename = FU_GetNewTimestampFilename("gb_printer");
 
-    u32 * buf_temp = calloc(160*144*4,1);
+    u32 buf_temp[160*144*4];
+    memset(buf_temp,0,sizeof(buf_temp));
     const u32 gb_pal_colors[4][3] = { {255,255,255}, {168,168,168}, {80,80,80}, {0,0,0} };
     int x,y;
 
@@ -184,8 +185,6 @@ static void GB_PrinterPrint(void)
     }
 
     Save_PNG(filename,160,144,buf_temp,0);
-
-    free(buf_temp);
 
     printer_file_number ++;
 }

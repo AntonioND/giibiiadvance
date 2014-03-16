@@ -161,16 +161,7 @@ static void GB_PrinterPrint(void)
         }
     }
 
-    char filename[MAX_PATHLEN];
-
-    while(1)
-    {
-        s_snprintf(filename,sizeof(filename),"%sprinter%d.png",DirGetScreenshotFolderPath(),printer_file_number);
-
-        FILE* file=fopen(filename, "rb");
-        if(file == NULL) break; //Ok
-        printer_file_number ++; //look for next free number
-    }
+    char * filename = FU_GetNewTimestampFilename("gb_printer");
 
     u32 * buf_temp = calloc(160*144*4,1);
     const u32 gb_pal_colors[4][3] = { {255,255,255}, {168,168,168}, {80,80,80}, {0,0,0} };

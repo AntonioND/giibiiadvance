@@ -611,7 +611,7 @@ static _gui_menu_entry mmfile_close = {"Close (CTRL+C)" , _win_main_menu_close};
 static _gui_menu_entry mmfile_closenosav = {"Close without saving", _win_main_menu_close_no_save};
 static _gui_menu_entry mmfile_reset = {"Reset (CTRL+R)", NULL};
 static _gui_menu_entry mmfile_pause = {"Pause (CTRL+P)", NULL};
-static _gui_menu_entry mmfile_rominfo = {"Rom Information", ConsoleShow};
+static _gui_menu_entry mmfile_rominfo = {"Show Console (Rom Info.)", ConsoleShow};
 static _gui_menu_entry mmfile_screenshot = {"Screenshot (F12)", _win_main_screenshot};
 static _gui_menu_entry mmfile_exit = {"Exit (CTRL+E)", _win_main_menu_exit};
 

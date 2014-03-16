@@ -42,6 +42,7 @@ GB emulation
 - Disassembly shows I/O register names that are accesed by memory instructions.
 - Added targets for compiling with GB Camera.
 - GB Camera emulation improved a lot since GiiBii. Contrast, enable/disable dithering, exposure time... There is only one game that use it so it's emulated for that game. Other software will probably fail (there are too many unknown things).
+- GB Camera image is very unstable if exposure time is very high...
 
 Version 0.1.0
 -------------

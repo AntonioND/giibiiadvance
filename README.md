@@ -11,6 +11,8 @@ This has been compiled in Linux Mint 16 and Windows 7 succesfuly. Compiling with
 
 When the current goals are done, the version 0.2.0 will be released. Until then even though the files say that it is version 0.2.0, it really isn't. It's 0.1.X.
 
+This is the only GB emulator that emulates completely the GB Camera if you have a webcam! :)
+
 Current goals
 -------------
 

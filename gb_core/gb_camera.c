@@ -23,11 +23,19 @@
 #include "gameboy.h"
 
 //------------------------------------------------------------------------------
+//
+//          WARNING: THIS FILE IS ALMOST EVERYTHING GUESSWORK!
+//
+//           Some information taken from M64282FP datasheet.
+//
+//------------------------------------------------------------------------------
 
 extern _GB_CONTEXT_ GameBoy;
 
 //------------------------------------------------------------------------------
 
+#include <stdlib.h>
+#include <string.h>
 
 #ifndef NO_CAMERA_EMULATION
 
@@ -116,7 +124,7 @@ void GB_CameraShoot(void)
     {
 #endif
         //just some random output...
-        for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++) gb_cam_shoot_buf[i][j] = rand();
+        for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++) gb_camera_retina_output[i][j] = rand();
 #ifndef NO_CAMERA_EMULATION
     }
     else
@@ -162,7 +170,18 @@ static inline int gb_clamp_int(int min, int value, int max)
     return value;
 }
 
-static void GB_CameraTakePicture(u32 exposure_time, int dithering_enabled)
+static inline int gb_min_int(int a, int b)
+{
+    return (a < b) ? a : b;
+}
+
+static inline int gb_max_int(int a, int b)
+{
+    return (a > b) ? a : b;
+}
+
+
+static void GB_CameraTakePicture(u32 exposure_time, int offset, int dithering_enabled, int contrast) // contrast: 0..100
 {
     GB_CameraShoot();
 
@@ -173,6 +192,8 @@ static void GB_CameraTakePicture(u32 exposure_time, int dithering_enabled)
     //Apply 3x3 programmable 1-D filtering
     for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
     {
+#if 0
+        // Horizontal edge
         if( (i > 0) && (i < 16*8-1))
             gb_cam_shoot_buf[i][j] =
                 gb_clamp_int( 0, (2 * gb_camera_retina_output[i][j]) -
@@ -180,13 +201,93 @@ static void GB_CameraTakePicture(u32 exposure_time, int dithering_enabled)
                              255);
         else
             gb_cam_shoot_buf[i][j] = gb_camera_retina_output[i][j];
+#else
+        // 2D edge
+        int ms = gb_camera_retina_output[i][gb_min_int(j+1,14*8-1)];
+        int mn = gb_camera_retina_output[i][gb_max_int(0,j-1)];
+        int mw = gb_camera_retina_output[gb_max_int(0,i-1)][j];
+        int me = gb_camera_retina_output[gb_min_int(i+1,16*8-1)][j];
+        gb_cam_shoot_buf[i][j] =
+            gb_clamp_int( 0, (3*gb_camera_retina_output[i][j]) - (ms+mn+mw+me)/2 , 255);
+#endif
     }
 
     //Apply exposure time
+    //exposure_time = (exposure_time * 16) / 10;
+    if(exposure_time >= 0x8000)
+    {
+        for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
+        {
+            int result = 255 - gb_cam_shoot_buf[i][j];
+            result = 255 - ( ( result * (0xFFFF-exposure_time) ) / 0x8000 );
+            gb_cam_shoot_buf[i][j] = gb_clamp_int(0,result,255);
+        }
+    }
+    else
+    {
+        for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
+        {
+            int result = gb_cam_shoot_buf[i][j];
+            result = ( ( result * exposure_time ) / 0x8000 );
+            gb_cam_shoot_buf[i][j] = gb_clamp_int(0,result,255);
+        }
+    }
+
+#if 0
+    //Apply offset
     for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
     {
-        gb_cam_shoot_buf[i][j] = gb_clamp_int(0,(gb_cam_shoot_buf[i][j] * exposure_time) / (0x6000),255);
+        gb_cam_shoot_buf[i][j] = gb_clamp_int(0,
+                            gb_cam_shoot_buf[i][j] + offset,
+                            255);
     }
+#endif
+
+    //Apply contrast
+    double c;
+    if(contrast <= 50)
+    {
+        c = (double)(50-contrast);
+        c /= 60.0;
+        c *= c;
+        c = (double)1.0 - c;
+    }
+    else
+    {
+        c = (double)(contrast-50);
+        c /= 60.0;
+        c *= c;
+        c *= c;
+        c *= 100;
+        c = (double)1.0 + c;
+    }
+
+    //_GB_CAMERA_CART_ * cam = &GameBoy.Emulator.CAM;
+    //extern int WinIDMain;
+    //char caption[60];
+    //s_snprintf(caption,sizeof(caption),"%d %f |  %04X", contrast,c,cam->reg[3] | (cam->reg[2]<<8));
+    //WH_SetCaption(WinIDMain,caption);
+
+    //double c = (100.0 + (double)contrast__) / 100.0;
+    //c *= c;
+    int contrast_lookup[256];
+    double newValue = 0;
+    for(i = 0; i < 256; i++)
+    {
+        newValue = (double)i;
+        newValue /= 255.0;
+        newValue -= 0.5;
+        newValue *= c;
+        newValue += 0.5;
+        newValue *= 255;
+
+        newValue = gb_clamp_int(0,newValue,255);
+        contrast_lookup[i] = (int)newValue;
+    }
+
+    for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
+        gb_cam_shoot_buf[i][j] = contrast_lookup[gb_cam_shoot_buf[i][j]];
+
 
     if(dithering_enabled)
     {
@@ -252,7 +353,7 @@ int GB_CameraReadRegister(int address)
     if(address == 0xA000) return 0; //'ready' register -- always ready in the emulator
     return 0xFF; //others are write-only? they are never read so the value doesn't matter...
 
-    //Registers C0 and C1 of M64282FP - Exposure time (each step is 16 µs) -- emulate delay
+    // TODO : Registers C0 and C1 of M64282FP - Exposure time (each step is 16 µs) -- emulate delay
 }
 
 void GB_CameraWriteRegister(int address, int value)
@@ -277,18 +378,11 @@ Register 0
     Execute command?
     Take picture when writing 03h
 
-Registers 1 and 2
--------------------
-
-    Exposure time (1 MSB, 2 LSB)
-    They correspond to registers C0 and C1 of M64282FP - Exposure time (each step is 16 us)
-
-Register 3
+Register 1
 ----------
 
     Changes all the time when camera is working.
-    Can have all values from 00f to FFh.
-    When a image is stable enough it stops changing.
+    Values seen: 00, 0A, 20, 24, 28, E4, E8.
 
     This corresponds to this register of M64282FP:
 
@@ -299,8 +393,11 @@ Register 3
           Z        2 bits          Zero point calibration ( Set the dark level output signal to Vref )
           O        6 bits          Output reference voltage ( In both plus and minus direction )
 
-    This makes sense. The GB Camera software recalculates the values based on the current image, and stops
-    changing then when not needed.
+Registers 2 and 3
+-----------------
+
+    Exposure time (2 MSB, 3 LSB)
+    They correspond to registers C0 and C1 of M64282FP - Exposure time (each step is 16 us)
 
 Register 4
 ----------
@@ -412,6 +509,7 @@ Registers 6..35h
 
     High light
 
+Reg  6  7  8  9  A  B  C  D  E  F 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F 20 21 22 23 24 25 26 27 28 29 2A 2B 2C 2D 2E 2F 30 31 32 33 34 35
     Min contrast
     80 8F D0 8B BF E0 82 9B D4 8E CB E4 87 AF DB 83 9F D5 8A BB DF 86 AB D9 81 97 D2 8D C7 E3 80 93 D1 8C C3 E1 89 B7 DD 85 A7 D8 88 B3 DC 84 A3 D6
     82 90 C8 8C BA DC 84 9A CD 8F C4 E1 89 AC D5 85 9E CE 8B B6 DA 88 A8 D3 83 97 CB 8E C1 DF 82 93 C9 8D BD DD 8A B3 D8 87 A5 D2 89 AF D7 86 A1 D0
@@ -433,6 +531,7 @@ Registers 6..35h
 
     Low light
 
+Reg  6  7  8  9  A  B  C  D  E  F 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F 20 21 22 23 24 25 26 27 28 29 2A 2B 2C 2D 2E 2F 30 31 32 33 34 35
     Min contrast
     80 94 DC 8F CA F6 83 A1 E2 92 D7 FC 8A B8 ED 85 A6 E4 8D C5 F4 88 B3 EB 82 9D E0 91 D3 FA 81 98 DE 90 CE F8 8C C1 F1 87 AF E9 8B BC EF 86 AA E6
     82 95 D2 90 C2 F3 85 A0 DA 93 CE FC 8B B3 E8 86 A4 DD 8F BE F0 8A AF E5 84 9C D7 92 CA F9 83 98 D4 91 C6 F6 8D BB EE 89 AB E2 8C B7 EB 87 A8 E0
@@ -455,12 +554,16 @@ Registers 6..35h
 
 3x3 programmable 1-D filtering
 ------------------------------
-
+       +--+
+       |MN|
     +--+--+--+
     |MW| P|ME|  Out = P + [2P - (MW+ME)] * alpha
-    +--+--+--+
+    +--+--+--+  Out = P + [4P - (MN+MS+ ME+ MW)] * alpha
+       |MS|
+       +--+
 
     With this configuration: Out = 2P - [ (MW+ME) / 2 ]
+                             Out = 3P - [ (MN+MS+ME+MW) / 2 ]
 
 ******************************************************************************************/
 
@@ -470,66 +573,29 @@ Registers 6..35h
         {
             if(value == 0x3) //execute command? take picture?
             {
-                u32 exposure_time = cam->reg[1] | (cam->reg[2]<<8);
-                GB_CameraTakePicture(exposure_time,1);
-                //Debug_LogMsgArg("");
-                //int i; for(i = 1; i < 0x36; i++)
-                //   Debug_LogMsgArg("\tld a,$%02X\n\tld [$A0%02X],a",cam->reg[i],i);
-                //Debug_LogMsgArg("\tld a,$03\tld [$A000],a\n");
+                u32 exposure_time = cam->reg[3] | (cam->reg[2]<<8);
+
+                int dithering = 0;
+
+                int i;
+                for(i = 6; i < 0x36; i += 3) // if first 3 registers mirror, not dithering
+                {
+                    if(cam->reg[6+(i%3)] != cam->reg[i])
+                    {
+                        dithering = 1;
+                        break;
+                    }
+                }
+
+                int contrast = gb_clamp_int(0, ((cam->reg[6] - 0x80) * 100) / 0x12, 100);
+
+                GB_CameraTakePicture(exposure_time,
+                                     (cam->reg[1]&0x20) ? -(cam->reg[1]&0x1F) : (cam->reg[1]&0x1F),
+                                     dithering,
+                                     contrast);
             }
             //else Debug_DebugMsgArg("CAMERA WROTE - %02x to %04x",value,address);
         }
-        /*
-        if(reg == 3)
-        {
-            extern int WinIDMain;
-
-            char caption[60];
-            s_snprintf(caption,sizeof(caption),"%02X",
-                       cam->reg[3]);
-            WH_SetCaption(WinIDMain,caption);
-            Debug_LogMsgArg("%02X",cam->reg[3]);
-        }
-        */
-        /*
-        if((reg >= 1) && (reg <= 5))
-        {
-            extern int WinIDMain;
-
-            char caption[60];
-            s_snprintf(caption,sizeof(caption),"%02X %02X %02X %02X %02X",
-                       cam->reg[1],cam->reg[2],cam->reg[3],cam->reg[4],cam->reg[5]);
-            WH_SetCaption(WinIDMain,caption);
-            //Debug_LogMsgArg("%02X",cam->reg[reg]);
-        }
-        */
-        /*
-        if((reg >= 6) && (reg <= 53))
-        {
-            extern int WinIDMain;
-
-            char caption[300];
-            s_snprintf(caption,sizeof(caption),"%02X %02X %02X %02X %02X %02X %02X %02X %02X %02X"
-                       " %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X"
-                       " %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X"
-                       " %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X"
-                       " %02X %02X %02X %02X %02X %02X %02X %02X",
-                       cam->reg[6],cam->reg[7],cam->reg[8],cam->reg[9],cam->reg[10],
-                       cam->reg[11],cam->reg[12],cam->reg[13],cam->reg[14],cam->reg[15],
-                       cam->reg[16],cam->reg[17],cam->reg[18],cam->reg[19],cam->reg[20],
-                       cam->reg[21],cam->reg[22],cam->reg[23],cam->reg[24],cam->reg[25],
-                       cam->reg[26],cam->reg[27],cam->reg[28],cam->reg[29],cam->reg[30],
-                       cam->reg[31],cam->reg[32],cam->reg[33],cam->reg[34],cam->reg[35],
-                       cam->reg[36],cam->reg[37],cam->reg[38],cam->reg[39],cam->reg[40],
-                       cam->reg[41],cam->reg[42],cam->reg[43],cam->reg[44],cam->reg[45],
-                       cam->reg[46],cam->reg[47],cam->reg[48],cam->reg[49],cam->reg[50],
-                       cam->reg[51],cam->reg[52],cam->reg[53]);
-            WH_SetCaption(WinIDMain,caption);
-            //Debug_LogMsgArg(caption);
-        }*/
-        //Debug_LogMsgArg("\tld a,$%02X",cam->reg[reg]);
-        //Debug_LogMsgArg("\tld [$A0%02X],a",reg);
-
     }
     else
     {

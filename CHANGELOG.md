@@ -38,10 +38,10 @@ GB emulation
 - 'ld hl,sp+n' and 'add sp,n' flags fixed.
 - CPU emulation rewriten. A lot more accurate, but SLOWER. It must be modified...
 - '4x4 World Trophy (Europe) (En,Fr,De,Es,It)' works.
-- Disassembly improved
+- Disassembly improved.
 - Disassembly shows I/O register names that are accesed by memory instructions.
 - Added targets for compiling with GB Camera.
-
+- GB Camera emulation improved a lot since GiiBii. Contrast, enable/disable dithering, exposure time... There is only one game that use it so it's emulated for that game. Other software will probably fail (there are too many unknown things).
 
 Version 0.1.0
 -------------

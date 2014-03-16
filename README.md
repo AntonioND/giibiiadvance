@@ -28,7 +28,6 @@ Current goals
  - Support for game controllers.
 
 - Obviously, improve emulation.
- - Correct GB Camera brightness (maybe).
  - Implement mosaic correctly (in GBA mode).
  - Correct GBA CPU timings. Maybe not for version 0.2.0.
  - Rewrite a lot of GB core to speed up emulation. NOT for version 0.2.0, maybe 0.3.0.

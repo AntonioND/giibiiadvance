@@ -292,6 +292,7 @@ typedef struct {
 
 typedef struct {
     u8 reg[0x36];
+    int clocks_left; // when taking a picture
 } _GB_CAMERA_CART_;
 
 typedef struct {

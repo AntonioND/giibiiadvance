@@ -24,6 +24,7 @@ void GB_CameraEnd(void);
 
 int GB_CameraReadRegister(int address);
 void GB_CameraWriteRegister(int address, int value);
+int GB_CameraClock(int clocks); // returns clocks to next event
 
 #endif // __GB_CAMERA__
 

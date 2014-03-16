@@ -31,6 +31,7 @@
 #include "sgb.h"
 #include "serial.h"
 #include "gb_main.h"
+#include "gb_camera.h"
 
 #include "../gui/win_gb_disassembler.h"
 
@@ -131,6 +132,7 @@ inline void GB_CPUClock(int clocks) // the lower the number of clocks, the bette
     GB_SoundUpdate(clocks);
     GB_SerialClocks(clocks);
     SGB_Clock(clocks);
+    GB_CameraClock(clocks);
 
     GB_CPUHandleClockEvents();
 }

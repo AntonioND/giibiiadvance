@@ -189,248 +189,6 @@ void GB_CameraShoot(void)
 
 //----------------------------------------------------------------------------
 
-static inline int gb_clamp_int(int min, int value, int max)
-{
-    if(value < min) return min;
-    if(value > max) return max;
-    return value;
-}
-
-static inline int gb_min_int(int a, int b)
-{
-    return (a < b) ? a : b;
-}
-
-static inline int gb_max_int(int a, int b)
-{
-    return (a > b) ? a : b;
-}
-
-
-static void GB_CameraTakePicture(u32 exposure_time, int offset, int dithering_enabled, int contrast) // contrast: 0..100
-{
-    GB_CameraShoot();
-
-    int inbuffer[16*8][14*8]; // buffer after aplying effects
-    u8 readybuffer[14][16][16];
-    int i, j;
-
-    //Apply 3x3 programmable 1-D filtering
-    for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
-    {
-#if 0
-        // Horizontal edge
-        if( (i > 0) && (i < 16*8-1))
-            gb_cam_shoot_buf[i][j] =
-                gb_clamp_int( 0, (2 * gb_camera_retina_output[i][j]) -
-                ( (gb_camera_retina_output[i-1][j] + gb_camera_retina_output[i+1][j]) / 2 ),
-                             255);
-        else
-            gb_cam_shoot_buf[i][j] = gb_camera_retina_output[i][j];
-#else
-        // 2D edge
-        int ms = gb_camera_retina_output[i][gb_min_int(j+1,14*8-1)];
-        int mn = gb_camera_retina_output[i][gb_max_int(0,j-1)];
-        int mw = gb_camera_retina_output[gb_max_int(0,i-1)][j];
-        int me = gb_camera_retina_output[gb_min_int(i+1,16*8-1)][j];
-        gb_cam_shoot_buf[i][j] =
-            gb_clamp_int( 0, (3*gb_camera_retina_output[i][j]) - (ms+mn+mw+me)/2 , 255);
-#endif
-    }
-
-    //Apply exposure time
-#if 0
-    //exposure_time = (exposure_time * 16) / 10;
-    if(exposure_time >= 0x8000)
-    {
-        for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
-        {
-            int result = 255 - gb_cam_shoot_buf[i][j];
-            result = 255 - ( ( result * (0xFFFF-exposure_time) ) / 0x8000 );
-            gb_cam_shoot_buf[i][j] = gb_clamp_int(0,result,255);
-        }
-    }
-    else
-    {
-        for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
-        {
-            int result = gb_cam_shoot_buf[i][j];
-            result = ( ( result * exposure_time ) / 0x8000 );
-            gb_cam_shoot_buf[i][j] = gb_clamp_int(0,result,255);
-        }
-    }
-#else
-    for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
-    {
-        int result = gb_cam_shoot_buf[i][j];
-        result = ( ( result * exposure_time ) / 0x6000 );
-        gb_cam_shoot_buf[i][j] = gb_clamp_int(0,result,255);
-    }
-#endif
-
-#if 0
-    //Apply offset
-    for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
-    {
-        gb_cam_shoot_buf[i][j] = gb_clamp_int(0,
-                            gb_cam_shoot_buf[i][j] + offset,
-                            255);
-    }
-#endif
-
-    //Apply contrast
-    double c;
-    if(contrast <= 50)
-    {
-        c = (double)(50-contrast);
-        c /= 60.0;
-        c *= c;
-        c = (double)1.0 - c;
-    }
-    else
-    {
-        c = (double)(contrast-50);
-        c /= 60.0;
-        c *= c;
-        c *= c;
-        c *= 100;
-        c = (double)1.0 + c;
-    }
-
-    //_GB_CAMERA_CART_ * cam = &GameBoy.Emulator.CAM;
-    //extern int WinIDMain;
-    //char caption[60];
-    //s_snprintf(caption,sizeof(caption),"%d %f |  %04X", contrast,c,cam->reg[3] | (cam->reg[2]<<8));
-    //WH_SetCaption(WinIDMain,caption);
-
-    //double c = (100.0 + (double)contrast__) / 100.0;
-    //c *= c;
-    int contrast_lookup[256];
-    double newValue = 0;
-    for(i = 0; i < 256; i++)
-    {
-        newValue = (double)i;
-        newValue /= 255.0;
-        newValue -= 0.5;
-        newValue *= c;
-        newValue += 0.5;
-        newValue *= 255;
-
-        newValue = gb_clamp_int(0,newValue,255);
-        contrast_lookup[i] = (int)newValue;
-    }
-
-    for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
-        gb_cam_shoot_buf[i][j] = contrast_lookup[gb_cam_shoot_buf[i][j]];
-
-
-    if(dithering_enabled)
-    {
-#if 0
-        // Floyd–Steinberg dithering - Wikipedia
-        for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
-        {
-            int oldpixel = gb_cam_shoot_buf[i][j]; // oldpixel  := pixel[x][y]
-            int newpixel = oldpixel & 0xC0;   // newpixel  := find_closest_palette_color(oldpixel)
-            inbuffer[i][j] = (u8)newpixel;    // pixel[x][y]  := newpixel
-            int error = oldpixel - newpixel;  // quant_error  := oldpixel - newpixel
-            //pixel[x+1][y  ] := pixel[x+1][y  ] + 7/16 * quant_error
-            //pixel[x-1][y+1] := pixel[x-1][y+1] + 3/16 * quant_error
-            //pixel[x  ][y+1] := pixel[x  ][y+1] + 5/16 * quant_error
-            //pixel[x+1][y+1] := pixel[x+1][y+1] + 1/16 * quant_error
-            if(i < (16*8-1))
-            {
-                gb_cam_shoot_buf[i+1][j] = gb_clamp_int(0,gb_cam_shoot_buf[i+1][j] + (7*error)/16,255);
-                if(j < (14*8-1))
-                    gb_cam_shoot_buf[i+1][j+1] = gb_clamp_int(0,gb_cam_shoot_buf[i+1][j+1] + (1*error)/16,255);
-            }
-            if(j < (14*8-1))
-            {
-                gb_cam_shoot_buf[i][j+1] = gb_clamp_int(0,gb_cam_shoot_buf[i][j+1] + (5*error)/16,255);
-                if(i > 0)
-                    gb_cam_shoot_buf[i-1][j+1] = gb_clamp_int(0,gb_cam_shoot_buf[i-1][j+1] + (3*error)/16,255);
-            }
-        }
-#else
-        // Standard ordered dithering. Bayer threshold matrix - http://bisqwit.iki.fi/story/howto/dither/jy/
-
-        //const int matrix[64] =  { // divided by 64
-        //    0, 48, 12, 60,  3, 51, 15, 63,
-        //    32, 16, 44, 28, 35, 19, 47, 31,
-        //     8, 56,  4, 52, 11, 59,  7, 55,
-        //    40, 24, 36, 20, 43, 27, 39, 23,
-        //     2, 50, 14, 62,  1, 49, 13, 61,
-        //    34, 18, 46, 30, 33, 17, 45, 29,
-        //    10, 58,  6, 54,  9, 57,  5, 53,
-        //    42, 26, 38, 22, 41, 25, 37, 21,
-        //};
-        //const int matrix_div = 64;
-
-        const int matrix[16] =  { // divided by 256
-             15, 135,  45, 165,
-            195,  75, 225, 105,
-             60, 180,  30, 150,
-            240, 120, 210,  90
-        };
-        const int matrix_div = 256;
-
-        int treshold = 256/4;
-        for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
-        {
-            int oldpixel = gb_cam_shoot_buf[i][j];
-            //int matrix_value = matrix[(i & 7) + ((j & 7) << 3)];
-            int matrix_value = matrix[(i & 3) + ((j & 3) << 2)];
-            int newpixel = gb_clamp_int(0, oldpixel + ( (matrix_value * treshold) / matrix_div), 255 ) & 0xC0;
-            inbuffer[i][j] = (u8)newpixel;
-        }
-#endif
-    }
-    else
-    {
-        // No dithering
-        for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
-        {
-            inbuffer[i][j] = (u8)(gb_cam_shoot_buf[i][j] & 0xC0);
-        }
-    }
-
-    //Convert to tiles
-    memset(readybuffer,0,sizeof(readybuffer));
-    for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
-    {
-        u8 outcolor = 3 - (inbuffer[i][j] >> 6);
-
-        u8 * tile_base = readybuffer[j>>3][i>>3];
-
-        tile_base = &tile_base[(j&7)*2];
-
-        if(outcolor & 1) tile_base[0] |= 1<<(7-(7&i));
-        if(outcolor & 2) tile_base[1] |= 1<<(7-(7&i));
-    }
-
-    //Copy to cart ram...
-    memcpy(&(GameBoy.Memory.ExternRAM[0][0xA100-0xA000]),readybuffer,sizeof(readybuffer));
-}
-
-int GB_CameraReadRegister(int address)
-{
-    if(address == 0xA000) return 0; //'ready' register -- always ready in the emulator
-    return 0xFF; //others are write-only? they are never read so the value doesn't matter...
-
-    // TODO : Registers C0 and C1 of M64282FP - Exposure time (each step is 16 µs) -- emulate delay
-}
-
-void GB_CameraWriteRegister(int address, int value)
-{
-    _GB_CAMERA_CART_ * cam = &GameBoy.Emulator.CAM;
-
-    int reg = address-0xA000;
-
-    //printf("[%04X]=%02X\n",(u32)(u16)address,(u32)(u8)value);
-    if(reg < 0x36)
-    {
-        //Debug_LogMsgArg("Cam [0x%02X]=0x%02X",(u32)(u16)(address&0xFF),(u32)(u8)value);
-
 /***************************************************************************************************
 
                             GB CAMERA REGISTERS
@@ -442,11 +200,28 @@ Register 0
     Execute command?
     Take picture when writing 03h
 
+    GB CPU: 4194304 Hz -> 0.2384185791015625 (us/clock)
+    Exposure time goes from 0x0000 to 0xFFFF
+    Each exposure time step is 16 (us)
+    16 (us) / 0.2384185791015625 (us/clock) = 67.108864 clocks per exposure step
+    if exposure_time = 0xFFFF -> 1,048576 second delay
+
+    Needed clocks for transfer (chip transfers 128*128 pixels, the last rows are garbage).
+    Since the output value is analog, only one clock per pixel.
+    I assume the value is stored in cartridge RAM while it is being transfered.
+
+    u16 exposure_time = reg[3] | (reg[2]<<8);
+    clocks_left = 67 * exposure_time;
+    clocks_left += 128*128;
+
+    After that time, reg[0] clears itself.
+
 Register 1
 ----------
 
     Changes all the time when camera is working.
-    Values seen: 00, 0A, 20, 24, 28, E4, E8.
+    Values seen at boot: 00, 0A, 20, 24, 28, E4, E8.
+    When working: 0A, E4, E8.
 
     This corresponds to this register of M64282FP:
 
@@ -528,8 +303,8 @@ Register 5
          1   001       N  VH1 VH0 G4  G3  G2  G1  G0
 
          Symbol   Bit Assignment  Operation
-         N        1 bit           Exclusively set edge enhancement mode
-         VH       2 bits          Select vertical - horizontal edge operation mode
+         N        1 bit           Exclusively set vertical edge enhancement mode (?)
+         VH       2 bits          Select vertical - horizontal edge operation mode (?)
          G        5 bits          Analog output gain
 
     I don't know what it does at boot... Calibrating or something? :P
@@ -547,29 +322,42 @@ Register 5
 
     At the end:
 
-        N  = 1  - Edge enhancement mode. Access to P and M registers is always ignored!!!!
+        N  = 1  - Vertical edge enhancement mode. Access to P and M registers is always ignored!!!!
         VH = 01 - Horizontal edge mode.
         G  = 1F - Total Gain (dB) = 57.5 dB
+
+    N and VH seems to have conflicting values... Maybe this GB Camera register corresponds to another
+    one... Anyway, emulate 2D edge enhancement.
 
 Registers 6..35h
 ----------------
 
     Unknown
-    Individual tile filter? 48 = 8*6?
-    Contrast seems to change all 48 registers...
-
+    Dithering/contrast matrix? They change all 48 registers...
     It seems that they are used by the GB cartridge itself, not by the M64282FP.
 
     Values change when selecting dithering/normal mode, or when changing contrast.
-    In normal mode values seems to mirror.
+    In normal mode the first 3 values seems to mirror to the other registers.
+
+    48/3 = 16 = 4x4 matrix of 3 elements -> For dithering?
+    Maybe each 3 elements represent divisions of the range of 0-255 for color that the camera gives.
+
+    For example (normal mode, high light): 00112233445566778899AABBCCDDEEFF (input color range 0 - 255)
+    - Min. contrast (0): 80 8F D0 ->       00000000000000001122222222233333 (output gb palete 0-3)
+    - Med. contrast (7): 89 92 A2 ->       00000000000000000122333333333333
+    - Max. contrast (F): 92 92 92 ->       00000000000000000033333333333333
+
+    Emulating this would require to emulate the hardware even to know the actual values returned by
+    the sensor... Taking a look at the medium contrast values, it seems that normal values of the
+    sensor are very near each other.
 
     Normal mode
-    ------
+    -----------
 
-    First 3 values of dithering mode are repeated 48/3 = 16 times
+    First 3 values of dithering mode, repeated 48/3 = 16 times
 
-    Dithering
-    ---------
+    Dithering mode
+    --------------
 
     High light
 
@@ -631,6 +419,223 @@ Reg  6  7  8  9  A  B  C  D  E  F 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1
 
 ******************************************************************************************/
 
+static inline int gb_clamp_int(int min, int value, int max)
+{
+    if(value < min) return min;
+    if(value > max) return max;
+    return value;
+}
+
+static inline int gb_min_int(int a, int b)
+{
+    return (a < b) ? a : b;
+}
+
+static inline int gb_max_int(int a, int b)
+{
+    return (a > b) ? a : b;
+}
+
+static void GB_CameraTakePicture(u32 exposure_time, int offset, int dithering_enabled, int contrast) // contrast: 0..100
+{
+    GB_CameraShoot();
+
+    int inbuffer[16*8][14*8]; // buffer after aplying effects
+    u8 readybuffer[14][16][16];
+    int i, j;
+
+    //Apply 3x3 programmable 1-D filtering
+    for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
+    {
+/*
+        // Horizontal edge
+        if( (i > 0) && (i < 16*8-1))
+            gb_cam_shoot_buf[i][j] =
+                gb_clamp_int( 0, (2 * gb_camera_retina_output[i][j]) -
+                ( (gb_camera_retina_output[i-1][j] + gb_camera_retina_output[i+1][j]) / 2 ),
+                             255);
+        else
+            gb_cam_shoot_buf[i][j] = gb_camera_retina_output[i][j];
+*/
+        // 2D edge
+        int ms = gb_camera_retina_output[i][gb_min_int(j+1,14*8-1)];
+        int mn = gb_camera_retina_output[i][gb_max_int(0,j-1)];
+        int mw = gb_camera_retina_output[gb_max_int(0,i-1)][j];
+        int me = gb_camera_retina_output[gb_min_int(i+1,16*8-1)][j];
+        gb_cam_shoot_buf[i][j] =
+            gb_clamp_int( 0, (3*gb_camera_retina_output[i][j]) - (ms+mn+mw+me)/2 , 255);
+    }
+
+    //Apply exposure time
+    for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
+    {
+        int result = gb_cam_shoot_buf[i][j];
+        result = ( ( (result + (exposure_time>>8)) * exposure_time ) / 0x800 );
+        gb_cam_shoot_buf[i][j] = gb_clamp_int(0,result,255);
+    }
+
+/*
+    //Apply offset
+    for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
+    {
+        gb_cam_shoot_buf[i][j] = gb_clamp_int(0,
+                            gb_cam_shoot_buf[i][j] + offset,
+                            255);
+    }
+*/
+
+    //Apply contrast
+    double c;
+    if(contrast <= 50)
+    {
+        c = (double)(50-contrast);
+        c /= 60.0;
+        c *= c;
+        c = (double)1.0 - c;
+    }
+    else
+    {
+        c = (double)(contrast-50);
+        c /= 60.0;
+        c *= c;
+        c *= c;
+        c *= 100;
+        c = (double)1.0 + c;
+    }
+
+    //_GB_CAMERA_CART_ * cam = &GameBoy.Emulator.CAM;
+    //extern int WinIDMain;
+    //char caption[60];
+    //s_snprintf(caption,sizeof(caption),"%d %f |  %04X", contrast,c,cam->reg[3] | (cam->reg[2]<<8));
+    //WH_SetCaption(WinIDMain,caption);
+
+    //double c = (100.0 + (double)contrast__) / 100.0;
+    //c *= c;
+    int contrast_lookup[256];
+    double newValue = 0;
+    for(i = 0; i < 256; i++)
+    {
+        newValue = (double)i;
+        newValue /= 255.0;
+        newValue -= 0.5;
+        newValue *= c;
+        newValue += 0.5;
+        newValue *= 255;
+
+        newValue = gb_clamp_int(0,newValue,255);
+        contrast_lookup[i] = (int)newValue;
+    }
+
+    for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
+        gb_cam_shoot_buf[i][j] = contrast_lookup[gb_cam_shoot_buf[i][j]];
+
+
+    if(dithering_enabled)
+    {
+/*
+        // Floyd–Steinberg dithering - Wikipedia
+        for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
+        {
+            int oldpixel = gb_cam_shoot_buf[i][j]; // oldpixel  := pixel[x][y]
+            int newpixel = oldpixel & 0xC0;   // newpixel  := find_closest_palette_color(oldpixel)
+            inbuffer[i][j] = (u8)newpixel;    // pixel[x][y]  := newpixel
+            int error = oldpixel - newpixel;  // quant_error  := oldpixel - newpixel
+            //pixel[x+1][y  ] := pixel[x+1][y  ] + 7/16 * quant_error
+            //pixel[x-1][y+1] := pixel[x-1][y+1] + 3/16 * quant_error
+            //pixel[x  ][y+1] := pixel[x  ][y+1] + 5/16 * quant_error
+            //pixel[x+1][y+1] := pixel[x+1][y+1] + 1/16 * quant_error
+            if(i < (16*8-1))
+            {
+                gb_cam_shoot_buf[i+1][j] = gb_clamp_int(0,gb_cam_shoot_buf[i+1][j] + (7*error)/16,255);
+                if(j < (14*8-1))
+                    gb_cam_shoot_buf[i+1][j+1] = gb_clamp_int(0,gb_cam_shoot_buf[i+1][j+1] + (1*error)/16,255);
+            }
+            if(j < (14*8-1))
+            {
+                gb_cam_shoot_buf[i][j+1] = gb_clamp_int(0,gb_cam_shoot_buf[i][j+1] + (5*error)/16,255);
+                if(i > 0)
+                    gb_cam_shoot_buf[i-1][j+1] = gb_clamp_int(0,gb_cam_shoot_buf[i-1][j+1] + (3*error)/16,255);
+            }
+        }
+*/
+        // Standard ordered dithering. Bayer threshold matrix - http://bisqwit.iki.fi/story/howto/dither/jy/
+
+        //const int matrix[64] =  { // divided by 64
+        //    0, 48, 12, 60,  3, 51, 15, 63,
+        //    32, 16, 44, 28, 35, 19, 47, 31,
+        //     8, 56,  4, 52, 11, 59,  7, 55,
+        //    40, 24, 36, 20, 43, 27, 39, 23,
+        //     2, 50, 14, 62,  1, 49, 13, 61,
+        //    34, 18, 46, 30, 33, 17, 45, 29,
+        //    10, 58,  6, 54,  9, 57,  5, 53,
+        //    42, 26, 38, 22, 41, 25, 37, 21,
+        //};
+        //const int matrix_div = 64;
+
+        const int matrix[16] =  { // divided by 256
+             15, 135,  45, 165,
+            195,  75, 225, 105,
+             60, 180,  30, 150,
+            240, 120, 210,  90
+        };
+        const int matrix_div = 256;
+
+        int treshold = 256/4;
+        for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
+        {
+            int oldpixel = gb_cam_shoot_buf[i][j];
+            //int matrix_value = matrix[(i & 7) + ((j & 7) << 3)];
+            int matrix_value = matrix[(i & 3) + ((j & 3) << 2)];
+            int newpixel = gb_clamp_int(0, oldpixel + ( (matrix_value * treshold) / matrix_div), 255 ) & 0xC0;
+            inbuffer[i][j] = (u8)newpixel;
+        }
+    }
+    else
+    {
+        // No dithering
+        for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
+        {
+            inbuffer[i][j] = (u8)(gb_cam_shoot_buf[i][j] & 0xC0);
+        }
+    }
+
+    //Convert to tiles
+    memset(readybuffer,0,sizeof(readybuffer));
+    for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
+    {
+        u8 outcolor = 3 - (inbuffer[i][j] >> 6);
+
+        u8 * tile_base = readybuffer[j>>3][i>>3];
+
+        tile_base = &tile_base[(j&7)*2];
+
+        if(outcolor & 1) tile_base[0] |= 1<<(7-(7&i));
+        if(outcolor & 2) tile_base[1] |= 1<<(7-(7&i));
+    }
+
+    //Copy to cart ram...
+    memcpy(&(GameBoy.Memory.ExternRAM[0][0xA100-0xA000]),readybuffer,sizeof(readybuffer));
+}
+
+int GB_CameraReadRegister(int address)
+{
+    _GB_CAMERA_CART_ * cam = &GameBoy.Emulator.CAM;
+
+    if(address == 0xA000) return cam->reg[0]; //'ready' register
+    return 0xFF; //others are write-only? they are never read so the value doesn't matter...
+}
+
+void GB_CameraWriteRegister(int address, int value)
+{
+    _GB_CAMERA_CART_ * cam = &GameBoy.Emulator.CAM;
+
+    int reg = address-0xA000;
+
+    //printf("[%04X]=%02X\n",(u32)(u16)address,(u32)(u8)value);
+    if(reg < 0x36)
+    {
+        //Debug_LogMsgArg("Cam [0x%02X]=0x%02X",(u32)(u16)(address&0xFF),(u32)(u8)value);
+
         cam->reg[reg] = value;
 
         if(reg == 0) // Take picture...
@@ -657,14 +662,46 @@ Reg  6  7  8  9  A  B  C  D  E  F 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1
                                      (cam->reg[1]&0x20) ? -(cam->reg[1]&0x1F) : (cam->reg[1]&0x1F),
                                      dithering,
                                      contrast);
+
+                // 4194304 Hz -> 0.2384185791015625 (us/clock)
+                // each exposure time step is 16 (us)
+                // 16 (us) / 0.2384185791015625 (us/clock) = 67.108864 clocks
+                cam->clocks_left = 67 * exposure_time;
+                //exposure_time = 0xFFFF -> 1,048576 second delay
+
+                // Needed clocks for transfer (chip transfers 128*128 pixels, the last rows are garbage)
+                // Since the output value is analog, only one clock per pixel.
+                cam->clocks_left += 128*128;
+                // I assume the value is stored in cartridge RAM while it is being transfered.
             }
             //else Debug_DebugMsgArg("CAMERA WROTE - %02x to %04x",value,address);
         }
     }
     else
     {
-        Debug_DebugMsgArg("CAMERA WROTE [%04x] = %02X",address,value);
+        Debug_DebugMsgArg("Camera wrote to invalid register: [%04x] = %02X",address,value);
     }
+}
+
+int GB_CameraClock(int clocks)
+{
+    if(gbcamenabled == 0)
+        return 0x7FFFFFFF;
+
+    _GB_CAMERA_CART_ * cam = &GameBoy.Emulator.CAM;
+
+    if(cam->clocks_left == 0)
+        return 0x7FFFFFFF;
+
+    cam->clocks_left -= clocks;
+
+    if(cam->clocks_left <= 0)
+    {
+        cam->reg[0] = 0; // ready
+        cam->clocks_left = 0;
+    }
+
+    return cam->clocks_left;
 }
 
 //----------------------------------------------------------------------------

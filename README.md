@@ -25,6 +25,8 @@ Current goals
  - Configuration window.
  - Complete main window menu. Accelerators (F12, CTRL+R, ...)
  - Export images from debugger windows.
+ - GB Camera and GB Printer viewers.
+ - GBA I/O hardware viewer (RTC, sensors...).
 
 - Customize controls.
  - Support for game controllers.

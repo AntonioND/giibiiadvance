@@ -194,6 +194,11 @@ void GB_CameraShoot(void)
                             GB CAMERA REGISTERS
                             -------------------
 
+    First of all, there are 2 chips that process the image. The first one is the M64282FP "retina"
+    chip. It handles exposure time, obviously, color offset and edge enhancing. The second one is
+    in the cart, and it does another processing. See registers 6..35h. It handles contrast and
+    dithering.
+
 Register 0
 ----------
 
@@ -342,14 +347,19 @@ Registers 6..35h
     48/3 = 16 = 4x4 matrix of 3 elements -> For dithering?
     Maybe each 3 elements represent divisions of the range of 0-255 for color that the camera gives.
 
+                                           Max Light              Min Light
     For example (normal mode, high light): 00112233445566778899AABBCCDDEEFF (input color range 0 - 255)
     - Min. contrast (0): 80 8F D0 ->       00000000000000001122222222233333 (output gb palete 0-3)
     - Med. contrast (7): 89 92 A2 ->       00000000000000000122333333333333
     - Max. contrast (F): 92 92 92 ->       00000000000000000033333333333333
+                                           White                      Black
 
     Emulating this would require to emulate the hardware even to know the actual values returned by
-    the sensor... Taking a look at the medium contrast values, it seems that normal values of the
-    sensor are very near each other.
+    the sensor...
+
+    4x4 matrix is row-major or column-major? Probably row-major.
+    Disable dithering -> put all elements of 4x4 matrix the same.
+    Enable dithering -> change offsets of each 4x4 element.
 
     Normal mode
     -----------
@@ -435,7 +445,26 @@ static inline int gb_max_int(int a, int b)
 {
     return (a > b) ? a : b;
 }
+/*
+static int gb_cam_matrix_process(int value, int x, int y)
+{
+    _GB_CAMERA_CART_ * cam = &GameBoy.Emulator.CAM;
 
+    x = x % 4;
+    y = y % 4;
+
+    int r0 = cam->reg[y*3+x+0];
+    int r1 = cam->reg[y*3+x+1];
+    int r2 = cam->reg[y*3+x+2];
+
+    value = (255 - value);
+
+    if(value < r0) return 0xC0;
+    if(value < r1) return 0x80;
+    if(value < r2) return 0x40;
+    return 0x00;
+}
+*/
 static void GB_CameraTakePicture(u32 exposure_time, int offset, int dithering_enabled, int contrast) // contrast: 0..100
 {
     GB_CameraShoot();
@@ -503,14 +532,6 @@ static void GB_CameraTakePicture(u32 exposure_time, int offset, int dithering_en
         c = (double)1.0 + c;
     }
 
-    //_GB_CAMERA_CART_ * cam = &GameBoy.Emulator.CAM;
-    //extern int WinIDMain;
-    //char caption[60];
-    //s_snprintf(caption,sizeof(caption),"%d %f |  %04X", contrast,c,cam->reg[3] | (cam->reg[2]<<8));
-    //WH_SetCaption(WinIDMain,caption);
-
-    //double c = (100.0 + (double)contrast__) / 100.0;
-    //c *= c;
     int contrast_lookup[256];
     double newValue = 0;
     for(i = 0; i < 256; i++)
@@ -528,7 +549,6 @@ static void GB_CameraTakePicture(u32 exposure_time, int offset, int dithering_en
 
     for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
         gb_cam_shoot_buf[i][j] = contrast_lookup[gb_cam_shoot_buf[i][j]];
-
 
     if(dithering_enabled)
     {
@@ -559,19 +579,6 @@ static void GB_CameraTakePicture(u32 exposure_time, int offset, int dithering_en
         }
 */
         // Standard ordered dithering. Bayer threshold matrix - http://bisqwit.iki.fi/story/howto/dither/jy/
-
-        //const int matrix[64] =  { // divided by 64
-        //    0, 48, 12, 60,  3, 51, 15, 63,
-        //    32, 16, 44, 28, 35, 19, 47, 31,
-        //     8, 56,  4, 52, 11, 59,  7, 55,
-        //    40, 24, 36, 20, 43, 27, 39, 23,
-        //     2, 50, 14, 62,  1, 49, 13, 61,
-        //    34, 18, 46, 30, 33, 17, 45, 29,
-        //    10, 58,  6, 54,  9, 57,  5, 53,
-        //    42, 26, 38, 22, 41, 25, 37, 21,
-        //};
-        //const int matrix_div = 64;
-
         const int matrix[16] =  { // divided by 256
              15, 135,  45, 165,
             195,  75, 225, 105,

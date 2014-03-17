@@ -108,13 +108,13 @@ int WH_Create(int width, int height, int texw, int texh, int scale) // returns -
     w->mWindowID = -1;
     w->mTexScale = scale;
 
-    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
-    SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 0 );
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
 
     //Create window
     w->mWindow = SDL_CreateWindow( "Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
                                width, height, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
-    if( w->mWindow != NULL )
+    if(w->mWindow != NULL)
     {
         w->mMouseFocus = 1;
         w->mKeyboardFocus = 1;
@@ -129,16 +129,18 @@ int WH_Create(int width, int height, int texw, int texh, int scale) // returns -
         for(i=0; i<nRD; i++)
         {
             SDL_RendererInfo info;
-            if(!SDL_GetRenderDriverInfo(i, &info))
-                if(!strcmp(info.name, "opengl"))
+            if(!SDL_GetRenderDriverInfo(i, &info)) if(!strcmp(info.name, "opengl"))
+            {
                 oglIdx = i;
+                break;
+            }
         }
 
         //Create renderer for window
         w->mRenderer = SDL_CreateRenderer( w->mWindow, oglIdx,
-                                    SDL_RENDERER_ACCELERATED  /*| SDL_RENDERER_PRESENTVSYNC*/);
+                                          SDL_RENDERER_ACCELERATED  /*| SDL_RENDERER_PRESENTVSYNC*/);
         //SDL_SetWindowFullscreen(w->mWindow,SDL_WINDOW_FULLSCREEN);
-        if( w->mRenderer == NULL )
+        if(w->mRenderer == NULL)
         {
             Debug_LogMsgArg("Renderer could not be created! SDL Error: %s\n", SDL_GetError());
             SDL_DestroyWindow(w->mWindow);
@@ -150,7 +152,7 @@ int WH_Create(int width, int height, int texw, int texh, int scale) // returns -
             w->mShown = 1; //Flag as opened
 
             w->mTexture = SDL_CreateTexture(w->mRenderer,SDL_PIXELFORMAT_RGB24,SDL_TEXTUREACCESS_STREAMING,texw,texh);
-            if( w->mTexture == NULL )
+            if(w->mTexture == NULL)
             {
                 Debug_LogMsgArg("Couldn't create texture! SDL Error: %s\n", SDL_GetError());
                 SDL_DestroyWindow( w->mWindow ); // this message shows even if everything is correct... weird...

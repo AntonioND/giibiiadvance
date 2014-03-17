@@ -19,6 +19,7 @@
 #include <SDL2/SDL.h>
 
 #include <string.h>
+#include <malloc.h>
 
 #include "../debug_utils.h"
 #include "../window_handler.h"
@@ -66,6 +67,7 @@ static _gui_console gba_sprview_con;
 static _gui_element gba_sprview_textbox;
 
 static _gui_element gba_sprview_allspr_dumpbtn;
+static _gui_element gba_sprview_pagespr_dumpbtn;
 static _gui_element gba_sprview_zoomed_spr_dumpbtn;
 
 static _gui_element gba_sprview_allspr_bmp, gba_sprview_zoomedspr_bmp;
@@ -77,6 +79,7 @@ static _gui_element * gba_sprviwer_window_gui_elements[] = {
     &gba_sprview_zoomedspr_bmp,
     &gba_sprview_textbox,
     &gba_sprview_allspr_dumpbtn,
+    &gba_sprview_pagespr_dumpbtn,
     &gba_sprview_zoomed_spr_dumpbtn,
     &gba_sprview_page0_radbtn,
     &gba_sprview_page1_radbtn,
@@ -98,7 +101,6 @@ void Win_GBASprViewerUpdate(void)
     if(Win_MainRunningGBA() == 0) return;
 
     GUI_ConsoleClear(&gba_sprview_con);
-
 
     static const int spr_size[4][4][2] = { //shape, size, (x,y)
         {{8,8},{16,16},{32,32},{64,64}}, //Square
@@ -240,15 +242,35 @@ int Win_GBASprViewerCallback(SDL_Event * e)
 
 static void _win_gba_sprviewer_page_dump_btn_callback(void)
 {
-    char allbuf[GBA_SPR_ALLSPR_BUFFER_WIDTH*GBA_SPR_ALLSPR_BUFFER_HEIGHT*4];
-    GBA_Debug_PrintSpritesPage(gba_sprview_selected_page, 1, allbuf,
+    char pagebuf[GBA_SPR_ALLSPR_BUFFER_WIDTH*GBA_SPR_ALLSPR_BUFFER_HEIGHT*4];
+    GBA_Debug_PrintSpritesPage(gba_sprview_selected_page, 1, pagebuf,
                 GBA_SPR_ALLSPR_BUFFER_WIDTH,GBA_SPR_ALLSPR_BUFFER_HEIGHT);
 
     char * name = (gba_sprview_selected_page == 0) ? FU_GetNewTimestampFilename("gba_sprite_page0") :
                                                      FU_GetNewTimestampFilename("gba_sprite_page1");
-    Save_PNG(name,GBA_SPR_ALLSPR_BUFFER_WIDTH,GBA_SPR_ALLSPR_BUFFER_HEIGHT,allbuf,1);
+    Save_PNG(name,GBA_SPR_ALLSPR_BUFFER_WIDTH,GBA_SPR_ALLSPR_BUFFER_HEIGHT,pagebuf,1);
 
-    Win_GBASprViewerUpdate();
+    //Win_GBASprViewerUpdate();
+}
+
+static void _win_gba_sprviewer_allspr_dump_btn_callback(void)
+{
+    char * allbuf = malloc(GBA_SPR_ALLSPR_BUFFER_WIDTH*((GBA_SPR_ALLSPR_BUFFER_HEIGHT*2)-16)*4);
+    if(allbuf == NULL)
+        return;
+
+    GBA_Debug_PrintSpritesPage(0, 1, allbuf,
+                GBA_SPR_ALLSPR_BUFFER_WIDTH,((GBA_SPR_ALLSPR_BUFFER_HEIGHT*2)-16));
+
+    GBA_Debug_PrintSpritesPage(1, 1, &(allbuf[GBA_SPR_ALLSPR_BUFFER_WIDTH*(GBA_SPR_ALLSPR_BUFFER_HEIGHT-16)*4]),
+                GBA_SPR_ALLSPR_BUFFER_WIDTH,GBA_SPR_ALLSPR_BUFFER_HEIGHT);
+
+    char * name = FU_GetNewTimestampFilename("gba_sprite_all");
+    Save_PNG(name,GBA_SPR_ALLSPR_BUFFER_WIDTH,((GBA_SPR_ALLSPR_BUFFER_HEIGHT*2)-16),allbuf,1);
+
+    free(allbuf);
+
+    //Win_GBASprViewerUpdate();
 }
 
 static void _win_gba_sprviewer_zoomed_dump_btn_callback(void)
@@ -274,7 +296,7 @@ static void _win_gba_sprviewer_zoomed_dump_btn_callback(void)
     char * name = FU_GetNewTimestampFilename("gba_sprite");
     Save_PNG(name,sx,sy,buf,1);
 
-    Win_GBASprViewerUpdate();
+    //Win_GBASprViewerUpdate();
 }
 
 //----------------------------------------------------------------
@@ -302,8 +324,11 @@ int Win_GBASprViewerCreate(void)
     GUI_SetButton(&gba_sprview_zoomed_spr_dumpbtn,668,352,FONT_12_WIDTH*13,FONT_12_HEIGHT+6,"Dump zoomed",
                   _win_gba_sprviewer_zoomed_dump_btn_callback);
 
-    GUI_SetButton(&gba_sprview_allspr_dumpbtn,668,383,FONT_12_WIDTH*13,FONT_12_HEIGHT+6,"Dump page",
+    GUI_SetButton(&gba_sprview_pagespr_dumpbtn,668,383,FONT_12_WIDTH*13,FONT_12_HEIGHT+6,"Dump page",
                   _win_gba_sprviewer_page_dump_btn_callback);
+
+    GUI_SetButton(&gba_sprview_allspr_dumpbtn,668,414,FONT_12_WIDTH*13,FONT_12_HEIGHT+6,"Dump all",
+                  _win_gba_sprviewer_allspr_dump_btn_callback);
 
     gba_sprview_selected_spr = 0;
     gba_sprview_selected_page = 0;

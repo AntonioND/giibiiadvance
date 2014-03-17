@@ -219,7 +219,6 @@ void GBA_Debug_PrintSpritesPage(int page, int buf_has_alpha_channel, char * buff
     for(i = 0; i < 8; i++) for(j = 0; j < 8; j++)
     {
         int sprnum = (page*64) + (j*8) + i;
-
         GBA_Debug_PrintZoomedSpriteAt(sprnum,buf_has_alpha_channel,buffer,bufw,bufh,
                                 (i*(64+16))+16,(j*(64+16))+16,64,64);
     }

@@ -58,6 +58,7 @@ Game Boy Advance
 - Fix simulated SWI 11h and 12h (offset). (?)
 - GBA_MemoryWrite8() will enter halt mode when writing to REG_POSTFLG. Fix it.
 - Emulate broken sorting of priorities.
+- What happens with prohibited code 3 in sprites?
 
 Random things
 -------------

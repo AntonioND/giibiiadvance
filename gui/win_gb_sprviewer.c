@@ -257,6 +257,8 @@ int Win_GBSprViewerCreate(void)
     GUI_SetButton(&gb_sprview_allspr_dumpbtn,268,241,FONT_12_WIDTH*13,FONT_12_HEIGHT+6,"Dump all",
                   _win_gb_sprviewer_allspr_dump_btn_callback);
 
+    gb_sprview_selected_spr = 0;
+
     GBSprViewerCreated = 1;
 
     WinIDGBSprViewer = WH_Create(WIN_GB_SPRVIEWER_WIDTH,WIN_GB_SPRVIEWER_HEIGHT, 0,0, 0);

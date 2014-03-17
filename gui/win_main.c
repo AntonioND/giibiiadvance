@@ -59,6 +59,7 @@
 #include "win_gba_disassembler.h"
 #include "win_gba_memviewer.h"
 //-
+#include "win_gba_sprviewer.h"
 #include "win_gba_palviewer.h"
 
 //------------------------------------------------------------------
@@ -555,7 +556,7 @@ static void _win_main_menu_open_io_viewer(void)
 
 static void _win_main_menu_open_spr_viewer(void)
 {
-    //Win_GBASprViewerCreate();
+    Win_GBASprViewerCreate();
     Win_GBSprViewerCreate();
 }
 

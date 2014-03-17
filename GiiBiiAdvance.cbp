@@ -266,6 +266,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="gba_core/gba.h" />
+		<Unit filename="gba_core/gba_debug_video.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gba_core/gba_debug_video.h" />
 		<Unit filename="gba_core/interrupts.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -334,6 +338,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="gui/win_gba_palviewer.h" />
+		<Unit filename="gui/win_gba_sprviewer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gui/win_gba_sprviewer.h" />
 		<Unit filename="gui/win_main.c">
 			<Option compilerVar="CC" />
 		</Unit>

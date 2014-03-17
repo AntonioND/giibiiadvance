@@ -17,6 +17,7 @@ General
 - Disassembly shows "true" or "false" to know if the next instruction will be executed (if it is conditional). [GB/GBA]
 - Disassembly shows little arrows in branches to know where they go (up/down). [GB/GBA]
 - Some fixes by looking at the commits of a fork of GiiBiiAdvance by wowzaman12 (and lioncash). Thanks!
+- Better sprite viewers. [GB/GBA]
 
 GBA emulation
 

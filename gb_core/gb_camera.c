@@ -202,7 +202,7 @@ Register 0
 
     GB CPU: 4194304 Hz -> 0.2384185791015625 (us/clock)
     Exposure time goes from 0x0000 to 0xFFFF
-    Each exposure time step is 16 (us)
+    Each exposure time step is 16 us
     16 (us) / 0.2384185791015625 (us/clock) = 67.108864 clocks per exposure step
     if exposure_time = 0xFFFF -> 1,048576 second delay
 
@@ -685,7 +685,7 @@ void GB_CameraWriteRegister(int address, int value)
 
 int GB_CameraClock(int clocks)
 {
-    if(gbcamenabled == 0)
+    if(GameBoy.Emulator.MemoryController != MEM_CAMERA)
         return 0x7FFFFFFF;
 
     _GB_CAMERA_CART_ * cam = &GameBoy.Emulator.CAM;

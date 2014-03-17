@@ -355,7 +355,8 @@ Registers 6..35h
                                            White                      Black
 
     Emulating this would require to emulate the hardware even to know the actual values returned by
-    the sensor...
+    the sensor... Are the input values linear or...? I don't have enough hardware to test this kind
+    of things.
 
     4x4 matrix is row-major or column-major? Probably row-major.
     Disable dithering -> put all elements of 4x4 matrix the same.

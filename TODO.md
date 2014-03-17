@@ -18,6 +18,9 @@ General
 - Change all strcpy by s_strncpy, strcat by s_strncat and sprintf by s_snprintf.
 - Fix F1.
 - Enable/disable debug messages based on configuration.
+- Rumble.
+- Speedup button.
+- In debugger windows, outline things that can be selected with mouse (where it isn't done yet).
 
 Game Boy
 --------

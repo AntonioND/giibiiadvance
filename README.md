@@ -23,6 +23,7 @@ Current goals
  - SGB viewer.
  - Configuration window.
  - Complete main window menu. Accelerators (F12, CTRL+R, ...)
+ - Disable main menu elements when they can't be used.
  - Export images from debugger windows.
  - GB Camera and GB Printer viewers.
  - GBA I/O hardware viewer (RTC, sensors...).

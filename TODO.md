@@ -21,6 +21,7 @@ General
 - Rumble.
 - Speedup button.
 - In debugger windows, outline things that can be selected with mouse (where it isn't done yet).
+- Cross out things in debugger that can't be used (transparent palette colors, GBA sprites that are hiden?, ...)
 
 Game Boy
 --------

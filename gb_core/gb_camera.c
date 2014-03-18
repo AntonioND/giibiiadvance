@@ -191,13 +191,53 @@ void GB_CameraShoot(void)
 
 /***************************************************************************************************
 
-                            GB CAMERA REGISTERS
-                            -------------------
+                        Game Boy Camera - Technical information
+                        ---------------------------------------
 
-    First of all, there are 2 chips that process the image. The first one is the M64282FP "retina"
-    chip. It handles exposure time, obviously, color offset and edge enhancing. The second one is
-    in the cart, and it does another processing. See registers 6..35h. It handles contrast and
-    dithering.
+    Author: Antonio Niño Díaz (AntonioND) - 03/2014
+
+    First of all, I haven't tested on real hardware anything of this information. I've just
+    observed the behaviour of the GB Camera software, compared it with the read/write logs
+    that I've created with the emulator and try to understand what is going on. Nobody has
+    documented anything of this hardware (well, the datasheet of the M64282FP "retina" chip
+    is right there, but it doesn't explain how the MAC-GBD cartridge control chip handles
+    anything.
+
+    There are 2 chips that process the image. The first one is the M64282FP "retina" chip.
+    It handles exposure time, obviously, which results in the brightness regulation in GB
+    Camera software. It also performs a color offset and edge enhancing. The second chip is
+    in the cart (MAC-GBD), and it does more processing. See registers 6..35h. It handles contrast
+    and dithering.
+
+    I have ONE GB Camera cartridge, which I'm not going to use for testing. If I manage to
+    get another one I may do some hardware tests with my FPGA. Some things I'd like to know:
+
+    - Actual values written to M64282FP registers when a MAC-GBD register is written.
+    - Range of values obtained from M64282FP when sending the image to MAC-GBD. Needed to
+      understand how dithering and contrast are handled. I think I understand how it works
+      more or less, but this is all guesswork.
+
+    I won't write here how the M64282FP works, so I'd be good to have it to understand some
+    things explained here.
+
+    From gbdev wiki:
+
+    Component#   Part#/inscription    Description
+
+                 MAC-GBD
+    U1           Nintendo             I/O, memory control?
+                 9807 SA
+
+                 GBD-PCAX-0 F
+    U2           M538011-E -08        1M X 8 ROM
+                 8145507
+
+                 52CV1000SF85LL
+    U3           SHARP JAPAN          128K X 8 RAM
+                 9805 5 0A
+
+    The U1 is the only one connected to the GB cartridge pins. The U2 and U3 (ROM and RAM) are
+    connected to U1.
 
 Register 0
 ----------
@@ -213,11 +253,15 @@ Register 0
 
     Needed clocks for transfer (chip transfers 128*128 pixels, the last rows are garbage).
     Since the output value is analog, only one clock per pixel.
-    I assume the value is stored in cartridge RAM while it is being transfered.
+    I assume the value is stored in cartridge RAM while it is being transfered. This is the logical
+    thing to think, since the RAM chip is connected directly to MAC-GBD, not to the cartridge bus.
+    It can change the owner of the RAM chip bus between GB and MAC-GBD. This means that during the
+    transfer from retina chip to RAM the GB shouldn't be able to access RAM. Or maybe trying to access
+    to RAM while a transfer is going on results in data corruption?
 
     u16 exposure_time = reg[3] | (reg[2]<<8);
     clocks_left = 67 * exposure_time;
-    clocks_left += 128*128;
+    clocks_left += 128*128; // transfer time
 
     After that time, reg[0] clears itself.
 
@@ -226,7 +270,7 @@ Register 1
 
     Changes all the time when camera is working.
     Values seen at boot: 00, 0A, 20, 24, 28, E4, E8.
-    When working: 0A, E4, E8.
+    When shooting the values used change basing on how much light there is: 0A, E4, E8.
 
     This corresponds to this register of M64282FP:
 
@@ -242,6 +286,7 @@ Registers 2 and 3
 
     Exposure time (2 MSB, 3 LSB)
     They correspond to registers C0 and C1 of M64282FP - Exposure time (each step is 16 us)
+    u16 exposure_time = reg[3] | (reg[2]<<8);
 
 Register 4
 ----------
@@ -331,8 +376,8 @@ Register 5
         VH = 01 - Horizontal edge mode.
         G  = 1F - Total Gain (dB) = 57.5 dB
 
-    N and VH seems to have conflicting values... Maybe this GB Camera register corresponds to another
-    one... Anyway, emulate 2D edge enhancement.
+    N and VH seems to have conflicting values. Maybe this GB Camera register corresponds to another
+    one, or this one but modifying the values... Anyway, emulate 2D edge enhancement.
 
 Registers 6..35h
 ----------------
@@ -355,12 +400,11 @@ Registers 6..35h
                                            White                      Black
 
     Emulating this would require to emulate the hardware even to know the actual values returned by
-    the sensor... Are the input values linear or...? I don't have enough hardware to test this kind
-    of things.
+    the sensor... Are the input values linear or...?
 
-    4x4 matrix is row-major or column-major? Probably row-major.
-    Disable dithering -> put all elements of 4x4 matrix the same.
-    Enable dithering -> change offsets of each 4x4 element.
+    4x4 matrix is row-major or column-major? Probably row-major?
+    Disable dithering -> put all groups of elements of the 4x4 matrix the same.
+    Enable dithering -> change offsets of each group of elements.
 
     Normal mode
     -----------
@@ -420,10 +464,13 @@ Reg  6  7  8  9  A  B  C  D  E  F 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1
        +--+
        |MN|
     +--+--+--+
-    |MW| P|ME|  Out = P + [2P - (MW+ME)] * alpha
-    +--+--+--+  Out = P + [4P - (MN+MS+ ME+ MW)] * alpha
+    |MW| P|ME|  Out = P + [2P - (MW+ME)] * alpha         -> 1D horizontal edge enhancement
+    +--+--+--+  Out = P + [4P - (MN+MS+ ME+ MW)] * alpha -> 2D edge enhancement
        |MS|
-       +--+
+       +--+                         alpha = 0.5 (?)
+
+    Not really sure of which is used but, by looking at the result in the GB Camera game and some tests
+    done in the emulator by changing the filters, it seems that the 2D edge enhancement is the one used.
 
     With this configuration: Out = 2P - [ (MW+ME) / 2 ]
                              Out = 3P - [ (MN+MS+ME+MW) / 2 ]

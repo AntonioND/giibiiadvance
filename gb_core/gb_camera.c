@@ -210,7 +210,14 @@ void GB_CameraShoot(void)
     and dithering.
 
     I have ONE GB Camera cartridge, which I'm not going to use for testing. If I manage to
-    get another one I may do some hardware tests with my FPGA. Some things I'd like to know:
+    get another one I may do some hardware tests with my FPGA. I've managed to write a program,
+    copy it to a flashcart, execute it (copy some code to WRAM and jump there), turn of LCD
+    while it waits for a button to be pressed (to avoid reseting the GB during swapping because
+    some sort of scanline glitch I've read there is?) and swap cartridges with the one of the
+    GB Camera without reseting the GB Camera, but when trying to re-enable LCD it just wont't work.
+    Maybe I'll do some more tests in the future.
+
+    Some things I'd like to know:
 
     - Actual values written to M64282FP registers when a MAC-GBD register is written.
     - Range of values obtained from M64282FP when sending the image to MAC-GBD. Needed to

@@ -201,7 +201,7 @@ void GB_CameraShoot(void)
     that I've created with the emulator and try to understand what is going on. Nobody has
     documented anything of this hardware (well, the datasheet of the M64282FP "retina" chip
     is right there, but it doesn't explain how the MAC-GBD cartridge control chip handles
-    anything.
+    anything).
 
     There are 2 chips that process the image. The first one is the M64282FP "retina" chip.
     It handles exposure time, obviously, which results in the brightness regulation in GB

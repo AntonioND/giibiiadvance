@@ -224,8 +224,8 @@ void GB_CameraShoot(void)
       understand how dithering and contrast are handled. I think I understand how it works
       more or less, but this is all guesswork.
 
-    I won't write here how the M64282FP works, so I'd be good to have it to understand some
-    things explained here.
+    I won't write here how the M64282FP works, so I'd be good to have the datasheet while reading
+    this to understand some things explained here. It's easy to find it online.
 
     From gbdev wiki:
 

@@ -242,6 +242,8 @@ int Win_GBASprViewerCallback(SDL_Event * e)
 
 static void _win_gba_sprviewer_page_dump_btn_callback(void)
 {
+    if(Win_MainRunningGBA() == 0) return;
+
     char pagebuf[GBA_SPR_ALLSPR_BUFFER_WIDTH*GBA_SPR_ALLSPR_BUFFER_HEIGHT*4];
     GBA_Debug_PrintSpritesPage(gba_sprview_selected_page, 1, pagebuf,
                 GBA_SPR_ALLSPR_BUFFER_WIDTH,GBA_SPR_ALLSPR_BUFFER_HEIGHT);
@@ -255,6 +257,8 @@ static void _win_gba_sprviewer_page_dump_btn_callback(void)
 
 static void _win_gba_sprviewer_allspr_dump_btn_callback(void)
 {
+    if(Win_MainRunningGBA() == 0) return;
+
     char * allbuf = malloc(GBA_SPR_ALLSPR_BUFFER_WIDTH*((GBA_SPR_ALLSPR_BUFFER_HEIGHT*2)-16)*4);
     if(allbuf == NULL)
         return;
@@ -275,6 +279,8 @@ static void _win_gba_sprviewer_allspr_dump_btn_callback(void)
 
 static void _win_gba_sprviewer_zoomed_dump_btn_callback(void)
 {
+    if(Win_MainRunningGBA() == 0) return;
+
     static const int spr_size[4][4][2] = { //shape, size, (x,y)
         {{8,8},{16,16},{32,32},{64,64}}, //Square
         {{16,8},{32,8},{32,16},{64,32}}, //Horizontal

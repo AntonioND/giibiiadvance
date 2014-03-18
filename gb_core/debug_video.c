@@ -698,15 +698,12 @@ void GB_Debug_TileVRAMDraw(char * buffer0, int bufw0, int bufh0, char * buffer1,
 	}
 }
 
-#if 0
-static void gb_tile_viewer_update_tile(void)
+void GB_Debug_TileDrawZoomed64x64(char * buffer, int tile, int bank)
 {
     int tiletempbuffer[8*8];
 
-    static const u32 gb_pal_colors[4][3] = { {255,255,255}, {168,168,168}, {80,80,80}, {0,0,0} };
-
-    u8 * tile_data = &GameBoy.Memory.VideoRAM[(SelTileX + (SelTileY*16))<<4]; //Bank 0
-    if(SelBank) tile_data += 0x2000; //Bank 1;
+    u8 * tile_data = &GameBoy.Memory.VideoRAM[tile<<4]; //Bank 0
+    if(bank) tile_data += 0x2000; //Bank 1;
 
 	u32 y, x;
 	for(y = 0; y < 8 ; y++) for(x = 0; x < 8; x++)
@@ -719,35 +716,15 @@ static void gb_tile_viewer_update_tile(void)
                 gb_pal_colors[color][2];
     }
 
-    u32 tile = (SelTileX + (SelTileY*16));
-    u32 tileindex = (tile > 255) ? (tile - 256) : (tile);
-    if(GameBoy.Emulator.CGBEnabled)
-    {
-        char text[1000];
-        sprintf(text,"Tile: %d(%d)\r\nAddr: 0x%04X\r\nBank: %d",tile,tileindex,
-            0x8000 + (tile * 16),SelBank);
-        SetWindowText(hTileText,(LPCTSTR)text);
-    }
-    else
-    {
-        char text[1000];
-        sprintf(text,"Tile: %d(%d)\r\nAddr: 0x%04X\r\nBank: -",tile,tileindex,
-            0x8000 + (tile * 16));
-        SetWindowText(hTileText,(LPCTSTR)text);
-    }
-
     //Expand to 64x64
     int i,j;
     for(i = 0; i < 64; i++) for(j = 0; j < 64; j++)
     {
-        SelectedTileBuffer[j*64+i] = tiletempbuffer[(j/8)*8 + (i/8)];
+        buffer[(j*64+i)*3+0] = tiletempbuffer[(j/8)*8 + (i/8)] & 0xFF;
+        buffer[(j*64+i)*3+1] = (tiletempbuffer[(j/8)*8 + (i/8)]>>8) & 0xFF;
+        buffer[(j*64+i)*3+2] = (tiletempbuffer[(j/8)*8 + (i/8)]>>16) & 0xFF;
     }
-
-    //Update window
-    RECT rc; rc.top = 133; rc.left = 5; rc.bottom = 133+64; rc.right = 5+64;
-    InvalidateRect(hWndTileViewer, &rc, FALSE);
 }
-#endif
 
 //------------------------------------------------------------------------------------------------
 

@@ -227,6 +227,8 @@ int Win_GBAPalViewerCallback(SDL_Event * e)
 
 static void _win_gba_palviewer_dump_btn_callback(void)
 {
+    if(Win_MainRunningGBA() == 0) return;
+
     memset(gba_pal_bg_buffer,192,sizeof(gba_pal_bg_buffer));
     memset(gba_pal_spr_buffer,192,sizeof(gba_pal_spr_buffer));
 

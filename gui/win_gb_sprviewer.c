@@ -211,6 +211,8 @@ int Win_GBSprViewerCallback(SDL_Event * e)
 
 static void _win_gb_sprviewer_allspr_dump_btn_callback(void)
 {
+    if(Win_MainRunningGB() == 0) return;
+
     char allbuf[GB_SPR_ALLSPR_BUFFER_WIDTH*GB_SPR_ALLSPR_BUFFER_HEIGHT*4];
     GB_Debug_PrintSpritesAlpha(allbuf);
 
@@ -222,6 +224,8 @@ static void _win_gb_sprviewer_allspr_dump_btn_callback(void)
 
 static void _win_gb_sprviewer_zoomed_dump_btn_callback(void)
 {
+    if(Win_MainRunningGB() == 0) return;
+
     char buf[8*16*4];
     GB_Debug_PrintSpriteAlpha(buf,gb_sprview_selected_spr);
 

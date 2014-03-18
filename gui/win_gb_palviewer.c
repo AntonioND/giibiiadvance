@@ -226,6 +226,8 @@ int Win_GBPalViewerCallback(SDL_Event * e)
 
 static void _win_gb_palviewer_dump_btn_callback(void)
 {
+    if(Win_MainRunningGB() == 0) return;
+
     memset(gb_pal_bg_buffer,192,sizeof(gb_pal_bg_buffer));
     memset(gb_pal_spr_buffer,192,sizeof(gb_pal_spr_buffer));
 

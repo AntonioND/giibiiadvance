@@ -35,25 +35,31 @@
 
 #include "../png/png_utils.h"
 
-//-----------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
+
+extern _GB_CONTEXT_ GameBoy;
+
+//------------------------------------------------------------------------------------------------
 
 static int WinIDGBTileViewer;
 
-#define WIN_GB_TILEVIEWER_WIDTH  258
+#define WIN_GB_TILEVIEWER_WIDTH  385
 #define WIN_GB_TILEVIEWER_HEIGHT 222
 
 static int GBTileViewerCreated = 0;
 
 //-----------------------------------------------------------------------------------
 
-static u32 gb_tileview_sprpal = 0; // 1 if selected a color from sprite palettes
-static u32 gb_tileview_selectedindex = 0;
+static u32 gb_tileview_selected_bank = 0;
+static u32 gb_tileview_selected_index = 0;
 
-#define GB_TILE_BUFFER_WIDTH ((16*8)+1)
-#define GB_TILE_BUFFER_HEIGHT ((24*8)+1)
+#define GB_TILE_BUFFER_WIDTH (16*8)
+#define GB_TILE_BUFFER_HEIGHT (24*8)
 
 static char gb_tile_bank0_buffer[GB_TILE_BUFFER_WIDTH*GB_TILE_BUFFER_HEIGHT*3];
 static char gb_tile_bank1_buffer[GB_TILE_BUFFER_WIDTH*GB_TILE_BUFFER_HEIGHT*3];
+
+static char gb_tile_zoomed_tile_buffer[64*64*3];
 
 //-----------------------------------------------------------------------------------
 
@@ -62,14 +68,17 @@ static _gui_element gb_tileview_textbox;
 
 static _gui_element gb_tileview_dumpbtn;
 
-static _gui_element gb_tileview_bgpal_bmp, gb_tileview_sprpal_bmp;
-static _gui_element gb_tileview_bgpal_label, gb_tileview_sprpal_label;
+static _gui_element gb_tileview_bank0_bmp, gb_tileview_bank1_bmp;
+static _gui_element gb_tileview_bank0_label, gb_tileview_bank1_label;
+
+static _gui_element gb_tileview_zoomed_tile_bmp;
 
 static _gui_element * gb_tileviwer_window_gui_elements[] = {
-    &gb_tileview_bgpal_label,
-    &gb_tileview_sprpal_label,
-    &gb_tileview_bgpal_bmp,
-    &gb_tileview_sprpal_bmp,
+    &gb_tileview_bank0_label,
+    &gb_tileview_bank1_label,
+    &gb_tileview_bank0_bmp,
+    &gb_tileview_bank1_bmp,
+    &gb_tileview_zoomed_tile_bmp,
     &gb_tileview_textbox,
     &gb_tileview_dumpbtn,
     NULL
@@ -92,17 +101,17 @@ static inline void rgb16to32(u16 color, u8 * r, u8 * g, u8 * b)
 
 //----------------------------------------------------------------
 
-static int _win_gb_tileviewer_bg_bmp_callback(int x, int y)
-{/*
-    gb_tileview_sprpal = 0; // bg
-    gb_tileview_selectedindex = (x/20) + ((y/20)*4);*/
+static int _win_gb_tileviewer_bank0_bmp_callback(int x, int y)
+{
+    gb_tileview_selected_bank = 0;
+    gb_tileview_selected_index = (x/8) + ((y/8)*16);
     return 1;
 }
 
-static int _win_gb_tileviewer_spr_bmp_callback(int x, int y)
-{/*
-    gb_tileview_sprpal = 1; // spr
-    gb_tileview_selectedindex = (x/20) + ((y/20)*4);*/
+static int _win_gb_tileviewer_bank1_bmp_callback(int x, int y)
+{
+    gb_tileview_selected_bank = 1;
+    gb_tileview_selected_index = (x/8) + ((y/8)*16);
     return 1;
 }
 
@@ -118,51 +127,33 @@ void Win_GBTileViewerUpdate(void)
 
     GB_Debug_TileVRAMDraw(gb_tile_bank0_buffer,GB_TILE_BUFFER_WIDTH,GB_TILE_BUFFER_HEIGHT,
                           gb_tile_bank1_buffer,GB_TILE_BUFFER_WIDTH,GB_TILE_BUFFER_HEIGHT);
-/*
-    u32 r,g,b;
-    GB_Debug_GetPalette(gb_tileview_sprpal,gb_tileview_selectedindex/4,gb_tileview_selectedindex%4,&r,&g,&b);
-    u16 value = ((r>>3)&0x1F)|(((g>>3)&0x1F)<<5)|(((b>>3)&0x1F)<<10);
-
-    GUI_ConsoleModePrintf(&gb_tileview_con,0,0,"Value: 0x%04X",value);
-
-    GUI_ConsoleModePrintf(&gb_tileview_con,0,1,"RGB: (%d,%d,%d)",r>>3,g>>3,b>>3);
-
-    GUI_ConsoleModePrintf(&gb_tileview_con,16,0,"Index: %d[%d]",
-                          gb_tileview_selectedindex/4,gb_tileview_selectedindex%4);
-
-    memset(gb_tile_bg_buffer,192,sizeof(gb_tile_bg_buffer));
-    memset(gb_tile_spr_buffer,192,sizeof(gb_tile_spr_buffer));
-
-    int i;
-    for(i = 0; i < 32; i++)
-    {
-        //BG
-        GB_Debug_GetPalette(0,i/4,i%4,&r,&g,&b);
-        GUI_Draw_SetDrawingColor(r,g,b);
-        GUI_Draw_FillRect(gb_tile_bg_buffer,GB_TILE_BUFFER_WIDTH,GB_TILE_BUFFER_HEIGHT,
-                          1 + ((i%4)*20), 19 + ((i%4)*20), 1 + ((i/4)*20), 19 + ((i/4)*20));
-        //SPR
-        GB_Debug_GetPalette(1,i/4,i%4,&r,&g,&b);
-        GUI_Draw_SetDrawingColor(r,g,b);
-        GUI_Draw_FillRect(gb_tile_spr_buffer,GB_TILE_BUFFER_WIDTH,GB_TILE_BUFFER_HEIGHT,
-                        1 + ((i%4)*20), 19 + ((i%4)*20), 1 + ((i/4)*20), 19 + ((i/4)*20));
-    }
 
     GUI_Draw_SetDrawingColor(255,0,0);
-
     char * buf;
-    if(gb_tileview_sprpal == 0)
-        buf = gb_tile_bg_buffer;
+    if(gb_tileview_selected_bank == 0)
+        buf = gb_tile_bank0_buffer;
     else
-        buf = gb_tile_spr_buffer;
+        buf = gb_tile_bank1_buffer;
+    int l = ((gb_tileview_selected_index%16)*8); //left
+    int t = ((gb_tileview_selected_index/16)*8); // top
+    int r = l + 7; // right
+    int b = t + 7; // bottom
+    GUI_Draw_Rect(buf,GB_TILE_BUFFER_WIDTH,GB_TILE_BUFFER_HEIGHT,l,r,t,b);
 
-    int ll = ((gb_tileview_selectedindex%4)*20); //left
-    int tt = ((gb_tileview_selectedindex/4)*20); // top
-    int rr = ll + 20; // right
-    int bb = tt + 20; // bottom
-    GUI_Draw_Rect(buf,GB_TILE_BUFFER_WIDTH,GB_TILE_BUFFER_HEIGHT,ll,rr,tt,bb);
-    ll++; tt++; rr--; bb--;
-    GUI_Draw_Rect(buf,GB_TILE_BUFFER_WIDTH,GB_TILE_BUFFER_HEIGHT,ll,rr,tt,bb);*/
+    GB_Debug_TileDrawZoomed64x64(gb_tile_zoomed_tile_buffer, gb_tileview_selected_index, gb_tileview_selected_bank);
+
+    u32 tile = gb_tileview_selected_index;
+    u32 tileindex = (tile > 255) ? (tile - 256) : (tile);
+    if(GameBoy.Emulator.CGBEnabled)
+    {
+        GUI_ConsoleModePrintf(&gb_tileview_con,0,0,"Tile: %d(%d)\nAddr: 0x%04X\nBank: %d",tile,tileindex,
+            0x8000 + (tile * 16),gb_tileview_selected_bank);
+    }
+    else
+    {
+        GUI_ConsoleModePrintf(&gb_tileview_con,0,0,"Tile: %d(%d)\nAddr: 0x%04X\nBank: -",tile,tileindex,
+            0x8000 + (tile * 16));
+    }
 }
 
 //----------------------------------------------------------------
@@ -228,56 +219,42 @@ int Win_GBTileViewerCallback(SDL_Event * e)
 //----------------------------------------------------------------
 
 static void _win_gb_tileviewer_dump_btn_callback(void)
-{/*
-    memset(gb_tile_bg_buffer,192,sizeof(gb_tile_bg_buffer));
-    memset(gb_tile_spr_buffer,192,sizeof(gb_tile_spr_buffer));
+{
+    if(Win_MainRunningGB() == 0) return;
 
-    u32 r,g,b;
+    GB_Debug_TileVRAMDraw(gb_tile_bank0_buffer,GB_TILE_BUFFER_WIDTH,GB_TILE_BUFFER_HEIGHT,
+                          gb_tile_bank1_buffer,GB_TILE_BUFFER_WIDTH,GB_TILE_BUFFER_HEIGHT);
+
+    char buf0[GB_TILE_BUFFER_WIDTH*GB_TILE_BUFFER_HEIGHT*4];
+    char buf1[GB_TILE_BUFFER_WIDTH*GB_TILE_BUFFER_HEIGHT*4];
 
     int i;
-    for(i = 0; i < 32; i++)
+    for(i = 0; i < (GB_TILE_BUFFER_WIDTH*GB_TILE_BUFFER_HEIGHT); i++)
     {
-        //BG
-        GB_Debug_GetPalette(0,i/4,i%4,&r,&g,&b);
-        GUI_Draw_SetDrawingColor(r,g,b);
-        GUI_Draw_FillRect(gb_tile_bg_buffer,GB_TILE_BUFFER_WIDTH,GB_TILE_BUFFER_HEIGHT,
-                          1 + ((i%4)*20), 19 + ((i%4)*20), 1 + ((i/4)*20), 19 + ((i/4)*20));
-        //SPR
-        GB_Debug_GetPalette(1,i/4,i%4,&r,&g,&b);
-        GUI_Draw_SetDrawingColor(r,g,b);
-        GUI_Draw_FillRect(gb_tile_spr_buffer,GB_TILE_BUFFER_WIDTH,GB_TILE_BUFFER_HEIGHT,
-                        1 + ((i%4)*20), 19 + ((i%4)*20), 1 + ((i/4)*20), 19 + ((i/4)*20));
+        buf0[i*4+0] = gb_tile_bank0_buffer[i*3+0];
+        buf0[i*4+1] = gb_tile_bank0_buffer[i*3+1];
+        buf0[i*4+2] = gb_tile_bank0_buffer[i*3+2];
+        buf0[i*4+3] = 255;
     }
 
-    char buffer_temp[GB_TILE_BUFFER_WIDTH*GB_TILE_BUFFER_HEIGHT * 4];
+    char * name_b0 = FU_GetNewTimestampFilename("gb_tiles_bank0");
+    Save_PNG(name_b0,GB_TILE_BUFFER_WIDTH,GB_TILE_BUFFER_HEIGHT,buf0,0);
 
-    char * src = gb_tile_bg_buffer;
-    char * dst = buffer_temp;
-    for(i = 0; i < GB_TILE_BUFFER_WIDTH*GB_TILE_BUFFER_HEIGHT; i++)
+    if(GameBoy.Emulator.CGBEnabled)
     {
-        *dst++ = *src++;
-        *dst++ = *src++;
-        *dst++ = *src++;
-        *dst++ = 0xFF;
+        for(i = 0; i < (GB_TILE_BUFFER_WIDTH*GB_TILE_BUFFER_HEIGHT); i++)
+        {
+            buf1[i*4+0] = gb_tile_bank1_buffer[i*3+0];
+            buf1[i*4+1] = gb_tile_bank1_buffer[i*3+1];
+            buf1[i*4+2] = gb_tile_bank1_buffer[i*3+2];
+            buf1[i*4+3] = 255;
+        }
+
+        char * name_b1 = FU_GetNewTimestampFilename("gb_tiles_bank1");
+        Save_PNG(name_b1,GB_TILE_BUFFER_WIDTH,GB_TILE_BUFFER_HEIGHT,buf1,0);
     }
 
-    char * name_bg = FU_GetNewTimestampFilename("gb_tiles_bg");
-    Save_PNG(name_bg,GB_TILE_BUFFER_WIDTH,GB_TILE_BUFFER_HEIGHT,buffer_temp,0);
 
-
-    src = gb_tile_spr_buffer;
-    dst = buffer_temp;
-    for(i = 0; i < GB_TILE_BUFFER_WIDTH*GB_TILE_BUFFER_HEIGHT; i++)
-    {
-        *dst++ = *src++;
-        *dst++ = *src++;
-        *dst++ = *src++;
-        *dst++ = 0xFF;
-    }
-
-    char * name_spr = FU_GetNewTimestampFilename("gb_tileette_spr");
-    Save_PNG(name_spr,GB_TILE_BUFFER_WIDTH,GB_TILE_BUFFER_HEIGHT,buffer_temp,0);
-*/
     Win_GBTileViewerUpdate();
 }
 
@@ -290,21 +267,27 @@ int Win_GBTileViewerCreate(void)
 
     if(Win_MainRunningGB() == 0) return 0;
 
-    GUI_SetLabel(&gb_tileview_bgpal_label,32,6,GB_TILE_BUFFER_WIDTH,FONT_12_HEIGHT,"Background");
-    GUI_SetLabel(&gb_tileview_sprpal_label,145,6,GB_TILE_BUFFER_WIDTH,FONT_12_HEIGHT,"Sprites");
+    GUI_SetLabel(&gb_tileview_bank0_label,117,6,GB_TILE_BUFFER_WIDTH,FONT_12_HEIGHT,"Bank 0");
+    GUI_SetLabel(&gb_tileview_bank1_label,251,6,GB_TILE_BUFFER_WIDTH,FONT_12_HEIGHT,"Bank 1");
 
     GUI_SetTextBox(&gb_tileview_textbox,&gb_tileview_con,
-                   6,192, 28*FONT_12_WIDTH,2*FONT_12_HEIGHT, NULL);
+                   6,6, 15*FONT_12_WIDTH,3*FONT_12_HEIGHT, NULL);
 
-    GUI_SetBitmap(&gb_tileview_bgpal_bmp,32,24,GB_TILE_BUFFER_WIDTH,GB_TILE_BUFFER_HEIGHT,gb_tile_bank0_buffer,
-                  _win_gb_tileviewer_bg_bmp_callback);
-    GUI_SetBitmap(&gb_tileview_sprpal_bmp,145,24,GB_TILE_BUFFER_WIDTH,GB_TILE_BUFFER_HEIGHT,gb_tile_bank1_buffer,
-                  _win_gb_tileviewer_spr_bmp_callback);
+    GUI_SetBitmap(&gb_tileview_bank0_bmp,117,24,GB_TILE_BUFFER_WIDTH,GB_TILE_BUFFER_HEIGHT,gb_tile_bank0_buffer,
+                  _win_gb_tileviewer_bank0_bmp_callback);
+    GUI_SetBitmap(&gb_tileview_bank1_bmp,251,24,GB_TILE_BUFFER_WIDTH,GB_TILE_BUFFER_HEIGHT,gb_tile_bank1_buffer,
+                  _win_gb_tileviewer_bank1_bmp_callback);
 
-    GUI_SetButton(&gb_tileview_dumpbtn,210,192,FONT_12_WIDTH*6,FONT_12_HEIGHT*2,"Dump",
+    GUI_SetBitmap(&gb_tileview_zoomed_tile_bmp,6,48, 64,64, gb_tile_zoomed_tile_buffer,
+                  NULL);
+
+    GUI_SetButton(&gb_tileview_dumpbtn,6,192,FONT_12_WIDTH*6,FONT_12_HEIGHT*2,"Dump",
                   _win_gb_tileviewer_dump_btn_callback);
 
     GBTileViewerCreated = 1;
+
+    gb_tileview_selected_bank = 0;
+    gb_tileview_selected_index = 0;
 
     WinIDGBTileViewer = WH_Create(WIN_GB_TILEVIEWER_WIDTH,WIN_GB_TILEVIEWER_HEIGHT, 0,0, 0);
     WH_SetCaption(WinIDGBTileViewer,"GB Tile Viewer");

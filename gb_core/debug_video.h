@@ -37,6 +37,7 @@ void GB_Debug_GetPalette(int is_sprite, int num, int color, u32 * red, u32 * gre
 //---------------------------------------------------------------------------------
 
 void GB_Debug_TileVRAMDraw(char * buffer0, int bufw0, int bufh0, char * buffer1, int bufw1, int bufh1);
+void GB_Debug_TileDrawZoomed64x64(char * buffer, int tile, int bank);
 
 //---------------------------------------------------------------------------------
 

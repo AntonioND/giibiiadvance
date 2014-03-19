@@ -19,6 +19,7 @@
 #include <SDL2/SDL.h>
 
 #include <string.h>
+#include <malloc.h>
 
 #include "../debug_utils.h"
 #include "../window_handler.h"
@@ -98,15 +99,6 @@ static _gui gba_tileviewer_window_gui = {
     NULL,
     NULL
 };
-
-//----------------------------------------------------------------
-
-static inline void rgb16to32(u16 color, u8 * r, u8 * g, u8 * b)
-{
-    *r = (color & 31)<<3;
-    *g = ((color >> 5) & 31)<<3;
-    *b = ((color >> 10) & 31)<<3;
-}
 
 //----------------------------------------------------------------
 

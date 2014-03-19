@@ -338,6 +338,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="gui/win_gba_disassembler.h" />
+		<Unit filename="gui/win_gba_mapviewer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gui/win_gba_mapviewer.h" />
 		<Unit filename="gui/win_gba_memviewer.c">
 			<Option compilerVar="CC" />
 		</Unit>

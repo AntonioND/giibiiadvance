@@ -61,7 +61,7 @@
 #include "win_gba_memviewer.h"
 //-
 #include "win_gba_tileviewer.h"
-//-
+#include "win_gba_mapviewer.h"
 #include "win_gba_sprviewer.h"
 #include "win_gba_palviewer.h"
 
@@ -565,7 +565,7 @@ static void _win_main_menu_open_tile_viewer(void)
 
 static void _win_main_menu_open_map_viewer(void)
 {
-    //Win_GBAMapViewerCreate();
+    Win_GBAMapViewerCreate();
     Win_GBMapViewerCreate();
 }
 

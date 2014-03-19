@@ -19,7 +19,7 @@ Current goals
 - Finish porting the GUI:
  - GBA I/O viewer
  - GBA tile viewer.
- - GB and GBA background viewer.
+ - GBA map viewer.
  - SGB viewer.
  - Configuration window.
  - Complete main window menu. Accelerators (F12, CTRL+R, ...)

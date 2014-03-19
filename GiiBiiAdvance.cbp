@@ -314,6 +314,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="gui/win_gb_ioviewer.h" />
+		<Unit filename="gui/win_gb_mapviewer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gui/win_gb_mapviewer.h" />
 		<Unit filename="gui/win_gb_memviewer.c">
 			<Option compilerVar="CC" />
 		</Unit>

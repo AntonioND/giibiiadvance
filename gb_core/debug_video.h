@@ -41,5 +41,9 @@ void GB_Debug_TileDrawZoomed64x64(char * buffer, int tile, int bank);
 
 //---------------------------------------------------------------------------------
 
+void GB_Debug_MapPrint(char * buffer, int bufw, int bufh, int map, int tile_base);
+
+//---------------------------------------------------------------------------------
+
 #endif //__DEBUG_VIDEO__
 

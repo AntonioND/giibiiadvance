@@ -409,7 +409,7 @@ void Win_GBAMemViewTextBoxCallback(int x, int y)
     }
 }
 
-void Win_GBAMemViewerModeRadioButtonsCallback(int btn_id)
+static void Win_GBAMemViewerModeRadioButtonsCallback(int btn_id)
 {
     gba_memviewer_mode = btn_id;
     Win_GBAMemViewerUpdate();

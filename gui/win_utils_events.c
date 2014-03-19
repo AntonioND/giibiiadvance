@@ -235,7 +235,8 @@ static void _gui_clear_radiobuttons(_gui_element ** complete_gui, int group_id)
 
         if(e->element_type == GUI_TYPE_RADIOBUTTON)
         {
-            e->info.radiobutton.is_pressed = 0;
+            if(e->info.radiobutton.group_id == group_id)
+                e->info.radiobutton.is_pressed = 0;
         }
 
         complete_gui++;

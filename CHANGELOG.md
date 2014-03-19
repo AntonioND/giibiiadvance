@@ -18,6 +18,7 @@ General
 - Disassembly shows little arrows in branches to know where they go (up/down). [GB/GBA]
 - Some fixes by looking at the commits of a fork of GiiBiiAdvance by wowzaman12 (and lioncash). Thanks!
 - Better sprite viewers. [GB/GBA]
+- Debugger windows can dump maps, sprites, palettes, tilesets... to png files.
 
 GBA emulation
 

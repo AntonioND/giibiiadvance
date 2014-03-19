@@ -728,7 +728,78 @@ void GB_Debug_TileDrawZoomed64x64(char * buffer, int tile, int bank)
 
 //------------------------------------------------------------------------------------------------
 
+
+//------------------------------------------------------------------------------------------------
+
+void GB_Debug_MapPrint(char * buffer, int bufw, int bufh, int map, int tile_base)
+{
+	_GB_MEMORY_ * mem = &GameBoy.Memory;
+	u32 y, x;
+
+	u8 * tiledata = tile_base ? &mem->VideoRAM[0x0800] : &mem->VideoRAM[0x0000];
+    u8 * bgtilemap = map ? &mem->VideoRAM[0x1C00] : &mem->VideoRAM[0x1800];
+
+    if(GameBoy.Emulator.CGBEnabled)
+    {
+        for(y = 0; y < 256; y ++) for(x = 0; x < 256; x ++)
+        {
+			u32 tile_location = ( ((y>>3) & 31) * 32) + ((x >> 3) & 31);
+			u32 tile = bgtilemap[tile_location];
+			u32 tileinfo = bgtilemap[tile_location + 0x2000];
+
+			if(tile_base) //If tile base is 0x8800
+            {
+                if(tile & (1<<7)) tile &= 0x7F;
+                else tile += 128;
+            }
+
+            u8 * data = &tiledata[(tile<<4) + ( (tileinfo&(1<<3)) ? 0x2000 : 0 )]; //Bank 1?
+
+            //V FLIP
+            if(tileinfo & (1<<6)) data += (((7-y)&7) * 2);
+            else data += ((y&7) * 2);
+
+            u32 x_;
+            //H FLIP
+			if(tileinfo & (1<<5)) x_ = (x&7);
+            else x_ = 7-(x&7);
+
+            u32 color = ( (*data >> x_) & 1 ) |  ( ( ( (*(data+1)) >> x_)  << 1) & 2);
+            u32 pal_index = ((tileinfo&7) * 8) + (2*color);
+
+            color = GameBoy.Emulator.bg_pal[pal_index] | (GameBoy.Emulator.bg_pal[pal_index+1]<<8);
+
+            buffer[(y*bufw+x)*3+0] = (color&0x1F)<<3;
+            buffer[(y*bufw+x)*3+1] = ((color>>5)&0x1F)<<3;
+            buffer[(y*bufw+x)*3+2] = ((color>>10)&0x1F)<<3;
+        }
+    }
+    else
+    {
+        for(y = 0; y < 256; y ++) for(x = 0; x < 256; x ++)
+        {
+            u32 tile = bgtilemap[( ((y>>3) & 31) * 32) + ((x >> 3) & 31)];
+
+            if(tile_base) //If tile base is 0x8800
+            {
+                if(tile & (1<<7)) tile &= 0x7F;
+                else tile += 128;
+            }
+
+            u8 * data = (&tiledata[tile<<4]) + ((y&7) << 1);
+
+            u32 x_ = 7-(x&7);
+
+            u32 color = ( (*data >> x_) & 1 ) |  ( ( ( (*(data+1)) >> x_)  << 1) & 2);
+
+            buffer[(y*bufw+x)*3+0] = gb_pal_colors[color][0];
+            buffer[(y*bufw+x)*3+1] = gb_pal_colors[color][1];
+            buffer[(y*bufw+x)*3+2] = gb_pal_colors[color][2];
+        }
+    }
+}
+
 //------------------------------------------------------------------------------------------------
 
 
-
+//------------------------------------------------------------------------------------------------

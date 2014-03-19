@@ -226,3 +226,85 @@ void GBA_Debug_PrintSpritesPage(int page, int buf_has_alpha_channel, char * buff
 }
 
 //----------------------------------------------------------------
+
+void GBA_Debug_PrintTiles(char * buffer, int bufw, int bufh, int cbb, int colors, int palette)
+{
+    u8 * charbaseblockptr = (u8*)&Mem.vram[cbb-0x06000000];
+
+    int i,j;
+    for(i = 0; i < 256; i++) for(j = 0; j < 256; j++)
+    {
+        buffer[(j*bufw+i)*3+0] = ((i&16)^(j&16)) ? 0x80 : 0xB0;
+        buffer[(j*bufw+i)*3+1] = ((i&16)^(j&16)) ? 0x80 : 0xB0;
+        buffer[(j*bufw+i)*3+2] = ((i&16)^(j&16)) ? 0x80 : 0xB0;
+    }
+
+
+    if(colors == 256) //256 Colors
+    {
+        int jmax = (cbb == 0x06014000) ? 64 : 128; //half size
+
+        //cbb >= 0x06010000 --> sprite
+        u32 pal = (cbb >= 0x06010000) ? 256 : 0;
+
+        for(i = 0; i < 256; i++) for(j = 0; j < jmax; j++)
+        {
+            u32 Index = (i/8) + (j/8)*32;
+            u8 * dataptr = (u8*)&(charbaseblockptr[(Index&0x3FF)*64]);
+
+            int data = dataptr[(i&7)+((j&7)*8)];
+
+            u32 color = rgb16to32(((u16*)Mem.pal_ram)[data+pal]);
+
+            buffer[(j*bufw+i)*3+0] = color & 0xFF;
+            buffer[(j*bufw+i)*3+1] = (color>>8) & 0xFF;
+            buffer[(j*bufw+i)*3+2] = (color>>16) & 0xFF;
+        }
+        for(i = 0; i < 256; i++) for(j = jmax; j < 256; j++)
+        {
+            if( ((i^j)&7) == 0 )
+            {
+                buffer[(j*bufw+i)*3+0] = 255;
+                buffer[(j*bufw+i)*3+1] = 0;
+                buffer[(j*bufw+i)*3+2] = 0;
+            }
+        }
+    }
+    else if(colors == 16) //16 colors
+    {
+        int jmax = (cbb == 0x06014000) ? 128 : 256; //half size
+
+        //cbb >= 0x06010000 --> sprite
+        u32 pal = (cbb >= 0x06010000) ? (palette+16) : palette;
+        u16 * palptr = (u16*)&Mem.pal_ram[pal*2*16];
+
+        for(i = 0; i < 256; i++) for(j = 0; j < jmax; j++)
+        {
+            u32 Index = (i/8) + (j/8)*32;
+            u8 * dataptr = (u8*)&(charbaseblockptr[(Index&0x3FF)*32]);
+
+            int data = dataptr[ ((i&7)+((j&7)*8))/2 ];
+
+            if(i&1) data = data>>4;
+            else data = data & 0xF;
+
+            u32 color = rgb16to32(palptr[data]);
+
+            buffer[(j*bufw+i)*3+0] = color & 0xFF;
+            buffer[(j*bufw+i)*3+1] = (color>>8) & 0xFF;
+            buffer[(j*bufw+i)*3+2] = (color>>16) & 0xFF;
+        }
+
+        for(i = 0; i < 256; i++) for(j = jmax; j < 256; j++)
+        {
+            if( ((i^j)&7) == 0 )
+            {
+                buffer[(j*bufw+i)*3+0] = 255;
+                buffer[(j*bufw+i)*3+1] = 0;
+                buffer[(j*bufw+i)*3+2] = 0;
+            }
+        }
+    }
+}
+
+//----------------------------------------------------------------

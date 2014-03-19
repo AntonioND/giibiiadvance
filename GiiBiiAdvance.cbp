@@ -350,6 +350,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="gui/win_gba_sprviewer.h" />
+		<Unit filename="gui/win_gba_tileviewer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gui/win_gba_tileviewer.h" />
 		<Unit filename="gui/win_main.c">
 			<Option compilerVar="CC" />
 		</Unit>

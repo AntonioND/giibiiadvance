@@ -272,22 +272,22 @@ int Win_GBMapViewerCreate(void)
 
     if(Win_MainRunningGB() == 0) return 0;
 
-    GUI_SetLabel(&gb_mapview_tilebase_label,6,6,9*FONT_12_WIDTH,FONT_12_HEIGHT,"Tile Base");
+    GUI_SetLabel(&gb_mapview_tilebase_label,6,6,9*FONT_WIDTH,FONT_HEIGHT,"Tile Base");
 
-    GUI_SetRadioButton(&gb_mapview_tilebase8000_radbtn,  6,24,8*FONT_12_WIDTH,24,
+    GUI_SetRadioButton(&gb_mapview_tilebase8000_radbtn,  6,24,8*FONT_WIDTH,24,
                   "0x8000", 0, 0, 1,_win_gb_map_viewer_tilebase_radbtn_callback);
-    GUI_SetRadioButton(&gb_mapview_tilebase8800_radbtn,  12+8*FONT_12_WIDTH,24,8*FONT_12_WIDTH,24,
+    GUI_SetRadioButton(&gb_mapview_tilebase8800_radbtn,  12+8*FONT_WIDTH,24,8*FONT_WIDTH,24,
                   "0x8800", 0, 1, 0,_win_gb_map_viewer_tilebase_radbtn_callback);
 
-    GUI_SetLabel(&gb_mapview_mapbase_label,6,54,8*FONT_12_WIDTH,FONT_12_HEIGHT,"Map Base");
+    GUI_SetLabel(&gb_mapview_mapbase_label,6,54,8*FONT_WIDTH,FONT_HEIGHT,"Map Base");
 
-    GUI_SetRadioButton(&gb_mapview_mapbase9800_radbtn,  6,72,8*FONT_12_WIDTH,24,
+    GUI_SetRadioButton(&gb_mapview_mapbase9800_radbtn,  6,72,8*FONT_WIDTH,24,
                   "0x9800", 1, 0, 1,_win_gb_map_viewer_mapbase_radbtn_callback);
-    GUI_SetRadioButton(&gb_mapview_mapbase9C00_radbtn,  12+8*FONT_12_WIDTH,72,8*FONT_12_WIDTH,24,
+    GUI_SetRadioButton(&gb_mapview_mapbase9C00_radbtn,  12+8*FONT_WIDTH,72,8*FONT_WIDTH,24,
                   "0x9C00", 1, 1, 0,_win_gb_map_viewer_mapbase_radbtn_callback);
 
     GUI_SetTextBox(&gb_mapview_textbox,&gb_mapview_con,
-                   6,108, 19*FONT_12_WIDTH,6*FONT_12_HEIGHT, NULL);
+                   6,108, 19*FONT_WIDTH,6*FONT_HEIGHT, NULL);
 
     GUI_SetBitmap(&gb_mapview_map_bmp,145,6,GB_MAP_BUFFER_WIDTH,GB_MAP_BUFFER_HEIGHT,gb_map_buffer,
                   _win_gb_mapviewer_map_bmp_callback);
@@ -295,7 +295,7 @@ int Win_GBMapViewerCreate(void)
     GUI_SetBitmap(&gb_mapview_zoomed_tile_bmp,6,198, 64,64, gb_map_zoomed_tile_buffer,
                   NULL);
 
-    GUI_SetButton(&gb_mapview_dumpbtn,87,238,FONT_12_WIDTH*6,FONT_12_HEIGHT*2,"Dump",
+    GUI_SetButton(&gb_mapview_dumpbtn,87,238,FONT_WIDTH*6,FONT_HEIGHT*2,"Dump",
                   _win_gb_mapviewer_dump_btn_callback);
 
     GBMapViewerCreated = 1;

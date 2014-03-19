@@ -113,20 +113,20 @@ static void _gui_draw_menu(_gui_menu * menu, char * buffer, int w, int h)
 
         int l = strlen(list->title);
 
-        FU_Print12Color(buffer,w,h,x,0,0xFFE0E0E0," ");
-        x += FONT_12_WIDTH;
+        FU_PrintColor(buffer,w,h,x,0,0xFFE0E0E0," ");
+        x += FONT_WIDTH;
         if(menu->element_opened == i)
         {
             selected_element_x = x;
-            FU_Print12Color(buffer,w,h,x,0,0xFFC0C0C0,list->title);
+            FU_PrintColor(buffer,w,h,x,0,0xFFC0C0C0,list->title);
         }
         else
         {
-            FU_Print12Color(buffer,w,h,x,0,0xFFE0E0E0,list->title);
+            FU_PrintColor(buffer,w,h,x,0,0xFFE0E0E0,list->title);
         }
-        x += l*FONT_12_WIDTH;
-        FU_Print12Color(buffer,w,h,x,0,0xFFE0E0E0," ");
-        x += FONT_12_WIDTH;
+        x += l*FONT_WIDTH;
+        FU_PrintColor(buffer,w,h,x,0,0xFFE0E0E0," ");
+        x += FONT_WIDTH;
 
         i++;
     }
@@ -134,15 +134,15 @@ static void _gui_draw_menu(_gui_menu * menu, char * buffer, int w, int h)
     GUI_Draw_SetDrawingColor(224,224,224);
     GUI_Draw_FillRect(buffer,w,h,
                         0,x,
-                        FONT_12_HEIGHT, FONT_12_HEIGHT + (FONT_12_HEIGHT/2) - 1);
+                        FONT_HEIGHT, FONT_HEIGHT + (FONT_HEIGHT/2) - 1);
 
     GUI_Draw_SetDrawingColor(0,0,0);
     GUI_Draw_HorizontalLine(buffer,w,h,
                               0,x,
-                              FONT_12_HEIGHT+FONT_12_HEIGHT/2);
+                              FONT_HEIGHT+FONT_HEIGHT/2);
     GUI_Draw_VerticalLine(buffer,w,h,
                               x,
-                              0,FONT_12_HEIGHT+FONT_12_HEIGHT/2);
+                              0,FONT_HEIGHT+FONT_HEIGHT/2);
 
     // draw the menu bar, but not any menu
     if(menu->element_opened < 0)
@@ -174,25 +174,25 @@ static void _gui_draw_menu(_gui_menu * menu, char * buffer, int w, int h)
 
     GUI_Draw_SetDrawingColor(224,224,224);
     GUI_Draw_FillRect(buffer,w,h,
-                        selected_element_x - FONT_12_WIDTH, selected_element_x + FONT_12_WIDTH*(longest_string+1),
-                        FONT_12_HEIGHT+FONT_12_HEIGHT/2, FONT_12_HEIGHT+FONT_12_HEIGHT/2 + (i+1)*FONT_12_HEIGHT);
+                        selected_element_x - FONT_WIDTH, selected_element_x + FONT_WIDTH*(longest_string+1),
+                        FONT_HEIGHT+FONT_HEIGHT/2, FONT_HEIGHT+FONT_HEIGHT/2 + (i+1)*FONT_HEIGHT);
 
     GUI_Draw_SetDrawingColor(0,0,0);
     GUI_Draw_Rect(buffer,w,h,
-                    selected_element_x - FONT_12_WIDTH - 1, selected_element_x + FONT_12_WIDTH*(longest_string+1) + 1,
-                    FONT_12_HEIGHT + FONT_12_HEIGHT/2 - 1, FONT_12_HEIGHT+FONT_12_HEIGHT/2 + (i+1)*FONT_12_HEIGHT + 1);
+                    selected_element_x - FONT_WIDTH - 1, selected_element_x + FONT_WIDTH*(longest_string+1) + 1,
+                    FONT_HEIGHT + FONT_HEIGHT/2 - 1, FONT_HEIGHT+FONT_HEIGHT/2 + (i+1)*FONT_HEIGHT + 1);
 
     //print list
-    int y = 2*FONT_12_HEIGHT;
+    int y = 2*FONT_HEIGHT;
     i = 0;
     while(1)
     {
         if(entries[i] == NULL)
             break;
 
-        FU_Print12Color(buffer,w,h,selected_element_x,y,0xFFE0E0E0,entries[i]->text);
+        FU_PrintColor(buffer,w,h,selected_element_x,y,0xFFE0E0E0,entries[i]->text);
 
-        y += FONT_12_HEIGHT;
+        y += FONT_HEIGHT;
         i++;
     }
 }
@@ -212,25 +212,25 @@ static void _gui_draw_inputwindow(_gui_inputwindow * win, char * buffer, int w, 
     GUI_Draw_SetDrawingColor(224,224,224);
     GUI_Draw_FillRect(buffer,w,h,
                       x,x+GUI_INPUTWINDOW_WIDTH-1,
-                      y,y+FONT_12_HEIGHT+1);
+                      y,y+FONT_HEIGHT+1);
 
     GUI_Draw_SetDrawingColor(0,0,0);
     GUI_Draw_Rect(buffer,w,h,
                       x-1,x+GUI_INPUTWINDOW_WIDTH-1+1,
                       y-1,y+GUI_INPUTWINDOW_HEIGHT-1+1);
-    GUI_Draw_HorizontalLine(buffer,w,h, x-1,x+GUI_INPUTWINDOW_WIDTH-1+1, y+FONT_12_HEIGHT+1);
+    GUI_Draw_HorizontalLine(buffer,w,h, x-1,x+GUI_INPUTWINDOW_WIDTH-1+1, y+FONT_HEIGHT+1);
 
     GUI_Draw_SetDrawingColor(255, 255,255);
     GUI_Draw_FillRect(buffer,w,h,
                       x,x+GUI_INPUTWINDOW_WIDTH-1,
-                      y+FONT_12_HEIGHT+2,y+GUI_INPUTWINDOW_HEIGHT-1);
+                      y+FONT_HEIGHT+2,y+GUI_INPUTWINDOW_HEIGHT-1);
 
-    int text_width = strlen(win->window_caption) * FONT_12_WIDTH;
+    int text_width = strlen(win->window_caption) * FONT_WIDTH;
     int x_off = ( GUI_INPUTWINDOW_WIDTH - text_width ) / 2;
 
-    FU_Print12Color(buffer,w,h,x+x_off,y,0xFFE0E0E0,win->window_caption);
+    FU_PrintColor(buffer,w,h,x+x_off,y,0xFFE0E0E0,win->window_caption);
 
-    FU_Print12(buffer,w,h,x+FONT_12_WIDTH,y+FONT_12_HEIGHT+4,win->input_text);
+    FU_Print(buffer,w,h,x+FONT_WIDTH,y+FONT_HEIGHT+4,win->input_text);
 
 }
 
@@ -285,14 +285,14 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
                       e->y-i,e->y+e->h+i-1);
         }
 
-        int namewidth = FONT_12_WIDTH*strlen(e->info.button.name);
+        int namewidth = FONT_WIDTH*strlen(e->info.button.name);
         int xoff = (e->w - namewidth) / 2;
-        int yoff = (e->h - FONT_12_HEIGHT) / 2;
+        int yoff = (e->h - FONT_HEIGHT) / 2;
 
         if(e->info.button.is_pressed)
-            FU_Print12Color(buffer,w,h,e->x+xoff,e->y+yoff,0xFFFFFFFF,e->info.button.name);
+            FU_PrintColor(buffer,w,h,e->x+xoff,e->y+yoff,0xFFFFFFFF,e->info.button.name);
         else
-            FU_Print12Color(buffer,w,h,e->x+xoff,e->y+yoff,0xFFE0E0E0,e->info.button.name);
+            FU_PrintColor(buffer,w,h,e->x+xoff,e->y+yoff,0xFFE0E0E0,e->info.button.name);
 
         e->info.button.is_pressed = 0;
     }
@@ -316,22 +316,22 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
                       e->y-i,e->y+e->h+i-1);
         }
 */
-        int namewidth = FONT_12_WIDTH*strlen(e->info.radiobutton.name);
+        int namewidth = FONT_WIDTH*strlen(e->info.radiobutton.name);
         int xoff = (e->w - namewidth) / 2;
-        int yoff = (e->h - FONT_12_HEIGHT) / 2;
+        int yoff = (e->h - FONT_HEIGHT) / 2;
 
         if(e->info.radiobutton.is_pressed)
-            FU_Print12Color(buffer,w,h,e->x+xoff,e->y+yoff,0xFFFFFFFF,e->info.radiobutton.name);
+            FU_PrintColor(buffer,w,h,e->x+xoff,e->y+yoff,0xFFFFFFFF,e->info.radiobutton.name);
         else
-            FU_Print12Color(buffer,w,h,e->x+xoff,e->y+yoff,0xFFE0E0E0,e->info.radiobutton.name);
+            FU_PrintColor(buffer,w,h,e->x+xoff,e->y+yoff,0xFFE0E0E0,e->info.radiobutton.name);
     }
     else if(e->element_type == GUI_TYPE_LABEL)
     {
-        int namewidth = FONT_12_WIDTH*strlen(e->info.label.text);
+        int namewidth = FONT_WIDTH*strlen(e->info.label.text);
         int xoff = (e->w - namewidth) / 2;
-        int yoff = (e->h - FONT_12_HEIGHT) / 2;
+        int yoff = (e->h - FONT_HEIGHT) / 2;
 
-        FU_Print12Color(buffer,w,h,e->x+xoff,e->y+yoff,0xFFC0C0C0,e->info.label.text);
+        FU_PrintColor(buffer,w,h,e->x+xoff,e->y+yoff,0xFFC0C0C0,e->info.label.text);
     }
     else if(e->element_type == GUI_TYPE_BITMAP)
     {
@@ -353,24 +353,24 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
         GUI_Draw_SetDrawingColor(224,224,224);
         GUI_Draw_FillRect(buffer,w,h,
                           e->x,e->x+e->w-1,
-                          e->y,e->y+FONT_12_HEIGHT+1);
+                          e->y,e->y+FONT_HEIGHT+1);
 
         GUI_Draw_SetDrawingColor(0,0,0);
         GUI_Draw_Rect(buffer,w,h,
                           e->x-1,e->x+e->w-1+1,
                           e->y-1,e->y+e->h-1+1);
         GUI_Draw_HorizontalLine(buffer,w,h, e->x-1,e->x+e->w-1+1,
-                                  e->y+FONT_12_HEIGHT+1);
+                                  e->y+FONT_HEIGHT+1);
 
         GUI_Draw_SetDrawingColor(255, 255,255);
         GUI_Draw_FillRect(buffer,w,h,
                           e->x,e->x+e->w-1,
-                          e->y+FONT_12_HEIGHT+2,e->y+e->h-1);
+                          e->y+FONT_HEIGHT+2,e->y+e->h-1);
 
-        int text_width = strlen(e->info.window.caption) * FONT_12_WIDTH;
+        int text_width = strlen(e->info.window.caption) * FONT_WIDTH;
         int x_off = ( e->w - text_width ) / 2;
 
-        FU_Print12Color(buffer,w,h,e->x+x_off,e->y,0xFFE0E0E0,e->info.window.caption);
+        FU_PrintColor(buffer,w,h,e->x+x_off,e->y,0xFFE0E0E0,e->info.window.caption);
 
         if(e->info.window.gui)
             GUI_Draw(e->info.window.gui,buffer,w,h,0);
@@ -383,28 +383,28 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
         GUI_Draw_SetDrawingColor(224,224,224);
         GUI_Draw_FillRect(buffer,w,h,
                           e->x,e->x+e->w-1,
-                          e->y,e->y+FONT_12_HEIGHT+1);
+                          e->y,e->y+FONT_HEIGHT+1);
 
         GUI_Draw_SetDrawingColor(0,0,0);
         GUI_Draw_Rect(buffer,w,h,
                           e->x-1,e->x+e->w-1+1,
                           e->y-1,e->y+e->h-1+1);
         GUI_Draw_HorizontalLine(buffer,w,h, e->x-1,e->x+e->w-1+1,
-                                  e->y+FONT_12_HEIGHT+1);
+                                  e->y+FONT_HEIGHT+1);
 
         GUI_Draw_SetDrawingColor(255, 255,255);
         GUI_Draw_FillRect(buffer,w,h,
                           e->x,e->x+e->w-1,
-                          e->y+FONT_12_HEIGHT+2,e->y+e->h-1);
+                          e->y+FONT_HEIGHT+2,e->y+e->h-1);
 
-        int text_width = strlen(e->info.messagebox.caption) * FONT_12_WIDTH;
+        int text_width = strlen(e->info.messagebox.caption) * FONT_WIDTH;
         int x_off = ( e->w - text_width ) / 2;
 
-        FU_Print12Color(buffer,w,h,e->x+x_off,e->y,0xFFE0E0E0,e->info.messagebox.caption);
+        FU_PrintColor(buffer,w,h,e->x+x_off,e->y,0xFFE0E0E0,e->info.messagebox.caption);
 
         GUI_ConsoleDrawAt(e->info.messagebox.con,
                             buffer,w,h,
-                            e->x,e->y+FONT_12_HEIGHT+2,
+                            e->x,e->y+FONT_HEIGHT+2,
                             e->x+e->w-1,e->y+e->h-1);
     }
     else if(e->element_type == GUI_TYPE_SCROLLABLETEXTWINDOW)
@@ -415,32 +415,32 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
         GUI_Draw_SetDrawingColor(224,224,224);
         GUI_Draw_FillRect(buffer,w,h,
                           e->x,e->x+e->w-1,
-                          e->y,e->y+FONT_12_HEIGHT+1);
+                          e->y,e->y+FONT_HEIGHT+1);
 
         GUI_Draw_SetDrawingColor(0,0,0);
         GUI_Draw_Rect(buffer,w,h,
                           e->x-1,e->x+e->w-1+1,
                           e->y-1,e->y+e->h-1+1);
         GUI_Draw_HorizontalLine(buffer,w,h, e->x-1,e->x+e->w-1+1,
-                                  e->y+FONT_12_HEIGHT+1);
+                                  e->y+FONT_HEIGHT+1);
 
         GUI_Draw_SetDrawingColor(255, 255,255);
         GUI_Draw_FillRect(buffer,w,h,
                           e->x,e->x+e->w-1,
-                          e->y+FONT_12_HEIGHT+2,e->y+e->h-1);
+                          e->y+FONT_HEIGHT+2,e->y+e->h-1);
 
-        int caption_width = strlen(e->info.scrollabletextwindow.caption) * FONT_12_WIDTH;
+        int caption_width = strlen(e->info.scrollabletextwindow.caption) * FONT_WIDTH;
         int x_off = ( e->w - caption_width ) / 2;
 
         int skipspaces = 0;
 
-        FU_Print12Color(buffer,w,h,e->x+x_off,e->y,0xFFE0E0E0,e->info.scrollabletextwindow.caption);
+        FU_PrintColor(buffer,w,h,e->x+x_off,e->y,0xFFE0E0E0,e->info.scrollabletextwindow.caption);
 
         if(e->info.scrollabletextwindow.text)
         {
             int countlines = 0;
 
-            int textwidth = (e->w / FONT_12_WIDTH) - 1;
+            int textwidth = (e->w / FONT_WIDTH) - 1;
 
             int i = 0;
             int curx = 0;
@@ -496,7 +496,7 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
             int cury = 0;
 
             int basexcoord = e->x;
-            int baseycoord = e->y+FONT_12_HEIGHT+2;
+            int baseycoord = e->y+FONT_HEIGHT+2;
 
             countlines = 0;
 
@@ -538,7 +538,7 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
                     }
                     else
                     {
-                        FU_PrintChar12(buffer,w,h, basexcoord+curx*FONT_12_WIDTH, baseycoord+cury*FONT_12_HEIGHT,
+                        FU_PrintChar(buffer,w,h, basexcoord+curx*FONT_WIDTH, baseycoord+cury*FONT_HEIGHT,
                                    c, 0xFFFFFFFF);
                         curx ++;
                         if(curx == textwidth)
@@ -558,7 +558,7 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
             }
 
             for(i = 0; i < e->info.scrollabletextwindow.max_drawn_lines; i++)
-                FU_PrintChar12(buffer,w,h, basexcoord+textwidth*FONT_12_WIDTH, baseycoord+i*FONT_12_HEIGHT,
+                FU_PrintChar(buffer,w,h, basexcoord+textwidth*FONT_WIDTH, baseycoord+i*FONT_HEIGHT,
                     ' ', 0xFFE0E0E0);
 
             int percent =
@@ -567,21 +567,97 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
 
             int bar_position = 1 + (percent * (e->info.scrollabletextwindow.max_drawn_lines-5) / 100);
 
-            FU_PrintChar12(buffer,w,h, basexcoord+textwidth*FONT_12_WIDTH, baseycoord+bar_position*FONT_12_HEIGHT,
+            FU_PrintChar(buffer,w,h, basexcoord+textwidth*FONT_WIDTH, baseycoord+bar_position*FONT_HEIGHT,
                     CHR_SHADED_DARK, 0xFFE0E0E0);
-            FU_PrintChar12(buffer,w,h, basexcoord+textwidth*FONT_12_WIDTH, baseycoord+(bar_position+1)*FONT_12_HEIGHT,
+            FU_PrintChar(buffer,w,h, basexcoord+textwidth*FONT_WIDTH, baseycoord+(bar_position+1)*FONT_HEIGHT,
                     CHR_SHADED_DARK, 0xFFE0E0E0);
-            FU_PrintChar12(buffer,w,h, basexcoord+textwidth*FONT_12_WIDTH, baseycoord+(bar_position+2)*FONT_12_HEIGHT,
+            FU_PrintChar(buffer,w,h, basexcoord+textwidth*FONT_WIDTH, baseycoord+(bar_position+2)*FONT_HEIGHT,
                     CHR_SHADED_DARK, 0xFFE0E0E0);
 
             //if(e->info.scrollabletextwindow.currentline > 0)
-                FU_PrintChar12(buffer,w,h, basexcoord+textwidth*FONT_12_WIDTH, baseycoord,
+                FU_PrintChar(buffer,w,h, basexcoord+textwidth*FONT_WIDTH, baseycoord,
                     CHR_ARROW_UP, 0xFFE0E0E0);
             //if(e->info.scrollabletextwindow.currentline <
             //        e->info.scrollabletextwindow.numlines - e->info.scrollabletextwindow.max_drawn_lines)
-                FU_PrintChar12(buffer,w,h, basexcoord+textwidth*FONT_12_WIDTH,
-                               baseycoord+(e->info.scrollabletextwindow.max_drawn_lines-1)*FONT_12_HEIGHT,
+                FU_PrintChar(buffer,w,h, basexcoord+textwidth*FONT_WIDTH,
+                               baseycoord+(e->info.scrollabletextwindow.max_drawn_lines-1)*FONT_HEIGHT,
                                CHR_ARROW_DOWN, 0xFFE0E0E0);
+        }
+    }
+    else if(e->element_type == GUI_TYPE_SCROLLBAR)
+    {
+        GUI_Draw_SetDrawingColor(224,224,224);
+
+        GUI_Draw_FillRect(buffer,w,h,
+                      e->x,e->x+e->w-1,
+                      e->y,e->y+e->h-1);
+
+        GUI_Draw_SetDrawingColor(0,0,0);
+        GUI_Draw_Rect(buffer,w,h,
+                      e->x-1,e->x+e->w,
+                      e->y-1,e->y+e->h);
+
+        GUI_Draw_SetDrawingColor(128,128,128);
+        GUI_Draw_Rect(buffer,w,h,
+                      e->x-2,e->x+e->w+1,
+                      e->y-2,e->y+e->h+1);
+
+        int barsize = 0;
+        if(e->info.scrollbar.is_vertical)
+        {
+            barsize = e->h - (2 * (e->w+1) ); // total length - side buttons
+            barsize -= 2*e->w; // total length - side buttons - scrollable button
+        }
+        else
+        {
+            barsize = e->w - (2 * (e->h+1) ); // total length - side buttons
+            barsize -= 2*e->h; // total length - side buttons - scrollable button
+        }
+        if(barsize < 0) return; // bad size...
+
+        int position = e->info.scrollbar.value * barsize / (e->info.scrollbar.value_max - e->info.scrollbar.value_min);
+
+        if(e->info.scrollbar.is_vertical)
+        {
+            GUI_Draw_SetDrawingColor(0,0,0);
+            GUI_Draw_Rect(buffer,w,h, e->x-1, e->x+e->w, e->y-1, e->y+e->w); // up
+            GUI_Draw_SetDrawingColor(128,128,128);
+            GUI_Draw_Rect(buffer,w,h, e->x-2, e->x+e->w+1, e->y-2, e->y+e->w+1);
+
+            GUI_Draw_SetDrawingColor(0,0,0);
+            GUI_Draw_Rect(buffer,w,h,
+                              e->x-1, e->x+e->w, e->y + e->h - e->w - 1, e->y+e->h); // down
+            GUI_Draw_SetDrawingColor(128,128,128);
+            GUI_Draw_Rect(buffer,w,h,
+                              e->x-2, e->x+e->w+1, e->y + e->h - e->w - 2, e->y+e->h+1); // down
+
+            GUI_Draw_SetDrawingColor(0,0,0);
+            GUI_Draw_Rect(buffer,w,h,
+                              e->x, e->x+e->w-1, e->y+e->w+position+1, e->y+e->w+position+2*e->w-1); // scroll
+            GUI_Draw_SetDrawingColor(128,128,128);
+            GUI_Draw_Rect(buffer,w,h,
+                              e->x+1, e->x+e->w-2, e->y+e->w+position+2, e->y+e->w+position+2*e->w-2); // scroll
+        }
+        else
+        {
+            GUI_Draw_SetDrawingColor(0,0,0);
+            GUI_Draw_Rect(buffer,w,h, e->x-1, e->x+e->h, e->y-1, e->y+e->h); // up
+            GUI_Draw_SetDrawingColor(128,128,128);
+            GUI_Draw_Rect(buffer,w,h, e->x-2, e->x+e->h+1, e->y-2, e->y+e->h+1);
+
+            GUI_Draw_SetDrawingColor(0,0,0);
+            GUI_Draw_Rect(buffer,w,h,
+                              e->x + e->w - e->h-1, e->x+e->h, e->y - 1, e->y+e->h); // down
+            GUI_Draw_SetDrawingColor(128,128,128);
+            GUI_Draw_Rect(buffer,w,h,
+                              e->x + e->w - e->h-2, e->x+e->h+1, e->y - 2, e->y+e->h+1); // down
+
+            GUI_Draw_SetDrawingColor(0,0,0);
+            GUI_Draw_Rect(buffer,w,h,
+                              e->x+e->h+position+1, e->x+e->h+position+2*e->h-1, e->y, e->y+e->h-1); // scroll
+            GUI_Draw_SetDrawingColor(128,128,128);
+            GUI_Draw_Rect(buffer,w,h,
+                              e->x+e->h+position+2, e->x+e->h+position+2*e->h-2, e->y+1, e->y+e->h-2); // scroll
         }
     }
 }

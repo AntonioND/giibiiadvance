@@ -327,77 +327,77 @@ int Win_GBIOViewerCreate(void)
     if(Win_MainRunningGB() == 0) return 0;
 
     GUI_SetLabel(&gb_ioview_screen_label,
-                   6,6, 13*FONT_12_WIDTH+2,FONT_12_HEIGHT, "Screen");
+                   6,6, 13*FONT_WIDTH+2,FONT_HEIGHT, "Screen");
     GUI_SetTextBox(&gb_ioview_screen_textbox,&gb_ioview_screen_con,
-                   6,20, 13*FONT_12_WIDTH+2,9*FONT_12_HEIGHT, NULL);
+                   6,20, 13*FONT_WIDTH+2,9*FONT_HEIGHT, NULL);
 
     GUI_SetLabel(&gb_ioview_gbpal_label,
-                   6,136, 13*FONT_12_WIDTH+2,FONT_12_HEIGHT, "GB Palettes");
+                   6,136, 13*FONT_WIDTH+2,FONT_HEIGHT, "GB Palettes");
     GUI_SetTextBox(&gb_ioview_gbpal_textbox,&gb_ioview_gbpal_con,
-                   6,150, 13*FONT_12_WIDTH+2,3*FONT_12_HEIGHT, NULL);
+                   6,150, 13*FONT_WIDTH+2,3*FONT_HEIGHT, NULL);
 
     GUI_SetLabel(&gb_ioview_gbcpal_label,
-                   6,194, 13*FONT_12_WIDTH+2,FONT_12_HEIGHT, "GBC Palettes");
+                   6,194, 13*FONT_WIDTH+2,FONT_HEIGHT, "GBC Palettes");
     GUI_SetTextBox(&gb_ioview_gbcpal_textbox,&gb_ioview_gbcpal_con,
-                   6,208, 13*FONT_12_WIDTH+2,4*FONT_12_HEIGHT, NULL);
+                   6,208, 13*FONT_WIDTH+2,4*FONT_HEIGHT, NULL);
 
     GUI_SetLabel(&gb_ioview_other_label,
-                   109,6, 13*FONT_12_WIDTH+2,FONT_12_HEIGHT, "Other");
+                   109,6, 13*FONT_WIDTH+2,FONT_HEIGHT, "Other");
     GUI_SetTextBox(&gb_ioview_other_textbox,&gb_ioview_other_con,
-                   109,20, 13*FONT_12_WIDTH+2,13*FONT_12_HEIGHT, NULL);
+                   109,20, 13*FONT_WIDTH+2,13*FONT_HEIGHT, NULL);
 
     GUI_SetLabel(&gb_ioview_gbcdma_label,
-                   109,182, 13*FONT_12_WIDTH+2,FONT_12_HEIGHT, "GBC DMA");
+                   109,182, 13*FONT_WIDTH+2,FONT_HEIGHT, "GBC DMA");
     GUI_SetTextBox(&gb_ioview_gbcdma_textbox,&gb_ioview_gbcdma_con,
-                   109,196, 13*FONT_12_WIDTH+2,5*FONT_12_HEIGHT, NULL);
+                   109,196, 13*FONT_WIDTH+2,5*FONT_HEIGHT, NULL);
 
     GUI_SetLabel(&gb_ioview_sndchannel1_label,
-                   212,6, 13*FONT_12_WIDTH+2,FONT_12_HEIGHT, "Snd Channel 1");
+                   212,6, 13*FONT_WIDTH+2,FONT_HEIGHT, "Snd Channel 1");
     GUI_SetTextBox(&gb_ioview_sndchannel1_textbox,&gb_ioview_sndchannel1_con,
-                   212,20, 13*FONT_12_WIDTH+2,5*FONT_12_HEIGHT, NULL);
+                   212,20, 13*FONT_WIDTH+2,5*FONT_HEIGHT, NULL);
 
     GUI_SetLabel(&gb_ioview_sndchannel2_label,
-                   315,6, 13*FONT_12_WIDTH+2,FONT_12_HEIGHT, "Snd Channel 2");
+                   315,6, 13*FONT_WIDTH+2,FONT_HEIGHT, "Snd Channel 2");
     GUI_SetTextBox(&gb_ioview_sndchannel2_textbox,&gb_ioview_sndchannel2_con,
-                   315,20, 13*FONT_12_WIDTH+2,5*FONT_12_HEIGHT, NULL);
+                   315,20, 13*FONT_WIDTH+2,5*FONT_HEIGHT, NULL);
 
     GUI_SetLabel(&gb_ioview_sndchannel3_label,
-                   212,88, 13*FONT_12_WIDTH+2,FONT_12_HEIGHT, "Snd Channel 3");
+                   212,88, 13*FONT_WIDTH+2,FONT_HEIGHT, "Snd Channel 3");
     GUI_SetTextBox(&gb_ioview_sndchannel3_textbox,&gb_ioview_sndchannel3_con,
-                   212,102, 13*FONT_12_WIDTH+2,5*FONT_12_HEIGHT, NULL);
+                   212,102, 13*FONT_WIDTH+2,5*FONT_HEIGHT, NULL);
 
     GUI_SetLabel(&gb_ioview_sndchannel4_label,
-                   315,88, 13*FONT_12_WIDTH+2,FONT_12_HEIGHT, "Snd Channel 4");
+                   315,88, 13*FONT_WIDTH+2,FONT_HEIGHT, "Snd Channel 4");
     GUI_SetTextBox(&gb_ioview_sndchannel4_textbox,&gb_ioview_sndchannel4_con,
-                   315,102, 13*FONT_12_WIDTH+2,5*FONT_12_HEIGHT, NULL);
+                   315,102, 13*FONT_WIDTH+2,5*FONT_HEIGHT, NULL);
 
     GUI_SetLabel(&gb_ioview_sndcontrol_label,
-                   418,6, 13*FONT_12_WIDTH+2,FONT_12_HEIGHT, "Snd Control");
+                   418,6, 13*FONT_WIDTH+2,FONT_HEIGHT, "Snd Control");
     GUI_SetTextBox(&gb_ioview_sndcontrol_textbox,&gb_ioview_sndcontrol_con,
-                   418,20, 13*FONT_12_WIDTH+2,3*FONT_12_HEIGHT, NULL);
+                   418,20, 13*FONT_WIDTH+2,3*FONT_HEIGHT, NULL);
 
     GUI_SetLabel(&gb_ioview_dmainfo_label,
-                   212,170, 13*FONT_12_WIDTH+2,FONT_12_HEIGHT, "GBC DMA Info.");
+                   212,170, 13*FONT_WIDTH+2,FONT_HEIGHT, "GBC DMA Info.");
     GUI_SetTextBox(&gb_ioview_dmainfo_textbox,&gb_ioview_dmainfo_con,
-                   212,184, 13*FONT_12_WIDTH+2,4*FONT_12_HEIGHT, NULL);
+                   212,184, 13*FONT_WIDTH+2,4*FONT_HEIGHT, NULL);
 
     GUI_SetLabel(&gb_ioview_mbc_label,
-                   315,170, 13*FONT_12_WIDTH+2,FONT_12_HEIGHT, "MBC Info.");
+                   315,170, 13*FONT_WIDTH+2,FONT_HEIGHT, "MBC Info.");
     GUI_SetTextBox(&gb_ioview_mbc_textbox,&gb_ioview_mbc_con,
-                   315,184, 13*FONT_12_WIDTH+2,4*FONT_12_HEIGHT, NULL);
+                   315,184, 13*FONT_WIDTH+2,4*FONT_HEIGHT, NULL);
 
     GUI_SetTextBox(&gb_ioview_cpuspeed_textbox,&gb_ioview_cpuspeed_con,
-                   212,244, 28*FONT_12_WIDTH,FONT_12_HEIGHT, NULL);
+                   212,244, 28*FONT_WIDTH,FONT_HEIGHT, NULL);
 
     GUI_SetLabel(&gb_ioview_irq_label,
-                   418,62, 13*FONT_12_WIDTH+2,FONT_12_HEIGHT, "IRQs");
+                   418,62, 13*FONT_WIDTH+2,FONT_HEIGHT, "IRQs");
     GUI_SetTextBox(&gb_ioview_irq_textbox,&gb_ioview_irq_con,
-                   418,78, 13*FONT_12_WIDTH+2,7*FONT_12_HEIGHT, NULL);
+                   418,78, 13*FONT_WIDTH+2,7*FONT_HEIGHT, NULL);
 
     GUI_SetLabel(&gb_ioview_clocks_label,
-                   418,168, 13*FONT_12_WIDTH+2,FONT_12_HEIGHT, "Clocks");
+                   418,168, 13*FONT_WIDTH+2,FONT_HEIGHT, "Clocks");
     GUI_SetTextBox(&gb_ioview_clocks_textbox,&gb_ioview_clocks_con,
-                   418,184, 13*FONT_12_WIDTH+2,6*FONT_12_HEIGHT, NULL);
+                   418,184, 13*FONT_WIDTH+2,6*FONT_HEIGHT, NULL);
 
     GBIOViewerCreated = 1;
 

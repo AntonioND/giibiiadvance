@@ -267,11 +267,11 @@ int Win_GBTileViewerCreate(void)
 
     if(Win_MainRunningGB() == 0) return 0;
 
-    GUI_SetLabel(&gb_tileview_bank0_label,117,6,GB_TILE_BUFFER_WIDTH,FONT_12_HEIGHT,"Bank 0");
-    GUI_SetLabel(&gb_tileview_bank1_label,251,6,GB_TILE_BUFFER_WIDTH,FONT_12_HEIGHT,"Bank 1");
+    GUI_SetLabel(&gb_tileview_bank0_label,117,6,GB_TILE_BUFFER_WIDTH,FONT_HEIGHT,"Bank 0");
+    GUI_SetLabel(&gb_tileview_bank1_label,251,6,GB_TILE_BUFFER_WIDTH,FONT_HEIGHT,"Bank 1");
 
     GUI_SetTextBox(&gb_tileview_textbox,&gb_tileview_con,
-                   6,6, 15*FONT_12_WIDTH,3*FONT_12_HEIGHT, NULL);
+                   6,6, 15*FONT_WIDTH,3*FONT_HEIGHT, NULL);
 
     GUI_SetBitmap(&gb_tileview_bank0_bmp,117,24,GB_TILE_BUFFER_WIDTH,GB_TILE_BUFFER_HEIGHT,gb_tile_bank0_buffer,
                   _win_gb_tileviewer_bank0_bmp_callback);
@@ -281,7 +281,7 @@ int Win_GBTileViewerCreate(void)
     GUI_SetBitmap(&gb_tileview_zoomed_tile_bmp,6,48, 64,64, gb_tile_zoomed_tile_buffer,
                   NULL);
 
-    GUI_SetButton(&gb_tileview_dumpbtn,6,192,FONT_12_WIDTH*6,FONT_12_HEIGHT*2,"Dump",
+    GUI_SetButton(&gb_tileview_dumpbtn,6,192,FONT_WIDTH*6,FONT_HEIGHT*2,"Dump",
                   _win_gb_tileviewer_dump_btn_callback);
 
     GBTileViewerCreated = 1;

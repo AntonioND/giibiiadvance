@@ -297,8 +297,8 @@ static void _win_gb_mem_viewer_inputwindow_callback(char * text, int is_valid)
 
 static void _win_gb_mem_view_textbox_callback(int x, int y)
 {
-    int xtile = x/FONT_12_WIDTH;
-    int ytile = y/FONT_12_HEIGHT;
+    int xtile = x/FONT_WIDTH;
+    int ytile = y/FONT_HEIGHT;
 
     int has_clicked_addr = 0;
     u32 clicked_addr;
@@ -376,16 +376,16 @@ int Win_GBMemViewerCreate(void)
 
     if(Win_MainRunningGB() == 0) return 0;
 
-    GUI_SetRadioButton(&gb_memview_mode_8_radbtn,   6,6,9*FONT_12_WIDTH,24,
+    GUI_SetRadioButton(&gb_memview_mode_8_radbtn,   6,6,9*FONT_WIDTH,24,
                   "8 bits",  0,GB_MEMVIEWER_8,  1,_win_gb_mem_viewer_mode_radbtn_callback);
-    GUI_SetRadioButton(&gb_memview_mode_16_radbtn,  6+9*FONT_12_WIDTH+12,6,9*FONT_12_WIDTH,24,
+    GUI_SetRadioButton(&gb_memview_mode_16_radbtn,  6+9*FONT_WIDTH+12,6,9*FONT_WIDTH,24,
                   "16 bits", 0,GB_MEMVIEWER_16, 0,_win_gb_mem_viewer_mode_radbtn_callback);
 
-    GUI_SetButton(&gb_memview_goto_btn,66+39*FONT_12_WIDTH+36,6,16*FONT_12_WIDTH,24,
+    GUI_SetButton(&gb_memview_goto_btn,66+39*FONT_WIDTH+36,6,16*FONT_WIDTH,24,
                   "Goto (F8)",_win_gb_mem_viewer_goto);
 
     GUI_SetTextBox(&gb_memview_textbox,&gb_memview_con,
-                   6,36, 69*FONT_12_WIDTH,GB_MEMVIEWER_MAX_LINES*FONT_12_HEIGHT,
+                   6,36, 69*FONT_WIDTH,GB_MEMVIEWER_MAX_LINES*FONT_HEIGHT,
                    _win_gb_mem_view_textbox_callback);
 
     GUI_InputWindowClose(&gui_iw_gb_memviewer);

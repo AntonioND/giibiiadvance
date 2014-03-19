@@ -60,6 +60,8 @@
 #include "win_gba_disassembler.h"
 #include "win_gba_memviewer.h"
 //-
+#include "win_gba_tileviewer.h"
+//-
 #include "win_gba_sprviewer.h"
 #include "win_gba_palviewer.h"
 
@@ -484,7 +486,7 @@ static void _win_main_file_explorer_open_index(int i)
 
 static void _win_main_file_explorer_text_box_callback(int x, int y)
 {
-    int i = y / FONT_12_HEIGHT;
+    int i = y / FONT_HEIGHT;
     _win_main_file_explorer_open_index(i);
 }
 
@@ -492,11 +494,11 @@ static void _win_main_file_explorer_create(void)
 {
     GUI_SetTextBox(&win_main_fileexpoler_textbox,&win_main_fileexpoler_con,
                    7,7,
-                   FONT_12_WIDTH*64,FONT_12_HEIGHT*WIN_MAIN_FILE_EXPLORER_NUM_ELEMENTS,
+                   FONT_WIDTH*64,FONT_HEIGHT*WIN_MAIN_FILE_EXPLORER_NUM_ELEMENTS,
                    _win_main_file_explorer_text_box_callback);
-    GUI_SetButton(&win_main_fileexpoler_up_btn,7,353,FONT_12_WIDTH*4,24,
+    GUI_SetButton(&win_main_fileexpoler_up_btn,7,353,FONT_WIDTH*4,24,
                   "Up",_win_main_file_explorer_up);
-    GUI_SetButton(&win_main_fileexpoler_cancel_btn,399,353,FONT_12_WIDTH*8,24,
+    GUI_SetButton(&win_main_fileexpoler_cancel_btn,399,353,FONT_WIDTH*8,24,
                   "Cancel",_win_main_file_explorer_close);
 }
 
@@ -557,7 +559,7 @@ static void _win_main_menu_open_io_viewer(void)
 
 static void _win_main_menu_open_tile_viewer(void)
 {
-    //Win_GBATileViewerCreate();
+    Win_GBATileViewerCreate();
     Win_GBTileViewerCreate();
 }
 
@@ -1020,10 +1022,10 @@ static int Win_MainEventCallback(SDL_Event * e)
 //@global function
 int Win_MainCreate(char * rom_path)
 {
-    GUI_SetButton(&mainwindow_subwindow_btn,10,50,7*FONT_12_WIDTH,FONT_12_HEIGHT,"CLOSE",_win_main_config_window_close);
-    GUI_SetButton(&mainwindow_subwindow_btn2,10,70,7*FONT_12_WIDTH,FONT_12_HEIGHT,"TEST",NULL);
+    GUI_SetButton(&mainwindow_subwindow_btn,10,50,7*FONT_WIDTH,FONT_HEIGHT,"CLOSE",_win_main_config_window_close);
+    GUI_SetButton(&mainwindow_subwindow_btn2,10,70,7*FONT_WIDTH,FONT_HEIGHT,"TEST",NULL);
 
-    GUI_SetButton(&mainwindow_btn,0,0,30*FONT_12_WIDTH,15*FONT_12_HEIGHT,"MAIN GUI",mainbtncallback_openwin);
+    GUI_SetButton(&mainwindow_btn,0,0,30*FONT_WIDTH,15*FONT_HEIGHT,"MAIN GUI",mainbtncallback_openwin);
     GUI_SetWindow(&mainwindow_configwin,100,50,100,200,&mainwindow_subwindow_config_gui,"TEST");
 
     _win_main_file_explorer_create();
@@ -1077,7 +1079,7 @@ void Win_MainRender(void)
         if(WIN_MAIN_RUNNING != RUNNING_NONE)
         {
             WinMain_frames_drawn ++;
-            //FU_Print12(GAME_SCREEN_BUFFER,_win_main_get_game_screen_texture_width(),_win_main_get_game_screen_texture_height(),0,0,
+            //FU_Print(GAME_SCREEN_BUFFER,_win_main_get_game_screen_texture_width(),_win_main_get_game_screen_texture_height(),0,0,
             //           "FPS: %d",FPS);
             WH_Render(WinIDMain, WIN_MAIN_GAME_SCREEN_BUFFER);
         }

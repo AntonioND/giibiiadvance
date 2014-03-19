@@ -293,18 +293,18 @@ int Win_GBPalViewerCreate(void)
 
     if(Win_MainRunningGB() == 0) return 0;
 
-    GUI_SetLabel(&gb_palview_bgpal_label,32,6,GB_PAL_BUFFER_WIDTH,FONT_12_HEIGHT,"Background");
-    GUI_SetLabel(&gb_palview_sprpal_label,145,6,GB_PAL_BUFFER_WIDTH,FONT_12_HEIGHT,"Sprites");
+    GUI_SetLabel(&gb_palview_bgpal_label,32,6,GB_PAL_BUFFER_WIDTH,FONT_HEIGHT,"Background");
+    GUI_SetLabel(&gb_palview_sprpal_label,145,6,GB_PAL_BUFFER_WIDTH,FONT_HEIGHT,"Sprites");
 
     GUI_SetTextBox(&gb_palview_textbox,&gb_palview_con,
-                   6,192, 28*FONT_12_WIDTH,2*FONT_12_HEIGHT, NULL);
+                   6,192, 28*FONT_WIDTH,2*FONT_HEIGHT, NULL);
 
     GUI_SetBitmap(&gb_palview_bgpal_bmp,32,24,GB_PAL_BUFFER_WIDTH,GB_PAL_BUFFER_HEIGHT,gb_pal_bg_buffer,
                   _win_gb_palviewer_bg_bmp_callback);
     GUI_SetBitmap(&gb_palview_sprpal_bmp,145,24,GB_PAL_BUFFER_WIDTH,GB_PAL_BUFFER_HEIGHT,gb_pal_spr_buffer,
                   _win_gb_palviewer_spr_bmp_callback);
 
-    GUI_SetButton(&gb_palview_dumpbtn,210,192,FONT_12_WIDTH*6,FONT_12_HEIGHT*2,"Dump",
+    GUI_SetButton(&gb_palview_dumpbtn,210,192,FONT_WIDTH*6,FONT_HEIGHT*2,"Dump",
                   _win_gb_palviewer_dump_btn_callback);
 
     GBPalViewerCreated = 1;

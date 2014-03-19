@@ -357,7 +357,7 @@ static void _win_gba_disassembly_textbox_callback(int x, int y)
         instr_size = 2;
     }
 
-    u32 addr = gba_disassembler_start_address + ( (y/FONT_12_HEIGHT) * instr_size );
+    u32 addr = gba_disassembler_start_address + ( (y/FONT_HEIGHT) * instr_size );
 
     if(GBA_DebugIsBreakpoint(addr) == 0)
         GBA_DebugAddBreakpoint(addr);
@@ -403,7 +403,7 @@ static void _win_gba_disassembly_inputwindow_callback(char * text, int is_valid)
 
 static void _win_gba_registers_textbox_callback(int x, int y)
 {
-    int reg = y/FONT_12_HEIGHT;
+    int reg = y/FONT_HEIGHT;
 
     char text[30];
     if(reg < 16)
@@ -459,26 +459,26 @@ int Win_GBADisassemblerCreate(void)
     if(Win_MainRunningGBA() == 0) return 0;
 
     GUI_SetTextBox(&gba_disassembly_textbox,&gba_disassembly_con,
-                   6,6, 66*FONT_12_WIDTH,CPU_DISASSEMBLER_MAX_INSTRUCTIONS*FONT_12_HEIGHT,
+                   6,6, 66*FONT_WIDTH,CPU_DISASSEMBLER_MAX_INSTRUCTIONS*FONT_HEIGHT,
                    _win_gba_disassembly_textbox_callback);
     GUI_SetTextBox(&gba_regs_textbox,&gba_regs_con,
-                   6+66*FONT_12_WIDTH+12,6, 16*FONT_12_WIDTH,22*FONT_12_HEIGHT,
+                   6+66*FONT_WIDTH+12,6, 16*FONT_WIDTH,22*FONT_HEIGHT,
                    _win_gba_registers_textbox_callback);
 
-    GUI_SetButton(&gba_disassembler_step_btn,6+66*FONT_12_WIDTH+12,280,16*FONT_12_WIDTH,24,
+    GUI_SetButton(&gba_disassembler_step_btn,6+66*FONT_WIDTH+12,280,16*FONT_WIDTH,24,
                   "Step (F7)",_win_gba_disassembler_step);
 
-    GUI_SetButton(&gba_disassembler_goto_btn,6+66*FONT_12_WIDTH+12,316,16*FONT_12_WIDTH,24,
+    GUI_SetButton(&gba_disassembler_goto_btn,6+66*FONT_WIDTH+12,316,16*FONT_WIDTH,24,
                   "Goto (F8)",_win_gba_disassembler_goto);
 
-    GUI_SetLabel(&gba_disassembler_disassembly_mode_label,6+66*FONT_12_WIDTH+12,366,16*FONT_12_WIDTH,24,
+    GUI_SetLabel(&gba_disassembler_disassembly_mode_label,6+66*FONT_WIDTH+12,366,16*FONT_WIDTH,24,
                  "Disassembly mode");
 
-    GUI_SetRadioButton(&gba_disassembler_auto_radbtn,6+66*FONT_12_WIDTH+12,388,16*FONT_12_WIDTH,24,
+    GUI_SetRadioButton(&gba_disassembler_auto_radbtn,6+66*FONT_WIDTH+12,388,16*FONT_WIDTH,24,
                   "Auto",  0,GBA_DISASM_CPU_AUTO,  1,_win_gba_cpu_mode_radbtn_callback);
-    GUI_SetRadioButton(&gba_disassembler_arm_radbtn,6+66*FONT_12_WIDTH+12,418,16*FONT_12_WIDTH,24,
+    GUI_SetRadioButton(&gba_disassembler_arm_radbtn,6+66*FONT_WIDTH+12,418,16*FONT_WIDTH,24,
                   "ARM",   0,GBA_DISASM_CPU_ARM,   0,_win_gba_cpu_mode_radbtn_callback);
-    GUI_SetRadioButton(&gba_disassembler_thumb_radbtn,6+66*FONT_12_WIDTH+12,448,16*FONT_12_WIDTH,24,
+    GUI_SetRadioButton(&gba_disassembler_thumb_radbtn,6+66*FONT_WIDTH+12,448,16*FONT_WIDTH,24,
                   "THUMB", 0,GBA_DISASM_CPU_THUMB, 0,_win_gba_cpu_mode_radbtn_callback);
 
     GUI_InputWindowClose(&gui_iw_gba_disassembler);

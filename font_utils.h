@@ -115,19 +115,12 @@ void FU_End(void);
 
 //---------------------------------------------------------------------------------
 
-#define FONT_12_WIDTH (7)
-#define FONT_12_HEIGHT (12)
+#define FONT_WIDTH (7)
+#define FONT_HEIGHT (12)
 
-int FU_Print12(char * buffer, int bufw, int bufh, int tx, int ty, const char * txt, ...);
-int FU_PrintChar12(char * buffer, int bufw, int bufh, int tx, int ty, unsigned char c, int color);
-int FU_Print12Color(char * buffer, int bufw, int bufh, int tx, int ty, int color, const char * txt, ...);
-
-//---------------------------------------------------------------------------------
-
-#define FONT_14_WIDTH (8)
-#define FONT_14_HEIGHT (14)
-
-int FU_Print14(char * buffer, int bufw, int bufh, int tx, int ty, const char * txt, ...);
+int FU_Print(char * buffer, int bufw, int bufh, int tx, int ty, const char * txt, ...);
+int FU_PrintChar(char * buffer, int bufw, int bufh, int tx, int ty, unsigned char c, int color);
+int FU_PrintColor(char * buffer, int bufw, int bufh, int tx, int ty, int color, const char * txt, ...);
 
 //---------------------------------------------------------------------------------
 

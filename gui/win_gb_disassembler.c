@@ -295,7 +295,7 @@ static int _win_gb_disassembler_callback(SDL_Event * e)
 
 static void _win_gb_disassembly_textbox_callback(int x, int y)
 {
-    u32 addr = gb_cpu_line_address[ y / FONT_12_HEIGHT ];
+    u32 addr = gb_cpu_line_address[ y / FONT_HEIGHT ];
 
     if(GB_DebugIsBreakpoint(addr) == 0)
         GB_DebugAddBreakpoint(addr);
@@ -333,7 +333,7 @@ static void _win_gb_disassembly_inputwindow_callback(char * text, int is_valid)
 
 static void _win_gb_registers_textbox_callback(int x, int y)
 {
-    int reg = y/FONT_12_HEIGHT;
+    int reg = y/FONT_HEIGHT;
 
     if(reg > 5)
         return;
@@ -384,20 +384,20 @@ int Win_GBDisassemblerCreate(void)
     if(Win_MainRunningGB() == 0) return 0;
 
     GUI_SetTextBox(&gb_disassembly_textbox,&gb_disassembly_con,
-                   6,6, 51*FONT_12_WIDTH,CPU_DISASSEMBLER_MAX_INSTRUCTIONS*FONT_12_HEIGHT,
+                   6,6, 51*FONT_WIDTH,CPU_DISASSEMBLER_MAX_INSTRUCTIONS*FONT_HEIGHT,
                    _win_gb_disassembly_textbox_callback);
     GUI_SetTextBox(&gb_regs_textbox,&gb_regs_con,
-                   6+51*FONT_12_WIDTH+12,6, 10*FONT_12_WIDTH,9*FONT_12_HEIGHT,
+                   6+51*FONT_WIDTH+12,6, 10*FONT_WIDTH,9*FONT_HEIGHT,
                    _win_gb_registers_textbox_callback);
 
-    GUI_SetButton(&gb_disassembler_step_btn,6+51*FONT_12_WIDTH+12,6+9*FONT_12_HEIGHT+12,10*FONT_12_WIDTH,24,
+    GUI_SetButton(&gb_disassembler_step_btn,6+51*FONT_WIDTH+12,6+9*FONT_HEIGHT+12,10*FONT_WIDTH,24,
                   "Step (F7)",_win_gb_disassembler_step);
 
-    GUI_SetButton(&gb_disassembler_goto_btn,6+51*FONT_12_WIDTH+12,6+9*FONT_12_HEIGHT+48,10*FONT_12_WIDTH,24,
+    GUI_SetButton(&gb_disassembler_goto_btn,6+51*FONT_WIDTH+12,6+9*FONT_HEIGHT+48,10*FONT_WIDTH,24,
                   "Goto (F8)",_win_gb_disassembler_goto);
 
     GUI_SetTextBox(&gb_stack_textbox,&gb_stack_con,
-                   6+51*FONT_12_WIDTH+12,6+9*FONT_12_HEIGHT+48+24+12,10*FONT_12_WIDTH,CPU_STACK_MAX_LINES*FONT_12_HEIGHT,
+                   6+51*FONT_WIDTH+12,6+9*FONT_HEIGHT+48+24+12,10*FONT_WIDTH,CPU_STACK_MAX_LINES*FONT_HEIGHT,
                    NULL);
 
     GUI_InputWindowClose(&gui_iw_gb_disassembler);

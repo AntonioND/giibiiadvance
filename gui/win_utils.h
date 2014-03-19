@@ -59,6 +59,7 @@ void GUI_ConsoleDrawAt(_gui_console * con, char * buffer, int buf_w, int buf_h, 
 #define GUI_TYPE_WINDOW               6
 #define GUI_TYPE_MESSAGEBOX           7
 #define GUI_TYPE_SCROLLABLETEXTWINDOW 8
+#define GUI_TYPE_SCROLLBAR            9
 
 typedef void (*_gui_void_arg_void_fn)(void);
 typedef void (*_gui_void_arg_int_fn)(int);
@@ -111,6 +112,13 @@ typedef struct {
             int numlines; // counted number of lines
             int max_drawn_lines;
         } scrollabletextwindow;
+        struct {
+            int is_vertical;
+            int value;
+            int value_min;
+            int value_max;
+            _gui_void_arg_int_fn callback; //arg -> newvalue
+        } scrollbar;
     } info ;
 } _gui_element;
 
@@ -118,17 +126,26 @@ typedef struct {
 
 void GUI_SetTextBox(_gui_element * e, _gui_console * con, int x, int y, int w, int h,
                      _gui_void_arg_int_int_fn callback);
+
 void GUI_SetButton(_gui_element * e, int x, int y, int w, int h, const char * label, _gui_void_arg_void_fn callback);
+
 void GUI_SetRadioButton(_gui_element * e, int x, int y, int w, int h, const char * label, int group_id, int btn_id,
                         int start_pressed, _gui_void_arg_int_fn callback);
+
 void GUI_SetLabel(_gui_element * e, int x, int y, int w, int h, const char * label);
 
 // bitmap is 24 bit. return 1 from callback to redraw GUI
 void GUI_SetBitmap(_gui_element * e, int x, int y, int w, int h, char * bitmap, _gui_int_arg_int_int_fn callback);
 
-void GUI_SetWindow(_gui_element * e, int x, int y, int w, int h, void * gui, const char * caption); // gui is a _gui pointer
+// gui is a _gui pointer
+void GUI_SetWindow(_gui_element * e, int x, int y, int w, int h, void * gui, const char * caption);
+
 void GUI_SetMessageBox(_gui_element * e, _gui_console * con, int x, int y, int w, int h, const char * caption);
+
 void GUI_SetScrollableTextWindow(_gui_element * e, int x, int y, int w, int h, const char * text, const char * caption);
+
+void GUI_SetScrollBar(_gui_element * e, int x, int y, int w, int h, int min_value, int max_value,
+                      int start_value, _gui_void_arg_int_fn callback);
 
 //----------------------------------------------------------------------------------------------
 
@@ -146,7 +163,7 @@ int GUI_ScrollableTextWindowGetEnabled(_gui_element * e);
 //----------------------------------------------------------------------------------------------
 
 #define GUI_INPUTWINDOW_MAX_LEN 30
-#define GUI_INPUTWINDOW_WIDTH  ( (GUI_INPUTWINDOW_MAX_LEN+2) * FONT_12_WIDTH )
+#define GUI_INPUTWINDOW_WIDTH  ( (GUI_INPUTWINDOW_MAX_LEN+2) * FONT_WIDTH )
 #define GUI_INPUTWINDOW_HEIGHT 50
 
 typedef struct {

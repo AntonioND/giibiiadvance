@@ -34,8 +34,8 @@
 void GUI_ConsoleReset(_gui_console * con, int screen_width, int screen_height) // in pixels
 {
     GUI_ConsoleClear(con);
-    con->__console_chars_w = screen_width/FONT_12_WIDTH;
-    con->__console_chars_h = screen_height/FONT_12_HEIGHT;
+    con->__console_chars_w = screen_width/FONT_WIDTH;
+    con->__console_chars_h = screen_height/FONT_HEIGHT;
     if(con->__console_chars_w > GUI_CONSOLE_MAX_WIDTH)
         con->__console_chars_w = GUI_CONSOLE_MAX_WIDTH;
     if(con->__console_chars_h > GUI_CONSOLE_MAX_HEIGHT)
@@ -111,7 +111,7 @@ void GUI_ConsoleDraw(_gui_console * con, char * buffer, int buf_w, int buf_h) //
     {
         unsigned char c = con->__console_buffer[y*con->__console_chars_w+x];
         int color = con->__console_buffer_color[y*con->__console_chars_w+x];
-        if(c) FU_PrintChar12(buffer,buf_w,buf_h,x*FONT_12_WIDTH,y*FONT_12_HEIGHT,c,color);
+        if(c) FU_PrintChar(buffer,buf_w,buf_h,x*FONT_WIDTH,y*FONT_HEIGHT,c,color);
     }
 }
 
@@ -124,11 +124,10 @@ void GUI_ConsoleDrawAt(_gui_console * con, char * buffer, int buf_w, int buf_h, 
         int color = con->__console_buffer_color[y*con->__console_chars_w+x];
         if(c)
         {
-            FU_PrintChar12(buffer,buf_w,buf_h,scrx+x*FONT_12_WIDTH,scry+y*FONT_12_HEIGHT,c,color);
+            FU_PrintChar(buffer,buf_w,buf_h,scrx+x*FONT_WIDTH,scry+y*FONT_HEIGHT,c,color);
         }
     }
 }
-
 
 //-------------------------------------------------------------------------------------------
 
@@ -249,7 +248,7 @@ void GUI_SetWindow(_gui_element * e, int x, int y, int w, int h, void * gui, con
     while(*gui_elements != NULL)
     {
         (*gui_elements)->x += x;
-        (*gui_elements)->y += y + FONT_12_HEIGHT + 2;
+        (*gui_elements)->y += y + FONT_HEIGHT + 2;
         gui_elements++;
     }
 }
@@ -266,7 +265,7 @@ void GUI_SetMessageBox(_gui_element * e, _gui_console * con, int x, int y, int w
     e->h = h;
     s_strncpy(e->info.messagebox.caption,caption,sizeof(e->info.messagebox.caption));
 
-    GUI_ConsoleReset(con, w, h-FONT_12_WIDTH-1);
+    GUI_ConsoleReset(con, w, h-FONT_WIDTH-1);
 }
 
 int _gui_word_fits(const char * text, int x_start, int x_end)
@@ -288,8 +287,8 @@ void GUI_SetScrollableTextWindow(_gui_element * e, int x, int y, int w, int h, c
 {
     e->element_type = GUI_TYPE_SCROLLABLETEXTWINDOW;
 
-    w = FONT_12_WIDTH*(w/FONT_12_WIDTH);
-    h = ( FONT_12_HEIGHT*( (h-(FONT_12_HEIGHT+2)) /FONT_12_HEIGHT) ) + (FONT_12_HEIGHT+2);
+    w = FONT_WIDTH*(w/FONT_WIDTH);
+    h = ( FONT_HEIGHT*( (h-(FONT_HEIGHT+2)) /FONT_HEIGHT) ) + (FONT_HEIGHT+2);
 
     e->x = x;
     e->y = y;
@@ -301,11 +300,11 @@ void GUI_SetScrollableTextWindow(_gui_element * e, int x, int y, int w, int h, c
     e->info.scrollabletextwindow.numlines = 0;
     e->info.scrollabletextwindow.currentline = 0;
 
-    e->info.scrollabletextwindow.max_drawn_lines = (e->h - (FONT_12_HEIGHT+1)) / FONT_12_HEIGHT;
+    e->info.scrollabletextwindow.max_drawn_lines = (e->h - (FONT_HEIGHT+1)) / FONT_HEIGHT;
 
     //count number of text lines
 
-    int textwidth = (e->w / FONT_12_WIDTH) - 1;
+    int textwidth = (e->w / FONT_WIDTH) - 1;
 
     int skipspaces = 0;
 
@@ -358,6 +357,25 @@ void GUI_SetScrollableTextWindow(_gui_element * e, int x, int y, int w, int h, c
     }
 
     e->info.scrollabletextwindow.numlines ++;
+}
+
+void GUI_SetScrollBar(_gui_element * e, int x, int y, int w, int h, int min_value, int max_value,
+                      int start_value, _gui_void_arg_int_fn callback)
+{
+    e->element_type = GUI_TYPE_SCROLLBAR;
+
+    e->x = x;
+    e->y = y;
+    e->w = w;
+    e->h = h;
+
+    if(w > h) e->info.scrollbar.is_vertical = 0;
+    else e->info.scrollbar.is_vertical = 1;
+
+    e->info.scrollbar.value_min = min_value;
+    e->info.scrollbar.value_max = max_value;
+    e->info.scrollbar.value = start_value;
+    e->info.scrollbar.callback = callback;
 }
 
 //----------------------------------------------------------------------------------------------

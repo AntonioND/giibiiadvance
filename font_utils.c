@@ -28,25 +28,22 @@
 #include "build_options.h"
 #include "general_utils.h"
 
+//------------------------------------------------------------------------------------------
+
 #define FONT_CHARS_IN_ROW    (32)
 #define FONT_CHARS_IN_COLUMN (8)
 
-static char * fnt12;
-static char * fnt14;
+static char * fnt = NULL;
+
+//------------------------------------------------------------------------------------------
 
 int FU_Init(void)
 {
     char path[MAX_PATHLEN];
-    s_snprintf(path,sizeof(path),"%sfont12.png",DirGetRunningPath());
+    s_snprintf(path,sizeof(path),"%sfont.png",DirGetRunningPath());
     int w,h;
-    if(Read_PNG(path,&fnt12,&w,&h))
+    if(Read_PNG(path,&fnt,&w,&h))
     {
-        return 1;
-    }
-    s_snprintf(path,sizeof(path),"%sfont14.png",DirGetRunningPath());
-    if(Read_PNG(path,&fnt14,&w,&h))
-    {
-        free(fnt12);
         return 1;
     }
     return 0;
@@ -54,11 +51,13 @@ int FU_Init(void)
 
 void FU_End(void)
 {
-    free(fnt12);
-    free(fnt14);
+    if(fnt) free(fnt);
+    fnt = NULL;
 }
 
-int FU_Print12(char * buffer, int bufw, int bufh, int tx, int ty, const char * txt, ...)
+//------------------------------------------------------------------------------------------
+
+int FU_Print(char * buffer, int bufw, int bufh, int tx, int ty, const char * txt, ...)
 {
     char txtbuffer[300];
     va_list args;
@@ -68,7 +67,7 @@ int FU_Print12(char * buffer, int bufw, int bufh, int tx, int ty, const char * t
     txtbuffer[sizeof(txtbuffer)-1] = '\0';
 
     if( (tx < 0) || (ty < 0) ) return 0;
-    if((ty + FONT_12_HEIGHT) > bufh) return 0; // not multiline...
+    if((ty + FONT_HEIGHT) > bufh) return 0; // not multiline...
 
     int i = 0;
     while(1)
@@ -76,31 +75,31 @@ int FU_Print12(char * buffer, int bufw, int bufh, int tx, int ty, const char * t
         unsigned char c = txtbuffer[i++];
         if(c == '\0') break;
 
-        if((tx + FONT_12_WIDTH) > bufw) break;
+        if((tx + FONT_WIDTH) > bufw) break;
 
-        int texx = (c%FONT_CHARS_IN_ROW)*FONT_12_WIDTH;
-        int texy = (c/FONT_CHARS_IN_ROW)*FONT_12_HEIGHT;
+        int texx = (c%FONT_CHARS_IN_ROW)*FONT_WIDTH;
+        int texy = (c/FONT_CHARS_IN_ROW)*FONT_HEIGHT;
 
-        int tex_offset = (texy*(FONT_CHARS_IN_ROW*FONT_12_WIDTH*4)) + texx*4; // font is 4 bytes per pixel
+        int tex_offset = (texy*(FONT_CHARS_IN_ROW*FONT_WIDTH*4)) + texx*4; // font is 4 bytes per pixel
         int buf_offset = ((ty*bufw) + tx)*3; // buffer is 3 bytes per pixel
 
         int x, y;
-        for(y = 0; y < FONT_12_HEIGHT; y ++)
+        for(y = 0; y < FONT_HEIGHT; y ++)
         {
             char * bufcopy = &(buffer[buf_offset]);
-            char * texcopy = &(fnt12[tex_offset]);
+            char * texcopy = &(fnt[tex_offset]);
 
-            for(x = 0; x < FONT_12_WIDTH; x++)
+            for(x = 0; x < FONT_WIDTH; x++)
             {
                 *bufcopy++ = *texcopy++;
                 *bufcopy++ = *texcopy++;
                 *bufcopy++ = *texcopy++;
                 texcopy++;
             }
-            tex_offset += (FONT_CHARS_IN_ROW*FONT_12_WIDTH*4);
+            tex_offset += (FONT_CHARS_IN_ROW*FONT_WIDTH*4);
             buf_offset += bufw * 3;
         }
-        tx += FONT_12_WIDTH;
+        tx += FONT_WIDTH;
     }
 
 /*
@@ -115,7 +114,7 @@ int FU_Print12(char * buffer, int bufw, int bufh, int tx, int ty, const char * t
     return ret;
 }
 
-int FU_Print12Color(char * buffer, int bufw, int bufh, int tx, int ty, int color, const char * txt, ...)
+int FU_PrintColor(char * buffer, int bufw, int bufh, int tx, int ty, int color, const char * txt, ...)
 {
     char txtbuffer[300];
     va_list args;
@@ -125,7 +124,7 @@ int FU_Print12Color(char * buffer, int bufw, int bufh, int tx, int ty, int color
     txtbuffer[sizeof(txtbuffer)-1] = '\0';
 
     if( (tx < 0) || (ty < 0) ) return 0;
-    if((ty + FONT_12_HEIGHT) > bufh) return 0; // not multiline...
+    if((ty + FONT_HEIGHT) > bufh) return 0; // not multiline...
 
     int i = 0;
     while(1)
@@ -133,116 +132,69 @@ int FU_Print12Color(char * buffer, int bufw, int bufh, int tx, int ty, int color
         unsigned char c = txtbuffer[i++];
         if(c == '\0') break;
 
-        if((tx + FONT_12_WIDTH) > bufw) break;
+        if((tx + FONT_WIDTH) > bufw) break;
 
-        int texx = (c%FONT_CHARS_IN_ROW)*FONT_12_WIDTH;
-        int texy = (c/FONT_CHARS_IN_ROW)*FONT_12_HEIGHT;
+        int texx = (c%FONT_CHARS_IN_ROW)*FONT_WIDTH;
+        int texy = (c/FONT_CHARS_IN_ROW)*FONT_HEIGHT;
 
-        int tex_offset = (texy*(FONT_CHARS_IN_ROW*FONT_12_WIDTH*4)) + texx*4; // font is 4 bytes per pixel
+        int tex_offset = (texy*(FONT_CHARS_IN_ROW*FONT_WIDTH*4)) + texx*4; // font is 4 bytes per pixel
         int buf_offset = ((ty*bufw) + tx)*3; // buffer is 3 bytes per pixel
 
         int x, y;
-        for(y = 0; y < FONT_12_HEIGHT; y ++)
+        for(y = 0; y < FONT_HEIGHT; y ++)
         {
             char * bufcopy = &(buffer[buf_offset]);
-            char * texcopy = &(fnt12[tex_offset]);
+            char * texcopy = &(fnt[tex_offset]);
 
-            for(x = 0; x < FONT_12_WIDTH; x++)
+            for(x = 0; x < FONT_WIDTH; x++)
             {
                 *bufcopy++ = ( (int)(unsigned char)(*texcopy++) * (color&0xFF) ) >> 8;
                 *bufcopy++ = ( (int)(unsigned char)(*texcopy++) * ((color>>8)&0xFF) ) >> 8;
                 *bufcopy++ = ( (int)(unsigned char)(*texcopy++) * ((color>>16)&0xFF) ) >> 8;
                 texcopy++;
             }
-            tex_offset += (FONT_CHARS_IN_ROW*FONT_12_WIDTH*4);
+            tex_offset += (FONT_CHARS_IN_ROW*FONT_WIDTH*4);
             buf_offset += bufw * 3;
         }
-        tx += FONT_12_WIDTH;
+        tx += FONT_WIDTH;
     }
 
     return ret;
 }
 
-int FU_PrintChar12(char * buffer, int bufw, int bufh, int tx, int ty, unsigned char c, int color)
+int FU_PrintChar(char * buffer, int bufw, int bufh, int tx, int ty, unsigned char c, int color)
 {
     if( (tx < 0) || (ty < 0) ) return 0;
-    if((ty + FONT_12_HEIGHT) > bufh) return 0;
+    if((ty + FONT_HEIGHT) > bufh) return 0;
 
     if(c == '\0') return 0;
 
-    if((tx + FONT_12_WIDTH) > bufw) return 0;
+    if((tx + FONT_WIDTH) > bufw) return 0;
 
-    int texx = (c%FONT_CHARS_IN_ROW)*FONT_12_WIDTH;
-    int texy = (c/FONT_CHARS_IN_ROW)*FONT_12_HEIGHT;
+    int texx = (c%FONT_CHARS_IN_ROW)*FONT_WIDTH;
+    int texy = (c/FONT_CHARS_IN_ROW)*FONT_HEIGHT;
 
-    int tex_offset = (texy*(FONT_CHARS_IN_ROW*FONT_12_WIDTH*4)) + texx*4; // font is 4 bytes per pixel
+    int tex_offset = (texy*(FONT_CHARS_IN_ROW*FONT_WIDTH*4)) + texx*4; // font is 4 bytes per pixel
     int buf_offset = ((ty*bufw) + tx)*3; // buffer is 3 bytes per pixel
 
     int x, y;
-    for(y = 0; y < FONT_12_HEIGHT; y ++)
+    for(y = 0; y < FONT_HEIGHT; y ++)
     {
         char * bufcopy = &(buffer[buf_offset]);
-        char * texcopy = &(fnt12[tex_offset]);
+        char * texcopy = &(fnt[tex_offset]);
 
-        for(x = 0; x < FONT_12_WIDTH; x++)
+        for(x = 0; x < FONT_WIDTH; x++)
         {
             *bufcopy++ = ( (int)(unsigned char)(*texcopy++) * (color&0xFF) ) >> 8;
             *bufcopy++ = ( (int)(unsigned char)(*texcopy++) * ((color>>8)&0xFF) ) >> 8;
             *bufcopy++ = ( (int)(unsigned char)(*texcopy++) * ((color>>16)&0xFF) ) >> 8;
             texcopy++;
         }
-        tex_offset += (FONT_CHARS_IN_ROW*FONT_12_WIDTH*4);
+        tex_offset += (FONT_CHARS_IN_ROW*FONT_WIDTH*4);
         buf_offset += bufw * 3;
     }
 
     return 1;
 }
 
-int FU_Print14(char * buffer, int bufw, int bufh, int tx, int ty, const char * txt, ...)
-{
-    char txtbuffer[300];
-    va_list args;
-    va_start(args,txt);
-    int ret = vsnprintf(txtbuffer, sizeof(txtbuffer), txt, args);
-    va_end(args);
-    txtbuffer[sizeof(txtbuffer)-1] = '\0';
-
-    if( (tx < 0) || (ty < 0) ) return 0;
-    if((ty + FONT_14_HEIGHT) > bufh) return 0; // not multiline...
-
-    int i = 0;
-    while(1)
-    {
-        unsigned char c = txtbuffer[i++];
-        if(c == '\0') break;
-
-        if((tx + FONT_14_WIDTH) > bufw) break;
-
-        int texx = (c%FONT_CHARS_IN_ROW)*FONT_14_WIDTH;
-        int texy = (c/FONT_CHARS_IN_ROW)*FONT_14_HEIGHT;
-
-        int tex_offset = (texy*(FONT_CHARS_IN_ROW*FONT_14_WIDTH*4)) + texx*4; // font is 4 bytes per pixel
-        int buf_offset = ((ty*bufw) + tx)*3; // buffer is 3 bytes per pixel
-
-        int x, y;
-        for(y = 0; y < FONT_14_HEIGHT; y ++)
-        {
-            char * bufcopy = &(buffer[buf_offset]);
-            char * texcopy = &(fnt14[tex_offset]);
-
-            for(x = 0; x < FONT_14_WIDTH; x++)
-            {
-                *bufcopy++ = *texcopy++;
-                *bufcopy++ = *texcopy++;
-                *bufcopy++ = *texcopy++;
-                texcopy++;
-            }
-            tex_offset += (FONT_CHARS_IN_ROW*FONT_14_WIDTH*4);
-            buf_offset += bufw * 3;
-        }
-        tx += FONT_14_WIDTH;
-    }
-
-    return ret;
-}
-
+//------------------------------------------------------------------------------------------

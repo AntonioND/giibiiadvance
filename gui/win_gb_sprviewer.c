@@ -248,17 +248,17 @@ int Win_GBSprViewerCreate(void)
     if(Win_MainRunningGB() == 0) return 0;
 
     GUI_SetTextBox(&gb_sprview_textbox,&gb_sprview_con,
-                   268,140, 13*FONT_12_WIDTH,5*FONT_12_HEIGHT, NULL);
+                   268,140, 13*FONT_WIDTH,5*FONT_HEIGHT, NULL);
 
     GUI_SetBitmap(&gb_sprview_allspr_bmp,6,6,GB_SPR_ALLSPR_BUFFER_WIDTH,GB_SPR_ALLSPR_BUFFER_HEIGHT,gb_spr_allspr_buffer,
                   _win_gb_sprviewer_allspr_bmp_callback);
     GUI_SetBitmap(&gb_sprview_zoomedspr_bmp,280,6,GB_SPR_ZOOMED_BUFFER_WIDTH,GB_SPR_ZOOMED_BUFFER_HEIGHT,gb_spr_zoomed_buffer,
                   NULL);
 
-    GUI_SetButton(&gb_sprview_zoomed_spr_dumpbtn,268,210,FONT_12_WIDTH*13,FONT_12_HEIGHT+6,"Dump zoomed",
+    GUI_SetButton(&gb_sprview_zoomed_spr_dumpbtn,268,210,FONT_WIDTH*13,FONT_HEIGHT+6,"Dump zoomed",
                   _win_gb_sprviewer_zoomed_dump_btn_callback);
 
-    GUI_SetButton(&gb_sprview_allspr_dumpbtn,268,241,FONT_12_WIDTH*13,FONT_12_HEIGHT+6,"Dump all",
+    GUI_SetButton(&gb_sprview_allspr_dumpbtn,268,241,FONT_WIDTH*13,FONT_HEIGHT+6,"Dump all",
                   _win_gb_sprviewer_allspr_dump_btn_callback);
 
     gb_sprview_selected_spr = 0;

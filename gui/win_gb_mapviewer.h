@@ -20,6 +20,8 @@
 #define __WIN_GB_MAPVIEWER__
 
 int Win_GBMapViewerCreate(void); // returns 1 if error
+void Win_GBMapViewerUpdate(void);
+void Win_GBMapViewerClose(void);
 
 #endif // __WIN_GB_MAPVIEWER__
 

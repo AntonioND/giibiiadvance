@@ -20,6 +20,8 @@
 #define __WIN_GBA_PALVIEWER__
 
 int Win_GBAPalViewerCreate(void); // returns 1 if error
+void Win_GBAPalViewerUpdate(void);
+void Win_GBAPalViewerClose(void);
 
 #endif // __WIN_GBA_PALVIEWER__
 

@@ -20,6 +20,8 @@
 #define __WIN_GB_TILEVIEWER__
 
 int Win_GBTileViewerCreate(void); // returns 1 if error
+void Win_GBTileViewerUpdate(void);
+void Win_GBTileViewerClose(void);
 
 #endif // __WIN_GB_TILEVIEWER__
 

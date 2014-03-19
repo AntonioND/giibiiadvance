@@ -163,7 +163,7 @@ void Win_GBMapViewerUpdate(void)
 
 //----------------------------------------------------------------
 
-void Win_GBMapViewerRender(void)
+static void _win_gb_map_viewer_render(void)
 {
     if(GBMapViewerCreated == 0) return;
 
@@ -173,7 +173,7 @@ void Win_GBMapViewerRender(void)
     WH_Render(WinIDGBMapViewer, buffer);
 }
 
-int Win_GBMapViewerCallback(SDL_Event * e)
+static int _win_gb_map_viewer_callback(SDL_Event * e)
 {
     if(GBMapViewerCreated == 0) return 1;
 
@@ -214,7 +214,7 @@ int Win_GBMapViewerCallback(SDL_Event * e)
     if(redraw)
     {
         Win_GBMapViewerUpdate();
-        Win_GBMapViewerRender();
+        _win_gb_map_viewer_render();
         return 1;
     }
 
@@ -223,13 +223,13 @@ int Win_GBMapViewerCallback(SDL_Event * e)
 
 //----------------------------------------------------------------
 
-void _win_gb_map_viewer_tilebase_radbtn_callback(int btn_id)
+static void _win_gb_map_viewer_tilebase_radbtn_callback(int btn_id)
 {
     gb_mapview_selected_tilebase = btn_id;
     Win_GBMapViewerUpdate();
 }
 
-void _win_gb_map_viewer_mapbase_radbtn_callback(int btn_id)
+static void _win_gb_map_viewer_mapbase_radbtn_callback(int btn_id)
 {
     gb_mapview_selected_mapbase = btn_id;
     Win_GBMapViewerUpdate();
@@ -306,12 +306,21 @@ int Win_GBMapViewerCreate(void)
     WinIDGBMapViewer = WH_Create(WIN_GB_MAPVIEWER_WIDTH,WIN_GB_MAPVIEWER_HEIGHT, 0,0, 0);
     WH_SetCaption(WinIDGBMapViewer,"GB Map Viewer");
 
-    WH_SetEventCallback(WinIDGBMapViewer,Win_GBMapViewerCallback);
+    WH_SetEventCallback(WinIDGBMapViewer,_win_gb_map_viewer_callback);
 
     Win_GBMapViewerUpdate();
-    Win_GBMapViewerRender();
+    _win_gb_map_viewer_render();
 
     return 1;
+}
+
+void Win_GBMapViewerClose(void)
+{
+    if(GBMapViewerCreated == 0)
+        return;
+
+    GBMapViewerCreated = 0;
+    WH_Close(WinIDGBMapViewer);
 }
 
 //----------------------------------------------------------------

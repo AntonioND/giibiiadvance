@@ -180,7 +180,7 @@ static void _win_gba_sprviewer_radbtn_callback(int btn_id)
 
 //----------------------------------------------------------------
 
-void Win_GBASprViewerRender(void)
+static void _win_gba_spr_viewer_render(void)
 {
     if(GBASprViewerCreated == 0) return;
 
@@ -190,7 +190,7 @@ void Win_GBASprViewerRender(void)
     WH_Render(WinIDGBASprViewer, buffer);
 }
 
-int Win_GBASprViewerCallback(SDL_Event * e)
+static int _win_gba_spr_viewer_callback(SDL_Event * e)
 {
     if(GBASprViewerCreated == 0) return 1;
 
@@ -231,7 +231,7 @@ int Win_GBASprViewerCallback(SDL_Event * e)
     if(redraw)
     {
         Win_GBASprViewerUpdate();
-        Win_GBASprViewerRender();
+        _win_gba_spr_viewer_render();
         return 1;
     }
 
@@ -344,10 +344,21 @@ int Win_GBASprViewerCreate(void)
     WinIDGBASprViewer = WH_Create(WIN_GBA_SPRVIEWER_WIDTH,WIN_GBA_SPRVIEWER_HEIGHT, 0,0, 0);
     WH_SetCaption(WinIDGBASprViewer,"GBA Sprite Viewer");
 
-    WH_SetEventCallback(WinIDGBASprViewer,Win_GBASprViewerCallback);
+    WH_SetEventCallback(WinIDGBASprViewer,_win_gba_spr_viewer_callback);
 
     Win_GBASprViewerUpdate();
-    Win_GBASprViewerRender();
+    _win_gba_spr_viewer_render();
 
     return 1;
 }
+
+void Win_GBASprViewerClose(void)
+{
+    if(GBASprViewerCreated == 0)
+        return;
+
+    GBASprViewerCreated = 0;
+    WH_Close(WinIDGBASprViewer);
+}
+
+//----------------------------------------------------------------

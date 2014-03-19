@@ -149,7 +149,7 @@ void Win_GBSprViewerUpdate(void)
 
 //----------------------------------------------------------------
 
-void Win_GBSprViewerRender(void)
+static void _win_gb_spr_viewer_render(void)
 {
     if(GBSprViewerCreated == 0) return;
 
@@ -159,7 +159,7 @@ void Win_GBSprViewerRender(void)
     WH_Render(WinIDGBSprViewer, buffer);
 }
 
-int Win_GBSprViewerCallback(SDL_Event * e)
+static int _win_gb_spr_viewer_callback(SDL_Event * e)
 {
     if(GBSprViewerCreated == 0) return 1;
 
@@ -200,7 +200,7 @@ int Win_GBSprViewerCallback(SDL_Event * e)
     if(redraw)
     {
         Win_GBSprViewerUpdate();
-        Win_GBSprViewerRender();
+        _win_gb_spr_viewer_render();
         return 1;
     }
 
@@ -268,10 +268,22 @@ int Win_GBSprViewerCreate(void)
     WinIDGBSprViewer = WH_Create(WIN_GB_SPRVIEWER_WIDTH,WIN_GB_SPRVIEWER_HEIGHT, 0,0, 0);
     WH_SetCaption(WinIDGBSprViewer,"GB Sprite Viewer");
 
-    WH_SetEventCallback(WinIDGBSprViewer,Win_GBSprViewerCallback);
+    WH_SetEventCallback(WinIDGBSprViewer,_win_gb_spr_viewer_callback);
 
     Win_GBSprViewerUpdate();
-    Win_GBSprViewerRender();
+    _win_gb_spr_viewer_render();
 
     return 1;
 }
+
+void Win_GBSprViewerClose(void)
+{
+    if(GBSprViewerCreated == 0)
+        return;
+
+    GBSprViewerCreated = 0;
+    WH_Close(WinIDGBSprViewer);
+}
+
+//----------------------------------------------------------------
+

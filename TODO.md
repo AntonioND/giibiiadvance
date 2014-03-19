@@ -4,16 +4,15 @@ General
 
 - ARM undefined opcodes
 - Autosave.
-- All missing things from version 0.1.0 Win32 GUI.
+- All missing things from version 0.1.0 Win32 GUI (in process).
 - Update README file.
-- Update memory, I/O viewers... with F7.
+- Update memory, I/O viewers...? with F7
 - Autoclose debugger windows according to configuration.
 - Save tilesets, maps, memory dumps...
 - Allow to execute one frame.
 - Pause/unpause.
 - Cross out unused palette colors in the palette viewer.
-- Better sprite viewer.
-- Detect ROM (GB/GBA) checking the headers?.
+- Detect ROM (GB/GBA) checking the headers?
 - Custom controls. Game controllers.
 - Change all strcpy by s_strncpy, strcat by s_strncat and sprintf by s_snprintf.
 - Fix F1.
@@ -22,6 +21,7 @@ General
 - Speedup button.
 - In debugger windows, outline things that can be selected with mouse (where it isn't done yet).
 - Cross out things in debugger that can't be used (transparent palette colors, GBA sprites that are hiden?, ...)
+- Remove debug log messages. Make it create the log file only if there is something written.
 
 Game Boy
 --------

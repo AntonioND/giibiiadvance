@@ -38,8 +38,8 @@
 
 static int WinIDGBAPalViewer;
 
-#define WIN_GBA_MEMVIEWER_WIDTH  356
-#define WIN_GBA_MEMVIEWER_HEIGHT 222
+#define WIN_GBA_PALVIEWER_WIDTH  356
+#define WIN_GBA_PALVIEWER_HEIGHT 222
 
 static int GBAPalViewerCreated = 0;
 
@@ -92,6 +92,8 @@ static inline void rgb16to32(u16 color, u8 * r, u8 * g, u8 * b)
 
 static int _win_gba_palviewer_bg_bmp_callback(int x, int y)
 {
+    if(x >= GBA_PAL_BUFFER_SIDE-1) x = GBA_PAL_BUFFER_SIDE-2;
+    if(y >= GBA_PAL_BUFFER_SIDE-1) y = GBA_PAL_BUFFER_SIDE-2;
     gba_palview_sprpal = 0; // bg
     gba_palview_selectedindex = (x/10) + ((y/10)*16);
     return 1;
@@ -99,6 +101,8 @@ static int _win_gba_palviewer_bg_bmp_callback(int x, int y)
 
 static int _win_gba_palviewer_spr_bmp_callback(int x, int y)
 {
+    if(x >= GBA_PAL_BUFFER_SIDE-1) x = GBA_PAL_BUFFER_SIDE-2;
+    if(y >= GBA_PAL_BUFFER_SIDE-1) y = GBA_PAL_BUFFER_SIDE-2;
     gba_palview_sprpal = 1; // spr
     gba_palview_selectedindex = (x/10) + ((y/10)*16);
     return 1;
@@ -165,17 +169,17 @@ void Win_GBAPalViewerUpdate(void)
 
 //----------------------------------------------------------------
 
-void Win_GBAPalViewerRender(void)
+static void _win_gba_pal_viewer_render(void)
 {
     if(GBAPalViewerCreated == 0) return;
 
-    char buffer[WIN_GBA_MEMVIEWER_WIDTH*WIN_GBA_MEMVIEWER_HEIGHT*3];
-    GUI_Draw(&gba_palviewer_window_gui,buffer,WIN_GBA_MEMVIEWER_WIDTH,WIN_GBA_MEMVIEWER_HEIGHT,1);
+    char buffer[WIN_GBA_PALVIEWER_WIDTH*WIN_GBA_PALVIEWER_HEIGHT*3];
+    GUI_Draw(&gba_palviewer_window_gui,buffer,WIN_GBA_PALVIEWER_WIDTH,WIN_GBA_PALVIEWER_HEIGHT,1);
 
     WH_Render(WinIDGBAPalViewer, buffer);
 }
 
-int Win_GBAPalViewerCallback(SDL_Event * e)
+static int _win_gba_pal_viewer_callback(SDL_Event * e)
 {
     if(GBAPalViewerCreated == 0) return 1;
 
@@ -216,7 +220,7 @@ int Win_GBAPalViewerCallback(SDL_Event * e)
     if(redraw)
     {
         Win_GBAPalViewerUpdate();
-        Win_GBAPalViewerRender();
+        _win_gba_pal_viewer_render();
         return 1;
     }
 
@@ -305,13 +309,24 @@ int Win_GBAPalViewerCreate(void)
 
     GBAPalViewerCreated = 1;
 
-    WinIDGBAPalViewer = WH_Create(WIN_GBA_MEMVIEWER_WIDTH,WIN_GBA_MEMVIEWER_HEIGHT, 0,0, 0);
+    WinIDGBAPalViewer = WH_Create(WIN_GBA_PALVIEWER_WIDTH,WIN_GBA_PALVIEWER_HEIGHT, 0,0, 0);
     WH_SetCaption(WinIDGBAPalViewer,"GBA Palette Viewer");
 
-    WH_SetEventCallback(WinIDGBAPalViewer,Win_GBAPalViewerCallback);
+    WH_SetEventCallback(WinIDGBAPalViewer,_win_gba_pal_viewer_callback);
 
     Win_GBAPalViewerUpdate();
-    Win_GBAPalViewerRender();
+    _win_gba_pal_viewer_render();
 
     return 1;
 }
+
+void Win_GBAPalViewerClose(void)
+{
+    if(GBAPalViewerCreated == 0)
+        return;
+
+    GBAPalViewerCreated = 0;
+    WH_Close(WinIDGBAPalViewer);
+}
+
+//----------------------------------------------------------------

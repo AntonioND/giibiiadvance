@@ -20,6 +20,8 @@
 #define __WIN_GB_SPRVIEWER__
 
 int Win_GBSprViewerCreate(void); // returns 1 if error
+void Win_GBSprViewerUpdate(void);
+void Win_GBSprViewerClose(void);
 
 #endif // __WIN_GB_SPRVIEWER__
 

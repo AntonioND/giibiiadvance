@@ -168,11 +168,11 @@ void Win_GBMemViewerUpdate(void)
 
 //----------------------------------------------------------------
 
-void Win_GBMemViewerGoto(void);
+static void _win_gb_mem_viewer_goto(void);
 
 //----------------------------------------------------------------
 
-void Win_GBMemViewerRender(void)
+static void _win_gb_mem_viewer_render(void)
 {
     if(GBMemViewerCreated == 0) return;
 
@@ -182,7 +182,7 @@ void Win_GBMemViewerRender(void)
     WH_Render(WinIDGBMemViewer, buffer);
 }
 
-int Win_GBMemViewerCallback(SDL_Event * e)
+static int _win_gba_mem_viewer_callback(SDL_Event * e)
 {
     if(GBMemViewerCreated == 0) return 1;
 
@@ -202,7 +202,7 @@ int Win_GBMemViewerCallback(SDL_Event * e)
             switch( e->key.keysym.sym )
             {
                 case SDLK_F8:
-                    Win_GBMemViewerGoto();
+                    _win_gb_mem_viewer_goto();
                     redraw = 1;
                     break;
 
@@ -257,7 +257,7 @@ int Win_GBMemViewerCallback(SDL_Event * e)
     if(redraw)
     {
         Win_GBMemViewerUpdate();
-        Win_GBMemViewerRender();
+        _win_gb_mem_viewer_render();
         return 1;
     }
 
@@ -266,7 +266,7 @@ int Win_GBMemViewerCallback(SDL_Event * e)
 
 static int gb_memviewer_inputwindow_is_goto = 0;
 
-void Win_GBMemViewerInputWindowCallback(char * text, int is_valid)
+static void _win_gb_mem_viewer_inputwindow_callback(char * text, int is_valid)
 {
     if(is_valid)
     {
@@ -295,7 +295,7 @@ void Win_GBMemViewerInputWindowCallback(char * text, int is_valid)
     }
 }
 
-void Win_GBMemViewTextBoxCallback(int x, int y)
+static void _win_gb_mem_view_textbox_callback(int x, int y)
 {
     int xtile = x/FONT_12_WIDTH;
     int ytile = y/FONT_12_HEIGHT;
@@ -347,25 +347,27 @@ void Win_GBMemViewTextBoxCallback(int x, int y)
         gb_memviewer_inputwindow_is_goto = 0;
         char caption[100];
         s_snprintf(caption,sizeof(caption),"Change [0x%08X] (%d bits)",clicked_addr,numbits);
-        GUI_InputWindowOpen(&gui_iw_gb_memviewer,caption,Win_GBMemViewerInputWindowCallback);
+        GUI_InputWindowOpen(&gui_iw_gb_memviewer,caption,_win_gb_mem_viewer_inputwindow_callback);
     }
 }
 
-void Win_GBMemViewerModeRadioButtonsCallback(int btn_id)
+static void _win_gb_mem_viewer_mode_radbtn_callback(int btn_id)
 {
     gb_memviewer_mode = btn_id;
     Win_GBMemViewerUpdate();
 }
 
-void Win_GBMemViewerGoto(void)
+static void _win_gb_mem_viewer_goto(void)
 {
     if(GBMemViewerCreated == 0) return;
 
     if(Win_MainRunningGB() == 0) return;
 
     gb_memviewer_inputwindow_is_goto = 1;
-    GUI_InputWindowOpen(&gui_iw_gb_memviewer,"Go to address",Win_GBMemViewerInputWindowCallback);
+    GUI_InputWindowOpen(&gui_iw_gb_memviewer,"Go to address",_win_gb_mem_viewer_inputwindow_callback);
 }
+
+//----------------------------------------------------------------
 
 int Win_GBMemViewerCreate(void)
 {
@@ -375,16 +377,16 @@ int Win_GBMemViewerCreate(void)
     if(Win_MainRunningGB() == 0) return 0;
 
     GUI_SetRadioButton(&gb_memview_mode_8_radbtn,   6,6,9*FONT_12_WIDTH,24,
-                  "8 bits",  0,GB_MEMVIEWER_8,  1,Win_GBMemViewerModeRadioButtonsCallback);
+                  "8 bits",  0,GB_MEMVIEWER_8,  1,_win_gb_mem_viewer_mode_radbtn_callback);
     GUI_SetRadioButton(&gb_memview_mode_16_radbtn,  6+9*FONT_12_WIDTH+12,6,9*FONT_12_WIDTH,24,
-                  "16 bits", 0,GB_MEMVIEWER_16, 0,Win_GBMemViewerModeRadioButtonsCallback);
+                  "16 bits", 0,GB_MEMVIEWER_16, 0,_win_gb_mem_viewer_mode_radbtn_callback);
 
     GUI_SetButton(&gb_memview_goto_btn,66+39*FONT_12_WIDTH+36,6,16*FONT_12_WIDTH,24,
-                  "Goto (F8)",Win_GBMemViewerGoto);
+                  "Goto (F8)",_win_gb_mem_viewer_goto);
 
     GUI_SetTextBox(&gb_memview_textbox,&gb_memview_con,
                    6,36, 69*FONT_12_WIDTH,GB_MEMVIEWER_MAX_LINES*FONT_12_HEIGHT,
-                   Win_GBMemViewTextBoxCallback);
+                   _win_gb_mem_view_textbox_callback);
 
     GUI_InputWindowClose(&gui_iw_gb_memviewer);
 
@@ -397,10 +399,21 @@ int Win_GBMemViewerCreate(void)
     WinIDGBMemViewer = WH_Create(WIN_GB_MEMVIEWER_WIDTH,WIN_GB_MEMVIEWER_HEIGHT, 0,0, 0);
     WH_SetCaption(WinIDGBMemViewer,"GB Memory Viewer");
 
-    WH_SetEventCallback(WinIDGBMemViewer,Win_GBMemViewerCallback);
+    WH_SetEventCallback(WinIDGBMemViewer,_win_gba_mem_viewer_callback);
 
     Win_GBMemViewerUpdate();
-    Win_GBMemViewerRender();
+    _win_gb_mem_viewer_render();
 
     return 1;
 }
+
+void Win_GBMemViewerClose(void)
+{
+    if(GBMemViewerCreated == 0)
+        return;
+
+    GBMemViewerCreated = 0;
+    WH_Close(WinIDGBMemViewer);
+}
+
+//----------------------------------------------------------------

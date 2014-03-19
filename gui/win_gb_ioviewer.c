@@ -261,7 +261,7 @@ void Win_GBIOViewerUpdate(void)
 
 //----------------------------------------------------------------
 
-void Win_GBIOViewerRender(void)
+static void _win_gb_io_viewer_render(void)
 {
     if(GBIOViewerCreated == 0) return;
 
@@ -271,7 +271,7 @@ void Win_GBIOViewerRender(void)
     WH_Render(WinIDGBIOViewer, buffer);
 }
 
-int Win_GBIOViewerCallback(SDL_Event * e)
+static int _win_gb_io_viewer_callback(SDL_Event * e)
 {
     if(GBIOViewerCreated == 0) return 1;
 
@@ -310,12 +310,14 @@ int Win_GBIOViewerCallback(SDL_Event * e)
     if(redraw)
     {
         Win_GBIOViewerUpdate();
-        Win_GBIOViewerRender();
+        _win_gb_io_viewer_render();
         return 1;
     }
 
     return 0;
 }
+
+//----------------------------------------------------------------
 
 int Win_GBIOViewerCreate(void)
 {
@@ -402,10 +404,21 @@ int Win_GBIOViewerCreate(void)
     WinIDGBIOViewer = WH_Create(WIN_GB_IOVIEWER_WIDTH,WIN_GB_IOVIEWER_HEIGHT, 0,0, 0);
     WH_SetCaption(WinIDGBIOViewer,"GB I/O Viewer");
 
-    WH_SetEventCallback(WinIDGBIOViewer,Win_GBIOViewerCallback);
+    WH_SetEventCallback(WinIDGBIOViewer,_win_gb_io_viewer_callback);
 
     Win_GBIOViewerUpdate();
-    Win_GBIOViewerRender();
+    _win_gb_io_viewer_render();
 
     return 1;
 }
+
+void Win_GBIOViewerClose(void)
+{
+    if(GBIOViewerCreated == 0)
+        return;
+
+    GBIOViewerCreated = 0;
+    WH_Close(WinIDGBIOViewer);
+}
+
+//----------------------------------------------------------------

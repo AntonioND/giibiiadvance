@@ -158,7 +158,7 @@ void Win_GBTileViewerUpdate(void)
 
 //----------------------------------------------------------------
 
-void Win_GBTileViewerRender(void)
+static void _win_gb_tile_viewer_render(void)
 {
     if(GBTileViewerCreated == 0) return;
 
@@ -168,7 +168,7 @@ void Win_GBTileViewerRender(void)
     WH_Render(WinIDGBTileViewer, buffer);
 }
 
-int Win_GBTileViewerCallback(SDL_Event * e)
+static int _win_gb_tile_viewer_callback(SDL_Event * e)
 {
     if(GBTileViewerCreated == 0) return 1;
 
@@ -209,7 +209,7 @@ int Win_GBTileViewerCallback(SDL_Event * e)
     if(redraw)
     {
         Win_GBTileViewerUpdate();
-        Win_GBTileViewerRender();
+        _win_gb_tile_viewer_render();
         return 1;
     }
 
@@ -292,11 +292,22 @@ int Win_GBTileViewerCreate(void)
     WinIDGBTileViewer = WH_Create(WIN_GB_TILEVIEWER_WIDTH,WIN_GB_TILEVIEWER_HEIGHT, 0,0, 0);
     WH_SetCaption(WinIDGBTileViewer,"GB Tile Viewer");
 
-    WH_SetEventCallback(WinIDGBTileViewer,Win_GBTileViewerCallback);
+    WH_SetEventCallback(WinIDGBTileViewer,_win_gb_tile_viewer_callback);
 
     Win_GBTileViewerUpdate();
-    Win_GBTileViewerRender();
+    _win_gb_tile_viewer_render();
 
     return 1;
 }
+
+void Win_GBTileViewerClose(void)
+{
+    if(GBTileViewerCreated == 0)
+        return;
+
+    GBTileViewerCreated = 0;
+    WH_Close(WinIDGBTileViewer);
+}
+
+//----------------------------------------------------------------
 

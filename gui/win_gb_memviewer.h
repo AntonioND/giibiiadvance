@@ -20,6 +20,8 @@
 #define __WIN_GB_MEMVIEWER__
 
 int Win_GBMemViewerCreate(void); // returns 1 if error
+void Win_GBMemViewerUpdate(void);
+void Win_GBMemViewerClose(void);
 
 #endif // __WIN_GB_MEMVIEWER__
 

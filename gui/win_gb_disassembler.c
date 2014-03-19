@@ -81,8 +81,8 @@ static _gui gb_disassembler_window_gui = {
 
 //-----------------------------------------------------------------------------------
 
-void Win_GBDisassemblerStep(void);
-void Win_GBDisassemblerGoto(void);
+static void _win_gb_disassembler_step(void);
+static void _win_gb_disassembler_goto(void);
 
 //-----------------------------------------------------------------------------------
 
@@ -197,7 +197,7 @@ void Win_GBDisassemblerUpdate(void)
     }
 }
 
-void Win_GBDisassemblerRender(void)
+static void _win_gb_dissasembler_render(void)
 {
     if(GBDisassemblerCreated == 0) return;
 
@@ -207,7 +207,7 @@ void Win_GBDisassemblerRender(void)
     WH_Render(WinIDGBDis, buffer);
 }
 
-int Win_GBDisassemblerCallback(SDL_Event * e)
+static int _win_gb_disassembler_callback(SDL_Event * e)
 {
     if(GBDisassemblerCreated == 0) return 1;
 
@@ -227,11 +227,11 @@ int Win_GBDisassemblerCallback(SDL_Event * e)
             switch( e->key.keysym.sym )
             {
                 case SDLK_F7:
-                    Win_GBDisassemblerStep();
+                    _win_gb_disassembler_step();
                     redraw = 1;
                     break;
                 case SDLK_F8:
-                    Win_GBDisassemblerGoto();
+                    _win_gb_disassembler_goto();
                     redraw = 1;
                     break;
 
@@ -286,14 +286,14 @@ int Win_GBDisassemblerCallback(SDL_Event * e)
     if(redraw)
     {
         Win_GBDisassemblerUpdate();
-        Win_GBDisassemblerRender();
+        _win_gb_dissasembler_render();
         return 1;
     }
 
     return 0;
 }
 
-void Win_GBDisassemblyTextBoxCallback(int x, int y)
+static void _win_gb_disassembly_textbox_callback(int x, int y)
 {
     u32 addr = gb_cpu_line_address[ y / FONT_12_HEIGHT ];
 
@@ -305,7 +305,7 @@ void Win_GBDisassemblyTextBoxCallback(int x, int y)
 
 static int gb_debugger_register_to_change; // 0-5 -> registers. 100 -> goto
 
-void Win_GBDisassemblyInputWindowCallback(char * text, int is_valid)
+static void _win_gb_disassembly_inputwindow_callback(char * text, int is_valid)
 {
     if(is_valid)
     {
@@ -331,7 +331,7 @@ void Win_GBDisassemblyInputWindowCallback(char * text, int is_valid)
     }
 }
 
-void Win_GBRegistersTextBoxCallback(int x, int y)
+static void _win_gb_registers_textbox_callback(int x, int y)
 {
     int reg = y/FONT_12_HEIGHT;
 
@@ -349,10 +349,10 @@ void Win_GBRegistersTextBoxCallback(int x, int y)
 
     gb_debugger_register_to_change = reg;
 
-    GUI_InputWindowOpen(&gui_iw_gb_disassembler,text[reg],Win_GBDisassemblyInputWindowCallback);
+    GUI_InputWindowOpen(&gui_iw_gb_disassembler,text[reg],_win_gb_disassembly_inputwindow_callback);
 }
 
-void Win_GBDisassemblerStep(void)
+static void _win_gb_disassembler_step(void)
 {
     if(GBDisassemblerCreated == 0) return;
 
@@ -363,7 +363,7 @@ void Win_GBDisassemblerStep(void)
     GB_RunForInstruction();
 }
 
-void Win_GBDisassemblerGoto(void)
+static void _win_gb_disassembler_goto(void)
 {
     if(GBDisassemblerCreated == 0) return;
 
@@ -371,8 +371,10 @@ void Win_GBDisassemblerGoto(void)
 
     gb_debugger_register_to_change = 100;
 
-    GUI_InputWindowOpen(&gui_iw_gb_disassembler,"Go to address",Win_GBDisassemblyInputWindowCallback);
+    GUI_InputWindowOpen(&gui_iw_gb_disassembler,"Go to address",_win_gb_disassembly_inputwindow_callback);
 }
+
+//----------------------------------------------------------------
 
 int Win_GBDisassemblerCreate(void)
 {
@@ -383,16 +385,16 @@ int Win_GBDisassemblerCreate(void)
 
     GUI_SetTextBox(&gb_disassembly_textbox,&gb_disassembly_con,
                    6,6, 51*FONT_12_WIDTH,CPU_DISASSEMBLER_MAX_INSTRUCTIONS*FONT_12_HEIGHT,
-                   Win_GBDisassemblyTextBoxCallback);
+                   _win_gb_disassembly_textbox_callback);
     GUI_SetTextBox(&gb_regs_textbox,&gb_regs_con,
                    6+51*FONT_12_WIDTH+12,6, 10*FONT_12_WIDTH,9*FONT_12_HEIGHT,
-                   Win_GBRegistersTextBoxCallback);
+                   _win_gb_registers_textbox_callback);
 
     GUI_SetButton(&gb_disassembler_step_btn,6+51*FONT_12_WIDTH+12,6+9*FONT_12_HEIGHT+12,10*FONT_12_WIDTH,24,
-                  "Step (F7)",Win_GBDisassemblerStep);
+                  "Step (F7)",_win_gb_disassembler_step);
 
     GUI_SetButton(&gb_disassembler_goto_btn,6+51*FONT_12_WIDTH+12,6+9*FONT_12_HEIGHT+48,10*FONT_12_WIDTH,24,
-                  "Goto (F8)",Win_GBDisassemblerGoto);
+                  "Goto (F8)",_win_gb_disassembler_goto);
 
     GUI_SetTextBox(&gb_stack_textbox,&gb_stack_con,
                    6+51*FONT_12_WIDTH+12,6+9*FONT_12_HEIGHT+48+24+12,10*FONT_12_WIDTH,CPU_STACK_MAX_LINES*FONT_12_HEIGHT,
@@ -405,12 +407,12 @@ int Win_GBDisassemblerCreate(void)
     WinIDGBDis = WH_Create(WIN_GB_DISASSEMBLER_WIDTH,WIN_GB_DISASSEMBLER_HEIGHT, 0,0, 0);
     WH_SetCaption(WinIDGBDis,"GB CPU Disassembly");
 
-    WH_SetEventCallback(WinIDGBDis,Win_GBDisassemblerCallback);
+    WH_SetEventCallback(WinIDGBDis,_win_gb_disassembler_callback);
 
     Win_GBDisassemblerStartAddressSetDefault();
 
     Win_GBDisassemblerUpdate();
-    Win_GBDisassemblerRender();
+    _win_gb_dissasembler_render();
 
     return 1;
 }
@@ -426,4 +428,14 @@ void Win_GBDisassemblerSetFocus(void)
     Win_GBDisassemblerCreate();
 }
 
+void Win_GBDisassemblerClose(void)
+{
+    if(GBDisassemblerCreated == 0)
+        return;
+
+    GBDisassemblerCreated = 0;
+    WH_Close(WinIDGBDis);
+}
+
+//----------------------------------------------------------------
 

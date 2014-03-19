@@ -94,6 +94,8 @@ static inline void rgb16to32(u16 color, u8 * r, u8 * g, u8 * b)
 
 static int _win_gb_palviewer_bg_bmp_callback(int x, int y)
 {
+    if(x >= GB_PAL_BUFFER_WIDTH-1) x = GB_PAL_BUFFER_WIDTH-2;
+    if(y >= GB_PAL_BUFFER_HEIGHT-1) y = GB_PAL_BUFFER_HEIGHT-2;
     gb_palview_sprpal = 0; // bg
     gb_palview_selectedindex = (x/20) + ((y/20)*4);
     return 1;
@@ -101,6 +103,8 @@ static int _win_gb_palviewer_bg_bmp_callback(int x, int y)
 
 static int _win_gb_palviewer_spr_bmp_callback(int x, int y)
 {
+    if(x >= GB_PAL_BUFFER_WIDTH-1) x = GB_PAL_BUFFER_WIDTH-2;
+    if(y >= GB_PAL_BUFFER_HEIGHT-1) y = GB_PAL_BUFFER_HEIGHT-2;
     gb_palview_sprpal = 1; // spr
     gb_palview_selectedindex = (x/20) + ((y/20)*4);
     return 1;
@@ -164,7 +168,7 @@ void Win_GBPalViewerUpdate(void)
 
 //----------------------------------------------------------------
 
-void Win_GBPalViewerRender(void)
+static void _win_gb_pal_viewer_render(void)
 {
     if(GBPalViewerCreated == 0) return;
 
@@ -174,7 +178,7 @@ void Win_GBPalViewerRender(void)
     WH_Render(WinIDGBPalViewer, buffer);
 }
 
-int Win_GBPalViewerCallback(SDL_Event * e)
+static int _win_gb_pal_viewer_callback(SDL_Event * e)
 {
     if(GBPalViewerCreated == 0) return 1;
 
@@ -215,7 +219,7 @@ int Win_GBPalViewerCallback(SDL_Event * e)
     if(redraw)
     {
         Win_GBPalViewerUpdate();
-        Win_GBPalViewerRender();
+        _win_gb_pal_viewer_render();
         return 1;
     }
 
@@ -308,10 +312,21 @@ int Win_GBPalViewerCreate(void)
     WinIDGBPalViewer = WH_Create(WIN_GB_PALVIEWER_WIDTH,WIN_GB_PALVIEWER_HEIGHT, 0,0, 0);
     WH_SetCaption(WinIDGBPalViewer,"GB Palette Viewer");
 
-    WH_SetEventCallback(WinIDGBPalViewer,Win_GBPalViewerCallback);
+    WH_SetEventCallback(WinIDGBPalViewer,_win_gb_pal_viewer_callback);
 
     Win_GBPalViewerUpdate();
-    Win_GBPalViewerRender();
+    _win_gb_pal_viewer_render();
 
     return 1;
 }
+
+void Win_GBPalViewerClose(void)
+{
+    if(GBPalViewerCreated == 0)
+        return;
+
+    GBPalViewerCreated = 0;
+    WH_Close(WinIDGBPalViewer);
+}
+
+//----------------------------------------------------------------

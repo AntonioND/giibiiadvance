@@ -89,8 +89,8 @@ static _gui gba_disassembler_window_gui = {
 
 //-----------------------------------------------------------------------------------
 
-void Win_GBADisassemblerStep(void);
-void Win_GBADisassemblerGoto(void);
+static void _win_gba_disassembler_step(void);
+static void _win_gba_disassembler_goto(void);
 
 //-----------------------------------------------------------------------------------
 
@@ -220,7 +220,7 @@ void Win_GBADisassemblerUpdate(void)
     }
 }
 
-void Win_GBADisassemblerRender(void)
+static void _win_gba_disassembler_render(void)
 {
     if(GBADisassemblerCreated == 0) return;
 
@@ -230,7 +230,7 @@ void Win_GBADisassemblerRender(void)
     WH_Render(WinIDGBADis, buffer);
 }
 
-int Win_GBADisassemblerCallback(SDL_Event * e)
+static int _win_gba_disassembler_callback(SDL_Event * e)
 {
     if(GBADisassemblerCreated == 0) return 1;
 
@@ -259,11 +259,11 @@ int Win_GBADisassemblerCallback(SDL_Event * e)
             switch( e->key.keysym.sym )
             {
                 case SDLK_F7:
-                    Win_GBADisassemblerStep();
+                    _win_gba_disassembler_step();
                     redraw = 1;
                     break;
                 case SDLK_F8:
-                    Win_GBADisassemblerGoto();
+                    _win_gba_disassembler_goto();
                     redraw = 1;
                     break;
 
@@ -334,14 +334,14 @@ int Win_GBADisassemblerCallback(SDL_Event * e)
     if(redraw)
     {
         Win_GBADisassemblerUpdate();
-        Win_GBADisassemblerRender();
+        _win_gba_disassembler_render();
         return 1;
     }
 
     return 0;
 }
 
-void Win_GBADisassemblyTextBoxCallback(int x, int y)
+static void _win_gba_disassembly_textbox_callback(int x, int y)
 {
     _cpu_t * cpu = GBA_CPUGet();
 
@@ -367,7 +367,7 @@ void Win_GBADisassemblyTextBoxCallback(int x, int y)
 
 static int gba_debugger_register_to_change; // 0-17 -> registers. 100 -> goto
 
-void Win_GBADisassemblyInputWindowCallback(char * text, int is_valid)
+static void _win_gba_disassembly_inputwindow_callback(char * text, int is_valid)
 {
     if(is_valid)
     {
@@ -401,7 +401,7 @@ void Win_GBADisassemblyInputWindowCallback(char * text, int is_valid)
     }
 }
 
-void Win_GBARegistersTextBoxCallback(int x, int y)
+static void _win_gba_registers_textbox_callback(int x, int y)
 {
     int reg = y/FONT_12_HEIGHT;
 
@@ -417,17 +417,17 @@ void Win_GBARegistersTextBoxCallback(int x, int y)
 
     gba_debugger_register_to_change = reg;
 
-    GUI_InputWindowOpen(&gui_iw_gba_disassembler,text,Win_GBADisassemblyInputWindowCallback);
+    GUI_InputWindowOpen(&gui_iw_gba_disassembler,text,_win_gba_disassembly_inputwindow_callback);
 }
 
-void Win_GBACPUModeRadioButtonsCallback(int btn_id)
+static void _win_gba_cpu_mode_radbtn_callback(int btn_id)
 {
     disassemble_mode = btn_id;
     Win_GBADisassemblerStartAddressSetDefault();
     Win_GBADisassemblerUpdate();
 }
 
-void Win_GBADisassemblerStep(void)
+static void _win_gba_disassembler_step(void)
 {
     if(GBADisassemblerCreated == 0) return;
 
@@ -438,7 +438,7 @@ void Win_GBADisassemblerStep(void)
     GBA_DebugStep();
 }
 
-void Win_GBADisassemblerGoto(void)
+static void _win_gba_disassembler_goto(void)
 {
     if(GBADisassemblerCreated == 0) return;
 
@@ -446,8 +446,10 @@ void Win_GBADisassemblerGoto(void)
 
     gba_debugger_register_to_change = 100;
 
-    GUI_InputWindowOpen(&gui_iw_gba_disassembler,"Go to address",Win_GBADisassemblyInputWindowCallback);
+    GUI_InputWindowOpen(&gui_iw_gba_disassembler,"Go to address",_win_gba_disassembly_inputwindow_callback);
 }
+
+//----------------------------------------------------------------
 
 int Win_GBADisassemblerCreate(void)
 {
@@ -458,26 +460,26 @@ int Win_GBADisassemblerCreate(void)
 
     GUI_SetTextBox(&gba_disassembly_textbox,&gba_disassembly_con,
                    6,6, 66*FONT_12_WIDTH,CPU_DISASSEMBLER_MAX_INSTRUCTIONS*FONT_12_HEIGHT,
-                   Win_GBADisassemblyTextBoxCallback);
+                   _win_gba_disassembly_textbox_callback);
     GUI_SetTextBox(&gba_regs_textbox,&gba_regs_con,
                    6+66*FONT_12_WIDTH+12,6, 16*FONT_12_WIDTH,22*FONT_12_HEIGHT,
-                   Win_GBARegistersTextBoxCallback);
+                   _win_gba_registers_textbox_callback);
 
     GUI_SetButton(&gba_disassembler_step_btn,6+66*FONT_12_WIDTH+12,280,16*FONT_12_WIDTH,24,
-                  "Step (F7)",Win_GBADisassemblerStep);
+                  "Step (F7)",_win_gba_disassembler_step);
 
     GUI_SetButton(&gba_disassembler_goto_btn,6+66*FONT_12_WIDTH+12,316,16*FONT_12_WIDTH,24,
-                  "Goto (F8)",Win_GBADisassemblerGoto);
+                  "Goto (F8)",_win_gba_disassembler_goto);
 
     GUI_SetLabel(&gba_disassembler_disassembly_mode_label,6+66*FONT_12_WIDTH+12,366,16*FONT_12_WIDTH,24,
                  "Disassembly mode");
 
     GUI_SetRadioButton(&gba_disassembler_auto_radbtn,6+66*FONT_12_WIDTH+12,388,16*FONT_12_WIDTH,24,
-                  "Auto",  0,GBA_DISASM_CPU_AUTO,  1,Win_GBACPUModeRadioButtonsCallback);
+                  "Auto",  0,GBA_DISASM_CPU_AUTO,  1,_win_gba_cpu_mode_radbtn_callback);
     GUI_SetRadioButton(&gba_disassembler_arm_radbtn,6+66*FONT_12_WIDTH+12,418,16*FONT_12_WIDTH,24,
-                  "ARM",   0,GBA_DISASM_CPU_ARM,   0,Win_GBACPUModeRadioButtonsCallback);
+                  "ARM",   0,GBA_DISASM_CPU_ARM,   0,_win_gba_cpu_mode_radbtn_callback);
     GUI_SetRadioButton(&gba_disassembler_thumb_radbtn,6+66*FONT_12_WIDTH+12,448,16*FONT_12_WIDTH,24,
-                  "THUMB", 0,GBA_DISASM_CPU_THUMB, 0,Win_GBACPUModeRadioButtonsCallback);
+                  "THUMB", 0,GBA_DISASM_CPU_THUMB, 0,_win_gba_cpu_mode_radbtn_callback);
 
     GUI_InputWindowClose(&gui_iw_gba_disassembler);
 
@@ -488,10 +490,10 @@ int Win_GBADisassemblerCreate(void)
     WinIDGBADis = WH_Create(WIN_GBA_DISASSEMBLER_WIDTH,WIN_GBA_DISASSEMBLER_HEIGHT, 0,0, 0);
     WH_SetCaption(WinIDGBADis,"GBA CPU Disassembly");
 
-    WH_SetEventCallback(WinIDGBADis,Win_GBADisassemblerCallback);
+    WH_SetEventCallback(WinIDGBADis,_win_gba_disassembler_callback);
 
     Win_GBADisassemblerUpdate();
-    Win_GBADisassemblerRender();
+    _win_gba_disassembler_render();
 
     return 1;
 }
@@ -506,4 +508,15 @@ void Win_GBADisassemblerSetFocus(void)
 
     Win_GBADisassemblerCreate();
 }
+
+void Win_GBADisassemblerClose(void)
+{
+    if(GBADisassemblerCreated == 0)
+        return;
+
+    GBADisassemblerCreated = 0;
+    WH_Close(WinIDGBADis);
+}
+
+//----------------------------------------------------------------
 

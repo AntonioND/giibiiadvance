@@ -307,4 +307,147 @@ void GBA_Debug_PrintTiles(char * buffer, int bufw, int bufh, int cbb, int colors
     }
 }
 
+void GBA_Debug_PrintTilesAlpha(char * buffer, int bufw, int bufh, int cbb, int colors, int palette)
+{
+    memset(buffer,0,bufw*bufh*4);
+
+    u8 * charbaseblockptr = (u8*)&Mem.vram[cbb-0x06000000];
+
+    int i,j;
+
+    if(colors == 256) //256 Colors
+    {
+        int jmax = (cbb == 0x06014000) ? 64 : 128; //half size
+
+        //cbb >= 0x06010000 --> sprite
+        u32 pal = (cbb >= 0x06010000) ? 256 : 0;
+
+        for(i = 0; i < 256; i++) for(j = 0; j < jmax; j++)
+        {
+            u32 Index = (i/8) + (j/8)*32;
+            u8 * dataptr = (u8*)&(charbaseblockptr[(Index&0x3FF)*64]);
+
+            int data = dataptr[(i&7)+((j&7)*8)];
+
+            u32 color = rgb16to32(((u16*)Mem.pal_ram)[data+pal]);
+
+            buffer[(j*bufw+i)*4+0] = color & 0xFF;
+            buffer[(j*bufw+i)*4+1] = (color>>8) & 0xFF;
+            buffer[(j*bufw+i)*4+2] = (color>>16) & 0xFF;
+            buffer[(j*bufw+i)*4+3] = 255;
+        }
+        for(i = 0; i < 256; i++) for(j = jmax; j < 256; j++)
+        {
+            if( ((i^j)&7) == 0 )
+            {
+                buffer[(j*bufw+i)*4+0] = 255;
+                buffer[(j*bufw+i)*4+1] = 0;
+                buffer[(j*bufw+i)*4+2] = 0;
+                buffer[(j*bufw+i)*4+3] = 255;
+            }
+        }
+    }
+    else if(colors == 16) //16 colors
+    {
+        int jmax = (cbb == 0x06014000) ? 128 : 256; //half size
+
+        //cbb >= 0x06010000 --> sprite
+        u32 pal = (cbb >= 0x06010000) ? (palette+16) : palette;
+        u16 * palptr = (u16*)&Mem.pal_ram[pal*2*16];
+
+        for(i = 0; i < 256; i++) for(j = 0; j < jmax; j++)
+        {
+            u32 Index = (i/8) + (j/8)*32;
+            u8 * dataptr = (u8*)&(charbaseblockptr[(Index&0x3FF)*32]);
+
+            int data = dataptr[ ((i&7)+((j&7)*8))/2 ];
+
+            if(i&1) data = data>>4;
+            else data = data & 0xF;
+
+            u32 color = rgb16to32(palptr[data]);
+
+            buffer[(j*bufw+i)*4+0] = color & 0xFF;
+            buffer[(j*bufw+i)*4+1] = (color>>8) & 0xFF;
+            buffer[(j*bufw+i)*4+2] = (color>>16) & 0xFF;
+            buffer[(j*bufw+i)*4+3] = 255;
+        }
+
+        for(i = 0; i < 256; i++) for(j = jmax; j < 256; j++)
+        {
+            if( ((i^j)&7) == 0 )
+            {
+                buffer[(j*bufw+i)*4+0] = 255;
+                buffer[(j*bufw+i)*4+1] = 0;
+                buffer[(j*bufw+i)*4+2] = 0;
+                buffer[(j*bufw+i)*4+3] = 255;
+            }
+        }
+    }
+}
+
+void GBA_Debug_TilePrint64x64(char * buffer, int bufw, int bufh, int cbb, int tile, int palcolors, int selected_pal)
+{
+    int tiletempbuffer[8*8], tiletempvis[8*8];
+    memset(tiletempvis,0,sizeof(tiletempvis));
+
+    u8 * charbaseblockptr = (u8*)&Mem.vram[cbb-0x06000000];
+
+    if(palcolors == 256) //256 Colors
+    {
+        u8 * data = (u8*)&(charbaseblockptr[(tile&0x3FF)*64]);
+
+        //SelectedBase >= 0x06010000 --> sprite
+        u32 pal = (cbb >= 0x06010000) ? 256 : 0;
+
+        int i,j;
+        for(i = 0; i < 8; i++) for(j = 0; j < 8; j++)
+        {
+            u8 dat_ = data[j*8 + i];
+
+            tiletempbuffer[j*8 + i] = rgb16to32(((u16*)Mem.pal_ram)[dat_+pal]);
+            tiletempvis[j*8 + i] = dat_;
+        }
+    }
+    else if(palcolors == 16)//16 Colors
+    {
+        u8 * data = (u8*)&(charbaseblockptr[(tile&0x3FF)*32]);
+
+        //cbb >= 0x06010000 --> sprite
+        u32 pal = (cbb >= 0x06010000) ? (selected_pal+16) : selected_pal;
+        u16 * palptr = (u16*)&Mem.pal_ram[pal*2*16];
+
+        int i,j;
+        for(i = 0; i < 8; i++) for(j = 0; j < 8; j++)
+        {
+            u8 dat_ = data[(j*8 + i)/2];
+            if(i&1) dat_ = dat_>>4;
+            else dat_ = dat_ & 0xF;
+
+            tiletempbuffer[j*8 + i] = rgb16to32(palptr[dat_]);
+            tiletempvis[j*8 + i] = dat_;
+        }
+    }
+
+    //Expand to 64x64
+    int i,j;
+    for(i = 0; i < 64; i++) for(j = 0; j < 64; j++)
+    {
+        buffer[(j*64+i)*3+0] = ((i&16)^(j&16)) ? 0x80 : 0xB0;
+        buffer[(j*64+i)*3+1] = ((i&16)^(j&16)) ? 0x80 : 0xB0;
+        buffer[(j*64+i)*3+2] = ((i&16)^(j&16)) ? 0x80 : 0xB0;
+    }
+
+    for(i = 0; i < 64; i++) for(j = 0; j < 64; j++)
+    {
+        if(tiletempvis[(j/8)*8 + (i/8)])
+        {
+            u32 color = tiletempbuffer[(j/8)*8 + (i/8)];
+            buffer[(j*64+i)*3+0] = color&0xFF;
+            buffer[(j*64+i)*3+1] = (color>>8)&0xFF;
+            buffer[(j*64+i)*3+2] = (color>>16)&0xFF;
+        }
+    }
+}
+
 //----------------------------------------------------------------

@@ -154,12 +154,17 @@ void Win_GBATileViewerUpdate(void)
 
     GUI_ConsoleClear(&gba_tileview_con);
 
-    GUI_ConsoleModePrintf(&gba_tileview_con,0,0,"Tile: 789\nAd: 0xFFFFFFFF\nPal: %d",gba_tileview_selected_pal);
+    u32 address = (gba_tileview_selected_colors == 16) ?
+            ( gba_tileview_selected_cbb + (gba_tileview_selected_index&0x3FF)*32 ) :
+            ( gba_tileview_selected_cbb + (gba_tileview_selected_index&0x3FF)*64 ) ;
+
+    GUI_ConsoleModePrintf(&gba_tileview_con,0,0,"Tile: %d\nAddr: %08X\nPal: %d",
+                          gba_tileview_selected_index, address,
+                          gba_tileview_selected_pal);
 
     GBA_Debug_PrintTiles(gba_tile_buffer,GBA_TILE_BUFFER_WIDTH,GBA_TILE_BUFFER_HEIGHT,
                          gba_tileview_selected_cbb, gba_tileview_selected_colors,
                          gba_tileview_selected_pal);
-
 
     GUI_Draw_SetDrawingColor(255,0,0);
     int l = ((gba_tileview_selected_index%32)*8); //left
@@ -168,21 +173,9 @@ void Win_GBATileViewerUpdate(void)
     int b = t + 7; // bottom
     GUI_Draw_Rect(gba_tile_buffer,GBA_TILE_BUFFER_WIDTH,GBA_TILE_BUFFER_HEIGHT,l,r,t,b);
 
-/*
-    GB_Debug_TileDrawZoomed64x64(gba_tile_zoomed_tile_buffer, gba_tileview_selected_index, gba_tileview_selected_bank);
-
-    u32 tile = gba_tileview_selected_index;
-    u32 tileindex = (tile > 255) ? (tile - 256) : (tile);
-    if(GameBoy.Emulator.CGBEnabled)
-    {
-        GUI_ConsoleModePrintf(&gba_tileview_con,0,0,"Tile: %d(%d)\nAddr: 0x%04X\nBank: %d",tile,tileindex,
-            0x8000 + (tile * 16),gba_tileview_selected_bank);
-    }
-    else
-    {
-        GUI_ConsoleModePrintf(&gba_tileview_con,0,0,"Tile: %d(%d)\nAddr: 0x%04X\nBank: -",tile,tileindex,
-            0x8000 + (tile * 16));
-    }*/
+    GBA_Debug_TilePrint64x64(gba_tile_zoomed_tile_buffer, 64,64,
+                             gba_tileview_selected_cbb, gba_tileview_selected_index,
+                             gba_tileview_selected_colors, gba_tileview_selected_pal);
 }
 
 //----------------------------------------------------------------
@@ -248,43 +241,23 @@ static int _win_gba_tile_viewer_callback(SDL_Event * e)
 //----------------------------------------------------------------
 
 static void _win_gba_tileviewer_dump_btn_callback(void)
-{/*
+{
     if(Win_MainRunningGBA() == 0) return;
 
-    GB_Debug_TileVRAMDraw(gba_tile_bank0_buffer,GBA_TILE_BUFFER_WIDTH,GBA_TILE_BUFFER_HEIGHT,
-                          gba_tile_bank1_buffer,GBA_TILE_BUFFER_WIDTH,GBA_TILE_BUFFER_HEIGHT);
+    char * buf = malloc(GBA_TILE_BUFFER_WIDTH*GBA_TILE_BUFFER_HEIGHT*4);
+    if(buf == NULL)
+        return;
 
-    char buf0[GBA_TILE_BUFFER_WIDTH*GBA_TILE_BUFFER_HEIGHT*4];
-    char buf1[GBA_TILE_BUFFER_WIDTH*GBA_TILE_BUFFER_HEIGHT*4];
+    GBA_Debug_PrintTilesAlpha(buf,GBA_TILE_BUFFER_WIDTH,GBA_TILE_BUFFER_HEIGHT,
+                         gba_tileview_selected_cbb, gba_tileview_selected_colors,
+                         gba_tileview_selected_pal);
 
-    int i;
-    for(i = 0; i < (GBA_TILE_BUFFER_WIDTH*GBA_TILE_BUFFER_HEIGHT); i++)
-    {
-        buf0[i*4+0] = gba_tile_bank0_buffer[i*3+0];
-        buf0[i*4+1] = gba_tile_bank0_buffer[i*3+1];
-        buf0[i*4+2] = gba_tile_bank0_buffer[i*3+2];
-        buf0[i*4+3] = 255;
-    }
+    char * name = FU_GetNewTimestampFilename("gba_tiles");
+    Save_PNG(name,GBA_TILE_BUFFER_WIDTH,GBA_TILE_BUFFER_HEIGHT,buf,1);
 
-    char * name_b0 = FU_GetNewTimestampFilename("gba_tiles_bank0");
-    Save_PNG(name_b0,GBA_TILE_BUFFER_WIDTH,GBA_TILE_BUFFER_HEIGHT,buf0,0);
+    free(buf);
 
-    if(GameBoy.Emulator.CGBEnabled)
-    {
-        for(i = 0; i < (GBA_TILE_BUFFER_WIDTH*GBA_TILE_BUFFER_HEIGHT); i++)
-        {
-            buf1[i*4+0] = gba_tile_bank1_buffer[i*3+0];
-            buf1[i*4+1] = gba_tile_bank1_buffer[i*3+1];
-            buf1[i*4+2] = gba_tile_bank1_buffer[i*3+2];
-            buf1[i*4+3] = 255;
-        }
-
-        char * name_b1 = FU_GetNewTimestampFilename("gba_tiles_bank1");
-        Save_PNG(name_b1,GBA_TILE_BUFFER_WIDTH,GBA_TILE_BUFFER_HEIGHT,buf1,0);
-    }
-
-
-    Win_GBATileViewerUpdate();*/
+    Win_GBATileViewerUpdate();
 }
 
 //----------------------------------------------------------------
@@ -360,137 +333,3 @@ void Win_GBATileViewerClose(void)
 }
 
 //----------------------------------------------------------------
-
-#if 0
-
-static void gba_tile_viewer_draw_to_buffer(void)
-{
-    memset(TileBuffer,0,sizeof(TileBuffer));
-
-    u8 * charbaseblockptr = (u8*)&Mem.vram[SelectedBase-0x06000000];
-
-    int i,j;
-    for(i = 0; i < 256; i++) for(j = 0; j < 256; j++)
-        TileBuffer[j*256+i] = ((i&16)^(j&16)) ? 0x00808080 : 0x00B0B0B0;
-
-    if(TileViewColors == 256) //256 Colors
-    {
-        int jmax = (SelectedBase == 0x06014000) ? 64 : 128; //half size
-
-        //SelectedBase >= 0x06010000 --> sprite
-        u32 pal = (SelectedBase >= 0x06010000) ? 256 : 0;
-
-        for(i = 0; i < 256; i++) for(j = 0; j < jmax; j++)
-        {
-            u32 Index = (i/8) + (j/8)*32;
-            u8 * dataptr = (u8*)&(charbaseblockptr[(Index&0x3FF)*64]);
-
-            int data = dataptr[(i&7)+((j&7)*8)];
-
-            TileBuffer[j*256+i] = expand16to32(((u16*)Mem.pal_ram)[data+pal]);
-        }
-        for(i = 0; i < 256; i++) for(j = jmax; j < 256; j++)
-        {
-            if( ((i^j)&7) == 0 ) TileBuffer[j*256+i] = 0x00FF0000;
-        }
-    }
-    else if(TileViewColors == 16) //16 colors
-    {
-        int jmax = (SelectedBase == 0x06014000) ? 128 : 256; //half size
-
-        //SelectedBase >= 0x06010000 --> sprite
-        u32 pal = (SelectedBase >= 0x06010000) ? (SelectedPalette+16) : SelectedPalette;
-        u16 * palptr = (u16*)&Mem.pal_ram[pal*2*16];
-
-        for(i = 0; i < 256; i++) for(j = 0; j < jmax; j++)
-        {
-            u32 Index = (i/8) + (j/8)*32;
-            u8 * dataptr = (u8*)&(charbaseblockptr[(Index&0x3FF)*32]);
-
-            int data = dataptr[ ((i&7)+((j&7)*8))/2 ];
-
-            if(i&1) data = data>>4;
-            else data = data & 0xF;
-
-            TileBuffer[j*256+i] = expand16to32(palptr[data]);
-        }
-
-        for(i = 0; i < 256; i++) for(j = jmax; j < 256; j++)
-        {
-            if( ((i^j)&7) == 0 ) TileBuffer[j*256+i] = 0x00FF0000;
-        }
-    }
-}
-
-static void gba_tile_viewer_update_tile(void)
-{
-    int tiletempbuffer[8*8], tiletempvis[8*8];
-    memset(tiletempvis,0,sizeof(tiletempvis));
-
-    u8 * charbaseblockptr = (u8*)&Mem.vram[SelectedBase-0x06000000];
-
-    u32 Index = SelTileX + SelTileY*32;
-
-    if(TileViewColors == 256) //256 Colors
-    {
-        u8 * data = (u8*)&(charbaseblockptr[(Index&0x3FF)*64]);
-
-        //SelectedBase >= 0x06010000 --> sprite
-        u32 pal = (SelectedBase >= 0x06010000) ? 256 : 0;
-
-        int i,j;
-        for(i = 0; i < 8; i++) for(j = 0; j < 8; j++)
-        {
-            u8 dat_ = data[j*8 + i];
-
-            tiletempbuffer[j*8 + i] = expand16to32(((u16*)Mem.pal_ram)[dat_+pal]);
-            tiletempvis[j*8 + i] = dat_;
-        }
-
-        char text[1000];
-        sprintf(text,"Tile: %d\r\nAddr: 0x%08X\r\nPal: --",Index&0x3FF, SelectedBase + (Index&0x3FF)*64);
-        SetWindowText(hTileText,(LPCTSTR)text);
-    }
-    else if(TileViewColors == 16)//16 Colors
-    {
-        u8 * data = (u8*)&(charbaseblockptr[(Index&0x3FF)*32]);
-
-        //SelectedBase >= 0x06010000 --> sprite
-        u32 pal = (SelectedBase >= 0x06010000) ? (SelectedPalette+16) : SelectedPalette;
-        u16 * palptr = (u16*)&Mem.pal_ram[pal*2*16];
-
-        int i,j;
-        for(i = 0; i < 8; i++) for(j = 0; j < 8; j++)
-        {
-            u8 dat_ = data[(j*8 + i)/2];
-            if(i&1) dat_ = dat_>>4;
-            else dat_ = dat_ & 0xF;
-
-            tiletempbuffer[j*8 + i] = expand16to32(palptr[dat_]);
-            tiletempvis[j*8 + i] = dat_;
-        }
-
-        char text[1000];
-        sprintf(text,"Tile: %d\r\nAddr: 0x%08X\r\nPal: %d",Index&0x3FF,
-            SelectedBase + (Index&0x3FF)*32,SelectedPalette);
-        SetWindowText(hTileText,(LPCTSTR)text);
-    }
-
-    //Expand to 64x64
-    int i,j;
-    for(i = 0; i < 64; i++) for(j = 0; j < 64; j++)
-        SelectedTileBuffer[j*64+i] = ((i&16)^(j&16)) ? 0x00808080 : 0x00B0B0B0;
-
-    for(i = 0; i < 64; i++) for(j = 0; j < 64; j++)
-    {
-        if(tiletempvis[(j/8)*8 + (i/8)])
-            SelectedTileBuffer[j*64+i] = tiletempbuffer[(j/8)*8 + (i/8)];
-    }
-
-    //Update window
-    RECT rc; rc.top = 194; rc.left = 5; rc.bottom = 194+64; rc.right = 5+64;
-    InvalidateRect(hWndTileViewer, &rc, FALSE);
-}
-
-#endif // 0
-

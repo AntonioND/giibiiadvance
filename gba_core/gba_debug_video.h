@@ -26,5 +26,8 @@ void GBA_Debug_PrintZoomedSpriteAt(int spritenum, int buf_has_alpha_channel, cha
 void GBA_Debug_PrintSpritesPage(int page, int buf_has_alpha_channel, char * buffer, int bufw, int bufh);
 
 void GBA_Debug_PrintTiles(char * buffer, int bufw, int bufh, int cbb, int colors, int palette);
+void GBA_Debug_PrintTilesAlpha(char * buffer, int bufw, int bufh, int cbb, int colors, int palette);
+
+void GBA_Debug_TilePrint64x64(char * buffer, int bufw, int bufh, int cbb, int tile, int palcolors, int selected_pal);
 
 #endif // __GBA_DEBUG_VIDEO__

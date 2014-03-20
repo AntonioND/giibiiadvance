@@ -30,4 +30,6 @@ void GBA_Debug_PrintTilesAlpha(char * buffer, int bufw, int bufh, int cbb, int c
 
 void GBA_Debug_TilePrint64x64(char * buffer, int bufw, int bufh, int cbb, int tile, int palcolors, int selected_pal);
 
+void GBA_Debug_PrintBackgroundAlpha(char * buffer, int bufw, int bufh, u16 control, int bgmode, int page);
+
 #endif // __GBA_DEBUG_VIDEO__

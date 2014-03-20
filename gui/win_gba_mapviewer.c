@@ -136,6 +136,55 @@ static void _win_gba_mapviewer_pagenum_radbtn_callback(int num)
 
 //----------------------------------------------------------------
 
+static void gba_map_update_window_from_temp_buffer(void)
+{
+    //Copy to real buffer
+    int i,j;
+    for(i = 0; i < GBA_MAP_BUFFER_WIDTH; i++) for(j = 0; j < GBA_MAP_BUFFER_HEIGHT; j++)
+    {
+        gba_map_buffer[(j*GBA_MAP_BUFFER_WIDTH+i)*3+0] = ((i&32)^(j&32)) ? 0x80 : 0xB0;
+        gba_map_buffer[(j*GBA_MAP_BUFFER_WIDTH+i)*3+1] = ((i&32)^(j&32)) ? 0x80 : 0xB0;
+        gba_map_buffer[(j*GBA_MAP_BUFFER_WIDTH+i)*3+2] = ((i&32)^(j&32)) ? 0x80 : 0xB0;
+    }
+
+/*
+    int scrollx = GetScrollPos(hWndMapScrollH, SB_CTL);
+    int scrolly = GetScrollPos(hWndMapScrollV, SB_CTL);
+*/
+    int scrollx = 0;
+    int scrolly = 0;
+
+    for(i = 0; i < GBA_MAP_BUFFER_WIDTH; i++) for(j = 0; j < GBA_MAP_BUFFER_HEIGHT; j++)
+    {
+        if( (i>=gba_mapview_sizex) || (j>=gba_mapview_sizey) )
+        {
+            if( ((i^j)&7) == 0 )
+            {
+                gba_map_buffer[(j*GBA_MAP_BUFFER_WIDTH+i)*3+0] = 0xFF;
+                gba_map_buffer[(j*GBA_MAP_BUFFER_WIDTH+i)*3+1] = 0x00;
+                gba_map_buffer[(j*GBA_MAP_BUFFER_WIDTH+i)*3+2] = 0x00;
+            }
+        }
+        else
+        {
+            //if(tempvismapbuffer[(j+scrolly)*1024 + (i+scrollx)])
+            {
+                int r = gba_complete_map_buffer[((j+scrolly)*1024 + (i+scrollx))*4+0];
+                int g = gba_complete_map_buffer[((j+scrolly)*1024 + (i+scrollx))*4+1];
+                int b = gba_complete_map_buffer[((j+scrolly)*1024 + (i+scrollx))*4+2];
+                int a = gba_complete_map_buffer[((j+scrolly)*1024 + (i+scrollx))*4+3];
+                if(a)
+                {
+                    gba_map_buffer[(j*GBA_MAP_BUFFER_WIDTH+i)*3+0] = r;
+                    gba_map_buffer[(j*GBA_MAP_BUFFER_WIDTH+i)*3+1] = g;
+                    gba_map_buffer[(j*GBA_MAP_BUFFER_WIDTH+i)*3+2] = b;
+                }
+
+            }
+        }
+    }
+}
+
 void Win_GBAMapViewerUpdate(void)
 {
     if(GBAMapViewerCreated == 0) return;
@@ -239,8 +288,12 @@ void Win_GBAMapViewerUpdate(void)
         GUI_ConsoleModePrintf(&gba_mapview_tileinfo_con,0,0,"Tile: --- (--)\nPos: ---------\nPal: --\n"
                               "Addr: ----------\n");
     }
+
+    GBA_Debug_PrintBackgroundAlpha(gba_complete_map_buffer,1024,1024,control,
+                                   gba_mapview_bgmode,gba_mapview_selected_bitmap_page);
+
+    gba_map_update_window_from_temp_buffer();
 /*
-    gba_map_viewer_draw_to_buffer(control,bgmode);
     gba_map_viewer_update_scrollbars();
     gba_map_update_window_from_temp_buffer();
     gba_map_viewer_update_tile();
@@ -336,20 +389,12 @@ static int _win_gba_map_viewer_callback(SDL_Event * e)
 static void _win_gba_mapviewer_dump_btn_callback(void)
 {
     if(Win_MainRunningGBA() == 0) return;
-/*
-    char * buf = malloc(GBA_MAP_BUFFER_WIDTH*GBA_MAP_BUFFER_HEIGHT*4);
-    if(buf == NULL)
-        return;
 
-    GBA_Debug_PrintTilesAlpha(buf,GBA_MAP_BUFFER_WIDTH,GBA_MAP_BUFFER_HEIGHT,
-                         gba_mapview_selected_cbb, gba_mapview_selected_colors,
-                         gba_mapview_selected_pal);
+    //copy actual background size to a buffer here and save that buffer, not the complete buffer
 
-    char * name = FU_GetNewTimestampFilename("gba_maps");
-    Save_PNG(name,GBA_MAP_BUFFER_WIDTH,GBA_MAP_BUFFER_HEIGHT,buf,1);
+    char * name = FU_GetNewTimestampFilename("gba_map");
+    Save_PNG(name,1024,1024,gba_complete_map_buffer,1);
 
-    free(buf);
-*/
     Win_GBAMapViewerUpdate();
 }
 
@@ -445,15 +490,7 @@ static int tempmapbuffer[1024*1024], tempvismapbuffer[1024*1024];
 #define IDC_BG2    3
 #define IDC_BG3    4
 
-static inline u32 se_index(u32 tx, u32 ty, u32 pitch) //from tonc
-{
-    u32 sbb = (ty/32)*(pitch/32) + (tx/32);
-    return sbb*1024 + (ty%32)*32 + tx%32;
-}
-static inline u32 se_index_affine(u32 tx, u32 ty, u32 tpitch)
-{
-    return (ty * tpitch) + tx;
-}
+
 
 static void gba_map_update_window_from_temp_buffer(void)
 {
@@ -490,143 +527,6 @@ static void gba_map_viewer_update_scrollbars(void)
     SetScrollInfo(hWndMapScrollH, SB_CTL, &si, TRUE);
     si.nMin = 0; si.nMax = max(0,SizeY-256); si.nPos = 0;
     SetScrollInfo(hWndMapScrollV, SB_CTL, &si, TRUE);
-}
-
-static void gba_map_viewer_draw_to_buffer(u16 control, int bgmode) //1 = text, 2 = affine, 3,4,5 = bmp mode 3,4,5
-{
-    if(bgmode == 0) return; //how the hell did this function get called with bgmode = 0 ???
-
-    memset(tempvismapbuffer,0,sizeof(tempvismapbuffer));
-
-    if(bgmode == 1) //text
-    {
-        static const u32 text_bg_size[4][2] = { {256,256}, {512,256}, {256,512}, {512,512} };
-
-        u8 * charbaseblockptr = (u8*)&Mem.vram[((control>>2)&3) * (16*1024)];
-        u16 * scrbaseblockptr = (u16*)&Mem.vram[((control>>8)&0x1F) * (2*1024)];
-
-        u32 sizex = text_bg_size[control>>14][0];
-        u32 sizey = text_bg_size[control>>14][1];
-
-        if(control & BIT(7)) //256 colors
-        {
-            int i, j;
-            for(i = 0; i < sizex; i++) for(j = 0; j < sizey; j++)
-            {
-                u32 index = se_index(i/8,j/8,sizex/8);
-                u16 SE = scrbaseblockptr[index];
-                //screen entry data
-                //0-9 tile id
-                //10-hflip
-                //11-vflip
-                int _x = i & 7;
-                if(SE & BIT(10)) _x = 7-_x; //hflip
-
-                int _y = j & 7;
-                if(SE & BIT(11)) _y = 7-_y; //vflip
-
-                int data = charbaseblockptr[((SE&0x3FF)*64)  +  (_x+(_y*8))];
-
-                tempmapbuffer[j*1024+i] = expand16to32(((u16*)Mem.pal_ram)[data]);
-                tempvismapbuffer[j*1024+i] = data;
-            }
-        }
-        else //16 colors
-        {
-            int i, j;
-            for(i = 0; i < sizex; i++) for(j = 0; j < sizey; j++)
-            {
-                u32 index = se_index(i/8,j/8,sizex/8);
-                u16 SE = scrbaseblockptr[index];
-                //screen entry data
-                //0-9 tile id
-                //10-hflip
-                //11-vflip
-                //12-15-pal
-                u16 * palptr = (u16*)&Mem.pal_ram[(SE>>12)*(2*16)];
-
-                int _x = i & 7;
-                if(SE & BIT(10)) _x = 7-_x; //hflip
-
-                int _y = j & 7;
-                if(SE & BIT(11)) _y = 7-_y; //vflip
-
-                u32 data = charbaseblockptr[((SE&0x3FF)*32)  +  ((_x/2)+(_y*4))];
-
-                if(_x&1) data = data>>4;
-                else data = data & 0xF;
-
-                tempmapbuffer[j*1024+i] = expand16to32(palptr[data]);
-                tempvismapbuffer[j*1024+i] = data;
-            }
-        }
-    }
-
-    if(bgmode == 2) //affine
-    {
-        static const u32 affine_bg_size[4] = { 128, 256, 512, 1024 };
-
-        u8 * charbaseblockptr = (u8*)&Mem.vram[((control>>2)&3) * (16*1024)];
-        u8 * scrbaseblockptr = (u8*)&Mem.vram[((control>>8)&0x1F) * (2*1024)];
-
-        u32 size = affine_bg_size[control>>14];
-        u32 tilesize = size/8;
-
-        //always 256 color
-
-        int i, j;
-        for(i = 0; i < size; i++) for(j = 0; j < size; j++)
-        {
-            int _x = i & 7;
-            int _y = j & 7;
-
-            u32 index = se_index_affine(i/8,j/8,tilesize);
-            u8 SE = scrbaseblockptr[index];
-            u16 data = charbaseblockptr[(SE*64) + (_x+(_y*8))];
-
-            tempmapbuffer[j*1024+i] = expand16to32(((u16*)Mem.pal_ram)[data]);
-            tempvismapbuffer[j*1024+i] = data;
-        }
-    }
-
-    if(bgmode == 3) //bg2 mode 3
-    {
-        u16 * srcptr = (u16*)&Mem.vram;
-
-        int i,j;
-        for(i = 0; i < 240; i++) for(j = 0; j < 160; j++)
-        {
-            u16 data = srcptr[i+240*j];
-            tempmapbuffer[j*1024+i] = expand16to32(data);
-            tempvismapbuffer[j*1024+i] = 1;
-        }
-    }
-
-    if(bgmode == 4) //bg2 mode 4
-    {
-        u8 * srcptr = (u8*)&Mem.vram[(REG_DISPCNT&BIT(4))?0xA000:0];
-
-        int i,j;
-        for(i = 0; i < 240; i++) for(j = 0; j < 160; j++)
-        {
-            u16 data = ((u16*)Mem.pal_ram)[srcptr[i+240*j]];
-            tempmapbuffer[j*1024+i] = expand16to32(data);
-            tempvismapbuffer[j*1024+i] = 1;
-        }
-    }
-
-    if(bgmode == 5) //bg2 mode 5
-    {
-        u16 * srcptr = (u16*)&Mem.vram[(REG_DISPCNT&BIT(4))?0xA000:0];
-
-        int i,j;
-        for(i = 0; i < 160; i++) for(j = 0; j < 128; j++)
-        {
-            u16 data = srcptr[i+160*j];
-            tempmapbuffer[j*1024+i] = expand16to32(data);
-            tempvismapbuffer[j*1024+i] = 1;
-        }
-    }
 }
 
 static void gba_map_viewer_update_tile(void)

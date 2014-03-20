@@ -451,3 +451,167 @@ void GBA_Debug_TilePrint64x64(char * buffer, int bufw, int bufh, int cbb, int ti
 }
 
 //----------------------------------------------------------------
+
+static inline u32 se_index(u32 tx, u32 ty, u32 pitch) //from tonc
+{
+    u32 sbb = (ty/32)*(pitch/32) + (tx/32);
+    return sbb*1024 + (ty%32)*32 + tx%32;
+}
+static inline u32 se_index_affine(u32 tx, u32 ty, u32 tpitch)
+{
+    return (ty * tpitch) + tx;
+}
+
+//bgmode => 1 = text, 2 = affine, 3,4,5 = bmp mode 3,4,5
+void GBA_Debug_PrintBackgroundAlpha(char * buffer, int bufw, int bufh, u16 control, int bgmode, int page)
+{
+    if(bgmode == 0) return; // shouldn't happen
+
+    memset(buffer,0,bufw*bufh*4);
+
+    if(bgmode == 1) //text
+    {
+        static const u32 text_bg_size[4][2] = { {256,256}, {512,256}, {256,512}, {512,512} };
+
+        u8 * charbaseblockptr = (u8*)&Mem.vram[((control>>2)&3) * (16*1024)];
+        u16 * scrbaseblockptr = (u16*)&Mem.vram[((control>>8)&0x1F) * (2*1024)];
+
+        u32 sizex = text_bg_size[control>>14][0];
+        u32 sizey = text_bg_size[control>>14][1];
+
+        if(control & BIT(7)) //256 colors
+        {
+            int i, j;
+            for(i = 0; i < sizex; i++) for(j = 0; j < sizey; j++)
+            {
+                u32 index = se_index(i/8,j/8,sizex/8);
+                u16 SE = scrbaseblockptr[index];
+                //screen entry data
+                //0-9 tile id
+                //10-hflip
+                //11-vflip
+                int _x = i & 7;
+                if(SE & BIT(10)) _x = 7-_x; //hflip
+
+                int _y = j & 7;
+                if(SE & BIT(11)) _y = 7-_y; //vflip
+
+                int data = charbaseblockptr[((SE&0x3FF)*64)  +  (_x+(_y*8))];
+
+                u32 color = rgb16to32(((u16*)Mem.pal_ram)[data]);
+                buffer[(j*bufw+i)*4+0] = color & 0xFF;
+                buffer[(j*bufw+i)*4+1] = (color>>8) & 0xFF;
+                buffer[(j*bufw+i)*4+2] = (color>>16) & 0xFF;
+                buffer[(j*bufw+i)*4+3] = data ? 0xFF : 0;
+            }
+        }
+        else //16 colors
+        {
+            int i, j;
+            for(i = 0; i < sizex; i++) for(j = 0; j < sizey; j++)
+            {
+                u32 index = se_index(i/8,j/8,sizex/8);
+                u16 SE = scrbaseblockptr[index];
+                //screen entry data
+                //0-9 tile id
+                //10-hflip
+                //11-vflip
+                //12-15-pal
+                u16 * palptr = (u16*)&Mem.pal_ram[(SE>>12)*(2*16)];
+
+                int _x = i & 7;
+                if(SE & BIT(10)) _x = 7-_x; //hflip
+
+                int _y = j & 7;
+                if(SE & BIT(11)) _y = 7-_y; //vflip
+
+                u32 data = charbaseblockptr[((SE&0x3FF)*32)  +  ((_x/2)+(_y*4))];
+
+                if(_x&1) data = data>>4;
+                else data = data & 0xF;
+
+                u32 color = rgb16to32(palptr[data]);
+                buffer[(j*bufw+i)*4+0] = color & 0xFF;
+                buffer[(j*bufw+i)*4+1] = (color>>8) & 0xFF;
+                buffer[(j*bufw+i)*4+2] = (color>>16) & 0xFF;
+                buffer[(j*bufw+i)*4+3] = data ? 0xFF : 0;
+            }
+        }
+    }
+    else if(bgmode == 2) //affine
+    {
+        static const u32 affine_bg_size[4] = { 128, 256, 512, 1024 };
+
+        u8 * charbaseblockptr = (u8*)&Mem.vram[((control>>2)&3) * (16*1024)];
+        u8 * scrbaseblockptr = (u8*)&Mem.vram[((control>>8)&0x1F) * (2*1024)];
+
+        u32 size = affine_bg_size[control>>14];
+        u32 tilesize = size/8;
+
+        //always 256 color
+
+        int i, j;
+        for(i = 0; i < size; i++) for(j = 0; j < size; j++)
+        {
+            int _x = i & 7;
+            int _y = j & 7;
+
+            u32 index = se_index_affine(i/8,j/8,tilesize);
+            u8 SE = scrbaseblockptr[index];
+            u16 data = charbaseblockptr[(SE*64) + (_x+(_y*8))];
+
+            u32 color = rgb16to32(((u16*)Mem.pal_ram)[data]);
+            buffer[(j*bufw+i)*4+0] = color & 0xFF;
+            buffer[(j*bufw+i)*4+1] = (color>>8) & 0xFF;
+            buffer[(j*bufw+i)*4+2] = (color>>16) & 0xFF;
+            buffer[(j*bufw+i)*4+3] = data ? 0xFF : 0;
+        }
+    }
+    else if(bgmode == 3) //bg2 mode 3
+    {
+        u16 * srcptr = (u16*)&Mem.vram;
+
+        int i,j;
+        for(i = 0; i < 240; i++) for(j = 0; j < 160; j++)
+        {
+            u16 data = srcptr[i+240*j];
+            u32 color = rgb16to32(data);
+            buffer[(j*bufw+i)*4+0] = color & 0xFF;
+            buffer[(j*bufw+i)*4+1] = (color>>8) & 0xFF;
+            buffer[(j*bufw+i)*4+2] = (color>>16) & 0xFF;
+            buffer[(j*bufw+i)*4+3] = 0xFF;
+        }
+    }
+    else if(bgmode == 4) //bg2 mode 4
+    {
+        u8 * srcptr = (u8*)&Mem.vram[page?0xA000:0];
+
+        int i,j;
+        for(i = 0; i < 240; i++) for(j = 0; j < 160; j++)
+        {
+            u16 data = ((u16*)Mem.pal_ram)[srcptr[i+240*j]];
+            u32 color = rgb16to32(data);
+            buffer[(j*bufw+i)*4+0] = color & 0xFF;
+            buffer[(j*bufw+i)*4+1] = (color>>8) & 0xFF;
+            buffer[(j*bufw+i)*4+2] = (color>>16) & 0xFF;
+            buffer[(j*bufw+i)*4+3] = 0xFF;
+        }
+    }
+    else if(bgmode == 5) //bg2 mode 5
+    {
+        u16 * srcptr = (u16*)&Mem.vram[page?0xA000:0];
+
+        int i,j;
+        for(i = 0; i < 160; i++) for(j = 0; j < 128; j++)
+        {
+            u16 data = srcptr[i+160*j];
+            u32 color = rgb16to32(data);
+            buffer[(j*bufw+i)*4+0] = color & 0xFF;
+            buffer[(j*bufw+i)*4+1] = (color>>8) & 0xFF;
+            buffer[(j*bufw+i)*4+2] = (color>>16) & 0xFF;
+            buffer[(j*bufw+i)*4+3] = 0xFF;
+        }
+    }
+}
+
+//----------------------------------------------------------------

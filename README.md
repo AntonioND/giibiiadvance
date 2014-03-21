@@ -27,7 +27,7 @@ Current goals for 0.2.0
 For 0.3.0
 ---------
 
-- Finish porting the GUI:
+- Improve the GUI:
  - GB Camera and GB Printer viewers.
  - GBA I/O hardware viewer (RTC, sensors...).
  - Export images from debugger windows.
@@ -38,7 +38,7 @@ For 0.3.0
 - Obviously, improve emulation.
  - Implement mosaic correctly (in GBA mode).
  - Correct GBA CPU timings. Maybe not for version 0.2.0.
- - Rewrite a lot of GB core to speed up emulation. NOT for version 0.2.0, maybe 0.3.0.
+ - Rewrite a lot of GB core to speed up emulation.
 
 Dependencies
 ------------

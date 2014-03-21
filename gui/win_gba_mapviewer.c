@@ -622,6 +622,21 @@ int Win_GBAMapViewerCreate(void)
     GUI_SetScrollBar(&gba_mapview_scrolly_scrollbar, 76+15*FONT_WIDTH+6+GBA_MAP_BUFFER_WIDTH,6, 12, 256,
                      0,0, 0, _win_gba_mapviewer_pal_scrollbar_y_callback);
 
+    gba_mapview_selected_bg = 0;
+    gba_mapview_selected_tilex = 0;
+    gba_mapview_selected_tiley = 0;
+    gba_mapview_selected_bitmap_page = 0;
+
+    gba_mapview_sizex = 0;
+    gba_mapview_sizey = 0;
+    gba_mapview_bgmode = 0;
+    gba_mapview_bgcontrolreg = 0;
+
+    gba_mapview_scrollx = 0;
+    gba_mapview_scrolly = 0;
+    gba_mapview_scrollx_max = 0;
+    gba_mapview_scrolly_max = 0;
+
     GBAMapViewerCreated = 1;
 
     WinIDGBAMapViewer = WH_Create(WIN_GBA_MAPVIEWER_WIDTH,WIN_GBA_MAPVIEWER_HEIGHT, 0,0, 0);

@@ -487,6 +487,8 @@ int Win_GBADisassemblerCreate(void)
 
     disassemble_mode = GBA_DISASM_CPU_AUTO;
 
+    Win_GBADisassemblerStartAddressSetDefault();
+
     WinIDGBADis = WH_Create(WIN_GBA_DISASSEMBLER_WIDTH,WIN_GBA_DISASSEMBLER_HEIGHT, 0,0, 0);
     WH_SetCaption(WinIDGBADis,"GBA CPU Disassembly");
 

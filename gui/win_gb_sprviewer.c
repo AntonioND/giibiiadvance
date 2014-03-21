@@ -144,6 +144,17 @@ void Win_GBSprViewerUpdate(void)
                           (info & (1<<5)) ? "H" : "-", (info & (1<<6)) ? "V" : "-",(info & (1<<7)) ? "P" : "-");
 
     GB_Debug_PrintSprites(gb_spr_allspr_buffer);
+
+    GUI_Draw_SetDrawingColor(255,0,0);
+    int l = (gb_sprview_selected_spr%8)*32+8; //left
+    int t = (gb_sprview_selected_spr/8)*52+10; // top
+    int r = l + 15; // right
+    int b = t + 2*sy-1; // bottom
+    l--; r++; t--; b++;
+    GUI_Draw_Rect(gb_spr_allspr_buffer,GB_SPR_ALLSPR_BUFFER_WIDTH,GB_SPR_ALLSPR_BUFFER_HEIGHT,l,r,t,b);
+    l--; r++; t--; b++;
+    GUI_Draw_Rect(gb_spr_allspr_buffer,GB_SPR_ALLSPR_BUFFER_WIDTH,GB_SPR_ALLSPR_BUFFER_HEIGHT,l,r,t,b);
+
     GB_Debug_PrintZoomedSprite(gb_spr_zoomed_buffer,gb_sprview_selected_spr);
 }
 

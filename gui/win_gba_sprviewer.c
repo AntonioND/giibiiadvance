@@ -154,6 +154,21 @@ void Win_GBASprViewerUpdate(void)
 
     GBA_Debug_PrintSpritesPage(gba_sprview_selected_page, 0, gba_spr_allspr_buffer,
                 GBA_SPR_ALLSPR_BUFFER_WIDTH,GBA_SPR_ALLSPR_BUFFER_HEIGHT);
+
+    if( (gba_sprview_selected_spr >> 6) == gba_sprview_selected_page)
+    {
+        int sprnum_in_page = gba_sprview_selected_spr & 63;
+
+        GUI_Draw_SetDrawingColor(255,0,0);
+        int l = (sprnum_in_page%8)*(64+16)+16; //left
+        int t = (sprnum_in_page/8)*(64+16)+16; // top
+        int r = l + 63; // right
+        int b = t + 63; // bottom
+        l--; r++; t--; b++;
+        GUI_Draw_Rect(gba_spr_allspr_buffer,GBA_SPR_ALLSPR_BUFFER_WIDTH,GBA_SPR_ALLSPR_BUFFER_HEIGHT,l,r,t,b);
+        l--; r++; t--; b++;
+        GUI_Draw_Rect(gba_spr_allspr_buffer,GBA_SPR_ALLSPR_BUFFER_WIDTH,GBA_SPR_ALLSPR_BUFFER_HEIGHT,l,r,t,b);
+    }
 }
 
 //----------------------------------------------------------------

@@ -307,6 +307,9 @@ int Win_GBAPalViewerCreate(void)
     GUI_SetButton(&gba_palview_dumpbtn,308,192,FONT_WIDTH*6,FONT_HEIGHT*2,"Dump",
                   _win_gba_palviewer_dump_btn_callback);
 
+    gba_palview_sprpal = 0;
+    gba_palview_selectedindex = 0;
+
     GBAPalViewerCreated = 1;
 
     WinIDGBAPalViewer = WH_Create(WIN_GBA_PALVIEWER_WIDTH,WIN_GBA_PALVIEWER_HEIGHT, 0,0, 0);

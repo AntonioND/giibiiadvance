@@ -303,6 +303,9 @@ int Win_GBMapViewerCreate(void)
     gb_mapview_selected_x = 0;
     gb_mapview_selected_y = 0;
 
+    gb_mapview_selected_tilebase = 0;
+    gb_mapview_selected_mapbase = 0;
+
     WinIDGBMapViewer = WH_Create(WIN_GB_MAPVIEWER_WIDTH,WIN_GB_MAPVIEWER_HEIGHT, 0,0, 0);
     WH_SetCaption(WinIDGBMapViewer,"GB Map Viewer");
 

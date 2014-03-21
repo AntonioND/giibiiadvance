@@ -307,6 +307,9 @@ int Win_GBPalViewerCreate(void)
     GUI_SetButton(&gb_palview_dumpbtn,210,192,FONT_WIDTH*6,FONT_HEIGHT*2,"Dump",
                   _win_gb_palviewer_dump_btn_callback);
 
+    gb_palview_sprpal = 0;
+    gb_palview_selectedindex = 0;
+
     GBPalViewerCreated = 1;
 
     WinIDGBPalViewer = WH_Create(WIN_GB_PALVIEWER_WIDTH,WIN_GB_PALVIEWER_HEIGHT, 0,0, 0);

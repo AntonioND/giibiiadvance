@@ -198,6 +198,7 @@ void GUI_SetRadioButton(_gui_element * e, int x, int y, int w, int h, const char
     e->info.radiobutton.group_id = group_id;
     e->info.radiobutton.btn_id = btn_id;
     e->info.radiobutton.is_pressed = start_pressed;
+    e->info.radiobutton.is_enabled = 1;
     strcpy(e->info.radiobutton.name,label);
 }
 
@@ -379,6 +380,44 @@ void GUI_SetScrollBar(_gui_element * e, int x, int y, int w, int h, int min_valu
 }
 
 //----------------------------------------------------------------------------------------------
+
+void _gui_clear_radiobuttons(_gui_element ** element_list, int group_id)
+{
+    while(*element_list != NULL)
+    {
+        _gui_element * e = *element_list;
+
+        if(e->element_type == GUI_TYPE_RADIOBUTTON)
+        {
+            if(e->info.radiobutton.group_id == group_id)
+                e->info.radiobutton.is_pressed = 0;
+        }
+
+        element_list++;
+    }
+}
+
+void GUI_RadioButtonSetEnabled(_gui_element * e, int enabled)
+{
+    if(e == NULL) return;
+
+    if(e->element_type != GUI_TYPE_RADIOBUTTON) return;
+
+    e->info.radiobutton.is_enabled = enabled;
+}
+
+void GUI_RadioButtonSetPressed(void * complete_gui, _gui_element * e)
+{
+    if(e == NULL) return;
+
+    if(e->element_type != GUI_TYPE_RADIOBUTTON) return;
+
+    _gui * g = complete_gui;
+
+    _gui_clear_radiobuttons(g->elements,e->info.radiobutton.group_id);
+
+    e->info.radiobutton.is_pressed = 1;
+}
 
 void GUI_WindowSetEnabled(_gui_element * e, int enabled)
 {

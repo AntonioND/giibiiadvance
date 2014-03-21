@@ -40,8 +40,8 @@
 
 static int WinIDGBAMapViewer;
 
-#define WIN_GBA_MAPVIEWER_WIDTH  449
-#define WIN_GBA_MAPVIEWER_HEIGHT 268
+#define WIN_GBA_MAPVIEWER_WIDTH  461
+#define WIN_GBA_MAPVIEWER_HEIGHT 280
 
 static int GBAMapViewerCreated = 0;
 
@@ -56,6 +56,11 @@ static u32 gba_mapview_sizex = 0;
 static u32 gba_mapview_sizey = 0;
 static u32 gba_mapview_bgmode = 0;
 static u32 gba_mapview_bgcontrolreg = 0;
+
+static int gba_mapview_scrollx = 0;
+static int gba_mapview_scrolly = 0;
+static int gba_mapview_scrollx_max = 0;
+static int gba_mapview_scrolly_max = 0;
 
 #define GBA_MAP_BUFFER_WIDTH  (32*8)
 #define GBA_MAP_BUFFER_HEIGHT (32*8)
@@ -86,7 +91,7 @@ static _gui_element gba_mapview_dumpbtn;
 
 static _gui_element gba_mapview_tiles_bmp;
 
-static _gui_element gba_mapview_pal_scrollbar;
+static _gui_element gba_mapview_scrollx_scrollbar, gba_mapview_scrolly_scrollbar;
 
 static _gui_element * gba_mapviwer_window_gui_elements[] = {
     &gba_mapview_bg_label,
@@ -99,7 +104,7 @@ static _gui_element * gba_mapviwer_window_gui_elements[] = {
     &gba_mapview_textbox,
     &gba_mapview_tileinfo_textbox,
     &gba_mapview_tiles_bmp,
-    &gba_mapview_pal_scrollbar,
+    &gba_mapview_scrollx_scrollbar, &gba_mapview_scrolly_scrollbar,
     NULL
 };
 
@@ -119,8 +124,15 @@ static int _win_gba_mapviewer_tiles_bmp_callback(int x, int y)
     return 1;
 }
 
-static void _win_gba_mapviewer_pal_scrollbar_callback(int value)
+static void _win_gba_mapviewer_pal_scrollbar_x_callback(int value)
 {
+    gba_mapview_scrollx = value;
+    return;
+}
+
+static void _win_gba_mapviewer_pal_scrollbar_y_callback(int value)
+{
+    gba_mapview_scrolly = value;
     return;
 }
 
@@ -136,7 +148,7 @@ static void _win_gba_mapviewer_pagenum_radbtn_callback(int num)
 
 //----------------------------------------------------------------
 
-static void gba_map_update_window_from_temp_buffer(void)
+static void _win_gba_mapviewer_update_mapbuffer_from_temp_buffer(void)
 {
     //Copy to real buffer
     int i,j;
@@ -147,12 +159,8 @@ static void gba_map_update_window_from_temp_buffer(void)
         gba_map_buffer[(j*GBA_MAP_BUFFER_WIDTH+i)*3+2] = ((i&32)^(j&32)) ? 0x80 : 0xB0;
     }
 
-/*
-    int scrollx = GetScrollPos(hWndMapScrollH, SB_CTL);
-    int scrolly = GetScrollPos(hWndMapScrollV, SB_CTL);
-*/
-    int scrollx = 0;
-    int scrolly = 0;
+    int scrollx = gba_mapview_scrollx * 8;
+    int scrolly = gba_mapview_scrolly * 8;
 
     for(i = 0; i < GBA_MAP_BUFFER_WIDTH; i++) for(j = 0; j < GBA_MAP_BUFFER_HEIGHT; j++)
     {
@@ -194,6 +202,51 @@ void Win_GBAMapViewerUpdate(void)
     GUI_ConsoleClear(&gba_mapview_con);
     GUI_ConsoleClear(&gba_mapview_tileinfo_con);
 
+    u32 mode = REG_DISPCNT & 0x7;
+
+    //-----------------------------------------------------------------------------
+
+    static const u32 bgenabled[8][4] = {
+        {1,1,1,1}, {1,1,1,0}, {0,0,1,1}, {0,0,1,0}, {0,0,1,0}, {0,0,1,0}, {0,0,0,0}, {0,0,0,0}
+    };
+
+    if(bgenabled[mode][gba_mapview_selected_bg] == 0)
+    {
+        gba_mapview_selected_bg = 0;
+        while(bgenabled[mode][gba_mapview_selected_bg] == 0)
+        {
+            gba_mapview_selected_bg++;
+            if(gba_mapview_selected_bg >= 4) break;
+        }
+
+        if(gba_mapview_selected_bg == 0)
+        {
+            GUI_RadioButtonSetPressed(&gba_mapviewer_window_gui,&gba_mapview_bg0_radbtn);
+        }
+        else if(gba_mapview_selected_bg == 1)
+        {
+            GUI_RadioButtonSetPressed(&gba_mapviewer_window_gui,&gba_mapview_bg1_radbtn);
+        }
+        else if(gba_mapview_selected_bg == 2)
+        {
+            GUI_RadioButtonSetPressed(&gba_mapviewer_window_gui,&gba_mapview_bg2_radbtn);
+        }
+        else if(gba_mapview_selected_bg == 3)
+        {
+            GUI_RadioButtonSetPressed(&gba_mapviewer_window_gui,&gba_mapview_bg3_radbtn);
+        }
+        if(gba_mapview_selected_bg == 4) //WTF? Disable all
+        {
+        }
+    }
+
+    GUI_RadioButtonSetEnabled(&gba_mapview_bg0_radbtn,bgenabled[mode][0]);
+    GUI_RadioButtonSetEnabled(&gba_mapview_bg1_radbtn,bgenabled[mode][1]);
+    GUI_RadioButtonSetEnabled(&gba_mapview_bg2_radbtn,bgenabled[mode][2]);
+    GUI_RadioButtonSetEnabled(&gba_mapview_bg3_radbtn,bgenabled[mode][3]);
+
+    //-----------------------------------------------------------------------------
+
     u16 control = 0;
     switch(gba_mapview_selected_bg)
     {
@@ -204,7 +257,6 @@ void Win_GBAMapViewerUpdate(void)
         default: return;
     }
 
-    u32 mode = REG_DISPCNT & 0x7;
     static const u32 bgtypearray[8][4] = {  //1 = text, 2 = affine, 3,4,5 = bmp mode 3,4,5
         {1,1,1,1}, {1,1,2,0}, {0,0,2,2}, {0,0,3,0}, {0,0,4,0}, {0,0,5,0}, {0,0,0,0}, {0,0,0,0}
     };
@@ -292,10 +344,26 @@ void Win_GBAMapViewerUpdate(void)
     GBA_Debug_PrintBackgroundAlpha(gba_complete_map_buffer,1024,1024,control,
                                    gba_mapview_bgmode,gba_mapview_selected_bitmap_page);
 
-    gba_map_update_window_from_temp_buffer();
+    //--------------------------------------------------
+
+    gba_mapview_scrollx_max = ((((int)gba_mapview_sizex) - 256)/8) - 1;
+    gba_mapview_scrolly_max = ((((int)gba_mapview_sizey) - 256)/8) - 1;
+
+    if(gba_mapview_scrollx_max < 0) gba_mapview_scrollx_max = 0;
+    if(gba_mapview_scrolly_max < 0) gba_mapview_scrolly_max = 0;
+
+    if(gba_mapview_scrollx > gba_mapview_scrollx_max)
+        gba_mapview_scrollx = gba_mapview_scrollx_max;
+    if(gba_mapview_scrolly > gba_mapview_scrolly_max)
+        gba_mapview_scrolly = gba_mapview_scrolly_max;
+
+    GUI_SetScrollBar(&gba_mapview_scrollx_scrollbar, 76+15*FONT_WIDTH+6,262, 256, 12,
+                     0,gba_mapview_scrollx_max, gba_mapview_scrollx, _win_gba_mapviewer_pal_scrollbar_x_callback);
+    GUI_SetScrollBar(&gba_mapview_scrolly_scrollbar, 76+15*FONT_WIDTH+6+GBA_MAP_BUFFER_WIDTH,6, 12, 256,
+                     0,gba_mapview_scrolly_max, gba_mapview_scrolly, _win_gba_mapviewer_pal_scrollbar_y_callback);
+
+    _win_gba_mapviewer_update_mapbuffer_from_temp_buffer();
 /*
-    gba_map_viewer_update_scrollbars();
-    gba_map_update_window_from_temp_buffer();
     gba_map_viewer_update_tile();
     */
 
@@ -390,10 +458,22 @@ static void _win_gba_mapviewer_dump_btn_callback(void)
 {
     if(Win_MainRunningGBA() == 0) return;
 
-    //copy actual background size to a buffer here and save that buffer, not the complete buffer
+    char * buf = malloc(gba_mapview_sizex*gba_mapview_sizey*4);
+    if(buf == NULL) return;
+
+    int i,j;
+    for(j = 0; j < gba_mapview_sizey; j++) for(i = 0; i < gba_mapview_sizex; i++)
+    {
+        buf[(j*gba_mapview_sizex+i)*4+0] = gba_complete_map_buffer[(j*1024+i)*4+0];
+        buf[(j*gba_mapview_sizex+i)*4+1] = gba_complete_map_buffer[(j*1024+i)*4+1];
+        buf[(j*gba_mapview_sizex+i)*4+2] = gba_complete_map_buffer[(j*1024+i)*4+2];
+        buf[(j*gba_mapview_sizex+i)*4+3] = gba_complete_map_buffer[(j*1024+i)*4+3];
+    }
 
     char * name = FU_GetNewTimestampFilename("gba_map");
-    Save_PNG(name,1024,1024,gba_complete_map_buffer,1);
+    Save_PNG(name,gba_mapview_sizex,gba_mapview_sizey,buf,1);
+
+    free(buf);
 
     Win_GBAMapViewerUpdate();
 }
@@ -439,15 +519,15 @@ int Win_GBAMapViewerCreate(void)
     GUI_SetTextBox(&gba_mapview_tileinfo_textbox,&gba_mapview_tileinfo_con,
                    76,198, 20*FONT_WIDTH,4*FONT_HEIGHT, NULL);
 
-    GUI_SetScrollBar(&gba_mapview_pal_scrollbar, 76,248, 15*FONT_WIDTH, 12,
-                     0,15, 0, _win_gba_mapviewer_pal_scrollbar_callback);
-
     GUI_SetBitmap(&gba_mapview_tiles_bmp,76+15*FONT_WIDTH+6,6,
                   GBA_MAP_BUFFER_WIDTH,GBA_MAP_BUFFER_HEIGHT,gba_map_buffer,
                   _win_gba_mapviewer_tiles_bmp_callback);
+    GUI_SetScrollBar(&gba_mapview_scrollx_scrollbar, 76+15*FONT_WIDTH+6,262, 256, 12,
+                     0,0, 0, _win_gba_mapviewer_pal_scrollbar_x_callback);
+    GUI_SetScrollBar(&gba_mapview_scrolly_scrollbar, 76+15*FONT_WIDTH+6+GBA_MAP_BUFFER_WIDTH,6, 12, 256,
+                     0,0, 0, _win_gba_mapviewer_pal_scrollbar_y_callback);
 
     GBAMapViewerCreated = 1;
-
 
     WinIDGBAMapViewer = WH_Create(WIN_GBA_MAPVIEWER_WIDTH,WIN_GBA_MAPVIEWER_HEIGHT, 0,0, 0);
     WH_SetCaption(WinIDGBAMapViewer,"GBA Map Viewer");
@@ -473,61 +553,6 @@ void Win_GBAMapViewerClose(void)
 
 
 #if 0
-
-
-static HWND hWndMapViewer;
-static int MapViewerCreated = 0;
-static int MapBuffer[256*256], MapTileBuffer[64*64];
-static HWND hWndMapScrollH, hWndMapScrollV;
-static u32 SizeX, SizeY;
-static u32 BgMode; static u16 BgControl;
-static u32 TileX,TileY;
-static HWND hMapText, hMapTileText;
-static int SelectedLayer;
-static int tempmapbuffer[1024*1024], tempvismapbuffer[1024*1024];
-#define IDC_BG0    1
-#define IDC_BG1    2
-#define IDC_BG2    3
-#define IDC_BG3    4
-
-
-
-static void gba_map_update_window_from_temp_buffer(void)
-{
-    //Copy to real buffer
-    int i,j;
-    for(i = 0; i < 256; i++) for(j = 0; j < 256; j++)
-        MapBuffer[j*256+i] = ((i&32)^(j&32)) ? 0x00808080 : 0x00B0B0B0;
-
-    int scrollx = GetScrollPos(hWndMapScrollH, SB_CTL);
-    int scrolly = GetScrollPos(hWndMapScrollV, SB_CTL);
-
-    for(i = 0; i < 256; i++) for(j = 0; j < 256; j++)
-    {
-        if( (i>=SizeX) || (j>=SizeY) )
-        {
-            if( ((i^j)&7) == 0 ) MapBuffer[j*256+i] = 0x00FF0000;
-        }
-        else
-        {
-            if(tempvismapbuffer[(j+scrolly)*1024 + (i+scrollx)])
-                MapBuffer[j*256+i] = tempmapbuffer[(j+scrolly)*1024 + (i+scrollx)];
-        }
-    }
-
-    RECT rc; rc.top = 5; rc.left = 200; rc.bottom = 5+256; rc.right = 200+256;
-    InvalidateRect(hWndMapViewer, &rc, FALSE);
-}
-
-static void gba_map_viewer_update_scrollbars(void)
-{
-    SCROLLINFO si; ZeroMemory(&si, sizeof(si));
-    si.cbSize = sizeof(si); si.fMask = SIF_RANGE | SIF_POS;
-    si.nMin = 0; si.nMax = max(0,SizeX-256); si.nPos = 0;
-    SetScrollInfo(hWndMapScrollH, SB_CTL, &si, TRUE);
-    si.nMin = 0; si.nMax = max(0,SizeY-256); si.nPos = 0;
-    SetScrollInfo(hWndMapScrollV, SB_CTL, &si, TRUE);
-}
 
 static void gba_map_viewer_update_tile(void)
 {
@@ -632,230 +657,5 @@ static void gba_map_viewer_update_tile(void)
     RECT rc; rc.top = 212; rc.left = 5; rc.bottom = 212+64; rc.right = 5+64;
     InvalidateRect(hWndMapViewer, &rc, FALSE);
 }
-
-
-void GLWindow_GBAMapViewerUpdate(void)
-{
-    if(MapViewerCreated == 0) return;
-
-    if(RUNNING != RUN_GBA) return;
-
-    u32 mode = REG_DISPCNT & 0x7;
-    static const u32 bgenabled[8][4] = {
-        {1,1,1,1}, {1,1,1,0}, {0,0,1,1}, {0,0,1,0}, {0,0,1,0}, {0,0,1,0}, {0,0,0,0}, {0,0,0,0}
-    };
-
-    if(bgenabled[mode][SelectedLayer] == 0)
-    {
-        CheckDlgButton(hWndMapViewer,IDC_BG0+SelectedLayer,BST_UNCHECKED);
-
-        SelectedLayer = 0;
-        while(bgenabled[mode][SelectedLayer] == 0)
-        {
-            SelectedLayer++;
-            if(SelectedLayer >= 4) break;
-        }
-        if(SelectedLayer == 4) //WTF? Disable all
-        {
-            HWND hCtl = GetDlgItem(hWndMapViewer, IDC_BG0); EnableWindow(hCtl, FALSE);
-            hCtl = GetDlgItem(hWndMapViewer, IDC_BG1); EnableWindow(hCtl, FALSE);
-            hCtl = GetDlgItem(hWndMapViewer, IDC_BG2); EnableWindow(hCtl, FALSE);
-            hCtl = GetDlgItem(hWndMapViewer, IDC_BG3); EnableWindow(hCtl, FALSE);
-        }
-
-        CheckDlgButton(hWndMapViewer,IDC_BG0+SelectedLayer,BST_CHECKED);
-    }
-
-
-    HWND hCtl = GetDlgItem(hWndMapViewer, IDC_BG0);
-    EnableWindow(hCtl, bgenabled[mode][0] ? TRUE : FALSE);
-    hCtl = GetDlgItem(hWndMapViewer, IDC_BG1);
-    EnableWindow(hCtl, bgenabled[mode][1] ? TRUE : FALSE);
-    hCtl = GetDlgItem(hWndMapViewer, IDC_BG2);
-    EnableWindow(hCtl, bgenabled[mode][2] ? TRUE : FALSE);
-    hCtl = GetDlgItem(hWndMapViewer, IDC_BG3);
-    EnableWindow(hCtl, bgenabled[mode][3] ? TRUE : FALSE);
-
-    gba_map_viewer_update();
-
-    InvalidateRect(hWndMapViewer, NULL, FALSE);
-}
-
-static LRESULT CALLBACK MapViewerProcedure(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
-{
-    static HFONT hFont, hFontFixed;
-
-    switch(Msg)
-    {
-        case WM_CREATE:
-        {
-            hFont = CreateFont(15,0,0,0, FW_REGULAR, 0, 0, 0, ANSI_CHARSET,
-                OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,PROOF_QUALITY, DEFAULT_PITCH, NULL);
-
-            hFontFixed = CreateFont(15,0,0,0, FW_REGULAR, 0, 0, 0, ANSI_CHARSET,
-                OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,PROOF_QUALITY, FIXED_PITCH, NULL);
-
-            hWndMapScrollH = CreateWindowEx(0,"SCROLLBAR",NULL,WS_CHILD | WS_VISIBLE | SBS_HORZ,
-                       200,261,  256,15,   hWnd,NULL,hInstance,NULL);
-            hWndMapScrollV = CreateWindowEx(0,"SCROLLBAR",NULL,WS_CHILD | WS_VISIBLE | SBS_VERT,
-                       456,5,  15,256,   hWnd,NULL,hInstance,NULL);
-
-            SCROLLINFO si; ZeroMemory(&si, sizeof(si));
-            si.cbSize = sizeof(si); si.fMask = SIF_RANGE | SIF_POS | SIF_PAGE;
-            si.nMin = 0; si.nMax = 0; si.nPos = 0; si.nPage = 8;
-            SetScrollInfo(hWndMapScrollH, SB_CTL, &si, TRUE);
-            SetScrollInfo(hWndMapScrollV, SB_CTL, &si, TRUE);
-
-            u32 mode = REG_DISPCNT & 0x7;
-            static const u32 bgenabled[8][4] = {
-                {1,1,1,1}, {1,1,1,0}, {0,0,1,1}, {0,0,1,0}, {0,0,1,0}, {0,0,1,0}, {0,0,0,0}, {0,0,0,0}
-            };
-
-            HWND hGroup = CreateWindow(TEXT("button"), TEXT("Layer"),
-                WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-                3,1, 110,100, hWnd, (HMENU) 0, hInstance, NULL);
-            HWND hBtn1 = CreateWindow(TEXT("button"), TEXT("Background 0"),
-                WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON | ( bgenabled[mode][0] ? 0 : WS_DISABLED),
-                8, 18, 100, 18, hWnd, (HMENU)IDC_BG0 , hInstance, NULL);
-            HWND hBtn2 = CreateWindow(TEXT("button"), TEXT("Background 1"),
-                WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON | ( bgenabled[mode][1] ? 0 : WS_DISABLED),
-                8, 38, 100, 18, hWnd, (HMENU)IDC_BG1 , hInstance, NULL);
-            HWND hBtn3 = CreateWindow(TEXT("button"), TEXT("Background 2"),
-                WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON | ( bgenabled[mode][2] ? 0 : WS_DISABLED),
-                8, 58, 100, 18, hWnd, (HMENU)IDC_BG2, hInstance, NULL);
-            HWND hBtn4 = CreateWindow(TEXT("button"), TEXT("Background 3"),
-                WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON | ( bgenabled[mode][3] ? 0 : WS_DISABLED),
-                8, 78, 100, 18, hWnd, (HMENU)IDC_BG3, hInstance, NULL);
-
-
-            SelectedLayer = 0;
-            while(bgenabled[mode][SelectedLayer] == 0)
-			{
-				SelectedLayer++;
-				if(SelectedLayer == 4) break;
-			}
-
-            if(SelectedLayer < 4) CheckDlgButton(hWnd,IDC_BG0+SelectedLayer,BST_CHECKED);
-
-            SizeX = 0; SizeY = 0;
-            TileX = 0; TileY = 0;
-
-            SendMessage(hGroup, WM_SETFONT, (WPARAM)hFont, MAKELPARAM(1, 0));
-            SendMessage(hBtn1, WM_SETFONT, (WPARAM)hFont, MAKELPARAM(1, 0));
-            SendMessage(hBtn2, WM_SETFONT, (WPARAM)hFont, MAKELPARAM(1, 0));
-            SendMessage(hBtn3, WM_SETFONT, (WPARAM)hFont, MAKELPARAM(1, 0));
-            SendMessage(hBtn4, WM_SETFONT, (WPARAM)hFont, MAKELPARAM(1, 0));
-
-            hMapText = CreateWindow(TEXT("edit"), TEXT(" "),
-                        WS_CHILD | WS_VISIBLE | BS_CENTER | ES_MULTILINE | ES_READONLY,
-                        5, 103, 170, 110, hWnd, NULL, hInstance, NULL);
-            SendMessage(hMapText, WM_SETFONT, (WPARAM)hFontFixed, MAKELPARAM(1, 0));
-
-            hMapTileText = CreateWindow(TEXT("edit"), TEXT(" "),
-                        WS_CHILD | WS_VISIBLE | BS_CENTER | ES_MULTILINE | ES_READONLY,
-                        75, 212, 120, 60, hWnd, NULL, hInstance, NULL);
-            SendMessage(hMapTileText, WM_SETFONT, (WPARAM)hFontFixed, MAKELPARAM(1, 0));
-
-            GLWindow_GBAMapViewerUpdate();
-            break;
-        }
-        case WM_COMMAND:
-        {
-            if(HIWORD(wParam) == BN_CLICKED)
-            {
-                switch(LOWORD(wParam))
-                {
-                    case IDC_BG0: SelectedLayer = 0; break;
-                    case IDC_BG1: SelectedLayer = 1; break;
-                    case IDC_BG2: SelectedLayer = 2; break;
-                    case IDC_BG3: SelectedLayer = 3; break;
-                    default: break;
-                }
-                GLWindow_GBAMapViewerUpdate();
-            }
-            break;
-        }
-        case WM_PAINT:
-        {
-            PAINTSTRUCT Ps;
-            HDC hDC = BeginPaint(hWnd, &Ps);
-            //Load the bitmap
-            HBITMAP bitmap = CreateBitmap(256, 256, 1, 32, MapBuffer);
-            // Create a memory device compatible with the above DC variable
-            HDC MemDC = CreateCompatibleDC(hDC);
-            // Select the new bitmap
-            SelectObject(MemDC, bitmap);
-            // Copy the bits from the memory DC into the current dc
-            BitBlt(hDC, 200, 5, 256, 256, MemDC, 0, 0, SRCCOPY);
-            // Restore the old bitmap
-            DeleteDC(MemDC);
-            DeleteObject(bitmap);
-
-            bitmap = CreateBitmap(64, 64, 1, 32, MapTileBuffer);
-            // Create a memory device compatible with the above DC variable
-            MemDC = CreateCompatibleDC(hDC);
-            // Select the new bitmap
-            SelectObject(MemDC, bitmap);
-            // Copy the bits from the memory DC into the current dc
-            BitBlt(hDC, 5, 212, 64, 64, MemDC, 0, 0, SRCCOPY);
-            // Restore the old bitmap
-            DeleteDC(MemDC);
-            DeleteObject(bitmap);
-
-            EndPaint(hWnd, &Ps);
-            break;
-        }
-        case WM_HSCROLL:
-        {
-            int CurPos = GetScrollPos(hWndMapScrollH, SB_CTL);
-            int max_x = max(0,SizeX-256);
-            switch (LOWORD(wParam))
-            {
-                case SB_LEFT: CurPos = 0; break;
-                case SB_LINELEFT: CurPos-=8; if(CurPos < 0) CurPos = 0;  break;
-                case SB_PAGELEFT: if(CurPos >= 8) { CurPos-=8; break; }
-                                  if(CurPos > 0) { CurPos = 0; } break;
-                case SB_THUMBPOSITION: CurPos = HIWORD(wParam)&~7; break;
-                case SB_THUMBTRACK: CurPos = HIWORD(wParam)&~7; break;
-                case SB_PAGERIGHT: if(CurPos < (max_x-8)) { CurPos+=8; break; }
-                                  if(CurPos < max_x) { CurPos = max_x; } break;
-                case SB_LINERIGHT: CurPos+= 8; if(CurPos > max_x) CurPos = max_x; break;
-                case SB_RIGHT: CurPos = max_x; break;
-                case SB_ENDSCROLL:
-                default:
-                    break;
-            }
-            SetScrollPos(hWndMapScrollH, SB_CTL, CurPos, TRUE);
-
-            gba_map_update_window_from_temp_buffer();
-            break;
-        }
-        case WM_LBUTTONDOWN:
-        {
-            if(BgMode != 1 && BgMode != 2) break; //not text or affine
-
-            int x = LOWORD(lParam);
-            int y = HIWORD(lParam);
-
-            if( (x >= 200) && (x < (200+256)) && (y >= 5) && (y < (5+256)) )
-            {
-                int scrollx = GetScrollPos(hWndMapScrollH, SB_CTL);
-                int scrolly = GetScrollPos(hWndMapScrollV, SB_CTL);
-
-                int bgx = (x-200)+scrollx;
-                int bgy = (y-5)+scrolly;
-                if(bgx < SizeX && bgy < SizeY)
-                {
-                    TileX = bgx/8; TileY = bgy/8;
-
-                    gba_map_viewer_update_tile();
-                }
-            }
-            break;
-        }
-    }
-    return 0;
-}
-
 
 #endif

@@ -290,7 +290,7 @@ int Win_GBATileViewerCreate(void)
     GUI_SetTextBox(&gba_tileview_textbox,&gba_tileview_con,
                    76,198, 15*FONT_WIDTH,3*FONT_HEIGHT, NULL);
 
-    GUI_SetScrollBar(&gba_tileview_pal_scrollbar, 76,248, 15*FONT_WIDTH, 12,
+    GUI_SetScrollBar(&gba_tileview_pal_scrollbar, 75,250, 2+15*FONT_WIDTH, 12,
                      0,15, 0, _win_gba_tileviewer_pal_scrollbar_callback);
 
     GUI_SetBitmap(&gba_tileview_tiles_bmp,76+15*FONT_WIDTH+6,6,

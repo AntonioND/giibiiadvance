@@ -226,21 +226,7 @@ static int _gui_get_first_messagebox_enabled(_gui * gui)
 
 //-------------------------------------------------------------------------------------------
 
-static void _gui_clear_radiobuttons(_gui_element ** complete_gui, int group_id)
-{
-    while(*complete_gui != NULL)
-    {
-        _gui_element * e = *complete_gui;
-
-        if(e->element_type == GUI_TYPE_RADIOBUTTON)
-        {
-            if(e->info.radiobutton.group_id == group_id)
-                e->info.radiobutton.is_pressed = 0;
-        }
-
-        complete_gui++;
-    }
-}
+void _gui_clear_radiobuttons(_gui_element ** element_list, int group_id);  // in win_utils.c
 
 //-------------------------------------------------------------------------------------------
 
@@ -302,24 +288,31 @@ int __gui_send_event_element(_gui_element ** complete_gui, _gui_element * gui, S
     }
     else if(gui->element_type == GUI_TYPE_RADIOBUTTON)
     {
-        if(e->type == SDL_MOUSEBUTTONDOWN)
+        if(gui->info.radiobutton.is_enabled)
         {
-            if(e->button.button == SDL_BUTTON_LEFT)
+            if(e->type == SDL_MOUSEBUTTONDOWN)
             {
-                if(_gui_pos_is_inside_rect(e->button.x,e->button.y,
-                                              gui->x,gui->w,
-                                              gui->y,gui->h))
+                if(e->button.button == SDL_BUTTON_LEFT)
                 {
-                    _gui_clear_radiobuttons(complete_gui,gui->info.radiobutton.group_id);
+                    if(_gui_pos_is_inside_rect(e->button.x,e->button.y,
+                                                  gui->x,gui->w,
+                                                  gui->y,gui->h))
+                    {
+                        _gui_clear_radiobuttons(complete_gui,gui->info.radiobutton.group_id);
 
-                    gui->info.radiobutton.is_pressed = 1;
+                        gui->info.radiobutton.is_pressed = 1;
 
-                    if(gui->info.radiobutton.callback)
-                            gui->info.radiobutton.callback(gui->info.radiobutton.btn_id);
+                        if(gui->info.radiobutton.callback)
+                                gui->info.radiobutton.callback(gui->info.radiobutton.btn_id);
 
-                    return 1;
+                        return 1;
+                    }
                 }
             }
+        }
+        else
+        {
+            gui->info.radiobutton.is_pressed = 0;
         }
     }
     else if(gui->element_type == GUI_TYPE_BITMAP)
@@ -520,6 +513,77 @@ int __gui_send_event_element(_gui_element ** complete_gui, _gui_element * gui, S
                         {
                             //down button
                             gui->info.scrollbar.value ++;
+                        }
+                        else
+                        {
+                            //bar
+                            int barsize = gui->w - (2 * (gui->h+1) ); // total length - side buttons
+                            barsize -= 2*gui->h; // total length - side buttons - scrollable button
+                            if(barsize < 0) return 1; // bad size...
+
+                            int range = gui->info.scrollbar.value_max - gui->info.scrollbar.value_min;
+
+                            int minus = (gui->h+1) + gui->h; // one side button plus half scroll button
+                            gui->info.scrollbar.value = ( (rel_x - minus) * range ) / barsize;
+                            gui->info.scrollbar.value += gui->info.scrollbar.value_min;
+                        }
+                    }
+
+                    if(gui->info.scrollbar.value < gui->info.scrollbar.value_min)
+                        gui->info.scrollbar.value = gui->info.scrollbar.value_min;
+                    else if(gui->info.scrollbar.value > gui->info.scrollbar.value_max)
+                        gui->info.scrollbar.value = gui->info.scrollbar.value_max;
+
+                    if(gui->info.scrollbar.callback)
+                        gui->info.scrollbar.callback(gui->info.scrollbar.value);
+
+                    return 1;
+                }
+            }
+        }
+        else if(e->type == SDL_MOUSEMOTION)
+        {
+            if(e->motion.state & SDL_BUTTON_LMASK)
+            {
+                //is inside the bar?
+                if(_gui_pos_is_inside_rect(e->button.x,e->button.y, gui->x,gui->w, gui->y,gui->h))
+                {
+                    int rel_x = e->button.x - gui->x;
+                    int rel_y = e->button.y - gui->y;
+
+                    if(gui->info.scrollbar.is_vertical)
+                    {
+                        if(rel_y < gui->w)
+                        {
+                            //up button
+                        }
+                        else if(rel_y > (gui->h-gui->w) )
+                        {
+                            //down button
+                        }
+                        else
+                        {
+                            //bar
+                            int barsize = gui->h - (2 * (gui->w+1) ); // total length - side buttons
+                            barsize -= 2*gui->w; // total length - side buttons - scrollable button
+                            if(barsize < 0) return 1; // bad size...
+
+                            int range = gui->info.scrollbar.value_max - gui->info.scrollbar.value_min;
+
+                            int minus = (gui->w+1) + gui->w; // one side button plus half scroll button
+                            gui->info.scrollbar.value = ( (rel_y - minus) * range ) / barsize;
+                            gui->info.scrollbar.value += gui->info.scrollbar.value_min;
+                        }
+                    }
+                    else
+                    {
+                        if(rel_x < gui->h)
+                        {
+                            //up button
+                        }
+                        else if(rel_x > (gui->w-gui->h) )
+                        {
+                            //down button
                         }
                         else
                         {

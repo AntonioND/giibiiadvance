@@ -86,6 +86,7 @@ typedef struct {
             int is_pressed;
             int group_id;
             int btn_id; // button inside group
+            int is_enabled;
         } radiobutton;
         struct {
             char text[100];
@@ -148,6 +149,9 @@ void GUI_SetScrollBar(_gui_element * e, int x, int y, int w, int h, int min_valu
                       int start_value, _gui_void_arg_int_fn callback);
 
 //----------------------------------------------------------------------------------------------
+
+void GUI_RadioButtonSetEnabled(_gui_element * e, int enabled);
+void GUI_RadioButtonSetPressed(void * complete_gui, _gui_element * e); // complete_gui is a _gui pointer
 
 void GUI_WindowSetEnabled(_gui_element * e, int enabled);
 int GUI_WindowGetEnabled(_gui_element * e);

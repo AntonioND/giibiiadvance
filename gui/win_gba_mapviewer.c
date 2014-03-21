@@ -118,9 +118,10 @@ static _gui gba_mapviewer_window_gui = {
 
 static int _win_gba_mapviewer_tiles_bmp_callback(int x, int y)
 {
-    //gba_mapview_sizex = 0;
-    //static u32 gba_mapview_sizey
-    //gba_mapview_selected_tile_index = (x/8) + ((y/8)*32);
+    gba_mapview_selected_tilex = (x/8) + gba_mapview_scrollx;
+    gba_mapview_selected_tiley = (y/8) + gba_mapview_scrolly;
+
+    Win_GBAMapViewerUpdate();
     return 1;
 }
 
@@ -193,6 +194,25 @@ static void _win_gba_mapviewer_update_mapbuffer_from_temp_buffer(void)
     }
 }
 
+static inline u32 rgb16to32(u16 color)
+{
+    int r = (color & 31)<<3;
+    int g = ((color >> 5) & 31)<<3;
+    int b = ((color >> 10) & 31)<<3;
+    return (b<<16)|(g<<8)|r;
+}
+
+static inline u32 se_index(u32 tx, u32 ty, u32 pitch) //from tonc
+{
+    u32 sbb = (ty/32)*(pitch/32) + (tx/32);
+    return sbb*1024 + (ty%32)*32 + tx%32;
+}
+
+static inline u32 se_index_affine(u32 tx, u32 ty, u32 tpitch)
+{
+    return (ty * tpitch) + tx;
+}
+
 void Win_GBAMapViewerUpdate(void)
 {
     if(GBAMapViewerCreated == 0) return;
@@ -220,24 +240,13 @@ void Win_GBAMapViewerUpdate(void)
         }
 
         if(gba_mapview_selected_bg == 0)
-        {
             GUI_RadioButtonSetPressed(&gba_mapviewer_window_gui,&gba_mapview_bg0_radbtn);
-        }
         else if(gba_mapview_selected_bg == 1)
-        {
             GUI_RadioButtonSetPressed(&gba_mapviewer_window_gui,&gba_mapview_bg1_radbtn);
-        }
         else if(gba_mapview_selected_bg == 2)
-        {
             GUI_RadioButtonSetPressed(&gba_mapviewer_window_gui,&gba_mapview_bg2_radbtn);
-        }
         else if(gba_mapview_selected_bg == 3)
-        {
             GUI_RadioButtonSetPressed(&gba_mapviewer_window_gui,&gba_mapview_bg3_radbtn);
-        }
-        if(gba_mapview_selected_bg == 4) //WTF? Disable all
-        {
-        }
     }
 
     GUI_RadioButtonSetEnabled(&gba_mapview_bg0_radbtn,bgenabled[mode][0]);
@@ -263,7 +272,6 @@ void Win_GBAMapViewerUpdate(void)
     gba_mapview_bgmode = bgtypearray[mode][gba_mapview_selected_bg];
 
     gba_mapview_bgcontrolreg = control;
-    gba_mapview_selected_tilex = 0; gba_mapview_selected_tiley = 0;
 
     if(gba_mapview_bgmode == 0) //Shouldn't get here...
     {
@@ -271,14 +279,10 @@ void Win_GBAMapViewerUpdate(void)
         GUI_ConsoleModePrintf(&gba_mapview_con,0,0,"Size: ------- (Unused)\nColors: ---\n"
                               "Priority: -\nWrap: -\nChar Base: ----------\nScrn Base: ----------\nMosaic: -");
         GUI_ConsoleModePrintf(&gba_mapview_tileinfo_con,0,0,"Tile: --- (--)\nPos: ---------\nPal: --\n"
-                              "Addr: ----------\n");
-/*
-        SCROLLINFO si; ZeroMemory(&si, sizeof(si));
-        si.cbSize = sizeof(si); si.fMask = SIF_RANGE | SIF_POS | SIF_PAGE;
-        si.nMin = 0; si.nMax = 0; si.nPos = 0; si.nPage = 1;
-        SetScrollInfo(hWndMapScrollH, SB_CTL, &si, TRUE);
-        SetScrollInfo(hWndMapScrollV, SB_CTL, &si, TRUE);
-*/
+                              "Ad: ----------\n");
+
+        gba_mapview_sizex = 0;
+        gba_mapview_sizey = 0;
     }
     else if(gba_mapview_bgmode == 1) //text
     {
@@ -316,29 +320,29 @@ void Win_GBAMapViewerUpdate(void)
         GUI_ConsoleModePrintf(&gba_mapview_con,0,0,"Size: 240x160 (Bitmap)\nColors: 16bit\nPriority: %d\nWrap: 0\n"
                               "Char Base: ----------\nScrn Base: 0x06000000\nMosaic: %d",prio,mosaic);
         GUI_ConsoleModePrintf(&gba_mapview_tileinfo_con,0,0,"Tile: --- (--)\nPos: ---------\nPal: --\n"
-                              "Addr: ----------\n");
+                              "Ad: ----------\n");
     }
     else if(gba_mapview_bgmode == 4) //bg2 mode 4
     {
         int mosaic = (control & BIT(6)) != 0; //mosaic
         int prio = control&3;
-        u32 SBB = 0x06000000 + ((REG_DISPCNT&BIT(4))?0xA000:0);
+        u32 SBB = 0x06000000 + (gba_mapview_selected_bitmap_page?0xA000:0);
         gba_mapview_sizex = 240; gba_mapview_sizey = 160;
         GUI_ConsoleModePrintf(&gba_mapview_con,0,0,"Size: 240x160 (Bitmap)\nColors: 256\nPriority: %d\nWrap: 0\n"
                               "Char Base: ----------\nScrn Base: 0x%08X\nMosaic: %d",prio,SBB,mosaic);
         GUI_ConsoleModePrintf(&gba_mapview_tileinfo_con,0,0,"Tile: --- (--)\nPos: ---------\nPal: --\n"
-                              "Addr: ----------\n");
+                              "Ad: ----------\n");
     }
     else if(gba_mapview_bgmode == 5) //bg2 mode 5
     {
         int mosaic = (control & BIT(6)) != 0; //mosaic
         int prio = control&3;
-        u32 SBB = 0x06000000 + ((REG_DISPCNT&BIT(4))?0xA000:0);
+        u32 SBB = 0x06000000 + (gba_mapview_selected_bitmap_page?0xA000:0);
         gba_mapview_sizex = 160; gba_mapview_sizey = 128;
         GUI_ConsoleModePrintf(&gba_mapview_con,0,0,"Size: 160x128 (Bitmap)\nColors: 16bit\nPriority: %d\nWrap: 0\n"
                               "Char Base: ----------\nScrn Base: 0x%08X\nMosaic: %d",prio,SBB,mosaic);
         GUI_ConsoleModePrintf(&gba_mapview_tileinfo_con,0,0,"Tile: --- (--)\nPos: ---------\nPal: --\n"
-                              "Addr: ----------\n");
+                              "Ad: ----------\n");
     }
 
     GBA_Debug_PrintBackgroundAlpha(gba_complete_map_buffer,1024,1024,control,
@@ -363,33 +367,128 @@ void Win_GBAMapViewerUpdate(void)
                      0,gba_mapview_scrolly_max, gba_mapview_scrolly, _win_gba_mapviewer_pal_scrollbar_y_callback);
 
     _win_gba_mapviewer_update_mapbuffer_from_temp_buffer();
-/*
-    gba_map_viewer_update_tile();
-    */
 
-/*
-    u32 address = (gba_mapview_selected_colors == 16) ?
-            ( gba_mapview_selected_cbb + (gba_mapview_selected_index&0x3FF)*32 ) :
-            ( gba_mapview_selected_cbb + (gba_mapview_selected_index&0x3FF)*64 ) ;
+    if( gba_mapview_selected_tilex >= (gba_mapview_sizex/8) )
+        gba_mapview_selected_tilex = 0;
+    if( gba_mapview_selected_tiley >= (gba_mapview_sizey/8) )
+        gba_mapview_selected_tiley = 0;
 
-    GUI_ConsoleModePrintf(&gba_mapview_con,0,0,"Tile: %d\nAddr: %08X\nPal: %d",
-                          gba_mapview_selected_index, address,
-                          gba_mapview_selected_pal);
+    //--------------------------------------------------
 
-    GBA_Debug_PrintTiles(gba_map_buffer,GBA_MAP_BUFFER_WIDTH,GBA_MAP_BUFFER_HEIGHT,
-                         gba_mapview_selected_cbb, gba_mapview_selected_colors,
-                         gba_mapview_selected_pal);
+    int tiletempbuffer[8*8], tiletempvis[8*8];
+    memset(tiletempvis,0,sizeof(tiletempvis));
 
-    GUI_Draw_SetDrawingColor(255,0,0);
-    int l = ((gba_mapview_selected_index%32)*8); //left
-    int t = ((gba_mapview_selected_index/32)*8); // top
-    int r = l + 7; // right
-    int b = t + 7; // bottom
-    GUI_Draw_Rect(gba_map_buffer,GBA_MAP_BUFFER_WIDTH,GBA_MAP_BUFFER_HEIGHT,l,r,t,b);
+    if(gba_mapview_bgmode == 1)
+    {
+        u8 * charbaseblockptr = (u8*)&Mem.vram[((control>>2)&3) * (16*1024)];
+        u16 * scrbaseblockptr = (u16*)&Mem.vram[((control>>8)&0x1F) * (2*1024)];
 
-    GBA_Debug_TilePrint64x64(gba_map_zoomed_tile_buffer, 64,64,
-                             gba_mapview_selected_cbb, gba_mapview_selected_index,
-                             gba_mapview_selected_colors, gba_mapview_selected_pal);*/
+        u32 TileSEIndex = se_index(gba_mapview_selected_tilex,gba_mapview_selected_tiley,(gba_mapview_sizex/8));
+
+        u16 SE = scrbaseblockptr[TileSEIndex];
+
+        if(control & BIT(7)) //256 Colors
+        {
+            u8 * data = (u8*)&(charbaseblockptr[(SE&0x3FF)*64]);
+
+            int i,j;
+            for(i = 0; i < 8; i++) for(j = 0; j < 8; j++)
+            {
+                u8 dat_ = data[j*8 + i];
+
+                tiletempbuffer[j*8 + i] = rgb16to32(((u16*)Mem.pal_ram)[dat_]);
+                tiletempvis[j*8 + i] = dat_;
+            }
+
+            GUI_ConsoleModePrintf(&gba_mapview_tileinfo_con,0,0,"Tile: %d (%s%s)\nPos: %d,%d\nPal: --\n"
+                                  "Ad: 0x%08X\n", SE&0x3FF, (SE & BIT(10)) ? "H" : "-",
+                                  (SE & BIT(11)) ? "V" : "-" , gba_mapview_selected_tilex,gba_mapview_selected_tiley,
+                                  ((control>>8)&0x1F) * (2*1024) + TileSEIndex + 0x06000000);
+        }
+        else //16 Colors
+        {
+            u8 * data = (u8*)&(charbaseblockptr[(SE&0x3FF)*32]);
+            u16 * palptr = (u16*)&Mem.pal_ram[(SE>>12)*(2*16)];
+
+            int i,j;
+            for(i = 0; i < 8; i++) for(j = 0; j < 8; j++)
+            {
+                u8 dat_ = data[(j*8 + i)/2];
+                if(i&1) dat_ = dat_>>4;
+                else dat_ = dat_ & 0xF;
+
+                tiletempbuffer[j*8 + i] = rgb16to32(palptr[dat_]);
+                tiletempvis[j*8 + i] = dat_;
+            }
+
+            GUI_ConsoleModePrintf(&gba_mapview_tileinfo_con,0,0,"Tile: %d (%s%s)\nPos: %d,%d\nPal: %d\n"
+                                  "Ad: 0x%08X\n", SE&0x3FF, (SE & BIT(10)) ? "H" : "-",
+                                  (SE & BIT(11)) ? "V" : "-" , gba_mapview_selected_tilex,gba_mapview_selected_tiley,
+                                  (SE>>12)&0xF, ((control>>8)&0x1F) * (2*1024) + TileSEIndex + 0x06000000);
+        }
+    }
+    else if(gba_mapview_bgmode == 2)
+    {
+        u8 * charbaseblockptr = (u8*)&Mem.vram[((control>>2)&3) * (16*1024)];
+        u8 * scrbaseblockptr = (u8*)&Mem.vram[((control>>8)&0x1F) * (2*1024)];
+
+        u32 TileSEIndex = se_index_affine(gba_mapview_selected_tilex,gba_mapview_selected_tiley,(gba_mapview_sizex/8));
+
+        u16 SE = scrbaseblockptr[TileSEIndex];
+        u8 * data = (u8*)&(charbaseblockptr[SE*64]);
+
+        //256 colors always
+        int i,j;
+        for(i = 0; i < 8; i++) for(j = 0; j < 8; j++)
+        {
+            u8 dat_ = data[j*8 + i];
+
+            tiletempbuffer[j*8 + i] = rgb16to32(((u16*)Mem.pal_ram)[dat_]);
+            tiletempvis[j*8 + i] = dat_;
+        }
+
+        GUI_ConsoleModePrintf(&gba_mapview_tileinfo_con,0,0,"Tile: %d (--)\nPos: %d,%d\nPal: --\nAd: 0x%08X\n",
+                SE&0x3FF,gba_mapview_selected_tilex,gba_mapview_selected_tiley,
+                ((control>>8)&0x1F) * (2*1024) + TileSEIndex + 0x06000000);
+    }
+    else
+    {
+        GUI_ConsoleModePrintf(&gba_mapview_tileinfo_con,0,0,"Tile: --- (--)\nPos: ---------\nPal: --\n"
+                              "Ad: ----------\n");
+        memset(tiletempvis,0,sizeof(tiletempvis));
+    }
+
+    //Expand to 64x64
+    int i,j;
+    for(i = 0; i < 64; i++) for(j = 0; j < 64; j++)
+    {
+        gba_map_zoomed_tile_buffer[(j*64+i)*3+0] = ((i&16)^(j&16)) ? 0x80 : 0xB0;
+        gba_map_zoomed_tile_buffer[(j*64+i)*3+1] = ((i&16)^(j&16)) ? 0x80 : 0xB0;
+        gba_map_zoomed_tile_buffer[(j*64+i)*3+2] = ((i&16)^(j&16)) ? 0x80 : 0xB0;
+    }
+
+    for(i = 0; i < 64; i++) for(j = 0; j < 64; j++)
+    {
+        if(tiletempvis[(j/8)*8 + (i/8)])
+        {
+            gba_map_zoomed_tile_buffer[(j*64+i)*3+0] = tiletempbuffer[(j/8)*8 + (i/8)] & 0xFF;
+            gba_map_zoomed_tile_buffer[(j*64+i)*3+1] = (tiletempbuffer[(j/8)*8 + (i/8)]>>8) & 0xFF;
+            gba_map_zoomed_tile_buffer[(j*64+i)*3+2] = (tiletempbuffer[(j/8)*8 + (i/8)]>>16) & 0xFF;
+        }
+    }
+
+    //--------------------------------------------------
+
+    if( (gba_mapview_bgmode == 1) || (gba_mapview_bgmode == 2) )
+    {
+        GUI_Draw_SetDrawingColor(255,0,0);
+        int l = (gba_mapview_selected_tilex-gba_mapview_scrollx)*8; //left
+        int t = (gba_mapview_selected_tiley-gba_mapview_scrolly)*8; // top
+        int r = l + 7; // right
+        int b = t + 7; // bottom
+        if( (l >= 0) && (r <= 255) && (t >= 0) && (b <= 255) )
+            GUI_Draw_Rect(gba_map_buffer,GBA_MAP_BUFFER_WIDTH,GBA_MAP_BUFFER_HEIGHT,l,r,t,b);
+    }
 }
 
 //----------------------------------------------------------------
@@ -497,15 +596,11 @@ int Win_GBAMapViewerCreate(void)
     GUI_SetRadioButton(&gba_mapview_bg3_radbtn,  6,84,15*FONT_WIDTH,18,
                   "Background 3", 0, 3, 0,_win_gba_mapviewer_bgnum_radbtn_callback);
 
-    GUI_SetLabel(&gba_mapview_page_label,12+15*FONT_WIDTH,6,11*FONT_WIDTH,FONT_HEIGHT,"Bitmap Page");
+    GUI_SetLabel(&gba_mapview_page_label,12+15*FONT_WIDTH,6,4*FONT_WIDTH,FONT_HEIGHT,"Page");
     GUI_SetRadioButton(&gba_mapview_page0_radbtn,  12+15*FONT_WIDTH,24,8*FONT_WIDTH,18,
                   "Page 0",  1, 0, 1,_win_gba_mapviewer_pagenum_radbtn_callback);
     GUI_SetRadioButton(&gba_mapview_page1_radbtn,  12+15*FONT_WIDTH,44,8*FONT_WIDTH,18,
                   "Page 1", 1, 1, 0,_win_gba_mapviewer_pagenum_radbtn_callback);
-
-    //***********************************************
-    // ENABLE / DISABLE RADIO BUTTONS!!!!!!!
-    //***********************************************
 
     GUI_SetBitmap(&gba_mapview_zoomed_tile_bmp,6,198, 64,64, gba_map_zoomed_tile_buffer,
                   NULL);
@@ -517,7 +612,7 @@ int Win_GBAMapViewerCreate(void)
                    6,108, 25*FONT_WIDTH,7*FONT_HEIGHT, NULL);
 
     GUI_SetTextBox(&gba_mapview_tileinfo_textbox,&gba_mapview_tileinfo_con,
-                   76,198, 20*FONT_WIDTH,4*FONT_HEIGHT, NULL);
+                   76,198, 15*FONT_WIDTH,4*FONT_HEIGHT, NULL);
 
     GUI_SetBitmap(&gba_mapview_tiles_bmp,76+15*FONT_WIDTH+6,6,
                   GBA_MAP_BUFFER_WIDTH,GBA_MAP_BUFFER_HEIGHT,gba_map_buffer,
@@ -551,111 +646,3 @@ void Win_GBAMapViewerClose(void)
 
 //----------------------------------------------------------------
 
-
-#if 0
-
-static void gba_map_viewer_update_tile(void)
-{
-    int tiletempbuffer[8*8], tiletempvis[8*8];
-    memset(tiletempvis,0,sizeof(tiletempvis));
-
-    if(BgMode == 1)
-    {
-        u8 * charbaseblockptr = (u8*)&Mem.vram[((BgControl>>2)&3) * (16*1024)];
-        u16 * scrbaseblockptr = (u16*)&Mem.vram[((BgControl>>8)&0x1F) * (2*1024)];
-
-        u32 TileSEIndex = se_index(TileX,TileY,(SizeX/8));
-
-        u16 SE = scrbaseblockptr[TileSEIndex];
-
-        if(BgControl & BIT(7)) //256 Colors
-        {
-            u8 * data = (u8*)&(charbaseblockptr[(SE&0x3FF)*64]);
-
-            int i,j;
-            for(i = 0; i < 8; i++) for(j = 0; j < 8; j++)
-            {
-                u8 dat_ = data[j*8 + i];
-
-                tiletempbuffer[j*8 + i] = expand16to32(((u16*)Mem.pal_ram)[dat_]);
-                tiletempvis[j*8 + i] = dat_;
-            }
-
-            char text[1000];
-            sprintf(text,"Tile: %d (%s%s)\nPos: %d,%d\nPal: --\nAddr: 0x%08X\n",
-                SE&0x3FF, (SE & BIT(10)) ? "H" : "-", (SE & BIT(11)) ? "V" : "-" ,
-                TileX,TileY,((BgControl>>8)&0x1F) * (2*1024) + TileSEIndex + 0x06000000);
-            SetWindowText(hMapTileText,(LPCTSTR)text);
-        }
-        else //16 Colors
-        {
-            u8 * data = (u8*)&(charbaseblockptr[(SE&0x3FF)*32]);
-            u16 * palptr = (u16*)&Mem.pal_ram[(SE>>12)*(2*16)];
-
-            int i,j;
-            for(i = 0; i < 8; i++) for(j = 0; j < 8; j++)
-            {
-                u8 dat_ = data[(j*8 + i)/2];
-                if(i&1) dat_ = dat_>>4;
-                else dat_ = dat_ & 0xF;
-
-                tiletempbuffer[j*8 + i] = expand16to32(palptr[dat_]);
-                tiletempvis[j*8 + i] = dat_;
-            }
-
-            char text[1000];
-            sprintf(text,"Tile: %d (%s%s)\nPos: %d,%d\nPal: %d\nAddr: 0x%08X\n",
-                SE&0x3FF, (SE & BIT(10)) ? "H" : "-", (SE & BIT(11)) ? "V" : "-" ,
-                TileX,TileY,(SE>>12)&0xF,((BgControl>>8)&0x1F) * (2*1024) + TileSEIndex + 0x06000000);
-            SetWindowText(hMapTileText,(LPCTSTR)text);
-        }
-    }
-    else if(BgMode == 2)
-    {
-        u8 * charbaseblockptr = (u8*)&Mem.vram[((BgControl>>2)&3) * (16*1024)];
-        u8 * scrbaseblockptr = (u8*)&Mem.vram[((BgControl>>8)&0x1F) * (2*1024)];
-
-        u32 TileSEIndex = se_index_affine(TileX,TileY,(SizeX/8));
-
-        u16 SE = scrbaseblockptr[TileSEIndex];
-        u8 * data = (u8*)&(charbaseblockptr[SE*64]);
-
-        //256 colors always
-        int i,j;
-        for(i = 0; i < 8; i++) for(j = 0; j < 8; j++)
-        {
-            u8 dat_ = data[j*8 + i];
-
-            tiletempbuffer[j*8 + i] = expand16to32(((u16*)Mem.pal_ram)[dat_]);
-            tiletempvis[j*8 + i] = dat_;
-        }
-
-        char text[1000];
-
-        sprintf(text,"Tile: %d (--)\nPos: %d,%d\nPal: --\nAddr: 0x%08X\n",
-                SE&0x3FF,TileX,TileY,((BgControl>>8)&0x1F) * (2*1024) + TileSEIndex + 0x06000000);
-        SetWindowText(hMapTileText,(LPCTSTR)text);
-    }
-    else
-    {
-        SetWindowText(hMapTileText,(LPCTSTR)"Tile: --- (--)\nPos: ---------\nPal: --\nAddr: ----------\n");
-        memset(tiletempvis,0,sizeof(tiletempvis));
-    }
-
-    //Expand to 64x64
-    int i,j;
-    for(i = 0; i < 64; i++) for(j = 0; j < 64; j++)
-        MapTileBuffer[j*64+i] = ((i&16)^(j&16)) ? 0x00808080 : 0x00B0B0B0;
-
-    for(i = 0; i < 64; i++) for(j = 0; j < 64; j++)
-    {
-        if(tiletempvis[(j/8)*8 + (i/8)])
-            MapTileBuffer[j*64+i] = tiletempbuffer[(j/8)*8 + (i/8)];
-    }
-
-    //Update window
-    RECT rc; rc.top = 212; rc.left = 5; rc.bottom = 212+64; rc.right = 5+64;
-    InvalidateRect(hWndMapViewer, &rc, FALSE);
-}
-
-#endif

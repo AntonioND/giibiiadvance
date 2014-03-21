@@ -13,19 +13,24 @@ When the current goals are done, the version 0.2.0 will be released. Until then 
 
 This is the only GB emulator that emulates completely the GB Camera if you have a webcam! :)
 
-Current goals
--------------
+Current goals for 0.2.0
+-----------------------
 
 - Finish porting the GUI:
  - GBA I/O viewer
- - GBA map viewer.
  - SGB viewer.
+ - Export images from debugger windows.
  - Configuration window.
  - Complete main window menu. Accelerators (F12, CTRL+R, ...)
  - Disable main menu elements when they can't be used.
- - Export images from debugger windows.
+
+For 0.3.0
+---------
+
+- Finish porting the GUI:
  - GB Camera and GB Printer viewers.
  - GBA I/O hardware viewer (RTC, sensors...).
+ - Export images from debugger windows.
 
 - Customize controls.
  - Support for game controllers.

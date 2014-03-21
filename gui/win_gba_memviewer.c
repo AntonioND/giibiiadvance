@@ -441,7 +441,7 @@ int Win_GBAMemViewerCreate(void)
     GUI_SetRadioButton(&gba_memview_mode_32_radbtn,  18+18*FONT_WIDTH+12,6,9*FONT_WIDTH,24,
                   "32 bits", 0,GBA_MEMVIEWER_32, 1,_win_gba_mem_viewer_mode_radiobtn_callback);
 
-    GUI_SetButton(&gba_memview_goto_btn,66+39*FONT_WIDTH+36,6,16*FONT_WIDTH,24,
+    GUI_SetButton(&gba_memview_goto_btn,68+39*FONT_WIDTH+36,6,16*FONT_WIDTH,24,
                   "Goto (F8)",_win_gba_mem_viewer_goto);
 
     GUI_SetTextBox(&gba_memview_textbox,&gba_memview_con,

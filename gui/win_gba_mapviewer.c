@@ -605,7 +605,7 @@ int Win_GBAMapViewerCreate(void)
     GUI_SetBitmap(&gba_mapview_zoomed_tile_bmp,6,198, 64,64, gba_map_zoomed_tile_buffer,
                   NULL);
 
-    GUI_SetButton(&gba_mapview_dumpbtn,19+15*FONT_WIDTH,70,FONT_WIDTH*6,FONT_HEIGHT*2,"Dump",
+    GUI_SetButton(&gba_mapview_dumpbtn,19+15*FONT_WIDTH,71,FONT_WIDTH*6,FONT_HEIGHT*2,"Dump",
                   _win_gba_mapviewer_dump_btn_callback);
 
     GUI_SetTextBox(&gba_mapview_textbox,&gba_mapview_con,

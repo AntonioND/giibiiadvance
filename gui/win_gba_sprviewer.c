@@ -342,13 +342,13 @@ int Win_GBASprViewerCreate(void)
     GUI_SetRadioButton(&gba_sprview_page1_radbtn,  668,321,12*FONT_WIDTH,24,
                   " 64 - 127", 0, 1,  0,_win_gba_sprviewer_radbtn_callback);
 
-    GUI_SetButton(&gba_sprview_zoomed_spr_dumpbtn,668,352,FONT_WIDTH*13,FONT_HEIGHT+6,"Dump zoomed",
+    GUI_SetButton(&gba_sprview_zoomed_spr_dumpbtn,668,352,FONT_WIDTH*13,FONT_HEIGHT*2,"Dump zoomed",
                   _win_gba_sprviewer_zoomed_dump_btn_callback);
 
-    GUI_SetButton(&gba_sprview_pagespr_dumpbtn,668,383,FONT_WIDTH*13,FONT_HEIGHT+6,"Dump page",
+    GUI_SetButton(&gba_sprview_pagespr_dumpbtn,668,383,FONT_WIDTH*13,FONT_HEIGHT*2,"Dump page",
                   _win_gba_sprviewer_page_dump_btn_callback);
 
-    GUI_SetButton(&gba_sprview_allspr_dumpbtn,668,414,FONT_WIDTH*13,FONT_HEIGHT+6,"Dump all",
+    GUI_SetButton(&gba_sprview_allspr_dumpbtn,668,414,FONT_WIDTH*13,FONT_HEIGHT*2,"Dump all",
                   _win_gba_sprviewer_allspr_dump_btn_callback);
 
     gba_sprview_selected_spr = 0;

@@ -381,7 +381,7 @@ int Win_GBMemViewerCreate(void)
     GUI_SetRadioButton(&gb_memview_mode_16_radbtn,  6+9*FONT_WIDTH+12,6,9*FONT_WIDTH,24,
                   "16 bits", 0,GB_MEMVIEWER_16, 0,_win_gb_mem_viewer_mode_radbtn_callback);
 
-    GUI_SetButton(&gb_memview_goto_btn,66+39*FONT_WIDTH+36,6,16*FONT_WIDTH,24,
+    GUI_SetButton(&gb_memview_goto_btn,68+39*FONT_WIDTH+36,6,16*FONT_WIDTH,24,
                   "Goto (F8)",_win_gb_mem_viewer_goto);
 
     GUI_SetTextBox(&gb_memview_textbox,&gb_memview_con,

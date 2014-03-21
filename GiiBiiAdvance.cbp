@@ -326,6 +326,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="gui/win_gb_palviewer.h" />
+		<Unit filename="gui/win_gb_sgbviewer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gui/win_gb_sgbviewer.h" />
 		<Unit filename="gui/win_gb_sprviewer.c">
 			<Option compilerVar="CC" />
 		</Unit>

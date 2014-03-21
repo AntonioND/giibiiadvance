@@ -592,6 +592,9 @@ char * GB_Dissasemble(u16 addr, int * step)
                 }
             }
         }
+
+        if(op_addr == 0xFFFF)
+            *step = 1;
     }
     else //not code...
     {

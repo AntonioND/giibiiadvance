@@ -277,12 +277,12 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
                       e->y,e->y+e->h-1);
 
         int i;
-        for(i = 1; i < 4; i++)
+        for(i = 0; i < 4; i++)
         {
-            GUI_Draw_SetDrawingColor(224-i*(224/4),224-i*(224/4),224-i*(224/4));
+            GUI_Draw_SetDrawingColor(i*(224/4),i*(224/4),i*(224/4));
             GUI_Draw_Rect(buffer,w,h,
-                      e->x-i,e->x+e->w+i-1,
-                      e->y-i,e->y+e->h+i-1);
+                      e->x+i,e->x+e->w-i-1,
+                      e->y+i,e->y+e->h-i-1);
         }
 
         int namewidth = FONT_WIDTH*strlen(e->info.button.name);

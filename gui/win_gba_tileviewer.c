@@ -284,7 +284,7 @@ int Win_GBATileViewerCreate(void)
     GUI_SetBitmap(&gba_tileview_zoomed_tile_bmp,6,198, 64,64, gba_tile_zoomed_tile_buffer,
                   NULL);
 
-    GUI_SetButton(&gba_tileview_dumpbtn,136,157,FONT_WIDTH*6,FONT_HEIGHT*2,"Dump",
+    GUI_SetButton(&gba_tileview_dumpbtn,139,160,FONT_WIDTH*6,FONT_HEIGHT*2,"Dump",
                   _win_gba_tileviewer_dump_btn_callback);
 
     GUI_SetTextBox(&gba_tileview_textbox,&gba_tileview_con,

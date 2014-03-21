@@ -56,6 +56,7 @@
 #include "win_gb_mapviewer.h"
 #include "win_gb_sprviewer.h"
 #include "win_gb_palviewer.h"
+#include "win_gb_sgbviewer.h"
 
 #include "win_gba_disassembler.h"
 #include "win_gba_memviewer.h"
@@ -581,6 +582,11 @@ static void _win_main_menu_open_pal_viewer(void)
     Win_GBPalViewerCreate();
 }
 
+static void _win_main_menu_open_sgb_viewer(void)
+{
+    Win_GB_SGBViewerCreate();
+}
+
 //------------------------------------------------------------------
 
 static _gui_element mainwindow_scrollable_text_window;
@@ -678,7 +684,7 @@ static _gui_menu_entry mmdebug_mapview = {"Map Viewer" , _win_main_menu_open_map
 static _gui_menu_entry mmdebug_sprview = {"Sprite Viewer" , _win_main_menu_open_spr_viewer};
 static _gui_menu_entry mmdebug_palview = {"Palette Viewer" , _win_main_menu_open_pal_viewer};
 
-static _gui_menu_entry mmdebug_sgbview = {"SGB Viewer" , NULL};
+static _gui_menu_entry mmdebug_sgbview = {"SGB Viewer" , _win_main_menu_open_sgb_viewer};
 
 static _gui_menu_entry * mmdisas_elements[] = {
     &mmdebug_disas,

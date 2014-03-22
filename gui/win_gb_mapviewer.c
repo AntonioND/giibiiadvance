@@ -80,7 +80,7 @@ static _gui_element gb_mapview_tilebase8000_radbtn, gb_mapview_tilebase8800_radb
 static _gui_element gb_mapview_mapbase9800_radbtn, gb_mapview_mapbase9C00_radbtn;
 
 static _gui_element gb_mapview_zoomed_tile_bmp;
-static _gui_element gb_mapview_zoomed_tile_bn_radbtn, gb_mapview_zoomed_tile_pal_radbtn;
+static _gui_element gb_mapview_zoomed_tile_bw_radbtn, gb_mapview_zoomed_tile_pal_radbtn;
 
 static _gui_element * gb_tileviwer_window_gui_elements[] = {
     &gb_mapview_tilebase_label,
@@ -91,7 +91,7 @@ static _gui_element * gb_tileviwer_window_gui_elements[] = {
     &gb_mapview_mapbase9C00_radbtn,
     &gb_mapview_map_bmp,
     &gb_mapview_zoomed_tile_bmp,
-    &gb_mapview_zoomed_tile_bn_radbtn,
+    &gb_mapview_zoomed_tile_bw_radbtn,
     &gb_mapview_zoomed_tile_pal_radbtn,
     &gb_mapview_textbox,
     &gb_mapview_dumpbtn,
@@ -122,7 +122,7 @@ static int _win_gb_mapviewer_map_bmp_callback(int x, int y)
     return 1;
 }
 
-static void _win_gb_mapviewer_zoomed_tile_bn_radbtn_callback(int num)
+static void _win_gb_mapviewer_zoomed_tile_bw_radbtn_callback(int num)
 {
     gb_map_zoomed_tile_is_pal = num;
 }
@@ -152,8 +152,13 @@ void Win_GBMapViewerUpdate(void)
             gb_mapview_selected_x,gb_mapview_selected_y,addr,tile,bank,(info & (1<<6)) ? "V" : "-",
             (info & (1<<5)) ? "H" : "-",info&7,(info & (1<<7)) != 0);
 
-    GB_Debug_MapPrint(gb_map_buffer,GB_MAP_BUFFER_WIDTH,GB_MAP_BUFFER_HEIGHT,gb_mapview_selected_mapbase,
-                      gb_mapview_selected_tilebase);
+    if(gb_map_zoomed_tile_is_pal == 0)
+        GB_Debug_MapPrintBW(gb_map_buffer,GB_MAP_BUFFER_WIDTH,GB_MAP_BUFFER_HEIGHT,gb_mapview_selected_mapbase,
+                        gb_mapview_selected_tilebase);
+    else
+        GB_Debug_MapPrint(gb_map_buffer,GB_MAP_BUFFER_WIDTH,GB_MAP_BUFFER_HEIGHT,gb_mapview_selected_mapbase,
+                        gb_mapview_selected_tilebase);
+
     GUI_Draw_SetDrawingColor(255,0,0);
     int l = gb_mapview_selected_x*8; //left
     int t = gb_mapview_selected_y*8; // top
@@ -254,8 +259,12 @@ static void _win_gb_mapviewer_dump_btn_callback(void)
 {
     if(Win_MainRunningGB() == 0) return;
 
-    GB_Debug_MapPrint(gb_map_buffer,GB_MAP_BUFFER_WIDTH,GB_MAP_BUFFER_HEIGHT,gb_mapview_selected_mapbase,
-                      gb_mapview_selected_tilebase);
+    if(gb_map_zoomed_tile_is_pal == 0)
+        GB_Debug_MapPrintBW(gb_map_buffer,GB_MAP_BUFFER_WIDTH,GB_MAP_BUFFER_HEIGHT,gb_mapview_selected_mapbase,
+                          gb_mapview_selected_tilebase);
+    else
+        GB_Debug_MapPrint(gb_map_buffer,GB_MAP_BUFFER_WIDTH,GB_MAP_BUFFER_HEIGHT,gb_mapview_selected_mapbase,
+                          gb_mapview_selected_tilebase);
 
     char buffer_temp[GB_MAP_BUFFER_WIDTH*GB_MAP_BUFFER_HEIGHT*4];
 
@@ -308,10 +317,10 @@ int Win_GBMapViewerCreate(void)
     GUI_SetBitmap(&gb_mapview_zoomed_tile_bmp,6,198, 64,64, gb_map_zoomed_tile_buffer,
                   NULL);
 
-    GUI_SetRadioButton(&gb_mapview_zoomed_tile_bn_radbtn,  76,198,4*FONT_WIDTH,18,
-                  "B/N", 2, 0, 0, _win_gb_mapviewer_zoomed_tile_bn_radbtn_callback);
+    GUI_SetRadioButton(&gb_mapview_zoomed_tile_bw_radbtn,  76,198,4*FONT_WIDTH,18,
+                  "B/W", 2, 0, 0, _win_gb_mapviewer_zoomed_tile_bw_radbtn_callback);
     GUI_SetRadioButton(&gb_mapview_zoomed_tile_pal_radbtn,  76+4*FONT_WIDTH+6,198,4*FONT_WIDTH,18,
-                  "Pal", 2, 1, 1, _win_gb_mapviewer_zoomed_tile_bn_radbtn_callback);
+                  "Pal", 2, 1, 1, _win_gb_mapviewer_zoomed_tile_bw_radbtn_callback);
 
     GUI_SetButton(&gb_mapview_dumpbtn,87,238,FONT_WIDTH*6,FONT_HEIGHT*2,"Dump",
                   _win_gb_mapviewer_dump_btn_callback);

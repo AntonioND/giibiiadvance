@@ -44,6 +44,7 @@ void GB_Debug_TileDrawZoomedPaletted64x64(char * buffer, int tile, int bank, int
 //---------------------------------------------------------------------------------
 
 void GB_Debug_MapPrint(char * buffer, int bufw, int bufh, int map, int tile_base);
+void GB_Debug_MapPrintBW(char * buffer, int bufw, int bufh, int map, int tile_base); // black and white
 
 //---------------------------------------------------------------------------------
 

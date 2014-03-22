@@ -75,7 +75,7 @@ static _gui_element gb_tileview_bank0_bmp, gb_tileview_bank1_bmp;
 static _gui_element gb_tileview_bank0_label, gb_tileview_bank1_label;
 
 static _gui_element gb_tileview_zoomed_tile_bmp;
-static _gui_element gb_tileview_zoomed_tile_bn_radbtn, gb_tileview_zoomed_tile_pal_radbtn;
+static _gui_element gb_tileview_zoomed_tile_bw_radbtn, gb_tileview_zoomed_tile_pal_radbtn;
 static _gui_element gb_tileview_zoomed_tile_pal_scrollbar;
 static _gui_element gb_tileview_zoomed_tile_pal_label;
 
@@ -86,7 +86,7 @@ static _gui_element * gb_tileviwer_window_gui_elements[] = {
     &gb_tileview_bank1_bmp,
     &gb_tileview_zoomed_tile_bmp,
     &gb_tileview_textbox,
-    &gb_tileview_zoomed_tile_bn_radbtn,
+    &gb_tileview_zoomed_tile_bw_radbtn,
     &gb_tileview_zoomed_tile_pal_radbtn,
     &gb_tileview_zoomed_tile_pal_scrollbar,
     &gb_tileview_zoomed_tile_pal_label,
@@ -121,7 +121,7 @@ static void _win_gb_tileviewer_pal_select_scrollbar_callback(int value)
     gb_tile_zoomed_tile_sel_pal = value;
 }
 
-static void _win_gb_tileviewer_zoomed_tile_bn_radbtn_callback(int num)
+static void _win_gb_tileviewer_zoomed_tile_bw_radbtn_callback(int num)
 {
     gb_tile_zoomed_tile_is_pal = num;
 }
@@ -318,10 +318,10 @@ int Win_GBTileViewerCreate(void)
     GUI_SetBitmap(&gb_tileview_zoomed_tile_bmp,6,48, 64,64, gb_tile_zoomed_tile_buffer,
                   NULL);
 
-    GUI_SetRadioButton(&gb_tileview_zoomed_tile_bn_radbtn,  6,118,6*FONT_WIDTH,18,
-                  "B/N", 0, 0, 0, _win_gb_tileviewer_zoomed_tile_bn_radbtn_callback);
+    GUI_SetRadioButton(&gb_tileview_zoomed_tile_bw_radbtn,  6,118,6*FONT_WIDTH,18,
+                  "B/W", 0, 0, 0, _win_gb_tileviewer_zoomed_tile_bw_radbtn_callback);
     GUI_SetRadioButton(&gb_tileview_zoomed_tile_pal_radbtn,  6+6*FONT_WIDTH+6,118,6*FONT_WIDTH,18,
-                  "Pal", 0, 1, 1, _win_gb_tileviewer_zoomed_tile_bn_radbtn_callback);
+                  "Pal", 0, 1, 1, _win_gb_tileviewer_zoomed_tile_bw_radbtn_callback);
 
     GUI_SetScrollBar(&gb_tileview_zoomed_tile_pal_scrollbar, 6,142, 90, 12,
                      0,7, 0, _win_gb_tileviewer_pal_select_scrollbar_callback);

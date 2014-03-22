@@ -422,6 +422,38 @@ int __gui_send_event_element(_gui_element ** complete_gui, _gui_element * gui, S
                 }
             }
         }
+        else if(e->type == SDL_MOUSEMOTION)
+        {
+            if(e->motion.state & SDL_BUTTON_LMASK)
+            {
+                int basexcoord = gui->x;
+                int baseycoord = gui->y+FONT_HEIGHT+2;
+                int textwidth = (gui->w / FONT_WIDTH) - 1;
+
+                if(_gui_pos_is_inside_rect(e->button.x,e->button.y,
+                                basexcoord+textwidth*FONT_WIDTH,FONT_WIDTH,
+                                baseycoord+FONT_HEIGHT,(gui->info.scrollabletextwindow.max_drawn_lines-1)*FONT_HEIGHT))
+                {
+                    int percent = ( ( e->button.y-(baseycoord+FONT_HEIGHT) ) * 100 ) /
+                                            ( (gui->info.scrollabletextwindow.max_drawn_lines-4) * FONT_HEIGHT );
+
+                    int line =
+                        ( (gui->info.scrollabletextwindow.numlines - gui->info.scrollabletextwindow.max_drawn_lines)
+                         * percent ) / 100;
+
+                    gui->info.scrollabletextwindow.currentline = line;
+
+                    if(gui->info.scrollabletextwindow.currentline >=
+                            gui->info.scrollabletextwindow.numlines - gui->info.scrollabletextwindow.max_drawn_lines)
+                        gui->info.scrollabletextwindow.currentline =
+                                gui->info.scrollabletextwindow.numlines - gui->info.scrollabletextwindow.max_drawn_lines;
+                    if(gui->info.scrollabletextwindow.currentline < 0)
+                        gui->info.scrollabletextwindow.currentline = 0;
+
+                    return 1;
+                }
+            }
+        }
         else if(e->type == SDL_MOUSEWHEEL)
         {
             gui->info.scrollabletextwindow.currentline -= e->wheel.y*3;

@@ -776,6 +776,13 @@ void GB_Debug_MapPrint(char * buffer, int bufw, int bufh, int map, int tile_base
     }
     else
     {
+        u32 bg_pal[4];
+        u32 bgp_reg = mem->IO_Ports[BGP_REG-0xFF00];
+        bg_pal[0] = gb_pal_colors[bgp_reg & 0x3][0];
+        bg_pal[1] = gb_pal_colors[(bgp_reg>>2) & 0x3][0];
+        bg_pal[2] = gb_pal_colors[(bgp_reg>>4) & 0x3][0];
+        bg_pal[3] = gb_pal_colors[(bgp_reg>>6) & 0x3][0];
+
         for(y = 0; y < 256; y ++) for(x = 0; x < 256; x ++)
         {
             u32 tile = bgtilemap[( ((y>>3) & 31) * 32) + ((x >> 3) & 31)];
@@ -792,9 +799,9 @@ void GB_Debug_MapPrint(char * buffer, int bufw, int bufh, int map, int tile_base
 
             u32 color = ( (*data >> x_) & 1 ) |  ( ( ( (*(data+1)) >> x_)  << 1) & 2);
 
-            buffer[(y*bufw+x)*3+0] = gb_pal_colors[color][0];
-            buffer[(y*bufw+x)*3+1] = gb_pal_colors[color][1];
-            buffer[(y*bufw+x)*3+2] = gb_pal_colors[color][2];
+            buffer[(y*bufw+x)*3+0] = bg_pal[color];
+            buffer[(y*bufw+x)*3+1] = bg_pal[color];
+            buffer[(y*bufw+x)*3+2] = bg_pal[color];
         }
     }
 }
@@ -803,211 +810,3 @@ void GB_Debug_MapPrint(char * buffer, int bufw, int bufh, int map, int tile_base
 
 
 //------------------------------------------------------------------------------------------------
-
-#if 0
-
-
-void GB_Debug_TileVRAMDraw_Pal(char * buffer0, int bufw0, int bufh0, char * buffer1, int bufw1, int bufh1, int pal)
-{
-    _GB_MEMORY_ * mem = &GameBoy.Memory;
-	u32 y, x;
-
-    u32 bg_pal[4];
-    u32 bgp_reg = mem->IO_Ports[BGP_REG-0xFF00];
-    bg_pal[0] = GB_GameBoyGetGray(bgp_reg & 0x3);
-    bg_pal[1] = GB_GameBoyGetGray((bgp_reg>>2) & 0x3);
-    bg_pal[2] = GB_GameBoyGetGray((bgp_reg>>4) & 0x3);
-    bg_pal[3] = GB_GameBoyGetGray((bgp_reg>>6) & 0x3);
-
-	for(y = 0; y < 192 ; y++)
-	{
-		for(x = 0; x < 128; x++)
-		{
-			u32 tile = (x>>3) + ((y>>3)*16);
-
-			u8 * data = &mem->VideoRAM[tile<<4]; //Bank 0
-
-			data += ( (y&7)*2 );
-
-			u32 x_ = 7-(x&7);
-
-			u32 color = ( (*data >> x_) & 1 ) |  ( ( ( (*(data+1)) >> x_)  << 1) & 2);
-            if(GameBoy.Emulator.CGBEnabled)
-            {
-                u32 pal_ram_index = (pal * 8) + (2*color);
-                color = GameBoy.Emulator.bg_pal[pal_ram_index] | (GameBoy.Emulator.bg_pal[pal_ram_index+1]<<8);
-            }
-            else
-            {
-                color = bg_pal[color];
-            }
-
-            buffer0[(y*bufw0+x)*3+0] = gb_pal_colors[color][0];
-            buffer0[(y*bufw0+x)*3+1] = gb_pal_colors[color][1];
-            buffer0[(y*bufw0+x)*3+2] = gb_pal_colors[color][2];
-		}
-	}
-
-	for(y = 0; y < 192 ; y++)
-	{
-		for(x = 0; x < 128; x++)
-		{
-			u32 tile = (x>>3) + ((y>>3)*16);
-
-			u8 * data = &mem->VideoRAM[tile<<4];
-			data += 0x2000; //Bank 1;
-
-			data += ( (y&7)*2 );
-
-			u32 x_ = 7-(x&7);
-
-			u32 color = ( (*data >> x_) & 1 ) |  ( ( ( (*(data+1)) >> x_)  << 1) & 2);
-            if(GameBoy.Emulator.CGBEnabled)
-            {
-                u32 pal_ram_index = (pal * 8) + (2*color);
-                color = GameBoy.Emulator.bg_pal[pal_ram_index] | (GameBoy.Emulator.bg_pal[pal_ram_index+1]<<8);
-            }
-            else
-            {
-                color = bg_pal[color];
-                color = (gb_pal_colors[color][0]<<16)|(gb_pal_colors[color][1]<<8)|gb_pal_colors[color][2];
-            }
-/*
-            buffer1[(y*bufw1+x)*3+0] = gb_pal_colors[color][0];
-            buffer1[(y*bufw1+x)*3+1] = gb_pal_colors[color][1];
-            buffer1[(y*bufw1+x)*3+2] = gb_pal_colors[color][2];*/
-            buffer1[(y*bufw1+x)*3+0] = color&0xFF;
-            buffer1[(y*bufw1+x)*3+1] = (color>>8)&0xFF;
-            buffer1[(y*bufw1+x)*3+2] = (color>>16)&0xFF;
-
-		}
-	}
-}
-
-void GB_Debug_TileDrawZoomed64x64(char * buffer, int tile, int bank, int pal)
-{
-    _GB_MEMORY_ * mem = &GameBoy.Memory;
-
-   int tiletempbuffer[8*8];
-
-    u8 * tile_data = &GameBoy.Memory.VideoRAM[tile<<4]; //Bank 0
-    if(bank) tile_data += 0x2000; //Bank 1;
-
-    u32 bg_pal[4];
-    u32 bgp_reg = mem->IO_Ports[BGP_REG-0xFF00];
-    bg_pal[0] = GB_GameBoyGetGray(bgp_reg & 0x3);
-    bg_pal[1] = GB_GameBoyGetGray((bgp_reg>>2) & 0x3);
-    bg_pal[2] = GB_GameBoyGetGray((bgp_reg>>4) & 0x3);
-    bg_pal[3] = GB_GameBoyGetGray((bgp_reg>>6) & 0x3);
-
-	u32 y, x;
-	for(y = 0; y < 8 ; y++) for(x = 0; x < 8; x++)
-    {
-        u8 * data = tile_data + ( (y&7)*2 );
-        u32 x_ = 7-(x&7);
-        u32 color = ( (*data >> x_) & 1 ) |  ( ( ( (*(data+1)) >> x_)  << 1) & 2);
-        if(GameBoy.Emulator.CGBEnabled)
-        {
-            u32 pal_ram_index = (pal * 8) + (2*color);
-            color = GameBoy.Emulator.bg_pal[pal_ram_index] | (GameBoy.Emulator.bg_pal[pal_ram_index+1]<<8);
-        }
-        else
-        {
-            color = bg_pal[color];
-            //color = (gb_pal_colors[color][0]<<16)|(gb_pal_colors[color][1]<<8)|gb_pal_colors[color][2];
-        }
-
-        //tiletempbuffer[x + y*8] = (gb_pal_colors[color][0]<<16)|(gb_pal_colors[color][1]<<8)|
-        //        gb_pal_colors[color][2];
-        tiletempbuffer[x + y*8] = color;
-    }
-
-    //Expand to 64x64
-    int i,j;
-    for(i = 0; i < 64; i++) for(j = 0; j < 64; j++)
-    {
-        buffer[(j*64+i)*3+0] = tiletempbuffer[(j/8)*8 + (i/8)] & 0xFF;
-        buffer[(j*64+i)*3+1] = (tiletempbuffer[(j/8)*8 + (i/8)]>>8) & 0xFF;
-        buffer[(j*64+i)*3+2] = (tiletempbuffer[(j/8)*8 + (i/8)]>>16) & 0xFF;
-    }
-}
-
-//------------------------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------------------------
-
-void GB_Debug_MapPrint(char * buffer, int bufw, int bufh, int map, int tile_base)
-{
-	_GB_MEMORY_ * mem = &GameBoy.Memory;
-	u32 y, x;
-
-	u8 * tiledata = tile_base ? &mem->VideoRAM[0x0800] : &mem->VideoRAM[0x0000];
-    u8 * bgtilemap = map ? &mem->VideoRAM[0x1C00] : &mem->VideoRAM[0x1800];
-
-    if(GameBoy.Emulator.CGBEnabled)
-    {
-        for(y = 0; y < 256; y ++) for(x = 0; x < 256; x ++)
-        {
-			u32 tile_location = ( ((y>>3) & 31) * 32) + ((x >> 3) & 31);
-			u32 tile = bgtilemap[tile_location];
-			u32 tileinfo = bgtilemap[tile_location + 0x2000];
-
-			if(tile_base) //If tile base is 0x8800
-            {
-                if(tile & (1<<7)) tile &= 0x7F;
-                else tile += 128;
-            }
-
-            u8 * data = &tiledata[(tile<<4) + ( (tileinfo&(1<<3)) ? 0x2000 : 0 )]; //Bank 1?
-
-            //V FLIP
-            if(tileinfo & (1<<6)) data += (((7-y)&7) * 2);
-            else data += ((y&7) * 2);
-
-            u32 x_;
-            //H FLIP
-			if(tileinfo & (1<<5)) x_ = (x&7);
-            else x_ = 7-(x&7);
-
-            u32 color = ( (*data >> x_) & 1 ) |  ( ( ( (*(data+1)) >> x_)  << 1) & 2);
-            u32 pal_index = ((tileinfo&7) * 8) + (2*color);
-
-            color = GameBoy.Emulator.bg_pal[pal_index] | (GameBoy.Emulator.bg_pal[pal_index+1]<<8);
-
-            buffer[(y*bufw+x)*3+0] = (color&0x1F)<<3;
-            buffer[(y*bufw+x)*3+1] = ((color>>5)&0x1F)<<3;
-            buffer[(y*bufw+x)*3+2] = ((color>>10)&0x1F)<<3;
-        }
-    }
-    else
-    {
-        for(y = 0; y < 256; y ++) for(x = 0; x < 256; x ++)
-        {
-            u32 tile = bgtilemap[( ((y>>3) & 31) * 32) + ((x >> 3) & 31)];
-
-            if(tile_base) //If tile base is 0x8800
-            {
-                if(tile & (1<<7)) tile &= 0x7F;
-                else tile += 128;
-            }
-
-            u8 * data = (&tiledata[tile<<4]) + ((y&7) << 1);
-
-            u32 x_ = 7-(x&7);
-
-            u32 color = ( (*data >> x_) & 1 ) |  ( ( ( (*(data+1)) >> x_)  << 1) & 2);
-//BGP_REG?**************************************************************************************************
-            buffer[(y*bufw+x)*3+0] = gb_pal_colors[color][0];
-            buffer[(y*bufw+x)*3+1] = gb_pal_colors[color][1];
-            buffer[(y*bufw+x)*3+2] = gb_pal_colors[color][2];
-        }
-    }
-}
-
-//------------------------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------------------------
-
-#endif // 0

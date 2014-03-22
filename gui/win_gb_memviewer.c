@@ -309,7 +309,7 @@ static void _win_gb_mem_view_textbox_callback(int x, int y)
     if(gb_memviewer_mode == GB_MEMVIEWER_16)
     {
         numbits = 16;
-        xtile -= 11;
+        xtile -= 7;
         int j;
         for(j = 0; j < 8; j++)
         {
@@ -326,7 +326,7 @@ static void _win_gb_mem_view_textbox_callback(int x, int y)
     else if(gb_memviewer_mode == GB_MEMVIEWER_8)
     {
         numbits = 8;
-        xtile -= 11;
+        xtile -= 7;
         int j;
         for(j = 0; j < 16; j++)
         {

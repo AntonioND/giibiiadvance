@@ -92,15 +92,6 @@ static _gui gb_tileviewer_window_gui = {
 
 //----------------------------------------------------------------
 
-static inline void rgb16to32(u16 color, u8 * r, u8 * g, u8 * b)
-{
-    *r = (color & 31)<<3;
-    *g = ((color >> 5) & 31)<<3;
-    *b = ((color >> 10) & 31)<<3;
-}
-
-//----------------------------------------------------------------
-
 static int _win_gb_tileviewer_bank0_bmp_callback(int x, int y)
 {
     gb_tileview_selected_bank = 0;

@@ -381,6 +381,17 @@ void GUI_SetScrollBar(_gui_element * e, int x, int y, int w, int h, int min_valu
 
 //----------------------------------------------------------------------------------------------
 
+void GUI_SetLabelCaption(_gui_element * e, const char * label)
+{
+    if(e == NULL)
+        return;
+
+    if(e->element_type != GUI_TYPE_LABEL)
+        return;
+
+    strcpy(e->info.label.text,label);
+}
+
 void _gui_clear_radiobuttons(_gui_element ** element_list, int group_id)
 {
     while(*element_list != NULL)

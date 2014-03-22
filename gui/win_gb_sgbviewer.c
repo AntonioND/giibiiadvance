@@ -45,8 +45,8 @@ extern _GB_CONTEXT_ GameBoy;
 
 static int WinIDGB_SGBViewer;
 
-#define WIN_GB_SGBVIEWER_WIDTH  700
-#define WIN_GB_SGBVIEWER_HEIGHT 500
+#define WIN_GB_SGBVIEWER_WIDTH  602
+#define WIN_GB_SGBVIEWER_HEIGHT 496
 
 static int GB_SGBViewerCreated = 0;
 
@@ -55,8 +55,21 @@ static int GB_SGBViewerCreated = 0;
 static char gb_sgb_border_buffer[256*256*3];
 static int gb_sgb_border_tilex;
 static int gb_sgb_border_tiley;
-
 static char gb_sgb_border_zoomed_tile_buffer[64*64*3];
+
+static char gb_sgb_tiles_buffer[128*128*3];
+static int gb_sgb_tiles_selected_index;
+static int gb_sgb_tiles_selected_pal;
+static char gb_sgb_tiles_zoomed_tile_buffer[64*64*3];
+
+static char gb_sgb_atf_buffer[(160+1)*(144+1)*3];
+static int gb_sgb_atf_selected_index; // 0 ~ 0x2D-1
+static int gb_sgb_atf_selected_x;
+static int gb_sgb_atf_selected_y;
+
+static char gb_sgb_pal_buffer[160*80*3];
+static int gb_sgb_pal_selected_pal;
+static int gb_sgb_pal_selected_color;
 
 //-----------------------------------------------------------------------------------
 
@@ -66,12 +79,66 @@ static _gui_element gb_sgbview_border_label;
 static _gui_element gb_sgbview_border_bmp, gb_sgbview_border_zoomed_tile_bmp;
 static _gui_element gb_sgbview_border_dump_btn;
 
+static _gui_element gb_sgbview_tiles_label;
+static _gui_element gb_sgbview_tiles_bmp;
+static _gui_element gb_sgbview_tiles_select_pal_scrollbar;
+static _gui_console gb_sgbview_tiles_con;
+static _gui_element gb_sgbview_tiles_textbox;
+static _gui_element gb_sgbview_tiles_zoomed_tile_bmp;
+static _gui_element gb_sgbview_tiles_dump_btn;
+
+static _gui_element gb_sgbview_atf_label;
+static _gui_element gb_sgbview_atf_bmp;
+static _gui_console gb_sgbview_atf_con;
+static _gui_element gb_sgbview_atf_textbox;
+static _gui_element gb_sgbview_atf_select_scrollbar;
+static _gui_element gb_sgbview_atf_dump_btn;
+
+static _gui_element gb_sgbview_pal_label;
+static _gui_element gb_sgbview_pal_bmp;
+static _gui_console gb_sgbview_pal_con;
+static _gui_element gb_sgbview_pal_textbox;
+static _gui_element gb_sgbview_pal_dump_btn;
+
+static _gui_element gb_sgbview_packet_label;
+static _gui_console gb_sgbview_packet_con;
+static _gui_element gb_sgbview_packet_textbox;
+
+static _gui_element gb_sgbview_otherinfo_label;
+static _gui_console gb_sgbview_otherinfo_con;
+static _gui_element gb_sgbview_otherinfo_textbox;
+
 static _gui_element * gb_sgbviwer_window_gui_elements[] = {
     &gb_sgbview_border_label,
     &gb_sgbview_border_textbox,
     &gb_sgbview_border_bmp,
     &gb_sgbview_border_zoomed_tile_bmp,
     &gb_sgbview_border_dump_btn,
+
+    &gb_sgbview_tiles_label,
+    &gb_sgbview_tiles_bmp,
+    &gb_sgbview_tiles_select_pal_scrollbar,
+    &gb_sgbview_tiles_textbox,
+    &gb_sgbview_tiles_zoomed_tile_bmp,
+    &gb_sgbview_tiles_dump_btn,
+
+    &gb_sgbview_atf_label,
+    &gb_sgbview_atf_bmp,
+    &gb_sgbview_atf_textbox,
+    &gb_sgbview_atf_select_scrollbar,
+    &gb_sgbview_atf_dump_btn,
+
+    &gb_sgbview_pal_label,
+    &gb_sgbview_pal_bmp,
+    &gb_sgbview_pal_textbox,
+    &gb_sgbview_pal_dump_btn,
+
+    &gb_sgbview_packet_label,
+    &gb_sgbview_packet_textbox,
+
+    &gb_sgbview_otherinfo_label,
+    &gb_sgbview_otherinfo_textbox,
+
     NULL
 };
 
@@ -172,8 +239,6 @@ static void _win_gb_sgbviewer_draw_border(void)
 
 static void _win_gb_sgbviewer_draw_border_zoomed_tile(void)
 {
-    GUI_ConsoleClear(&gb_sgbview_border_con);
-
     u32 info = SGBInfo.tile_map[gb_sgb_border_tiley*32+gb_sgb_border_tilex];
 
     u32 tile = info & 0xFF;
@@ -219,6 +284,8 @@ static void _win_gb_sgbviewer_draw_border_zoomed_tile(void)
 
     //--------------------
 
+    GUI_ConsoleClear(&gb_sgbview_border_con);
+
     GUI_ConsoleModePrintf(&gb_sgbview_border_con,0,0,"Pos: %d,%d\nTile: %d\nFlip: %s%s\nPal: %d",
                           gb_sgb_border_tilex, gb_sgb_border_tiley, tile,
                           xflip ? "H" : "-",  yflip ? "V" : "-", pal);
@@ -232,12 +299,292 @@ static void _win_gb_sgbviewer_draw_border_zoomed_tile(void)
     GUI_Draw_Rect(gb_sgb_border_buffer,256,256,l,r,t,b);
 }
 
+static void _win_gb_sgbviewer_draw_tiles(void)
+{
+    GUI_ConsoleClear(&gb_sgbview_tiles_con);
+
+    GUI_ConsoleModePrintf(&gb_sgbview_tiles_con,0,0,"Pal: %d\nInd: %d",
+                          gb_sgb_tiles_selected_pal,gb_sgb_tiles_selected_index);
+
+    u32 i,j;
+	for(i = 0; i < 16; i++) for(j = 0; j < 16; j++)
+	{
+	    u32 tile = i + j*16;
+
+        u32 * tile_ptr = &SGBInfo.tile_data[((8*8*4)/8) * tile];
+
+        u32 x,y;
+        for(y = 0; y < 8; y++) for(x = 0; x < 8; x++)
+        {
+            u32 * data = tile_ptr;
+            u32 * data2 = tile_ptr + 16;
+
+            data += y<<1;
+            data2 += y<<1;
+
+            u32 x_ = 7-x;
+
+            u32 color = (*data >> x_) & 1;
+            color |= ( ( ( (*(data+1)) >> x_) << 1) & (1<<1));
+            color |= ( ( ( (*data2) >> x_) << 2) & (1<<2));
+            color |= ( ( ( (*(data2+1)) >> x_) << 3) & (1<<3));
+            color = SGBInfo.palette[gb_sgb_tiles_selected_pal][color];
+
+            int temp = ((y+(j<<3))*128) + (x+(i<<3));
+
+            int r,g,b;
+            rgb16to32(color,&r,&g,&b);
+            gb_sgb_tiles_buffer[temp*3+0] = r;
+            gb_sgb_tiles_buffer[temp*3+1] = g;
+            gb_sgb_tiles_buffer[temp*3+2] = b;
+        }
+	}
+}
+
+static void _win_gb_sgbviewer_draw_tiles_zoomed_tile(void)
+{
+    u32 * tile_ptr = &SGBInfo.tile_data[((8*8*4)/8) * gb_sgb_tiles_selected_index];
+
+    u32 x,y;
+    for(y = 0; y < 8; y++) for(x = 0; x < 8; x++)
+    {
+        u32 * data = tile_ptr;
+        u32 * data2 = tile_ptr + 16;
+
+        data += y<<1;
+        data2 += y<<1;
+
+        u32 x_ = 7-x;
+
+        u32 color = (*data >> x_) & 1;
+        color |= ( ( ( (*(data+1)) >> x_) << 1) & (1<<1));
+        color |= ( ( ( (*data2) >> x_) << 2) & (1<<2));
+        color |= ( ( ( (*(data2+1)) >> x_) << 3) & (1<<3));
+        color = SGBInfo.palette[gb_sgb_tiles_selected_pal][color];
+
+        int i,j;
+        for(i = 0; i < 8; i++) for(j = 0; j < 8; j++)
+        {
+            int temp = (((y*8)+j)*64) + (x*8)+i;
+            int r,g,b;
+            rgb16to32(color,&r,&g,&b);
+            gb_sgb_tiles_zoomed_tile_buffer[temp*3+0] = r;
+            gb_sgb_tiles_zoomed_tile_buffer[temp*3+1] = g;
+            gb_sgb_tiles_zoomed_tile_buffer[temp*3+2] = b;
+        }
+    }
+
+    //Mark in buffer the zoomed tile
+    GUI_Draw_SetDrawingColor(255,0,0);
+    int l = (gb_sgb_tiles_selected_index%16)*8; //left
+    int t = (gb_sgb_tiles_selected_index/16)*8; // top
+    int r = l + 7; // right
+    int b = t + 7; // bottom
+    GUI_Draw_Rect(gb_sgb_tiles_buffer,128,128,l,r,t,b);
+}
+
+static void _win_gb_sgbviewer_draw_atf(void)
+{
+    memset(gb_sgb_atf_buffer,0,161*145*3);
+
+	u32 i,j;
+	for(i = 0; i < 20; i++) for(j = 0; j < 18; j++)
+	{
+        u32 pal = SGBInfo.ATF_list[gb_sgb_atf_selected_index][ (20*j) + i];
+
+        u32 x,y;
+        for(y = 0; y < 8; y++) for(x = 0; x < 8; x++)
+        {
+            if( ! ( (x == 0) || (y == 0) ) )
+            {
+                u32 color;
+                if(x < 4)
+                {
+                    if(y < 4) color = 0;
+                    else color = 2;
+                }
+                else
+                {
+                    if(y < 4) color = 1;
+                    else color = 3;
+                }
+
+                int temp = ((y+(j<<3))*(160+1)) + (x+(i<<3));
+
+                color = SGBInfo.palette[pal][color];
+
+                int r,g,b;
+                rgb16to32(color,&r,&g,&b);
+                gb_sgb_atf_buffer[temp*3+0] = r;
+                gb_sgb_atf_buffer[temp*3+1] = g;
+                gb_sgb_atf_buffer[temp*3+2] = b;
+            }
+        }
+	}
+
+    //Mark in buffer the selected tile
+    GUI_Draw_SetDrawingColor(255,0,0);
+    int l = gb_sgb_atf_selected_x*8; //left
+    int t = gb_sgb_atf_selected_y*8; // top
+    int r = l + 8; // right
+    int b = t + 8; // bottom
+    GUI_Draw_Rect(gb_sgb_atf_buffer,160+1,144+1,l,r,t,b);
+    l++; r--; t++; b--;
+    GUI_Draw_Rect(gb_sgb_atf_buffer,160+1,144+1,l,r,t,b);
+
+    u32 pal = SGBInfo.ATF_list[gb_sgb_atf_selected_index][ (20*gb_sgb_atf_selected_y) + gb_sgb_atf_selected_x];
+
+    GUI_ConsoleClear(&gb_sgbview_atf_con);
+
+    GUI_ConsoleModePrintf(&gb_sgbview_atf_con,0,0,"Sel: %2d\nX: %d\nY: %d\nPal: %d\nNow: %2d",
+        gb_sgb_atf_selected_index, gb_sgb_atf_selected_x, gb_sgb_atf_selected_y, pal, SGBInfo.curr_ATF);
+}
+
+static void _win_gb_sgbviewer_draw_pal(void)
+{
+    GUI_ConsoleClear(&gb_sgbview_pal_con);
+
+    u32 color = SGBInfo.palette[gb_sgb_pal_selected_pal][gb_sgb_pal_selected_color];
+    GUI_ConsoleModePrintf(&gb_sgbview_pal_con,0,0,"Color: P%d[%d]\nRGB: %d,%d,%d",
+                          gb_sgb_pal_selected_pal, gb_sgb_pal_selected_color,
+                          color&0x1F, (color>>5)&0x1F, (color>>10)&0x1F);
+
+    memset(gb_sgb_pal_buffer,192,160*80*3);
+
+    int i;
+    for(i = 0; i < 8*16; i++)
+    {
+        if(!( ((i/16)<4) && ((i%16)>=4) ))
+        {
+            int r,g,b;
+            rgb16to32(SGBInfo.palette[i/16][i%16] ,&r,&g,&b);
+            GUI_Draw_SetDrawingColor(r,g,b);
+            GUI_Draw_FillRect(gb_sgb_pal_buffer,160,80,
+                          ((i%16)*10)+1,((i%16)*10)+8, ((i/16)*10)+1,((i/16)*10)+8);
+        }
+        else
+        {
+            int x,y;
+            for(y = 1; y < 9; y++) for(x = 1; x < 9; x++)
+            {
+                int x_ = (i%16)*10 + x;
+                int y_ = (i/16)*10 + y;
+
+                int r = 0;
+                if( (((x-1)&~1)==((y-1)&~1)) ) r = 255;
+
+                gb_sgb_pal_buffer[(y_*160+x_)*3+0] = r;
+                gb_sgb_pal_buffer[(y_*160+x_)*3+1] = 0;
+                gb_sgb_pal_buffer[(y_*160+x_)*3+2] = 0;
+            }
+        }
+    }
+
+    //Mark in buffer the selected color
+    GUI_Draw_SetDrawingColor(255,0,0);
+    int l = gb_sgb_pal_selected_color*10; //left
+    int t = gb_sgb_pal_selected_pal*10; // top
+    int r = l + 9; // right
+    int b = t + 9; // bottom
+    GUI_Draw_Rect(gb_sgb_pal_buffer,160,80,l,r,t,b);
+    l++; r--; t++; b--;
+    GUI_Draw_Rect(gb_sgb_pal_buffer,160,80,l,r,t,b);
+}
+
+static void _win_gb_sgbviewer_packetdata_update(void)
+{
+    GUI_ConsoleClear(&gb_sgbview_packet_con);
+
+    int numpackets = SGBInfo.data[0][0]&0x07;
+    if(numpackets == 0) numpackets = 1;
+    u32 i = 0;
+	while(numpackets--)
+	{
+	    GUI_ConsoleModePrintf(&gb_sgbview_packet_con,0,i+2,
+            "%d : %02X%02X %02X%02X %02X%02X %02X%02X %02X%02X %02X%02X %02X%02X %02X%02X",
+            i+1,SGBInfo.data[i][0],SGBInfo.data[i][1],SGBInfo.data[i][2],SGBInfo.data[i][3],
+            SGBInfo.data[i][4],SGBInfo.data[i][5],SGBInfo.data[i][6],SGBInfo.data[i][7],
+            SGBInfo.data[i][8],SGBInfo.data[i][9],SGBInfo.data[i][10],SGBInfo.data[i][11],
+            SGBInfo.data[i][12],SGBInfo.data[i][13],SGBInfo.data[i][14],SGBInfo.data[i][15]);
+        i++;
+	}
+
+    //--------------------------------------
+
+    const char * command_names[0x20] = {
+        "PAL01","PAL23","PAL03","PAL12","ATTR_BLK","ATTR_LIN","ATTR_DIV","ATTR_CHR",
+        "SOUND","SOU_TRN","PAL_SET","PAL_TRN","ATRC_EN","TEST_EN","ICON_EN","DATA_SND",
+        "DATA_TRN","MLT_REG","JUMP","CHR_TRN","PCT_TRN","ATTR_TRN","ATTR_SET","MASK_EN",
+        "OBJ_TRN","???","UNKNOWN","UNKNOWN","UNKNOWN","UNKNOWN","BIOS_1 (?)","BIOS_2 (?)"
+    };
+
+    const char * command_len[0x20] = {
+        "1","1","1","1","1~7","1~7","1","1~6",
+        "1","1","1","1","1","1","1","1",
+        "1","1","1","1","1","1","1","1",
+        "1","1?","?","?","?","?","1?","1?"
+    };
+
+    GUI_ConsoleModePrintf(&gb_sgbview_packet_con,0,0,"Command: 0x%02X %s | Length = %s",(SGBInfo.data[0][0]>>3)&0x1F,
+        command_names[(SGBInfo.data[0][0]>>3)&0x1F],command_len[(SGBInfo.data[0][0]>>3)&0x1F]);
+}
+
+static void _win_gb_sgbviewer_otherinfo_update(void)
+{
+    GUI_ConsoleClear(&gb_sgbview_otherinfo_con);
+
+    const char * screen_mode[4] = {"Normal","Freeze","Black","Backdrop"};
+
+    GUI_ConsoleModePrintf(&gb_sgbview_otherinfo_con,0,0,"Players: %d\n\nScrn: %s\n\nAttraction: %d\n"
+        "Test Speed: %d\n\nSGB Disabled: %d",
+        SGBInfo.multiplayer != 0 ? SGBInfo.multiplayer : 1,
+        screen_mode[SGBInfo.freeze_screen],SGBInfo.attracion_mode,SGBInfo.test_speed_mode,
+        SGBInfo.disable_sgb);
+}
+
 //----------------------------------------------------------------
 
 static int _win_gb_sgbviewer_border_bmp_callback(int x, int y)
 {
     gb_sgb_border_tilex = x/8;
     gb_sgb_border_tiley = y/8;
+    return 1;
+}
+
+static int _win_gb_sgbviewer_tiles_bmp_callback(int x, int y)
+{
+    gb_sgb_tiles_selected_index = (y/8)*16+(x/8);
+    return 1;
+}
+
+static void _win_gb_sgbviewer_tiles_select_pal_scrollbar_callback(int value)
+{
+    gb_sgb_tiles_selected_pal = value;
+}
+
+static int _win_gb_sgbviewer_atf_bmp_callback(int x, int y)
+{
+    gb_sgb_atf_selected_x = x/8;
+    gb_sgb_atf_selected_y = y/8;
+
+    if(gb_sgb_atf_selected_x >= 20) gb_sgb_atf_selected_x = 20-1;
+    if(gb_sgb_atf_selected_y >= 18) gb_sgb_atf_selected_y = 18-1;
+
+    return 1;
+}
+
+static void _win_gb_sgbviewer_atf_select_scrollbar_callback(int value)
+{
+    gb_sgb_atf_selected_index = value;
+}
+
+static int _win_gb_sgbviewer_pal_bmp_callback(int x, int y)
+{
+    if( ! ((x >= 40) && (y < 40)) )
+    {
+        gb_sgb_pal_selected_pal = y/10;
+        gb_sgb_pal_selected_color = x/10;
+    }
     return 1;
 }
 
@@ -254,7 +601,16 @@ void Win_GB_SGBViewerUpdate(void)
     _win_gb_sgbviewer_draw_border();
     _win_gb_sgbviewer_draw_border_zoomed_tile();
 
+    _win_gb_sgbviewer_draw_tiles();
+    _win_gb_sgbviewer_draw_tiles_zoomed_tile();
 
+    _win_gb_sgbviewer_draw_atf();
+
+    _win_gb_sgbviewer_draw_pal();
+
+    _win_gb_sgbviewer_packetdata_update();
+
+    _win_gb_sgbviewer_otherinfo_update();
 }
 
 //----------------------------------------------------------------
@@ -414,6 +770,170 @@ static void _win_gb_sgbviewer_border_dump_btn_callback(void)
     Win_GB_SGBViewerUpdate();
 }
 
+static void _win_gb_sgbviewer_tiles_dump_btn_callback(void)
+{
+    if(Win_MainRunningGB() == 0) return;
+
+    if(GameBoy.Emulator.SGBEnabled == 0) return;
+
+    char * tiles_buff = malloc(128*128*4);
+    if(tiles_buff == NULL)
+        return;
+
+    u32 i,j;
+	for(i = 0; i < 16; i++) for(j = 0; j < 16; j++)
+	{
+	    u32 tile = i + j*16;
+
+        u32 * tile_ptr = &SGBInfo.tile_data[((8*8*4)/8) * tile];
+
+        u32 x,y;
+        for(y = 0; y < 8; y++) for(x = 0; x < 8; x++)
+        {
+            u32 * data = tile_ptr;
+            u32 * data2 = tile_ptr + 16;
+
+            data += y<<1;
+            data2 += y<<1;
+
+            u32 x_ = 7-x;
+
+            u32 color = (*data >> x_) & 1;
+            color |= ( ( ( (*(data+1)) >> x_) << 1) & (1<<1));
+            color |= ( ( ( (*data2) >> x_) << 2) & (1<<2));
+            color |= ( ( ( (*(data2+1)) >> x_) << 3) & (1<<3));
+            color = SGBInfo.palette[gb_sgb_tiles_selected_pal][color];
+
+            int temp = ((y+(j<<3))*128) + (x+(i<<3));
+
+            int r,g,b;
+            rgb16to32(color,&r,&g,&b);
+            tiles_buff[temp*4+0] = r;
+            tiles_buff[temp*4+1] = g;
+            tiles_buff[temp*4+2] = b;
+            tiles_buff[temp*4+3] = 0xFF;
+        }
+	}
+
+    char * name = FU_GetNewTimestampFilename("gb_sgb_tiles");
+    Save_PNG(name,128,128,tiles_buff,0);
+
+	free(tiles_buff);
+
+    Win_GB_SGBViewerUpdate();
+}
+
+static void _win_gb_sgbviewer_atf_dump_btn_callback(void)
+{
+    if(Win_MainRunningGB() == 0) return;
+
+    if(GameBoy.Emulator.SGBEnabled == 0) return;
+
+    char * buf = calloc(161*145*4,1);
+    if(buf == NULL)
+        return;
+
+	u32 i,j;
+	for(i = 0; i < 20; i++) for(j = 0; j < 18; j++)
+	{
+        u32 pal = SGBInfo.ATF_list[gb_sgb_atf_selected_index][ (20*j) + i];
+
+        u32 x,y;
+        for(y = 0; y < 8; y++) for(x = 0; x < 8; x++)
+        {
+            if( ! ( (x == 0) || (y == 0) ) )
+            {
+                u32 color;
+                if(x < 4)
+                {
+                    if(y < 4) color = 0;
+                    else color = 2;
+                }
+                else
+                {
+                    if(y < 4) color = 1;
+                    else color = 3;
+                }
+
+                int temp = ((y+(j<<3))*(160+1)) + (x+(i<<3));
+
+                color = SGBInfo.palette[pal][color];
+
+                int r,g,b;
+                rgb16to32(color,&r,&g,&b);
+                buf[temp*4+0] = r;
+                buf[temp*4+1] = g;
+                buf[temp*4+2] = b;
+                buf[temp*4+3] = 0xFF;
+            }
+        }
+	}
+
+    char * name = FU_GetNewTimestampFilename("gb_sgb_atf");
+    Save_PNG(name,161,145,buf,0);
+
+	free(buf);
+
+    Win_GB_SGBViewerUpdate();
+}
+
+static void _win_gb_sgbviewer_pal_dump_btn_callback(void)
+{
+    if(Win_MainRunningGB() == 0) return;
+
+    if(GameBoy.Emulator.SGBEnabled == 0) return;
+
+    char * buf = malloc(160*80*4);
+    if(buf == NULL)
+        return;
+
+    //draw as normal
+	memset(gb_sgb_pal_buffer,192,160*80*3);
+
+    int i;
+    for(i = 0; i < 8*16; i++)
+    {
+        if(!( ((i/16)<4) && ((i%16)>=4) ))
+        {
+            int r,g,b;
+            rgb16to32(SGBInfo.palette[i/16][i%16] ,&r,&g,&b);
+            GUI_Draw_SetDrawingColor(r,g,b);
+            GUI_Draw_FillRect(gb_sgb_pal_buffer,160,80,
+                          ((i%16)*10)+1,((i%16)*10)+8, ((i/16)*10)+1,((i/16)*10)+8);
+        }
+        else
+        {
+            int x,y;
+            for(y = 1; y < 9; y++) for(x = 1; x < 9; x++)
+            {
+                int x_ = (i%16)*10 + x;
+                int y_ = (i/16)*10 + y;
+
+                int r = 0;
+                if( (((x-1)&~1)==((y-1)&~1)) ) r = 255;
+
+                gb_sgb_pal_buffer[(y_*160+x_)*3+0] = r;
+                gb_sgb_pal_buffer[(y_*160+x_)*3+1] = 0;
+                gb_sgb_pal_buffer[(y_*160+x_)*3+2] = 0;
+            }
+        }
+    }
+
+    for(i = 0; i < 160*80; i++)
+    {
+        buf[i*4+0] = gb_sgb_pal_buffer[i*3+0];
+        buf[i*4+1] = gb_sgb_pal_buffer[i*3+1];
+        buf[i*4+2] = gb_sgb_pal_buffer[i*3+2];
+        buf[i*4+3] = 0xFF;
+    }
+
+    char * name = FU_GetNewTimestampFilename("gb_sgb_pal");
+    Save_PNG(name,160,80,buf,0);
+
+	free(buf);
+
+    Win_GB_SGBViewerUpdate();
+}
 //----------------------------------------------------------------
 
 int Win_GB_SGBViewerCreate(void)
@@ -425,7 +945,7 @@ int Win_GB_SGBViewerCreate(void)
 
     if(GameBoy.Emulator.SGBEnabled == 0) return 0;
 
-    //Border
+    // Border
 
     GUI_SetLabel(&gb_sgbview_border_label,6,6,6*FONT_WIDTH,FONT_HEIGHT,"Border");
 
@@ -436,15 +956,88 @@ int Win_GB_SGBViewerCreate(void)
 
     GUI_SetBitmap(&gb_sgbview_border_zoomed_tile_bmp, 6,286, 64,64,gb_sgb_border_zoomed_tile_buffer, NULL);
 
-    GUI_SetButton(&gb_sgbview_border_dump_btn,159,286,FONT_WIDTH*6,FONT_HEIGHT*2,"Dump",
+    GUI_SetButton(&gb_sgbview_border_dump_btn,159,286,FONT_WIDTH*14,FONT_HEIGHT*2,"Dump border",
                   _win_gb_sgbviewer_border_dump_btn_callback);
 
     gb_sgb_border_tilex = 0;
     gb_sgb_border_tiley = 0;
 
-    //...
+    // Tiles
 
+    GUI_SetLabel(&gb_sgbview_tiles_label,274,6,5*FONT_WIDTH,FONT_HEIGHT,"Tiles");
 
+    GUI_SetBitmap(&gb_sgbview_tiles_bmp, 274,24, 128,128,gb_sgb_tiles_buffer,
+                  _win_gb_sgbviewer_tiles_bmp_callback);
+
+    GUI_SetBitmap(&gb_sgbview_tiles_bmp, 274,24, 128,128,gb_sgb_tiles_buffer,
+                  _win_gb_sgbviewer_tiles_bmp_callback);
+
+    GUI_SetScrollBar(&gb_sgbview_tiles_select_pal_scrollbar, 408,24, 64, 12,
+                     4,7, 4,  _win_gb_sgbviewer_tiles_select_pal_scrollbar_callback);
+
+    GUI_SetTextBox(&gb_sgbview_tiles_textbox,&gb_sgbview_tiles_con,
+                   408,42,9*FONT_WIDTH,2*FONT_HEIGHT, NULL);
+
+    GUI_SetBitmap(&gb_sgbview_tiles_zoomed_tile_bmp, 408,88, 64,64,gb_sgb_tiles_zoomed_tile_buffer,
+                  NULL);
+
+    GUI_SetButton(&gb_sgbview_tiles_dump_btn,159,316,FONT_WIDTH*14,FONT_HEIGHT*2,"Dump tiles",
+                  _win_gb_sgbviewer_tiles_dump_btn_callback);
+
+    gb_sgb_tiles_selected_index = 0;
+    gb_sgb_tiles_selected_pal = 4;
+
+    // Attribute Files (ATFs)
+
+    GUI_SetLabel(&gb_sgbview_atf_label,274,164,22*FONT_WIDTH,FONT_HEIGHT,"Attribute Files (ATFs)");
+
+    GUI_SetBitmap(&gb_sgbview_atf_bmp, 274,182, 160+1,144+1,gb_sgb_atf_buffer,
+                  _win_gb_sgbviewer_atf_bmp_callback);
+
+    GUI_SetScrollBar(&gb_sgbview_atf_select_scrollbar, 274,327, 160+1, 12,
+                     0,0x2D-1, 0,  _win_gb_sgbviewer_atf_select_scrollbar_callback);
+
+    GUI_SetTextBox(&gb_sgbview_atf_textbox,&gb_sgbview_atf_con,
+                   441,182,8*FONT_WIDTH,5*FONT_HEIGHT, NULL);
+
+    GUI_SetButton(&gb_sgbview_atf_dump_btn,441,248,FONT_WIDTH*8,FONT_HEIGHT*2,"Dump",
+                  _win_gb_sgbviewer_atf_dump_btn_callback);
+
+    gb_sgb_atf_selected_index = 0;
+    gb_sgb_atf_selected_x = 0;
+    gb_sgb_atf_selected_y = 0;
+
+    // Palettes
+
+    GUI_SetLabel(&gb_sgbview_pal_label,6,362,8*FONT_WIDTH,FONT_HEIGHT,"Palettes");
+
+    GUI_SetBitmap(&gb_sgbview_pal_bmp, 6,380, 160,80,gb_sgb_pal_buffer,
+                  _win_gb_sgbviewer_pal_bmp_callback);
+
+    GUI_SetTextBox(&gb_sgbview_pal_textbox,&gb_sgbview_pal_con,
+                   6,466,14*FONT_WIDTH,2*FONT_HEIGHT, NULL);
+
+    GUI_SetButton(&gb_sgbview_pal_dump_btn,110,466,FONT_WIDTH*8,FONT_HEIGHT*2,"Dump",
+                  _win_gb_sgbviewer_pal_dump_btn_callback);
+
+    gb_sgb_pal_selected_pal = 0;
+    gb_sgb_pal_selected_color = 0;
+
+    // Packet data
+
+    GUI_SetLabel(&gb_sgbview_packet_label,178,362,11*FONT_WIDTH,FONT_HEIGHT,"Packet data");
+
+    GUI_SetTextBox(&gb_sgbview_packet_textbox,&gb_sgbview_packet_con,
+                   178,380,45*FONT_WIDTH,9*FONT_HEIGHT, NULL);
+
+    // Other info
+
+    GUI_SetLabel(&gb_sgbview_otherinfo_label,484,6,11*FONT_WIDTH,FONT_HEIGHT,"Other info.");
+
+    GUI_SetTextBox(&gb_sgbview_otherinfo_textbox,&gb_sgbview_otherinfo_con,
+                   484,24,16*FONT_WIDTH,8*FONT_HEIGHT, NULL);
+
+    //---------------
 
     GB_SGBViewerCreated = 1;
 
@@ -469,440 +1062,3 @@ void Win_GB_SGBViewerClose(void)
 }
 
 //----------------------------------------------------------------
-
-#if 0
-
-static HWND hComboTilesPal, hStaticTilesetInfo;
-static u32 sgbtiles[128*128], sgbtiletileset[64*64];;
-static int SelectedTileTileset;
-
-static HWND hWndScrollATF, hEditATFInfo;
-static u32 atfscreen[(160+1)*(144+1)];
-static int SelectedATF, SelectedATFTile;
-
-static HWND hEditPaletteInfo;
-static int SelectedPal;
-
-static HWND hEditPacketData;
-
-static HWND hStaticCommandInfo;
-
-static HWND hEditOtherInfo;
-
-//-----------------
-
-static inline u32 rgb16to32(u32 color)
-{
-    return ( ((color&0x1F)<<(3+16)) | (((color>>5)&0x1F)<<(3+8)) | (((color>>10)&0x1F)<<3) );
-}
-
-static inline COLORREF rgb16toCOLORREF(u16 color)
-{
-    return RGB((color & 31)<<3,((color >> 5) & 31)<<3,((color >> 10) & 31)<<3);
-}
-
-//-----------------
-
-static void SGB_TilesDraw(void) // 4 ~ 7
-{
-    u32 pal = SendMessage(hComboTilesPal, CB_GETCURSEL, 0, 0)+4;
-
-    u32 i,j;
-	for(i = 0; i < 16; i++) for(j = 0; j < 16; j++)
-	{
-	    u32 tile = i + j*16;
-
-        u32 * tile_ptr = &SGBInfo.tile_data[((8*8*4)/8) * tile];
-
-        u32 x,y;
-        for(y = 0; y < 8; y++) for(x = 0; x < 8; x++)
-        {
-            u32 * data = tile_ptr;
-            u32 * data2 = tile_ptr + 16;
-
-            data += y<<1;
-            data2 += y<<1;
-
-            u32 x_ = 7-x;
-
-            u32 color = (*data >> x_) & 1;
-            color |= ( ( ( (*(data+1)) >> x_) << 1) & (1<<1));
-            color |= ( ( ( (*data2) >> x_) << 2) & (1<<2));
-            color |= ( ( ( (*(data2+1)) >> x_) << 3) & (1<<3));
-            color = SGBInfo.palette[pal][color];
-
-            int temp = ((y+(j<<3))*128) + (x+(i<<3));
-            sgbtiles[temp] = rgb16to32(color);
-        }
-	}
-}
-
-static void sgb_updatetilesetinfo(void)
-{
-    char text[20];
-    sprintf(text,"Tile: %d",  SelectedTileTileset);
-    SetWindowText(hStaticTilesetInfo,(LPCTSTR)text);
-
-    //--------------------
-
-    u32 pal = SendMessage(hComboTilesPal, CB_GETCURSEL, 0, 0)+4;
-    u32 * tile_ptr = &SGBInfo.tile_data[((8*8*4)/8) * SelectedTileTileset];
-
-    u32 x,y;
-    for(y = 0; y < 8; y++) for(x = 0; x < 8; x++)
-    {
-        u32 * data = tile_ptr;
-        u32 * data2 = tile_ptr + 16;
-
-        data += y<<1;
-        data2 += y<<1;
-
-        u32 x_ = 7-x;
-
-        u32 color = (*data >> x_) & 1;
-        color |= ( ( ( (*(data+1)) >> x_) << 1) & (1<<1));
-        color |= ( ( ( (*data2) >> x_) << 2) & (1<<2));
-        color |= ( ( ( (*(data2+1)) >> x_) << 3) & (1<<3));
-        color = SGBInfo.palette[pal][color];
-
-        int i,j;
-        for(i = 0; i < 8; i++) for(j = 0; j < 8; j++)
-        {
-            int temp = (((y*8)+j)*64) + (x*8)+i;
-            sgbtiletileset[temp] = rgb16to32(color);
-        }
-    }
-}
-
-//-----------------
-
-static inline u32 SGB_GetATFPal(u32 atf, u32 tilex, u32 tiley)
-{
-	return SGBInfo.ATF_list[atf][ (20*tiley) + tilex];
-}
-
-static void SGB_ATFDraw(int atf) // 0 ~ 0x2D-1
-{
-	u32 i,j;
-	for(i = 0; i < 20; i++) for(j = 0; j < 18; j++)
-	{
-        u32 pal = SGB_GetATFPal(atf,i,j);
-
-        u32 x,y;
-        for(y = 0; y < 8; y++) for(x = 0; x < 8; x++)
-        {
-            int temp = ((y+(j<<3))*(160+1)) + (x+(i<<3));
-
-            if( (x == 0) || (y == 0) )
-            {
-                atfscreen[temp] = 0;
-            }
-            else
-            {
-                u32 color;
-                if(x < 4)
-                {
-                    if(y < 4) color = 0;
-                    else color = 2;
-                }
-                else
-                {
-                    if(y < 4) color = 1;
-                    else color = 3;
-                }
-
-                color = SGBInfo.palette[pal][color];
-                atfscreen[temp] = rgb16to32(color);
-            }
-        }
-	}
-
-	for(i = 0; i < 161; i++) atfscreen[144*(160+1)+i] = 0;
-	for(j = 0; j < 145; j++) atfscreen[j*(160+1)+161] = 0;
-}
-
-static void sgb_updateatfinfo(void)
-{
-    char text[30];
-    sprintf(text,"ATF: %2d\r\nX: %2d\r\nY: %2d\r\nPal: %d\r\n\r\nNow: %2d",  SelectedATF,
-        SelectedATFTile%20, SelectedATFTile/20,
-        SGB_GetATFPal(SelectedATF,SelectedATFTile%20,SelectedATFTile/20), SGBInfo.curr_ATF);
-    SetWindowText(hEditATFInfo,(LPCTSTR)text);
-}
-
-//-----------------
-
-static void sgb_updatepalinfo(void)
-{
-    u32 color = SGBInfo.palette[SelectedPal/16][SelectedPal%16];
-    char text[200];
-    sprintf(text,"Pal: %d|Color: %2d\r\nRGB: %2d,%2d,%2d",  SelectedPal/16, SelectedPal%16,
-        color&0x1F, (color>>5)&0x1F, (color>>10)&0x1F);
-    SetWindowText(hEditPaletteInfo,(LPCTSTR)text);
-}
-
-//-----------------
-
-static void sgb_updatepacketinfo(void)
-{
-    char endtext[1000];
-    memset(endtext,0,sizeof(endtext));
-
-    int numpackets = SGBInfo.data[0][0]&0x07;
-    if(numpackets == 0) numpackets = 1;
-    u32 i = 0;
-	while(numpackets--)
-	{
-	    char text[100];
-        sprintf(text,"%d : %02X%02X %02X%02X %02X%02X %02X%02X %02X%02X %02X%02X %02X%02X %02X%02X",
-            i+1,SGBInfo.data[i][0],SGBInfo.data[i][1],SGBInfo.data[i][2],SGBInfo.data[i][3],
-            SGBInfo.data[i][4],SGBInfo.data[i][5],SGBInfo.data[i][6],SGBInfo.data[i][7],
-            SGBInfo.data[i][8],SGBInfo.data[i][9],SGBInfo.data[i][10],SGBInfo.data[i][11],
-            SGBInfo.data[i][12],SGBInfo.data[i][13],SGBInfo.data[i][14],SGBInfo.data[i][15]);
-        strcat(endtext,text);
-        if(numpackets) strcat(endtext,"\r\n");
-        i++;
-	}
-    SetWindowText(hEditPacketData,(LPCTSTR)endtext);
-
-    //--------------------------------------
-
-    char * command_names[0x20] = {
-            "PAL01","PAL23","PAL03","PAL12","ATTR_BLK","ATTR_LIN","ATTR_DIV","ATTR_CHR",
-            "SOUND","SOU_TRN","PAL_SET","PAL_TRN","ATRC_EN","TEST_EN","ICON_EN","DATA_SND",
-            "DATA_TRN","MLT_REG","JUMP","CHR_TRN","PCT_TRN","ATTR_TRN","ATTR_SET","MASK_EN",
-            "OBJ_TRN","???","UNKNOWN","UNKNOWN","UNKNOWN","UNKNOWN","BIOS_1 (?)","BIOS_2 (?)"
-    };
-    char * command_len[0x20] = {
-        "1","1","1","1","1~7","1~7","1","1~6",
-        "1","1","1","1","1","1","1","1",
-        "1","1","1","1","1","1","1","1",
-        "1","1?","?","?","?","?","1?","1?"
-    };
-    sprintf(endtext,"CMD:0x%02X %s(%s)",(SGBInfo.data[0][0]>>3)&0x1F,
-        command_names[(SGBInfo.data[0][0]>>3)&0x1F],command_len[(SGBInfo.data[0][0]>>3)&0x1F]);
-    SetWindowText(hStaticCommandInfo,(LPCTSTR)endtext);
-}
-
-//-----------------
-
-static void sgb_updateotherinfo(void)
-{
-    char * srcmode[4] = {"Normal","Freeze","Black","Backdrop"};
-
-    char text[200];
-    sprintf(text,"Players: %d\r\n\r\nScreen: %s\r\n\r\nAttraction: %d\r\n"
-        "Test Speed: %d\r\n\r\nSGB Disabled: %d",
-        SGBInfo.multiplayer != 0 ? SGBInfo.multiplayer : 1,
-        srcmode[SGBInfo.freeze_screen],SGBInfo.attracion_mode,SGBInfo.test_speed_mode,
-        SGBInfo.disable_sgb);
-    SetWindowText(hEditOtherInfo,(LPCTSTR)text);
-}
-
-//-----------------
-
-void GLWindow_SGBViewerUpdate(void)
-{
-    if(ViewerCreated == 0) return;
-
-    if(RUNNING != RUN_GB) return;
-    if(GameBoy.Emulator.SGBEnabled == 0) return;
-
-    SGB_ScreenDraw();
-    sgb_updatescreeninfo();
-
-    SGB_TilesDraw();
-    sgb_updatetilesetinfo();
-
-    SelectedATF = SGBInfo.curr_ATF;
-    SetScrollPos(hWndScrollATF, SB_CTL, SelectedATF, TRUE);
-    SGB_ATFDraw(SelectedATF);
-    sgb_updateatfinfo();
-
-    sgb_updatepalinfo();
-
-    sgb_updatepacketinfo();
-
-    sgb_updateotherinfo();
-
-    InvalidateRect(hWndSGBViewer, NULL, FALSE);
-}
-
-static LRESULT CALLBACK SGBViewerProcedure(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
-{
-    static HFONT hFont, hFontFixed;
-
-    switch(Msg)
-    {
-        case WM_PAINT:
-        {
-            //START
-            PAINTSTRUCT Ps;
-            HBRUSH hBrush;
-            RECT sel_rc;
-            HDC hDC = BeginPaint(hWnd, &Ps);
-
-            //SGB SCREEN
-            HBITMAP bitmap = CreateBitmap(256, 256, 1, 32, sgbscreen);
-            HDC MemDC = CreateCompatibleDC(hDC);
-            SelectObject(MemDC, bitmap);
-            BitBlt(hDC, 15, 25, 256, 256, MemDC, 0, 0, SRCCOPY);
-            DeleteDC(MemDC);
-            DeleteObject(bitmap);
-
-            hBrush = (HBRUSH)CreateSolidBrush( RGB(255,0,0) );
-            sel_rc.left = 15 + ((SelectedTileScreen%32)*8);
-            sel_rc.top = 25 + ((SelectedTileScreen/32)*8);
-            sel_rc.right = sel_rc.left + 8;
-            sel_rc.bottom = sel_rc.top + 8;
-            FrameRect(hDC,&sel_rc,hBrush);
-            DeleteObject(hBrush);
-
-            bitmap = CreateBitmap(64, 64, 1, 32, sgbtilescreen);
-            MemDC = CreateCompatibleDC(hDC);
-            SelectObject(MemDC, bitmap);
-            BitBlt(hDC, 15, 285, 64, 64, MemDC, 0, 0, SRCCOPY);
-            DeleteDC(MemDC);
-            DeleteObject(bitmap);
-
-            //SGB TILES
-            bitmap = CreateBitmap(128, 128, 1, 32, sgbtiles);
-            MemDC = CreateCompatibleDC(hDC);
-            SelectObject(MemDC, bitmap);
-            BitBlt(hDC, 300, 25, 128, 128, MemDC, 0, 0, SRCCOPY);
-            DeleteDC(MemDC);
-            DeleteObject(bitmap);
-
-            hBrush = (HBRUSH)CreateSolidBrush( RGB(255,0,0) );
-            sel_rc.left = 300 + ((SelectedTileTileset%16)*8);
-            sel_rc.top = 25 + ((SelectedTileTileset/16)*8);
-            sel_rc.right = sel_rc.left + 8;
-            sel_rc.bottom = sel_rc.top + 8;
-            FrameRect(hDC,&sel_rc,hBrush);
-            DeleteObject(hBrush);
-
-            bitmap = CreateBitmap(64, 64, 1, 32, sgbtiletileset);
-            MemDC = CreateCompatibleDC(hDC);
-            SelectObject(MemDC, bitmap);
-            BitBlt(hDC, 435, 88, 64, 64, MemDC, 0, 0, SRCCOPY);
-            DeleteDC(MemDC);
-            DeleteObject(bitmap);
-
-            //ATF
-            bitmap = CreateBitmap(160+1, 144+1, 1, 32, atfscreen);
-            MemDC = CreateCompatibleDC(hDC);
-            SelectObject(MemDC, bitmap);
-            BitBlt(hDC, 300, 185, 160+1, 144+1, MemDC, 0, 0, SRCCOPY);
-            DeleteDC(MemDC);
-            DeleteObject(bitmap);
-
-            hBrush = (HBRUSH)CreateSolidBrush( RGB(255,0,0) );
-            sel_rc.left = 300 + ((SelectedATFTile%20)*8);
-            sel_rc.top = 185 + ((SelectedATFTile/20)*8);
-            sel_rc.right = sel_rc.left + 9;
-            sel_rc.bottom = sel_rc.top + 9;
-            FrameRect(hDC,&sel_rc,hBrush);
-            DeleteObject(hBrush);
-
-            //PALETTES
-            HPEN hPen = (HPEN)CreatePen(PS_SOLID, 1, RGB(192,192,192));
-            SelectObject(hDC, hPen);
-            int i;
-            for(i = 0; i < 8*16; i++)
-            {
-                if(!( ((i/16)<4) && ((i%16)>=4) ))
-                {
-                    hBrush = (HBRUSH)CreateSolidBrush( rgb16toCOLORREF(SGBInfo.palette[i/16][i%16]) );
-                    SelectObject(hDC, hBrush);
-                    Rectangle(hDC, 15 + ((i%16)*10), 380 + ((i/16)*10), 15 + 10 + ((i%16)*10), 380 + 10 + ((i/16)*10));
-                    DeleteObject(hBrush);
-                }
-            }
-            DeleteObject(hPen);
-
-            hBrush = (HBRUSH)CreateSolidBrush( RGB(255,0,0) );
-            sel_rc.left = 15 + ((SelectedPal%16)*10);
-            sel_rc.top = 380 + ((SelectedPal/16)*10);
-            sel_rc.right = sel_rc.left + 10;
-            sel_rc.bottom = sel_rc.top + 10;
-            FrameRect(hDC,&sel_rc,hBrush);
-            sel_rc.left++; sel_rc.top++; sel_rc.right--; sel_rc.bottom--;
-            FrameRect(hDC,&sel_rc,hBrush);
-            DeleteObject(hBrush);
-
-            //END
-            EndPaint(hWnd, &Ps);
-            break;
-        }
-        case WM_HSCROLL:
-        {
-            int CurPos = GetScrollPos(hWndScrollATF, SB_CTL);
-            int update = 0;
-            switch (LOWORD(wParam))
-            {
-                case SB_LEFT: CurPos = 0; update = 1; break;
-                case SB_LINELEFT: if(CurPos > 0) { CurPos--; update = 1; } break;
-                case SB_PAGELEFT: if(CurPos >= 4) { CurPos-=4; update = 1; break; }
-                                  if(CurPos > 0) { CurPos = 0; update = 1; } break;
-                case SB_THUMBPOSITION: CurPos = HIWORD(wParam); update = 1; break;
-                case SB_THUMBTRACK: CurPos = HIWORD(wParam); update = 1; break;
-                case SB_PAGERIGHT: if(CurPos < 40) { CurPos+=4; update = 1; break; }
-                                   if(CurPos < 44) { CurPos = 44; update = 1; } break;
-                case SB_LINERIGHT: if(CurPos < 44) { CurPos++; update = 1; } break;
-                case SB_RIGHT: CurPos = 44; update = 1; break;
-                case SB_ENDSCROLL:
-                default:
-                    break;
-            }
-
-            if(update)
-            {
-                SetScrollPos(hWndScrollATF, SB_CTL, CurPos, TRUE);
-                SelectedATF = CurPos;
-                sgb_updateatfinfo();
-                SGB_ATFDraw(SelectedATF);
-                InvalidateRect(hWndSGBViewer, NULL, FALSE);
-            }
-            break;
-        }
-        case WM_LBUTTONDOWN:
-        {
-            int x = LOWORD(lParam);
-            int y = HIWORD(lParam);
-            //SGB SCREEN
-            if( (x>=15) && (x<15+256) && (y>=25) && (y<25+256) )
-            {
-                SelectedTileScreen = ((x-15)/8) + ((y-25)/8)*32;
-                sgb_updatescreeninfo();
-            }
-            //SGB TILES
-            if( (x>=300) && (x<300+128) && (y>=25) && (y<25+128) )
-            {
-                SelectedTileTileset = ((x-300)/8) + ((y-25)/8)*16;
-                sgb_updatetilesetinfo();
-            }
-            //ATF
-            if( (x>=300) && (x<300+160) && (y>=185) && (y<185+144) )
-            {
-                SelectedATFTile = ((x-300)/8) + ((y-185)/8)*20;
-                sgb_updateatfinfo();
-            }
-            //PALETTES
-            if( (x>=15) && (x<15+40) && (y>=380) && (y<420) )
-            {
-                SelectedPal = ((x-15)/10) + ((y-380)/10)*16;
-                sgb_updatepalinfo();
-            }
-            if( (x>=15) && (x<15+160) && (y>=420) && (y<460) )
-            {
-                SelectedPal = ((x-15)/10) + ((y-380)/10)*16;
-                sgb_updatepalinfo();
-            }
-            InvalidateRect(hWndSGBViewer, NULL, FALSE);
-            break;
-        }
-    }
-    return 0;
-}
-
-#endif // 0

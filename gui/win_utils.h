@@ -150,6 +150,8 @@ void GUI_SetScrollBar(_gui_element * e, int x, int y, int w, int h, int min_valu
 
 //----------------------------------------------------------------------------------------------
 
+void GUI_SetLabelCaption(_gui_element * e, const char * label);
+
 void GUI_RadioButtonSetEnabled(_gui_element * e, int enabled);
 void GUI_RadioButtonSetPressed(void * complete_gui, _gui_element * e); // complete_gui is a _gui pointer
 

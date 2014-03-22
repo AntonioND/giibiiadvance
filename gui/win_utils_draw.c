@@ -619,7 +619,7 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
         int range = e->info.scrollbar.value_max - e->info.scrollbar.value_min;
         if(range <= 0) range = 1;
 
-        int position = e->info.scrollbar.value * barsize / range;
+        int position = (e->info.scrollbar.value - e->info.scrollbar.value_min) * barsize / range;
 
         if(e->info.scrollbar.is_vertical)
         {

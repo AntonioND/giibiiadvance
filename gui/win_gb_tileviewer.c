@@ -61,6 +61,9 @@ static char gb_tile_bank1_buffer[GB_TILE_BUFFER_WIDTH*GB_TILE_BUFFER_HEIGHT*3];
 
 static char gb_tile_zoomed_tile_buffer[64*64*3];
 
+static int gb_tile_zoomed_tile_is_pal = 1;
+static int gb_tile_zoomed_tile_sel_pal = 0;
+
 //-----------------------------------------------------------------------------------
 
 static _gui_console gb_tileview_con;
@@ -72,6 +75,9 @@ static _gui_element gb_tileview_bank0_bmp, gb_tileview_bank1_bmp;
 static _gui_element gb_tileview_bank0_label, gb_tileview_bank1_label;
 
 static _gui_element gb_tileview_zoomed_tile_bmp;
+static _gui_element gb_tileview_zoomed_tile_bn_radbtn, gb_tileview_zoomed_tile_pal_radbtn;
+static _gui_element gb_tileview_zoomed_tile_pal_scrollbar;
+static _gui_element gb_tileview_zoomed_tile_pal_label;
 
 static _gui_element * gb_tileviwer_window_gui_elements[] = {
     &gb_tileview_bank0_label,
@@ -80,6 +86,10 @@ static _gui_element * gb_tileviwer_window_gui_elements[] = {
     &gb_tileview_bank1_bmp,
     &gb_tileview_zoomed_tile_bmp,
     &gb_tileview_textbox,
+    &gb_tileview_zoomed_tile_bn_radbtn,
+    &gb_tileview_zoomed_tile_pal_radbtn,
+    &gb_tileview_zoomed_tile_pal_scrollbar,
+    &gb_tileview_zoomed_tile_pal_label,
     &gb_tileview_dumpbtn,
     NULL
 };
@@ -106,6 +116,16 @@ static int _win_gb_tileviewer_bank1_bmp_callback(int x, int y)
     return 1;
 }
 
+static void _win_gb_tileviewer_pal_select_scrollbar_callback(int value)
+{
+    gb_tile_zoomed_tile_sel_pal = value;
+}
+
+static void _win_gb_tileviewer_zoomed_tile_bn_radbtn_callback(int num)
+{
+    gb_tile_zoomed_tile_is_pal = num;
+}
+
 //----------------------------------------------------------------
 
 void Win_GBTileViewerUpdate(void)
@@ -116,8 +136,21 @@ void Win_GBTileViewerUpdate(void)
 
     GUI_ConsoleClear(&gb_tileview_con);
 
-    GB_Debug_TileVRAMDraw(gb_tile_bank0_buffer,GB_TILE_BUFFER_WIDTH,GB_TILE_BUFFER_HEIGHT,
-                          gb_tile_bank1_buffer,GB_TILE_BUFFER_WIDTH,GB_TILE_BUFFER_HEIGHT);
+    if(gb_tile_zoomed_tile_is_pal == 0)
+    {
+        GB_Debug_TileVRAMDraw(gb_tile_bank0_buffer,GB_TILE_BUFFER_WIDTH,GB_TILE_BUFFER_HEIGHT,
+                              gb_tile_bank1_buffer,GB_TILE_BUFFER_WIDTH,GB_TILE_BUFFER_HEIGHT);
+    }
+    else
+    {
+        GB_Debug_TileVRAMDrawPaletted(gb_tile_bank0_buffer,GB_TILE_BUFFER_WIDTH,GB_TILE_BUFFER_HEIGHT,
+                                      gb_tile_bank1_buffer,GB_TILE_BUFFER_WIDTH,GB_TILE_BUFFER_HEIGHT,
+                                      gb_tile_zoomed_tile_sel_pal);
+    }
+
+    char text[8];
+    s_snprintf(text,sizeof(text),"Pal: %d",gb_tile_zoomed_tile_sel_pal);
+    GUI_SetLabelCaption(&gb_tileview_zoomed_tile_pal_label,text);
 
     GUI_Draw_SetDrawingColor(255,0,0);
     char * buf;
@@ -131,7 +164,11 @@ void Win_GBTileViewerUpdate(void)
     int b = t + 7; // bottom
     GUI_Draw_Rect(buf,GB_TILE_BUFFER_WIDTH,GB_TILE_BUFFER_HEIGHT,l,r,t,b);
 
-    GB_Debug_TileDrawZoomed64x64(gb_tile_zoomed_tile_buffer, gb_tileview_selected_index, gb_tileview_selected_bank);
+    if(gb_tile_zoomed_tile_is_pal == 0)
+        GB_Debug_TileDrawZoomed64x64(gb_tile_zoomed_tile_buffer, gb_tileview_selected_index, gb_tileview_selected_bank);
+    else
+        GB_Debug_TileDrawZoomedPaletted64x64(gb_tile_zoomed_tile_buffer, gb_tileview_selected_index,
+                                             gb_tileview_selected_bank,gb_tile_zoomed_tile_sel_pal);
 
     u32 tile = gb_tileview_selected_index;
     u32 tileindex = (tile > 255) ? (tile - 256) : (tile);
@@ -213,8 +250,17 @@ static void _win_gb_tileviewer_dump_btn_callback(void)
 {
     if(Win_MainRunningGB() == 0) return;
 
-    GB_Debug_TileVRAMDraw(gb_tile_bank0_buffer,GB_TILE_BUFFER_WIDTH,GB_TILE_BUFFER_HEIGHT,
-                          gb_tile_bank1_buffer,GB_TILE_BUFFER_WIDTH,GB_TILE_BUFFER_HEIGHT);
+    if(gb_tile_zoomed_tile_is_pal == 0)
+    {
+        GB_Debug_TileVRAMDraw(gb_tile_bank0_buffer,GB_TILE_BUFFER_WIDTH,GB_TILE_BUFFER_HEIGHT,
+                              gb_tile_bank1_buffer,GB_TILE_BUFFER_WIDTH,GB_TILE_BUFFER_HEIGHT);
+    }
+    else
+    {
+        GB_Debug_TileVRAMDrawPaletted(gb_tile_bank0_buffer,GB_TILE_BUFFER_WIDTH,GB_TILE_BUFFER_HEIGHT,
+                                      gb_tile_bank1_buffer,GB_TILE_BUFFER_WIDTH,GB_TILE_BUFFER_HEIGHT,
+                                      gb_tile_zoomed_tile_sel_pal);
+    }
 
     char buf0[GB_TILE_BUFFER_WIDTH*GB_TILE_BUFFER_HEIGHT*4];
     char buf1[GB_TILE_BUFFER_WIDTH*GB_TILE_BUFFER_HEIGHT*4];
@@ -272,6 +318,15 @@ int Win_GBTileViewerCreate(void)
     GUI_SetBitmap(&gb_tileview_zoomed_tile_bmp,6,48, 64,64, gb_tile_zoomed_tile_buffer,
                   NULL);
 
+    GUI_SetRadioButton(&gb_tileview_zoomed_tile_bn_radbtn,  6,118,6*FONT_WIDTH,18,
+                  "B/N", 0, 0, 0, _win_gb_tileviewer_zoomed_tile_bn_radbtn_callback);
+    GUI_SetRadioButton(&gb_tileview_zoomed_tile_pal_radbtn,  6+6*FONT_WIDTH+6,118,6*FONT_WIDTH,18,
+                  "Pal", 0, 1, 1, _win_gb_tileviewer_zoomed_tile_bn_radbtn_callback);
+
+    GUI_SetScrollBar(&gb_tileview_zoomed_tile_pal_scrollbar, 6,142, 90, 12,
+                     0,7, 0, _win_gb_tileviewer_pal_select_scrollbar_callback);
+    GUI_SetLabel(&gb_tileview_zoomed_tile_pal_label, 6,160, 6*FONT_WIDTH,FONT_HEIGHT,"Pal: -");
+
     GUI_SetButton(&gb_tileview_dumpbtn,6,192,FONT_WIDTH*6,FONT_HEIGHT*2,"Dump",
                   _win_gb_tileviewer_dump_btn_callback);
 
@@ -279,6 +334,9 @@ int Win_GBTileViewerCreate(void)
 
     gb_tileview_selected_bank = 0;
     gb_tileview_selected_index = 0;
+
+    gb_tile_zoomed_tile_is_pal = 1;
+    gb_tile_zoomed_tile_sel_pal = 0;
 
     WinIDGBTileViewer = WH_Create(WIN_GB_TILEVIEWER_WIDTH,WIN_GB_TILEVIEWER_HEIGHT, 0,0, 0);
     WH_SetCaption(WinIDGBTileViewer,"GB Tile Viewer");

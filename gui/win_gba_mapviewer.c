@@ -125,13 +125,13 @@ static int _win_gba_mapviewer_tiles_bmp_callback(int x, int y)
     return 1;
 }
 
-static void _win_gba_mapviewer_pal_scrollbar_x_callback(int value)
+static void _win_gba_mapviewer_scrollbar_x_callback(int value)
 {
     gba_mapview_scrollx = value;
     return;
 }
 
-static void _win_gba_mapviewer_pal_scrollbar_y_callback(int value)
+static void _win_gba_mapviewer_scrollbar_y_callback(int value)
 {
     gba_mapview_scrolly = value;
     return;
@@ -362,9 +362,9 @@ void Win_GBAMapViewerUpdate(void)
         gba_mapview_scrolly = gba_mapview_scrolly_max;
 
     GUI_SetScrollBar(&gba_mapview_scrollx_scrollbar, 76+15*FONT_WIDTH+6,262, 256, 12,
-                     0,gba_mapview_scrollx_max, gba_mapview_scrollx, _win_gba_mapviewer_pal_scrollbar_x_callback);
+                     0,gba_mapview_scrollx_max, gba_mapview_scrollx, _win_gba_mapviewer_scrollbar_x_callback);
     GUI_SetScrollBar(&gba_mapview_scrolly_scrollbar, 76+15*FONT_WIDTH+6+GBA_MAP_BUFFER_WIDTH,6, 12, 256,
-                     0,gba_mapview_scrolly_max, gba_mapview_scrolly, _win_gba_mapviewer_pal_scrollbar_y_callback);
+                     0,gba_mapview_scrolly_max, gba_mapview_scrolly, _win_gba_mapviewer_scrollbar_y_callback);
 
     _win_gba_mapviewer_update_mapbuffer_from_temp_buffer();
 
@@ -618,9 +618,9 @@ int Win_GBAMapViewerCreate(void)
                   GBA_MAP_BUFFER_WIDTH,GBA_MAP_BUFFER_HEIGHT,gba_map_buffer,
                   _win_gba_mapviewer_tiles_bmp_callback);
     GUI_SetScrollBar(&gba_mapview_scrollx_scrollbar, 76+15*FONT_WIDTH+6,262, 256, 12,
-                     0,0, 0, _win_gba_mapviewer_pal_scrollbar_x_callback);
+                     0,0, 0, _win_gba_mapviewer_scrollbar_x_callback);
     GUI_SetScrollBar(&gba_mapview_scrolly_scrollbar, 76+15*FONT_WIDTH+6+GBA_MAP_BUFFER_WIDTH,6, 12, 256,
-                     0,0, 0, _win_gba_mapviewer_pal_scrollbar_y_callback);
+                     0,0, 0, _win_gba_mapviewer_scrollbar_y_callback);
 
     gba_mapview_selected_bg = 0;
     gba_mapview_selected_tilex = 0;

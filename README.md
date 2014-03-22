@@ -21,8 +21,6 @@ Current goals for 0.2.0
  - Configuration window.
  - Complete main window menu. Accelerators (F12, CTRL+R, ...)
  - Disable main menu elements when they can't be used.
- - Make better scroll bars in about/readme/etc windows.
- - Palette selector for GB tile viewer.
 
 For 0.3.0
 ---------

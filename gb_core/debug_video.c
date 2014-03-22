@@ -39,7 +39,17 @@ extern _GB_CONTEXT_ GameBoy;
 
 //------------------------------------------------------------------------------------------------
 
-u32 gb_pal_colors[4][3] = { {255,255,255}, {168,168,168}, {80,80,80}, {0,0,0} };
+static u32 gb_pal_colors[4][3] = { {255,255,255}, {168,168,168}, {80,80,80}, {0,0,0} };
+
+//------------------------------------------------------------------------------------------------
+
+static inline u32 rgb16to32(u16 color)
+{
+    int r = (color&31)<<3;
+    int g = ((color>>5)&31)<<3;
+    int b = ((color>>10)&31)<<3;
+    return (b<<16)|(g<<8)|r;
+}
 
 //------------------------------------------------------------------------------------------------
 
@@ -698,6 +708,82 @@ void GB_Debug_TileVRAMDraw(char * buffer0, int bufw0, int bufh0, char * buffer1,
 	}
 }
 
+void GB_Debug_TileVRAMDrawPaletted(char * buffer0, int bufw0, int bufh0, char * buffer1, int bufw1, int bufh1, int pal)
+{
+    _GB_MEMORY_ * mem = &GameBoy.Memory;
+	u32 y, x;
+
+    u32 bg_pal[4];
+    u32 bgp_reg = mem->IO_Ports[BGP_REG-0xFF00];
+    bg_pal[0] = gb_pal_colors[bgp_reg & 0x3][0];
+    bg_pal[1] = gb_pal_colors[(bgp_reg>>2) & 0x3][0];
+    bg_pal[2] = gb_pal_colors[(bgp_reg>>4) & 0x3][0];
+    bg_pal[3] = gb_pal_colors[(bgp_reg>>6) & 0x3][0];
+
+	for(y = 0; y < 192 ; y++)
+	{
+		for(x = 0; x < 128; x++)
+		{
+			u32 tile = (x>>3) + ((y>>3)*16);
+
+			u8 * data = &mem->VideoRAM[tile<<4]; //Bank 0
+
+			data += ( (y&7)*2 );
+
+			u32 x_ = 7-(x&7);
+
+			u32 color = ( (*data >> x_) & 1 ) |  ( ( ( (*(data+1)) >> x_)  << 1) & 2);
+
+            if(GameBoy.Emulator.CGBEnabled)
+            {
+                u32 pal_index = (pal * 8) + (2*color);
+                color = GameBoy.Emulator.bg_pal[pal_index] | (GameBoy.Emulator.bg_pal[pal_index+1]<<8);
+                color = rgb16to32(color);
+            }
+            else
+            {
+                color = bg_pal[color]|(bg_pal[color]<<8)|(bg_pal[color]<<16);
+            }
+
+            buffer0[(y*bufw0+x)*3+0] = color&0xFF;
+            buffer0[(y*bufw0+x)*3+1] = (color>>8)&0xFF;
+            buffer0[(y*bufw0+x)*3+2] = (color>>16)&0xFF;
+		}
+	}
+
+	for(y = 0; y < 192 ; y++)
+	{
+		for(x = 0; x < 128; x++)
+		{
+			u32 tile = (x>>3) + ((y>>3)*16);
+
+			u8 * data = &mem->VideoRAM[tile<<4];
+			data += 0x2000; //Bank 1;
+
+			data += ( (y&7)*2 );
+
+			u32 x_ = 7-(x&7);
+
+			u32 color = ( (*data >> x_) & 1 ) |  ( ( ( (*(data+1)) >> x_)  << 1) & 2);
+
+            if(GameBoy.Emulator.CGBEnabled)
+            {
+                u32 pal_index = (pal * 8) + (2*color);
+                color = GameBoy.Emulator.bg_pal[pal_index] | (GameBoy.Emulator.bg_pal[pal_index+1]<<8);
+                color = rgb16to32(color);
+            }
+            else
+            {
+                color = bg_pal[color]|(bg_pal[color]<<8)|(bg_pal[color]<<16);
+            }
+
+            buffer1[(y*bufw0+x)*3+0] = color&0xFF;
+            buffer1[(y*bufw0+x)*3+1] = (color>>8)&0xFF;
+            buffer1[(y*bufw0+x)*3+2] = (color>>16)&0xFF;
+		}
+	}
+}
+
 void GB_Debug_TileDrawZoomed64x64(char * buffer, int tile, int bank)
 {
     int tiletempbuffer[8*8];
@@ -714,6 +800,53 @@ void GB_Debug_TileDrawZoomed64x64(char * buffer, int tile, int bank)
 
         tiletempbuffer[x + y*8] = (gb_pal_colors[color][0]<<16)|(gb_pal_colors[color][1]<<8)|
                 gb_pal_colors[color][2];
+    }
+
+    //Expand to 64x64
+    int i,j;
+    for(i = 0; i < 64; i++) for(j = 0; j < 64; j++)
+    {
+        buffer[(j*64+i)*3+0] = tiletempbuffer[(j/8)*8 + (i/8)] & 0xFF;
+        buffer[(j*64+i)*3+1] = (tiletempbuffer[(j/8)*8 + (i/8)]>>8) & 0xFF;
+        buffer[(j*64+i)*3+2] = (tiletempbuffer[(j/8)*8 + (i/8)]>>16) & 0xFF;
+    }
+}
+
+void GB_Debug_TileDrawZoomedPaletted64x64(char * buffer, int tile, int bank, int palette)
+{
+    _GB_MEMORY_ * mem = &GameBoy.Memory;
+
+    int tiletempbuffer[8*8];
+
+    u8 * tile_data = &GameBoy.Memory.VideoRAM[tile<<4]; //Bank 0
+    if(bank) tile_data += 0x2000; //Bank 1;
+
+    u32 bg_pal[4];
+    u32 bgp_reg = mem->IO_Ports[BGP_REG-0xFF00];
+    bg_pal[0] = gb_pal_colors[bgp_reg & 0x3][0];
+    bg_pal[1] = gb_pal_colors[(bgp_reg>>2) & 0x3][0];
+    bg_pal[2] = gb_pal_colors[(bgp_reg>>4) & 0x3][0];
+    bg_pal[3] = gb_pal_colors[(bgp_reg>>6) & 0x3][0];
+
+	u32 y, x;
+	for(y = 0; y < 8 ; y++) for(x = 0; x < 8; x++)
+    {
+        u8 * data = tile_data + ( (y&7)*2 );
+        u32 x_ = 7-(x&7);
+        u32 color = ( (*data >> x_) & 1 ) |  ( ( ( (*(data+1)) >> x_)  << 1) & 2);
+
+        if(GameBoy.Emulator.CGBEnabled)
+        {
+            u32 pal_index = (palette * 8) + (2*color);
+
+            color = GameBoy.Emulator.bg_pal[pal_index] | (GameBoy.Emulator.bg_pal[pal_index+1]<<8);
+
+            tiletempbuffer[x + y*8] = rgb16to32(color);
+        }
+        else
+        {
+            tiletempbuffer[x + y*8] = bg_pal[color]|(bg_pal[color]<<8)|(bg_pal[color]<<16);
+        }
     }
 
     //Expand to 64x64

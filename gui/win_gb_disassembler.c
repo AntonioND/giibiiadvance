@@ -390,10 +390,10 @@ int Win_GBDisassemblerCreate(void)
                    6+51*FONT_WIDTH+12,6, 10*FONT_WIDTH,9*FONT_HEIGHT,
                    _win_gb_registers_textbox_callback);
 
-    GUI_SetButton(&gb_disassembler_step_btn,6+51*FONT_WIDTH+12,6+9*FONT_HEIGHT+12,10*FONT_WIDTH,24,
+    GUI_SetButton(&gb_disassembler_step_btn,5+51*FONT_WIDTH+12,6+9*FONT_HEIGHT+12,2+10*FONT_WIDTH,24,
                   "Step (F7)",_win_gb_disassembler_step);
 
-    GUI_SetButton(&gb_disassembler_goto_btn,6+51*FONT_WIDTH+12,6+9*FONT_HEIGHT+48,10*FONT_WIDTH,24,
+    GUI_SetButton(&gb_disassembler_goto_btn,5+51*FONT_WIDTH+12,6+9*FONT_HEIGHT+48,2+10*FONT_WIDTH,24,
                   "Goto (F8)",_win_gb_disassembler_goto);
 
     GUI_SetTextBox(&gb_stack_textbox,&gb_stack_con,

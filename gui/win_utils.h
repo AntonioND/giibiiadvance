@@ -133,6 +133,7 @@ void GUI_SetButton(_gui_element * e, int x, int y, int w, int h, const char * la
 void GUI_SetRadioButton(_gui_element * e, int x, int y, int w, int h, const char * label, int group_id, int btn_id,
                         int start_pressed, _gui_void_arg_int_fn callback);
 
+// if(w <= 0) w = strlen(label)*FONT_WIDTH;
 void GUI_SetLabel(_gui_element * e, int x, int y, int w, int h, const char * label);
 
 // bitmap is 24 bit. return 1 from callback to redraw GUI

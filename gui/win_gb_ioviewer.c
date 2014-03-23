@@ -244,11 +244,11 @@ void Win_GBIOViewerUpdate(void)
     int __ie = GB_MemRead8(IE_REG);
     int __if = GB_MemRead8(IF_REG);
     GUI_ConsoleModePrintf(&gb_ioview_irq_con,0,1,"       IE IF");
-    GUI_ConsoleModePrintf(&gb_ioview_irq_con,0,2,"VBLANK [%c][%c]",(__ie&1)?'X':' ',(__if&1)?'X':' ');
-    GUI_ConsoleModePrintf(&gb_ioview_irq_con,0,3,"STAT   [%c][%c]",(__ie&2)?'X':' ',(__if&2)?'X':' ');
-    GUI_ConsoleModePrintf(&gb_ioview_irq_con,0,4,"TIMER  [%c][%c]",(__ie&4)?'X':' ',(__if&4)?'X':' ');
-    GUI_ConsoleModePrintf(&gb_ioview_irq_con,0,5,"SERIAL [%c][%c]",(__ie&8)?'X':' ',(__if&8)?'X':' ');
-    GUI_ConsoleModePrintf(&gb_ioview_irq_con,0,6,"JOYPAD [%c][%c]",(__ie&16)?'X':' ',(__if&16)?'X':' ');
+    GUI_ConsoleModePrintf(&gb_ioview_irq_con,0,2,"VBLANK [%c][%c]",(__ie&1)?CHR_SQUAREBLACK_MID:' ',(__if&1)?CHR_SQUAREBLACK_MID:' ');
+    GUI_ConsoleModePrintf(&gb_ioview_irq_con,0,3,"STAT   [%c][%c]",(__ie&2)?CHR_SQUAREBLACK_MID:' ',(__if&2)?CHR_SQUAREBLACK_MID:' ');
+    GUI_ConsoleModePrintf(&gb_ioview_irq_con,0,4,"TIMER  [%c][%c]",(__ie&4)?CHR_SQUAREBLACK_MID:' ',(__if&4)?CHR_SQUAREBLACK_MID:' ');
+    GUI_ConsoleModePrintf(&gb_ioview_irq_con,0,5,"SERIAL [%c][%c]",(__ie&8)?CHR_SQUAREBLACK_MID:' ',(__if&8)?CHR_SQUAREBLACK_MID:' ');
+    GUI_ConsoleModePrintf(&gb_ioview_irq_con,0,6,"JOYPAD [%c][%c]",(__ie&16)?CHR_SQUAREBLACK_MID:' ',(__if&16)?CHR_SQUAREBLACK_MID:' ');
 
     //Clocks
     GUI_ConsoleModePrintf(&gb_ioview_clocks_con,0,0,"LCD: %d",GameBoy.Emulator.LCD_clocks);

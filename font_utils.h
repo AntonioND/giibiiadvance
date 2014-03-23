@@ -112,6 +112,8 @@ void FU_End(void);
 #define CHR_BARS_RD         218
 #define STR_BARS_RD         "\xDA"
 
+#define CHR_SQUAREBLACK_MID 254
+#define STR_SQUAREBLACK_MID "\xFE"
 
 //---------------------------------------------------------------------------------
 

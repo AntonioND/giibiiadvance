@@ -118,7 +118,7 @@ static void _gui_draw_menu(_gui_menu * menu, char * buffer, int w, int h)
         if(menu->element_opened == i)
         {
             selected_element_x = x;
-            FU_PrintColor(buffer,w,h,x,0,0xFFC0C0C0,list->title);
+            FU_PrintColor(buffer,w,h,x,0,0xFFFFFFFF,list->title);
         }
         else
         {
@@ -209,7 +209,7 @@ static void _gui_draw_inputwindow(_gui_inputwindow * win, char * buffer, int w, 
     int x = (w - GUI_INPUTWINDOW_WIDTH) / 2;
     int y = (h - GUI_INPUTWINDOW_HEIGHT) / 2;
 
-    GUI_Draw_SetDrawingColor(224,224,224);
+    GUI_Draw_SetDrawingColor(GUI_BACKGROUND_GREY,GUI_BACKGROUND_GREY,GUI_BACKGROUND_GREY);
     GUI_Draw_FillRect(buffer,w,h,
                       x,x+GUI_INPUTWINDOW_WIDTH-1,
                       y,y+FONT_HEIGHT+1);
@@ -238,7 +238,7 @@ static void _gui_draw_inputwindow(_gui_inputwindow * win, char * buffer, int w, 
 
 static void __gui_draw_init_buffer(char * buffer, int w, int h)
 {
-    GUI_Draw_SetDrawingColor(192,192,192);
+    GUI_Draw_SetDrawingColor(GUI_BACKGROUND_GREY,GUI_BACKGROUND_GREY,GUI_BACKGROUND_GREY);
     GUI_Draw_FillRect(buffer,w,h,  0,w-1,  0,h-1);
 }
 
@@ -251,14 +251,11 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
         GUI_Draw_FillRect(buffer,w,h,
                       e->x,e->x+e->w-1,
                       e->y,e->y+e->h-1);
-        int i;
-        for(i = 1; i < 2; i++)
-        {
-            GUI_Draw_SetDrawingColor(i*(256/4),i*(256/4),i*(256/4));
-            GUI_Draw_Rect(buffer,w,h,
-                      e->x-i,e->x+e->w+i-1,
-                      e->y-i,e->y+e->h+i-1);
-        }
+
+        GUI_Draw_SetDrawingColor(256/4,256/4,256/4);
+        GUI_Draw_Rect(buffer,w,h,
+                  e->x-1,e->x+e->w,
+                  e->y-1,e->y+e->h);
 
         GUI_ConsoleDrawAt(e->info.textbox.con,
                            buffer,w,h,
@@ -270,7 +267,7 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
         if(e->info.button.is_pressed)
             GUI_Draw_SetDrawingColor(255,255,255);
         else
-            GUI_Draw_SetDrawingColor(224,224,224);
+            GUI_Draw_SetDrawingColor(GUI_BACKGROUND_GREY,GUI_BACKGROUND_GREY,GUI_BACKGROUND_GREY);
 
         GUI_Draw_FillRect(buffer,w,h,
                       e->x,e->x+e->w-1,
@@ -279,7 +276,7 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
         int i;
         for(i = 0; i < 4; i++)
         {
-            GUI_Draw_SetDrawingColor(i*(224/4),i*(224/4),i*(224/4));
+            GUI_Draw_SetDrawingColor(i*(GUI_BACKGROUND_GREY/4),i*(GUI_BACKGROUND_GREY/4),i*(GUI_BACKGROUND_GREY/4));
             GUI_Draw_Rect(buffer,w,h,
                       e->x+i,e->x+e->w-i-1,
                       e->y+i,e->y+e->h-i-1);
@@ -292,7 +289,7 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
         if(e->info.button.is_pressed)
             FU_PrintColor(buffer,w,h,e->x+xoff,e->y+yoff,0xFFFFFFFF,e->info.button.name);
         else
-            FU_PrintColor(buffer,w,h,e->x+xoff,e->y+yoff,0xFFE0E0E0,e->info.button.name);
+            FU_PrintColor(buffer,w,h,e->x+xoff,e->y+yoff,GUI_BACKGROUND_GREY_RGBA,e->info.button.name);
 
         e->info.button.is_pressed = 0;
     }
@@ -303,10 +300,10 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
             if(e->info.radiobutton.is_pressed)
                 GUI_Draw_SetDrawingColor(255,255,255);
             else
-                GUI_Draw_SetDrawingColor(224,224,224);
+                GUI_Draw_SetDrawingColor(0xC0,0xC0,0xC0);
         }
         else
-            GUI_Draw_SetDrawingColor(176,176,176);
+            GUI_Draw_SetDrawingColor(0x80,0x80,0x80);
 
         GUI_Draw_FillRect(buffer,w,h,
                       e->x,e->x+e->w-1,
@@ -321,10 +318,10 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
             if(e->info.radiobutton.is_pressed)
                 FU_PrintColor(buffer,w,h,e->x+xoff,e->y+yoff,0xFFFFFFFF,e->info.radiobutton.name);
             else
-                FU_PrintColor(buffer,w,h,e->x+xoff,e->y+yoff,0xFFE0E0E0,e->info.radiobutton.name);
+                FU_PrintColor(buffer,w,h,e->x+xoff,e->y+yoff,0xFFC0C0C0,e->info.radiobutton.name);
         }
         else
-            FU_PrintColor(buffer,w,h,e->x+xoff,e->y+yoff,0xFFB0B0B0,e->info.radiobutton.name);
+            FU_PrintColor(buffer,w,h,e->x+xoff,e->y+yoff,0xFF808080,e->info.radiobutton.name);
     }
     else if(e->element_type == GUI_TYPE_LABEL)
     {
@@ -332,7 +329,7 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
         int xoff = (e->w - namewidth) / 2;
         int yoff = (e->h - FONT_HEIGHT) / 2;
 
-        FU_PrintColor(buffer,w,h,e->x+xoff,e->y+yoff,0xFFC0C0C0,e->info.label.text);
+        FU_PrintColor(buffer,w,h,e->x+xoff,e->y+yoff,GUI_BACKGROUND_GREY_RGBA,e->info.label.text);
     }
     else if(e->element_type == GUI_TYPE_BITMAP)
     {
@@ -351,7 +348,7 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
         if(e->info.window.enabled == 0)
             return;
 
-        GUI_Draw_SetDrawingColor(224,224,224);
+        GUI_Draw_SetDrawingColor(GUI_BACKGROUND_GREY,GUI_BACKGROUND_GREY,GUI_BACKGROUND_GREY);
         GUI_Draw_FillRect(buffer,w,h,
                           e->x,e->x+e->w-1,
                           e->y,e->y+FONT_HEIGHT+1);
@@ -371,7 +368,7 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
         int text_width = strlen(e->info.window.caption) * FONT_WIDTH;
         int x_off = ( e->w - text_width ) / 2;
 
-        FU_PrintColor(buffer,w,h,e->x+x_off,e->y,0xFFE0E0E0,e->info.window.caption);
+        FU_PrintColor(buffer,w,h,e->x+x_off,e->y,GUI_BACKGROUND_GREY_RGBA,e->info.window.caption);
 
         if(e->info.window.gui)
             GUI_Draw(e->info.window.gui,buffer,w,h,0);
@@ -381,7 +378,7 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
         if(e->info.messagebox.enabled == 0)
             return;
 
-        GUI_Draw_SetDrawingColor(224,224,224);
+        GUI_Draw_SetDrawingColor(GUI_BACKGROUND_GREY,GUI_BACKGROUND_GREY,GUI_BACKGROUND_GREY);
         GUI_Draw_FillRect(buffer,w,h,
                           e->x,e->x+e->w-1,
                           e->y,e->y+FONT_HEIGHT+1);
@@ -393,7 +390,7 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
         GUI_Draw_HorizontalLine(buffer,w,h, e->x-1,e->x+e->w-1+1,
                                   e->y+FONT_HEIGHT+1);
 
-        GUI_Draw_SetDrawingColor(255, 255,255);
+        GUI_Draw_SetDrawingColor(255,255,255);
         GUI_Draw_FillRect(buffer,w,h,
                           e->x,e->x+e->w-1,
                           e->y+FONT_HEIGHT+2,e->y+e->h-1);
@@ -401,7 +398,7 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
         int text_width = strlen(e->info.messagebox.caption) * FONT_WIDTH;
         int x_off = ( e->w - text_width ) / 2;
 
-        FU_PrintColor(buffer,w,h,e->x+x_off,e->y,0xFFE0E0E0,e->info.messagebox.caption);
+        FU_PrintColor(buffer,w,h,e->x+x_off,e->y,GUI_BACKGROUND_GREY_RGBA,e->info.messagebox.caption);
 
         GUI_ConsoleDrawAt(e->info.messagebox.con,
                             buffer,w,h,
@@ -413,7 +410,7 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
         if(e->info.scrollabletextwindow.enabled == 0)
             return;
 
-        GUI_Draw_SetDrawingColor(224,224,224);
+        GUI_Draw_SetDrawingColor(GUI_BACKGROUND_GREY,GUI_BACKGROUND_GREY,GUI_BACKGROUND_GREY);
         GUI_Draw_FillRect(buffer,w,h,
                           e->x,e->x+e->w-1,
                           e->y,e->y+FONT_HEIGHT+1);
@@ -435,7 +432,7 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
 
         int skipspaces = 0;
 
-        FU_PrintColor(buffer,w,h,e->x+x_off,e->y,0xFFE0E0E0,e->info.scrollabletextwindow.caption);
+        FU_PrintColor(buffer,w,h,e->x+x_off,e->y,GUI_BACKGROUND_GREY_RGBA,e->info.scrollabletextwindow.caption);
 
         if(e->info.scrollabletextwindow.text)
         {
@@ -587,7 +584,7 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
     }
     else if(e->element_type == GUI_TYPE_SCROLLBAR)
     {
-        GUI_Draw_SetDrawingColor(224,224,224);
+        GUI_Draw_SetDrawingColor(GUI_BACKGROUND_GREY,GUI_BACKGROUND_GREY,GUI_BACKGROUND_GREY);
 
         GUI_Draw_FillRect(buffer,w,h,
                       e->x,e->x+e->w-1,

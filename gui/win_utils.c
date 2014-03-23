@@ -208,6 +208,7 @@ void GUI_SetLabel(_gui_element * e, int x, int y, int w, int h, const char * lab
 
     e->x = x;
     e->y = y;
+    if(w <= 0) w = strlen(label)*FONT_WIDTH;
     e->w = w;
     e->h = h;
     strcpy(e->info.label.text,label);

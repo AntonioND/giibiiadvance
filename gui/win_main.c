@@ -60,7 +60,7 @@
 
 #include "win_gba_disassembler.h"
 #include "win_gba_memviewer.h"
-//-
+#include "win_gba_ioviewer.h"
 #include "win_gba_tileviewer.h"
 #include "win_gba_mapviewer.h"
 #include "win_gba_sprviewer.h"
@@ -603,6 +603,7 @@ static void _win_main_menu_open_mem_viewer(void)
 static void _win_main_menu_open_io_viewer(void)
 {
     Win_GBIOViewerCreate();
+    Win_GBAIOViewerCreate();
 }
 
 static void _win_main_menu_open_tile_viewer(void)

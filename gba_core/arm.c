@@ -1395,7 +1395,7 @@ inline s32 GBA_ExecuteARM(s32 clocks) //returns residual clocks
                                     CPU.R[R_PC] -= 4; //Undefined Instruction
                                     clocks -= 100; // DON'T TRAP!!! ???
                                     break;
-                                 default: //???
+                                default: //???
                                     CPU.R[R_PC] -= 4;
                                     clocks -= 100;
                                     break;

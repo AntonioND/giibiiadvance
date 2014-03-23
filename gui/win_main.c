@@ -394,6 +394,51 @@ static int _win_main_load_rom_autodetect(char * path)
 
 //------------------------------------------------------------------
 
+static void _win_main_file_explorer_close(void); // down here
+
+static _gui_element mainwindow_scrollable_text_window;
+
+static void _win_main_scrollable_text_window_show_about(void)
+{
+    _win_main_file_explorer_close();
+
+    extern const char * about_text;
+    GUI_SetScrollableTextWindow(&mainwindow_scrollable_text_window,25,25,
+                                _win_main_get_menu_texture_width()-50,_win_main_get_menu_texture_height()-50,
+                                about_text, "About");
+    GUI_ScrollableTextWindowSetEnabled(&mainwindow_scrollable_text_window,1);
+}
+
+static void _win_main_scrollable_text_window_show_license(void)
+{
+    _win_main_file_explorer_close();
+
+    extern const char * license_text;
+    GUI_SetScrollableTextWindow(&mainwindow_scrollable_text_window,25,25,
+                                _win_main_get_menu_texture_width()-50,_win_main_get_menu_texture_height()-50,
+                                license_text, "License");
+    GUI_ScrollableTextWindowSetEnabled(&mainwindow_scrollable_text_window,1);
+}
+
+static void _win_main_scrollable_text_window_show_readme(void)
+{
+    _win_main_file_explorer_close();
+
+    extern const char * readme_text;
+    GUI_SetScrollableTextWindow(&mainwindow_scrollable_text_window,25,25,
+                                _win_main_get_menu_texture_width()-50,_win_main_get_menu_texture_height()-50,
+                                readme_text, "Readme");
+    GUI_ScrollableTextWindowSetEnabled(&mainwindow_scrollable_text_window,1);
+}
+
+static void _win_main_scrollable_text_window_close(void)
+{
+    GUI_ScrollableTextWindowSetEnabled(&mainwindow_scrollable_text_window,0);
+    memset(&mainwindow_scrollable_text_window,0,sizeof(mainwindow_scrollable_text_window));
+}
+
+//------------------------------------------------------------------
+
 //------------------------------------------------------------------
 
 // FILE EXPLORER WINDOW
@@ -509,6 +554,8 @@ static void _win_main_file_explorer_create(void)
 
 static void _win_main_file_explorer_load(void)
 {
+    _win_main_scrollable_text_window_close();
+
     GUI_WindowSetEnabled(&mainwindow_fileexplorer_win,1);
     FileExplorer_SetPath(DirGetRunningPath());
     _win_main_file_explorer_refresh();
@@ -585,42 +632,6 @@ static void _win_main_menu_open_pal_viewer(void)
 static void _win_main_menu_open_sgb_viewer(void)
 {
     Win_GB_SGBViewerCreate();
-}
-
-//------------------------------------------------------------------
-
-static _gui_element mainwindow_scrollable_text_window;
-
-static void _win_main_scrollable_text_window_show_about(void)
-{
-    extern const char * about_text;
-    GUI_SetScrollableTextWindow(&mainwindow_scrollable_text_window,25,25,
-                                _win_main_get_menu_texture_width()-50,_win_main_get_menu_texture_height()-50,
-                                about_text, "About");
-    GUI_ScrollableTextWindowSetEnabled(&mainwindow_scrollable_text_window,1);
-}
-
-static void _win_main_scrollable_text_window_show_license(void)
-{
-    extern const char * license_text;
-    GUI_SetScrollableTextWindow(&mainwindow_scrollable_text_window,25,25,
-                                _win_main_get_menu_texture_width()-50,_win_main_get_menu_texture_height()-50,
-                                license_text, "License");
-    GUI_ScrollableTextWindowSetEnabled(&mainwindow_scrollable_text_window,1);
-}
-
-static void _win_main_scrollable_text_window_show_readme(void)
-{
-    extern const char * readme_text;
-    GUI_SetScrollableTextWindow(&mainwindow_scrollable_text_window,25,25,
-                                _win_main_get_menu_texture_width()-50,_win_main_get_menu_texture_height()-50,
-                                readme_text, "Readme");
-    GUI_ScrollableTextWindowSetEnabled(&mainwindow_scrollable_text_window,1);
-}
-
-static void _win_main_scrollable_text_window_close(void)
-{
-    memset(&mainwindow_scrollable_text_window,0,sizeof(mainwindow_scrollable_text_window));
 }
 
 //------------------------------------------------------------------

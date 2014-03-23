@@ -19,6 +19,7 @@ General
 - Some fixes by looking at the commits of a fork of GiiBiiAdvance by wowzaman12 (and lioncash). Thanks!
 - Better sprite viewers. [GB/GBA]
 - Debugger windows can dump maps, sprites, palettes, tilesets... to png files.
+- Better map and tile viewers. [GB]
 
 GBA emulation
 

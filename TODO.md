@@ -40,6 +40,7 @@ Game Boy Advance
 ----------------
 
 - Sound glitches. (Buffer underflow or something?)
+- The NDS7 and GBA allow to access CP14 (unlike as for CP0..CP13 & CP15, access to CP14 doesn't generate any exceptions)
 - What happens with video modes 6 and 7?
 - Emulate weird things with invalid window coordinates.
 - Affine sprites/bgs(mode 7) + mosaic = bad

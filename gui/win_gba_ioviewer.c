@@ -37,7 +37,7 @@
 static int WinIDGBAIOViewer;
 
 #define WIN_GBA_IOVIEWER_WIDTH  593
-#define WIN_GBA_IOVIEWER_HEIGHT 400
+#define WIN_GBA_IOVIEWER_HEIGHT 314
 
 static int GBAIOViewerCreated = 0;
 
@@ -48,16 +48,30 @@ static int gba_ioview_selected_tab = 0;
 static _gui_element gba_ioview_display_tabbtn, gba_ioview_backgrounds_tabbtn, gba_ioview_dma_tabbtn,
                     gba_ioview_timers_tabbtn, gba_ioview_sound_tabbtn, gba_ioview_other_tabbtn;
 
+//-----------------------
+
 static _gui_console gba_ioview_display_lcdcontrol_con;
 static _gui_element gba_ioview_display_lcdcontrol_textbox, gba_ioview_display_lcdcontrol_label;
+static _gui_console gba_ioview_display_lcdstatus_con;
+static _gui_element gba_ioview_display_lcdstatus_textbox, gba_ioview_display_lcdstatus_label;
+static _gui_console gba_ioview_display_windows_con;
+static _gui_element gba_ioview_display_windows_textbox, gba_ioview_display_windows_label;
+static _gui_console gba_ioview_display_special_con;
+static _gui_element gba_ioview_display_special_textbox, gba_ioview_display_special_label;
 
 static _gui_element * gba_ioviwer_display_elements[] = {
     &gba_ioview_display_tabbtn, &gba_ioview_backgrounds_tabbtn, &gba_ioview_dma_tabbtn,
     &gba_ioview_timers_tabbtn, &gba_ioview_sound_tabbtn, &gba_ioview_other_tabbtn,
 
     &gba_ioview_display_lcdcontrol_textbox, &gba_ioview_display_lcdcontrol_label,
+    &gba_ioview_display_lcdstatus_textbox, &gba_ioview_display_lcdstatus_label,
+    &gba_ioview_display_windows_textbox, &gba_ioview_display_windows_label,
+    &gba_ioview_display_special_textbox, &gba_ioview_display_special_label,
+
     NULL
 };
+
+//-----------------------
 
 static _gui_element * gba_ioviwer_backgrounds_elements[] = {
     &gba_ioview_display_tabbtn, &gba_ioview_backgrounds_tabbtn, &gba_ioview_dma_tabbtn,
@@ -66,12 +80,16 @@ static _gui_element * gba_ioviwer_backgrounds_elements[] = {
     NULL
 };
 
+//-----------------------
+
 static _gui_element * gba_ioviwer_dma_elements[] = {
     &gba_ioview_display_tabbtn, &gba_ioview_backgrounds_tabbtn, &gba_ioview_dma_tabbtn,
     &gba_ioview_timers_tabbtn, &gba_ioview_sound_tabbtn, &gba_ioview_other_tabbtn,
 
     NULL
 };
+
+//-----------------------
 
 static _gui_element * gba_ioviwer_timers_elements[] = {
     &gba_ioview_display_tabbtn, &gba_ioview_backgrounds_tabbtn, &gba_ioview_dma_tabbtn,
@@ -80,6 +98,8 @@ static _gui_element * gba_ioviwer_timers_elements[] = {
     NULL
 };
 
+//-----------------------
+
 static _gui_element * gba_ioviwer_sound_elements[] = {
     &gba_ioview_display_tabbtn, &gba_ioview_backgrounds_tabbtn, &gba_ioview_dma_tabbtn,
     &gba_ioview_timers_tabbtn, &gba_ioview_sound_tabbtn, &gba_ioview_other_tabbtn,
@@ -87,12 +107,16 @@ static _gui_element * gba_ioviwer_sound_elements[] = {
     NULL
 };
 
+//-----------------------
+
 static _gui_element * gba_ioviwer_other_elements[] = {
     &gba_ioview_display_tabbtn, &gba_ioview_backgrounds_tabbtn, &gba_ioview_dma_tabbtn,
     &gba_ioview_timers_tabbtn, &gba_ioview_sound_tabbtn, &gba_ioview_other_tabbtn,
 
     NULL
 };
+
+//-----------------------
 
 static _gui gba_ioviewer_page_gui[] = {
     { gba_ioviwer_display_elements, NULL, NULL },
@@ -102,6 +126,8 @@ static _gui gba_ioviewer_page_gui[] = {
     { gba_ioviwer_sound_elements, NULL, NULL },
     { gba_ioviwer_other_elements, NULL, NULL }
 };
+
+//--------------------------------------------------------------------------------------
 
 void Win_GBAIOViewerUpdate(void)
 {
@@ -117,13 +143,15 @@ void Win_GBAIOViewerUpdate(void)
         {
             #define CHECK(a) ((a)?CHR_SQUAREBLACK_MID:' ')
 
+            // LCD Control
             GUI_ConsoleClear(&gba_ioview_display_lcdcontrol_con);
-            GUI_ConsoleModePrintf(&gba_ioview_display_lcdcontrol_con,0,0, "000h DISPCNT - %04X",REG_DISPCNT);
+
+            GUI_ConsoleModePrintf(&gba_ioview_display_lcdcontrol_con,0,0, "%04X : 000h DISPCNT",REG_DISPCNT);
 
             GUI_ConsoleModePrintf(&gba_ioview_display_lcdcontrol_con,0,2, "[%d] Video Mode",REG_DISPCNT&7);
             GUI_ConsoleModePrintf(&gba_ioview_display_lcdcontrol_con,0,3, "[%c] CGB Mode (?)",CHECK(REG_DISPCNT&BIT(3)));
             GUI_ConsoleModePrintf(&gba_ioview_display_lcdcontrol_con,0,4, "[%c] Display Frame Select",CHECK(REG_DISPCNT&BIT(4)));
-            GUI_ConsoleModePrintf(&gba_ioview_display_lcdcontrol_con,0,5, "[%c] H-Blank Interval Free",CHECK(REG_DISPCNT&BIT(5)));
+            GUI_ConsoleModePrintf(&gba_ioview_display_lcdcontrol_con,0,5, "[%c] HBL Interval Free",CHECK(REG_DISPCNT&BIT(5)));
             GUI_ConsoleModePrintf(&gba_ioview_display_lcdcontrol_con,0,6, "[%c] 1D Character Mapping",CHECK(REG_DISPCNT&BIT(6)));
             GUI_ConsoleModePrintf(&gba_ioview_display_lcdcontrol_con,0,7, "[%c] Forced Blank",CHECK(REG_DISPCNT&BIT(7)));
             GUI_ConsoleModePrintf(&gba_ioview_display_lcdcontrol_con,0,8, "[%c] Display BG0",CHECK(REG_DISPCNT&BIT(8)));
@@ -135,28 +163,120 @@ void Win_GBAIOViewerUpdate(void)
             GUI_ConsoleModePrintf(&gba_ioview_display_lcdcontrol_con,0,14, "[%c] Display Window 1",CHECK(REG_DISPCNT&BIT(14)));
             GUI_ConsoleModePrintf(&gba_ioview_display_lcdcontrol_con,0,15, "[%c] Display OBJ Window",CHECK(REG_DISPCNT&BIT(15)));
 
-            GUI_ConsoleModePrintf(&gba_ioview_display_lcdcontrol_con,0,18, "002h GREENSWP - %04X",REG_GREENSWAP);
+            GUI_ConsoleModePrintf(&gba_ioview_display_lcdcontrol_con,0,17, "%04X : 002h GREENSWP",REG_GREENSWAP);
 
+            // LCD Status
+            GUI_ConsoleClear(&gba_ioview_display_lcdstatus_con);
+
+            GUI_ConsoleModePrintf(&gba_ioview_display_lcdstatus_con,0,0, "%04X : 004h DISPSTAT",REG_DISPSTAT);
+
+            GUI_ConsoleModePrintf(&gba_ioview_display_lcdstatus_con,0,2, "[%c] V-Blank flag",CHECK(REG_DISPSTAT&BIT(0)));
+            GUI_ConsoleModePrintf(&gba_ioview_display_lcdstatus_con,0,3, "[%c] H-Blank flag",CHECK(REG_DISPSTAT&BIT(1)));
+            GUI_ConsoleModePrintf(&gba_ioview_display_lcdstatus_con,0,4, "[%c] V-Count flag",CHECK(REG_DISPSTAT&BIT(2)));
+            GUI_ConsoleModePrintf(&gba_ioview_display_lcdstatus_con,0,5, "[%c] V-Blank IRQ Enable",CHECK(REG_DISPSTAT&BIT(3)));
+            GUI_ConsoleModePrintf(&gba_ioview_display_lcdstatus_con,0,6, "[%c] H-Blank IRQ Enable",CHECK(REG_DISPSTAT&BIT(4)));
+            GUI_ConsoleModePrintf(&gba_ioview_display_lcdstatus_con,0,7, "[%c] V-Count IRQ Enable",CHECK(REG_DISPSTAT&BIT(5)));
+            GUI_ConsoleModePrintf(&gba_ioview_display_lcdstatus_con,0,8, "[%3d] LYC",(REG_DISPSTAT>>8)&0xFF);
+
+            GUI_ConsoleModePrintf(&gba_ioview_display_lcdstatus_con,0,10, "%04X : 006h VCOUNT",REG_VCOUNT);
+
+            GUI_ConsoleModePrintf(&gba_ioview_display_lcdstatus_con,0,12, "[%3d] LY",REG_VCOUNT);
+
+            // Windows
+
+            GUI_ConsoleClear(&gba_ioview_display_windows_con);
+
+            GUI_ConsoleModePrintf(&gba_ioview_display_windows_con,0,0, "%04X/%04X : 040/044h WIN0[H/V]",REG_WIN0H,REG_WIN0V);
+            GUI_ConsoleModePrintf(&gba_ioview_display_windows_con,0,1, "%04X/%04X : 042/046h WIN1[H/V]",REG_WIN1H,REG_WIN1V);
+
+            u32 x1,x2,y1,y2;
+            x1 = (REG_WIN0H>>8)&0xFF; x2 = REG_WIN0H&0xFF;
+            if(x2 > 240) x2 = 240; if(x1 > x2) x2 = 240; //real bounds
+            y1 = (REG_WIN0V>>8)&0xFF; y2 = REG_WIN0V&0xFF;
+            if(y2 > 160) y2 = 160; if(y1 > y2) y2 = 160;
+            GUI_ConsoleModePrintf(&gba_ioview_display_windows_con,0,3, "[%3d,%3d][%3d,%3d] Window 0",x1,y1,x2,y2);
+
+            x1 = (REG_WIN1H>>8)&0xFF; x2 = REG_WIN1H&0xFF;
+            if(x2 > 240) x2 = 240; if(x1 > x2) x2 = 240;
+            y1 = (REG_WIN1V>>8)&0xFF; y2 = REG_WIN1V&0xFF;
+            if(y2 > 160) y2 = 160; if(y1 > y2) y2 = 160;
+            GUI_ConsoleModePrintf(&gba_ioview_display_windows_con,0,4, "[%3d,%3d][%3d,%3d] Window 1",x1,y1,x2,y2);
+
+            GUI_ConsoleModePrintf(&gba_ioview_display_windows_con,0,6, "%04X/%04X : 048/04Ah WIN[IN/OUT]",REG_WININ,REG_WINOUT);
+
+            u32 in0 = REG_WININ&0xFF; u32 in1 = (REG_WININ>>8)&0xFF;
+            u32 out = REG_WINOUT&0xFF; u32 obj = (REG_WINOUT>>8)&0xFF;
+
+            GUI_ConsoleModePrintf(&gba_ioview_display_windows_con,0,8,  "    Bg0 Bg1 Bg2 Bg3 Obj Spe");
+            GUI_ConsoleModePrintf(&gba_ioview_display_windows_con,0,9,  "IN0 [%c] [%c] [%c] [%c] [%c] [%c]",
+                                  CHECK(in0&BIT(0)), CHECK(in0&BIT(1)), CHECK(in0&BIT(2)),
+                                  CHECK(in0&BIT(3)), CHECK(in0&BIT(4)), CHECK(in0&BIT(5)));
+            GUI_ConsoleModePrintf(&gba_ioview_display_windows_con,0,10, "IN1 [%c] [%c] [%c] [%c] [%c] [%c]",
+                                  CHECK(in1&BIT(0)), CHECK(in1&BIT(1)), CHECK(in1&BIT(2)),
+                                  CHECK(in1&BIT(3)), CHECK(in1&BIT(4)), CHECK(in1&BIT(5)));
+            GUI_ConsoleModePrintf(&gba_ioview_display_windows_con,0,11, "OUT [%c] [%c] [%c] [%c] [%c] [%c]",
+                                  CHECK(out&BIT(0)), CHECK(out&BIT(1)), CHECK(out&BIT(2)),
+                                  CHECK(out&BIT(3)), CHECK(out&BIT(4)), CHECK(out&BIT(5)));
+            GUI_ConsoleModePrintf(&gba_ioview_display_windows_con,0,12, "OBJ [%c] [%c] [%c] [%c] [%c] [%c]",
+                                  CHECK(obj&BIT(0)), CHECK(obj&BIT(1)), CHECK(obj&BIT(2)),
+                                  CHECK(obj&BIT(3)), CHECK(obj&BIT(4)), CHECK(obj&BIT(5)));
+
+            // Special Effects
+
+            GUI_ConsoleClear(&gba_ioview_display_special_con);
+
+            u32 mos = REG_MOSAIC;
+            GUI_ConsoleModePrintf(&gba_ioview_display_special_con,0,0, "%04X : 04Ch MOSAIC",mos);
+            GUI_ConsoleModePrintf(&gba_ioview_display_special_con,0,2, "[%2d,%2d] Spr  [%2d,%2d] Bg",
+                                  ((mos>>8)&0xF)+1,((mos>>12)&0xF)+1,(mos&0xF)+1,((mos>>4)&0xF)+1);
+
+            GUI_ConsoleModePrintf(&gba_ioview_display_special_con,0,4, "%04X : 050h BLDCNT",REG_BLDCNT);
+            GUI_ConsoleModePrintf(&gba_ioview_display_special_con,0,5, "%04X : 052h BLDALPHA",REG_BLDALPHA);
+            GUI_ConsoleModePrintf(&gba_ioview_display_special_con,0,6, "%04X : 054h BLDY",REG_BLDY);
+
+            const char * bld_modes[4] = { "None ", "Alpha", "White", "Black" };
+            GUI_ConsoleModePrintf(&gba_ioview_display_special_con,27,0, "[%s] Blending Mode", bld_modes[(REG_BLDCNT>>6)&3]);
+            int eva = REG_BLDALPHA&0x1F; if(eva > 16) eva = 16;
+            int evb = (REG_BLDALPHA>>8)&0x1F; if(evb > 16) evb = 16;
+            int evy = REG_BLDY&0x1F; if(evy > 16) evy = 16;
+            GUI_ConsoleModePrintf(&gba_ioview_display_special_con,27,2, "[%2d] EVA  [%2d] EVB  [%2d] EVY",eva,evb,evy);
+
+            u32 first = REG_BLDCNT&0x3F;
+            u32 second = (REG_BLDCNT>>8)&0x3F;
+            GUI_ConsoleModePrintf(&gba_ioview_display_special_con,27,4,  "    Bg0 Bg1 Bg2 Bg3 Obj BD");
+            GUI_ConsoleModePrintf(&gba_ioview_display_special_con,27,5,  "1st [%c] [%c] [%c] [%c] [%c] [%c]",
+                                  CHECK(first&BIT(0)), CHECK(first&BIT(1)), CHECK(first&BIT(2)),
+                                  CHECK(first&BIT(3)), CHECK(first&BIT(4)), CHECK(first&BIT(5)));
+            GUI_ConsoleModePrintf(&gba_ioview_display_special_con,27,6, "2nd [%c] [%c] [%c] [%c] [%c] [%c]",
+                                  CHECK(second&BIT(0)), CHECK(second&BIT(1)), CHECK(second&BIT(2)),
+                                  CHECK(second&BIT(3)), CHECK(second&BIT(4)), CHECK(second&BIT(5)));
+
+            break;
         }
         case 1: // Backgrounds
         {
 
+            break;
         }
         case 2: // DMA
         {
 
+            break;
         }
         case 3: // Timers
         {
 
+            break;
         }
         case 4: // Sound
         {
 
+            break;
         }
         case 5: // Other
         {
 
+            break;
         }
         default:
         {
@@ -261,7 +381,22 @@ int Win_GBAIOViewerCreate(void)
     GUI_SetLabel(&gba_ioview_display_lcdcontrol_label,
                    6,24, -1,FONT_HEIGHT, "LCD Control");
     GUI_SetTextBox(&gba_ioview_display_lcdcontrol_textbox,&gba_ioview_display_lcdcontrol_con,
-                   6,42, 26*FONT_WIDTH+2,19*FONT_HEIGHT, NULL);
+                   6,42, 25*FONT_WIDTH,18*FONT_HEIGHT, NULL);
+
+    GUI_SetLabel(&gba_ioview_display_lcdstatus_label,
+                   6+25*FONT_WIDTH+6,24, -1,FONT_HEIGHT, "LCD Status");
+    GUI_SetTextBox(&gba_ioview_display_lcdstatus_textbox,&gba_ioview_display_lcdstatus_con,
+                   6+25*FONT_WIDTH+6,42, 23*FONT_WIDTH,13*FONT_HEIGHT, NULL);
+
+    GUI_SetLabel(&gba_ioview_display_windows_label,
+                   12+48*FONT_WIDTH+6,24, -1,FONT_HEIGHT, "Windows");
+    GUI_SetTextBox(&gba_ioview_display_windows_textbox,&gba_ioview_display_windows_con,
+                   12+48*FONT_WIDTH+6,42, 33*FONT_WIDTH,13*FONT_HEIGHT, NULL);
+
+    GUI_SetLabel(&gba_ioview_display_special_label,
+                   6+25*FONT_WIDTH+6,42+13*FONT_HEIGHT+6, -1,FONT_HEIGHT, "Special Effects");
+    GUI_SetTextBox(&gba_ioview_display_special_textbox,&gba_ioview_display_special_con,
+                   6+25*FONT_WIDTH+6,42+13*FONT_HEIGHT+6+18, 55*FONT_WIDTH+13,7*FONT_HEIGHT, NULL);
 
     // Backgrounds
 
@@ -301,11 +436,6 @@ void Win_GBAIOViewerClose(void)
 
 #if 0
 
-#include "gui_mainloop.h"
-#include "gui_main.h"
-#include "gui_gba_debugger.h"
-#include "gba_core/gba.h"
-#include "gba_core/memory.h"
 #include "gba_core/timers.h"
 #include "gba_core/cpu.h"
 #include "gba_core/disassembler.h"
@@ -322,92 +452,6 @@ void GLWindow_GBAIOViewerUpdate(void)
 
     switch(ioviewer_curpage)
     {
-        case 0: //Display
-        {
-            char text[5];
-
-            //DISPSTAT
-            sprintf(text,"%04X",REG_DISPSTAT); SetWindowText(hTabPageItem[0][33],(LPCTSTR)text);
-            SET_CHECK(0,35,REG_DISPSTAT&BIT(0));
-            SET_CHECK(0,37,REG_DISPSTAT&BIT(1));
-            SET_CHECK(0,39,REG_DISPSTAT&BIT(2));
-            SET_CHECK(0,41,REG_DISPSTAT&BIT(3));
-            SET_CHECK(0,43,REG_DISPSTAT&BIT(4));
-            SET_CHECK(0,45,REG_DISPSTAT&BIT(5));
-            sprintf(text,"%d",REG_DISPSTAT>>8); SetWindowText(hTabPageItem[0][47],(LPCTSTR)text);
-
-            //VCOUNT
-            sprintf(text,"%04X",REG_VCOUNT); SetWindowText(hTabPageItem[0][49],(LPCTSTR)text);
-            sprintf(text,"%d",REG_VCOUNT); SetWindowText(hTabPageItem[0][51],(LPCTSTR)text);
-
-            //MOSAIC
-            u32 mos = REG_MOSAIC;
-            sprintf(text,"%04X",mos); SetWindowText(hTabPageItem[0][54],(LPCTSTR)text);
-            sprintf(text,"Sp %2d,%2d|Bg %2d,%2d",((mos>>8)&0xF)+1,((mos>>12)&0xF)+1,(mos&0xF)+1,
-                ((mos>>4)&0xF)+1); SetWindowText(hTabPageItem[0][55],(LPCTSTR)text);
-
-            //WINDOWS
-            sprintf(text,"%04X|%04X",REG_WIN0H,REG_WIN0V); SetWindowText(hTabPageItem[0][63],(LPCTSTR)text);
-            sprintf(text,"%04X|%04X",REG_WIN1H,REG_WIN1V); SetWindowText(hTabPageItem[0][65],(LPCTSTR)text);
-
-            u32 x1,x2,y1,y2;
-            x1 = (REG_WIN0H>>8)&0xFF; x2 = REG_WIN0H&0xFF;
-            if(x2 > 240) x2 = 240; if(x1 > x2) x2 = 240; //real bounds
-            y1 = (REG_WIN0V>>8)&0xFF; y2 = REG_WIN0V&0xFF;
-            if(y2 > 160) y2 = 160; if(y1 > y2) y2 = 160;
-            sprintf(text,"%3d,%3d|%3d,%3d",x1,y1,x2,y2); SetWindowText(hTabPageItem[0][67],(LPCTSTR)text);
-
-            x1 = (REG_WIN1H>>8)&0xFF; x2 = REG_WIN1H&0xFF;
-            if(x2 > 240) x2 = 240; if(x1 > x2) x2 = 240;
-            y1 = (REG_WIN1V>>8)&0xFF; y2 = REG_WIN1V&0xFF;
-            if(y2 > 160) y2 = 160; if(y1 > y2) y2 = 160;
-            sprintf(text,"%3d,%3d|%3d,%3d",x1,y1,x2,y2); SetWindowText(hTabPageItem[0][69],(LPCTSTR)text);
-
-            sprintf(text,"%04X|%04X",REG_WININ,REG_WINOUT); SetWindowText(hTabPageItem[0][71],(LPCTSTR)text);
-
-            u32 in0 = REG_WININ&0xFF; u32 in1 = (REG_WININ>>8)&0xFF;
-            u32 out = REG_WINOUT&0xFF; u32 obj = (REG_WINOUT>>8)&0xFF;
-
-            SET_CHECK(0,82,in0&BIT(0)); SET_CHECK(0,83,in0&BIT(1)); SET_CHECK(0,84,in0&BIT(2));
-            SET_CHECK(0,85,in0&BIT(3)); SET_CHECK(0,86,in0&BIT(4)); SET_CHECK(0,87,in0&BIT(5));
-
-            SET_CHECK(0,88,in1&BIT(0)); SET_CHECK(0,89,in1&BIT(1)); SET_CHECK(0,90,in1&BIT(2));
-            SET_CHECK(0,91,in1&BIT(3)); SET_CHECK(0,92,in1&BIT(4)); SET_CHECK(0,93,in1&BIT(5));
-
-            SET_CHECK(0,94,out&BIT(0)); SET_CHECK(0,95,out&BIT(1)); SET_CHECK(0,96,out&BIT(2));
-            SET_CHECK(0,97,out&BIT(3)); SET_CHECK(0,98,out&BIT(4)); SET_CHECK(0,99,out&BIT(5));
-
-            SET_CHECK(0,100,obj&BIT(0)); SET_CHECK(0,101,obj&BIT(1)); SET_CHECK(0,102,obj&BIT(2));
-            SET_CHECK(0,103,obj&BIT(3)); SET_CHECK(0,104,obj&BIT(4)); SET_CHECK(0,105,obj&BIT(5));
-
-            //BLENDING
-            sprintf(text,"%04X",REG_BLDALPHA); SetWindowText(hTabPageItem[0][57],(LPCTSTR)text);
-            sprintf(text,"%04X",REG_BLDY); SetWindowText(hTabPageItem[0][107],(LPCTSTR)text);
-            sprintf(text,"%04X",REG_BLDCNT); SetWindowText(hTabPageItem[0][109],(LPCTSTR)text);
-
-            int evy = REG_BLDY&0x1F; if(evy > 16) evy = 16;
-            sprintf(text,"EVY %2d",evy); SetWindowText(hTabPageItem[0][58],(LPCTSTR)text);
-
-            int eva = REG_BLDALPHA&0x1F; if(eva > 16) eva = 16;
-            int evb = (REG_BLDALPHA>>8)&0x1F; if(evb > 16) evb = 16;
-            sprintf(text,"EVA %2d|EVB %2d",eva,evb); SetWindowText(hTabPageItem[0][110],(LPCTSTR)text);
-
-            const char * bld_modes[4] = { "Mode: None", "Mode: Alpha", "Mode: White", "Mode: Black" };
-            SetWindowText(hTabPageItem[0][111],(LPCTSTR)bld_modes[(REG_BLDCNT>>6)&3]);
-
-            u32 first = REG_BLDCNT&0x3F;
-            u32 second = (REG_BLDCNT>>8)&0x3F;
-
-            SET_CHECK(0,120,first&BIT(0)); SET_CHECK(0,121,first&BIT(1));
-            SET_CHECK(0,122,first&BIT(2)); SET_CHECK(0,123,first&BIT(3));
-            SET_CHECK(0,124,first&BIT(4)); SET_CHECK(0,125,first&BIT(5));
-
-            SET_CHECK(0,126,second&BIT(0)); SET_CHECK(0,127,second&BIT(1));
-            SET_CHECK(0,128,second&BIT(2)); SET_CHECK(0,129,second&BIT(3));
-            SET_CHECK(0,130,second&BIT(4)); SET_CHECK(0,131,second&BIT(5));
-
-            break;
-        }
         case 1: //Background
         {
             char text[20];
@@ -854,234 +898,6 @@ void GLWindow_GBAIOViewerUpdate(void)
 
 static void GLWindow_IOViewerMakePages(HWND hWnd)
 {
-    //-----------------------------------------------------------------------------------
-    //                        FIRST PAGE - DISPLAY
-    //-----------------------------------------------------------------------------------
-    {
-        //DISPCNT
-        hTabPageItem[0][0] = CreateWindow(TEXT("button"), TEXT("LCD Control"),
-                    WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-                    5, 25, 150, 300, hWnd, (HMENU) 0, hInstance, NULL);
-        SendMessage(hTabPageItem[0][0], WM_SETFONT, (WPARAM)hFontNormalIO, MAKELPARAM(1, 0));
-
-        #define CREATE_REG_STATIC_TEXT(page,baseid,basex,basey,text) \
-        { \
-            hTabPageItem[page][baseid] = CreateWindow(TEXT("static"), TEXT(text), WS_CHILD | WS_VISIBLE, \
-                            basex+39, basey+1, 7*(strlen(text)-1), 13, hWnd, NULL, hInstance, NULL); \
-            SendMessage(hTabPageItem[page][baseid], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0)); \
-            hTabPageItem[page][baseid+1] = CreateWindow(TEXT("static"), TEXT("0000"), \
-                            WS_CHILD | WS_VISIBLE | SS_SUNKEN | BS_CENTER, \
-                            basex, basey, 35, 17, hWnd, NULL, hInstance, NULL); \
-            SendMessage(hTabPageItem[page][baseid+1], WM_SETFONT, (WPARAM)hFontFixedIO, MAKELPARAM(1, 0)); \
-        }
-
-
-        #define CREATE_CHECK_STATIC(page,baseid,basex,basey,text) \
-        { \
-            hTabPageItem[page][baseid] = CreateWindow(TEXT("static"), TEXT(text), \
-                            WS_CHILD | WS_VISIBLE, \
-                            basex+19, basey+1, 12 + 5*strlen(text), 13, hWnd, NULL, hInstance, NULL); \
-            SendMessage(hTabPageItem[page][baseid], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0)); \
-            hTabPageItem[page][baseid+1] = CreateWindow(TEXT("button"), NULL, WS_CHILD | WS_VISIBLE | BS_CHECKBOX, \
-                            basex, basey, 12, 17, hWnd, NULL, hInstance, NULL); \
-        }
-
-
-        //DISPSTAT, VCOUNT
-        hTabPageItem[0][31] = CreateWindow(TEXT("button"), TEXT("LCD Status"),
-                    WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-                    160, 25, 135, 202, hWnd, (HMENU) 0, hInstance, NULL);
-        SendMessage(hTabPageItem[0][31], WM_SETFONT, (WPARAM)hFontNormalIO, MAKELPARAM(1, 0));
-
-        CREATE_REG_STATIC_TEXT(0,32, 165, 45, "004h DISPSTAT");
-
-        CREATE_CHECK_STATIC(0,34, 165, 63, "V-Blank flag");
-        CREATE_CHECK_STATIC(0,36, 165, 79, "H-Blank flag");
-        CREATE_CHECK_STATIC(0,38, 165, 95, "V-Count flag");
-        CREATE_CHECK_STATIC(0,40, 165, 111, "V-Blank IRQ Enable");
-        CREATE_CHECK_STATIC(0,42, 165, 127, "H-Blank IRQ Enable");
-        CREATE_CHECK_STATIC(0,44, 165, 143, "V-Count IRQ Enable");
-
-        hTabPageItem[0][46] = CreateWindow(TEXT("static"), TEXT("LYC"),
-                        WS_CHILD | WS_VISIBLE,
-                        195, 162, 80, 13, hWnd, NULL, hInstance, NULL);
-        SendMessage(hTabPageItem[0][46], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0));
-
-        hTabPageItem[0][47] = CreateWindow(TEXT("static"), TEXT("0"),
-                        WS_CHILD | WS_VISIBLE | SS_SUNKEN | BS_CENTER,
-                        165, 163, 26, 17, hWnd, NULL, hInstance, NULL);
-        SendMessage(hTabPageItem[0][47], WM_SETFONT, (WPARAM)hFontFixedIO, MAKELPARAM(1, 0));
-
-        CREATE_REG_STATIC_TEXT(0,48, 165, 183, "006h VCOUNT");
-
-        hTabPageItem[0][50] = CreateWindow(TEXT("static"), TEXT("LY"),
-                        WS_CHILD | WS_VISIBLE,
-                        195, 204, 80, 13, hWnd, NULL, hInstance, NULL);
-        SendMessage(hTabPageItem[0][50], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0));
-
-        hTabPageItem[0][51] = CreateWindow(TEXT("static"), TEXT("0"),
-                        WS_CHILD | WS_VISIBLE | SS_SUNKEN | BS_CENTER,
-                        165, 203, 26, 17, hWnd, NULL, hInstance, NULL);
-        SendMessage(hTabPageItem[0][51], WM_SETFONT, (WPARAM)hFontFixedIO, MAKELPARAM(1, 0));
-
-
-        //MOSAIC
-        hTabPageItem[0][52] = CreateWindow(TEXT("button"), TEXT("Effects"),
-                    WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-                    160, 227, 328, 98, hWnd, (HMENU) 0, hInstance, NULL);
-        SendMessage(hTabPageItem[0][52], WM_SETFONT, (WPARAM)hFontNormalIO, MAKELPARAM(1, 0));
-
-        CREATE_REG_STATIC_TEXT(0,53, 165,243, "04Ch MOSAIC");
-
-        hTabPageItem[0][55] = CreateWindow(TEXT("static"), TEXT("Sp  1, 1|Bg  1, 1"),
-                        WS_CHILD | WS_VISIBLE | SS_SUNKEN | BS_CENTER,
-                        165, 265, 123, 17, hWnd, NULL, hInstance, NULL);
-        SendMessage(hTabPageItem[0][55], WM_SETFONT, (WPARAM)hFontFixedIO, MAKELPARAM(1, 0));
-
-
-
-        //WINDOWS
-        hTabPageItem[0][61] = CreateWindow(TEXT("button"), TEXT("Windows"),
-                    WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-                    300, 25, 188, 202, hWnd, (HMENU) 0, hInstance, NULL);
-        SendMessage(hTabPageItem[0][61], WM_SETFONT, (WPARAM)hFontNormalIO, MAKELPARAM(1, 0));
-
-        #define CREATE_DOUBLE_REG_STATIC_TEXT(page,baseid,basex,basey,text) \
-        { \
-            hTabPageItem[page][baseid] = CreateWindow(TEXT("static"), TEXT(text), WS_CHILD | WS_VISIBLE, \
-                            basex+68, basey+1, 110, 13, hWnd, NULL, hInstance, NULL); \
-            SendMessage(hTabPageItem[page][baseid], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0)); \
-            hTabPageItem[page][baseid+1] = CreateWindow(TEXT("static"), TEXT("0000|0000"), \
-                            WS_CHILD | WS_VISIBLE | SS_SUNKEN | BS_CENTER, \
-                            basex, basey, 66, 17, hWnd, NULL, hInstance, NULL); \
-            SendMessage(hTabPageItem[page][baseid+1], WM_SETFONT, (WPARAM)hFontFixedIO, MAKELPARAM(1, 0)); \
-        }
-
-        CREATE_DOUBLE_REG_STATIC_TEXT(0,62, 305,45, "040/044h WIN0[H/V]");
-        CREATE_DOUBLE_REG_STATIC_TEXT(0,64, 305,65, "042/046h WIN1[H/V]");
-
-        hTabPageItem[0][66] = CreateWindow(TEXT("static"), TEXT(" Window 0"), WS_CHILD | WS_VISIBLE,
-                        305+118, 85+1, 55, 13, hWnd, NULL, hInstance, NULL);
-        SendMessage(hTabPageItem[0][66], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0));
-        hTabPageItem[0][67] = CreateWindow(TEXT("static"), TEXT("000,000|000,000"),
-                        WS_CHILD | WS_VISIBLE | SS_SUNKEN | BS_CENTER,
-                        305, 85, 110, 17, hWnd, NULL, hInstance, NULL);
-        SendMessage(hTabPageItem[0][67], WM_SETFONT, (WPARAM)hFontFixedIO, MAKELPARAM(1, 0));
-
-        hTabPageItem[0][68] = CreateWindow(TEXT("static"), TEXT(" Window 1"), WS_CHILD | WS_VISIBLE,
-                        305+118, 105+1, 55, 13, hWnd, NULL, hInstance, NULL);
-        SendMessage(hTabPageItem[0][68], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0));
-        hTabPageItem[0][69] = CreateWindow(TEXT("static"), TEXT("000,000|000,000"),
-                        WS_CHILD | WS_VISIBLE | SS_SUNKEN | BS_CENTER,
-                        305, 105, 110, 17, hWnd, NULL, hInstance, NULL);
-        SendMessage(hTabPageItem[0][69], WM_SETFONT, (WPARAM)hFontFixedIO, MAKELPARAM(1, 0));
-
-        CREATE_DOUBLE_REG_STATIC_TEXT(0,70, 305,125, "048/04Ah WIN[IN/OUT]");
-
-        hTabPageItem[0][72] = CreateWindow(TEXT("static"), TEXT("Bg0"), WS_CHILD | WS_VISIBLE,
-                        305+30, 145, 20, 13, hWnd, NULL, hInstance, NULL);
-        SendMessage(hTabPageItem[0][72], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0));
-        hTabPageItem[0][73] = CreateWindow(TEXT("static"), TEXT("Bg1"), WS_CHILD | WS_VISIBLE,
-                        305+55, 145, 20, 13, hWnd, NULL, hInstance, NULL);
-        SendMessage(hTabPageItem[0][73], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0));
-        hTabPageItem[0][74] = CreateWindow(TEXT("static"), TEXT("Bg2"), WS_CHILD | WS_VISIBLE,
-                        305+80, 145, 20, 13, hWnd, NULL, hInstance, NULL);
-        SendMessage(hTabPageItem[0][74], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0));
-        hTabPageItem[0][75] = CreateWindow(TEXT("static"), TEXT("Bg3"), WS_CHILD | WS_VISIBLE,
-                        305+105, 145, 20, 13, hWnd, NULL, hInstance, NULL);
-        SendMessage(hTabPageItem[0][75], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0));
-        hTabPageItem[0][76] = CreateWindow(TEXT("static"), TEXT("Obj"), WS_CHILD | WS_VISIBLE,
-                        305+130, 145, 20, 13, hWnd, NULL, hInstance, NULL);
-        SendMessage(hTabPageItem[0][76], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0));
-        hTabPageItem[0][77] = CreateWindow(TEXT("static"), TEXT("Spe"), WS_CHILD | WS_VISIBLE,
-                        305+155, 145, 20, 13, hWnd, NULL, hInstance, NULL);
-        SendMessage(hTabPageItem[0][77], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0));
-
-        hTabPageItem[0][78] = CreateWindow(TEXT("static"), TEXT("IN0"), WS_CHILD | WS_VISIBLE,
-                        305, 145+16, 55, 13, hWnd, NULL, hInstance, NULL);
-        SendMessage(hTabPageItem[0][78], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0));
-        hTabPageItem[0][79] = CreateWindow(TEXT("static"), TEXT("IN1"), WS_CHILD | WS_VISIBLE,
-                        305, 145+32, 55, 13, hWnd, NULL, hInstance, NULL);
-        SendMessage(hTabPageItem[0][79], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0));
-        hTabPageItem[0][80] = CreateWindow(TEXT("static"), TEXT("OUT"), WS_CHILD | WS_VISIBLE,
-                        305, 145+48, 55, 13, hWnd, NULL, hInstance, NULL);
-        SendMessage(hTabPageItem[0][80], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0));
-        hTabPageItem[0][81] = CreateWindow(TEXT("static"), TEXT("OBJ"), WS_CHILD | WS_VISIBLE,
-                        305, 145+64, 55, 13, hWnd, NULL, hInstance, NULL);
-        SendMessage(hTabPageItem[0][81], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0));
-
-        #define CREATE_6_CHECK(page,baseid,basex,basey) \
-        { \
-            hTabPageItem[page][baseid] = CreateWindow(TEXT("button"), NULL, WS_CHILD | WS_VISIBLE | BS_CHECKBOX, \
-                            basex, basey, 12, 17, hWnd, NULL, hInstance, NULL); \
-            hTabPageItem[page][baseid+1] = CreateWindow(TEXT("button"), NULL, WS_CHILD | WS_VISIBLE | BS_CHECKBOX, \
-                            basex+25, basey, 12, 17, hWnd, NULL, hInstance, NULL); \
-            hTabPageItem[page][baseid+2] = CreateWindow(TEXT("button"), NULL, WS_CHILD | WS_VISIBLE | BS_CHECKBOX, \
-                            basex+50, basey, 12, 17, hWnd, NULL, hInstance, NULL); \
-            hTabPageItem[page][baseid+3] = CreateWindow(TEXT("button"), NULL, WS_CHILD | WS_VISIBLE | BS_CHECKBOX, \
-                            basex+75, basey, 12, 17, hWnd, NULL, hInstance, NULL); \
-            hTabPageItem[page][baseid+4] = CreateWindow(TEXT("button"), NULL, WS_CHILD | WS_VISIBLE | BS_CHECKBOX, \
-                            basex+100, basey, 12, 17, hWnd, NULL, hInstance, NULL); \
-            hTabPageItem[page][baseid+5] = CreateWindow(TEXT("button"), NULL, WS_CHILD | WS_VISIBLE | BS_CHECKBOX, \
-                            basex+125, basey, 12, 17, hWnd, NULL, hInstance, NULL); \
-        }
-
-        CREATE_6_CHECK(0,82,308+30,144+16);
-        CREATE_6_CHECK(0,88,308+30,144+32);
-        CREATE_6_CHECK(0,94,308+30,144+48);
-        CREATE_6_CHECK(0,100,308+30,144+64);
-
-        //BLENDING
-        CREATE_REG_STATIC_TEXT(0,56, 165,283, "052h BLDALPHA");
-        CREATE_REG_STATIC_TEXT(0,106, 165,303, "054h BLDY");
-
-        CREATE_REG_STATIC_TEXT(0,108, 295,238, "050h BLDCNT");
-
-        hTabPageItem[0][58] = CreateWindow(TEXT("static"), TEXT("EVY  0"),
-                        WS_CHILD | WS_VISIBLE | SS_SUNKEN | BS_CENTER,
-                        431, 238, 50, 17, hWnd, NULL, hInstance, NULL);
-        SendMessage(hTabPageItem[0][58], WM_SETFONT, (WPARAM)hFontFixedIO, MAKELPARAM(1, 0));
-
-        hTabPageItem[0][110] = CreateWindow(TEXT("static"), TEXT("EVA  0|EVB  0"),
-                        WS_CHILD | WS_VISIBLE | SS_SUNKEN | BS_CENTER,
-                        295, 258, 98, 17, hWnd, NULL, hInstance, NULL);
-        SendMessage(hTabPageItem[0][110], WM_SETFONT, (WPARAM)hFontFixedIO, MAKELPARAM(1, 0));
-
-        hTabPageItem[0][111] = CreateWindow(TEXT("static"), TEXT("Mode: Blend"),
-                        WS_CHILD | WS_VISIBLE | SS_SUNKEN | BS_CENTER,
-                        398, 258, 83, 17, hWnd, NULL, hInstance, NULL);
-        SendMessage(hTabPageItem[0][111], WM_SETFONT, (WPARAM)hFontFixedIO, MAKELPARAM(1, 0));
-
-
-        hTabPageItem[0][112] = CreateWindow(TEXT("static"), TEXT("Bg0"), WS_CHILD | WS_VISIBLE,
-                        295+30, 276, 20, 13, hWnd, NULL, hInstance, NULL);
-        SendMessage(hTabPageItem[0][112], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0));
-        hTabPageItem[0][113] = CreateWindow(TEXT("static"), TEXT("Bg1"), WS_CHILD | WS_VISIBLE,
-                        295+55, 276, 20, 13, hWnd, NULL, hInstance, NULL);
-        SendMessage(hTabPageItem[0][113], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0));
-        hTabPageItem[0][114] = CreateWindow(TEXT("static"), TEXT("Bg2"), WS_CHILD | WS_VISIBLE,
-                        295+80, 276, 20, 13, hWnd, NULL, hInstance, NULL);
-        SendMessage(hTabPageItem[0][114], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0));
-        hTabPageItem[0][115] = CreateWindow(TEXT("static"), TEXT("Bg3"), WS_CHILD | WS_VISIBLE,
-                        295+105, 276, 20, 13, hWnd, NULL, hInstance, NULL);
-        SendMessage(hTabPageItem[0][115], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0));
-        hTabPageItem[0][116] = CreateWindow(TEXT("static"), TEXT("Obj"), WS_CHILD | WS_VISIBLE,
-                        295+130, 276, 20, 13, hWnd, NULL, hInstance, NULL);
-        SendMessage(hTabPageItem[0][116], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0));
-        hTabPageItem[0][117] = CreateWindow(TEXT("static"), TEXT("BD"), WS_CHILD | WS_VISIBLE,
-                        295+155, 276, 20, 13, hWnd, NULL, hInstance, NULL);
-        SendMessage(hTabPageItem[0][117], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0));
-
-        hTabPageItem[0][118] = CreateWindow(TEXT("static"), TEXT("1st"), WS_CHILD | WS_VISIBLE,
-                        295, 276+15, 55, 13, hWnd, NULL, hInstance, NULL);
-        SendMessage(hTabPageItem[0][118], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0));
-        hTabPageItem[0][119] = CreateWindow(TEXT("static"), TEXT("2nd"), WS_CHILD | WS_VISIBLE,
-                        295, 276+30, 55, 13, hWnd, NULL, hInstance, NULL);
-        SendMessage(hTabPageItem[0][119], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0));
-
-        CREATE_6_CHECK(0,120,295+30,276+15);
-        CREATE_6_CHECK(0,126,295+30,276+30);
-    }
     //-----------------------------------------------------------------------------------
     //                        SECOND PAGE - BACKGROUNDS
     //-----------------------------------------------------------------------------------

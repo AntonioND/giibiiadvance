@@ -708,7 +708,8 @@ void GB_Debug_TileVRAMDraw(char * buffer0, int bufw0, int bufh0, char * buffer1,
 	}
 }
 
-void GB_Debug_TileVRAMDrawPaletted(char * buffer0, int bufw0, int bufh0, char * buffer1, int bufw1, int bufh1, int pal)
+void GB_Debug_TileVRAMDrawPaletted(char * buffer0, int bufw0, int bufh0, char * buffer1, int bufw1, int bufh1,
+                                   int pal, int pal_is_spr)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 	u32 y, x;
@@ -737,7 +738,10 @@ void GB_Debug_TileVRAMDrawPaletted(char * buffer0, int bufw0, int bufh0, char * 
             if(GameBoy.Emulator.CGBEnabled)
             {
                 u32 pal_index = (pal * 8) + (2*color);
-                color = GameBoy.Emulator.bg_pal[pal_index] | (GameBoy.Emulator.bg_pal[pal_index+1]<<8);
+                if(pal_is_spr)
+                    color = GameBoy.Emulator.spr_pal[pal_index] | (GameBoy.Emulator.spr_pal[pal_index+1]<<8);
+                else
+                    color = GameBoy.Emulator.bg_pal[pal_index] | (GameBoy.Emulator.bg_pal[pal_index+1]<<8);
                 color = rgb16to32(color);
             }
             else
@@ -769,7 +773,10 @@ void GB_Debug_TileVRAMDrawPaletted(char * buffer0, int bufw0, int bufh0, char * 
             if(GameBoy.Emulator.CGBEnabled)
             {
                 u32 pal_index = (pal * 8) + (2*color);
-                color = GameBoy.Emulator.bg_pal[pal_index] | (GameBoy.Emulator.bg_pal[pal_index+1]<<8);
+                if(pal_is_spr)
+                    color = GameBoy.Emulator.spr_pal[pal_index] | (GameBoy.Emulator.spr_pal[pal_index+1]<<8);
+                else
+                    color = GameBoy.Emulator.bg_pal[pal_index] | (GameBoy.Emulator.bg_pal[pal_index+1]<<8);
                 color = rgb16to32(color);
             }
             else

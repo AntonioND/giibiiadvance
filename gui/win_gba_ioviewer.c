@@ -45,6 +45,7 @@ static int gba_ioview_selected_tab = 0;
 
 //-----------------------------------------------------------------------------------
 
+// Those are shared between the 6 pages
 static _gui_element gba_ioview_display_tabbtn, gba_ioview_backgrounds_tabbtn, gba_ioview_dma_tabbtn,
                     gba_ioview_timers_tabbtn, gba_ioview_sound_tabbtn, gba_ioview_other_tabbtn;
 
@@ -73,9 +74,17 @@ static _gui_element * gba_ioviwer_display_elements[] = {
 
 //-----------------------
 
+static _gui_console gba_ioview_bgs_bgcontrol_con;
+static _gui_element gba_ioview_bgs_bgcontrol_textbox, gba_ioview_bgs_bgcontrol_label;
+static _gui_console gba_ioview_bgs_bgscroll_con;
+static _gui_element gba_ioview_bgs_bgscroll_textbox, gba_ioview_bgs_bgscroll_label;
+
 static _gui_element * gba_ioviwer_backgrounds_elements[] = {
     &gba_ioview_display_tabbtn, &gba_ioview_backgrounds_tabbtn, &gba_ioview_dma_tabbtn,
     &gba_ioview_timers_tabbtn, &gba_ioview_sound_tabbtn, &gba_ioview_other_tabbtn,
+
+    &gba_ioview_bgs_bgcontrol_textbox, &gba_ioview_bgs_bgcontrol_label,
+    &gba_ioview_bgs_bgscroll_textbox, &gba_ioview_bgs_bgscroll_label,
 
     NULL
 };
@@ -134,8 +143,6 @@ void Win_GBAIOViewerUpdate(void)
     if(GBAIOViewerCreated == 0) return;
 
     if(Win_MainRunningGBA() == 0) return;
-
-
 
     switch(gba_ioview_selected_tab)
     {
@@ -255,6 +262,114 @@ void Win_GBAIOViewerUpdate(void)
         }
         case 1: // Backgrounds
         {
+            int scrmode = REG_DISPCNT&7;
+
+            //BG Control
+
+            GUI_ConsoleClear(&gba_ioview_bgs_bgcontrol_con);
+
+            const char * size_bg01[8][4] = { //mode(isaffine), size
+                {" 256x256 ", " 512x256 ", " 256x512 ", " 512x512 "},
+                {" 256x256 ", " 512x256 ", " 256x512 ", " 512x512 "},
+                {"---------", "---------", "---------", "---------"},
+                {"---------", "---------", "---------", "---------"},
+                {"---------", "---------", "---------", "---------"},
+                {"---------", "---------", "---------", "---------"},
+                {"---------", "---------", "---------", "---------"},
+                {"---------", "---------", "---------", "---------"}
+            };
+
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_bgcontrol_con,0,0, "%04X : 008h BG0CNT",REG_BG0CNT);
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_bgcontrol_con,0,2, "[%d] Priority",REG_BG0CNT&3);
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_bgcontrol_con,0,3, "[%08X] CBB",0x06000000+(((REG_BG0CNT>>2)&3)*0x4000));
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_bgcontrol_con,0,4, "[%08X] SBB",0x06000000+(((REG_BG0CNT>>8)&31)*0x800));
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_bgcontrol_con,0,5, "[%s] Size",size_bg01[scrmode][(REG_BG0CNT>>14)&3]);
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_bgcontrol_con,0,6, "[%c] Mosaic",CHECK(REG_BG0CNT&BIT(6)));
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_bgcontrol_con,0,7, "[%c] 256 colors",CHECK(REG_BG0CNT&BIT(7)));
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_bgcontrol_con,0,8, "[%c] Overflow Wrap",CHECK(REG_BG0CNT&BIT(13)));
+
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_bgcontrol_con,21,0, "%04X : 00Ah BG1CNT",REG_BG1CNT);
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_bgcontrol_con,21,2, "[%d] Priority",REG_BG1CNT&3);
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_bgcontrol_con,21,3, "[%08X] CBB",0x06000000+(((REG_BG1CNT>>2)&3)*0x4000));
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_bgcontrol_con,21,4, "[%08X] SBB",0x06000000+(((REG_BG1CNT>>8)&31)*0x800));
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_bgcontrol_con,21,5, "[%s] Size",size_bg01[scrmode][(REG_BG1CNT>>14)&3]);
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_bgcontrol_con,21,6, "[%c] Mosaic",CHECK(REG_BG1CNT&BIT(6)));
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_bgcontrol_con,21,7, "[%c] 256 colors",CHECK(REG_BG1CNT&BIT(7)));
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_bgcontrol_con,21,8, "[%c] Overflow Wrap",CHECK(REG_BG1CNT&BIT(13)));
+
+            const char * size_bg2[8][4] = { //mode(isaffine), size
+                {" 256x256 ", " 512x256 ", " 256x512 ", " 512x512 "},
+                {" 128x128 ", " 256x256 ", " 512x512 ", "1024x1024"},
+                {" 128x128 ", " 256x256 ", " 512x512 ", "1024x1024"},
+                {" 240x160 ", " 240x160 ", " 240x160 ", " 240x160 "},
+                {" 240x160 ", " 240x160 ", " 240x160 ", " 240x160 "},
+                {" 160x128 ", " 160x128 ", " 160x128 ", " 160x128 "},
+                {"---------", "---------", "---------", "---------"},
+                {"---------", "---------", "---------", "---------"}
+            };
+
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_bgcontrol_con,42,0, "%04X : 00Ch BG2CNT",REG_BG2CNT);
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_bgcontrol_con,42,2, "[%d] Priority",REG_BG2CNT&3);
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_bgcontrol_con,42,3, "[%08X] CBB",0x06000000+(((REG_BG2CNT>>2)&3)*0x4000));
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_bgcontrol_con,42,4, "[%08X] SBB",0x06000000+(((REG_BG2CNT>>8)&31)*0x800));
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_bgcontrol_con,42,5, "[%s] Size",size_bg2[scrmode][(REG_BG2CNT>>14)&3]);
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_bgcontrol_con,42,6, "[%c] Mosaic",CHECK(REG_BG2CNT&BIT(6)));
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_bgcontrol_con,42,7, "[%c] 256 colors",CHECK(REG_BG2CNT&BIT(7)));
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_bgcontrol_con,42,8, "[%c] Overflow Wrap",CHECK(REG_BG2CNT&BIT(13)));
+
+            const char * size_bg3[8][4] = { //mode(isaffine), size
+                {" 256x256 ", " 512x256 ", " 256x512 ", " 512x512 "},
+                {"---------", "---------", "---------", "---------"},
+                {" 128x128 ", " 256x256 ", " 512x512 ", "1024x1024"},
+                {"---------", "---------", "---------", "---------"},
+                {"---------", "---------", "---------", "---------"},
+                {"---------", "---------", "---------", "---------"},
+                {"---------", "---------", "---------", "---------"},
+                {"---------", "---------", "---------", "---------"}
+            };
+
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_bgcontrol_con,63,0, "%04X : 00Eh BG3CNT",REG_BG3CNT);
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_bgcontrol_con,63,2, "[%d] Priority",REG_BG3CNT&3);
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_bgcontrol_con,63,3, "[%08X] CBB",0x06000000+(((REG_BG3CNT>>2)&3)*0x4000));
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_bgcontrol_con,63,4, "[%08X] SBB",0x06000000+(((REG_BG3CNT>>8)&31)*0x800));
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_bgcontrol_con,63,5, "[%s] Size",size_bg3[scrmode][(REG_BG3CNT>>14)&3]);
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_bgcontrol_con,63,6, "[%c] Mosaic",CHECK(REG_BG3CNT&BIT(6)));
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_bgcontrol_con,63,7, "[%c] 256 colors",CHECK(REG_BG3CNT&BIT(7)));
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_bgcontrol_con,63,8, "[%c] Overflow Wrap",CHECK(REG_BG3CNT&BIT(13)));
+
+
+            GUI_ConsoleClear(&gba_ioview_bgs_bgscroll_con);
+
+            //BGxHOFS,BGxVOFS
+            static const int bgistext[8][4] = { //mode, bgnumber
+                {1,1,1,1},{1,1,0,0},{0,0,0,0},{0,0,0,0},
+                {0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0}
+            };
+
+            if(bgistext[scrmode][0])
+                GUI_ConsoleModePrintf(&gba_ioview_bgs_bgscroll_con,0,0, "[%3d,%3d] : 010/012h BG0[H/V]OFS",
+                                      REG_BG0HOFS,REG_BG0VOFS);
+            else
+                GUI_ConsoleModePrintf(&gba_ioview_bgs_bgscroll_con,0,0, "[---,---] : 010/012h BG0[H/V]OFS");
+
+            if(bgistext[scrmode][1])
+                GUI_ConsoleModePrintf(&gba_ioview_bgs_bgscroll_con,0,2, "[%3d,%3d] : 014/016h BG1[H/V]OFS",
+                                      REG_BG1HOFS,REG_BG1VOFS);
+            else
+                GUI_ConsoleModePrintf(&gba_ioview_bgs_bgscroll_con,0,2, "[---,---] : 014/016h BG1[H/V]OFS");
+
+            if(bgistext[scrmode][2])
+                GUI_ConsoleModePrintf(&gba_ioview_bgs_bgscroll_con,0,4, "[%3d,%3d] : 018/01Ah BG2[H/V]OFS",
+                                      REG_BG2HOFS,REG_BG2VOFS);
+            else
+                GUI_ConsoleModePrintf(&gba_ioview_bgs_bgscroll_con,0,4, "[---,---] : 018/01Ah BG2[H/V]OFS");
+
+            if(bgistext[scrmode][3])
+                GUI_ConsoleModePrintf(&gba_ioview_bgs_bgscroll_con,0,6, "[%3d,%3d] : 01C/01Eh BG3[H/V]OFS",
+                                      REG_BG3HOFS,REG_BG3VOFS);
+            else
+                GUI_ConsoleModePrintf(&gba_ioview_bgs_bgscroll_con,0,6, "[---,---] : 01C/01Eh BG3[H/V]OFS");
+
 
             break;
         }
@@ -400,6 +515,16 @@ int Win_GBAIOViewerCreate(void)
 
     // Backgrounds
 
+    GUI_SetLabel(&gba_ioview_bgs_bgcontrol_label,
+                   6,24, -1,FONT_HEIGHT, "BG Control");
+    GUI_SetTextBox(&gba_ioview_bgs_bgcontrol_textbox,&gba_ioview_bgs_bgcontrol_con,
+                   6,42, 83*FONT_WIDTH,9*FONT_HEIGHT, NULL);
+
+    GUI_SetLabel(&gba_ioview_bgs_bgscroll_label,
+                   6,42+9*FONT_HEIGHT+6, -1,FONT_HEIGHT, "BG Text Mode Scroll");
+    GUI_SetTextBox(&gba_ioview_bgs_bgscroll_textbox,&gba_ioview_bgs_bgscroll_con,
+                   6,42+9*FONT_HEIGHT+6+18, 33*FONT_WIDTH,8*FONT_HEIGHT, NULL);
+
     // DMA
 
     // Timers
@@ -457,105 +582,7 @@ void GLWindow_GBAIOViewerUpdate(void)
             char text[20];
             int scrmode = REG_DISPCNT&7;
 
-            //BG0CNT
-            sprintf(text,"%04X",REG_BG0CNT); SetWindowText(hTabPageItem[1][2],(LPCTSTR)text);
-            sprintf(text,"%d",REG_BG0CNT&3); SetWindowText(hTabPageItem[1][4],(LPCTSTR)text);
-            sprintf(text,"%08X",0x06000000+(((REG_BG0CNT>>2)&3)*0x4000));
-            SetWindowText(hTabPageItem[1][6],(LPCTSTR)text);
-            sprintf(text,"%08X",0x06000000+(((REG_BG0CNT>>8)&31)*0x800));
-            SetWindowText(hTabPageItem[1][8],(LPCTSTR)text);
 
-            const char * size_bg01[8][4] = { //mode(isaffine), size
-                {"256x256", "512x256", "256x512", "512x512"},
-                {"256x256", "512x256", "256x512", "512x512"},
-                {"---------", "---------", "---------", "---------"},
-                {"---------", "---------", "---------", "---------"},
-                {"---------", "---------", "---------", "---------"},
-                {"---------", "---------", "---------", "---------"},
-                {"---------", "---------", "---------", "---------"},
-                {"---------", "---------", "---------", "---------"}
-            };
-
-            SetWindowText(hTabPageItem[1][10],(LPCTSTR)size_bg01[scrmode][(REG_BG0CNT>>14)&3]);
-            SET_CHECK(1,12,REG_BG0CNT&BIT(6));
-            SET_CHECK(1,14,REG_BG0CNT&BIT(7));
-            SET_CHECK(1,16,REG_BG0CNT&BIT(13));
-
-            //BG1CNT
-            sprintf(text,"%04X",REG_BG1CNT); SetWindowText(hTabPageItem[1][18],(LPCTSTR)text);
-            sprintf(text,"%d",REG_BG1CNT&3); SetWindowText(hTabPageItem[1][20],(LPCTSTR)text);
-            sprintf(text,"%08X",0x06000000+(((REG_BG1CNT>>2)&3)*0x4000));
-            SetWindowText(hTabPageItem[1][22],(LPCTSTR)text);
-            sprintf(text,"%08X",0x06000000+(((REG_BG1CNT>>8)&31)*0x800));
-            SetWindowText(hTabPageItem[1][24],(LPCTSTR)text);
-            SetWindowText(hTabPageItem[1][26],(LPCTSTR)size_bg01[scrmode][(REG_BG1CNT>>14)&3]);
-            SET_CHECK(1,28,REG_BG1CNT&BIT(6));
-            SET_CHECK(1,30,REG_BG1CNT&BIT(7));
-            SET_CHECK(1,32,REG_BG1CNT&BIT(13));
-
-            //BG2CNT
-            sprintf(text,"%04X",REG_BG2CNT); SetWindowText(hTabPageItem[1][34],(LPCTSTR)text);
-            sprintf(text,"%d",REG_BG2CNT&3); SetWindowText(hTabPageItem[1][36],(LPCTSTR)text);
-            sprintf(text,"%08X",0x06000000+(((REG_BG2CNT>>2)&3)*0x4000));
-            SetWindowText(hTabPageItem[1][38],(LPCTSTR)text);
-            sprintf(text,"%08X",0x06000000+(((REG_BG2CNT>>8)&31)*0x800));
-            SetWindowText(hTabPageItem[1][40],(LPCTSTR)text);
-
-            const char * size_bg2[8][4] = { //mode(isaffine), size
-                {"256x256", "512x256", "256x512", "512x512"},
-                {"128x128", "256x256", "512x512", "1024x1024"},
-                {"128x128", "256x256", "512x512", "1024x1024"},
-                {"240x160", "240x160", "240x160", "240x160"},
-                {"240x160", "240x160", "240x160", "240x160"},
-                {"160x128", "160x128", "160x128", "160x128"},
-                {"---------", "---------", "---------", "---------"},
-                {"---------", "---------", "---------", "---------"}
-            };
-            SetWindowText(hTabPageItem[1][42],(LPCTSTR)size_bg2[scrmode][(REG_BG2CNT>>14)&3]);
-            SET_CHECK(1,44,REG_BG2CNT&BIT(6));
-            SET_CHECK(1,46,REG_BG2CNT&BIT(7));
-            SET_CHECK(1,48,REG_BG2CNT&BIT(13));
-
-            //BG3CNT
-            sprintf(text,"%04X",REG_BG3CNT); SetWindowText(hTabPageItem[1][50],(LPCTSTR)text);
-            sprintf(text,"%d",REG_BG3CNT&3); SetWindowText(hTabPageItem[1][52],(LPCTSTR)text);
-            sprintf(text,"%08X",0x06000000+(((REG_BG3CNT>>2)&3)*0x4000));
-            SetWindowText(hTabPageItem[1][54],(LPCTSTR)text);
-            sprintf(text,"%08X",0x06000000+(((REG_BG3CNT>>8)&31)*0x800));
-            SetWindowText(hTabPageItem[1][56],(LPCTSTR)text);
-
-            const char * size_bg3[8][4] = { //mode(isaffine), size
-                {"256x256", "512x256", "256x512", "512x512"},
-                {"---------", "---------", "---------", "---------"},
-                {"128x128", "256x256", "512x512", "1024x1024"},
-                {"---------", "---------", "---------", "---------"},
-                {"---------", "---------", "---------", "---------"},
-                {"---------", "---------", "---------", "---------"},
-                {"---------", "---------", "---------", "---------"},
-                {"---------", "---------", "---------", "---------"}
-            };
-            SetWindowText(hTabPageItem[1][58],(LPCTSTR)size_bg3[scrmode][(REG_BG3CNT>>14)&3]);
-            SET_CHECK(1,60,REG_BG3CNT&BIT(6));
-            SET_CHECK(1,62,REG_BG3CNT&BIT(7));
-            SET_CHECK(1,64,REG_BG3CNT&BIT(13));
-
-            //BGxHOFS,BGxVOFS
-            static const int bgistext[8][4] = { //mode, bgnumber
-                {1,1,1,1},{1,1,0,0},{0,0,0,0},{0,0,0,0},
-                {0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0}
-            };
-            if(bgistext[scrmode][0]) sprintf(text,"%d,%d",REG_BG0HOFS,REG_BG0VOFS);
-            else strcpy(text,"---,---");
-            SetWindowText(hTabPageItem[1][67],(LPCTSTR)text);
-            if(bgistext[scrmode][1]) sprintf(text,"%d,%d",REG_BG1HOFS,REG_BG1VOFS);
-            else strcpy(text,"---,---");
-            SetWindowText(hTabPageItem[1][69],(LPCTSTR)text);
-            if(bgistext[scrmode][2]) sprintf(text,"%d,%d",REG_BG2HOFS,REG_BG2VOFS);
-            else strcpy(text,"---,---");
-            SetWindowText(hTabPageItem[1][71],(LPCTSTR)text);
-            if(bgistext[scrmode][3]) sprintf(text,"%d,%d",REG_BG3HOFS,REG_BG3VOFS);
-            else strcpy(text,"---,---");
-            SetWindowText(hTabPageItem[1][73],(LPCTSTR)text);
 
             //BGxPA-BGxPD,BGxX,BGxY
             static const int bgisaffine[8][2] = { //mode, bgnumber (2,3)
@@ -902,71 +929,6 @@ static void GLWindow_IOViewerMakePages(HWND hWnd)
     //                        SECOND PAGE - BACKGROUNDS
     //-----------------------------------------------------------------------------------
     {
-        hTabPageItem[1][0] = CreateWindow(TEXT("button"), TEXT("BG control"),
-                    WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-                    5, 25, 485, 170, hWnd, (HMENU) 0, hInstance, NULL);
-        SendMessage(hTabPageItem[1][0], WM_SETFONT, (WPARAM)hFontNormalIO, MAKELPARAM(1, 0));
-
-        #define BGnCONTROL(idbase,x,y,regname) \
-        { \
-            CREATE_REG_STATIC_TEXT(1,idbase, x+6, y+20, regname); \
-            hTabPageItem[1][idbase+2] = CreateWindow(TEXT("static"), TEXT("Priority"), WS_CHILD | WS_VISIBLE, \
-                            x+25, y+42, 60, 13, hWnd, NULL, hInstance, NULL); \
-            SendMessage(hTabPageItem[1][idbase+2], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0)); \
-            hTabPageItem[1][idbase+3] = CreateWindow(TEXT("static"), TEXT("0"), \
-                            WS_CHILD | WS_VISIBLE | SS_SUNKEN | BS_CENTER, \
-                            x+6, y+40, 12, 17, hWnd, NULL, hInstance, NULL); \
-            SendMessage(hTabPageItem[1][idbase+3], WM_SETFONT, (WPARAM)hFontFixedIO, MAKELPARAM(1, 0)); \
-            hTabPageItem[1][idbase+4] = CreateWindow(TEXT("static"), TEXT("CBB"), WS_CHILD | WS_VISIBLE, \
-                            x+72, y+60, 40, 13, hWnd, NULL, hInstance, NULL); \
-            SendMessage(hTabPageItem[1][idbase+4], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0)); \
-            hTabPageItem[1][idbase+5] = CreateWindow(TEXT("static"), TEXT("06000000"), \
-                            WS_CHILD | WS_VISIBLE | SS_SUNKEN | BS_CENTER, \
-                            x+6, y+60, 60, 17, hWnd, NULL, hInstance, NULL); \
-            SendMessage(hTabPageItem[1][idbase+5], WM_SETFONT, (WPARAM)hFontFixedIO, MAKELPARAM(1, 0)); \
-            hTabPageItem[1][idbase+6] = CreateWindow(TEXT("static"), TEXT("SBB"), WS_CHILD | WS_VISIBLE, \
-                            x+72, y+80, 40, 13, hWnd, NULL, hInstance, NULL); \
-            SendMessage(hTabPageItem[1][idbase+6], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0)); \
-            hTabPageItem[1][idbase+7] = CreateWindow(TEXT("static"), TEXT("06000000"), \
-                            WS_CHILD | WS_VISIBLE | SS_SUNKEN | BS_CENTER, \
-                            x+6, y+80, 60, 17, hWnd, NULL, hInstance, NULL); \
-            SendMessage(hTabPageItem[1][idbase+7], WM_SETFONT, (WPARAM)hFontFixedIO, MAKELPARAM(1, 0)); \
-            hTabPageItem[1][idbase+8] = CreateWindow(TEXT("static"), TEXT("Size"), WS_CHILD | WS_VISIBLE, \
-                            x+82, y+100, 30, 13, hWnd, NULL, hInstance, NULL); \
-            SendMessage(hTabPageItem[1][idbase+8], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0)); \
-            hTabPageItem[1][idbase+9] = CreateWindow(TEXT("static"), TEXT("256x256"), \
-                            WS_CHILD | WS_VISIBLE | SS_SUNKEN | BS_CENTER, \
-                            x+6, y+100, 70, 17, hWnd, NULL, hInstance, NULL); \
-            SendMessage(hTabPageItem[1][idbase+9], WM_SETFONT, (WPARAM)hFontFixedIO, MAKELPARAM(1, 0)); \
-            CREATE_CHECK_STATIC(1,idbase+10, x+6, y+118, "Mosaic"); \
-            CREATE_CHECK_STATIC(1,idbase+12, x+6, y+134, "256 colors"); \
-            CREATE_CHECK_STATIC(1,idbase+14, x+6, y+150, "Overflow Wrap"); \
-        }
-
-        BGnCONTROL(1, 5,25, "008h BG0CNT");
-        BGnCONTROL(17, 127,25, "00Ah BG1CNT");
-        BGnCONTROL(33, 249,25, "00Ch BG2CNT");
-        BGnCONTROL(49, 366,25, "00Eh BG3CNT");
-
-        hTabPageItem[1][65] = CreateWindow(TEXT("button"), TEXT("BG scroll"),
-                    WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-                    5, 195, 200, 100, hWnd, (HMENU) 0, hInstance, NULL);
-        SendMessage(hTabPageItem[1][65], WM_SETFONT, (WPARAM)hFontNormalIO, MAKELPARAM(1, 0));
-
-        #define CREATE_BGnXOFFSET(base_id, x, y, text) \
-        { \
-            hTabPageItem[1][base_id] = CreateWindow(TEXT("static"), TEXT(text), WS_CHILD | WS_VISIBLE, \
-                            x+66, y, 120, 13, hWnd, NULL, hInstance, NULL); \
-            SendMessage(hTabPageItem[1][base_id], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0)); \
-            hTabPageItem[1][base_id+1] = CreateWindow(TEXT("static"), TEXT("000,000"), \
-                            WS_CHILD | WS_VISIBLE | SS_SUNKEN | BS_CENTER, \
-                            x, y, 60, 17, hWnd, NULL, hInstance, NULL); \
-            SendMessage(hTabPageItem[1][base_id+1], WM_SETFONT, (WPARAM)hFontFixedIO, MAKELPARAM(1, 0)); \
-        }
-        CREATE_BGnXOFFSET(66, 11,210, "010/012h BG0[H/V]OFS");
-        CREATE_BGnXOFFSET(68, 11,230, "014/016h BG1[H/V]OFS");
-        CREATE_BGnXOFFSET(70, 11,250, "018/01Ah BG2[H/V]OFS");
-        CREATE_BGnXOFFSET(72, 11,270, "01C/01Eh BG3[H/V]OFS");
 
         hTabPageItem[1][74] = CreateWindow(TEXT("button"), TEXT("BG affine transformation"),
                     WS_CHILD | WS_VISIBLE | BS_GROUPBOX,

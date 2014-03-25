@@ -63,6 +63,8 @@ Game Boy Advance
 - GBA_MemoryWrite8() will enter halt mode when writing to REG_POSTFLG. Fix it.
 - Emulate broken sorting of priorities.
 - What happens with prohibited code 3 in sprites?
+- GBC DISPCNT bit can only be written from bios? Test.
+- DMA Repeat bit (DMACNT 9) (Must be zero if Bit 11 set) - What happens if it is 1?
 
 Random things
 -------------

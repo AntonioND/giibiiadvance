@@ -61,6 +61,8 @@ static char gba_spr_allspr_buffer[GBA_SPR_ALLSPR_BUFFER_WIDTH*GBA_SPR_ALLSPR_BUF
 
 static char gba_spr_zoomed_buffer[GBA_SPR_ZOOMED_BUFFER_WIDTH*GBA_SPR_ZOOMED_BUFFER_HEIGHT*3];
 
+static u32 gba_sprview_selected_matrix = 0;
+
 //-----------------------------------------------------------------------------------
 
 static _gui_console gba_sprview_con;
@@ -74,6 +76,11 @@ static _gui_element gba_sprview_allspr_bmp, gba_sprview_zoomedspr_bmp;
 
 static _gui_element gba_sprview_page0_radbtn, gba_sprview_page1_radbtn;
 
+static _gui_console gba_sprview_matrixinfo_con;
+static _gui_element gba_sprview_matrixinfo_textbox;
+
+static _gui_element gba_sprview_selectmatrix_scrollbar;
+
 static _gui_element * gba_sprviwer_window_gui_elements[] = {
     &gba_sprview_allspr_bmp,
     &gba_sprview_zoomedspr_bmp,
@@ -83,6 +90,8 @@ static _gui_element * gba_sprviwer_window_gui_elements[] = {
     &gba_sprview_zoomed_spr_dumpbtn,
     &gba_sprview_page0_radbtn,
     &gba_sprview_page1_radbtn,
+    &gba_sprview_matrixinfo_textbox,
+    &gba_sprview_selectmatrix_scrollbar,
     NULL
 };
 
@@ -169,6 +178,29 @@ void Win_GBASprViewerUpdate(void)
         l--; r++; t--; b++;
         GUI_Draw_Rect(gba_spr_allspr_buffer,GBA_SPR_ALLSPR_BUFFER_WIDTH,GBA_SPR_ALLSPR_BUFFER_HEIGHT,l,r,t,b);
     }
+
+    // Matrix information
+
+    GUI_ConsoleClear(&gba_sprview_matrixinfo_con);
+
+    GUI_ConsoleModePrintf(&gba_sprview_matrixinfo_con,0,0,"Matrix index: %d",gba_sprview_selected_matrix);
+
+    _oam_matrix_entry_t * mat = &(((_oam_matrix_entry_t*)Mem.oam)[gba_sprview_selected_matrix & 0x1F]);
+
+    int pa = (s32)(s16)(mat[gba_sprview_selected_matrix].pa);
+    int pb = (s32)(s16)(mat[gba_sprview_selected_matrix].pb);
+    int pc = (s32)(s16)(mat[gba_sprview_selected_matrix].pc);
+    int pd = (s32)(s16)(mat[gba_sprview_selected_matrix].pd);
+
+    GUI_ConsoleModePrintf(&gba_sprview_matrixinfo_con,0,2,"     [%04X,%04X]",(u16)pa,(u16)pb);
+    GUI_ConsoleModePrintf(&gba_sprview_matrixinfo_con,0,3,"     [%04X,%04X]",(u16)pc,(u16)pd);
+
+    char text_a[7]; s_snprintf(text_a,sizeof(text_a),"%.8f",((float)pa)/(1<<8));
+    char text_b[7]; s_snprintf(text_b,sizeof(text_b),"%.8f",((float)pb)/(1<<8));
+    char text_c[7]; s_snprintf(text_c,sizeof(text_c),"%.8f",((float)pc)/(1<<8));
+    char text_d[7]; s_snprintf(text_d,sizeof(text_d),"%.8f",((float)pd)/(1<<8));
+    GUI_ConsoleModePrintf(&gba_sprview_matrixinfo_con,0,5, "   (%s,%s)",text_a,text_b);
+    GUI_ConsoleModePrintf(&gba_sprview_matrixinfo_con,0,6, "   (%s,%s)",text_c,text_d);
 }
 
 //----------------------------------------------------------------
@@ -191,6 +223,12 @@ static void _win_gba_sprviewer_radbtn_callback(int btn_id)
 {
     gba_sprview_selected_page = btn_id;
     Win_GBASprViewerUpdate();
+}
+
+static void _win_gba_sprviewer_matrixinfo_scrollbar_callback(int value)
+{
+    gba_sprview_selected_matrix = value;
+    return;
 }
 
 //----------------------------------------------------------------
@@ -351,8 +389,14 @@ int Win_GBASprViewerCreate(void)
     GUI_SetButton(&gba_sprview_allspr_dumpbtn,668,414,FONT_WIDTH*13,FONT_HEIGHT*2,"Dump all",
                   _win_gba_sprviewer_allspr_dump_btn_callback);
 
+    GUI_SetTextBox(&gba_sprview_matrixinfo_textbox,&gba_sprview_matrixinfo_con,
+                   668,445, 21*FONT_WIDTH,8*FONT_HEIGHT, NULL);
+    GUI_SetScrollBar(&gba_sprview_selectmatrix_scrollbar, 668-1,445+8*FONT_HEIGHT, 21*FONT_WIDTH+1, 12,
+                     0,31, 0, _win_gba_sprviewer_matrixinfo_scrollbar_callback);
+
     gba_sprview_selected_spr = 0;
     gba_sprview_selected_page = 0;
+    gba_sprview_selected_matrix = 0;
 
     GBASprViewerCreated = 1;
 

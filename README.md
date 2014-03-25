@@ -5,7 +5,7 @@ Another GB, GBC and GBA emulator writen in C.
 
 This is an emulator I started a few years ago. I haven't released any version since 0.1.0, but I've done some changes that have improved compatibility anyway.
 
-I'm currently porting the Win32 GUI to SDL2.
+I'm currently porting the Win32 GUI to SDL2. The objective is to make it portable, so the only windows outside the main one are the debugger windows. This way, if someone wanted to port this to a machine without window manager, the only thing he would need to do is to remove the debugger.
 
 This has been compiled in Linux Mint 16 and Windows 7 succesfuly. Compiling with OpenCV in Linux is a bit tricky, and the emulator can't close nicely, but camera works.
 
@@ -18,10 +18,11 @@ Current goals for 0.2.0
 
 - Finish porting the GUI:
  - GBA I/O viewer
- - Configuration window.
+ - Configuration window. Color select dialog?
  - Complete main window menu. Accelerators (F12, CTRL+R, ...)
  - Disable main menu elements when they can't be used.
  - Include font and app icon as binary data. Don't include icon data in linux.
+ - Speedup button. Frameskip.
 
 For 0.3.0
 ---------

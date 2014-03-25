@@ -97,9 +97,24 @@ static _gui_element * gba_ioviwer_backgrounds_elements[] = {
 
 //-----------------------
 
+static _gui_console gba_ioview_dma_dma0_con;
+static _gui_element gba_ioview_dma_dma0_textbox, gba_ioview_dma_dma0_label;
+static _gui_console gba_ioview_dma_dma1_con;
+static _gui_element gba_ioview_dma_dma1_textbox, gba_ioview_dma_dma1_label;
+static _gui_console gba_ioview_dma_dma2_con;
+static _gui_element gba_ioview_dma_dma2_textbox, gba_ioview_dma_dma2_label;
+static _gui_console gba_ioview_dma_dma3_con;
+static _gui_element gba_ioview_dma_dma3_textbox, gba_ioview_dma_dma3_label;
+
+
 static _gui_element * gba_ioviwer_dma_elements[] = {
     &gba_ioview_display_tabbtn, &gba_ioview_backgrounds_tabbtn, &gba_ioview_dma_tabbtn,
     &gba_ioview_timers_tabbtn, &gba_ioview_sound_tabbtn, &gba_ioview_other_tabbtn,
+
+    &gba_ioview_dma_dma0_textbox, &gba_ioview_dma_dma0_label,
+    &gba_ioview_dma_dma1_textbox, &gba_ioview_dma_dma1_label,
+    &gba_ioview_dma_dma2_textbox, &gba_ioview_dma_dma2_label,
+    &gba_ioview_dma_dma3_textbox, &gba_ioview_dma_dma3_label,
 
     NULL
 };
@@ -150,12 +165,12 @@ void Win_GBAIOViewerUpdate(void)
 
     if(Win_MainRunningGBA() == 0) return;
 
+    #define CHECK(a) ((a)?CHR_SQUAREBLACK_MID:' ')
+
     switch(gba_ioview_selected_tab)
     {
         case 0: // Display
         {
-            #define CHECK(a) ((a)?CHR_SQUAREBLACK_MID:' ')
-
             // LCD Control
             GUI_ConsoleClear(&gba_ioview_display_lcdcontrol_con);
 
@@ -476,6 +491,91 @@ void Win_GBAIOViewerUpdate(void)
         }
         case 2: // DMA
         {
+            const char * srcincmode[4] = { "Increment ","Decrement ","Fixed     ","Prohibited" };
+            const char * dstincmode[4] = { "Increment ","Decrement ","Fixed     ","Inc/Reload" };
+            const char * startmode[4][4] = {
+                {"Start immediately", "Start immediately", "Start immediately", "Start immediately"},
+                {"Start at VBlank  ", "Start at VBlank  ", "Start at VBlank  ", "Start at VBlank  "},
+                {"Start at HBlank  ", "Start at HBlank  ", "Start at HBlank  ", "Start at HBlank  "},
+                {"Prohibited       ", "Sound FIFO       ", "Sound FIFO       ", "Video Capture    "}
+            };
+
+            // DMA 0
+
+            GUI_ConsoleClear(&gba_ioview_dma_dma0_con);
+
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma0_con,0,0, "%08X : 0B0h DMA0SAD",REG_DMA0SAD);
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma0_con,0,1, "%08X : 0B4h DMA0DAD",REG_DMA0DAD);
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma0_con,0,2, "%08X : 0B8h DMA0CNT",REG_DMA0CNT);
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma0_con,26,0, "[%s]",srcincmode[(REG_DMA0CNT_H>>7)&3]);
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma0_con,26,1, "[%s]",dstincmode[(REG_DMA0CNT_H>>5)&3]);
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma0_con,26,2, "[%c] 32 bit",CHECK(REG_DMA0CNT_H&BIT(10)));
+
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma0_con,0,4, "[%5d] bytes",REG_DMA0CNT_L*((REG_DMA0CNT_H&BIT(10))?4:2));
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma0_con,26,4, "[%c] Repeat",CHECK(REG_DMA0CNT_H&BIT(9)));
+
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma0_con,0,6, "[%s] DMA Start Timing",startmode[(REG_DMA0CNT_H>>12)&3][0]);
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma0_con,26,8, "[%c] IRQ enable",CHECK(REG_DMA0CNT_H&BIT(14)));
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma0_con,0,8, "[%c] DMA enable",CHECK(REG_DMA0CNT_H&BIT(15)));
+
+            // DMA 1
+
+            GUI_ConsoleClear(&gba_ioview_dma_dma1_con);
+
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma1_con,0,0, "%08X : 0BCh DMA1SAD",REG_DMA1SAD);
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma1_con,0,1, "%08X : 0C0h DMA1DAD",REG_DMA1DAD);
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma1_con,0,2, "%08X : 0C4h DMA1CNT",REG_DMA1CNT);
+
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma1_con,26,0, "[%s]",srcincmode[(REG_DMA1CNT_H>>7)&3]);
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma1_con,26,1, "[%s]",dstincmode[(REG_DMA1CNT_H>>5)&3]);
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma1_con,26,2, "[%c] 32 bit",CHECK(REG_DMA1CNT_H&BIT(10)));
+
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma1_con,0,4, "[%5d] bytes",REG_DMA1CNT_L*((REG_DMA1CNT_H&BIT(10))?4:2));
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma1_con,26,4, "[%c] Repeat",CHECK(REG_DMA1CNT_H&BIT(9)));
+
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma1_con,0,6, "[%s] DMA Start Timing",startmode[(REG_DMA1CNT_H>>12)&3][1]);
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma1_con,26,8, "[%c] IRQ enable",CHECK(REG_DMA1CNT_H&BIT(14)));
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma1_con,0,8, "[%c] DMA enable",CHECK(REG_DMA1CNT_H&BIT(15)));
+
+            // DMA 2
+
+            GUI_ConsoleClear(&gba_ioview_dma_dma2_con);
+
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma2_con,0,0, "%08X : 0C8h DMA2SAD",REG_DMA2SAD);
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma2_con,0,1, "%08X : 0CCh DMA2DAD",REG_DMA2DAD);
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma2_con,0,2, "%08X : 0D0h DMA2CNT",REG_DMA2CNT);
+
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma2_con,26,0, "[%s]",srcincmode[(REG_DMA2CNT_H>>7)&3]);
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma2_con,26,1, "[%s]",dstincmode[(REG_DMA2CNT_H>>5)&3]);
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma2_con,26,2, "[%c] 32 bit",CHECK(REG_DMA2CNT_H&BIT(10)));
+
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma2_con,0,4, "[%5d] bytes",REG_DMA2CNT_L*((REG_DMA2CNT_H&BIT(10))?4:2));
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma2_con,26,4, "[%c] Repeat",CHECK(REG_DMA2CNT_H&BIT(9)));
+
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma2_con,0,6, "[%s] DMA Start Timing",startmode[(REG_DMA2CNT_H>>12)&3][2]);
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma2_con,26,8, "[%c] IRQ enable",CHECK(REG_DMA2CNT_H&BIT(14)));
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma2_con,0,8, "[%c] DMA enable",CHECK(REG_DMA2CNT_H&BIT(15)));
+
+            // DMA 3
+
+            GUI_ConsoleClear(&gba_ioview_dma_dma3_con);
+
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma3_con,0,0, "%08X : 0D4h DMA3SAD",REG_DMA3SAD);
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma3_con,0,1, "%08X : 0D8h DMA3DAD",REG_DMA3DAD);
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma3_con,0,2, "%08X : 0DCh DMA3CNT",REG_DMA3CNT);
+
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma3_con,26,0, "[%s]",srcincmode[(REG_DMA3CNT_H>>7)&3]);
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma3_con,26,1, "[%s]",dstincmode[(REG_DMA3CNT_H>>5)&3]);
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma3_con,26,2, "[%c] 32 bit",CHECK(REG_DMA3CNT_H&BIT(10)));
+
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma3_con,0,4, "[%5d] bytes",REG_DMA3CNT_L*((REG_DMA3CNT_H&BIT(10))?4:2));
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma3_con,26,4, "[%c] Repeat",CHECK(REG_DMA3CNT_H&BIT(9)));
+
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma3_con,0,6, "[%s] DMA Start Timing",startmode[(REG_DMA3CNT_H>>12)&3][3]);
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma3_con,26,8, "[%c] IRQ enable",CHECK(REG_DMA3CNT_H&BIT(14)));
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma3_con,0,8, "[%c] DMA enable",CHECK(REG_DMA3CNT_H&BIT(15)));
+
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma3_con,0,9, "[%c] Game Pak DRQ",CHECK(REG_DMA3CNT_H&BIT(11)));
 
             break;
         }
@@ -638,6 +738,26 @@ int Win_GBAIOViewerCreate(void)
 
     // DMA
 
+    GUI_SetLabel(&gba_ioview_dma_dma0_label,
+                   6,24, -1,FONT_HEIGHT, "DMA 0");
+    GUI_SetTextBox(&gba_ioview_dma_dma0_textbox,&gba_ioview_dma_dma0_con,
+                   6,42, 41*FONT_WIDTH,10*FONT_HEIGHT, NULL);
+
+    GUI_SetLabel(&gba_ioview_dma_dma1_label,
+                   6+41*FONT_WIDTH+7,24, -1,FONT_HEIGHT, "DMA 1");
+    GUI_SetTextBox(&gba_ioview_dma_dma1_textbox,&gba_ioview_dma_dma1_con,
+                   6+41*FONT_WIDTH+7,42, 41*FONT_WIDTH,10*FONT_HEIGHT, NULL);
+
+    GUI_SetLabel(&gba_ioview_dma_dma2_label,
+                   6,42+10*FONT_HEIGHT+6, -1,FONT_HEIGHT, "DMA 2");
+    GUI_SetTextBox(&gba_ioview_dma_dma2_textbox,&gba_ioview_dma_dma2_con,
+                   6,60+10*FONT_HEIGHT+6, 41*FONT_WIDTH,10*FONT_HEIGHT, NULL);
+
+    GUI_SetLabel(&gba_ioview_dma_dma3_label,
+                   6+41*FONT_WIDTH+7,42+10*FONT_HEIGHT+6, -1,FONT_HEIGHT, "DMA 3");
+    GUI_SetTextBox(&gba_ioview_dma_dma3_textbox,&gba_ioview_dma_dma3_con,
+                   6+41*FONT_WIDTH+7,60+10*FONT_HEIGHT+6, 41*FONT_WIDTH,10*FONT_HEIGHT, NULL);
+
     // Timers
 
     // Sound
@@ -679,88 +799,8 @@ void Win_GBAIOViewerClose(void)
 
 void GLWindow_GBAIOViewerUpdate(void)
 {
-    if(IOViewerCreated == 0) return;
-
-    if(RUNNING != RUN_GBA) return;
-
-    #define SET_CHECK(page,item,condition) \
-    SendMessage(hTabPageItem[page][item], BM_SETCHECK, ((condition)?BST_CHECKED:BST_UNCHECKED), 0)
-
     switch(ioviewer_curpage)
     {
-        case 2: //DMA
-        {
-            char text[20];
-
-            const char * srcincmode[4] = { "Increment","Decrement","Fixed","Prohibited" };
-            const char * dstincmode[4] = { "Increment","Decrement","Fixed","Inc/Reload" };
-            const char * startmode[4][4] = {
-                {"Start immediately","Start immediately","Start immediately","Start immediately"},
-                {"Start at VBlank","Start at VBlank","Start at VBlank","Start at VBlank"},
-                {"Start at HBlank","Start at HBlank","Start at HBlank","Start at HBlank"},
-                {"Prohibited","Sound FIFO","Sound FIFO","Video Capture"}
-            };
-
-            //DMA 0
-            sprintf(text,"%08X",REG_DMA0SAD); SetWindowText(hTabPageItem[2][2],(LPCTSTR)text);
-            sprintf(text,"%08X",REG_DMA0DAD); SetWindowText(hTabPageItem[2][4],(LPCTSTR)text);
-            sprintf(text,"%08X",REG_DMA0CNT); SetWindowText(hTabPageItem[2][6],(LPCTSTR)text);
-            SetWindowText(hTabPageItem[2][7],(LPCTSTR)srcincmode[(REG_DMA0CNT_H>>7)&3]);
-            SetWindowText(hTabPageItem[2][8],(LPCTSTR)dstincmode[(REG_DMA0CNT_H>>5)&3]);
-            SET_CHECK(2,10,REG_DMA0CNT_H&BIT(10));
-            SetWindowText(hTabPageItem[2][11],(LPCTSTR)startmode[(REG_DMA0CNT_H>>12)&3][0]);
-            sprintf(text,"%d bytes",REG_DMA0CNT_L*((REG_DMA0CNT_H&BIT(10))?4:2));
-            SetWindowText(hTabPageItem[2][12],(LPCTSTR)text);
-            SET_CHECK(2,14,REG_DMA0CNT_H&BIT(9));
-            SET_CHECK(2,16,REG_DMA0CNT_H&BIT(14));
-            SET_CHECK(2,18,REG_DMA0CNT_H&BIT(15));
-
-            //DMA 1
-            sprintf(text,"%08X",REG_DMA1SAD); SetWindowText(hTabPageItem[2][21],(LPCTSTR)text);
-            sprintf(text,"%08X",REG_DMA1DAD); SetWindowText(hTabPageItem[2][23],(LPCTSTR)text);
-            sprintf(text,"%08X",REG_DMA1CNT); SetWindowText(hTabPageItem[2][25],(LPCTSTR)text);
-            SetWindowText(hTabPageItem[2][26],(LPCTSTR)srcincmode[(REG_DMA1CNT_H>>7)&3]);
-            SetWindowText(hTabPageItem[2][27],(LPCTSTR)dstincmode[(REG_DMA1CNT_H>>5)&3]);
-            SET_CHECK(2,29,REG_DMA1CNT_H&BIT(10));
-            SetWindowText(hTabPageItem[2][30],(LPCTSTR)startmode[(REG_DMA1CNT_H>>12)&3][1]);
-            sprintf(text,"%d bytes",REG_DMA1CNT_L*((REG_DMA1CNT_H&BIT(10))?4:2));
-            SetWindowText(hTabPageItem[2][31],(LPCTSTR)text);
-            SET_CHECK(2,33,REG_DMA1CNT_H&BIT(9));
-            SET_CHECK(2,35,REG_DMA1CNT_H&BIT(14));
-            SET_CHECK(2,37,REG_DMA1CNT_H&BIT(15));
-
-            //DMA 2
-            sprintf(text,"%08X",REG_DMA2SAD); SetWindowText(hTabPageItem[2][40],(LPCTSTR)text);
-            sprintf(text,"%08X",REG_DMA2DAD); SetWindowText(hTabPageItem[2][42],(LPCTSTR)text);
-            sprintf(text,"%08X",REG_DMA2CNT); SetWindowText(hTabPageItem[2][44],(LPCTSTR)text);
-            SetWindowText(hTabPageItem[2][45],(LPCTSTR)srcincmode[(REG_DMA2CNT_H>>7)&3]);
-            SetWindowText(hTabPageItem[2][46],(LPCTSTR)dstincmode[(REG_DMA2CNT_H>>5)&3]);
-            SET_CHECK(2,48,REG_DMA2CNT_H&BIT(10));
-            SetWindowText(hTabPageItem[2][49],(LPCTSTR)startmode[(REG_DMA2CNT_H>>12)&3][2]);
-            sprintf(text,"%d bytes",REG_DMA2CNT_L*((REG_DMA2CNT_H&BIT(10))?4:2));
-            SetWindowText(hTabPageItem[2][50],(LPCTSTR)text);
-            SET_CHECK(2,52,REG_DMA2CNT_H&BIT(9));
-            SET_CHECK(2,54,REG_DMA2CNT_H&BIT(14));
-            SET_CHECK(2,56,REG_DMA2CNT_H&BIT(15));
-
-            //DMA 3
-            sprintf(text,"%08X",REG_DMA3SAD); SetWindowText(hTabPageItem[2][59],(LPCTSTR)text);
-            sprintf(text,"%08X",REG_DMA3DAD); SetWindowText(hTabPageItem[2][61],(LPCTSTR)text);
-            sprintf(text,"%08X",REG_DMA3CNT); SetWindowText(hTabPageItem[2][63],(LPCTSTR)text);
-            SetWindowText(hTabPageItem[2][64],(LPCTSTR)srcincmode[(REG_DMA3CNT_H>>7)&3]);
-            SetWindowText(hTabPageItem[2][65],(LPCTSTR)dstincmode[(REG_DMA3CNT_H>>5)&3]);
-            SET_CHECK(2,67,REG_DMA3CNT_H&BIT(10));
-            SetWindowText(hTabPageItem[2][68],(LPCTSTR)startmode[(REG_DMA3CNT_H>>12)&3][3]);
-            sprintf(text,"%d bytes",REG_DMA3CNT_L*((REG_DMA3CNT_H&BIT(10))?4:2));
-            SetWindowText(hTabPageItem[2][69],(LPCTSTR)text);
-            SET_CHECK(2,71,REG_DMA3CNT_H&BIT(9));
-            SET_CHECK(2,73,REG_DMA3CNT_H&BIT(14));
-            SET_CHECK(2,75,REG_DMA3CNT_H&BIT(15));
-
-            SET_CHECK(2,76,REG_DMA3CNT_H&BIT(11));
-
-            break;
-        }
         case 3: //Timers
         {
             char text[10];
@@ -973,58 +1013,6 @@ void GLWindow_GBAIOViewerUpdate(void)
 
 static void GLWindow_IOViewerMakePages(HWND hWnd)
 {
-    //-----------------------------------------------------------------------------------
-    //                        THIRD PAGE - DMA
-    //-----------------------------------------------------------------------------------
-    {
-        #define CREATE_REG32(page,base_id, x, y, text) \
-        { \
-            hTabPageItem[page][base_id] = CreateWindow(TEXT("static"), TEXT(text), WS_CHILD | WS_VISIBLE, \
-                            x+65, y, 80, 13, hWnd, NULL, hInstance, NULL); \
-            SendMessage(hTabPageItem[page][base_id], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0)); \
-            hTabPageItem[page][base_id+1] = CreateWindow(TEXT("static"), TEXT("00000000"), \
-                            WS_CHILD | WS_VISIBLE | SS_SUNKEN | BS_CENTER, \
-                            x, y, 60, 17, hWnd, NULL, hInstance, NULL); \
-            SendMessage(hTabPageItem[page][base_id+1], WM_SETFONT, (WPARAM)hFontFixedIO, MAKELPARAM(1, 0)); \
-        }
-
-        #define CREATE_DMA_CHANNEL(idbase,x,y,text,srctext,dsttext,cnttext) \
-        { \
-            hTabPageItem[2][idbase] = CreateWindow(TEXT("button"), TEXT(text), \
-                        WS_CHILD | WS_VISIBLE | BS_GROUPBOX, \
-                        x, y, 240, 150, hWnd, (HMENU) 0, hInstance, NULL); \
-            SendMessage(hTabPageItem[2][idbase], WM_SETFONT, (WPARAM)hFontNormalIO, MAKELPARAM(1, 0)); \
-            CREATE_REG32(2,idbase+1, x+6, y+21, srctext); \
-            CREATE_REG32(2,idbase+3, x+6, y+42, dsttext); \
-            CREATE_REG32(2,idbase+5, x+6, y+63, cnttext); \
-            hTabPageItem[2][idbase+7] = CreateWindow(TEXT("static"), TEXT("Increment"), \
-                            WS_CHILD | WS_VISIBLE | SS_SUNKEN | BS_CENTER, \
-                            x+158, y+21, 75, 17, hWnd, NULL, hInstance, NULL); \
-            SendMessage(hTabPageItem[2][idbase+7], WM_SETFONT, (WPARAM)hFontFixedIO, MAKELPARAM(1, 0)); \
-            hTabPageItem[2][idbase+8] = CreateWindow(TEXT("static"), TEXT("Increment"), \
-                            WS_CHILD | WS_VISIBLE | SS_SUNKEN | BS_CENTER, \
-                            x+158, y+42, 75, 17, hWnd, NULL, hInstance, NULL); \
-            SendMessage(hTabPageItem[2][idbase+8], WM_SETFONT, (WPARAM)hFontFixedIO, MAKELPARAM(1, 0)); \
-            CREATE_CHECK_STATIC(2,idbase+9, x+158, y+63, "32 bit"); \
-            hTabPageItem[2][idbase+11] = CreateWindow(TEXT("static"), TEXT("Start immediately"), \
-                            WS_CHILD | WS_VISIBLE | SS_SUNKEN | BS_CENTER, \
-                            x+6, y+84, 145, 17, hWnd, NULL, hInstance, NULL); \
-            SendMessage(hTabPageItem[2][idbase+11], WM_SETFONT, (WPARAM)hFontFixedIO, MAKELPARAM(1, 0)); \
-            hTabPageItem[2][idbase+12] = CreateWindow(TEXT("static"), TEXT("000000 bytes"), \
-                            WS_CHILD | WS_VISIBLE | SS_SUNKEN | BS_CENTER, \
-                            x+6, y+105, 100, 17, hWnd, NULL, hInstance, NULL); \
-            SendMessage(hTabPageItem[2][idbase+12], WM_SETFONT, (WPARAM)hFontFixedIO, MAKELPARAM(1, 0)); \
-            CREATE_CHECK_STATIC(2,idbase+13, x+158, y+84, "Repeat"); \
-            CREATE_CHECK_STATIC(2,idbase+15, x+118, y+105, "IRQ Enable"); \
-            CREATE_CHECK_STATIC(2,idbase+17, x+6, y+126, "DMA Enable"); \
-        }
-
-        CREATE_DMA_CHANNEL(0, 5,25, "DMA 0", "0B0h DMA0SAD","0B4h DMA0DAD","0B8h DMA0CNT");
-        CREATE_DMA_CHANNEL(19, 249,25, "DMA 1", "0BCh DMA1SAD","0C0h DMA1DAD","0C4h DMA1CNT");
-        CREATE_DMA_CHANNEL(38, 5,175, "DMA 2", "0C8h DMA2SAD","0CCh DMA2DAD","0D0h DMA2CNT");
-        CREATE_DMA_CHANNEL(57, 249,175, "DMA 3", "0D4h DMA3SAD","0D8h DMA3DAD","0DCh DMA3CNT");
-        CREATE_CHECK_STATIC(2,76, 249+118, 175+126, "Game Pak DRQ");
-    }
     //-----------------------------------------------------------------------------------
     //                        FOURTH PAGE - TIMERS
     //-----------------------------------------------------------------------------------

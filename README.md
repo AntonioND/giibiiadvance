@@ -29,7 +29,8 @@ For 0.3.0
 - Improve the GUI:
  - GB Camera and GB Printer viewers. GB Camera: Registers, images (let the user see the thumbnails to choose).
  - GBA I/O hardware viewer (RTC, sensors...).
- - Export images from debugger windows.
+ - Export images from new debugger windows.
+ - Dump dissasembly/memory to a file and restore it?
 
 - Customize controls.
  - Support for game controllers.

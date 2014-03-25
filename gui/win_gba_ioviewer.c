@@ -78,6 +78,10 @@ static _gui_console gba_ioview_bgs_bgcontrol_con;
 static _gui_element gba_ioview_bgs_bgcontrol_textbox, gba_ioview_bgs_bgcontrol_label;
 static _gui_console gba_ioview_bgs_bgscroll_con;
 static _gui_element gba_ioview_bgs_bgscroll_textbox, gba_ioview_bgs_bgscroll_label;
+static _gui_console gba_ioview_bgs_affine_con;
+static _gui_element gba_ioview_bgs_affine_textbox, gba_ioview_bgs_affine_label;
+static _gui_console gba_ioview_bgs_vidmode_con;
+static _gui_element gba_ioview_bgs_vidmode_textbox, gba_ioview_bgs_vidmode_label;
 
 static _gui_element * gba_ioviwer_backgrounds_elements[] = {
     &gba_ioview_display_tabbtn, &gba_ioview_backgrounds_tabbtn, &gba_ioview_dma_tabbtn,
@@ -85,6 +89,8 @@ static _gui_element * gba_ioviwer_backgrounds_elements[] = {
 
     &gba_ioview_bgs_bgcontrol_textbox, &gba_ioview_bgs_bgcontrol_label,
     &gba_ioview_bgs_bgscroll_textbox, &gba_ioview_bgs_bgscroll_label,
+    &gba_ioview_bgs_affine_textbox, &gba_ioview_bgs_affine_label,
+    &gba_ioview_bgs_vidmode_textbox, &gba_ioview_bgs_vidmode_label,
 
     NULL
 };
@@ -338,9 +344,10 @@ void Win_GBAIOViewerUpdate(void)
             GUI_ConsoleModePrintf(&gba_ioview_bgs_bgcontrol_con,63,8, "[%c] Overflow Wrap",CHECK(REG_BG3CNT&BIT(13)));
 
 
+            // BG Text Mode Scroll
+
             GUI_ConsoleClear(&gba_ioview_bgs_bgscroll_con);
 
-            //BGxHOFS,BGxVOFS
             static const int bgistext[8][4] = { //mode, bgnumber
                 {1,1,1,1},{1,1,0,0},{0,0,0,0},{0,0,0,0},
                 {0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0}
@@ -370,6 +377,100 @@ void Win_GBAIOViewerUpdate(void)
             else
                 GUI_ConsoleModePrintf(&gba_ioview_bgs_bgscroll_con,0,6, "[---,---] : 01C/01Eh BG3[H/V]OFS");
 
+            // BG Affine Transformation
+
+            GUI_ConsoleClear(&gba_ioview_bgs_affine_con);
+
+            static const int bgisaffine[8][2] = { //mode, bgnumber (2,3)
+                {0,0},{1,0},{1,1},{1,0},{1,0},{1,0},{0,0},{0,0}
+            };
+
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,2,0,  " 028/02Ch BG2[X/Y]");
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,26,0, " 038/03Ch BG3[X/Y]");
+
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,2,5,  "020-026h BG2[PA-PD]");
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,26,5, "030-036h BG3[PA-PD]");
+
+            if(bgisaffine[scrmode][0])
+            {
+                GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,2,2,  "[%08X,%08X]",REG_BG2X,REG_BG2Y);
+
+                int bg2x = REG_BG2X; if(bg2x&BIT(27)) bg2x |= 0xF0000000;
+                int bg2y = REG_BG2Y; if(bg2y&BIT(27)) bg2y |= 0xF0000000;
+                char text_x[9]; s_snprintf(text_x,sizeof(text_x),"%.8f",((float)bg2x)/(1<<8));
+                char text_y[9]; s_snprintf(text_y,sizeof(text_y),"%.8f",((float)bg2y)/(1<<8));
+                GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,2,3, "(%s,%s)",text_x,text_y);
+
+                GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,2,7, "    [%04X,%04X]",REG_BG2PA,REG_BG2PB);
+                GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,2,8, "    [%04X,%04X]",REG_BG2PC,REG_BG2PD);
+
+                int pa = (s32)(s16)REG_BG2PA; int pb = (s32)(s16)REG_BG2PB;
+                int pc = (s32)(s16)REG_BG2PC; int pd = (s32)(s16)REG_BG2PD;
+                char text_a[7]; s_snprintf(text_a,sizeof(text_a),"%.8f",((float)pa)/(1<<8));
+                char text_b[7]; s_snprintf(text_b,sizeof(text_b),"%.8f",((float)pb)/(1<<8));
+                char text_c[7]; s_snprintf(text_c,sizeof(text_c),"%.8f",((float)pc)/(1<<8));
+                char text_d[7]; s_snprintf(text_d,sizeof(text_d),"%.8f",((float)pd)/(1<<8));
+                GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,2,9,  "  (%s,%s)",text_a,text_b);
+                GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,2,10, "  (%s,%s)",text_c,text_d);
+            }
+            else
+            {
+                GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,2,2, "[--------,--------]");
+                GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,2,3, "(--------,--------)");
+                GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,2,7, "    [----,----]");
+                GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,2,8, "    [----,----]");
+                GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,2,9, "  (------,------)");
+                GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,2,10,"  (------,------)");
+            }
+
+            if(bgisaffine[scrmode][1])
+            {
+                GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,26,2, "[%08X,%08X]",REG_BG3X,REG_BG3Y);
+
+                int bg3x = REG_BG3X; if(bg3x&BIT(27)) bg3x |= 0xF0000000;
+                int bg3y = REG_BG3Y; if(bg3y&BIT(27)) bg3y |= 0xF0000000;
+                char text_x[9]; s_snprintf(text_x,sizeof(text_x),"%.8f",((float)bg3x)/(1<<8));
+                char text_y[9]; s_snprintf(text_y,sizeof(text_y),"%.8f",((float)bg3y)/(1<<8));
+                GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,26,3, "(%s,%s)",text_x,text_y);
+
+                GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,26,7, "    [%04X,%04X]",REG_BG3PA,REG_BG3PB);
+                GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,26,8, "    [%04X,%04X]",REG_BG3PC,REG_BG3PD);
+
+                int pa = (s32)(s16)REG_BG3PA; int pb = (s32)(s16)REG_BG3PB;
+                int pc = (s32)(s16)REG_BG3PC; int pd = (s32)(s16)REG_BG3PD;
+                char text_a[7]; s_snprintf(text_a,sizeof(text_a),"%.8f",((float)pa)/(1<<8));
+                char text_b[7]; s_snprintf(text_b,sizeof(text_b),"%.8f",((float)pb)/(1<<8));
+                char text_c[7]; s_snprintf(text_c,sizeof(text_c),"%.8f",((float)pc)/(1<<8));
+                char text_d[7]; s_snprintf(text_d,sizeof(text_d),"%.8f",((float)pd)/(1<<8));
+                GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,26,9,  "  (%s,%s)",text_a,text_b);
+                GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,26,10, "  (%s,%s)",text_c,text_d);
+            }
+            else
+            {
+                GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,26,2, "[--------,--------]");
+                GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,26,3, "(--------,--------)");
+                GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,26,7, "    [----,----]");
+                GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,26,8, "    [----,----]");
+                GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,26,9, "  (------,------)");
+                GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,26,10,"  (------,------)");
+            }
+
+            // Video Mode
+
+            GUI_ConsoleClear(&gba_ioview_bgs_vidmode_con);
+
+            static const char * videomodetext[8] = {
+                "Mode: 0 (4 text)",
+                "Mode: 1 (2 text, 1 affine)",
+                "Mode: 2 (2 affine)",
+                "Mode: 3 (1x bitmap 16bit)",
+                "Mode: 4 (2x bitmap 8bit)",
+                "Mode: 5 (2x bitmap 16bit)",
+                "Mode: 6 (INVALID)",
+                "Mode: 7 (INVALID)"
+            };
+
+            GUI_ConsoleModePrintf(&gba_ioview_bgs_vidmode_con,0,0,videomodetext[scrmode]);
 
             break;
         }
@@ -525,6 +626,16 @@ int Win_GBAIOViewerCreate(void)
     GUI_SetTextBox(&gba_ioview_bgs_bgscroll_textbox,&gba_ioview_bgs_bgscroll_con,
                    6,42+9*FONT_HEIGHT+6+18, 33*FONT_WIDTH,8*FONT_HEIGHT, NULL);
 
+    GUI_SetLabel(&gba_ioview_bgs_affine_label,
+                   6+33*FONT_WIDTH+6,42+9*FONT_HEIGHT+6, -1,FONT_HEIGHT, "BG Affine Transformation");
+    GUI_SetTextBox(&gba_ioview_bgs_affine_textbox,&gba_ioview_bgs_affine_con,
+                   6+33*FONT_WIDTH+6,42+9*FONT_HEIGHT+6+18, 49*FONT_WIDTH+1,11*FONT_HEIGHT, NULL);
+
+    GUI_SetLabel(&gba_ioview_bgs_vidmode_label,
+                   6,42+17*FONT_HEIGHT+12+18, -1,FONT_HEIGHT, "Video Mode");
+    GUI_SetTextBox(&gba_ioview_bgs_vidmode_textbox,&gba_ioview_bgs_vidmode_con,
+                   6,42+17*FONT_HEIGHT+12+36, 33*FONT_WIDTH,FONT_HEIGHT, NULL);
+
     // DMA
 
     // Timers
@@ -577,69 +688,6 @@ void GLWindow_GBAIOViewerUpdate(void)
 
     switch(ioviewer_curpage)
     {
-        case 1: //Background
-        {
-            char text[20];
-            int scrmode = REG_DISPCNT&7;
-
-
-
-            //BGxPA-BGxPD,BGxX,BGxY
-            static const int bgisaffine[8][2] = { //mode, bgnumber (2,3)
-                {0,0},{1,0},{1,1},{1,0},{1,0},{1,0},{0,0},{0,0}
-            };
-
-            if(bgisaffine[scrmode][0])
-            {
-                sprintf(text,"%07X,%07X",REG_BG2X,REG_BG2Y);
-                SetWindowText(hTabPageItem[1][76],(LPCTSTR)text);
-                sprintf(text,"%04X,%04X",REG_BG2PA,REG_BG2PB);
-                SetWindowText(hTabPageItem[1][80],(LPCTSTR)text);
-                sprintf(text,"%04X,%04X",REG_BG2PC,REG_BG2PD);
-                SetWindowText(hTabPageItem[1][81],(LPCTSTR)text);
-            }
-            else
-            {
-                strcpy(text,"-------,-------");
-                SetWindowText(hTabPageItem[1][76],(LPCTSTR)text);
-                strcpy(text,"----,----");
-                SetWindowText(hTabPageItem[1][80],(LPCTSTR)text);
-                SetWindowText(hTabPageItem[1][81],(LPCTSTR)text);
-            }
-
-            if(bgisaffine[scrmode][1])
-            {
-                sprintf(text,"%07X,%07X",REG_BG3X,REG_BG3Y);
-                SetWindowText(hTabPageItem[1][78],(LPCTSTR)text);
-                sprintf(text,"%04X,%04X",REG_BG3PA,REG_BG3PB);
-                SetWindowText(hTabPageItem[1][83],(LPCTSTR)text);
-                sprintf(text,"%04X,%04X",REG_BG3PC,REG_BG3PD);
-                SetWindowText(hTabPageItem[1][84],(LPCTSTR)text);
-            }
-            else
-            {
-                strcpy(text,"-------,-------");
-                SetWindowText(hTabPageItem[1][78],(LPCTSTR)text);
-                strcpy(text,"----,----");
-                SetWindowText(hTabPageItem[1][83],(LPCTSTR)text);
-                SetWindowText(hTabPageItem[1][84],(LPCTSTR)text);
-            }
-
-            static const char * videomodetext[8] = {
-                "Video Mode: 0 (4 txt)",
-                "Video Mode: 1 (2 txt, 1 aff)",
-                "Video Mode: 2 (2 aff)",
-                "Video Mode: 3 (bitmap 16bit)",
-                "Video Mode: 4 (bitmap 8bit)",
-                "Video Mode: 5 (bitmap 16bit)",
-                "Video Mode: 6 (INVALID)",
-                "Video Mode: 7 (INVALID)"
-            };
-
-            SetWindowText(hTabPageItem[1][85],(LPCTSTR)videomodetext[scrmode]);
-
-            break;
-        }
         case 2: //DMA
         {
             char text[20];
@@ -925,51 +973,6 @@ void GLWindow_GBAIOViewerUpdate(void)
 
 static void GLWindow_IOViewerMakePages(HWND hWnd)
 {
-    //-----------------------------------------------------------------------------------
-    //                        SECOND PAGE - BACKGROUNDS
-    //-----------------------------------------------------------------------------------
-    {
-
-        hTabPageItem[1][74] = CreateWindow(TEXT("button"), TEXT("BG affine transformation"),
-                    WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-                    210, 195, 280, 130, hWnd, (HMENU) 0, hInstance, NULL);
-        SendMessage(hTabPageItem[1][74], WM_SETFONT, (WPARAM)hFontNormalIO, MAKELPARAM(1, 0));
-
-        #define CREATE_BGXY(base_id, x, y, text) \
-        { \
-            hTabPageItem[1][base_id] = CreateWindow(TEXT("static"), TEXT(text), WS_CHILD | WS_VISIBLE, \
-                            x+10, y, 100, 13, hWnd, NULL, hInstance, NULL); \
-            SendMessage(hTabPageItem[1][base_id], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0)); \
-            hTabPageItem[1][base_id+1] = CreateWindow(TEXT("static"), TEXT("0000000,0000000"), \
-                            WS_CHILD | WS_VISIBLE | SS_SUNKEN | BS_CENTER, \
-                            x, y+20, 115, 17, hWnd, NULL, hInstance, NULL); \
-            SendMessage(hTabPageItem[1][base_id+1], WM_SETFONT, (WPARAM)hFontFixedIO, MAKELPARAM(1, 0)); \
-        }
-        CREATE_BGXY(75, 225,210, "028/02Ch BG2[X/Y]");
-        CREATE_BGXY(77, 360,210, "038/03Ch BG3[X/Y]");
-
-        #define CREATE_AFFINE_MATRIX(base_id, x, y, text) \
-        { \
-            hTabPageItem[1][base_id] = CreateWindow(TEXT("static"), TEXT(text), WS_CHILD | WS_VISIBLE, \
-                            x, y, 110, 13, hWnd, NULL, hInstance, NULL); \
-            SendMessage(hTabPageItem[1][base_id], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0)); \
-            hTabPageItem[1][base_id+1] = CreateWindow(TEXT("static"), TEXT("0000,0000"), \
-                            WS_CHILD | WS_VISIBLE | SS_SUNKEN | BS_CENTER, \
-                            x+20, y+20, 70, 17, hWnd, NULL, hInstance, NULL); \
-            SendMessage(hTabPageItem[1][base_id+1], WM_SETFONT, (WPARAM)hFontFixedIO, MAKELPARAM(1, 0)); \
-            hTabPageItem[1][base_id+2] = CreateWindow(TEXT("static"), TEXT("0000,0000"), \
-                            WS_CHILD | WS_VISIBLE | SS_SUNKEN | BS_CENTER, \
-                            x+20, y+40, 70, 17, hWnd, NULL, hInstance, NULL); \
-            SendMessage(hTabPageItem[1][base_id+2], WM_SETFONT, (WPARAM)hFontFixedIO, MAKELPARAM(1, 0)); \
-        }
-        CREATE_AFFINE_MATRIX(79, 230,255, "020-026h BG2[PA-PD]");
-        CREATE_AFFINE_MATRIX(82, 365,255, "030-036h BG3[PA-PD]");
-
-        hTabPageItem[1][85] = CreateWindow(TEXT("static"), TEXT("Video Mode: 0 (4x text)"),
-                        WS_CHILD | WS_VISIBLE | SS_SUNKEN | BS_CENTER,
-                        5, 302, 200, 17, hWnd, NULL, hInstance, NULL);
-        SendMessage(hTabPageItem[1][85], WM_SETFONT, (WPARAM)hFontFixedIO, MAKELPARAM(1, 0));
-    }
     //-----------------------------------------------------------------------------------
     //                        THIRD PAGE - DMA
     //-----------------------------------------------------------------------------------

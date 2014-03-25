@@ -21,12 +21,13 @@ Current goals for 0.2.0
  - Configuration window.
  - Complete main window menu. Accelerators (F12, CTRL+R, ...)
  - Disable main menu elements when they can't be used.
+ - Include font and app icon as binary data. Don't include icon data in linux.
 
 For 0.3.0
 ---------
 
 - Improve the GUI:
- - GB Camera and GB Printer viewers.
+ - GB Camera and GB Printer viewers. GB Camera: Registers, images (let the user see the thumbnails to choose).
  - GBA I/O hardware viewer (RTC, sensors...).
  - Export images from debugger windows.
 

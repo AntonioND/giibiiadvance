@@ -126,9 +126,9 @@ void Win_GBAPalViewerUpdate(void)
 
     GUI_ConsoleModePrintf(&gba_palview_con,0,1,"Value: 0x%04X",value);
 
-    GUI_ConsoleModePrintf(&gba_palview_con,26,0,"RGB: (%d,%d,%d)",value&31,(value>>5)&31,(value>>10)&31);
+    GUI_ConsoleModePrintf(&gba_palview_con,24,0,"RGB: (%d,%d,%d)",value&31,(value>>5)&31,(value>>10)&31);
 
-    GUI_ConsoleModePrintf(&gba_palview_con,26,1,"Index: %d|%d[%d]",gba_palview_selectedindex,
+    GUI_ConsoleModePrintf(&gba_palview_con,24,1,"Index: %d|%d[%d]",gba_palview_selectedindex,
                           gba_palview_selectedindex/16,gba_palview_selectedindex%16);
 
     memset(gba_pal_bg_buffer,192,sizeof(gba_pal_bg_buffer));

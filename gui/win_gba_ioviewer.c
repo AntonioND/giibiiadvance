@@ -31,6 +31,7 @@
 
 #include "../gba_core/gba.h"
 #include "../gba_core/memory.h"
+#include "../gba_core/timers.h"
 
 //-----------------------------------------------------------------------------------
 
@@ -121,9 +122,23 @@ static _gui_element * gba_ioviwer_dma_elements[] = {
 
 //-----------------------
 
+static _gui_console gba_ioview_timers_tmr0_con;
+static _gui_element gba_ioview_timers_tmr0_textbox, gba_ioview_timers_tmr0_label;
+static _gui_console gba_ioview_timers_tmr1_con;
+static _gui_element gba_ioview_timers_tmr1_textbox, gba_ioview_timers_tmr1_label;
+static _gui_console gba_ioview_timers_tmr2_con;
+static _gui_element gba_ioview_timers_tmr2_textbox, gba_ioview_timers_tmr2_label;
+static _gui_console gba_ioview_timers_tmr3_con;
+static _gui_element gba_ioview_timers_tmr3_textbox, gba_ioview_timers_tmr3_label;
+
 static _gui_element * gba_ioviwer_timers_elements[] = {
     &gba_ioview_display_tabbtn, &gba_ioview_backgrounds_tabbtn, &gba_ioview_dma_tabbtn,
     &gba_ioview_timers_tabbtn, &gba_ioview_sound_tabbtn, &gba_ioview_other_tabbtn,
+
+    &gba_ioview_timers_tmr0_textbox, &gba_ioview_timers_tmr0_label,
+    &gba_ioview_timers_tmr1_textbox, &gba_ioview_timers_tmr1_label,
+    &gba_ioview_timers_tmr2_textbox, &gba_ioview_timers_tmr2_label,
+    &gba_ioview_timers_tmr3_textbox, &gba_ioview_timers_tmr3_label,
 
     NULL
 };
@@ -515,8 +530,8 @@ void Win_GBAIOViewerUpdate(void)
             GUI_ConsoleModePrintf(&gba_ioview_dma_dma0_con,26,4, "[%c] Repeat",CHECK(REG_DMA0CNT_H&BIT(9)));
 
             GUI_ConsoleModePrintf(&gba_ioview_dma_dma0_con,0,6, "[%s] DMA Start Timing",startmode[(REG_DMA0CNT_H>>12)&3][0]);
-            GUI_ConsoleModePrintf(&gba_ioview_dma_dma0_con,26,8, "[%c] IRQ enable",CHECK(REG_DMA0CNT_H&BIT(14)));
-            GUI_ConsoleModePrintf(&gba_ioview_dma_dma0_con,0,8, "[%c] DMA enable",CHECK(REG_DMA0CNT_H&BIT(15)));
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma0_con,26,8, "[%c] IRQ enabled",CHECK(REG_DMA0CNT_H&BIT(14)));
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma0_con,0,8, "[%c] DMA enabled",CHECK(REG_DMA0CNT_H&BIT(15)));
 
             // DMA 1
 
@@ -534,8 +549,8 @@ void Win_GBAIOViewerUpdate(void)
             GUI_ConsoleModePrintf(&gba_ioview_dma_dma1_con,26,4, "[%c] Repeat",CHECK(REG_DMA1CNT_H&BIT(9)));
 
             GUI_ConsoleModePrintf(&gba_ioview_dma_dma1_con,0,6, "[%s] DMA Start Timing",startmode[(REG_DMA1CNT_H>>12)&3][1]);
-            GUI_ConsoleModePrintf(&gba_ioview_dma_dma1_con,26,8, "[%c] IRQ enable",CHECK(REG_DMA1CNT_H&BIT(14)));
-            GUI_ConsoleModePrintf(&gba_ioview_dma_dma1_con,0,8, "[%c] DMA enable",CHECK(REG_DMA1CNT_H&BIT(15)));
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma1_con,26,8, "[%c] IRQ enabled",CHECK(REG_DMA1CNT_H&BIT(14)));
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma1_con,0,8, "[%c] DMA enabled",CHECK(REG_DMA1CNT_H&BIT(15)));
 
             // DMA 2
 
@@ -553,8 +568,8 @@ void Win_GBAIOViewerUpdate(void)
             GUI_ConsoleModePrintf(&gba_ioview_dma_dma2_con,26,4, "[%c] Repeat",CHECK(REG_DMA2CNT_H&BIT(9)));
 
             GUI_ConsoleModePrintf(&gba_ioview_dma_dma2_con,0,6, "[%s] DMA Start Timing",startmode[(REG_DMA2CNT_H>>12)&3][2]);
-            GUI_ConsoleModePrintf(&gba_ioview_dma_dma2_con,26,8, "[%c] IRQ enable",CHECK(REG_DMA2CNT_H&BIT(14)));
-            GUI_ConsoleModePrintf(&gba_ioview_dma_dma2_con,0,8, "[%c] DMA enable",CHECK(REG_DMA2CNT_H&BIT(15)));
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma2_con,26,8, "[%c] IRQ enabled",CHECK(REG_DMA2CNT_H&BIT(14)));
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma2_con,0,8, "[%c] DMA enabled",CHECK(REG_DMA2CNT_H&BIT(15)));
 
             // DMA 3
 
@@ -572,8 +587,8 @@ void Win_GBAIOViewerUpdate(void)
             GUI_ConsoleModePrintf(&gba_ioview_dma_dma3_con,26,4, "[%c] Repeat",CHECK(REG_DMA3CNT_H&BIT(9)));
 
             GUI_ConsoleModePrintf(&gba_ioview_dma_dma3_con,0,6, "[%s] DMA Start Timing",startmode[(REG_DMA3CNT_H>>12)&3][3]);
-            GUI_ConsoleModePrintf(&gba_ioview_dma_dma3_con,26,8, "[%c] IRQ enable",CHECK(REG_DMA3CNT_H&BIT(14)));
-            GUI_ConsoleModePrintf(&gba_ioview_dma_dma3_con,0,8, "[%c] DMA enable",CHECK(REG_DMA3CNT_H&BIT(15)));
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma3_con,26,8, "[%c] IRQ enabled",CHECK(REG_DMA3CNT_H&BIT(14)));
+            GUI_ConsoleModePrintf(&gba_ioview_dma_dma3_con,0,8, "[%c] DMA enabled",CHECK(REG_DMA3CNT_H&BIT(15)));
 
             GUI_ConsoleModePrintf(&gba_ioview_dma_dma3_con,0,9, "[%c] Game Pak DRQ",CHECK(REG_DMA3CNT_H&BIT(11)));
 
@@ -581,6 +596,104 @@ void Win_GBAIOViewerUpdate(void)
         }
         case 3: // Timers
         {
+            const char * tmrfreq[4] = { "16.78MHz", "262.2KHz", "65.54KHz", "16.38KHz" };
+            const char * clkspertick[4] = { "   1", "  64", " 256", "1024" };
+
+            //Timer 0
+
+            GUI_ConsoleClear(&gba_ioview_timers_tmr0_con);
+
+            GUI_ConsoleModePrintf(&gba_ioview_timers_tmr0_con,0,0, "%04X : 100h TM0CNT_L",REG_TM0CNT_L);
+            GUI_ConsoleModePrintf(&gba_ioview_timers_tmr0_con,0,1, "%04X : 102h TM0CNT_H",REG_TM0CNT_H);
+
+            GUI_ConsoleModePrintf(&gba_ioview_timers_tmr0_con,23,0, "[%04X] On reload",gba_timergetstart0());
+            GUI_ConsoleModePrintf(&gba_ioview_timers_tmr0_con,23,3, "[%c] Cascade",CHECK(REG_TM0CNT_H&BIT(2)));
+
+            if(REG_TM0CNT_H&BIT(2))
+            {
+                GUI_ConsoleModePrintf(&gba_ioview_timers_tmr0_con,0,3, "[Invalid!] Frequency");
+                GUI_ConsoleModePrintf(&gba_ioview_timers_tmr0_con,0,5, "[----] CPU clocks per tick");
+            }
+            else
+            {
+                GUI_ConsoleModePrintf(&gba_ioview_timers_tmr0_con,0,3, "[%s] Frequency",tmrfreq[REG_TM0CNT_H&3]);
+                GUI_ConsoleModePrintf(&gba_ioview_timers_tmr0_con,0,5, "[%s] CPU clocks per tick",clkspertick[REG_TM0CNT_H&3]);
+            }
+
+            GUI_ConsoleModePrintf(&gba_ioview_timers_tmr0_con,0,7, "[%c] Timer Enabled",CHECK(REG_TM0CNT_H&BIT(7)));
+            GUI_ConsoleModePrintf(&gba_ioview_timers_tmr0_con,23,7, "[%c] IRQ Enabled",CHECK(REG_TM0CNT_H&BIT(6)));
+
+            //Timer 1
+
+            GUI_ConsoleClear(&gba_ioview_timers_tmr1_con);
+
+            GUI_ConsoleModePrintf(&gba_ioview_timers_tmr1_con,0,0, "%04X : 104h TM1CNT_L",REG_TM1CNT_L);
+            GUI_ConsoleModePrintf(&gba_ioview_timers_tmr1_con,0,1, "%04X : 106h TM1CNT_H",REG_TM1CNT_H);
+
+            GUI_ConsoleModePrintf(&gba_ioview_timers_tmr1_con,23,0, "[%04X] On reload",gba_timergetstart1());
+            GUI_ConsoleModePrintf(&gba_ioview_timers_tmr1_con,23,3, "[%c] Cascade",CHECK(REG_TM1CNT_H&BIT(2)));
+
+            if(REG_TM1CNT_H&BIT(2))
+            {
+                GUI_ConsoleModePrintf(&gba_ioview_timers_tmr1_con,0,3, "[--------] Frequency");
+                GUI_ConsoleModePrintf(&gba_ioview_timers_tmr1_con,0,5, "[----] CPU clocks per tick");
+            }
+            else
+            {
+                GUI_ConsoleModePrintf(&gba_ioview_timers_tmr1_con,0,3, "[%s] Frequency",tmrfreq[REG_TM1CNT_H&3]);
+                GUI_ConsoleModePrintf(&gba_ioview_timers_tmr1_con,0,5, "[%s] CPU clocks per tick",clkspertick[REG_TM1CNT_H&3]);
+            }
+
+            GUI_ConsoleModePrintf(&gba_ioview_timers_tmr1_con,0,7, "[%c] Timer Enabled",CHECK(REG_TM1CNT_H&BIT(7)));
+            GUI_ConsoleModePrintf(&gba_ioview_timers_tmr1_con,23,7, "[%c] IRQ Enabled",CHECK(REG_TM1CNT_H&BIT(6)));
+
+            //Timer 2
+
+            GUI_ConsoleClear(&gba_ioview_timers_tmr2_con);
+
+            GUI_ConsoleModePrintf(&gba_ioview_timers_tmr2_con,0,0, "%04X : 108h TM2CNT_L",REG_TM2CNT_L);
+            GUI_ConsoleModePrintf(&gba_ioview_timers_tmr2_con,0,1, "%04X : 10Ah TM2CNT_H",REG_TM2CNT_H);
+
+            GUI_ConsoleModePrintf(&gba_ioview_timers_tmr2_con,23,0, "[%04X] On reload",gba_timergetstart2());
+            GUI_ConsoleModePrintf(&gba_ioview_timers_tmr2_con,23,3, "[%c] Cascade",CHECK(REG_TM2CNT_H&BIT(2)));
+
+            if(REG_TM2CNT_H&BIT(2))
+            {
+                GUI_ConsoleModePrintf(&gba_ioview_timers_tmr2_con,0,3, "[--------] Frequency");
+                GUI_ConsoleModePrintf(&gba_ioview_timers_tmr2_con,0,5, "[----] CPU clocks per tick");
+            }
+            else
+            {
+                GUI_ConsoleModePrintf(&gba_ioview_timers_tmr2_con,0,3, "[%s] Frequency",tmrfreq[REG_TM2CNT_H&3]);
+                GUI_ConsoleModePrintf(&gba_ioview_timers_tmr2_con,0,5, "[%s] CPU clocks per tick",clkspertick[REG_TM2CNT_H&3]);
+            }
+
+            GUI_ConsoleModePrintf(&gba_ioview_timers_tmr2_con,0,7, "[%c] Timer Enabled",CHECK(REG_TM2CNT_H&BIT(7)));
+            GUI_ConsoleModePrintf(&gba_ioview_timers_tmr2_con,23,7, "[%c] IRQ Enabled",CHECK(REG_TM2CNT_H&BIT(6)));
+
+            //Timer 3
+
+            GUI_ConsoleClear(&gba_ioview_timers_tmr3_con);
+
+            GUI_ConsoleModePrintf(&gba_ioview_timers_tmr3_con,0,0, "%04X : 10Ch TM3CNT_L",REG_TM3CNT_L);
+            GUI_ConsoleModePrintf(&gba_ioview_timers_tmr3_con,0,1, "%04X : 10Eh TM3CNT_H",REG_TM3CNT_H);
+
+            GUI_ConsoleModePrintf(&gba_ioview_timers_tmr3_con,23,0, "[%04X] On reload",gba_timergetstart3());
+            GUI_ConsoleModePrintf(&gba_ioview_timers_tmr3_con,23,3, "[%c] Cascade",CHECK(REG_TM3CNT_H&BIT(2)));
+
+            if(REG_TM3CNT_H&BIT(2))
+            {
+                GUI_ConsoleModePrintf(&gba_ioview_timers_tmr3_con,0,3, "[--------] Frequency");
+                GUI_ConsoleModePrintf(&gba_ioview_timers_tmr3_con,0,5, "[----] CPU clocks per tick");
+            }
+            else
+            {
+                GUI_ConsoleModePrintf(&gba_ioview_timers_tmr3_con,0,3, "[%s] Frequency",tmrfreq[REG_TM3CNT_H&3]);
+                GUI_ConsoleModePrintf(&gba_ioview_timers_tmr3_con,0,5, "[%s] CPU clocks per tick",clkspertick[REG_TM3CNT_H&3]);
+            }
+
+            GUI_ConsoleModePrintf(&gba_ioview_timers_tmr3_con,0,7, "[%c] Timer Enabled",CHECK(REG_TM3CNT_H&BIT(7)));
+            GUI_ConsoleModePrintf(&gba_ioview_timers_tmr3_con,23,7, "[%c] IRQ Enabled",CHECK(REG_TM3CNT_H&BIT(6)));
 
             break;
         }
@@ -760,6 +873,26 @@ int Win_GBAIOViewerCreate(void)
 
     // Timers
 
+    GUI_SetLabel(&gba_ioview_timers_tmr0_label,
+                   6,24, -1,FONT_HEIGHT, "Timer 0");
+    GUI_SetTextBox(&gba_ioview_timers_tmr0_textbox,&gba_ioview_timers_tmr0_con,
+                   6,42, 41*FONT_WIDTH,10*FONT_HEIGHT, NULL);
+
+    GUI_SetLabel(&gba_ioview_timers_tmr1_label,
+                   6+41*FONT_WIDTH+7,24, -1,FONT_HEIGHT, "Timer 1");
+    GUI_SetTextBox(&gba_ioview_timers_tmr1_textbox,&gba_ioview_timers_tmr1_con,
+                   6+41*FONT_WIDTH+7,42, 41*FONT_WIDTH,10*FONT_HEIGHT, NULL);
+
+    GUI_SetLabel(&gba_ioview_timers_tmr2_label,
+                   6,42+10*FONT_HEIGHT+6, -1,FONT_HEIGHT, "Timer 2");
+    GUI_SetTextBox(&gba_ioview_timers_tmr2_textbox,&gba_ioview_timers_tmr2_con,
+                   6,60+10*FONT_HEIGHT+6, 41*FONT_WIDTH,10*FONT_HEIGHT, NULL);
+
+    GUI_SetLabel(&gba_ioview_timers_tmr3_label,
+                   6+41*FONT_WIDTH+7,42+10*FONT_HEIGHT+6, -1,FONT_HEIGHT, "Timer 3");
+    GUI_SetTextBox(&gba_ioview_timers_tmr3_textbox,&gba_ioview_timers_tmr3_con,
+                   6+41*FONT_WIDTH+7,60+10*FONT_HEIGHT+6, 41*FONT_WIDTH,10*FONT_HEIGHT, NULL);
+
     // Sound
 
     // Other
@@ -792,7 +925,6 @@ void Win_GBAIOViewerClose(void)
 
 #if 0
 
-#include "gba_core/timers.h"
 #include "gba_core/cpu.h"
 #include "gba_core/disassembler.h"
 #include "gba_core/sound.h"
@@ -801,87 +933,6 @@ void GLWindow_GBAIOViewerUpdate(void)
 {
     switch(ioviewer_curpage)
     {
-        case 3: //Timers
-        {
-            char text[10];
-
-            const char * tmrfreq[4] = { "16.78MHz","262.2KHz","65.54KHz","16.38KHz" };
-            const char * clkspertick[4] = { "1", "64", "256", "1024" };
-
-            //Timer 0
-            sprintf(text,"%04X",REG_TM0CNT_L); SetWindowText(hTabPageItem[3][2],(LPCTSTR)text);
-            sprintf(text,"%04X",gba_timergetstart0()); SetWindowText(hTabPageItem[3][4],(LPCTSTR)text);
-            sprintf(text,"%04X",REG_TM0CNT_H); SetWindowText(hTabPageItem[3][6],(LPCTSTR)text);
-            if(REG_TM0CNT_H&BIT(2))
-            {
-                SetWindowText(hTabPageItem[3][8],(LPCTSTR)"--------");
-                SetWindowText(hTabPageItem[3][10],(LPCTSTR)"----");
-            }
-            else
-            {
-                SetWindowText(hTabPageItem[3][8],(LPCTSTR)tmrfreq[REG_TM0CNT_H&3]);
-                SetWindowText(hTabPageItem[3][10],(LPCTSTR)clkspertick[REG_TM0CNT_H&3]);
-            }
-            SET_CHECK(3,12,REG_TM0CNT_H&BIT(2));
-            SET_CHECK(3,14,REG_TM0CNT_H&BIT(6));
-            SET_CHECK(3,16,REG_TM0CNT_H&BIT(7));
-
-            //Timer 1
-            sprintf(text,"%04X",REG_TM1CNT_L); SetWindowText(hTabPageItem[3][19],(LPCTSTR)text);
-            sprintf(text,"%04X",gba_timergetstart1()); SetWindowText(hTabPageItem[3][21],(LPCTSTR)text);
-            sprintf(text,"%04X",REG_TM1CNT_H); SetWindowText(hTabPageItem[3][23],(LPCTSTR)text);
-            if(REG_TM1CNT_H&BIT(2))
-            {
-                SetWindowText(hTabPageItem[3][25],(LPCTSTR)"--------");
-                SetWindowText(hTabPageItem[3][27],(LPCTSTR)"----");
-            }
-            else
-            {
-                SetWindowText(hTabPageItem[3][25],(LPCTSTR)tmrfreq[REG_TM1CNT_H&3]);
-                SetWindowText(hTabPageItem[3][27],(LPCTSTR)clkspertick[REG_TM1CNT_H&3]);
-            }
-            SET_CHECK(3,29,REG_TM1CNT_H&BIT(2));
-            SET_CHECK(3,31,REG_TM1CNT_H&BIT(6));
-            SET_CHECK(3,33,REG_TM1CNT_H&BIT(7));
-
-            //Timer 2
-            sprintf(text,"%04X",REG_TM2CNT_L); SetWindowText(hTabPageItem[3][36],(LPCTSTR)text);
-            sprintf(text,"%04X",gba_timergetstart2()); SetWindowText(hTabPageItem[3][38],(LPCTSTR)text);
-            sprintf(text,"%04X",REG_TM2CNT_H); SetWindowText(hTabPageItem[3][40],(LPCTSTR)text);
-            if(REG_TM2CNT_H&BIT(2))
-            {
-                SetWindowText(hTabPageItem[3][42],(LPCTSTR)"--------");
-                SetWindowText(hTabPageItem[3][44],(LPCTSTR)"----");
-            }
-            else
-            {
-                SetWindowText(hTabPageItem[3][42],(LPCTSTR)tmrfreq[REG_TM2CNT_H&3]);
-                SetWindowText(hTabPageItem[3][44],(LPCTSTR)clkspertick[REG_TM2CNT_H&3]);
-            }
-            SET_CHECK(3,46,REG_TM2CNT_H&BIT(2));
-            SET_CHECK(3,48,REG_TM2CNT_H&BIT(6));
-            SET_CHECK(3,50,REG_TM2CNT_H&BIT(7));
-
-            //Timer 3
-            sprintf(text,"%04X",REG_TM3CNT_L); SetWindowText(hTabPageItem[3][53],(LPCTSTR)text);
-            sprintf(text,"%04X",gba_timergetstart3()); SetWindowText(hTabPageItem[3][55],(LPCTSTR)text);
-            sprintf(text,"%04X",REG_TM3CNT_H); SetWindowText(hTabPageItem[3][57],(LPCTSTR)text);
-            if(REG_TM3CNT_H&BIT(2))
-            {
-                SetWindowText(hTabPageItem[3][59],(LPCTSTR)"--------");
-                SetWindowText(hTabPageItem[3][61],(LPCTSTR)"----");
-            }
-            else
-            {
-                SetWindowText(hTabPageItem[3][59],(LPCTSTR)tmrfreq[REG_TM3CNT_H&3]);
-                SetWindowText(hTabPageItem[3][61],(LPCTSTR)clkspertick[REG_TM3CNT_H&3]);
-            }
-            SET_CHECK(3,63,REG_TM3CNT_H&BIT(2));
-            SET_CHECK(3,65,REG_TM3CNT_H&BIT(6));
-            SET_CHECK(3,67,REG_TM3CNT_H&BIT(7));
-
-            break;
-        }
         case 4: //Sound
         {
             char text[50];
@@ -1013,49 +1064,6 @@ void GLWindow_GBAIOViewerUpdate(void)
 
 static void GLWindow_IOViewerMakePages(HWND hWnd)
 {
-    //-----------------------------------------------------------------------------------
-    //                        FOURTH PAGE - TIMERS
-    //-----------------------------------------------------------------------------------
-    {
-        #define CREATE_TIMER(idbase,x,y,text,l_text,h_text) \
-        { \
-            hTabPageItem[3][idbase] = CreateWindow(TEXT("button"), TEXT(text), \
-                        WS_CHILD | WS_VISIBLE | BS_GROUPBOX, \
-                        x, y, 240, 150, hWnd, (HMENU) 0, hInstance, NULL); \
-            SendMessage(hTabPageItem[3][idbase], WM_SETFONT, (WPARAM)hFontNormalIO, MAKELPARAM(1, 0)); \
-            CREATE_REG_STATIC_TEXT(3,idbase+1, x+6, y+21, l_text); \
-            hTabPageItem[3][idbase+3] = CreateWindow(TEXT("static"), TEXT("On reload"), WS_CHILD | WS_VISIBLE, \
-                            x+177, y+21, 60, 13, hWnd, NULL, hInstance, NULL); \
-            SendMessage(hTabPageItem[3][idbase+3], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0)); \
-            hTabPageItem[3][idbase+4] = CreateWindow(TEXT("static"), TEXT("0000"), \
-                            WS_CHILD | WS_VISIBLE | SS_SUNKEN | BS_CENTER, \
-                            x+136, y+21, 35, 17, hWnd, NULL, hInstance, NULL); \
-            SendMessage(hTabPageItem[3][idbase+4], WM_SETFONT, (WPARAM)hFontFixedIO, MAKELPARAM(1, 0)); \
-            CREATE_REG_STATIC_TEXT(3,idbase+5, x+6, y+42, h_text); \
-            hTabPageItem[3][idbase+7] = CreateWindow(TEXT("static"), TEXT("Frequency"), WS_CHILD | WS_VISIBLE, \
-                            x+72, y+63, 55, 13, hWnd, NULL, hInstance, NULL); \
-            SendMessage(hTabPageItem[3][idbase+7], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0)); \
-            hTabPageItem[3][idbase+8] = CreateWindow(TEXT("static"), TEXT("16.78MHz"), \
-                            WS_CHILD | WS_VISIBLE | SS_SUNKEN | BS_CENTER, \
-                            x+6, y+63, 60, 17, hWnd, NULL, hInstance, NULL); \
-            SendMessage(hTabPageItem[3][idbase+8], WM_SETFONT, (WPARAM)hFontFixedIO, MAKELPARAM(1, 0)); \
-            hTabPageItem[3][idbase+9] = CreateWindow(TEXT("static"), TEXT("CPU clocks per tick"), WS_CHILD | WS_VISIBLE, \
-                            x+47, y+84, 120, 13, hWnd, NULL, hInstance, NULL); \
-            SendMessage(hTabPageItem[3][idbase+9], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0)); \
-            hTabPageItem[3][idbase+10] = CreateWindow(TEXT("static"), TEXT("1024"), \
-                            WS_CHILD | WS_VISIBLE | SS_SUNKEN | BS_CENTER, \
-                            x+6, y+84, 35, 17, hWnd, NULL, hInstance, NULL); \
-            SendMessage(hTabPageItem[3][idbase+10], WM_SETFONT, (WPARAM)hFontFixedIO, MAKELPARAM(1, 0)); \
-            CREATE_CHECK_STATIC(3,idbase+11, x+140, y+63, "Cascade"); \
-            CREATE_CHECK_STATIC(3,idbase+13, x+6, y+105, "IRQ Enable"); \
-            CREATE_CHECK_STATIC(3,idbase+15, x+6, y+126, "Timer Enabled"); \
-        }
-
-        CREATE_TIMER(0, 5,25, "Timer 0", "100h TM0CNT_L","102h TM0CNT_H");
-        CREATE_TIMER(17, 249,25, "Timer 1", "104h TM1CNT_L","106h TM1CNT_H");
-        CREATE_TIMER(34, 5,175, "Timer 2", "108h TM2CNT_L","10Ah TM2CNT_H");
-        CREATE_TIMER(51, 249,175, "Timer 3", "10Ch TM3CNT_L","10Eh TM3CNT_H");
-    }
     //-----------------------------------------------------------------------------------
     //                        FIFTH PAGE - SOUND
     //-----------------------------------------------------------------------------------

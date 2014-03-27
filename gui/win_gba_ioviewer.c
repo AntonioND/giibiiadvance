@@ -154,9 +154,17 @@ static _gui_element * gba_ioviwer_sound_elements[] = {
 
 //-----------------------
 
+static _gui_console gba_ioview_others_interrupts_con;
+static _gui_element gba_ioview_others_interrupts_textbox, gba_ioview_others_interrupts_label;
+static _gui_console gba_ioview_others_int_flags_con;
+static _gui_element gba_ioview_others_int_flags_textbox, gba_ioview_others_int_flags_label;
+
 static _gui_element * gba_ioviwer_other_elements[] = {
     &gba_ioview_display_tabbtn, &gba_ioview_backgrounds_tabbtn, &gba_ioview_dma_tabbtn,
     &gba_ioview_timers_tabbtn, &gba_ioview_sound_tabbtn, &gba_ioview_other_tabbtn,
+
+    &gba_ioview_others_interrupts_textbox, &gba_ioview_others_interrupts_label,
+    &gba_ioview_others_int_flags_textbox, &gba_ioview_others_int_flags_label,
 
     NULL
 };
@@ -192,7 +200,7 @@ void Win_GBAIOViewerUpdate(void)
             GUI_ConsoleModePrintf(&gba_ioview_display_lcdcontrol_con,0,0, "%04X : 000h DISPCNT",REG_DISPCNT);
 
             GUI_ConsoleModePrintf(&gba_ioview_display_lcdcontrol_con,0,2, "[%d] Video Mode",REG_DISPCNT&7);
-            GUI_ConsoleModePrintf(&gba_ioview_display_lcdcontrol_con,0,3, "[%c] CGB Mode (?)",CHECK(REG_DISPCNT&BIT(3)));
+            GUI_ConsoleModePrintf(&gba_ioview_display_lcdcontrol_con,0,3, "[%c] CGB Mode (Bios)",CHECK(REG_DISPCNT&BIT(3)));
             GUI_ConsoleModePrintf(&gba_ioview_display_lcdcontrol_con,0,4, "[%c] Display Frame Select",CHECK(REG_DISPCNT&BIT(4)));
             GUI_ConsoleModePrintf(&gba_ioview_display_lcdcontrol_con,0,5, "[%c] HBL Interval Free",CHECK(REG_DISPCNT&BIT(5)));
             GUI_ConsoleModePrintf(&gba_ioview_display_lcdcontrol_con,0,6, "[%c] 1D Character Mapping",CHECK(REG_DISPCNT&BIT(6)));
@@ -704,6 +712,45 @@ void Win_GBAIOViewerUpdate(void)
         }
         case 5: // Other
         {
+            GUI_ConsoleClear(&gba_ioview_others_interrupts_con);
+
+            GUI_ConsoleModePrintf(&gba_ioview_others_interrupts_con,0,0, "%04X : 208h IME",REG_IME);
+            GUI_ConsoleModePrintf(&gba_ioview_others_interrupts_con,0,2, "%04X : 200h IE",REG_IE);
+            GUI_ConsoleModePrintf(&gba_ioview_others_interrupts_con,0,3, "%04X : 202h IF",REG_IF);
+
+            GUI_ConsoleClear(&gba_ioview_others_int_flags_con);
+
+            u16 biosflags = GBA_MemoryReadFast16(0x03007FF8);
+
+            GUI_ConsoleModePrintf(&gba_ioview_others_int_flags_con,0,0, "IE IF Bios");
+            GUI_ConsoleModePrintf(&gba_ioview_others_int_flags_con,0,1, "[%c][%c][%c] V-Blank",
+                                  CHECK(REG_IE&BIT(0)),CHECK(REG_IF&BIT(0)),CHECK(biosflags&BIT(0)));
+            GUI_ConsoleModePrintf(&gba_ioview_others_int_flags_con,0,2, "[%c][%c][%c] H-Blank",
+                                  CHECK(REG_IE&BIT(1)),CHECK(REG_IF&BIT(1)),CHECK(biosflags&BIT(1)));
+            GUI_ConsoleModePrintf(&gba_ioview_others_int_flags_con,0,3, "[%c][%c][%c] V-Count",
+                                  CHECK(REG_IE&BIT(2)),CHECK(REG_IF&BIT(2)),CHECK(biosflags&BIT(2)));
+            GUI_ConsoleModePrintf(&gba_ioview_others_int_flags_con,0,4, "[%c][%c][%c] Timer 0",
+                                  CHECK(REG_IE&BIT(3)),CHECK(REG_IF&BIT(3)),CHECK(biosflags&BIT(3)));
+            GUI_ConsoleModePrintf(&gba_ioview_others_int_flags_con,0,5, "[%c][%c][%c] Timer 1",
+                                  CHECK(REG_IE&BIT(4)),CHECK(REG_IF&BIT(4)),CHECK(biosflags&BIT(4)));
+            GUI_ConsoleModePrintf(&gba_ioview_others_int_flags_con,0,6, "[%c][%c][%c] Timer 2",
+                                  CHECK(REG_IE&BIT(5)),CHECK(REG_IF&BIT(5)),CHECK(biosflags&BIT(5)));
+            GUI_ConsoleModePrintf(&gba_ioview_others_int_flags_con,0,7, "[%c][%c][%c] Timer 3",
+                                  CHECK(REG_IE&BIT(6)),CHECK(REG_IF&BIT(6)),CHECK(biosflags&BIT(6)));
+            GUI_ConsoleModePrintf(&gba_ioview_others_int_flags_con,0,8, "[%c][%c][%c] Serial",
+                                  CHECK(REG_IE&BIT(7)),CHECK(REG_IF&BIT(7)),CHECK(biosflags&BIT(7)));
+            GUI_ConsoleModePrintf(&gba_ioview_others_int_flags_con,0,9, "[%c][%c][%c] DMA 0",
+                                  CHECK(REG_IE&BIT(8)),CHECK(REG_IF&BIT(8)),CHECK(biosflags&BIT(8)));
+            GUI_ConsoleModePrintf(&gba_ioview_others_int_flags_con,0,10, "[%c][%c][%c] DMA 1",
+                                  CHECK(REG_IE&BIT(9)),CHECK(REG_IF&BIT(9)),CHECK(biosflags&BIT(9)));
+            GUI_ConsoleModePrintf(&gba_ioview_others_int_flags_con,0,11, "[%c][%c][%c] DMA 2",
+                                  CHECK(REG_IE&BIT(10)),CHECK(REG_IF&BIT(10)),CHECK(biosflags&BIT(10)));
+            GUI_ConsoleModePrintf(&gba_ioview_others_int_flags_con,0,12, "[%c][%c][%c] DMA 3",
+                                  CHECK(REG_IE&BIT(11)),CHECK(REG_IF&BIT(11)),CHECK(biosflags&BIT(11)));
+            GUI_ConsoleModePrintf(&gba_ioview_others_int_flags_con,0,13, "[%c][%c][%c] Keypad",
+                                  CHECK(REG_IE&BIT(12)),CHECK(REG_IF&BIT(12)),CHECK(biosflags&BIT(12)));
+            GUI_ConsoleModePrintf(&gba_ioview_others_int_flags_con,0,14, "[%c][%c][%c] Game Pak",
+                                  CHECK(REG_IE&BIT(13)),CHECK(REG_IF&BIT(13)),CHECK(biosflags&BIT(13)));
 
             break;
         }
@@ -897,6 +944,16 @@ int Win_GBAIOViewerCreate(void)
 
     // Other
 
+    GUI_SetLabel(&gba_ioview_others_interrupts_label,
+                   6,24, -1,FONT_HEIGHT, "Interrupts");
+    GUI_SetTextBox(&gba_ioview_others_interrupts_textbox,&gba_ioview_others_interrupts_con,
+                   6,42, 19*FONT_WIDTH,5*FONT_HEIGHT, NULL);
+
+    GUI_SetLabel(&gba_ioview_others_int_flags_label,
+                   6,42+5*FONT_HEIGHT+6, -1,FONT_HEIGHT, "Flags");
+    GUI_SetTextBox(&gba_ioview_others_int_flags_textbox,&gba_ioview_others_int_flags_con,
+                   6,60+5*FONT_HEIGHT+6, 19*FONT_WIDTH,15*FONT_HEIGHT, NULL);
+
     //--------------------------------------------------------------------
 
     GBAIOViewerCreated = 1;
@@ -1029,32 +1086,6 @@ void GLWindow_GBAIOViewerUpdate(void)
                 "7bit | 131.072kHz", "6bit | 262.144kHz" };
 
             SetWindowText(hTabPageItem[4][80],(LPCTSTR)biasinfo[(REG_SOUNDBIAS>>14)&3]);
-            break;
-        }
-        case 5: //Other
-        {
-            char text[5];
-            //IE,IF,IME
-            sprintf(text,"%04X",REG_IE); SetWindowText(hTabPageItem[5][2],(LPCTSTR)text);
-            sprintf(text,"%04X",REG_IF); SetWindowText(hTabPageItem[5][4],(LPCTSTR)text);
-            sprintf(text,"%04X",REG_IME); SetWindowText(hTabPageItem[5][6],(LPCTSTR)text);
-
-            //"IE IF BIOS" FLAGS
-            u16 biosflags = GBA_MemoryReadFast16(0x03007FF8);
-            SET_CHECK(5,8,REG_IE&BIT(0)); SET_CHECK(5,9,REG_IF&BIT(0)); SET_CHECK(5,10,biosflags&BIT(0));
-            SET_CHECK(5,12,REG_IE&BIT(1)); SET_CHECK(5,13,REG_IF&BIT(1)); SET_CHECK(5,14,biosflags&BIT(1));
-            SET_CHECK(5,16,REG_IE&BIT(2)); SET_CHECK(5,17,REG_IF&BIT(2)); SET_CHECK(5,18,biosflags&BIT(2));
-            SET_CHECK(5,20,REG_IE&BIT(3)); SET_CHECK(5,21,REG_IF&BIT(3)); SET_CHECK(5,22,biosflags&BIT(3));
-            SET_CHECK(5,24,REG_IE&BIT(4)); SET_CHECK(5,25,REG_IF&BIT(4)); SET_CHECK(5,26,biosflags&BIT(4));
-            SET_CHECK(5,28,REG_IE&BIT(5)); SET_CHECK(5,29,REG_IF&BIT(5)); SET_CHECK(5,30,biosflags&BIT(5));
-            SET_CHECK(5,32,REG_IE&BIT(6)); SET_CHECK(5,33,REG_IF&BIT(6)); SET_CHECK(5,34,biosflags&BIT(6));
-            SET_CHECK(5,36,REG_IE&BIT(7)); SET_CHECK(5,37,REG_IF&BIT(7)); SET_CHECK(5,38,biosflags&BIT(7));
-            SET_CHECK(5,40,REG_IE&BIT(8)); SET_CHECK(5,41,REG_IF&BIT(8)); SET_CHECK(5,42,biosflags&BIT(8));
-            SET_CHECK(5,44,REG_IE&BIT(9)); SET_CHECK(5,45,REG_IF&BIT(9)); SET_CHECK(5,46,biosflags&BIT(9));
-            SET_CHECK(5,48,REG_IE&BIT(10)); SET_CHECK(5,49,REG_IF&BIT(10)); SET_CHECK(5,50,biosflags&BIT(10));
-            SET_CHECK(5,52,REG_IE&BIT(11)); SET_CHECK(5,53,REG_IF&BIT(11)); SET_CHECK(5,54,biosflags&BIT(11));
-            SET_CHECK(5,56,REG_IE&BIT(12)); SET_CHECK(5,57,REG_IF&BIT(12)); SET_CHECK(5,58,biosflags&BIT(12));
-            SET_CHECK(5,60,REG_IE&BIT(13)); SET_CHECK(5,61,REG_IF&BIT(13)); SET_CHECK(5,62,biosflags&BIT(13));
             break;
         }
         default:
@@ -1251,51 +1282,6 @@ static void GLWindow_IOViewerMakePages(HWND hWnd)
                         WS_CHILD | WS_VISIBLE | SS_SUNKEN | BS_CENTER,
                         185, 300, 130, 17, hWnd, NULL, hInstance, NULL);
         SendMessage(hTabPageItem[4][80], WM_SETFONT, (WPARAM)hFontFixedIO, MAKELPARAM(1, 0));
-    }
-    //-----------------------------------------------------------------------------------
-    //                        SIXTH PAGE - OTHER
-    //-----------------------------------------------------------------------------------
-    {
-        hTabPageItem[5][0] = CreateWindow(TEXT("button"), TEXT("Interrupts"),
-                    WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-                    5, 25, 300, 65, hWnd, (HMENU) 0, hInstance, NULL);
-        SendMessage(hTabPageItem[5][0], WM_SETFONT, (WPARAM)hFontNormalIO, MAKELPARAM(1, 0));
-
-        CREATE_REG_STATIC_TEXT(5,1, 11, 45, "200h IE");
-        CREATE_REG_STATIC_TEXT(5,3, 11, 65, "202h IF");
-        CREATE_REG_STATIC_TEXT(5,5, 100, 45, "208h IME");
-
-        hTabPageItem[5][7] = CreateWindow(TEXT("button"), TEXT("IE IF BIOS"),
-                    WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-                    5, 90, 125, 235, hWnd, (HMENU) 0, hInstance, NULL);
-        SendMessage(hTabPageItem[5][7], WM_SETFONT, (WPARAM)hFontNormalIO, MAKELPARAM(1, 0));
-
-        #define CREATE_3_CHECK_STATIC(basey, baseid, text) \
-        { \
-            hTabPageItem[5][baseid] = CreateWindow(TEXT("button"), NULL, WS_CHILD | WS_VISIBLE | BS_CHECKBOX, \
-                            11, basey, 12, 17, hWnd, NULL, hInstance, NULL); \
-            hTabPageItem[5][baseid+1] = CreateWindow(TEXT("button"), NULL, WS_CHILD | WS_VISIBLE | BS_CHECKBOX, \
-                            30, basey, 12, 17, hWnd, NULL, hInstance, NULL); \
-            hTabPageItem[5][baseid+2] = CreateWindow(TEXT("button"), NULL, WS_CHILD | WS_VISIBLE | BS_CHECKBOX, \
-                            49, basey, 12, 17, hWnd, NULL, hInstance, NULL); \
-            hTabPageItem[5][baseid+3] = CreateWindow(TEXT("static"), TEXT(text), WS_CHILD | WS_VISIBLE, \
-                            70, basey+1, 50, 13, hWnd, NULL, hInstance, NULL); \
-            SendMessage(hTabPageItem[5][baseid+3], WM_SETFONT, (WPARAM)hFontIO, MAKELPARAM(1, 0)); \
-        }
-        CREATE_3_CHECK_STATIC(105,8,"V-Blank");
-        CREATE_3_CHECK_STATIC(120,12,"H-Blank");
-        CREATE_3_CHECK_STATIC(135,16,"V-Count");
-        CREATE_3_CHECK_STATIC(150,20,"Timer 0");
-        CREATE_3_CHECK_STATIC(165,24,"Timer 1");
-        CREATE_3_CHECK_STATIC(180,28,"Timer 2");
-        CREATE_3_CHECK_STATIC(195,32,"Timer 3");
-        CREATE_3_CHECK_STATIC(210,36,"Serial");
-        CREATE_3_CHECK_STATIC(225,40,"DMA 0");
-        CREATE_3_CHECK_STATIC(240,44,"DMA 1");
-        CREATE_3_CHECK_STATIC(255,48,"DMA 2");
-        CREATE_3_CHECK_STATIC(270,52,"DMA 3");
-        CREATE_3_CHECK_STATIC(285,56,"Keypad");
-        CREATE_3_CHECK_STATIC(300,60,"Game Pak");
     }
 }
 

@@ -142,13 +142,18 @@ static char sys_info_buffer[10000];
 static void _sys_info_printf(const char * msg, ...)
 {
     va_list args;
-    char buffer[10000];
+    char buffer[1000];
 
     va_start(args,msg);
     vsnprintf(buffer, sizeof(buffer), msg, args);
     va_end(args);
 
-    s_strncat(sys_info_buffer,buffer,sizeof(console_buffer));
+    s_strncat(sys_info_buffer,buffer,sizeof(sys_info_buffer));
+}
+
+static void _sys_info_print(const char * msg)
+{
+    s_strncat(sys_info_buffer,msg,sizeof(sys_info_buffer));
 }
 
 static void _sys_info_reset(void)
@@ -188,9 +193,9 @@ static void _sys_info_reset(void)
             break;
     }
 
-    int hours = total_secs/3600;
-    int min = (total_secs-(hours*3600))/60;
-    int secs = (total_secs-(hours*3600)-(min*60));
+    unsigned int hours = ((unsigned int)total_secs)/3600;
+    unsigned int min = (((unsigned int)total_secs)-(hours*3600))/60;
+    unsigned int secs = (((unsigned int)total_secs)-(hours*3600)-(min*60));
 
     _sys_info_printf("SDL_GetPowerInfo():\n  %s\n  Time left: %d:%02d:%02d\n  Percentage: %3d%%\n\n",
                      st_string,hours,min,secs,pct);
@@ -201,11 +206,12 @@ static void _sys_info_reset(void)
                      "GL_RENDERER   = %s\n"
                      "GL_VERSION    = %s\n"
                      "GL_VENDOR     = %s\n"
-                     "GL_EXTENSIONS = %s\n",
+                     "GL_EXTENSIONS = ",
                      (char*)glGetString(GL_RENDERER),(char*)glGetString(GL_VERSION),
-                     (char*)glGetString(GL_VENDOR),(char*)glGetString(GL_EXTENSIONS));
+                     (char*)glGetString(GL_VENDOR));
+    _sys_info_print((char*)glGetString(GL_EXTENSIONS));
 
-    _sys_info_printf("\nEND LOG\n");
+    _sys_info_printf("\n\nEND LOG\n");
 }
 
 void SysInfoShow(void)

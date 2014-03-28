@@ -190,7 +190,8 @@ static void _gui_draw_menu(_gui_menu * menu, char * buffer, int w, int h)
         if(entries[i] == NULL)
             break;
 
-        FU_PrintColor(buffer,w,h,selected_element_x,y,0xFFE0E0E0,entries[i]->text);
+        unsigned int color = entries[i]->enabled ? 0xFFE0E0E0 : 0xFFB0B0B0;
+        FU_PrintColor(buffer,w,h,selected_element_x,y,color,entries[i]->text);
 
         y += FONT_HEIGHT;
         i++;

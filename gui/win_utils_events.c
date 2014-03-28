@@ -151,7 +151,7 @@ static int _gui_menu_send_event(_gui_menu * menu, SDL_Event * e)
             selected_element_x - FONT_WIDTH - 1, FONT_WIDTH*(longest_string+1+1) + 1,
             y, FONT_HEIGHT)) // clicked in an element
         {
-            if(entries[i]->callback)
+            if( (entries[i]->enabled) && (entries[i]->callback) )
             {
                 entries[i]->callback();
                 menu->element_opened = -1; // close the menu

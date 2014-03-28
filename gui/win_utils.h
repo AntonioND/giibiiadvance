@@ -196,6 +196,7 @@ int GUI_InputWindowSendEvent(_gui_inputwindow * win, SDL_Event * e);
 typedef struct {
     char * text;
     _gui_void_arg_void_fn callback;
+    int enabled; // 1 -> enabled
 } _gui_menu_entry;
 
 typedef struct {

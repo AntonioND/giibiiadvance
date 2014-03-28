@@ -672,16 +672,16 @@ static void _win_main_menu_open_sgb_viewer(void)
 
 //Window Menu
 
-static _gui_menu_entry mm_separator = {" " , NULL};
+static _gui_menu_entry mm_separator = {" " , NULL, 1};
 
-static _gui_menu_entry mmfile_open = {"Load (CTRL+L)" , _win_main_file_explorer_load};
-static _gui_menu_entry mmfile_close = {"Close (CTRL+C)" , _win_main_menu_close};
-static _gui_menu_entry mmfile_closenosav = {"Close without saving", _win_main_menu_close_no_save};
-static _gui_menu_entry mmfile_reset = {"Reset (CTRL+R)", _win_main_reset};
-static _gui_menu_entry mmfile_pause = {"Pause (CTRL+P)", _win_main_menu_toggle_pause};
-static _gui_menu_entry mmfile_rominfo = {"Show Console (Rom Info.)", ConsoleShow};
-static _gui_menu_entry mmfile_screenshot = {"Screenshot (F12)", _win_main_screenshot};
-static _gui_menu_entry mmfile_exit = {"Exit (CTRL+E)", _win_main_menu_exit};
+static _gui_menu_entry mmfile_open = {"Load (CTRL+L)" , _win_main_file_explorer_load, 1};
+static _gui_menu_entry mmfile_close = {"Close (CTRL+C)" , _win_main_menu_close, 1};
+static _gui_menu_entry mmfile_closenosav = {"Close without saving", _win_main_menu_close_no_save, 1};
+static _gui_menu_entry mmfile_reset = {"Reset (CTRL+R)", _win_main_reset, 1};
+static _gui_menu_entry mmfile_pause = {"Pause (CTRL+P)", _win_main_menu_toggle_pause, 1};
+static _gui_menu_entry mmfile_rominfo = {"Show Console (Rom Info.)", ConsoleShow, 1};
+static _gui_menu_entry mmfile_screenshot = {"Screenshot (F12)", _win_main_screenshot, 1};
+static _gui_menu_entry mmfile_exit = {"Exit (CTRL+E)", _win_main_menu_exit, 1};
 
 static _gui_menu_entry * mmfile_elements[] = {
     &mmfile_open,
@@ -703,9 +703,9 @@ static _gui_menu_list main_menu_file = {
     mmfile_elements,
 };
 
-static _gui_menu_entry mmoptions_configuration = {"Configuration" , NULL};
-static _gui_menu_entry mmoptions_mutesound = {"Mute Sound (CTRL+M)" , _win_main_menu_toggle_mute_sound};
-static _gui_menu_entry mmoptions_sysinfo = {"System Information" , SysInfoShow};
+static _gui_menu_entry mmoptions_configuration = {"Configuration" , NULL, 1};
+static _gui_menu_entry mmoptions_mutesound = {"Mute Sound (CTRL+M)" , _win_main_menu_toggle_mute_sound, 1};
+static _gui_menu_entry mmoptions_sysinfo = {"System Information" , SysInfoShow, 1};
 
 static _gui_menu_entry * mmoptions_elements[] = {
     &mmoptions_configuration,
@@ -720,16 +720,16 @@ static _gui_menu_list main_menu_options = {
     mmoptions_elements,
 };
 
-static _gui_menu_entry mmdebug_disas = {"Disassembler (F5)" , _win_main_menu_open_disassembler};
-static _gui_menu_entry mmdebug_memview = {"Memory Viewer (F6)" , _win_main_menu_open_mem_viewer};
-static _gui_menu_entry mmdebug_ioview = {"I/O Viewer (F7)" , _win_main_menu_open_io_viewer};
+static _gui_menu_entry mmdebug_disas = {"Disassembler (F5)" , _win_main_menu_open_disassembler, 1};
+static _gui_menu_entry mmdebug_memview = {"Memory Viewer (F6)" , _win_main_menu_open_mem_viewer, 1};
+static _gui_menu_entry mmdebug_ioview = {"I/O Viewer (F7)" , _win_main_menu_open_io_viewer, 1};
 
-static _gui_menu_entry mmdebug_tileview = {"Tile Viewer" , _win_main_menu_open_tile_viewer};
-static _gui_menu_entry mmdebug_mapview = {"Map Viewer" , _win_main_menu_open_map_viewer};
-static _gui_menu_entry mmdebug_sprview = {"Sprite Viewer" , _win_main_menu_open_spr_viewer};
-static _gui_menu_entry mmdebug_palview = {"Palette Viewer" , _win_main_menu_open_pal_viewer};
+static _gui_menu_entry mmdebug_tileview = {"Tile Viewer" , _win_main_menu_open_tile_viewer, 1};
+static _gui_menu_entry mmdebug_mapview = {"Map Viewer" , _win_main_menu_open_map_viewer, 1};
+static _gui_menu_entry mmdebug_sprview = {"Sprite Viewer" , _win_main_menu_open_spr_viewer, 1};
+static _gui_menu_entry mmdebug_palview = {"Palette Viewer" , _win_main_menu_open_pal_viewer, 1};
 
-static _gui_menu_entry mmdebug_sgbview = {"SGB Viewer" , _win_main_menu_open_sgb_viewer};
+static _gui_menu_entry mmdebug_sgbview = {"SGB Viewer" , _win_main_menu_open_sgb_viewer, 1};
 
 static _gui_menu_entry * mmdisas_elements[] = {
     &mmdebug_disas,
@@ -750,9 +750,9 @@ static _gui_menu_list main_menu_debug = {
     mmdisas_elements,
 };
 
-static _gui_menu_entry mmhelp_readme = {"Readme (F1)" , _win_main_scrollable_text_window_show_readme};
-static _gui_menu_entry mmhelp_license = {"License" , _win_main_scrollable_text_window_show_license};
-static _gui_menu_entry mmhelp_about = {"About" , _win_main_scrollable_text_window_show_about};
+static _gui_menu_entry mmhelp_readme = {"Readme (F1)" , _win_main_scrollable_text_window_show_readme, 1};
+static _gui_menu_entry mmhelp_license = {"License" , _win_main_scrollable_text_window_show_license, 1};
+static _gui_menu_entry mmhelp_about = {"About" , _win_main_scrollable_text_window_show_about, 1};
 
 static _gui_menu_entry * mmhelp_elements[] = {
     &mmhelp_readme,
@@ -779,6 +779,68 @@ static _gui_menu main_menu = {
     -1,
     mmenu_lists
 };
+
+//------------------------------------------------------------------
+
+static void _win_main_menu_update_elements_enabled(void)
+{
+    if(WIN_MAIN_RUNNING == RUNNING_NONE)
+    {
+        mmfile_close.enabled = 0;
+        mmfile_closenosav.enabled = 0;
+        mmfile_reset.enabled = 0;
+        mmfile_pause.enabled = 0;
+        mmfile_rominfo.enabled = 0;
+        mmfile_screenshot.enabled = 0;
+
+        mmoptions_mutesound.enabled = 0;
+
+        mmdebug_disas.enabled = 0;
+        mmdebug_memview.enabled = 0;
+        mmdebug_ioview.enabled = 0;
+
+        mmdebug_tileview.enabled = 0;
+        mmdebug_mapview.enabled = 0;
+        mmdebug_sprview.enabled = 0;
+        mmdebug_palview.enabled = 0;
+
+        mmdebug_sgbview.enabled = 0;
+    }
+    else
+    {
+        mmfile_close.enabled = 1;
+        mmfile_closenosav.enabled = 1;
+        mmfile_reset.enabled = 1;
+        mmfile_pause.enabled = 1;
+        mmfile_rominfo.enabled = 1;
+        mmfile_screenshot.enabled = 1;
+
+        mmoptions_mutesound.enabled = 1;
+
+        mmdebug_disas.enabled = 1;
+        mmdebug_memview.enabled = 1;
+        mmdebug_ioview.enabled = 1;
+
+        mmdebug_tileview.enabled = 1;
+        mmdebug_mapview.enabled = 1;
+        mmdebug_sprview.enabled = 1;
+        mmdebug_palview.enabled = 1;
+
+        if(WIN_MAIN_RUNNING == RUNNING_GB)
+        {
+            if(GB_EmulatorIsEnabledSGB())
+                mmdebug_sgbview.enabled = 1;
+            else
+                mmdebug_sgbview.enabled = 0;
+        }
+        else if(WIN_MAIN_RUNNING == RUNNING_GBA)
+        {
+            mmdebug_sgbview.enabled = 0;
+        }
+    }
+}
+
+//------------------------------------------------------------------
 
 //------------------------------------------------------------------
 
@@ -832,7 +894,7 @@ void mainbtncallback_openwin(void)
 //------------------------------------------------------------------
 
 //@global function
-void Win_MainShowMessage(int type, const char * text) // 0 = error, 1 = debug, 2 = console
+void Win_MainShowMessage(int type, const char * text) // 0 = error, 1 = debug, 2 = console, 3 = sys info
 {
     _win_main_switch_to_menu();
 
@@ -926,7 +988,10 @@ static void _win_main_change_zoom(int newzoom)
 static int Win_MainEventCallback(SDL_Event * e)
 {
     if(WIN_MAIN_MENU_ENABLED)
+    {
+        _win_main_menu_update_elements_enabled();
         WIN_MAIN_MENU_HAS_TO_UPDATE |= GUI_SendEvent(&mainwindow_window_gui,e);
+    }
 
     int close_this = 0;
 

@@ -23,5 +23,7 @@ void GB_PowerOn(void);
 void GB_PowerOff(void);
 void GB_HardReset(void);
 
+int GB_EmulatorIsEnabledSGB(void);
+
 #endif //__GENERAL__
 

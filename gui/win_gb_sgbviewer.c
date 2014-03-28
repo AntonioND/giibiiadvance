@@ -32,6 +32,7 @@
 #include "win_utils.h"
 
 #include "../gb_core/gameboy.h"
+#include "../gb_core/general.h"
 #include "../gb_core/debug_video.h"
 #include "../gb_core/sgb.h"
 
@@ -596,7 +597,7 @@ void Win_GB_SGBViewerUpdate(void)
 
     if(Win_MainRunningGB() == 0) return;
 
-    if(GameBoy.Emulator.SGBEnabled == 0) return;
+    if(GB_EmulatorIsEnabledSGB() == 0) return;
 
     _win_gb_sgbviewer_draw_border();
     _win_gb_sgbviewer_draw_border_zoomed_tile();
@@ -679,7 +680,7 @@ static void _win_gb_sgbviewer_border_dump_btn_callback(void)
 {
     if(Win_MainRunningGB() == 0) return;
 
-    if(GameBoy.Emulator.SGBEnabled == 0) return;
+    if(GB_EmulatorIsEnabledSGB() == 0) return;
 
     char * border_buff = malloc(256*256*4);
     if(border_buff == NULL)
@@ -774,7 +775,7 @@ static void _win_gb_sgbviewer_tiles_dump_btn_callback(void)
 {
     if(Win_MainRunningGB() == 0) return;
 
-    if(GameBoy.Emulator.SGBEnabled == 0) return;
+    if(GB_EmulatorIsEnabledSGB() == 0) return;
 
     char * tiles_buff = malloc(128*128*4);
     if(tiles_buff == NULL)
@@ -827,7 +828,7 @@ static void _win_gb_sgbviewer_atf_dump_btn_callback(void)
 {
     if(Win_MainRunningGB() == 0) return;
 
-    if(GameBoy.Emulator.SGBEnabled == 0) return;
+    if(GB_EmulatorIsEnabledSGB() == 0) return;
 
     char * buf = calloc(161*145*4,1);
     if(buf == NULL)
@@ -881,7 +882,7 @@ static void _win_gb_sgbviewer_pal_dump_btn_callback(void)
 {
     if(Win_MainRunningGB() == 0) return;
 
-    if(GameBoy.Emulator.SGBEnabled == 0) return;
+    if(GB_EmulatorIsEnabledSGB() == 0) return;
 
     char * buf = malloc(160*80*4);
     if(buf == NULL)
@@ -943,7 +944,7 @@ int Win_GB_SGBViewerCreate(void)
 
     if(Win_MainRunningGB() == 0) return 0;
 
-    if(GameBoy.Emulator.SGBEnabled == 0) return 0;
+    if(GB_EmulatorIsEnabledSGB() == 0) return 0;
 
     // Border
 

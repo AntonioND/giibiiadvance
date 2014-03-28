@@ -86,4 +86,8 @@ void GB_HardReset(void)
     GB_PowerOn();
 }
 
+int GB_EmulatorIsEnabledSGB(void)
+{
+    return GameBoy.Emulator.SGBEnabled;
+}
 

@@ -17,8 +17,7 @@ Current goals for 0.2.0
 -----------------------
 
 - Finish porting the GUI:
- - Configuration window. Color select dialog?
- - Disable main menu elements when they can't be used.
+ - Configuration window.
  - Speedup button. Frameskip.
 
 For 0.3.0

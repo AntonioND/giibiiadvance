@@ -542,9 +542,9 @@ void Win_GBAIOViewerUpdate(void)
             const char * dstincmode[4] = { "Increment ","Decrement ","Fixed     ","Inc/Reload" };
             const char * startmode[4][4] = {
                 {"Start immediately", "Start immediately", "Start immediately", "Start immediately"},
-                {"Start at VBlank  ", "Start at VBlank  ", "Start at VBlank  ", "Start at VBlank  "},
-                {"Start at HBlank  ", "Start at HBlank  ", "Start at HBlank  ", "Start at HBlank  "},
-                {"Prohibited       ", "Sound FIFO       ", "Sound FIFO       ", "Video Capture    "}
+                {"  Start at VBlank", "  Start at VBlank", "  Start at VBlank", "  Start at VBlank"},
+                {"  Start at HBlank", "  Start at HBlank", "  Start at HBlank", "  Start at HBlank"},
+                {"       Prohibited", "       Sound FIFO", "       Sound FIFO", "    Video Capture"}
             };
 
             // DMA 0

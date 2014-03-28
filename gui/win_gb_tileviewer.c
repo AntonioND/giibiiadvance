@@ -169,7 +169,8 @@ void Win_GBTileViewerUpdate(void)
         GB_Debug_TileDrawZoomed64x64(gb_tile_zoomed_tile_buffer, gb_tileview_selected_index, gb_tileview_selected_bank);
     else
         GB_Debug_TileDrawZoomedPaletted64x64(gb_tile_zoomed_tile_buffer, gb_tileview_selected_index,
-                                             gb_tileview_selected_bank,gb_tile_zoomed_tile_sel_pal);
+                                             gb_tileview_selected_bank,gb_tile_zoomed_tile_sel_pal,
+                                             gb_tile_zoomed_tile_is_pal==2);
 
     u32 tile = gb_tileview_selected_index;
     u32 tileindex = (tile > 255) ? (tile - 256) : (tile);

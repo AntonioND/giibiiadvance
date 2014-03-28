@@ -819,7 +819,7 @@ void GB_Debug_TileDrawZoomed64x64(char * buffer, int tile, int bank)
     }
 }
 
-void GB_Debug_TileDrawZoomedPaletted64x64(char * buffer, int tile, int bank, int palette)
+void GB_Debug_TileDrawZoomedPaletted64x64(char * buffer, int tile, int bank, int palette, int is_sprite_palette)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
@@ -846,7 +846,10 @@ void GB_Debug_TileDrawZoomedPaletted64x64(char * buffer, int tile, int bank, int
         {
             u32 pal_index = (palette * 8) + (2*color);
 
-            color = GameBoy.Emulator.bg_pal[pal_index] | (GameBoy.Emulator.bg_pal[pal_index+1]<<8);
+            if(is_sprite_palette)
+                color = GameBoy.Emulator.spr_pal[pal_index] | (GameBoy.Emulator.spr_pal[pal_index+1]<<8);
+            else
+                color = GameBoy.Emulator.bg_pal[pal_index] | (GameBoy.Emulator.bg_pal[pal_index+1]<<8);
 
             tiletempbuffer[x + y*8] = rgb16to32(color);
         }

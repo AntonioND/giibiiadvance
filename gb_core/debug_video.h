@@ -40,7 +40,7 @@ void GB_Debug_TileVRAMDraw(char * buffer0, int bufw0, int bufh0, char * buffer1,
 void GB_Debug_TileVRAMDrawPaletted(char * buffer0, int bufw0, int bufh0, char * buffer1, int bufw1, int bufh1,
                                    int pal, int pal_is_spr);
 void GB_Debug_TileDrawZoomed64x64(char * buffer, int tile, int bank);
-void GB_Debug_TileDrawZoomedPaletted64x64(char * buffer, int tile, int bank, int palette);
+void GB_Debug_TileDrawZoomedPaletted64x64(char * buffer, int tile, int bank, int palette, int is_sprite_palette);
 
 //---------------------------------------------------------------------------------
 

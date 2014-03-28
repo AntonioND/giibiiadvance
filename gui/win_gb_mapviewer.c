@@ -176,7 +176,7 @@ void Win_GBMapViewerUpdate(void)
     if(gb_map_zoomed_tile_is_pal == 0)
         GB_Debug_TileDrawZoomed64x64(gb_map_zoomed_tile_buffer,tile,bank);
     else
-        GB_Debug_TileDrawZoomedPaletted64x64(gb_map_zoomed_tile_buffer,tile,bank,info&7);
+        GB_Debug_TileDrawZoomedPaletted64x64(gb_map_zoomed_tile_buffer,tile,bank,info&7,0);
 }
 
 //----------------------------------------------------------------

@@ -171,6 +171,9 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="file_utils.h" />
+		<Unit filename="font_data.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="font_utils.c">
 			<Option compilerVar="CC" />
 		</Unit>

@@ -49,11 +49,6 @@ static int Init(void)
     //    DU_Log("Warning: VSync not enabled!");
     //}
 
-    if(FU_Init())
-        return 1;
-
-    atexit(FU_End);
-
     Sound_Init();
 
     if(DirCheckExistence(DirGetScreenshotFolderPath()) == 0)

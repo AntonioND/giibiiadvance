@@ -20,7 +20,6 @@ Current goals for 0.2.0
  - Configuration window. Color select dialog?
  - Complete main window menu. Accelerators (F12, CTRL+R, ...)
  - Disable main menu elements when they can't be used.
- - Include font and app icon as binary data. Don't include icon data in linux.
  - Speedup button. Frameskip.
  - Remove log.txt file if not used.
 

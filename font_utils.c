@@ -33,27 +33,7 @@
 #define FONT_CHARS_IN_ROW    (32)
 #define FONT_CHARS_IN_COLUMN (8)
 
-static char * fnt = NULL;
-
-//------------------------------------------------------------------------------------------
-
-int FU_Init(void)
-{
-    char path[MAX_PATHLEN];
-    s_snprintf(path,sizeof(path),"%sfont.png",DirGetRunningPath());
-    int w,h;
-    if(Read_PNG(path,&fnt,&w,&h))
-    {
-        return 1;
-    }
-    return 0;
-}
-
-void FU_End(void)
-{
-    if(fnt) free(fnt);
-    fnt = NULL;
-}
+extern const char fnt_data[]; // in font_data.c
 
 //------------------------------------------------------------------------------------------
 
@@ -87,7 +67,7 @@ int FU_Print(char * buffer, int bufw, int bufh, int tx, int ty, const char * txt
         for(y = 0; y < FONT_HEIGHT; y ++)
         {
             char * bufcopy = &(buffer[buf_offset]);
-            char * texcopy = &(fnt[tex_offset]);
+            const char * texcopy = &(fnt_data[tex_offset]);
 
             for(x = 0; x < FONT_WIDTH; x++)
             {
@@ -144,7 +124,7 @@ int FU_PrintColor(char * buffer, int bufw, int bufh, int tx, int ty, int color, 
         for(y = 0; y < FONT_HEIGHT; y ++)
         {
             char * bufcopy = &(buffer[buf_offset]);
-            char * texcopy = &(fnt[tex_offset]);
+            const char * texcopy = &(fnt_data[tex_offset]);
 
             for(x = 0; x < FONT_WIDTH; x++)
             {
@@ -181,7 +161,7 @@ int FU_PrintChar(char * buffer, int bufw, int bufh, int tx, int ty, unsigned cha
     for(y = 0; y < FONT_HEIGHT; y ++)
     {
         char * bufcopy = &(buffer[buf_offset]);
-        char * texcopy = &(fnt[tex_offset]);
+        const char * texcopy = &(fnt_data[tex_offset]);
 
         for(x = 0; x < FONT_WIDTH; x++)
         {

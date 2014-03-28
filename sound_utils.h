@@ -30,5 +30,8 @@ void Sound_Disable(void);
 
 void Sound_SetVolume(int vol);
 
+void Sound_SetEnabled(int enable);
+int Sound_GetEnabled(void);
+
 #endif // __SOUND_UTILS__
 

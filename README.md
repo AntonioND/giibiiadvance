@@ -18,10 +18,8 @@ Current goals for 0.2.0
 
 - Finish porting the GUI:
  - Configuration window. Color select dialog?
- - Complete main window menu. Accelerators (F12, CTRL+R, ...)
  - Disable main menu elements when they can't be used.
  - Speedup button. Frameskip.
- - Remove log.txt file if not used.
 
 For 0.3.0
 ---------

@@ -25,6 +25,8 @@
 
 #include "general_utils.h"
 #include "config.h"
+#include "build_options.h"
+#include "file_utils.h"
 
 #include "gui/win_main.h"
 
@@ -39,7 +41,9 @@ void Debug_End(void)
 
 void Debug_Init(void)
 {
-    f_log = fopen("log.txt","w");
+    char logpath[MAX_PATHLEN];
+    s_snprintf(logpath,sizeof(logpath),"%slog.txt",DirGetRunningPath());
+    f_log = fopen(logpath,"w");
     atexit(Debug_End);
 }
 

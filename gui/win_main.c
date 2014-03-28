@@ -39,6 +39,7 @@
 #include "../gb_core/gb_main.h"
 #include "../gb_core/interrupts.h"
 #include "../gb_core/video.h"
+#include "../gb_core/general.h"
 #include "../gb_core/rom.h"
 
 #include "../gba_core/gba.h"
@@ -588,6 +589,38 @@ static void _win_main_menu_exit(void)
     WH_CloseAll();
 }
 
+static void _win_main_menu_toggle_pause(void)
+{
+    if(WIN_MAIN_MENU_ENABLED)
+        _win_main_switch_to_game();
+    else
+        _win_main_switch_to_menu();
+
+    WIN_MAIN_MENU_HAS_TO_UPDATE = 1;
+}
+
+static void _win_main_reset(void)
+{
+    if(WIN_MAIN_RUNNING != RUNNING_NONE)
+    {
+        if(WIN_MAIN_MENU_ENABLED)
+            _win_main_switch_to_game();
+
+        if(WIN_MAIN_RUNNING == RUNNING_GBA) GBA_Reset();
+        else if(WIN_MAIN_RUNNING == RUNNING_GB) GB_HardReset();
+        if(EmulatorConfig.frameskip == -1)
+        {
+            //FRAMESKIP = 0;
+            //AUTO_FRAMESKIP_WAIT = 2;
+        }
+    }
+}
+
+static void _win_main_menu_toggle_mute_sound(void)
+{
+    Sound_SetEnabled(!Sound_GetEnabled());
+}
+
 static void _win_main_menu_open_disassembler(void)
 {
     Win_GBADisassemblerCreate();
@@ -644,8 +677,8 @@ static _gui_menu_entry mm_separator = {" " , NULL};
 static _gui_menu_entry mmfile_open = {"Load (CTRL+L)" , _win_main_file_explorer_load};
 static _gui_menu_entry mmfile_close = {"Close (CTRL+C)" , _win_main_menu_close};
 static _gui_menu_entry mmfile_closenosav = {"Close without saving", _win_main_menu_close_no_save};
-static _gui_menu_entry mmfile_reset = {"Reset (CTRL+R)", NULL};
-static _gui_menu_entry mmfile_pause = {"Pause (CTRL+P)", NULL};
+static _gui_menu_entry mmfile_reset = {"Reset (CTRL+R)", _win_main_reset};
+static _gui_menu_entry mmfile_pause = {"Pause (CTRL+P)", _win_main_menu_toggle_pause};
 static _gui_menu_entry mmfile_rominfo = {"Show Console (Rom Info.)", ConsoleShow};
 static _gui_menu_entry mmfile_screenshot = {"Screenshot (F12)", _win_main_screenshot};
 static _gui_menu_entry mmfile_exit = {"Exit (CTRL+E)", _win_main_menu_exit};
@@ -671,7 +704,7 @@ static _gui_menu_list main_menu_file = {
 };
 
 static _gui_menu_entry mmoptions_configuration = {"Configuration" , NULL};
-static _gui_menu_entry mmoptions_mutesound = {"Mute Sound (CTRL+M)" , NULL};
+static _gui_menu_entry mmoptions_mutesound = {"Mute Sound (CTRL+M)" , _win_main_menu_toggle_mute_sound};
 static _gui_menu_entry mmoptions_sysinfo = {"System Information" , NULL};
 
 static _gui_menu_entry * mmoptions_elements[] = {
@@ -907,6 +940,7 @@ static int Win_MainEventCallback(SDL_Event * e)
             case SDLK_F7:
                 _win_main_menu_open_io_viewer();
                 break;
+
             case SDLK_F12:
                 _win_main_screenshot();
                 break;
@@ -937,25 +971,62 @@ static int Win_MainEventCallback(SDL_Event * e)
                 }
                 break;
 
-            //case SDLK_p:
-            //    if(SDL_GetModState()|KMOD_CTRL)
-            //    {
-            //        if(MENU_ENABLED)
-            //            _win_main_switch_to_game();
-            //        else
-            //            _win_main_switch_to_menu();
-            //    }
-            //    break;
+            case SDLK_p:
+                if(SDL_GetModState()&KMOD_CTRL)
+                {
+                    _win_main_menu_toggle_pause();
+                }
+                break;
 
-            case SDLK_1:
-                _win_main_change_zoom(2);
-                return 1;
-            case SDLK_2:
-                _win_main_change_zoom(3);
-                return 1;
-            case SDLK_3:
-                _win_main_change_zoom(4);
-                return 1;
+            case SDLK_m:
+                if(SDL_GetModState()&KMOD_CTRL)
+                {
+                    _win_main_menu_toggle_mute_sound();
+                }
+                break;
+
+            case SDLK_l:
+                if(SDL_GetModState()&KMOD_CTRL)
+                {
+                    if(WIN_MAIN_MENU_ENABLED == 0)
+                        _win_main_switch_to_menu();
+
+                    _win_main_file_explorer_load();
+
+                    WIN_MAIN_MENU_HAS_TO_UPDATE = 1;
+                }
+                break;
+
+            case SDLK_c:
+                if(SDL_GetModState()&KMOD_CTRL)
+                {
+                    _win_main_menu_close();
+                }
+                break;
+
+            case SDLK_e:
+                if(SDL_GetModState()&KMOD_CTRL)
+                {
+                    _win_main_menu_exit();
+                }
+                break;
+
+            case SDLK_r:
+                if(SDL_GetModState()&KMOD_CTRL)
+                {
+                    _win_main_reset();
+                }
+                break;
+
+            //case SDLK_1:
+            //    _win_main_change_zoom(2);
+            //    return 1;
+            //case SDLK_2:
+            //    _win_main_change_zoom(3);
+            //    return 1;
+            //case SDLK_3:
+            //    _win_main_change_zoom(4);
+            //    return 1;
 
             case SDLK_ESCAPE:
                 WH_CloseAll();

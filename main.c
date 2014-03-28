@@ -64,20 +64,19 @@ static int Init(void)
 
 int main( int argc, char * argv[] )
 {
-    Debug_Init();
-    atexit(Debug_End);
-
-    if(argc > 0) Debug_LogMsgArg("argv[0] = %s",argv[0]);
-    if(argc > 1) Debug_LogMsgArg("argv[1] = %s",argv[1]);
-
     if(argc > 0)
         DirSetRunningPath(argv[0]); // whatever...
+
+    Debug_Init();
+    atexit(Debug_End);
 
     if(Init() != 0)
         return 1;
 
     Win_MainCreate( (argc > 1) ? argv[1] : NULL );
 
+    if(argc > 0) Debug_LogMsgArg("argv[0] = %s",argv[0]);
+    if(argc > 1) Debug_LogMsgArg("argv[1] = %s",argv[1]);
     Debug_LogMsgArg(DirGetRunningPath());
     Debug_LogMsgArg(DirGetBiosFolderPath());
     Debug_LogMsgArg(DirGetScreenshotFolderPath());

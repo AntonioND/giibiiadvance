@@ -95,6 +95,17 @@ void Sound_SetVolume(int vol)
 
 }
 
+void Sound_SetEnabled(int enable)
+{
+    EmulatorConfig.snd_mute = enable;
+}
+
+int Sound_GetEnabled(void)
+{
+    return EmulatorConfig.snd_mute;
+}
+
+
 /*
 FILE * f = NULL;
 void closewavfile(void)

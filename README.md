@@ -22,6 +22,7 @@ Current goals for 0.2.0
  - Disable main menu elements when they can't be used.
  - Include font and app icon as binary data. Don't include icon data in linux.
  - Speedup button. Frameskip.
+ - Remove log.txt file if not used.
 
 For 0.3.0
 ---------

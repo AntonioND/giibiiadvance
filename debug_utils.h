@@ -32,4 +32,6 @@ void ConsoleReset(void);
 void ConsolePrint(const char * msg, ...);
 void ConsoleShow(void);
 
+void SysInfoShow(void);
+
 #endif // __DEBUG_UTILS__

@@ -17,6 +17,7 @@
 */
 
 #include <SDL2/SDL.h>
+#include <gl/gl.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -109,7 +110,7 @@ void Debug_ErrorMsg(const char * msg)
 
 //----------------------------------------------------------------------------------
 
-char console_buffer[5000];
+static char console_buffer[5000];
 
 void ConsoleReset(void)
 {
@@ -132,6 +133,86 @@ void ConsoleShow(void)
 {
     Win_MainShowMessage(2,console_buffer);
     //SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "GiiBiiAdvance - Console", console_buffer, NULL);
+}
+
+//----------------------------------------------------------------------------------
+
+static char sys_info_buffer[10000];
+
+static void _sys_info_printf(const char * msg, ...)
+{
+    va_list args;
+    char buffer[10000];
+
+    va_start(args,msg);
+    vsnprintf(buffer, sizeof(buffer), msg, args);
+    va_end(args);
+
+    s_strncat(sys_info_buffer,buffer,sizeof(console_buffer));
+}
+
+static void _sys_info_reset(void)
+{
+    memset(sys_info_buffer,0,sizeof(sys_info_buffer));
+
+    _sys_info_printf("SDL information:\n"
+                     "----------------\n"
+                     "\n"
+                     "SDL_GetPlatform(): %s\n\n"
+                     "SDL_GetCPUCount(): %d (Number of logical CPU cores)\n"
+                     "SDL_GetSystemRAM(): %d MB\n"
+                     "SDL_GetCPUCacheLineSize(): %d kB (Cache L1)\n\n",
+                     SDL_GetPlatform(), SDL_GetCPUCount(),
+                     SDL_GetSystemRAM(), SDL_GetCPUCacheLineSize() );
+
+    int total_secs, pct;
+    SDL_PowerState st = SDL_GetPowerInfo(&total_secs,&pct);
+    char * st_string;
+    switch(st)
+    {
+        default:
+        case SDL_POWERSTATE_UNKNOWN:
+            st_string = "SDL_POWERSTATE_UNKNOWN (cannot determine power status)";
+            break;
+        case SDL_POWERSTATE_ON_BATTERY:
+            st_string = "SDL_POWERSTATE_ON_BATTERY (not plugged in, running on battery)";
+            break;
+        case SDL_POWERSTATE_NO_BATTERY:
+            st_string = "SDL_POWERSTATE_NO_BATTERY (plugged in, no battery available)";
+            break;
+        case SDL_POWERSTATE_CHARGING:
+            st_string = "SDL_POWERSTATE_CHARGING (plugged in, charging battery)";
+            break;
+        case SDL_POWERSTATE_CHARGED:
+            st_string = "SDL_POWERSTATE_CHARGED (plugged in, battery charged)";
+            break;
+    }
+
+    int hours = total_secs/3600;
+    int min = (total_secs-(hours*3600))/60;
+    int secs = (total_secs-(hours*3600)-(min*60));
+
+    _sys_info_printf("SDL_GetPowerInfo():\n  %s\n  Time left: %d:%02d:%02d\n  Percentage: %3d%%\n\n",
+                     st_string,hours,min,secs,pct);
+
+    _sys_info_printf("OpenGL information:\n"
+                     "-------------------\n"
+                     "\n"
+                     "GL_RENDERER   = %s\n"
+                     "GL_VERSION    = %s\n"
+                     "GL_VENDOR     = %s\n"
+                     "GL_EXTENSIONS = %s\n",
+                     (char*)glGetString(GL_RENDERER),(char*)glGetString(GL_VERSION),
+                     (char*)glGetString(GL_VENDOR),(char*)glGetString(GL_EXTENSIONS));
+
+    _sys_info_printf("\nEND LOG\n");
+}
+
+void SysInfoShow(void)
+{
+    _sys_info_reset();
+
+    Win_MainShowMessage(3,sys_info_buffer);
 }
 
 //----------------------------------------------------------------------------------

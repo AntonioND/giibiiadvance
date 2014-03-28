@@ -705,7 +705,7 @@ static _gui_menu_list main_menu_file = {
 
 static _gui_menu_entry mmoptions_configuration = {"Configuration" , NULL};
 static _gui_menu_entry mmoptions_mutesound = {"Mute Sound (CTRL+M)" , _win_main_menu_toggle_mute_sound};
-static _gui_menu_entry mmoptions_sysinfo = {"System Information" , NULL};
+static _gui_menu_entry mmoptions_sysinfo = {"System Information" , SysInfoShow};
 
 static _gui_menu_entry * mmoptions_elements[] = {
     &mmoptions_configuration,
@@ -857,6 +857,13 @@ void Win_MainShowMessage(int type, const char * text) // 0 = error, 1 = debug, 2
         GUI_SetScrollableTextWindow(&mainwindow_scrollable_text_window,25,25,
                                 _win_main_get_menu_texture_width()-50,_win_main_get_menu_texture_height()-50,
                                 text, "Console");
+        GUI_ScrollableTextWindowSetEnabled(&mainwindow_scrollable_text_window,1);
+    }
+    else if(type == 3)
+    {
+        GUI_SetScrollableTextWindow(&mainwindow_scrollable_text_window,25,25,
+                                _win_main_get_menu_texture_width()-50,_win_main_get_menu_texture_height()-50,
+                                text, "System Information");
         GUI_ScrollableTextWindowSetEnabled(&mainwindow_scrollable_text_window,1);
     }
     else return;
@@ -1222,13 +1229,13 @@ static void GB_KeyboardGamepadGetInput(void)
 //@global function
 int Win_MainRunningGBA(void)
 {
-    return WIN_MAIN_RUNNING == RUNNING_GBA;
+    return (WIN_MAIN_RUNNING == RUNNING_GBA);
 }
 
 //@global function
 int Win_MainRunningGB(void)
 {
-    return WIN_MAIN_RUNNING == RUNNING_GB;
+    return (WIN_MAIN_RUNNING == RUNNING_GB);
 }
 
 //@global function

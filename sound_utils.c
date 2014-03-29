@@ -23,6 +23,8 @@
 #include "sound_utils.h"
 #include "debug_utils.h"
 #include "config.h"
+#include "input_utils.h"
+
 #define SDL_BUFFER_SAMPLES (1*1024);
 
 static Sound_CallbackPointer * _sound_callback;
@@ -31,7 +33,7 @@ static SDL_AudioSpec obtained_spec;
 
 static void __sound_callback(void * userdata, Uint8 * buffer, int len)
 {
-    if((_sound_enabled == 0) || EmulatorConfig.snd_mute)
+    if((_sound_enabled == 0) || EmulatorConfig.snd_mute || Input_Speedup_Enabled())
     {
         //nothing
     }
@@ -92,7 +94,7 @@ void Sound_Disable(void)
 
 void Sound_SetVolume(int vol)
 {
-
+    EmulatorConfig.volume = vol;
 }
 
 void Sound_SetEnabled(int enable)
@@ -103,6 +105,11 @@ void Sound_SetEnabled(int enable)
 int Sound_GetEnabled(void)
 {
     return EmulatorConfig.snd_mute;
+}
+
+void Sound_SetEnabledChannels(int flags)
+{
+    EmulatorConfig.chn_flags = flags & 0x3F;
 }
 
 

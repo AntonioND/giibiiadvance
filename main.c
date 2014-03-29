@@ -26,6 +26,8 @@
 #include "file_utils.h"
 #include "sound_utils.h"
 #include "config.h"
+#include "input_utils.h"
+
 #include "gui/win_main.h"
 
 static int Init(void)
@@ -87,7 +89,7 @@ int main( int argc, char * argv[] )
 
     while( !WH_AreAllWindowsClosed() )
     {
-        //Handle all window events
+        //Handle events for all windows
         WH_HandleEvents();
 
         Win_MainLoopHandle();
@@ -97,13 +99,20 @@ int main( int argc, char * argv[] )
 
         //-------------------
 
-        while(waitforticks >= SDL_GetTicks()) SDL_Delay(1);
-
-        int ticksnow = SDL_GetTicks();
-        if(waitforticks < (ticksnow - FLOAT_MS_PER_FRAME)) // if lost a frame or more
-            waitforticks = ticksnow + FLOAT_MS_PER_FRAME;
+        if(Input_Speedup_Enabled())
+        {
+            SDL_Delay(1);
+        }
         else
-            waitforticks += FLOAT_MS_PER_FRAME;
+        {
+            while(waitforticks >= SDL_GetTicks()) SDL_Delay(1);
+
+            int ticksnow = SDL_GetTicks();
+            if(waitforticks < (ticksnow - FLOAT_MS_PER_FRAME)) // if lost a frame or more
+                waitforticks = ticksnow + FLOAT_MS_PER_FRAME;
+            else
+                waitforticks += FLOAT_MS_PER_FRAME;
+        }
     }
 
     return 0;

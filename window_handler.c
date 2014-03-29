@@ -367,7 +367,6 @@ int WH_Create(int width, int height, int texw, int texh, int scale) // returns -
             break;
         }
     }
-    //DU_Log("WH_Init() got index %d\n",WindowHandleIndex);
     if(WindowHandleIndex == -1) return -1;
 
     if(texw == 0) texw = width;

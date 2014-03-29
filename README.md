@@ -18,10 +18,9 @@ Current goals for 0.2.0
 
 - Finish porting the GUI:
  - Configuration window.
- - Speedup button.
  - Readme and about text.
- - Fix error messages not showing when loading roms.
-
+ - Auto frameskip.
+ 
 For 0.3.0
 ---------
 
@@ -30,11 +29,11 @@ For 0.3.0
  - GBA I/O hardware viewer (RTC, sensors...).
  - Export images from new debugger windows.
  - Dump dissasembly/memory to a file and restore it?
- - Auto frameskip.
- - Select filter
- 
+ - Wav recording.
+ - Video recording?
+
 - Customize controls.
- - Support for game controllers.
+ - Add support for game controllers.
 
 - Obviously, improve emulation.
  - Implement mosaic correctly (in GBA mode).

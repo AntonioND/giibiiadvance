@@ -34,6 +34,7 @@
 #include "../build_options.h"
 #include "../general_utils.h"
 #include "../file_utils.h"
+#include "../input_utils.h"
 
 #include "../gb_core/sound.h"
 #include "../gb_core/debug.h"
@@ -130,6 +131,34 @@ static Uint32 _fps_callback_function(Uint32 interval, void *param)
     else
         s_snprintf(caption,sizeof(caption),"GiiBiiAdvance: %d fps - %.2f%%",WinMain_FPS,(float)WinMain_FPS*10.0f/6.0f);
     WH_SetCaption(WinIDMain,caption);
+
+
+    /*
+int FRAMESKIP = 0;
+int AUTO_FRAMESKIP_WAIT = 0;
+
+    if(PAUSED == 0)
+    {
+        if(EmulatorConfig.frameskip == -1)
+        {
+            if(GLWindow_Active)
+            {
+                if(AUTO_FRAMESKIP_WAIT) // this is used because the first seconds of emulation FPS counter doesn't work right
+                {
+                    AUTO_FRAMESKIP_WAIT--;
+                }
+                else
+                {
+                    if(FPS < 58) FRAMESKIP ++;
+                }
+            }
+            else AUTO_FRAMESKIP_WAIT = 2;
+        }
+        else FRAMESKIP = EmulatorConfig.frameskip;
+    }
+}
+    */
+
     return interval;
 }
 
@@ -1236,39 +1265,6 @@ void Win_MainRender(void)
     }
 }
 
-static void GBA_KeyboardGamepadGetInput(void)
-{
-    const Uint8 * state = SDL_GetKeyboardState(NULL);
-
-    int a = state[SDL_SCANCODE_X];
-    int b = state[SDL_SCANCODE_Z];
-    int l = state[SDL_SCANCODE_A];
-    int r = state[SDL_SCANCODE_S];
-    int st = state[SDL_SCANCODE_RETURN];
-    int se = state[SDL_SCANCODE_RSHIFT];
-    int dr = state[SDL_SCANCODE_RIGHT];
-    int dl = state[SDL_SCANCODE_LEFT];
-    int du = state[SDL_SCANCODE_UP];
-    int dd = state[SDL_SCANCODE_DOWN];
-
-    GBA_HandleInput(a, b, l, r, st, se, dr, dl, du, dd);
-}
-
-static void GB_KeyboardGamepadGetInput(void)
-{
-    const Uint8 * state = SDL_GetKeyboardState(NULL);
-
-    int a = state[SDL_SCANCODE_X];
-    int b = state[SDL_SCANCODE_Z];
-    int st = state[SDL_SCANCODE_RETURN];
-    int se = state[SDL_SCANCODE_RSHIFT];
-    int dr = state[SDL_SCANCODE_RIGHT];
-    int dl = state[SDL_SCANCODE_LEFT];
-    int du = state[SDL_SCANCODE_UP];
-    int dd = state[SDL_SCANCODE_DOWN];
-
-    GB_InputSet(0, a, b, st, se, dr, dl, du, dd);
-}
 
 //@global function
 int Win_MainRunningGBA(void)
@@ -1285,16 +1281,25 @@ int Win_MainRunningGB(void)
 //@global function
 void Win_MainLoopHandle(void)
 {
-/*
-    const Uint8 * state = SDL_GetKeyboardState(NULL);
-    int speedup = state[SDL_SCANCODE_SPACE];
+    int speedup = Input_Speedup_Enabled();
+
     if(speedup)
         _win_main_set_frameskip(10);
     else
         _win_main_set_frameskip(EmulatorConfig.frameskip);
-*/
+
     if(WH_HasKeyboardFocus(WinIDMain) && (WIN_MAIN_MENU_ENABLED == 0))
     {
+        //if( GUI_WindowGetEnabled(&mainwindow_configwin) || GUI_WindowGetEnabled(&mainwindow_fileexplorer_win) ||
+        //    GUI_ScrollableTextWindowGetEnabled(&mainwindow_scrollable_text_window) ||
+        //    GUI_MessageBoxGetEnabled(&mainwindow_show_message_win) )
+        if( GUI_MessageBoxGetEnabled(&mainwindow_show_message_win) )
+        {
+            _win_main_switch_to_menu();
+            Sound_Disable();
+            return;
+        }
+
         Sound_Enable();
 
         if(WIN_MAIN_RUNNING == RUNNING_GBA)
@@ -1307,9 +1312,11 @@ void Win_MainLoopHandle(void)
 
             Win_GBADisassemblerStartAddressSetDefault();
 
+            if(speedup) GBA_SoundResetBufferPointers();
+
             GBA_SkipFrame(_win_main_has_to_frameskip());
 
-            GBA_KeyboardGamepadGetInput();
+            Input_Update_GBA();
             GBA_RunForOneFrame();
 
             if(_win_main_has_to_frameskip() == 0)
@@ -1327,9 +1334,11 @@ void Win_MainLoopHandle(void)
                 return;
             }
 
+            if(speedup) GB_SoundResetBufferPointers();
+
             GB_SkipFrame(_win_main_has_to_frameskip());
 
-            GB_KeyboardGamepadGetInput();
+            Input_Update_GB();
             GB_RunForOneFrame();
             if(_win_main_has_to_frameskip() == 0)
                 GB_Screen_WriteBuffer_24RGB(WIN_MAIN_GAME_SCREEN_BUFFER);

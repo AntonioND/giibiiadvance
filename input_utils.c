@@ -16,11 +16,30 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <SDL2/SDL.h>
+
 #include "input_utils.h"
 
-#if 0
-void GB_Input_Update(void)
+#include "gb_core/gb_main.h"
+
+#include "gba_core/gba.h"
+
+void Input_Update_GB(void)
 {
+    const Uint8 * state = SDL_GetKeyboardState(NULL);
+
+    int a = state[SDL_SCANCODE_X];
+    int b = state[SDL_SCANCODE_Z];
+    int st = state[SDL_SCANCODE_RETURN];
+    int se = state[SDL_SCANCODE_RSHIFT];
+    int dr = state[SDL_SCANCODE_RIGHT];
+    int dl = state[SDL_SCANCODE_LEFT];
+    int du = state[SDL_SCANCODE_UP];
+    int dd = state[SDL_SCANCODE_DOWN];
+
+    GB_InputSet(0, a, b, st, se, dr, dl, du, dd);
+
+    /*
     Keys[0] = 0; Keys[1] = 0; Keys[2] = 0; Keys[3] = 0;
 
     if(Keys_Down[VK_LEFT]) Keys[0] |= KEY_LEFT;
@@ -53,10 +72,33 @@ void GB_Input_Update(void)
         GB_Input_Update_MBC7(Keys_Down[VK_NUMPAD8],Keys_Down[VK_NUMPAD2],
                             Keys_Down[VK_NUMPAD6],Keys_Down[VK_NUMPAD4]);
     }
-
+*/
 }
-#endif
 
+void Input_Update_GBA(void)
+{
+    const Uint8 * state = SDL_GetKeyboardState(NULL);
+
+    int a = state[SDL_SCANCODE_X];
+    int b = state[SDL_SCANCODE_Z];
+    int l = state[SDL_SCANCODE_A];
+    int r = state[SDL_SCANCODE_S];
+    int st = state[SDL_SCANCODE_RETURN];
+    int se = state[SDL_SCANCODE_RSHIFT];
+    int dr = state[SDL_SCANCODE_RIGHT];
+    int dl = state[SDL_SCANCODE_LEFT];
+    int du = state[SDL_SCANCODE_UP];
+    int dd = state[SDL_SCANCODE_DOWN];
+
+    GBA_HandleInput(a, b, l, r, st, se, dr, dl, du, dd);
+}
+
+int Input_Speedup_Enabled(void)
+{
+    const Uint8 * state = SDL_GetKeyboardState(NULL);
+
+    return state[SDL_SCANCODE_SPACE];
+}
 
 //void GB_InputSet(int player, int a, int b, int st, int se, int r, int l, int u, int d);
 //void GB_InputSetMBC7Joystick(int x, int y); // -200 to 200

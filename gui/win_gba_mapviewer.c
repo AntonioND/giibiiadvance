@@ -581,10 +581,13 @@ static void _win_gba_mapviewer_dump_btn_callback(void)
 
 int Win_GBAMapViewerCreate(void)
 {
-    if(GBAMapViewerCreated == 1)
-        return 0;
-
     if(Win_MainRunningGBA() == 0) return 0;
+
+    if(GBAMapViewerCreated == 1)
+    {
+        WH_Focus(WinIDGBAMapViewer);
+        return 0;
+    }
 
     GUI_SetLabel(&gba_mapview_bg_label,6,6,10*FONT_WIDTH,FONT_HEIGHT,"Background");
     GUI_SetRadioButton(&gba_mapview_bg0_radbtn,  6,24,15*FONT_WIDTH,18,

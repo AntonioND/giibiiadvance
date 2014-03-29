@@ -253,10 +253,13 @@ static void _win_gb_sprviewer_zoomed_dump_btn_callback(void)
 
 int Win_GBSprViewerCreate(void)
 {
-    if(GBSprViewerCreated == 1)
-        return 0;
-
     if(Win_MainRunningGB() == 0) return 0;
+
+    if(GBSprViewerCreated == 1)
+    {
+        WH_Focus(WinIDGBSprViewer);
+        return 0;
+    }
 
     GUI_SetTextBox(&gb_sprview_textbox,&gb_sprview_con,
                    268,140, 13*FONT_WIDTH,5*FONT_HEIGHT, NULL);

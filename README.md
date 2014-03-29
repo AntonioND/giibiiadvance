@@ -20,6 +20,7 @@ Current goals for 0.2.0
  - Configuration window.
  - Speedup button.
  - Readme and about text.
+ - Fix error messages not showing when loading roms.
 
 For 0.3.0
 ---------

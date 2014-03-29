@@ -371,10 +371,13 @@ static void _win_gb_mem_viewer_goto(void)
 
 int Win_GBMemViewerCreate(void)
 {
-    if(GBMemViewerCreated == 1)
-        return 0;
-
     if(Win_MainRunningGB() == 0) return 0;
+
+    if(GBMemViewerCreated == 1)
+    {
+        WH_Focus(WinIDGBMemViewer);
+        return 0;
+    }
 
     GUI_SetRadioButton(&gb_memview_mode_8_radbtn,   6,6,9*FONT_WIDTH,24,
                   "8 bits",  0,GB_MEMVIEWER_8,  1,_win_gb_mem_viewer_mode_radbtn_callback);

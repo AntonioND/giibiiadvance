@@ -256,10 +256,13 @@ static void _win_gba_tileviewer_dump_btn_callback(void)
 
 int Win_GBATileViewerCreate(void)
 {
-    if(GBATileViewerCreated == 1)
-        return 0;
-
     if(Win_MainRunningGBA() == 0) return 0;
+
+    if(GBATileViewerCreated == 1)
+    {
+        WH_Focus(WinIDGBATileViewer);
+        return 0;
+    }
 
     GUI_SetLabel(&gba_tileview_cbb_label,6,6,20*FONT_WIDTH,FONT_HEIGHT,"Character Base Block");
     GUI_SetRadioButton(&gba_tileview_cbb_06000000_radbtn,  6,24,25*FONT_WIDTH,18,

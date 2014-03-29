@@ -429,10 +429,13 @@ static void _win_gba_mem_viewer_goto(void)
 
 int Win_GBAMemViewerCreate(void)
 {
-    if(GBAMemViewerCreated == 1)
-        return 0;
-
     if(Win_MainRunningGBA() == 0) return 0;
+
+    if(GBAMemViewerCreated == 1)
+    {
+        WH_Focus(WinIDGBAMemViewer);
+        return 0;
+    }
 
     GUI_SetRadioButton(&gba_memview_mode_8_radbtn,   6,6,9*FONT_WIDTH,24,
                   "8 bits",  0,GBA_MEMVIEWER_8,  0,_win_gba_mem_viewer_mode_radiobtn_callback);

@@ -349,7 +349,7 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
         if(e->info.window.enabled == 0)
             return;
 
-        GUI_Draw_SetDrawingColor(GUI_BACKGROUND_GREY,GUI_BACKGROUND_GREY,GUI_BACKGROUND_GREY);
+        GUI_Draw_SetDrawingColor(GUI_WINDOWBAR_GREY,GUI_WINDOWBAR_GREY,GUI_WINDOWBAR_GREY);
         GUI_Draw_FillRect(buffer,w,h,
                           e->x,e->x+e->w-1,
                           e->y,e->y+FONT_HEIGHT+1);
@@ -369,7 +369,7 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
         int text_width = strlen(e->info.window.caption) * FONT_WIDTH;
         int x_off = ( e->w - text_width ) / 2;
 
-        FU_PrintColor(buffer,w,h,e->x+x_off,e->y,GUI_BACKGROUND_GREY_RGBA,e->info.window.caption);
+        FU_PrintColor(buffer,w,h,e->x+x_off,e->y,GUI_WINDOWBAR_GREY_RGBA,e->info.window.caption);
 
         if(e->info.window.gui)
             GUI_Draw(e->info.window.gui,buffer,w,h,0);
@@ -379,7 +379,7 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
         if(e->info.messagebox.enabled == 0)
             return;
 
-        GUI_Draw_SetDrawingColor(GUI_BACKGROUND_GREY,GUI_BACKGROUND_GREY,GUI_BACKGROUND_GREY);
+        GUI_Draw_SetDrawingColor(GUI_WINDOWBAR_GREY,GUI_WINDOWBAR_GREY,GUI_WINDOWBAR_GREY);
         GUI_Draw_FillRect(buffer,w,h,
                           e->x,e->x+e->w-1,
                           e->y,e->y+FONT_HEIGHT+1);
@@ -399,7 +399,7 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
         int text_width = strlen(e->info.messagebox.caption) * FONT_WIDTH;
         int x_off = ( e->w - text_width ) / 2;
 
-        FU_PrintColor(buffer,w,h,e->x+x_off,e->y,GUI_BACKGROUND_GREY_RGBA,e->info.messagebox.caption);
+        FU_PrintColor(buffer,w,h,e->x+x_off,e->y,GUI_WINDOWBAR_GREY_RGBA,e->info.messagebox.caption);
 
         GUI_ConsoleDrawAt(e->info.messagebox.con,
                             buffer,w,h,
@@ -411,7 +411,7 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
         if(e->info.scrollabletextwindow.enabled == 0)
             return;
 
-        GUI_Draw_SetDrawingColor(GUI_BACKGROUND_GREY,GUI_BACKGROUND_GREY,GUI_BACKGROUND_GREY);
+        GUI_Draw_SetDrawingColor(GUI_WINDOWBAR_GREY,GUI_WINDOWBAR_GREY,GUI_WINDOWBAR_GREY);
         GUI_Draw_FillRect(buffer,w,h,
                           e->x,e->x+e->w-1,
                           e->y,e->y+FONT_HEIGHT+1);
@@ -433,7 +433,7 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
 
         int skipspaces = 0;
 
-        FU_PrintColor(buffer,w,h,e->x+x_off,e->y,GUI_BACKGROUND_GREY_RGBA,e->info.scrollabletextwindow.caption);
+        FU_PrintColor(buffer,w,h,e->x+x_off,e->y,GUI_WINDOWBAR_GREY_RGBA,e->info.scrollabletextwindow.caption);
 
         if(e->info.scrollabletextwindow.text)
         {

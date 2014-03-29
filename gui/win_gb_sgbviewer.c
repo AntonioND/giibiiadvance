@@ -940,12 +940,15 @@ static void _win_gb_sgbviewer_pal_dump_btn_callback(void)
 
 int Win_GB_SGBViewerCreate(void)
 {
-    if(GB_SGBViewerCreated == 1)
-        return 0;
-
     if(Win_MainRunningGB() == 0) return 0;
 
     if(GB_EmulatorIsEnabledSGB() == 0) return 0;
+
+    if(GB_SGBViewerCreated == 1)
+    {
+        WH_Focus(WinIDGB_SGBViewer);
+        return 0;
+    }
 
     // Border
 

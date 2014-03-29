@@ -288,10 +288,13 @@ static void _win_gb_palviewer_dump_btn_callback(void)
 
 int Win_GBPalViewerCreate(void)
 {
-    if(GBPalViewerCreated == 1)
-        return 0;
-
     if(Win_MainRunningGB() == 0) return 0;
+
+    if(GBPalViewerCreated == 1)
+    {
+        WH_Focus(WinIDGBPalViewer);
+        return 0;
+    }
 
     GUI_SetLabel(&gb_palview_bgpal_label,32,6,GB_PAL_BUFFER_WIDTH,FONT_HEIGHT,"Background");
     GUI_SetLabel(&gb_palview_sprpal_label,145,6,GB_PAL_BUFFER_WIDTH,FONT_HEIGHT,"Sprites");

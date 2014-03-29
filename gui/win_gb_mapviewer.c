@@ -289,10 +289,13 @@ static void _win_gb_mapviewer_dump_btn_callback(void)
 
 int Win_GBMapViewerCreate(void)
 {
-    if(GBMapViewerCreated == 1)
-        return 0;
-
     if(Win_MainRunningGB() == 0) return 0;
+
+    if(GBMapViewerCreated == 1)
+    {
+        WH_Focus(WinIDGBMapViewer);
+        return 0;
+    }
 
     GUI_SetLabel(&gb_mapview_tilebase_label,6,6,9*FONT_WIDTH,FONT_HEIGHT,"Tile Base");
 

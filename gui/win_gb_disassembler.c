@@ -378,10 +378,13 @@ static void _win_gb_disassembler_goto(void)
 
 int Win_GBDisassemblerCreate(void)
 {
-    if(GBDisassemblerCreated == 1)
-        return 0;
-
     if(Win_MainRunningGB() == 0) return 0;
+
+    if(GBDisassemblerCreated == 1)
+    {
+        WH_Focus(WinIDGBDis);
+        return 0;
+    }
 
     GUI_SetTextBox(&gb_disassembly_textbox,&gb_disassembly_con,
                    6,6, 51*FONT_WIDTH,CPU_DISASSEMBLER_MAX_INSTRUCTIONS*FONT_HEIGHT,

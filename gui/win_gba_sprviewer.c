@@ -370,10 +370,13 @@ static void _win_gba_sprviewer_zoomed_dump_btn_callback(void)
 
 int Win_GBASprViewerCreate(void)
 {
-    if(GBASprViewerCreated == 1)
-        return 0;
-
     if(Win_MainRunningGBA() == 0) return 0;
+
+    if(GBASprViewerCreated == 1)
+    {
+        WH_Focus(WinIDGBASprViewer);
+        return 0;
+    }
 
     GUI_SetTextBox(&gba_sprview_textbox,&gba_sprview_con,
                    668,140, 21*FONT_WIDTH,12*FONT_HEIGHT, NULL);

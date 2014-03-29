@@ -77,7 +77,7 @@ static int WinIDMain = -1;
 static int _win_main_frameskip = 0;
 static int _win_main_frameskipcount = 0;
 
-static void _win_main_set_frameskip(int frameskip)
+void _win_main_set_frameskip(int frameskip)
 {
     if(_win_main_frameskip == frameskip)
         return;
@@ -338,6 +338,29 @@ static void _win_main_unload_rom(int save_data)
     _win_main_switch_to_menu();
 
     WIN_MAIN_MENU_HAS_TO_UPDATE = 1;
+
+    if(EmulatorConfig.auto_close_debugger)
+    {
+        Win_GBDisassemblerClose();
+        Win_GBMemViewerClose();
+        Win_GBIOViewerClose();
+
+        Win_GBTileViewerClose();
+        Win_GBMapViewerClose();
+        Win_GBSprViewerClose();
+        Win_GBPalViewerClose();
+
+        Win_GB_SGBViewerClose();
+
+        Win_GBADisassemblerClose();
+        Win_GBAMemViewerClose();
+        Win_GBAIOViewerClose();
+
+        Win_GBATileViewerClose();
+        Win_GBAMapViewerClose();
+        Win_GBASprViewerClose();
+        Win_GBAPalViewerClose();
+    }
 }
 
 static int _win_main_load_rom_autodetect(char * path)
@@ -642,6 +665,13 @@ static void _win_main_reset(void)
     }
 }
 
+static void _win_main_show_console(void)
+{
+    _win_main_file_explorer_close();
+    Win_MainCloseConfigWindow();
+    ConsoleShow();
+}
+
 static void _win_main_menu_toggle_mute_sound(void)
 {
     Sound_SetEnabled(!Sound_GetEnabled());
@@ -701,6 +731,8 @@ static void _win_main_menu_open_sgb_viewer(void)
     Win_GB_SGBViewerCreate();
 }
 
+
+
 //------------------------------------------------------------------
 
 //Window Menu
@@ -712,7 +744,7 @@ static _gui_menu_entry mmfile_close = {"Close (CTRL+C)" , _win_main_menu_close, 
 static _gui_menu_entry mmfile_closenosav = {"Close without saving", _win_main_menu_close_no_save, 1};
 static _gui_menu_entry mmfile_reset = {"Reset (CTRL+R)", _win_main_reset, 1};
 static _gui_menu_entry mmfile_pause = {"Pause (CTRL+P)", _win_main_menu_toggle_pause, 1};
-static _gui_menu_entry mmfile_rominfo = {"Show Console (Rom Info.)", ConsoleShow, 1};
+static _gui_menu_entry mmfile_rominfo = {"Show Console (Rom Info.)", _win_main_show_console, 1};
 static _gui_menu_entry mmfile_screenshot = {"Screenshot (F12)", _win_main_screenshot, 1};
 static _gui_menu_entry mmfile_exit = {"Exit (CTRL+E)", _win_main_menu_exit, 1};
 

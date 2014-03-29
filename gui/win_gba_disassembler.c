@@ -453,10 +453,13 @@ static void _win_gba_disassembler_goto(void)
 
 int Win_GBADisassemblerCreate(void)
 {
-    if(GBADisassemblerCreated == 1)
-        return 0;
-
     if(Win_MainRunningGBA() == 0) return 0;
+
+    if(GBADisassemblerCreated == 1)
+    {
+        WH_Focus(WinIDGBADis);
+        return 0;
+    }
 
     GUI_SetTextBox(&gba_disassembly_textbox,&gba_disassembly_con,
                    6,6, 66*FONT_WIDTH,CPU_DISASSEMBLER_MAX_INSTRUCTIONS*FONT_HEIGHT,

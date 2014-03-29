@@ -321,10 +321,13 @@ static int _win_gb_io_viewer_callback(SDL_Event * e)
 
 int Win_GBIOViewerCreate(void)
 {
-    if(GBIOViewerCreated == 1)
-        return 0;
-
     if(Win_MainRunningGB() == 0) return 0;
+
+    if(GBIOViewerCreated == 1)
+    {
+        WH_Focus(WinIDGBIOViewer);
+        return 0;
+    }
 
     GUI_SetLabel(&gb_ioview_screen_label,
                    6,6, 13*FONT_WIDTH+2,FONT_HEIGHT, "Screen");

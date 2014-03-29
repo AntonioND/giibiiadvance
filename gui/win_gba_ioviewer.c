@@ -969,10 +969,13 @@ static int _win_gba_io_viewer_callback(SDL_Event * e)
 
 int Win_GBAIOViewerCreate(void)
 {
-    if(GBAIOViewerCreated == 1)
-        return 0;
-
     if(Win_MainRunningGBA() == 0) return 0;
+
+    if(GBAIOViewerCreated == 1)
+    {
+        WH_Focus(WinIDGBAIOViewer);
+        return 0;
+    }
 
     gba_ioview_selected_tab = 0;
 

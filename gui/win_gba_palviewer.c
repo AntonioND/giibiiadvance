@@ -288,10 +288,13 @@ static void _win_gba_palviewer_dump_btn_callback(void)
 
 int Win_GBAPalViewerCreate(void)
 {
-    if(GBAPalViewerCreated == 1)
-        return 0;
-
     if(Win_MainRunningGBA() == 0) return 0;
+
+    if(GBAPalViewerCreated == 1)
+    {
+        WH_Focus(WinIDGBAPalViewer);
+        return 0;
+    }
 
     GUI_SetLabel(&gba_palview_bgpal_label,6,6,GBA_PAL_BUFFER_SIDE,FONT_HEIGHT,"Background");
     GUI_SetLabel(&gba_palview_sprpal_label,188,6,GBA_PAL_BUFFER_SIDE,FONT_HEIGHT,"Sprites");

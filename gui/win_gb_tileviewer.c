@@ -301,10 +301,13 @@ static void _win_gb_tileviewer_dump_btn_callback(void)
 
 int Win_GBTileViewerCreate(void)
 {
-    if(GBTileViewerCreated == 1)
-        return 0;
-
     if(Win_MainRunningGB() == 0) return 0;
+
+    if(GBTileViewerCreated == 1)
+    {
+        WH_Focus(WinIDGBTileViewer);
+        return 0;
+    }
 
     GUI_SetLabel(&gb_tileview_bank0_label,117,6,GB_TILE_BUFFER_WIDTH,FONT_HEIGHT,"Bank 0");
     GUI_SetLabel(&gb_tileview_bank1_label,251,6,GB_TILE_BUFFER_WIDTH,FONT_HEIGHT,"Bank 1");

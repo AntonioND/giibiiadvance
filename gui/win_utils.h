@@ -50,16 +50,17 @@ void GUI_ConsoleDrawAt(_gui_console * con, char * buffer, int buf_w, int buf_h, 
 
 //----------------------------------------------------------------------------------------------
 
-#define GUI_TYPE_NONE                 0
-#define GUI_TYPE_TEXTBOX              1
-#define GUI_TYPE_BUTTON               2
-#define GUI_TYPE_RADIOBUTTON          3
-#define GUI_TYPE_LABEL                4
-#define GUI_TYPE_BITMAP               5
-#define GUI_TYPE_WINDOW               6
-#define GUI_TYPE_MESSAGEBOX           7
-#define GUI_TYPE_SCROLLABLETEXTWINDOW 8
-#define GUI_TYPE_SCROLLBAR            9
+#define GUI_TYPE_NONE                  0
+#define GUI_TYPE_TEXTBOX               1
+#define GUI_TYPE_BUTTON                2
+#define GUI_TYPE_RADIOBUTTON           3
+#define GUI_TYPE_LABEL                 4
+#define GUI_TYPE_BITMAP                5
+#define GUI_TYPE_WINDOW                6
+#define GUI_TYPE_MESSAGEBOX            7
+#define GUI_TYPE_SCROLLABLETEXTWINDOW  8
+#define GUI_TYPE_SCROLLBAR             9
+#define GUI_TYPE_GROUPBOX             10
 
 typedef void (*_gui_void_arg_void_fn)(void);
 typedef void (*_gui_void_arg_int_fn)(int);
@@ -120,6 +121,9 @@ typedef struct {
             int value_max;
             _gui_void_arg_int_fn callback; //arg -> newvalue
         } scrollbar;
+        struct {
+            char label[100];
+        } groupbox;
     } info ;
 } _gui_element;
 
@@ -148,6 +152,8 @@ void GUI_SetScrollableTextWindow(_gui_element * e, int x, int y, int w, int h, c
 
 void GUI_SetScrollBar(_gui_element * e, int x, int y, int w, int h, int min_value, int max_value,
                       int start_value, _gui_void_arg_int_fn callback);
+
+void GUI_SetGroupBox(_gui_element * e, int x, int y, int w, int h, const char * label);
 
 //----------------------------------------------------------------------------------------------
 

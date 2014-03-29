@@ -49,7 +49,7 @@ t_config EmulatorConfig = { //Default options...
     0, //enableblur
     0, //realcolors
 
-    //gb palette is not saved here, it is saved in gb_main.c
+    //gb palette is not stored here, it is stored in gb_main.c
     //key config not here, either...
     };
 /*

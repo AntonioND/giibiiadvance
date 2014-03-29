@@ -361,7 +361,7 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
         GUI_Draw_HorizontalLine(buffer,w,h, e->x-1,e->x+e->w-1+1,
                                   e->y+FONT_HEIGHT+1);
 
-        GUI_Draw_SetDrawingColor(255, 255,255);
+        GUI_Draw_SetDrawingColor(GUI_BACKGROUND_GREY,GUI_BACKGROUND_GREY,GUI_BACKGROUND_GREY);
         GUI_Draw_FillRect(buffer,w,h,
                           e->x,e->x+e->w-1,
                           e->y+FONT_HEIGHT+2,e->y+e->h-1);
@@ -661,6 +661,16 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
             GUI_Draw_Rect(buffer,w,h,
                               e->x+e->h+position+2, e->x+e->h+position+2*e->h-2, e->y+1, e->y+e->h-2); // scroll
         }
+    }
+    else if(e->element_type == GUI_TYPE_GROUPBOX)
+    {
+        GUI_Draw_SetDrawingColor(GUI_BACKGROUND_GREY/2,GUI_BACKGROUND_GREY/2,GUI_BACKGROUND_GREY/2);
+
+        GUI_Draw_Rect(buffer,w,h,
+                          e->x,e->x+e->w-1,
+                          e->y+FONT_HEIGHT/2-1,e->y+e->h-1);
+
+        FU_PrintColor(buffer,w,h,e->x+6,e->y,GUI_BACKGROUND_GREY_RGBA,e->info.groupbox.label);
     }
 }
 

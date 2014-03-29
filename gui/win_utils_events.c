@@ -315,6 +315,11 @@ int __gui_send_event_element(_gui_element ** complete_gui, _gui_element * gui, S
             gui->info.radiobutton.is_pressed = 0;
         }
     }
+    else if(gui->element_type == GUI_TYPE_LABEL)
+    {
+        //nothing
+        return 0;
+    }
     else if(gui->element_type == GUI_TYPE_BITMAP)
     {
         if(e->type == SDL_MOUSEBUTTONDOWN)
@@ -337,8 +342,12 @@ int __gui_send_event_element(_gui_element ** complete_gui, _gui_element * gui, S
         if(gui->info.window.enabled == 0)
             return 0;
 
-        _gui * relative_gui = gui->info.window.gui;
-        return GUI_SendEvent(relative_gui,e);
+        if(_gui_pos_is_inside_rect(e->button.x,e->button.y, gui->x,gui->w, gui->y,gui->h))
+        {
+            _gui * relative_gui = gui->info.window.gui;
+            return GUI_SendEvent(relative_gui,e);
+        }
+        return 0;
     }
     else if(gui->element_type == GUI_TYPE_MESSAGEBOX)
     {
@@ -644,6 +653,11 @@ int __gui_send_event_element(_gui_element ** complete_gui, _gui_element * gui, S
                 }
             }
         }
+    }
+    else if(gui->element_type == GUI_TYPE_GROUPBOX)
+    {
+        //nothing
+        return 0;
     }
 
     return 0;

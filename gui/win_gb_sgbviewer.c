@@ -46,8 +46,8 @@ extern _GB_CONTEXT_ GameBoy;
 
 static int WinIDGB_SGBViewer;
 
-#define WIN_GB_SGBVIEWER_WIDTH  602
-#define WIN_GB_SGBVIEWER_HEIGHT 496
+#define WIN_GB_SGBVIEWER_WIDTH  617
+#define WIN_GB_SGBVIEWER_HEIGHT 503
 
 static int GB_SGBViewerCreated = 0;
 
@@ -76,11 +76,11 @@ static int gb_sgb_pal_selected_color;
 
 static _gui_console gb_sgbview_border_con;
 static _gui_element gb_sgbview_border_textbox;
-static _gui_element gb_sgbview_border_label;
+static _gui_element gb_sgbview_border_groupbox;
 static _gui_element gb_sgbview_border_bmp, gb_sgbview_border_zoomed_tile_bmp;
 static _gui_element gb_sgbview_border_dump_btn;
 
-static _gui_element gb_sgbview_tiles_label;
+static _gui_element gb_sgbview_tiles_groupbox;
 static _gui_element gb_sgbview_tiles_bmp;
 static _gui_element gb_sgbview_tiles_select_pal_scrollbar;
 static _gui_console gb_sgbview_tiles_con;
@@ -88,14 +88,14 @@ static _gui_element gb_sgbview_tiles_textbox;
 static _gui_element gb_sgbview_tiles_zoomed_tile_bmp;
 static _gui_element gb_sgbview_tiles_dump_btn;
 
-static _gui_element gb_sgbview_atf_label;
+static _gui_element gb_sgbview_atf_groupbox;
 static _gui_element gb_sgbview_atf_bmp;
 static _gui_console gb_sgbview_atf_con;
 static _gui_element gb_sgbview_atf_textbox;
 static _gui_element gb_sgbview_atf_select_scrollbar;
 static _gui_element gb_sgbview_atf_dump_btn;
 
-static _gui_element gb_sgbview_pal_label;
+static _gui_element gb_sgbview_pal_groupbox;
 static _gui_element gb_sgbview_pal_bmp;
 static _gui_console gb_sgbview_pal_con;
 static _gui_element gb_sgbview_pal_textbox;
@@ -110,26 +110,26 @@ static _gui_console gb_sgbview_otherinfo_con;
 static _gui_element gb_sgbview_otherinfo_textbox;
 
 static _gui_element * gb_sgbviwer_window_gui_elements[] = {
-    &gb_sgbview_border_label,
+    &gb_sgbview_border_groupbox,
     &gb_sgbview_border_textbox,
     &gb_sgbview_border_bmp,
     &gb_sgbview_border_zoomed_tile_bmp,
     &gb_sgbview_border_dump_btn,
 
-    &gb_sgbview_tiles_label,
+    &gb_sgbview_tiles_groupbox,
     &gb_sgbview_tiles_bmp,
     &gb_sgbview_tiles_select_pal_scrollbar,
     &gb_sgbview_tiles_textbox,
     &gb_sgbview_tiles_zoomed_tile_bmp,
     &gb_sgbview_tiles_dump_btn,
 
-    &gb_sgbview_atf_label,
+    &gb_sgbview_atf_groupbox,
     &gb_sgbview_atf_bmp,
     &gb_sgbview_atf_textbox,
     &gb_sgbview_atf_select_scrollbar,
     &gb_sgbview_atf_dump_btn,
 
-    &gb_sgbview_pal_label,
+    &gb_sgbview_pal_groupbox,
     &gb_sgbview_pal_bmp,
     &gb_sgbview_pal_textbox,
     &gb_sgbview_pal_dump_btn,
@@ -935,6 +935,7 @@ static void _win_gb_sgbviewer_pal_dump_btn_callback(void)
 
     Win_GB_SGBViewerUpdate();
 }
+
 //----------------------------------------------------------------
 
 int Win_GB_SGBViewerCreate(void)
@@ -948,16 +949,16 @@ int Win_GB_SGBViewerCreate(void)
 
     // Border
 
-    GUI_SetLabel(&gb_sgbview_border_label,6,6,6*FONT_WIDTH,FONT_HEIGHT,"Border");
+    GUI_SetGroupBox(&gb_sgbview_border_groupbox,6,6,268,350,"Border");
 
     GUI_SetTextBox(&gb_sgbview_border_textbox,&gb_sgbview_border_con,
-                   76,286, 11*FONT_WIDTH,4*FONT_HEIGHT, NULL);
+                   82,286, 11*FONT_WIDTH,4*FONT_HEIGHT, NULL);
 
-    GUI_SetBitmap(&gb_sgbview_border_bmp, 6,24, 256,256 ,gb_sgb_border_buffer, _win_gb_sgbviewer_border_bmp_callback);
+    GUI_SetBitmap(&gb_sgbview_border_bmp, 12,24, 256,256 ,gb_sgb_border_buffer, _win_gb_sgbviewer_border_bmp_callback);
 
-    GUI_SetBitmap(&gb_sgbview_border_zoomed_tile_bmp, 6,286, 64,64,gb_sgb_border_zoomed_tile_buffer, NULL);
+    GUI_SetBitmap(&gb_sgbview_border_zoomed_tile_bmp, 12,286, 64,64,gb_sgb_border_zoomed_tile_buffer, NULL);
 
-    GUI_SetButton(&gb_sgbview_border_dump_btn,159,286,FONT_WIDTH*14,FONT_HEIGHT*2,"Dump border",
+    GUI_SetButton(&gb_sgbview_border_dump_btn,165,286,FONT_WIDTH*8,FONT_HEIGHT*2,"Dump",
                   _win_gb_sgbviewer_border_dump_btn_callback);
 
     gb_sgb_border_tilex = 0;
@@ -965,24 +966,24 @@ int Win_GB_SGBViewerCreate(void)
 
     // Tiles
 
-    GUI_SetLabel(&gb_sgbview_tiles_label,274,6,5*FONT_WIDTH,FONT_HEIGHT,"Tiles");
+    GUI_SetGroupBox(&gb_sgbview_tiles_groupbox,280,6,271,152,"Tiles");
 
-    GUI_SetBitmap(&gb_sgbview_tiles_bmp, 274,24, 128,128,gb_sgb_tiles_buffer,
+    GUI_SetBitmap(&gb_sgbview_tiles_bmp, 286,24, 128,128,gb_sgb_tiles_buffer,
                   _win_gb_sgbviewer_tiles_bmp_callback);
 
-    GUI_SetBitmap(&gb_sgbview_tiles_bmp, 274,24, 128,128,gb_sgb_tiles_buffer,
+    GUI_SetBitmap(&gb_sgbview_tiles_bmp, 286,24, 128,128,gb_sgb_tiles_buffer,
                   _win_gb_sgbviewer_tiles_bmp_callback);
-
-    GUI_SetScrollBar(&gb_sgbview_tiles_select_pal_scrollbar, 408,24, 64, 12,
-                     4,7, 4,  _win_gb_sgbviewer_tiles_select_pal_scrollbar_callback);
 
     GUI_SetTextBox(&gb_sgbview_tiles_textbox,&gb_sgbview_tiles_con,
-                   408,42,9*FONT_WIDTH,2*FONT_HEIGHT, NULL);
+                   420,24,9*FONT_WIDTH,2*FONT_HEIGHT, NULL);
 
-    GUI_SetBitmap(&gb_sgbview_tiles_zoomed_tile_bmp, 408,88, 64,64,gb_sgb_tiles_zoomed_tile_buffer,
+    GUI_SetScrollBar(&gb_sgbview_tiles_select_pal_scrollbar, 420,54, 64, 12,
+                     4,7, 4,  _win_gb_sgbviewer_tiles_select_pal_scrollbar_callback);
+
+    GUI_SetBitmap(&gb_sgbview_tiles_zoomed_tile_bmp, 420,88, 64,64,gb_sgb_tiles_zoomed_tile_buffer,
                   NULL);
 
-    GUI_SetButton(&gb_sgbview_tiles_dump_btn,159,316,FONT_WIDTH*14,FONT_HEIGHT*2,"Dump tiles",
+    GUI_SetButton(&gb_sgbview_tiles_dump_btn,489,24,FONT_WIDTH*8,FONT_HEIGHT*2,"Dump",
                   _win_gb_sgbviewer_tiles_dump_btn_callback);
 
     gb_sgb_tiles_selected_index = 0;
@@ -990,18 +991,18 @@ int Win_GB_SGBViewerCreate(void)
 
     // Attribute Files (ATFs)
 
-    GUI_SetLabel(&gb_sgbview_atf_label,274,164,22*FONT_WIDTH,FONT_HEIGHT,"Attribute Files (ATFs)");
+    GUI_SetGroupBox(&gb_sgbview_atf_groupbox,280,164,239,181,"Attribute Files (ATFs)");
 
-    GUI_SetBitmap(&gb_sgbview_atf_bmp, 274,182, 160+1,144+1,gb_sgb_atf_buffer,
+    GUI_SetBitmap(&gb_sgbview_atf_bmp, 286,182, 160+1,144+1,gb_sgb_atf_buffer,
                   _win_gb_sgbviewer_atf_bmp_callback);
 
-    GUI_SetScrollBar(&gb_sgbview_atf_select_scrollbar, 274,327, 160+1, 12,
+    GUI_SetScrollBar(&gb_sgbview_atf_select_scrollbar, 286,327, 160+1, 12,
                      0,0x2D-1, 0,  _win_gb_sgbviewer_atf_select_scrollbar_callback);
 
     GUI_SetTextBox(&gb_sgbview_atf_textbox,&gb_sgbview_atf_con,
-                   441,182,8*FONT_WIDTH,5*FONT_HEIGHT, NULL);
+                   457,182,8*FONT_WIDTH,5*FONT_HEIGHT, NULL);
 
-    GUI_SetButton(&gb_sgbview_atf_dump_btn,441,248,FONT_WIDTH*8,FONT_HEIGHT*2,"Dump",
+    GUI_SetButton(&gb_sgbview_atf_dump_btn,457,248,FONT_WIDTH*8,FONT_HEIGHT*2,"Dump",
                   _win_gb_sgbviewer_atf_dump_btn_callback);
 
     gb_sgb_atf_selected_index = 0;
@@ -1010,15 +1011,15 @@ int Win_GB_SGBViewerCreate(void)
 
     // Palettes
 
-    GUI_SetLabel(&gb_sgbview_pal_label,6,362,8*FONT_WIDTH,FONT_HEIGHT,"Palettes");
+    GUI_SetGroupBox(&gb_sgbview_pal_groupbox,6,362,172,135,"Palettes");
 
-    GUI_SetBitmap(&gb_sgbview_pal_bmp, 6,380, 160,80,gb_sgb_pal_buffer,
+    GUI_SetBitmap(&gb_sgbview_pal_bmp, 12,380, 160,80,gb_sgb_pal_buffer,
                   _win_gb_sgbviewer_pal_bmp_callback);
 
     GUI_SetTextBox(&gb_sgbview_pal_textbox,&gb_sgbview_pal_con,
-                   6,466,14*FONT_WIDTH,2*FONT_HEIGHT, NULL);
+                   12,466,14*FONT_WIDTH,2*FONT_HEIGHT, NULL);
 
-    GUI_SetButton(&gb_sgbview_pal_dump_btn,110,466,FONT_WIDTH*8,FONT_HEIGHT*2,"Dump",
+    GUI_SetButton(&gb_sgbview_pal_dump_btn,116,466,FONT_WIDTH*8,FONT_HEIGHT*2,"Dump",
                   _win_gb_sgbviewer_pal_dump_btn_callback);
 
     gb_sgb_pal_selected_pal = 0;
@@ -1026,17 +1027,17 @@ int Win_GB_SGBViewerCreate(void)
 
     // Packet data
 
-    GUI_SetLabel(&gb_sgbview_packet_label,178,362,11*FONT_WIDTH,FONT_HEIGHT,"Packet data");
+    GUI_SetLabel(&gb_sgbview_packet_label,184,362,11*FONT_WIDTH,FONT_HEIGHT,"Packet data");
 
     GUI_SetTextBox(&gb_sgbview_packet_textbox,&gb_sgbview_packet_con,
-                   178,380,45*FONT_WIDTH,9*FONT_HEIGHT, NULL);
+                   184,380,44*FONT_WIDTH,9*FONT_HEIGHT, NULL);
 
     // Other info
 
-    GUI_SetLabel(&gb_sgbview_otherinfo_label,484,6,11*FONT_WIDTH,FONT_HEIGHT,"Other info.");
+    GUI_SetLabel(&gb_sgbview_otherinfo_label,498,362,11*FONT_WIDTH,FONT_HEIGHT,"Other info.");
 
     GUI_SetTextBox(&gb_sgbview_otherinfo_textbox,&gb_sgbview_otherinfo_con,
-                   484,24,16*FONT_WIDTH,8*FONT_HEIGHT, NULL);
+                   498,380,16*FONT_WIDTH,8*FONT_HEIGHT, NULL);
 
     //---------------
 

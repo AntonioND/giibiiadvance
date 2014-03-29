@@ -23,6 +23,7 @@
 
 #include "win_main.h"
 #include "win_utils.h"
+#include "win_main_config.h"
 
 #include "../config.h"
 #include "../file_explorer.h"
@@ -169,28 +170,21 @@ static int WIN_MAIN_SCREEN_TYPE;
 static int WIN_MAIN_MENU_ENABLED = 0;
 static int WIN_MAIN_MENU_HAS_TO_UPDATE = 0;
 static char WIN_MAIN_GAME_MENU_BUFFER[256*CONFIG_ZOOM_MAX * 224*CONFIG_ZOOM_MAX * 4];
-
 static char WIN_MAIN_GAME_SCREEN_BUFFER[256*224*3]; // max possible size = SGB
 
 static int _win_main_get_game_screen_texture_width(void)
 {
-    if(WIN_MAIN_SCREEN_TYPE == SCREEN_GB)
-        return 160;
-    else if(WIN_MAIN_SCREEN_TYPE == SCREEN_SGB)
-        return 256;
-    else if(WIN_MAIN_SCREEN_TYPE == SCREEN_GBA)
-        return 240;
+    if(WIN_MAIN_SCREEN_TYPE == SCREEN_GB) return 160;
+    else if(WIN_MAIN_SCREEN_TYPE == SCREEN_SGB) return 256;
+    else if(WIN_MAIN_SCREEN_TYPE == SCREEN_GBA) return 240;
     return 0;
 }
 
 static int _win_main_get_game_screen_texture_height(void)
 {
-    if(WIN_MAIN_SCREEN_TYPE == SCREEN_GB)
-        return 144;
-    else if(WIN_MAIN_SCREEN_TYPE == SCREEN_SGB)
-        return 224;
-    else if(WIN_MAIN_SCREEN_TYPE == SCREEN_GBA)
-        return 160;
+    if(WIN_MAIN_SCREEN_TYPE == SCREEN_GB) return 144;
+    else if(WIN_MAIN_SCREEN_TYPE == SCREEN_SGB) return 224;
+    else if(WIN_MAIN_SCREEN_TYPE == SCREEN_GBA) return 160;
     return 0;
 }
 
@@ -436,6 +430,7 @@ static _gui_element mainwindow_scrollable_text_window;
 static void _win_main_scrollable_text_window_show_about(void)
 {
     _win_main_file_explorer_close();
+    Win_MainCloseConfigWindow();
 
     extern const char * about_text;
     GUI_SetScrollableTextWindow(&mainwindow_scrollable_text_window,25,25,
@@ -447,6 +442,7 @@ static void _win_main_scrollable_text_window_show_about(void)
 static void _win_main_scrollable_text_window_show_license(void)
 {
     _win_main_file_explorer_close();
+    Win_MainCloseConfigWindow();
 
     extern const char * license_text;
     GUI_SetScrollableTextWindow(&mainwindow_scrollable_text_window,25,25,
@@ -458,6 +454,7 @@ static void _win_main_scrollable_text_window_show_license(void)
 static void _win_main_scrollable_text_window_show_readme(void)
 {
     _win_main_file_explorer_close();
+    Win_MainCloseConfigWindow();
 
     extern const char * readme_text;
     GUI_SetScrollableTextWindow(&mainwindow_scrollable_text_window,25,25,
@@ -486,16 +483,11 @@ static _gui_console win_main_fileexpoler_con;
 static _gui_element win_main_fileexpoler_textbox, win_main_fileexpoler_up_btn, win_main_fileexpoler_cancel_btn;
 
 static _gui_element * mainwindow_subwindow_fileexplorer_elements[] = {
-    &win_main_fileexpoler_textbox,
-    &win_main_fileexpoler_up_btn,
-    &win_main_fileexpoler_cancel_btn,
-    NULL
+    &win_main_fileexpoler_textbox, &win_main_fileexpoler_up_btn, &win_main_fileexpoler_cancel_btn, NULL
 };
 
 static _gui mainwindow_subwindow_fileexplorer_gui = {
-    mainwindow_subwindow_fileexplorer_elements,
-    NULL,
-    NULL
+    mainwindow_subwindow_fileexplorer_elements, NULL, NULL
 };
 
 static int _win_main_file_explorer_windows_selection = 0;
@@ -581,6 +573,9 @@ static void _win_main_file_explorer_create(void)
                   "Up",_win_main_file_explorer_up);
     GUI_SetButton(&win_main_fileexpoler_cancel_btn,399,353,FONT_WIDTH*8,24,
                   "Cancel",_win_main_file_explorer_close);
+
+    GUI_SetWindow(&mainwindow_fileexplorer_win,25,25,256*2-50,224*2-50,&mainwindow_subwindow_fileexplorer_gui,
+                  "File Explorer");
 }
 
 //------------------------------------------------------------------
@@ -590,6 +585,7 @@ static void _win_main_file_explorer_create(void)
 static void _win_main_file_explorer_load(void)
 {
     _win_main_scrollable_text_window_close();
+    Win_MainCloseConfigWindow();
 
     GUI_WindowSetEnabled(&mainwindow_fileexplorer_win,1);
     FileExplorer_SetPath(DirGetRunningPath());
@@ -610,10 +606,8 @@ static void _win_main_menu_close_no_save(void)
 
 static void _win_main_screenshot(void)
 {
-    if(Win_MainRunningGBA())
-        GBA_Screenshot();
-    if(Win_MainRunningGB())
-        GB_Screenshot();
+    if(Win_MainRunningGBA()) GBA_Screenshot();
+    if(Win_MainRunningGB()) GB_Screenshot();
 }
 
 static void _win_main_menu_exit(void)
@@ -625,10 +619,8 @@ static void _win_main_menu_exit(void)
 
 static void _win_main_menu_toggle_pause(void)
 {
-    if(WIN_MAIN_MENU_ENABLED)
-        _win_main_switch_to_game();
-    else
-        _win_main_switch_to_menu();
+    if(WIN_MAIN_MENU_ENABLED) _win_main_switch_to_game();
+    else _win_main_switch_to_menu();
 
     WIN_MAIN_MENU_HAS_TO_UPDATE = 1;
 }
@@ -653,6 +645,13 @@ static void _win_main_reset(void)
 static void _win_main_menu_toggle_mute_sound(void)
 {
     Sound_SetEnabled(!Sound_GetEnabled());
+}
+
+static void _win_main_menu_open_configuration_window(void)
+{
+    _win_main_file_explorer_close();
+    _win_main_scrollable_text_window_close();
+    Win_MainOpenConfigWindow();
 }
 
 static void _win_main_menu_open_disassembler(void)
@@ -718,40 +717,24 @@ static _gui_menu_entry mmfile_screenshot = {"Screenshot (F12)", _win_main_screen
 static _gui_menu_entry mmfile_exit = {"Exit (CTRL+E)", _win_main_menu_exit, 1};
 
 static _gui_menu_entry * mmfile_elements[] = {
-    &mmfile_open,
-    &mmfile_close,
-    &mmfile_closenosav,
-    &mm_separator,
-    &mmfile_reset,
-    &mmfile_pause,
-    &mm_separator,
-    &mmfile_rominfo,
-    &mmfile_screenshot,
-    &mm_separator,
-    &mmfile_exit,
-    NULL
+    &mmfile_open, &mmfile_close, &mmfile_closenosav, &mm_separator, &mmfile_reset, &mmfile_pause,
+    &mm_separator, &mmfile_rominfo, &mmfile_screenshot, &mm_separator, &mmfile_exit, NULL
 };
 
 static _gui_menu_list main_menu_file = {
-    "File",
-    mmfile_elements,
+    "File", mmfile_elements,
 };
 
-static _gui_menu_entry mmoptions_configuration = {"Configuration" , NULL, 1};
+static _gui_menu_entry mmoptions_configuration = {"Configuration" , _win_main_menu_open_configuration_window, 1};
 static _gui_menu_entry mmoptions_mutesound = {"Mute Sound (CTRL+M)" , _win_main_menu_toggle_mute_sound, 1};
 static _gui_menu_entry mmoptions_sysinfo = {"System Information" , SysInfoShow, 1};
 
 static _gui_menu_entry * mmoptions_elements[] = {
-    &mmoptions_configuration,
-    &mmoptions_mutesound,
-    &mm_separator,
-    &mmoptions_sysinfo,
-    NULL
+    &mmoptions_configuration, &mmoptions_mutesound, &mm_separator, &mmoptions_sysinfo, NULL
 };
 
 static _gui_menu_list main_menu_options = {
-    "Options",
-    mmoptions_elements,
+    "Options", mmoptions_elements,
 };
 
 static _gui_menu_entry mmdebug_disas = {"Disassembler (F5)" , _win_main_menu_open_disassembler, 1};
@@ -766,22 +749,12 @@ static _gui_menu_entry mmdebug_palview = {"Palette Viewer" , _win_main_menu_open
 static _gui_menu_entry mmdebug_sgbview = {"SGB Viewer" , _win_main_menu_open_sgb_viewer, 1};
 
 static _gui_menu_entry * mmdisas_elements[] = {
-    &mmdebug_disas,
-    &mmdebug_memview,
-    &mmdebug_ioview,
-    &mm_separator,
-    &mmdebug_tileview,
-    &mmdebug_mapview,
-    &mmdebug_sprview,
-    &mmdebug_palview,
-    &mm_separator,
-    &mmdebug_sgbview,
-    NULL
+    &mmdebug_disas, &mmdebug_memview, &mmdebug_ioview, &mm_separator, &mmdebug_tileview, &mmdebug_mapview,
+    &mmdebug_sprview, &mmdebug_palview, &mm_separator, &mmdebug_sgbview, NULL
 };
 
 static _gui_menu_list main_menu_debug = {
-    "Debug",
-    mmdisas_elements,
+    "Debug", mmdisas_elements,
 };
 
 static _gui_menu_entry mmhelp_readme = {"Readme (F1)" , _win_main_scrollable_text_window_show_readme, 1};
@@ -789,29 +762,19 @@ static _gui_menu_entry mmhelp_license = {"License" , _win_main_scrollable_text_w
 static _gui_menu_entry mmhelp_about = {"About" , _win_main_scrollable_text_window_show_about, 1};
 
 static _gui_menu_entry * mmhelp_elements[] = {
-    &mmhelp_readme,
-    &mmhelp_license,
-    &mm_separator,
-    &mmhelp_about,
-    NULL
+    &mmhelp_readme, &mmhelp_license, &mm_separator, &mmhelp_about, NULL
 };
 
 static _gui_menu_list main_menu_help = {
-    "Help",
-    mmhelp_elements,
+    "Help", mmhelp_elements,
 };
 
 static _gui_menu_list * mmenu_lists[] = {
-    &main_menu_file,
-    &main_menu_options,
-    &main_menu_debug,
-    &main_menu_help,
-    NULL
+    &main_menu_file, &main_menu_options, &main_menu_debug, &main_menu_help, NULL
 };
 
 static _gui_menu main_menu = {
-    -1,
-    mmenu_lists
+    -1, mmenu_lists
 };
 
 //------------------------------------------------------------------
@@ -876,35 +839,16 @@ static void _win_main_menu_update_elements_enabled(void)
 
 //------------------------------------------------------------------
 
-// CONFIGURATION WINDOW
-/*
-static _gui_element mainwindow_subwindow_btn, mainwindow_subwindow_btn2;
-
-static _gui_element * mainwindow_subwindow_config_gui_elements[] = {
-    &mainwindow_subwindow_btn,
-    &mainwindow_subwindow_btn2,
-    NULL
-};
-
-static _gui mainwindow_subwindow_config_gui = {
-    mainwindow_subwindow_config_gui_elements,
-    NULL,
-    NULL
-};
-*/
-//------------------------------------------------------------------
-
 //MAIN WINDOW GUI
 
 static _gui_console mainwindow_show_message_con;
 static _gui_element mainwindow_show_message_win;
 
 static _gui_element mainwindow_bg;
-static _gui_element mainwindow_configwin;
 
 static _gui_element * mainwindow_gui_elements[] = {
     &mainwindow_bg,
-    &mainwindow_configwin,
+    &mainwindow_configwin, // in win_main_config.c
     &mainwindow_fileexplorer_win,
     &mainwindow_scrollable_text_window,
     &mainwindow_show_message_win, // least priority = always drawn
@@ -916,11 +860,6 @@ static _gui mainwindow_window_gui = {
     NULL,
     &main_menu
 };
-
-void mainbtncallback_openwin(void)
-{
-    GUI_WindowSetEnabled(&mainwindow_configwin,1);
-}
 
 //------------------------------------------------------------------
 
@@ -1033,7 +972,6 @@ static int Win_MainEventCallback(SDL_Event * e)
             case SDLK_F1:
                 _win_main_scrollable_text_window_show_readme();
                 break;
-
             case SDLK_F5:
                 _win_main_menu_open_disassembler();
                 break;
@@ -1043,7 +981,6 @@ static int Win_MainEventCallback(SDL_Event * e)
             case SDLK_F7:
                 _win_main_menu_open_io_viewer();
                 break;
-
             case SDLK_F12:
                 _win_main_screenshot();
                 break;
@@ -1075,19 +1012,11 @@ static int Win_MainEventCallback(SDL_Event * e)
                 break;
 
             case SDLK_p:
-                if(SDL_GetModState()&KMOD_CTRL)
-                {
-                    _win_main_menu_toggle_pause();
-                }
+                if(SDL_GetModState()&KMOD_CTRL) _win_main_menu_toggle_pause();
                 break;
-
             case SDLK_m:
-                if(SDL_GetModState()&KMOD_CTRL)
-                {
-                    _win_main_menu_toggle_mute_sound();
-                }
+                if(SDL_GetModState()&KMOD_CTRL) _win_main_menu_toggle_mute_sound();
                 break;
-
             case SDLK_l:
                 if(SDL_GetModState()&KMOD_CTRL)
                 {
@@ -1099,26 +1028,14 @@ static int Win_MainEventCallback(SDL_Event * e)
                     WIN_MAIN_MENU_HAS_TO_UPDATE = 1;
                 }
                 break;
-
             case SDLK_c:
-                if(SDL_GetModState()&KMOD_CTRL)
-                {
-                    _win_main_menu_close();
-                }
+                if(SDL_GetModState()&KMOD_CTRL) _win_main_menu_close();
                 break;
-
             case SDLK_e:
-                if(SDL_GetModState()&KMOD_CTRL)
-                {
-                    _win_main_menu_exit();
-                }
+                if(SDL_GetModState()&KMOD_CTRL) _win_main_menu_exit();
                 break;
-
             case SDLK_r:
-                if(SDL_GetModState()&KMOD_CTRL)
-                {
-                    _win_main_reset();
-                }
+                if(SDL_GetModState()&KMOD_CTRL) _win_main_reset();
                 break;
 
             //case SDLK_1:
@@ -1222,8 +1139,8 @@ int Win_MainCreate(char * rom_path)
     GUI_SetWindow(&mainwindow_configwin,100,50,100,200,&mainwindow_subwindow_config_gui,"TEST");
 */
     _win_main_file_explorer_create();
-    GUI_SetWindow(&mainwindow_fileexplorer_win,25,25,256*2-50,224*2-50,&mainwindow_subwindow_fileexplorer_gui,
-                  "File Explorer");
+
+    Win_MainCreateConfigWindow();
 
     _win_main_scrollable_text_window_close();
     _win_main_clear_message();

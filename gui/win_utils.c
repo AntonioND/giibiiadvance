@@ -380,6 +380,17 @@ void GUI_SetScrollBar(_gui_element * e, int x, int y, int w, int h, int min_valu
     e->info.scrollbar.callback = callback;
 }
 
+void GUI_SetGroupBox(_gui_element * e, int x, int y, int w, int h, const char * label)
+{
+    e->element_type = GUI_TYPE_GROUPBOX;
+
+    e->x = x;
+    e->y = y;
+    e->w = w;
+    e->h = h;
+    strcpy(e->info.groupbox.label,label);
+}
+
 //----------------------------------------------------------------------------------------------
 
 void GUI_ScrollBarSetValue(_gui_element * e, int value) // clamped to configured range

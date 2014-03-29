@@ -30,6 +30,7 @@ For 0.3.0
  - Export images from new debugger windows.
  - Dump dissasembly/memory to a file and restore it?
  - Auto frameskip.
+ - Select filter
  
 - Customize controls.
  - Support for game controllers.

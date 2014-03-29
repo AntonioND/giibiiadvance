@@ -73,6 +73,36 @@ static int WinIDMain = -1;
 
 //------------------------------------------------------------------
 
+static int _win_main_frameskip = 0;
+static int _win_main_frameskipcount = 0;
+
+static void _win_main_set_frameskip(int frameskip)
+{
+    if(_win_main_frameskip == frameskip)
+        return;
+
+    _win_main_frameskipcount = 0;
+    _win_main_frameskip = frameskip;
+}
+
+static void _win_main_update_frameskip(void)
+{
+    if(_win_main_frameskipcount >= _win_main_frameskip)
+    {
+        _win_main_frameskipcount = 0;
+        return;
+    }
+
+    _win_main_frameskipcount ++;
+}
+
+static int _win_main_has_to_frameskip(void)
+{
+    return (_win_main_frameskipcount != 0); // skip when not 0
+}
+
+//------------------------------------------------------------------
+
 #define RUNNING_NONE 0
 #define RUNNING_GB   1
 #define RUNNING_GBA  2
@@ -93,7 +123,11 @@ static Uint32 _fps_callback_function(Uint32 interval, void *param)
     WinMain_FPS = WinMain_frames_drawn;
     WinMain_frames_drawn = 0;
     char caption[60];
-    s_snprintf(caption,sizeof(caption),"GiiBiiAdvance: %d fps - %.2f%%",WinMain_FPS,(float)WinMain_FPS*10.0f/6.0f);
+    if(_win_main_frameskip > 0)
+        s_snprintf(caption,sizeof(caption),"GiiBiiAdvance: %d fps - %.2f%% - (%d)",WinMain_FPS,
+                   (float)WinMain_FPS*10.0f/6.0f,_win_main_frameskip);
+    else
+        s_snprintf(caption,sizeof(caption),"GiiBiiAdvance: %d fps - %.2f%%",WinMain_FPS,(float)WinMain_FPS*10.0f/6.0f);
     WH_SetCaption(WinIDMain,caption);
     return interval;
 }
@@ -608,11 +642,11 @@ static void _win_main_reset(void)
 
         if(WIN_MAIN_RUNNING == RUNNING_GBA) GBA_Reset();
         else if(WIN_MAIN_RUNNING == RUNNING_GB) GB_HardReset();
-        if(EmulatorConfig.frameskip == -1)
-        {
+        //if(EmulatorConfig.frameskip == -1)
+        //{
             //FRAMESKIP = 0;
             //AUTO_FRAMESKIP_WAIT = 2;
-        }
+        //}
     }
 }
 
@@ -790,7 +824,6 @@ static void _win_main_menu_update_elements_enabled(void)
         mmfile_closenosav.enabled = 0;
         mmfile_reset.enabled = 0;
         mmfile_pause.enabled = 0;
-        mmfile_rominfo.enabled = 0;
         mmfile_screenshot.enabled = 0;
 
         mmoptions_mutesound.enabled = 0;
@@ -812,7 +845,6 @@ static void _win_main_menu_update_elements_enabled(void)
         mmfile_closenosav.enabled = 1;
         mmfile_reset.enabled = 1;
         mmfile_pause.enabled = 1;
-        mmfile_rominfo.enabled = 1;
         mmfile_screenshot.enabled = 1;
 
         mmoptions_mutesound.enabled = 1;
@@ -845,7 +877,7 @@ static void _win_main_menu_update_elements_enabled(void)
 //------------------------------------------------------------------
 
 // CONFIGURATION WINDOW
-
+/*
 static _gui_element mainwindow_subwindow_btn, mainwindow_subwindow_btn2;
 
 static _gui_element * mainwindow_subwindow_config_gui_elements[] = {
@@ -859,7 +891,7 @@ static _gui mainwindow_subwindow_config_gui = {
     NULL,
     NULL
 };
-
+*/
 //------------------------------------------------------------------
 
 //MAIN WINDOW GUI
@@ -868,7 +900,6 @@ static _gui_console mainwindow_show_message_con;
 static _gui_element mainwindow_show_message_win;
 
 static _gui_element mainwindow_bg;
-static _gui_element mainwindow_btn;
 static _gui_element mainwindow_configwin;
 
 static _gui_element * mainwindow_gui_elements[] = {
@@ -1183,12 +1214,13 @@ static int Win_MainEventCallback(SDL_Event * e)
 //@global function
 int Win_MainCreate(char * rom_path)
 {
+    /*
     GUI_SetButton(&mainwindow_subwindow_btn,10,50,7*FONT_WIDTH,FONT_HEIGHT,"CLOSE",_win_main_config_window_close);
     GUI_SetButton(&mainwindow_subwindow_btn2,10,70,7*FONT_WIDTH,FONT_HEIGHT,"TEST",NULL);
 
     GUI_SetButton(&mainwindow_btn,0,0,30*FONT_WIDTH,15*FONT_HEIGHT,"MAIN GUI",mainbtncallback_openwin);
     GUI_SetWindow(&mainwindow_configwin,100,50,100,200,&mainwindow_subwindow_config_gui,"TEST");
-
+*/
     _win_main_file_explorer_create();
     GUI_SetWindow(&mainwindow_fileexplorer_win,25,25,256*2-50,224*2-50,&mainwindow_subwindow_fileexplorer_gui,
                   "File Explorer");
@@ -1197,6 +1229,7 @@ int Win_MainCreate(char * rom_path)
     _win_main_clear_message();
 
     _win_main_change_zoom(EmulatorConfig.screen_size);
+    _win_main_set_frameskip(EmulatorConfig.frameskip);
 
     WinIDMain = WH_Create(256*WIN_MAIN_CONFIG_ZOOM,224*WIN_MAIN_CONFIG_ZOOM, 0,0, 0);
     if( WinIDMain == -1 )
@@ -1239,9 +1272,6 @@ void Win_MainRender(void)
     {
         if(WIN_MAIN_RUNNING != RUNNING_NONE)
         {
-            WinMain_frames_drawn ++;
-            //FU_Print(GAME_SCREEN_BUFFER,_win_main_get_game_screen_texture_width(),_win_main_get_game_screen_texture_height(),0,0,
-            //           "FPS: %d",FPS);
             WH_Render(WinIDMain, WIN_MAIN_GAME_SCREEN_BUFFER);
         }
     }
@@ -1306,6 +1336,14 @@ int Win_MainRunningGB(void)
 //@global function
 void Win_MainLoopHandle(void)
 {
+/*
+    const Uint8 * state = SDL_GetKeyboardState(NULL);
+    int speedup = state[SDL_SCANCODE_SPACE];
+    if(speedup)
+        _win_main_set_frameskip(10);
+    else
+        _win_main_set_frameskip(EmulatorConfig.frameskip);
+*/
     if(WH_HasKeyboardFocus(WinIDMain) && (WIN_MAIN_MENU_ENABLED == 0))
     {
         Sound_Enable();
@@ -1320,10 +1358,17 @@ void Win_MainLoopHandle(void)
 
             Win_GBADisassemblerStartAddressSetDefault();
 
+            GBA_SkipFrame(_win_main_has_to_frameskip());
+
             GBA_KeyboardGamepadGetInput();
             GBA_RunForOneFrame();
-            GBA_ConvertScreenBufferTo24RGB(WIN_MAIN_GAME_SCREEN_BUFFER);
-             //GBA_UpdateFrameskip();
+
+            if(_win_main_has_to_frameskip() == 0)
+                GBA_ConvertScreenBufferTo24RGB(WIN_MAIN_GAME_SCREEN_BUFFER);
+
+            _win_main_update_frameskip();
+
+            WinMain_frames_drawn ++;
         }
         else if(WIN_MAIN_RUNNING == RUNNING_GB)
         {
@@ -1333,9 +1378,16 @@ void Win_MainLoopHandle(void)
                 return;
             }
 
+            GB_SkipFrame(_win_main_has_to_frameskip());
+
             GB_KeyboardGamepadGetInput();
             GB_RunForOneFrame();
-            GB_Screen_WriteBuffer_24RGB(WIN_MAIN_GAME_SCREEN_BUFFER);
+            if(_win_main_has_to_frameskip() == 0)
+                GB_Screen_WriteBuffer_24RGB(WIN_MAIN_GAME_SCREEN_BUFFER);
+
+            _win_main_update_frameskip();
+
+            WinMain_frames_drawn ++;
         }
     }
     else

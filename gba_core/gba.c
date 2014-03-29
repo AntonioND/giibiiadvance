@@ -52,7 +52,6 @@ _cpu_t * GBA_CPUGet(void)
     return &CPU;
 }
 
-
 int GBA_InitRom(void * bios_ptr, void * rom_ptr, u32 romsize)
 {
     if(inited) GBA_EndRom(1); //shouldn't be needed here
@@ -84,6 +83,8 @@ int GBA_InitRom(void * bios_ptr, void * rom_ptr, u32 romsize)
     GBA_DMA3Setup();
     GBA_SoundInit();
     GBA_FillFadeTables();
+
+    GBA_SkipFrame(0);
 
     clocks_to_next_event = 1;
     lastresidualclocks = 0;

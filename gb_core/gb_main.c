@@ -58,7 +58,7 @@ int GB_ROMLoad(const char * rom_path)
             SRAM_Load();
             RTC_Load();
             GB_PowerOn();
-            GB_Frameskip(0);
+            GB_SkipFrame(0);
             return 1;
         }
 

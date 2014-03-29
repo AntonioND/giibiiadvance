@@ -23,11 +23,12 @@
 
 //----------------------------------------------------
 
-inline void GB_FrameskipUpdate(void);
-inline void GB_Frameskip(int _frames_to_skip);
+inline void GB_SkipFrame(int skip);
+inline int GB_HasToSkipFrame(void);
+
 inline void GB_EnableBlur(int enable);
 inline void GB_EnableRealColors(int enable);
-inline int GB_HaveToFrameskip(void);
+
 void GB_ConfigGetPalette(u8 * red, u8 * green, u8 * blue);
 void GB_ConfigSetPalette(u8 red, u8 green, u8 blue);
 void GB_ConfigLoadPalette(void);

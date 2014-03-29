@@ -59,27 +59,16 @@ static inline void mem_clear_32(u32 * ptr, u32 size)
 
 //-----------------------------------------------------------
 
-int frameskip = 0;
-int frameskipcounter = 0;
-inline void GBA_SetFrameskip(int value)
-{
-    if(frameskip == value) return;
-    frameskip = value;
-    frameskipcounter = 0;
-}
+static int gba_frameskip = 0;
 
-inline void GBA_UpdateFrameskip(void)
+inline void GBA_SkipFrame(int skip)
 {
-    if(frameskip)
-    {
-        frameskipcounter++;
-        if(frameskipcounter >= frameskip) frameskipcounter = 0;
-    }
+    gba_frameskip = skip;
 }
 
 inline int GBA_HasToSkipFrame(void)
 {
-    return frameskipcounter;
+    return gba_frameskip;
 }
 
 //-----------------------------------------------------------

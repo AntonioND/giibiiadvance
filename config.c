@@ -205,7 +205,7 @@ void Config_Load(void)
     if(tmp)
     {
         tmp += strlen(CFG_FRAMESKIP) + 1;
-        if(*tmp == '-') //*(tmp+1) == 1
+        if(*tmp == '-') //&& (*(tmp+1) == 1)
              EmulatorConfig.frameskip = -1;
         else
             EmulatorConfig.frameskip = *tmp - '0';

@@ -22,8 +22,8 @@
 typedef struct {
     int debug_msg_enable;
     int screen_size;
-    int load_from_boot_rom; //gba always tries to load the rom, but this skips initial logo
-    int frameskip;
+    int load_from_boot_rom; //gba always tries to load the bios, but this skips initial logo
+    int frameskip; // -1 = auto, 0-9 = fixed frameskip
     int oglfilter;
     int auto_close_debugger;
 
@@ -41,8 +41,7 @@ typedef struct {
     int enableblur;
     int realcolors;
 
-
-    //gb palette is not saved here, it is saved in gb_main.c
+    //gb palette is not stored here, it is stored in gb_main.c
     } t_config;
 
 extern t_config EmulatorConfig;

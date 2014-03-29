@@ -45,32 +45,21 @@ static u32 gb_realcolors;
 static u32 gb_cur_fb;
 static u16 gb_framebuffer[2][256 * 224];
 
-static u32 gb_frames_skipped;
-static u32 gb_frames_to_skip;
+//-----------------------------------------------------------
 
-inline void GB_FrameskipUpdate(void)
+static int gb_frameskip = 0;
+
+inline void GB_SkipFrame(int skip)
 {
-    if(gb_frames_to_skip)
-    {
-        gb_frames_skipped++;
-        if(gb_frames_skipped >= gb_frames_to_skip)
-        {
-            gb_frames_skipped = 0;
-        }
-    }
+    gb_frameskip = skip;
 }
 
-inline void GB_Frameskip(int _frames_to_skip)
+inline int GB_HasToSkipFrame(void)
 {
-    if(gb_frames_to_skip == _frames_to_skip) return;
-    gb_frames_skipped = 0;
-    gb_frames_to_skip = _frames_to_skip;
+    return gb_frameskip;
 }
 
-inline int GB_HaveToFrameskip(void)
-{
-     return (gb_frames_skipped != 0);
-}
+//-----------------------------------------------------------
 
 inline void GB_EnableBlur(int enable)
 {
@@ -131,7 +120,7 @@ inline u32 GB_GameBoyGetGray(u32 number)
 
 void GB_ScreenDrawScanline(s32 y)
 {
-    if(GB_HaveToFrameskip()) return;
+    if(GB_HasToSkipFrame()) return;
 
     if(y > 143) return;
 
@@ -377,7 +366,7 @@ u32 gbc_getsprpalcolor(int pal, int color)
 
 void GBC_ScreenDrawScanline(s32 y)
 {
-    if(GB_HaveToFrameskip()) return;
+    if(GB_HasToSkipFrame()) return;
 
     if(y > 143) return;
 
@@ -625,7 +614,7 @@ void GBC_ScreenDrawScanline(s32 y)
 
 void GBC_GB_ScreenDrawScanline(s32 y)
 {
-    if(GB_HaveToFrameskip()) return;
+    if(GB_HasToSkipFrame()) return;
 
     if(y > 143) return;
 
@@ -990,7 +979,7 @@ void SGB_ScreenDrawBorderInside(void)
 
 void SGB_ScreenDrawScanline(s32 y)
 {
-    if(GB_HaveToFrameskip()) return;
+    if(GB_HasToSkipFrame()) return;
 
     if(y > 143) return;
 

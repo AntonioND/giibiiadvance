@@ -21,8 +21,7 @@
 
 #include "gba.h"
 
-inline void GBA_SetFrameskip(int value);
-inline void GBA_UpdateFrameskip(void);
+inline void GBA_SkipFrame(int skip);
 inline int GBA_HasToSkipFrame(void);
 
 //---------------------------------------------------------

@@ -216,6 +216,14 @@ static int _win_gba_sprviewer_allspr_bmp_callback(int x, int y)
     if(y_ < 0) y_ = 0;
 
     gba_sprview_selected_spr = (gba_sprview_selected_page*64) + (y_*8) + x_;
+
+    _oam_spr_entry_t * spr = &(((_oam_spr_entry_t*)Mem.oam)[gba_sprview_selected_spr]);
+    if(spr->attr0 & BIT(8)) // if affine
+    {
+        GUI_ScrollBarSetValue(&gba_sprview_selectmatrix_scrollbar,(spr->attr1>>9) & 0x1F);
+        gba_sprview_selected_matrix = (spr->attr1>>9) & 0x1F; // select its matrix when clicked
+    }
+
     return 1;
 }
 

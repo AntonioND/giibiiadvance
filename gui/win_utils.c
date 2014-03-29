@@ -382,6 +382,22 @@ void GUI_SetScrollBar(_gui_element * e, int x, int y, int w, int h, int min_valu
 
 //----------------------------------------------------------------------------------------------
 
+void GUI_ScrollBarSetValue(_gui_element * e, int value) // clamped to configured range
+{
+    if(e == NULL)
+        return;
+
+    if(e->element_type != GUI_TYPE_SCROLLBAR)
+        return;
+
+    e->info.scrollbar.value = value;
+
+    if(e->info.scrollbar.value < e->info.scrollbar.value_min)
+        e->info.scrollbar.value = e->info.scrollbar.value_min;
+    else if(e->info.scrollbar.value > e->info.scrollbar.value_max)
+        e->info.scrollbar.value = e->info.scrollbar.value_max;
+}
+
 void GUI_SetLabelCaption(_gui_element * e, const char * label)
 {
     if(e == NULL)

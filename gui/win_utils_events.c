@@ -659,6 +659,26 @@ int __gui_send_event_element(_gui_element ** complete_gui, _gui_element * gui, S
         //nothing
         return 0;
     }
+    else if(gui->element_type == GUI_TYPE_CHECKBOX)
+    {
+        if(e->type == SDL_MOUSEBUTTONDOWN)
+        {
+            if(e->button.button == SDL_BUTTON_LEFT)
+            {
+                if(_gui_pos_is_inside_rect(e->button.x,e->button.y,
+                                              gui->x,gui->h,
+                                              gui->y,gui->h))
+                {
+                    gui->info.checkbox.checked = !gui->info.checkbox.checked;
+
+                    if(gui->info.checkbox.callback)
+                            gui->info.checkbox.callback(gui->info.checkbox.checked);
+
+                    return 1;
+                }
+            }
+        }
+    }
 
     return 0;
 }

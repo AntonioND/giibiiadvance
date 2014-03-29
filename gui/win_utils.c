@@ -391,6 +391,20 @@ void GUI_SetGroupBox(_gui_element * e, int x, int y, int w, int h, const char * 
     strcpy(e->info.groupbox.label,label);
 }
 
+void GUI_SetCheckBox(_gui_element * e, int x, int y, int w, int h, const char * label,
+                        int start_pressed, _gui_void_arg_int_fn callback)
+{
+    e->element_type = GUI_TYPE_CHECKBOX;
+
+    e->x = x;
+    e->y = y;
+    e->w = w;
+    e->h = h;
+    strcpy(e->info.checkbox.label,label);
+    e->info.checkbox.checked = start_pressed;
+    e->info.checkbox.callback = callback;
+}
+
 //----------------------------------------------------------------------------------------------
 
 void GUI_ScrollBarSetValue(_gui_element * e, int value) // clamped to configured range

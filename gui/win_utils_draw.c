@@ -672,6 +672,31 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
 
         FU_PrintColor(buffer,w,h,e->x+6,e->y,GUI_BACKGROUND_GREY_RGBA,e->info.groupbox.label);
     }
+    else if(e->element_type == GUI_TYPE_CHECKBOX)
+    {
+        GUI_Draw_SetDrawingColor(255,255,255);
+
+        GUI_Draw_FillRect(buffer,w,h,
+                          e->x+1,e->x+e->h-1-1,
+                          e->y+1,e->y+e->h-1-1);
+
+        GUI_Draw_SetDrawingColor(0,0,0);
+
+        GUI_Draw_Rect(buffer,w,h,
+                          e->x,e->x+e->h-1,
+                          e->y,e->y+e->h-1);
+
+        if(e->info.checkbox.checked)
+        {
+            GUI_Draw_SetDrawingColor(0,0,0);
+
+            GUI_Draw_FillRect(buffer,w,h,
+                              e->x+3,e->x+e->h-1-3,
+                              e->y+3,e->y+e->h-1-3);
+        }
+
+        FU_PrintColor(buffer,w,h,e->x+e->h+FONT_WIDTH/2,e->y,GUI_BACKGROUND_GREY_RGBA,e->info.checkbox.label);
+    }
 }
 
 void GUI_Draw(_gui * gui, char * buffer, int w, int h, int clean)

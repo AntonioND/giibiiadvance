@@ -41,6 +41,8 @@ static _gui_element mainwindow_configwin_general_filterlinear_radbtn;
 static _gui_element mainwindow_configwin_general_frameskip_label;
 static _gui_element mainwindow_configwin_general_frameskip_scrollbar;
 
+static _gui_element mainwindow_configwin_general_load_bootrom_checkbox;
+
 
 static _gui_element mainwindow_configwin_sound_groupbox;
 
@@ -58,6 +60,7 @@ static _gui_element * mainwindow_configwin_gui_elements[] = {
     &mainwindow_configwin_general_filterlinear_radbtn,
     &mainwindow_configwin_general_frameskip_label,
     &mainwindow_configwin_general_frameskip_scrollbar,
+    &mainwindow_configwin_general_load_bootrom_checkbox,
 
     &mainwindow_configwin_sound_groupbox,
 
@@ -100,6 +103,11 @@ static void _win_main_config_filter_callback(int num)
         SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
 }
 
+static void _win_main_config_load_boot_rom_callback(int checked)
+{
+    EmulatorConfig.load_from_boot_rom = checked;
+}
+
 //-----------------------------------------------------------------------------------
 
 void Win_MainCreateConfigWindow(void)
@@ -115,12 +123,13 @@ void Win_MainCreateConfigWindow(void)
     GUI_SetRadioButton(&mainwindow_configwin_general_filterlinear_radbtn,  12+19*FONT_WIDTH,24,9*FONT_WIDTH,18,
                   "Linear",  0, 1, 0,_win_main_config_filter_callback);
 
-    GUI_SetLabel(&mainwindow_configwin_general_frameskip_label,12,64,-1,FONT_HEIGHT,"Frameskip: Auto");
+    GUI_SetLabel(&mainwindow_configwin_general_frameskip_label,12,100,-1,FONT_HEIGHT,"Frameskip: Auto");
 
-    GUI_SetScrollBar(&mainwindow_configwin_general_frameskip_scrollbar,12,82,100,12,
+    GUI_SetScrollBar(&mainwindow_configwin_general_frameskip_scrollbar,12,112,100,12,
                      0,9,EmulatorConfig.frameskip,_win_main_config_frameskip_scrollbar_callback);
 
-    GUI_SetButton(&mainwindow_configwin_close_btn, 300,300,6*FONT_WIDTH,2*FONT_HEIGHT,"Close",Win_MainCloseConfigWindow);
+    GUI_SetCheckBox(&mainwindow_configwin_general_load_bootrom_checkbox,12,48,100,12,"Load from boot ROM",
+                        EmulatorConfig.load_from_boot_rom, _win_main_config_load_boot_rom_callback);
 
     //-----------------------------
 
@@ -135,6 +144,8 @@ void Win_MainCreateConfigWindow(void)
     GUI_SetGroupBox(&mainwindow_configwin_gameboyadvance_groupbox,234,195,222,183,"Game Boy Advance");
 
     //-----------------------------
+
+    GUI_SetButton(&mainwindow_configwin_close_btn, 300,300,6*FONT_WIDTH,2*FONT_HEIGHT,"Close",Win_MainCloseConfigWindow);
 
     GUI_SetWindow(&mainwindow_configwin,25,25,256*2-50,224*2-50,&mainwindow_subwindow_config_gui,
                   "Configuration");

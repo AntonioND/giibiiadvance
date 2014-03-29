@@ -61,6 +61,7 @@ void GUI_ConsoleDrawAt(_gui_console * con, char * buffer, int buf_w, int buf_h, 
 #define GUI_TYPE_SCROLLABLETEXTWINDOW  8
 #define GUI_TYPE_SCROLLBAR             9
 #define GUI_TYPE_GROUPBOX             10
+#define GUI_TYPE_CHECKBOX             11
 
 typedef void (*_gui_void_arg_void_fn)(void);
 typedef void (*_gui_void_arg_int_fn)(int);
@@ -124,6 +125,11 @@ typedef struct {
         struct {
             char label[100];
         } groupbox;
+        struct {
+            int checked;
+            char label[100];
+            _gui_void_arg_int_fn callback; //arg -> 1 = is checked
+        } checkbox;
     } info ;
 } _gui_element;
 
@@ -154,6 +160,9 @@ void GUI_SetScrollBar(_gui_element * e, int x, int y, int w, int h, int min_valu
                       int start_value, _gui_void_arg_int_fn callback);
 
 void GUI_SetGroupBox(_gui_element * e, int x, int y, int w, int h, const char * label);
+
+void GUI_SetCheckBox(_gui_element * e, int x, int y, int w, int h, const char * label,
+                        int start_pressed, _gui_void_arg_int_fn callback);
 
 //----------------------------------------------------------------------------------------------
 

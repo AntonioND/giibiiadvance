@@ -533,9 +533,12 @@ static _gui_element mainwindow_fileexplorer_win;
 
 static _gui_console win_main_fileexpoler_con;
 static _gui_element win_main_fileexpoler_textbox, win_main_fileexpoler_up_btn, win_main_fileexpoler_cancel_btn;
+static _gui_console win_main_fileexpoler_path_con;
+static _gui_element win_main_fileexpoler_path_textbox;
 
 static _gui_element * mainwindow_subwindow_fileexplorer_elements[] = {
-    &win_main_fileexpoler_textbox, &win_main_fileexpoler_up_btn, &win_main_fileexpoler_cancel_btn, NULL
+    &win_main_fileexpoler_textbox, &win_main_fileexpoler_up_btn, &win_main_fileexpoler_cancel_btn,
+    &win_main_fileexpoler_path_textbox, NULL
 };
 
 static _gui mainwindow_subwindow_fileexplorer_gui = {
@@ -543,6 +546,22 @@ static _gui mainwindow_subwindow_fileexplorer_gui = {
 };
 
 static int _win_main_file_explorer_windows_selection = 0;
+
+static int _win_main_file_explorer_get_starting_drawing_index(void)
+{
+    int start_print_index;
+
+    int numfiles = FileExplorer_GetNumFiles();
+
+    if(WIN_MAIN_FILE_EXPLORER_NUM_ELEMENTS >= numfiles)
+        start_print_index = 0;
+    else if(_win_main_file_explorer_windows_selection < (WIN_MAIN_FILE_EXPLORER_NUM_ELEMENTS/2))
+        start_print_index = 0;
+    else
+        start_print_index = _win_main_file_explorer_windows_selection - (WIN_MAIN_FILE_EXPLORER_NUM_ELEMENTS/2);
+
+    return start_print_index;
+}
 
 static void _win_main_file_explorer_refresh(void)
 {
@@ -554,14 +573,7 @@ static void _win_main_file_explorer_refresh(void)
 
     int numfiles = FileExplorer_GetNumFiles();
 
-    int start_print_index;
-
-    if(WIN_MAIN_FILE_EXPLORER_NUM_ELEMENTS >= numfiles)
-        start_print_index = 0;
-    else if(_win_main_file_explorer_windows_selection < (WIN_MAIN_FILE_EXPLORER_NUM_ELEMENTS/2))
-        start_print_index = 0;
-    else
-        start_print_index = _win_main_file_explorer_windows_selection - (WIN_MAIN_FILE_EXPLORER_NUM_ELEMENTS/2);
+    int start_print_index = _win_main_file_explorer_get_starting_drawing_index();
 
     int i;
     for(i = 0; i < WIN_MAIN_FILE_EXPLORER_NUM_ELEMENTS; i++)
@@ -578,6 +590,9 @@ static void _win_main_file_explorer_refresh(void)
                                     FileExplorer_GetName(selected_file));
         }
     }
+
+    GUI_ConsoleClear(&win_main_fileexpoler_path_con);
+    GUI_ConsoleModePrintf(&win_main_fileexpoler_path_con,0,0,FileExplorer_GetCurrentPath());
 }
 
 static void _win_main_file_explorer_close(void)
@@ -599,6 +614,9 @@ static void _win_main_file_explorer_open_index(int i)
 
     //Debug_DebugMsg(FileExplorer_GetName(i));
     int is_dir = FileExplorer_SelectEntry(FileExplorer_GetName(i));
+
+    //SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "GiiBiiAdvance - Debug", FileExplorer_GetName(i), NULL);
+
     _win_main_file_explorer_refresh();
 
     if(is_dir == 0)
@@ -611,20 +629,23 @@ static void _win_main_file_explorer_open_index(int i)
 
 static void _win_main_file_explorer_text_box_callback(int x, int y)
 {
-    int i = y / FONT_HEIGHT;
+    int i = _win_main_file_explorer_get_starting_drawing_index() + (y / FONT_HEIGHT);
     _win_main_file_explorer_open_index(i);
 }
 
 static void _win_main_file_explorer_create(void)
 {
     GUI_SetTextBox(&win_main_fileexpoler_textbox,&win_main_fileexpoler_con,
-                   7,7,
-                   FONT_WIDTH*64,FONT_HEIGHT*WIN_MAIN_FILE_EXPLORER_NUM_ELEMENTS,
+                   7,7,  FONT_WIDTH*64,FONT_HEIGHT*WIN_MAIN_FILE_EXPLORER_NUM_ELEMENTS,
                    _win_main_file_explorer_text_box_callback);
     GUI_SetButton(&win_main_fileexpoler_up_btn,7,353,FONT_WIDTH*4,24,
                   "Up",_win_main_file_explorer_up);
     GUI_SetButton(&win_main_fileexpoler_cancel_btn,399,353,FONT_WIDTH*8,24,
                   "Cancel",_win_main_file_explorer_close);
+
+    GUI_SetTextBox(&win_main_fileexpoler_path_textbox,&win_main_fileexpoler_path_con,
+                   7+FONT_WIDTH*4+6,353,  FONT_WIDTH*50,FONT_HEIGHT*2,
+                   NULL);
 
     GUI_SetWindow(&mainwindow_fileexplorer_win,25,25,256*2-50,224*2-50,&mainwindow_subwindow_fileexplorer_gui,
                   "File Explorer");
@@ -982,11 +1003,11 @@ void _win_main_config_window_close(void)
 
 //------------------------------------------------------------------
 
-static void _win_main_change_zoom(int newzoom)
+void Win_MainChangeZoom(int newzoom)
 {
     if( (newzoom < 2) && (newzoom > 4) )
     {
-        Debug_LogMsgArg("_win_main_switch_to_menu(): Unsupported zoom level: %d",newzoom);
+        Debug_LogMsgArg("Win_MainChangeZoom(): Unsupported zoom level: %d",newzoom);
         return;
     }
 
@@ -1071,6 +1092,12 @@ static int Win_MainEventCallback(SDL_Event * e)
                     WIN_MAIN_MENU_HAS_TO_UPDATE = 1;
                 }
                 break;
+            case SDLK_BACKSPACE:
+                if(GUI_WindowGetEnabled(&mainwindow_fileexplorer_win))
+                {
+                    _win_main_file_explorer_up();
+                    WIN_MAIN_MENU_HAS_TO_UPDATE = 1;
+                }
 
             case SDLK_p:
                 if(SDL_GetModState()&KMOD_CTRL) _win_main_menu_toggle_pause();
@@ -1100,13 +1127,13 @@ static int Win_MainEventCallback(SDL_Event * e)
                 break;
 
             //case SDLK_1:
-            //    _win_main_change_zoom(2);
+            //    Win_MainChangeZoom(2);
             //    return 1;
             //case SDLK_2:
-            //    _win_main_change_zoom(3);
+            //    Win_MainChangeZoom(3);
             //    return 1;
             //case SDLK_3:
-            //    _win_main_change_zoom(4);
+            //    Win_MainChangeZoom(4);
             //    return 1;
 
             case SDLK_ESCAPE:
@@ -1206,7 +1233,7 @@ int Win_MainCreate(char * rom_path)
     _win_main_scrollable_text_window_close();
     _win_main_clear_message();
 
-    _win_main_change_zoom(EmulatorConfig.screen_size);
+    Win_MainChangeZoom(EmulatorConfig.screen_size);
     _win_main_set_frameskip(EmulatorConfig.frameskip);
 
     WinIDMain = WH_Create(256*WIN_MAIN_CONFIG_ZOOM,224*WIN_MAIN_CONFIG_ZOOM, 0,0, 0);

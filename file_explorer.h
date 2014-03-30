@@ -29,7 +29,7 @@ int FileExplorer_GetIsDir(int index);
 int FileExplorer_LoadFolder(void);
 int FileExplorer_SelectEntry(char * file); // returns 1 if dir, 0 if file
 char * FileExplorer_GetResultFilePath(void); // this holds the last file selected even after FileExplorer_ListFree()
-
+char * FileExplorer_GetCurrentPath(void); // current exploring path
 
 //---------------------------------------------------------------------
 

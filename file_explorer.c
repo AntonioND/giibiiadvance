@@ -285,5 +285,10 @@ char * FileExplorer_GetResultFilePath(void)
     return fileselected;
 }
 
+char * FileExplorer_GetCurrentPath(void)
+{
+    return (char*)exploring_path;
+}
+
 
 

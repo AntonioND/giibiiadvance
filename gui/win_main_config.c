@@ -20,8 +20,10 @@
 
 #include <string.h>
 
-#include "win_main_config.h"
 #include "win_utils.h"
+
+#include "win_main_config.h"
+#include "win_main.h"
 
 #include "../font_utils.h"
 #include "../config.h"
@@ -34,24 +36,35 @@ _gui_element mainwindow_configwin;
 
 static _gui_element mainwindow_configwin_close_btn;
 
+//------------------------
+
 static _gui_element mainwindow_configwin_general_groupbox;
 static _gui_element mainwindow_configwin_general_filter_label;
 static _gui_element mainwindow_configwin_general_filternearest_radbtn;
 static _gui_element mainwindow_configwin_general_filterlinear_radbtn;
 static _gui_element mainwindow_configwin_general_frameskip_label;
 static _gui_element mainwindow_configwin_general_frameskip_scrollbar;
-
 static _gui_element mainwindow_configwin_general_load_bootrom_checkbox;
+static _gui_element mainwindow_configwin_general_scrnzoom_label;
+static _gui_element mainwindow_configwin_general_scrnzoom2_radbtn;
+static _gui_element mainwindow_configwin_general_scrnzoom3_radbtn;
+static _gui_element mainwindow_configwin_general_scrnzoom4_radbtn;
+static _gui_element mainwindow_configwin_general_autoclose_debugger_checkbox;
+static _gui_element mainwindow_configwin_general_debug_messages_enabled_checkbox;
 
+//------------------------
 
 static _gui_element mainwindow_configwin_sound_groupbox;
 
+//------------------------
 
 static _gui_element mainwindow_configwin_gameboy_groupbox;
 
+//------------------------
 
 static _gui_element mainwindow_configwin_gameboyadvance_groupbox;
 
+//------------------------
 
 static _gui_element * mainwindow_configwin_gui_elements[] = {
     &mainwindow_configwin_general_groupbox,
@@ -61,6 +74,12 @@ static _gui_element * mainwindow_configwin_gui_elements[] = {
     &mainwindow_configwin_general_frameskip_label,
     &mainwindow_configwin_general_frameskip_scrollbar,
     &mainwindow_configwin_general_load_bootrom_checkbox,
+    &mainwindow_configwin_general_scrnzoom_label,
+    &mainwindow_configwin_general_scrnzoom2_radbtn,
+    &mainwindow_configwin_general_scrnzoom3_radbtn,
+    &mainwindow_configwin_general_scrnzoom4_radbtn,
+    &mainwindow_configwin_general_autoclose_debugger_checkbox,
+    &mainwindow_configwin_general_debug_messages_enabled_checkbox,
 
     &mainwindow_configwin_sound_groupbox,
 
@@ -108,6 +127,22 @@ static void _win_main_config_load_boot_rom_callback(int checked)
     EmulatorConfig.load_from_boot_rom = checked;
 }
 
+static void _win_main_config_screen_zoom_radbtn_callback(int num)
+{
+    EmulatorConfig.screen_size = num;
+    Win_MainChangeZoom(EmulatorConfig.screen_size);
+}
+
+static void _win_main_config_autoclose_debugger_callback(int checked)
+{
+    EmulatorConfig.auto_close_debugger = checked;
+}
+
+static void _win_main_config_debug_msg_enabled_callback(int checked)
+{
+    EmulatorConfig.debug_msg_enable = checked;
+}
+
 //-----------------------------------------------------------------------------------
 
 void Win_MainCreateConfigWindow(void)
@@ -117,20 +152,37 @@ void Win_MainCreateConfigWindow(void)
     GUI_SetGroupBox(&mainwindow_configwin_general_groupbox,6,6,222,183,"General");
 
     GUI_SetLabel(&mainwindow_configwin_general_filter_label,12,24,-1,18,"Filter:");
-
     GUI_SetRadioButton(&mainwindow_configwin_general_filternearest_radbtn,  12+9*FONT_WIDTH,24,9*FONT_WIDTH,18,
                   "Nearest", 0, 0, 1,_win_main_config_filter_callback);
     GUI_SetRadioButton(&mainwindow_configwin_general_filterlinear_radbtn,  12+19*FONT_WIDTH,24,9*FONT_WIDTH,18,
                   "Linear",  0, 1, 0,_win_main_config_filter_callback);
 
-    GUI_SetLabel(&mainwindow_configwin_general_frameskip_label,12,100,-1,FONT_HEIGHT,"Frameskip: Auto");
+    GUI_SetLabel(&mainwindow_configwin_general_scrnzoom_label,12,48,-1,18,"Screen zoom:");
+    GUI_SetRadioButton(&mainwindow_configwin_general_scrnzoom2_radbtn,  12+12*FONT_WIDTH+6,48, 4*FONT_WIDTH,18,
+                  "x2", 1, 2, EmulatorConfig.screen_size==2,_win_main_config_screen_zoom_radbtn_callback);
+    GUI_SetRadioButton(&mainwindow_configwin_general_scrnzoom3_radbtn,  12+16*FONT_WIDTH+12,48,4*FONT_WIDTH,18,
+                  "x3", 1, 3, EmulatorConfig.screen_size==3,_win_main_config_screen_zoom_radbtn_callback);
+    GUI_SetRadioButton(&mainwindow_configwin_general_scrnzoom4_radbtn,  12+20*FONT_WIDTH+18,48,4*FONT_WIDTH,18,
+                  "x4", 1, 4, EmulatorConfig.screen_size==4,_win_main_config_screen_zoom_radbtn_callback);
 
-    GUI_SetScrollBar(&mainwindow_configwin_general_frameskip_scrollbar,12,112,100,12,
-                     0,9,EmulatorConfig.frameskip,_win_main_config_frameskip_scrollbar_callback);
-
-    GUI_SetCheckBox(&mainwindow_configwin_general_load_bootrom_checkbox,12,48,100,12,"Load from boot ROM",
+    GUI_SetCheckBox(&mainwindow_configwin_general_load_bootrom_checkbox,12,72,-1,12,"Load from boot ROM",
                         EmulatorConfig.load_from_boot_rom, _win_main_config_load_boot_rom_callback);
 
+    GUI_SetCheckBox(&mainwindow_configwin_general_autoclose_debugger_checkbox,12,90,-1,12,"Auto close debugger",
+                        EmulatorConfig.auto_close_debugger, _win_main_config_autoclose_debugger_callback);
+
+    GUI_SetCheckBox(&mainwindow_configwin_general_debug_messages_enabled_checkbox,12,108,-1,12,"Debug messages enabled",
+                        EmulatorConfig.debug_msg_enable, _win_main_config_debug_msg_enabled_callback);
+
+
+
+
+
+
+    GUI_SetLabel(&mainwindow_configwin_general_frameskip_label,12,150,-1,FONT_HEIGHT,"Frameskip: Auto");
+
+    GUI_SetScrollBar(&mainwindow_configwin_general_frameskip_scrollbar,12,162,100,12,
+                     0,9,EmulatorConfig.frameskip,_win_main_config_frameskip_scrollbar_callback);
     //-----------------------------
 
     GUI_SetGroupBox(&mainwindow_configwin_sound_groupbox,234,6,222,183,"Sound");

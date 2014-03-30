@@ -161,6 +161,7 @@ void GUI_SetScrollBar(_gui_element * e, int x, int y, int w, int h, int min_valu
 
 void GUI_SetGroupBox(_gui_element * e, int x, int y, int w, int h, const char * label);
 
+// w is ignored
 void GUI_SetCheckBox(_gui_element * e, int x, int y, int w, int h, const char * label,
                         int start_pressed, _gui_void_arg_int_fn callback);
 

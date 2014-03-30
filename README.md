@@ -1,7 +1,7 @@
 GiiBiiAdvance
 =============
 
-Another GB, GBC and GBA emulator writen in C.
+Another GB, GBC and GBA emulator writen in C. By Antonio Niño Díaz (AntonioND).
 
 This is an emulator I started a few years ago. I haven't released any version since 0.1.0, but I've done some changes that have improved compatibility anyway.
 
@@ -16,12 +16,11 @@ This is the only GB emulator that emulates completely the GB Camera if you have 
 Current goals for 0.2.0
 -----------------------
 
-- Finish porting the GUI:
- - Configuration window.
- - Readme and about text.
- - Auto frameskip.
- - Fix GBA emulation (Linux). THUMB mode ROR doesn't work right?
- 
+- Readme and about text.
+- Auto frameskip.
+- Fix GBA emulation (Linux). THUMB mode ROR doesn't work right?
+- MBC7 input.
+
 For 0.3.0
 ---------
 

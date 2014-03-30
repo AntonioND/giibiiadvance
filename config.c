@@ -65,7 +65,7 @@ const char * GBKeyNames[P_NUM_KEYS] =
 // "true" - "false"
 
 #define CFG_FRAMESKIP "frameskip"
-// "-1" - "9"
+// "-1" - "4"
 
 #define CFG_OPENGL_FILTER "opengl_filter"
 char * oglfiltertype[] = { "nearest", "linear" };
@@ -204,6 +204,8 @@ void Config_Load(void)
              EmulatorConfig.frameskip = -1;
         else
             EmulatorConfig.frameskip = *tmp - '0';
+
+        if(EmulatorConfig.frameskip > 4) EmulatorConfig.frameskip = 4;
     }
 
     tmp = strstr(ini,CFG_OPENGL_FILTER);

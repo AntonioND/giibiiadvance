@@ -88,7 +88,7 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add option="-lSDL2" />
+					<Add option="-lSDL2 -lGL" />
 					<Add option="`pkg-config --libs opencv`" />
 				</Linker>
 			</Target>
@@ -103,7 +103,7 @@
 					<Add option="-DNO_CAMERA_EMULATION" />
 				</Compiler>
 				<Linker>
-					<Add option="-lSDL2" />
+					<Add option="-lSDL2 -lGL" />
 				</Linker>
 			</Target>
 			<Target title="Release_Linux">
@@ -120,7 +120,7 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add option="-lSDL2" />
+					<Add option="-lSDL2 -lGL" />
 					<Add option="`pkg-config --libs opencv`" />
 				</Linker>
 			</Target>
@@ -139,7 +139,7 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add option="-lSDL2" />
+					<Add option="-lSDL2 -lGL" />
 				</Linker>
 			</Target>
 		</Build>

@@ -208,6 +208,7 @@ const char * about_text = {
 "-Authors of MESS, for its source code (which i've used to get information about the incomplete MBC6 mapper).\n"
 //"-Sindre Aamås for Gambatte and its source code (Used for some details about sound emulation).\n"
 "-Sindre Aam" STR_ARING_MINUS "s for Gambatte and its source code (Used for some details about sound emulation).\n"
+"-Beware for BGB.\n"
 "-Normmatt for telling me a few bugs he found in GBA ARM core and sending me Armwrestler ROM for checking the CPU.\n"
 "-Probably a lot of people that i've unfairly forgotten... :)\n"
 "\n"

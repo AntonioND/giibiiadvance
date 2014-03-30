@@ -20,6 +20,7 @@ Current goals for 0.2.0
  - Configuration window.
  - Readme and about text.
  - Auto frameskip.
+ - Fix GBA emulation (Linux). THUMB mode ROR doesn't work right?
  
 For 0.3.0
 ---------

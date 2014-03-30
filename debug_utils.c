@@ -17,7 +17,7 @@
 */
 
 #include <SDL2/SDL.h>
-#include <gl/gl.h>
+#include <SDL2/SDL_opengl.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -165,10 +165,15 @@ static void _sys_info_reset(void)
                      "\n"
                      "SDL_GetPlatform(): %s\n\n"
                      "SDL_GetCPUCount(): %d (Number of logical CPU cores)\n"
+#if SDL_VERSION_ATLEAST(2,0,1)
                      "SDL_GetSystemRAM(): %d MB\n"
+#endif
                      "SDL_GetCPUCacheLineSize(): %d kB (Cache L1)\n\n",
                      SDL_GetPlatform(), SDL_GetCPUCount(),
-                     SDL_GetSystemRAM(), SDL_GetCPUCacheLineSize() );
+#if SDL_VERSION_ATLEAST(2,0,1)
+                     SDL_GetSystemRAM(),
+#endif
+                     SDL_GetCPUCacheLineSize() );
 
     int total_secs, pct;
     SDL_PowerState st = SDL_GetPowerInfo(&total_secs,&pct);
@@ -199,7 +204,7 @@ static void _sys_info_reset(void)
 
     _sys_info_printf("SDL_GetPowerInfo():\n  %s\n  Time left: %d:%02d:%02d\n  Percentage: %3d%%\n\n",
                      st_string,hours,min,secs,pct);
-
+#ifdef USE_OPENGL
     _sys_info_printf("OpenGL information:\n"
                      "-------------------\n"
                      "\n"
@@ -210,7 +215,7 @@ static void _sys_info_reset(void)
                      (char*)glGetString(GL_RENDERER),(char*)glGetString(GL_VERSION),
                      (char*)glGetString(GL_VENDOR));
     _sys_info_print((char*)glGetString(GL_EXTENSIONS));
-
+#endif
     _sys_info_printf("\n\nEND LOG\n");
 }
 

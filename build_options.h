@@ -48,6 +48,7 @@
 //---------------------------------------------------------------
 
 #define USE_ASM
+#define USE_OPENGL
 
 #define BIOS_FOLDER "bios"
 #define SCREENSHOT_FOLDER "screenshots"

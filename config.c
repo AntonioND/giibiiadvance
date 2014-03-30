@@ -39,7 +39,6 @@ t_config EmulatorConfig = { //Default options...
     0, //oglfilter
     0, //auto_close_debugger
     //---------
-    100, //server_buffer_len
     64, //volume
     0x3F, //chn_flags
     0, //snd_mute
@@ -73,9 +72,6 @@ char * oglfiltertype[] = { "nearest", "linear" };
 
 #define CFG_AUTO_CLOSE_DEBUGGER "auto_close_debugger"
 // "true" - "false"
-
-#define CFG_SND_BUF_LEN "sound_buffer_lenght"
-// unsigned integer ( "50" - "250" ) -- in steps of 50
 
 #define CFG_SND_CHN_ENABLE "channels_enabled"
 // "#3F" 3F = flags
@@ -121,7 +117,6 @@ void Config_Save(void)
     fprintf(ini_file,"\r\n");
 
     fprintf(ini_file,"[Sound]\r\n");
-    fprintf(ini_file,CFG_SND_BUF_LEN "=%03d\r\n",EmulatorConfig.server_buffer_len);
     int volume, chn_flags;
     GBA_SoundGetConfig(&volume,&chn_flags); //GB doesn't get all information
     fprintf(ini_file,CFG_SND_CHN_ENABLE "=#%02X\r\n",chn_flags);
@@ -235,21 +230,6 @@ void Config_Load(void)
     }
 
     //SOUND
-    tmp = strstr(ini,CFG_SND_BUF_LEN);
-    if(tmp)
-    {
-        tmp += strlen(CFG_SND_BUF_LEN) + 1;
-
-        char aux[4]; aux[3] = '\0';
-        aux[0] = *tmp++;
-        aux[1] = *tmp++;
-        aux[2] = *tmp;
-
-        EmulatorConfig.server_buffer_len = asciidec_to_int(aux);
-        if(EmulatorConfig.server_buffer_len < 50) EmulatorConfig.server_buffer_len = 50;
-        else if(EmulatorConfig.server_buffer_len > 250) EmulatorConfig.server_buffer_len = 250;
-    }
-
     int vol = 64, chn_flags = 0x3F;
     tmp = strstr(ini,CFG_SND_CHN_ENABLE);
     if(tmp)

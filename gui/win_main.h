@@ -26,6 +26,7 @@ int Win_MainRunningGB(void);
 void Win_MainLoopHandle(void);
 
 void Win_MainChangeZoom(int newzoom);
+void Win_MainSetFrameskip(int frameskip); // in win_main.c
 
 void Win_MainShowMessage(int type, const char * text); // 0 = error, 1 = debug, 2 = console, 3 = sys info
 

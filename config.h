@@ -29,8 +29,7 @@ typedef struct {
 
     //Sound
     //-----
-    int server_buffer_len;
-    float volume;
+    int volume;
     int chn_flags;
     int snd_mute;
 

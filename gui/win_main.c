@@ -78,7 +78,7 @@ static int WinIDMain = -1;
 static int _win_main_frameskip = 0;
 static int _win_main_frameskipcount = 0;
 
-void _win_main_set_frameskip(int frameskip)
+void Win_MainSetFrameskip(int frameskip)
 {
     if(_win_main_frameskip == frameskip)
         return;
@@ -1234,7 +1234,7 @@ int Win_MainCreate(char * rom_path)
     _win_main_clear_message();
 
     Win_MainChangeZoom(EmulatorConfig.screen_size);
-    _win_main_set_frameskip(EmulatorConfig.frameskip);
+    Win_MainSetFrameskip(EmulatorConfig.frameskip);
 
     WinIDMain = WH_Create(256*WIN_MAIN_CONFIG_ZOOM,224*WIN_MAIN_CONFIG_ZOOM, 0,0, 0);
     if( WinIDMain == -1 )
@@ -1311,9 +1311,9 @@ void Win_MainLoopHandle(void)
     int speedup = Input_Speedup_Enabled();
 
     if(speedup)
-        _win_main_set_frameskip(10);
+        Win_MainSetFrameskip(10);
     else
-        _win_main_set_frameskip(EmulatorConfig.frameskip);
+        Win_MainSetFrameskip(EmulatorConfig.frameskip);
 
     if(WH_HasKeyboardFocus(WinIDMain) && (WIN_MAIN_MENU_ENABLED == 0))
     {

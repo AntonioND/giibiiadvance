@@ -188,7 +188,7 @@ typedef struct {
                              //E000 -- ram echo
     u8 ObjAttrMem[0xA0];     //FE00 | (40 * 4) B
     u8 StrangeRAM[0x30];     //FEA0 -- strange RAM - (only GBC, see memory.c for the reason of
-    u8 IO_Ports[0x80];       //FF00 | 128B         | 0x30 instead of 0x60)
+    u8 IO_Ports[0x80];       //FF00 | 128B                                 0x30 instead of 0x60)
     u8 HighRAM[0x80];        //FF80 | 128B
 
 

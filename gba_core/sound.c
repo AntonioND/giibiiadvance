@@ -396,7 +396,7 @@ void GBA_SoundInit(void)
     Sound.FifoB.running = 0;
 
     int i;
-    for(i = 0; i < 32; i+=2)
+    for(i = 0; i < 16; i+=2)
     {
         Sound.Chn3.wave_ram_buffer[0][i] = 0x00;
         Sound.Chn3.wave_ram_buffer[0][i+1] = 0xFF;

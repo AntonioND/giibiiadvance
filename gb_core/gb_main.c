@@ -53,10 +53,10 @@ int GB_ROMLoad(const char * rom_path)
             //Init after loading the cartridge to set the hardware type value and allow
             //GB_Screen_Init choose the correct dimensions for the texture.
 
-            Cardridge_Set_Filename((char*)rom_path);
+            GB_Cardridge_Set_Filename((char*)rom_path);
 
-            SRAM_Load();
-            RTC_Load();
+            GB_SRAM_Load();
+            GB_RTC_Load();
             GB_PowerOn();
             GB_SkipFrame(0);
             return 1;
@@ -78,11 +78,12 @@ void GB_End(int save)
 {
     if(save)
     {
-        SRAM_Save();
-        RTC_Save();
+        GB_SRAM_Save();
+        GB_RTC_Save();
     }
+
     GB_PowerOff();
-    Cartridge_Unload();
+    GB_Cartridge_Unload();
 }
 
 //---------------------------------------------------------------------------

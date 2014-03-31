@@ -19,6 +19,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <malloc.h>
+#include <stdlib.h>
 
 #include "build_options.h"
 #include "file_utils.h"
@@ -107,46 +108,46 @@ void Config_Save(void)
     FILE * ini_file = fopen(path,"wb");
     if(ini_file == NULL) return;
 
-    fprintf(ini_file,"[General]\r\n");
-    fprintf(ini_file,CFG_DB_MSG_ENABLE "=%s\r\n",EmulatorConfig.debug_msg_enable?"true":"false");
-    fprintf(ini_file,CFG_SCREEN_SIZE "=%d\r\n",EmulatorConfig.screen_size);
-    fprintf(ini_file,CFG_LOAD_BOOT_ROM "=%s\r\n",EmulatorConfig.load_from_boot_rom?"true":"false");
-    fprintf(ini_file,CFG_FRAMESKIP "=%d\r\n",EmulatorConfig.frameskip);
-    fprintf(ini_file,CFG_OPENGL_FILTER "=%s\r\n",oglfiltertype[EmulatorConfig.oglfilter]);
-    fprintf(ini_file,CFG_AUTO_CLOSE_DEBUGGER "=%s\r\n",EmulatorConfig.auto_close_debugger?"true":"false");
-    fprintf(ini_file,"\r\n");
+    fprintf(ini_file,"[General]\n");
+    fprintf(ini_file,CFG_DB_MSG_ENABLE "=%s\n",EmulatorConfig.debug_msg_enable?"true":"false");
+    fprintf(ini_file,CFG_SCREEN_SIZE "=%d\n",EmulatorConfig.screen_size);
+    fprintf(ini_file,CFG_LOAD_BOOT_ROM "=%s\n",EmulatorConfig.load_from_boot_rom?"true":"false");
+    fprintf(ini_file,CFG_FRAMESKIP "=%d\n",EmulatorConfig.frameskip);
+    fprintf(ini_file,CFG_OPENGL_FILTER "=%s\n",oglfiltertype[EmulatorConfig.oglfilter]);
+    fprintf(ini_file,CFG_AUTO_CLOSE_DEBUGGER "=%s\n",EmulatorConfig.auto_close_debugger?"true":"false");
+    fprintf(ini_file,"\n");
 
-    fprintf(ini_file,"[Sound]\r\n");
+    fprintf(ini_file,"[Sound]\n");
     int volume, chn_flags;
     GBA_SoundGetConfig(&volume,&chn_flags); //GB doesn't get all information
-    fprintf(ini_file,CFG_SND_CHN_ENABLE "=#%02X\r\n",chn_flags);
-    fprintf(ini_file,CFG_SND_VOLUME "=#%02X\r\n",volume);
-    fprintf(ini_file,CFG_SND_MUTE "=%s\r\n",EmulatorConfig.snd_mute?"true":"false");
-    fprintf(ini_file,"\r\n");
+    fprintf(ini_file,CFG_SND_CHN_ENABLE "=#%02X\n",chn_flags);
+    fprintf(ini_file,CFG_SND_VOLUME "=#%02X\n",volume);
+    fprintf(ini_file,CFG_SND_MUTE "=%s\n",EmulatorConfig.snd_mute?"true":"false");
+    fprintf(ini_file,"\n");
 
-    fprintf(ini_file,"[GameBoy]\r\n");
-    fprintf(ini_file,CFG_HW_TYPE "=%s\r\n",hwtype[EmulatorConfig.hardware_type+1]);
-    fprintf(ini_file,CFG_SERIAL_DEVICE "=%s\r\n",serialdevice[EmulatorConfig.serial_device]);
-    fprintf(ini_file,CFG_ENABLE_BLUR "=%s\r\n",EmulatorConfig.enableblur?"true":"false");
-    fprintf(ini_file,CFG_REAL_GB_COLORS "=%s\r\n",EmulatorConfig.realcolors?"true":"false");
+    fprintf(ini_file,"[GameBoy]\n");
+    fprintf(ini_file,CFG_HW_TYPE "=%s\n",hwtype[EmulatorConfig.hardware_type+1]);
+    fprintf(ini_file,CFG_SERIAL_DEVICE "=%s\n",serialdevice[EmulatorConfig.serial_device]);
+    fprintf(ini_file,CFG_ENABLE_BLUR "=%s\n",EmulatorConfig.enableblur?"true":"false");
+    fprintf(ini_file,CFG_REAL_GB_COLORS "=%s\n",EmulatorConfig.realcolors?"true":"false");
     u8 r,g,b; GB_ConfigGetPalette(&r,&g,&b);
-    fprintf(ini_file,CFG_GB_PALETTE "=#%02X%02X%02X\r\n",r,g,b);
-    fprintf(ini_file,"\r\n");
+    fprintf(ini_file,CFG_GB_PALETTE "=#%02X%02X%02X\n",r,g,b);
+    fprintf(ini_file,"\n");
 
 /*
-    fprintf(ini_file,"[Controls]\r\n");
+    fprintf(ini_file,"[Controls]\n");
     int player, key;
     for(player = 0; player < 4; player ++) for(key = 0; key < P_NUM_KEYS; key ++)
     {
         char * keyname = SDL_GetKeyName(Config_Controls_Get_Key(player,key));
         if(strcmp(keyname,"unknown key") != 0)
-            fprintf(ini_file,"P%d_%s=%s\r\n",player+1,GBKeyNames[key],keyname);
+            fprintf(ini_file,"P%d_%s=%s\n",player+1,GBKeyNames[key],keyname);
     }
     if(Config_Controls_Get_Key(0,P_KEY_SPEEDUP) != 0)
-        fprintf(ini_file,"SpeedUp=%s\r\n",SDL_GetKeyName(Config_Controls_Get_Key(0,P_KEY_SPEEDUP)));
+        fprintf(ini_file,"SpeedUp=%s\n",SDL_GetKeyName(Config_Controls_Get_Key(0,P_KEY_SPEEDUP)));
     else
-        fprintf(ini_file,"SpeedUp=\r\n");
-    fprintf(ini_file,"\r\n");
+        fprintf(ini_file,"SpeedUp=\n");
+    fprintf(ini_file,"\n");
 */
     fclose(ini_file);
 }

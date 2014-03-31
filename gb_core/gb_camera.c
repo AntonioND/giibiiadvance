@@ -67,7 +67,7 @@ void GB_CameraEnd(void)
 #endif
 }
 
-int GB_CameraInit(int createwindow)
+int GB_CameraInit(void) // (int createwindow)
 {
 #ifndef NO_CAMERA_EMULATION
     if(gbcamenabled) return 1;
@@ -75,7 +75,7 @@ int GB_CameraInit(int createwindow)
     capture = cvCaptureFromCAM(CV_CAP_ANY); // TODO : Select camera from configuration file?
     if(!capture)
     {
-        Debug_ErrorMsgArg("OpenCV ERROR: capture is NULL\nNo camera detected?");
+        Debug_DebugMsgArg("OpenCV ERROR:\ncvCaptureFromCAM(CV_CAP_ANY) is NULL.\nNo camera detected?");
         return 0;
     }
 

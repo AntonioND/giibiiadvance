@@ -19,7 +19,7 @@
 #ifndef __GB_CAMERA__
 #define __GB_CAMERA__
 
-int GB_CameraInit(int createwindow);
+int GB_CameraInit(void);
 void GB_CameraEnd(void);
 
 int GB_CameraReadRegister(int address);

@@ -80,15 +80,15 @@ typedef struct PACKED {
 
 int GB_ShowConsoleRequested(void);
 int GB_CartridgeLoad(const u8 * pointer, const u32 rom_size);
-void Cartridge_Unload(void);
+void GB_Cartridge_Unload(void);
 
-void Cardridge_Set_Filename(char * filename);
+void GB_Cardridge_Set_Filename(char * filename);
 
-void SRAM_Save(void);
-void SRAM_Load(void);
+void GB_SRAM_Save(void);
+void GB_SRAM_Load(void);
 
-void RTC_Save(void);
-void RTC_Load(void);
+void GB_RTC_Save(void);
+void GB_RTC_Load(void);
 
 #endif //__LOAD_ROM__
 

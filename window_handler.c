@@ -80,7 +80,6 @@ void WH_Init(void)
 
 //-------------------------------------------------------------------------------------
 
-#ifdef _WIN32
 const char icon_data[] = {
     0x00,0x00,0x00,0xFF,0x00,0x00,0x00,0xFF,0x00,0x00,0x00,0xFF,0x00,0x00,0x00,0xFF,
     0x00,0x00,0x00,0xFF,0x00,0x00,0x00,0xFF,0x00,0x00,0x00,0xFF,0x00,0x00,0x00,0xFF,
@@ -349,7 +348,6 @@ static void _wh_set_window_icon(SDL_Window * window)
 
     SDL_FreeSurface(surface);
 }
-#endif // _WIN32
 
 //-------------------------------------------------------------------------------------
 
@@ -390,9 +388,7 @@ int WH_Create(int width, int height, int texw, int texh, int scale) // returns -
                                width, height, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
     if(w->mWindow != NULL)
     {
-#ifdef _WIN32
         _wh_set_window_icon(w->mWindow);
-#endif // _WIN32
 
         w->mMouseFocus = 1;
         w->mKeyboardFocus = 1;

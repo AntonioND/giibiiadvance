@@ -32,6 +32,7 @@
 #include "serial.h"
 #include "video.h"
 #include "gb_main.h"
+#include "gb_camera.h"
 
 _GB_CONTEXT_ GameBoy;
 
@@ -47,8 +48,9 @@ void GB_PowerOn(void)
 
     if(GameBoy.Emulator.MemoryController == MEM_CAMERA)
     {
-        if(GB_CameraInit(EmulatorConfig.debug_msg_enable) == 0)
-            Debug_DebugMsgArg("Camera functions won't be emulated... How about some screen noise instead? :)");
+        //if(GB_CameraInit(EmulatorConfig.debug_msg_enable) == 0)
+        //    Debug_DebugMsgArg("Camera functions won't be emulated... How about some screen noise instead? :)");
+        GB_CameraInit();
     }
 
     if(GameBoy.Emulator.MemoryController == MEM_MBC7)

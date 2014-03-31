@@ -31,8 +31,5 @@ u32 GB_MemReadReg8(u32 address);
 
 inline u32 GBC_HDMAcopy(void);
 
-void GB_CameraEnd(void);
-int GB_CameraInit(int createwindow);
-
 #endif //__MEMORY__
 

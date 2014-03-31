@@ -39,6 +39,13 @@ void Input_Update_GB(void)
 
     GB_InputSet(0, a, b, st, se, dr, dl, du, dd);
 
+    int accr = state[SDL_SCANCODE_KP_6];
+    int accl = state[SDL_SCANCODE_KP_4];
+    int accu = state[SDL_SCANCODE_KP_8];
+    int accd = state[SDL_SCANCODE_KP_2];
+
+    GB_InputSetMBC7Buttons(accu,accd,accr,accl);
+
     /*
     Keys[0] = 0; Keys[1] = 0; Keys[2] = 0; Keys[3] = 0;
 

@@ -31,7 +31,7 @@ void GB_RunForOneFrame(void);
 int GB_IsEnabledSGB(void);
 
 void GB_InputSet(int player, int a, int b, int st, int se, int r, int l, int u, int d);
-void GB_InputSetMBC7Joystick(int x, int y); // -200 to 200
+void GB_InputSetMBC7(int x, int y); // -200 to 200
 void GB_InputSetMBC7Buttons(int up, int down, int right, int left);
 
 int GB_Input_Get(int player);

@@ -48,7 +48,7 @@ static int Init(void)
     //Enable VSync
     //if(!SDL_SetHint( SDL_HINT_RENDER_VSYNC, "1"))
     //{
-    //    DU_Log("Warning: VSync not enabled!");
+    //    Debug_LogMsgArg("Warning: VSync not enabled!");
     //}
 
     Sound_Init();

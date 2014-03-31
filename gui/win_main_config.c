@@ -353,6 +353,9 @@ void Win_MainCreateConfigWindow(void)
     GUI_SetRadioButton(&mainwindow_configwin_gameboy_frameskip_4_radbtn,    12+23*FONT_WIDTH+36,126, 2*FONT_WIDTH,18,
                   "4",    2,  4, EmulatorConfig.frameskip==4, _win_main_config_frameskip_radbtn_callback);
 
+    // Auto frameskip not implemented.
+    GUI_RadioButtonSetEnabled(&mainwindow_configwin_gameboy_frameskip_auto_radbtn,0);
+
     //-----------------------------
 
     GUI_SetGroupBox(&mainwindow_configwin_sound_groupbox,234,6,222,183,"Sound");

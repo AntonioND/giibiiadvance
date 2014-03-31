@@ -132,33 +132,6 @@ static Uint32 _fps_callback_function(Uint32 interval, void *param)
         s_snprintf(caption,sizeof(caption),"GiiBiiAdvance: %d fps - %.2f%%",WinMain_FPS,(float)WinMain_FPS*10.0f/6.0f);
     WH_SetCaption(WinIDMain,caption);
 
-
-    /*
-int FRAMESKIP = 0;
-int AUTO_FRAMESKIP_WAIT = 0;
-
-    if(PAUSED == 0)
-    {
-        if(EmulatorConfig.frameskip == -1)
-        {
-            if(GLWindow_Active)
-            {
-                if(AUTO_FRAMESKIP_WAIT) // this is used because the first seconds of emulation FPS counter doesn't work right
-                {
-                    AUTO_FRAMESKIP_WAIT--;
-                }
-                else
-                {
-                    if(FPS < 58) FRAMESKIP ++;
-                }
-            }
-            else AUTO_FRAMESKIP_WAIT = 2;
-        }
-        else FRAMESKIP = EmulatorConfig.frameskip;
-    }
-}
-    */
-
     return interval;
 }
 
@@ -417,16 +390,7 @@ static int _win_main_load_rom_autodetect(char * path)
             WIN_MAIN_RUNNING = RUNNING_GB;
 
             Sound_SetCallback(GB_SoundCallback);
-#if 0
-            if(EmulatorConfig.frameskip == -1)
-            {
-                FRAMESKIP = 0;
-                AUTO_FRAMESKIP_WAIT = 2;
-            }
 
-            GLWindow_MenuEnableROMCommands(1);
-            GLWindow_ClearPause();
-#endif
             _win_main_switch_to_game_delayed();
 
             return 1;
@@ -455,16 +419,7 @@ static int _win_main_load_rom_autodetect(char * path)
         Sound_SetCallback(GBA_SoundCallback);
 
         _win_main_set_game_screen(SCREEN_GBA);
-#if 0
-        if(EmulatorConfig.frameskip == -1)
-        {
-            FRAMESKIP = 0;
-            AUTO_FRAMESKIP_WAIT = 2;
-        }
 
-        GLWindow_MenuEnableROMCommands(1);
-        GLWindow_ClearPause();
-#endif
         _win_main_switch_to_game_delayed();
 
         return 1;

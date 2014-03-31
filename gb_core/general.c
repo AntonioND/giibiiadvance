@@ -50,6 +50,11 @@ void GB_PowerOn(void)
         if(GB_CameraInit(EmulatorConfig.debug_msg_enable) == 0)
             Debug_DebugMsgArg("Camera functions won't be emulated... How about some screen noise instead? :)");
     }
+
+    if(GameBoy.Emulator.MemoryController == MEM_MBC7)
+    {
+        GB_InputSetMBC7(0,0);
+    }
 }
 
 void GB_PowerOff(void)

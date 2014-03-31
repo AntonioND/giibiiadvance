@@ -16,10 +16,7 @@ This is the only GB emulator that emulates completely the GB Camera if you have 
 Current goals for 0.2.0
 -----------------------
 
-- Readme and about text.
-- Auto frameskip.
-- Fix GBA emulation (Linux). THUMB mode ROR doesn't work right?
-- MBC7 input.
+- Fix GBA emulation in Linux. THUMB mode ROR doesn't work right?
 
 For 0.3.0
 ---------
@@ -39,6 +36,7 @@ For 0.3.0
  - Implement mosaic correctly (in GBA mode).
  - Correct GBA CPU timings.
  - Rewrite a lot of GB core to speed up emulation.
+ - Auto frameskip.
 
 Dependencies
 ------------

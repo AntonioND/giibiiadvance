@@ -133,6 +133,9 @@ void GB_InputSetMBC7(int x, int y)
 
 void GB_InputSetMBC7Buttons(int up, int down, int right, int left)
 {
+    if(GameBoy.Emulator.MemoryController != MEM_MBC7)
+        return;
+
     if(up)
     {
         if(GameBoy.Emulator.MBC7.sensorY < 2047 - 50)

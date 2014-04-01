@@ -108,6 +108,7 @@ const char * readme_text = {
 "-Every command should be self-explanatory, but if you don't understand "
 "something tell me and I will tell you (and add it to the help next time). "
 "You can find my email at the end of this text.\n"
+"-When GB Printer is enabled, some games may not work, like Alleyway."
 "\n"
 "\n"
 "License\n"

@@ -340,8 +340,8 @@ void Win_MainCreateConfigWindow(void)
 
     GUI_SetLabel(&mainwindow_configwin_general_frameskip_label,12,129,-1,FONT_HEIGHT,"Frameskip:");
 
-    GUI_SetRadioButton(&mainwindow_configwin_gameboy_frameskip_auto_radbtn, 12+10*FONT_WIDTH+6, 126, 5*FONT_WIDTH,18,
-                  "Auto", 2, -1, EmulatorConfig.frameskip==-1,_win_main_config_frameskip_radbtn_callback);
+    //GUI_SetRadioButton(&mainwindow_configwin_gameboy_frameskip_auto_radbtn, 12+10*FONT_WIDTH+6, 126, 5*FONT_WIDTH,18,
+    //              "Auto", 2, -1, EmulatorConfig.frameskip==-1,_win_main_config_frameskip_radbtn_callback);
     GUI_SetRadioButton(&mainwindow_configwin_gameboy_frameskip_0_radbtn,    12+15*FONT_WIDTH+12,126, 2*FONT_WIDTH,18,
                   "0",    2,  0, EmulatorConfig.frameskip==0, _win_main_config_frameskip_radbtn_callback);
     GUI_SetRadioButton(&mainwindow_configwin_gameboy_frameskip_1_radbtn,    12+17*FONT_WIDTH+18,126, 2*FONT_WIDTH,18,
@@ -354,7 +354,7 @@ void Win_MainCreateConfigWindow(void)
                   "4",    2,  4, EmulatorConfig.frameskip==4, _win_main_config_frameskip_radbtn_callback);
 
     // Auto frameskip not implemented.
-    GUI_RadioButtonSetEnabled(&mainwindow_configwin_gameboy_frameskip_auto_radbtn,0);
+    //GUI_RadioButtonSetEnabled(&mainwindow_configwin_gameboy_frameskip_auto_radbtn,0);
 
     //-----------------------------
 
@@ -410,12 +410,12 @@ void Win_MainCreateConfigWindow(void)
                        12+6*FONT_WIDTH+6,278,11*FONT_WIDTH,18,
                        "GB Printer", 4,  SERIAL_GBPRINTER, EmulatorConfig.serial_device == SERIAL_GBPRINTER,
                        _win_main_config_serial_device_radbtn_callback);
-    GUI_SetRadioButton(&mainwindow_configwin_gameboy_serial_device_gameboy_radbtn,
-                       12+17*FONT_WIDTH+12,278,11*FONT_WIDTH,18,
-                       "Game Boy",   4,  SERIAL_GAMEBOY, EmulatorConfig.serial_device == SERIAL_GAMEBOY,
-                       _win_main_config_serial_device_radbtn_callback);
+    //GUI_SetRadioButton(&mainwindow_configwin_gameboy_serial_device_gameboy_radbtn,
+    //                   12+17*FONT_WIDTH+12,278,11*FONT_WIDTH,18,
+    //                   "Game Boy",   4,  SERIAL_GAMEBOY, EmulatorConfig.serial_device == SERIAL_GAMEBOY,
+    //                   _win_main_config_serial_device_radbtn_callback);
     // Game Boy serial to another Game Boy not implemented, so disable this.
-    GUI_RadioButtonSetEnabled(&mainwindow_configwin_gameboy_serial_device_gameboy_radbtn,0);
+    //GUI_RadioButtonSetEnabled(&mainwindow_configwin_gameboy_serial_device_gameboy_radbtn,0);
 
     GUI_SetCheckBox(&mainwindow_configwin_gameboy_enableblur_checkbox,12,302,-1,12,"Enable blur",
                         EmulatorConfig.enableblur, _win_main_config_enable_blur_callback);

@@ -292,11 +292,11 @@ u32 GBA_MemoryRead32(u32 address)
     }
 
 #ifdef USE_ASM
-    asm("and $3,%%eax    \n\t"
-        "mov $3,%%cl     \n\t"
-        "shl %%cl,%%eax  \n\t" //eax = shift value
-        "mov %%eax,%%ecx \n\t" //ecx = shift value, ebx = data
-        "ror %%cl,%%ebx  \n\t"
+    asm("and $3,%%eax    \n\t" // eax = address & 3
+        "mov $3,%%cl     \n\t" // cl = 3
+        "shl %%cl,%%eax  \n\t" // eax = (address & 3) << 3
+        "mov %%eax,%%ecx \n\t" // ecx = shift = (address & 3) << 3
+        "ror %%cl,%%ebx  \n\t" // ebx = [ data ]  ror [ shift ]
         : "=b" (data)
         : "a" (address), "b" (data)
         : "ecx" );

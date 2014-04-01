@@ -23,6 +23,10 @@
 
 //-----------------------------------------------------------------------------------
 
+//#ifdef __unix__
+#undef USE_ASM // ASM is broken in this file...
+//#endif // __unix__
+
 //-----------------------------------------------------------------------------------
 
 //For building immediate values in ARM mode (shift = 0~31)
@@ -44,15 +48,9 @@ static inline u32 ror_immed(u32 value, u8 shift, u8 * carry)
     {
 #ifdef USE_ASM
         asm("ror %%cl,%%eax \n\t" // eax = eax ror cl
-            "setc %2 \n\t"
-            : "=a" (value) : "a" (value), "m" (carry), "c" (shift));
-        return value;
-/*
-        asm("ror %%cl,%%eax \n\t" // eax = eax ror cl
             "setc (%%ebx) \n\t"   // (ebx) = carry
             : "=a" (value) : "a" (value), "b" (carry), "c" (shift));
         return value;
-*/
 #else
         *carry = (value & BIT(shift-1)) != 0;
         return ( (value >> shift) | (value<<(32-shift)) );
@@ -79,15 +77,9 @@ static inline u32 lsl_shift_by_immed(u32 value, u8 shift, u8 * carry)
     {
 #ifdef USE_ASM
         asm("shl %%cl,%%eax \n\t"
-            "setc %2 \n\t"
-            : "=a" (value) : "a" (value), "m" (carry), "c" (shift));
-        return value;
-/*
-        asm("shl %%cl,%%eax \n\t"
             "setc (%%ebx) \n\t"
             : "=a" (value) : "a" (value), "b" (carry), "c" (shift));
         return value;
-*/
 #else
         *carry = (value&BIT(32-shift)) != 0;
         return ( value << shift );
@@ -102,8 +94,8 @@ static inline u32 lsr_shift_by_immed(u32 value, u8 shift, u8 * carry)
     {
 #ifdef USE_ASM
         asm("shr %%cl,%%eax \n\t"
-            "setc %2 \n\t"
-            : "=a" (value) : "a" (value), "m" (carry), "c" (shift));
+            "setc (%%ebx) \n\t"
+            : "=a" (value) : "a" (value), "b" (carry), "c" (shift));
         return value;
 #else
         *carry = (value&BIT(shift-1)) != 0;
@@ -119,8 +111,8 @@ static inline u32 asr_shift_by_immed(u32 value, u8 shift, u8 * carry)
     {
 #ifdef USE_ASM
         asm("sar %%cl,%%eax \n\t"
-            "setc %2 \n\t"
-            : "=a" (value) : "a" (value), "m" (carry), "c" (shift));
+            "setc (%%ebx) \n\t"
+            : "=a" (value) : "a" (value), "b" (carry), "c" (shift));
         return value;
 #else
         *carry = (value&BIT(shift-1)) != 0;
@@ -140,8 +132,8 @@ static inline u32 ror_shift_by_immed(u32 value, u8 shift, u8 * carry)
     {
 #ifdef USE_ASM
         asm("ror %%cl,%%eax \n\t"
-            "setc %2 \n\t"
-            : "=a" (value) : "a" (value), "m" (carry), "c" (shift));
+            "setc (%%ebx) \n\t"
+            : "=a" (value) : "a" (value), "b" (carry), "c" (shift));
         return value;
 #else
         *carry = (value & BIT(shift-1)) != 0;
@@ -249,15 +241,9 @@ static inline u32 lsl_shift_by_reg(u32 value, u8 shift, u8 * carry)
         {
 #ifdef USE_ASM
             asm("shl %%cl,%%eax \n\t"
-                "setc %2 \n\t"
-                : "=a" (value) : "a" (value), "m" (carry), "c" (shift));
-            return value;
-/*
-            asm("shl %%cl,%%eax \n\t"
                 "setc (%%ebx) \n\t"
                 : "=a" (value) : "a" (value), "b" (carry), "c" (shift));
             return value;
-*/
 #else
             *carry = (value&BIT(32-shift)) != 0;
             return value<<shift;
@@ -278,8 +264,8 @@ static inline u32 lsr_shift_by_reg(u32 value, u8 shift, u8 * carry)
         {
 #ifdef USE_ASM
             asm("shr %%cl,%%eax \n\t"
-                "setc %2 \n\t"
-                : "=a" (value) : "a" (value), "m" (carry), "c" (shift));
+                "setc (%%ebx) \n\t"
+                : "=a" (value) : "a" (value), "b" (carry), "c" (shift));
             return value;
 #else
             *carry = (value&BIT(shift-1)) != 0;
@@ -302,8 +288,8 @@ static inline u32 asr_shift_by_reg(u32 value, u8 shift, u8 * carry)
         {
 #ifdef USE_ASM
             asm("sar %%cl,%%eax \n\t"
-                "setc %2 \n\t"
-                : "=a" (value) : "a" (value), "m" (carry), "c" (shift));
+                "setc (%%ebx) \n\t"
+                : "=a" (value) : "a" (value), "b" (carry), "c" (shift));
             return value;
 #else
             *carry = (value&BIT(shift-1)) != 0;
@@ -325,8 +311,8 @@ static inline u32 ror_shift_by_reg(u32 value, u8 shift, u8 * carry)
         {
 #ifdef USE_ASM
             asm("ror %%cl,%%eax \n\t"
-                "setc %2 \n\t"
-                : "=a" (value) : "a" (value), "m" (carry), "c" (shift));
+                "setc (%%ebx) \n\t"
+                : "=a" (value) : "a" (value), "b" (carry), "c" (shift));
             return value;
 #else
             *carry = (value & BIT(shift-1)) != 0;

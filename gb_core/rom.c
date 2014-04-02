@@ -712,7 +712,11 @@ void GB_SRAM_Load(void)
 
     FILE * savefile = fopen (name,"rb");
 
-    if(!savefile) return; // No save file...
+    if(!savefile) // No save file...
+    {
+        free(name);
+        return;
+    }
 
     ConsolePrint("Loading SRAM... ");
 
@@ -737,6 +741,7 @@ void GB_SRAM_Load(void)
     }
 
     fclose(savefile);
+    free(name);
 
     ConsolePrint("Done!\n");
 }
@@ -754,12 +759,18 @@ void GB_RTC_Save(void)
 
     FILE * savefile = fopen (name,"wb+");
 
-    if(!savefile) Debug_ErrorMsgArg("Couldn't save rtc data.");
+    if(!savefile)
+    {
+        Debug_ErrorMsgArg("Couldn't save rtc data.");
+        free(name);
+        return;
+    }
 
     fwrite(&GameBoy.Emulator.Timer, 1, sizeof(_GB_MB3_TIMER_), savefile);
     fwrite(&current_time, 1, sizeof(time_t), savefile);
 
     fclose(savefile);
+    free(name);
 }
 
 void GB_RTC_Load(void)

@@ -85,7 +85,7 @@ void FileExplorer_SetPath(char * path)
     if(path)
         s_strncpy(exploring_path,path,sizeof(exploring_path));
     else
-        strcpy(exploring_path,".");
+        s_strncpy(exploring_path,".",sizeof(exploring_path));
 }
 
 void FileExplorer_ListFree(void)
@@ -137,8 +137,9 @@ void FileExplorer_ListAdd(char * name, int isdir)
         }
 
         list_isdir[filenum] = isdir;
-        filename[filenum] = malloc(strlen(name)+1);
-        strcpy(filename[filenum],name);
+        int size = strlen(name)+1;
+        filename[filenum] = malloc(size);
+        s_strncpy(filename[filenum],name,size);
         filenum ++;
     }
 }

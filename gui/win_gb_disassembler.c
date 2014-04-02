@@ -168,7 +168,7 @@ void Win_GBDisassemblerUpdate(void)
     for(i = 0; i < CPU_DISASSEMBLER_MAX_INSTRUCTIONS; i++)
     {
         int step;
-        strcpy(opcode_text,GB_Dissasemble(address,&step));
+        s_strncpy(opcode_text,GB_Dissasemble(address,&step),sizeof(opcode_text));
         GUI_ConsoleModePrintf(&gb_disassembly_con,0,i,"%04X:%s",address,opcode_text);
         gb_cpu_line_address[i] = address;
 

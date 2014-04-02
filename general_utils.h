@@ -34,14 +34,17 @@ typedef signed char s8;
 
 //----------------------------------------------------------------------------------
 
+//safe versions of snprintf, strncpy and strncat that set a terminating character if needed.
+//strncpy doesn't set it, and I'd say I've seen implementations of strncat and snprinf that
+//doesn't, either.
 int s_snprintf(char * dest, int _size, const char * msg, ...);
 void s_strncpy(char * dest, const char * src, int _size);
 void s_strncat(char * dest, const char * src, int _size);
 
 void memset_rand(u8 * start, u32 _size);
 
-u64 asciihex_to_int(const char * text);
-u64 asciidec_to_int(const char * text);
+u64 asciihex_to_int(const char * text); // converts an hexadecimal number in an ASCII string into integer
+u64 asciidec_to_int(const char * text); // converts a decimal number in an ASCII string into integer
 
 void ScaleImage24RGB(int zoom, char * srcbuf, int srcw, int srch, char * dstbuf, int dstw, int dsth);
 

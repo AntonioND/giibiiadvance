@@ -182,7 +182,7 @@ void GUI_SetButton(_gui_element * e, int x, int y, int w, int h, const char * la
     e->w = w;
     e->h = h;
     e->info.button.callback = callback;
-    strcpy(e->info.button.name,label);
+    s_strncpy(e->info.button.name,label,sizeof(e->info.button.name));
 }
 
 void GUI_SetRadioButton(_gui_element * e, int x, int y, int w, int h, const char * label, int group_id, int btn_id,
@@ -199,7 +199,7 @@ void GUI_SetRadioButton(_gui_element * e, int x, int y, int w, int h, const char
     e->info.radiobutton.btn_id = btn_id;
     e->info.radiobutton.is_pressed = start_pressed;
     e->info.radiobutton.is_enabled = 1;
-    strcpy(e->info.radiobutton.name,label);
+    s_strncpy(e->info.radiobutton.name,label,sizeof(e->info.radiobutton.name));
 }
 
 void GUI_SetLabel(_gui_element * e, int x, int y, int w, int h, const char * label)
@@ -211,7 +211,7 @@ void GUI_SetLabel(_gui_element * e, int x, int y, int w, int h, const char * lab
     if(w <= 0) w = strlen(label)*FONT_WIDTH;
     e->w = w;
     e->h = h;
-    strcpy(e->info.label.text,label);
+    s_strncpy(e->info.label.text,label,sizeof(e->info.label.text));
 }
 
 void GUI_SetBitmap(_gui_element * e, int x, int y, int w, int h, char * bitmap, _gui_int_arg_int_int_fn callback) // 24 bit
@@ -236,7 +236,7 @@ void GUI_SetWindow(_gui_element * e, int x, int y, int w, int h, void * gui, con
     e->h = h;
     e->info.window.gui = gui;
     e->info.window.enabled = 0;
-    strcpy(e->info.window.caption,caption);
+    s_strncpy(e->info.window.caption,caption,sizeof(e->info.window.caption));
 
     _gui * relative_gui = gui;
 
@@ -298,7 +298,7 @@ void GUI_SetScrollableTextWindow(_gui_element * e, int x, int y, int w, int h, c
     e->h = h;
     e->info.scrollabletextwindow.text = text;
     e->info.scrollabletextwindow.enabled = 0;
-    strcpy(e->info.scrollabletextwindow.caption,caption);
+    s_strncpy(e->info.scrollabletextwindow.caption,caption,sizeof(e->info.scrollabletextwindow.caption));
     e->info.scrollabletextwindow.numlines = 0;
     e->info.scrollabletextwindow.currentline = 0;
 
@@ -388,7 +388,7 @@ void GUI_SetGroupBox(_gui_element * e, int x, int y, int w, int h, const char * 
     e->y = y;
     e->w = w;
     e->h = h;
-    strcpy(e->info.groupbox.label,label);
+    s_strncpy(e->info.groupbox.label,label,sizeof(e->info.groupbox.label));
 }
 
 void GUI_SetCheckBox(_gui_element * e, int x, int y, int w, int h, const char * label,
@@ -400,7 +400,7 @@ void GUI_SetCheckBox(_gui_element * e, int x, int y, int w, int h, const char * 
     e->y = y;
     e->w = w;
     e->h = h;
-    strcpy(e->info.checkbox.label,label);
+    s_strncpy(e->info.checkbox.label,label,sizeof(e->info.checkbox.label));
     e->info.checkbox.checked = start_pressed;
     e->info.checkbox.callback = callback;
 }
@@ -431,7 +431,7 @@ void GUI_SetLabelCaption(_gui_element * e, const char * label)
     if(e->element_type != GUI_TYPE_LABEL)
         return;
 
-    strcpy(e->info.label.text,label);
+    s_strncpy(e->info.label.text,label,sizeof(e->info.label.text));
 }
 
 void _gui_clear_radiobuttons(_gui_element ** element_list, int group_id)

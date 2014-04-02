@@ -284,9 +284,9 @@ int GB_CartridgeLoad(const u8 * pointer, const u32 rom_size)
         {
             if(DirGetBiosFolderPath())
             {
-                char * completepath = malloc(strlen(DirGetBiosFolderPath())
-                                            +strlen(boot_rom_filename)+2);
-                sprintf(completepath,"%s%s",DirGetBiosFolderPath(),boot_rom_filename);
+                int size = strlen(DirGetBiosFolderPath()) + strlen(boot_rom_filename) + 2;
+                char * completepath = malloc(size);
+                s_snprintf(completepath,size,"%s%s",DirGetBiosFolderPath(),boot_rom_filename);
                 FILE * test = fopen(completepath,"rb");
                 if(test)
                 {
@@ -676,8 +676,9 @@ void GB_SRAM_Save(void)
 {
     if(GameBoy.Emulator.RAM_Banks == 0 || GameBoy.Emulator.HasBattery == 0) return;
 
-    char * name = malloc(strlen(GameBoy.Emulator.save_filename) + 5);
-    sprintf(name,"%s.sav",GameBoy.Emulator.save_filename);
+    int size = strlen(GameBoy.Emulator.save_filename) + 5;
+    char * name = malloc(size);
+    s_snprintf(name,size,"%s.sav",GameBoy.Emulator.save_filename);
 
     FILE * savefile = fopen (name,"wb+");
 
@@ -714,8 +715,9 @@ void GB_SRAM_Load(void)
 {
     if(GameBoy.Emulator.RAM_Banks == 0 || GameBoy.Emulator.HasBattery == 0) return;
 
-    char * name = malloc(strlen(GameBoy.Emulator.save_filename) + 5);
-    sprintf(name,"%s.sav",GameBoy.Emulator.save_filename);
+    int size = strlen(GameBoy.Emulator.save_filename) + 5;
+    char * name = malloc(size);
+    s_snprintf(name,size,"%s.sav",GameBoy.Emulator.save_filename);
 
     FILE * savefile = fopen (name,"rb");
 
@@ -759,8 +761,9 @@ void GB_RTC_Save(void)
 {
     if(GameBoy.Emulator.HasTimer == 0) return;
 
-    char * name = malloc(strlen(GameBoy.Emulator.save_filename) + 5);
-    sprintf(name,"%s.rtc",GameBoy.Emulator.save_filename);
+    int size = strlen(GameBoy.Emulator.save_filename) + 5;
+    char * name = malloc(size);
+    s_snprintf(name,size,"%s.rtc",GameBoy.Emulator.save_filename);
 
     time_t current_time = time(NULL);
 
@@ -790,8 +793,9 @@ void GB_RTC_Load(void)
 {
     if(GameBoy.Emulator.HasTimer == 0) return;
 
-    char * name = malloc(strlen(GameBoy.Emulator.save_filename) + 5);
-    sprintf(name,"%s.rtc",GameBoy.Emulator.save_filename);
+    int size = strlen(GameBoy.Emulator.save_filename) + 5;
+    char * name = malloc(size);
+    s_snprintf(name,size,"%s.rtc",GameBoy.Emulator.save_filename);
 
     time_t current_time = time(NULL);
     time_t old_time;

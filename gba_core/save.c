@@ -164,7 +164,7 @@ void GBA_SaveSetFilename(char * rom_path)
         exit(1);
     }
 
-    strcpy(SAVE_PATH,rom_path);
+    s_strncpy(SAVE_PATH,rom_path,sizeof(SAVE_PATH));
     int cursor = strlen(SAVE_PATH);
 
     //path should end in ".gba" or ".bin"

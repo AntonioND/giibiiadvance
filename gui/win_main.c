@@ -1008,6 +1008,7 @@ static int Win_MainEventCallback(SDL_Event * e)
         {
             case SDLK_F1:
                 _win_main_scrollable_text_window_show_readme();
+                WIN_MAIN_MENU_HAS_TO_UPDATE = 1;
                 break;
             case SDLK_F5:
                 _win_main_menu_open_disassembler();
@@ -1080,16 +1081,6 @@ static int Win_MainEventCallback(SDL_Event * e)
             case SDLK_r:
                 if(SDL_GetModState()&KMOD_CTRL) _win_main_reset();
                 break;
-
-            //case SDLK_1:
-            //    Win_MainChangeZoom(2);
-            //    return 1;
-            //case SDLK_2:
-            //    Win_MainChangeZoom(3);
-            //    return 1;
-            //case SDLK_3:
-            //    Win_MainChangeZoom(4);
-            //    return 1;
 
             case SDLK_ESCAPE:
                 WH_CloseAll();

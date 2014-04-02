@@ -174,7 +174,7 @@ void Win_GBADisassemblerUpdate(void)
         {
             u32 opcode = GBA_MemoryReadFast32(address);
 
-            GBA_DisassembleARM(opcode,address,opcode_text);
+            GBA_DisassembleARM(opcode,address,opcode_text,sizeof(opcode_text));
             s_snprintf(final_text,sizeof(final_text),"%08X:%08X %s",address,opcode,opcode_text);
 
             GUI_ConsoleModePrintf(&gba_disassembly_con,0,i,final_text);
@@ -200,7 +200,7 @@ void Win_GBADisassemblerUpdate(void)
         {
             u16 opcode = GBA_MemoryReadFast16(address);
 
-            GBA_DisassembleTHUMB(opcode,address,opcode_text);
+            GBA_DisassembleTHUMB(opcode,address,opcode_text,sizeof(opcode_text));
             s_snprintf(final_text,sizeof(final_text),"%08X:%04X %s",address,opcode,opcode_text);
 
             GUI_ConsoleModePrintf(&gba_disassembly_con,0,i,final_text);

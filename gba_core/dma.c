@@ -121,7 +121,7 @@ void GBA_DMA0Setup(void)
     }
 
 /*
-    char text[64]; sprintf(text,"DMA0 SETUP\nMODE: %d\nSRC: %08X (%d)\nDST: %08X (%d)\n"
+    char text[64]; s_snprintf(text,sizeof(text),"DMA0 SETUP\nMODE: %d\nSRC: %08X (%d)\nDST: %08X (%d)\n"
         "CHUNK: %08X"
         ,DMA[0].starttime,DMA[0].srcaddr,DMA[0].srcadd,DMA[0].dstaddr,DMA[0].dstadd,
         DMA[0].num_chunks);
@@ -281,7 +281,7 @@ void GBA_DMA3Setup(void)
 
     if(DMA[3].starttime == START_NOW) { gba_dmaworking = 1; GBA_ExecutionBreak(); }
 /*
-    char text[64]; sprintf(text,"DMA3 SETUP\nMODE: %d\nSRC: %08X (%d)\nDST: %08X (%d)\n"
+    char text[64]; s_snprintf(text,sizeof(text),"DMA3 SETUP\nMODE: %d\nSRC: %08X (%d)\nDST: %08X (%d)\n"
         "CHUNK: %08X"
         ,DMA[3].starttime,DMA[3].srcaddr,DMA[3].srcadd,DMA[3].dstaddr,DMA[3].dstadd,
         DMA[3].num_chunks);
@@ -398,7 +398,7 @@ static inline s32 GBA_DMA1Update(s32 clocks) //return clocks to finish transfer
 
     if(DMA[1].starttime == START_SPECIAL)
     {
-        //char text[64]; sprintf(text,"DMA1, MODE: %d",DMA[1].starttime);
+        //char text[64]; s_snprintf(text,sizeof(text),"DMA1, MODE: %d",DMA[1].starttime);
         //MessageBox(NULL, text, "EMULATION", MB_OK);
         //GBA_ExecutionBreak();
         DMA[1].enabled = 0;
@@ -509,7 +509,7 @@ static inline s32 GBA_DMA2Update(s32 clocks) //return clocks to finish transfer
 
     if(DMA[2].starttime == START_SPECIAL)
     {
-        //char text[64]; sprintf(text,"DMA1, MODE: %d",DMA[1].starttime);
+        //char text[64]; s_snprintf(text,sizeof(text),"DMA1, MODE: %d",DMA[1].starttime);
         //MessageBox(NULL, text, "EMULATION", MB_OK);
         //GBA_ExecutionBreak();
         DMA[2].enabled = 0;
@@ -659,7 +659,7 @@ static inline s32 GBA_DMA3Update(s32 clocks) //return clocks to finish transfer
             //MessageBox(NULL, "DMA 3 copy", "EMULATION", MB_OK);
             //GBA_ExecutionBreak();
 
-            //char text[64]; sprintf(text,"DMA3\nSRC: %08X\nDST: %08X\nCHUNCKS: %08X",
+            //char text[64]; s_snprintf(text,sizeof(text),"DMA3\nSRC: %08X\nDST: %08X\nCHUNCKS: %08X",
             //    DMA[3].srcaddr,DMA[3].dstaddr,DMA[3].num_chunks);
             //MessageBox(NULL, text, "EMULATION", MB_OK);
             //GBA_ExecutionBreak();

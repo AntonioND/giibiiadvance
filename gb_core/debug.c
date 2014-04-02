@@ -409,7 +409,7 @@ static struct {
     {NULL, 0}
 };
 
-int gb_dissasemble_add_io_register_name(int reg_address, char * dest, int add_comment)
+int gb_dissasemble_add_io_register_name(int reg_address, char * dest, int add_comment, int dest_size)
 {
     int i = 0;
     while(1)
@@ -419,13 +419,13 @@ int gb_dissasemble_add_io_register_name(int reg_address, char * dest, int add_co
         {
             if(add_comment)
             {
-                strcat(dest," ; ");
-                strcat(dest,gb_io_reg_struct[i].name);
+                s_strncat(dest," ; ",dest_size);
+                s_strncat(dest,gb_io_reg_struct[i].name,dest_size);
             }
             else
             {
-                strcat(dest," - ");
-                strcat(dest,gb_io_reg_struct[i].name);
+                s_strncat(dest," - ",dest_size);
+                s_strncat(dest,gb_io_reg_struct[i].name,dest_size);
             }
             return 1;
         }
@@ -451,7 +451,7 @@ char * GB_Dissasemble(u16 addr, int * step)
         if(paramsize == 0)
         {
             *step = 1;
-            sprintf(text,"%02X       %s",cmd,debug_commands[cmd]);
+            s_snprintf(text,sizeof(text),"%02X       %s",cmd,debug_commands[cmd]);
             info = debug_commands_info[cmd];
             param = 0;
         }
@@ -465,33 +465,33 @@ char * GB_Dissasemble(u16 addr, int * step)
             {
                 if(cmd == 0x10) //stop
                 {
-                    strcpy(instr_text, (param == 0x00) ? "stop" : "stop ; [!] corrupted");
+                    s_strncpy(instr_text, (param == 0x00) ? "stop" : "stop ; [!] corrupted", sizeof(instr_text));
                     param = 0;
                     info = 0;
                 }
                 else if(cmd == 0xCB)
                 {
-                    strcpy(instr_text,debug_commands_cb[param]);
+                    s_strncpy(instr_text,debug_commands_cb[param],sizeof(instr_text));
                     param = 0;
                     info = debug_commands_cb_info[param];
                 }
                 else
                 {
                     char temp[32];
-                    strcpy(temp, debug_commands[cmd]);
+                    s_strncpy(temp, debug_commands[cmd], sizeof(temp));
                     info = debug_commands_info[cmd];
-                    sprintf(instr_text,temp,param);
+                    s_snprintf(instr_text,sizeof(instr_text),temp,param);
                 }
             }
             else
             {
                 char temp[32];
-                strcpy(temp, debug_commands[cmd]);
+                s_strncpy(temp, debug_commands[cmd], sizeof(temp));
                 info = debug_commands_info[cmd];
-                sprintf(instr_text,temp,param);
+                s_snprintf(instr_text,sizeof(instr_text),temp,param);
             }
 
-            sprintf(text,"%02X%02X     %s",cmd,param,instr_text);
+            s_snprintf(text,sizeof(text),"%02X%02X     %s",cmd,param,instr_text);
             *step = 2;
         }
         else if(paramsize == 2)
@@ -504,10 +504,10 @@ char * GB_Dissasemble(u16 addr, int * step)
             u8 param2 = GB_MemRead8(addr++);
             param = param1 | (param2 << 8);
             char temp[32];
-            strcpy(temp, debug_commands[cmd]);
-            sprintf(instr_text,temp,param);
+            s_strncpy(temp, debug_commands[cmd], sizeof(temp));
+            s_snprintf(instr_text,sizeof(instr_text),temp,param);
             info = debug_commands_info[cmd];
-            sprintf(text,"%02X%02X%02X   %s",cmd,param1,param2,instr_text);
+            s_snprintf(text,sizeof(text),"%02X%02X%02X   %s",cmd,param1,param2,instr_text);
             *step = 3;
         }
         else if(paramsize == 3) //jump relative
@@ -515,10 +515,10 @@ char * GB_Dissasemble(u16 addr, int * step)
             param = (s8)GB_MemRead8(addr++);
             char temp[32];
             char instr_text[64];
-            strcpy(temp, debug_commands[cmd]);
-            sprintf(instr_text,temp,param + addr);
+            s_strncpy(temp, debug_commands[cmd], sizeof(temp));
+            s_snprintf(instr_text,sizeof(instr_text),temp,param + addr);
             info = debug_commands_info[cmd];
-            sprintf(text,"%02X%02X     %s",cmd,(u8)param,instr_text);
+            s_snprintf(text,sizeof(text),"%02X%02X     %s",cmd,(u8)param,instr_text);
             param = param + addr;
             *step = 2;
         }
@@ -530,37 +530,37 @@ char * GB_Dissasemble(u16 addr, int * step)
             case OP_NONE:
                 break;
             case RW_BC:
-                comment_added = gb_dissasemble_add_io_register_name(GameBoy.CPU.Reg16.BC,text,1);
+                comment_added = gb_dissasemble_add_io_register_name(GameBoy.CPU.Reg16.BC,text,1,sizeof(text));
                 break;
             case RW_DE:
-                comment_added = gb_dissasemble_add_io_register_name(GameBoy.CPU.Reg16.DE,text,1);
+                comment_added = gb_dissasemble_add_io_register_name(GameBoy.CPU.Reg16.DE,text,1,sizeof(text));
                 break;
             case RW_HL:
-                comment_added = gb_dissasemble_add_io_register_name(GameBoy.CPU.Reg16.HL,text,1);
+                comment_added = gb_dissasemble_add_io_register_name(GameBoy.CPU.Reg16.HL,text,1,sizeof(text));
                 break;
             case RW_SP:
-                comment_added = gb_dissasemble_add_io_register_name(GameBoy.CPU.Reg16.SP,text,1);
+                comment_added = gb_dissasemble_add_io_register_name(GameBoy.CPU.Reg16.SP,text,1,sizeof(text));
                 break;
             case RW_INST:
-                comment_added = gb_dissasemble_add_io_register_name(param,text,1);
+                comment_added = gb_dissasemble_add_io_register_name(param,text,1,sizeof(text));
                 break;
             case RW_FF_INST:
-                comment_added = gb_dissasemble_add_io_register_name(param|0xFF00,text,1);
+                comment_added = gb_dissasemble_add_io_register_name(param|0xFF00,text,1,sizeof(text));
                 break;
             case RW_FF_C:
-                comment_added = gb_dissasemble_add_io_register_name(((int)(u8)GameBoy.CPU.Reg8.C)|0xFF00,text,1);
+                comment_added = gb_dissasemble_add_io_register_name(((int)(u8)GameBoy.CPU.Reg8.C)|0xFF00,text,1,sizeof(text));
                 break;
             case JMP_HL:
                 param = (int)(u16)GameBoy.CPU.Reg16.HL;
             case JMP_REL:
             case JMP_ABS:
-                if(param > op_addr) strcat(text," ; " STR_SLIM_ARROW_DOWN);
-                else if(param == op_addr) strcat(text," ; <-");
-                else strcat(text," ; " STR_SLIM_ARROW_UP);
+                if(param > op_addr) s_strncat(text," ; " STR_SLIM_ARROW_DOWN,sizeof(text));
+                else if(param == op_addr) s_strncat(text," ; <-",sizeof(text));
+                else s_strncat(text," ; " STR_SLIM_ARROW_UP,sizeof(text));
                 comment_added = 1;
                 break;
             case OP_CALL:
-                strcat(text," ; ->");
+                s_strncat(text," ; ->",sizeof(text));
                 comment_added = 1;
                 break;
         }
@@ -582,13 +582,13 @@ char * GB_Dissasemble(u16 addr, int * step)
 
                 if(comment_added)
                 {
-                    if(cond_true) strcat(text," - true");
-                    else strcat(text," - false");
+                    if(cond_true) s_strncat(text," - true",sizeof(text));
+                    else s_strncat(text," - false",sizeof(text));
                 }
                 else
                 {
-                    if(cond_true) strcat(text," ; true");
-                    else strcat(text," ; false");
+                    if(cond_true) s_strncat(text," ; true",sizeof(text));
+                    else s_strncat(text," ; false",sizeof(text));
                 }
             }
         }
@@ -599,7 +599,7 @@ char * GB_Dissasemble(u16 addr, int * step)
     else //not code...
     {
         u8 data = GB_MemRead8(addr);
-        sprintf(text,"%02X       db 0x%02X",data,data);
+        s_snprintf(text,sizeof(text),"%02X       db 0x%02X",data,data);
         *step = 1;
     }
 

@@ -4,18 +4,12 @@ General
 
 - ARM undefined opcodes
 - Autosave.
-- All missing things from version 0.1.0 Win32 GUI (in process).
-- Update README file.
 - Update memory, I/O viewers...? with F7
-- Autoclose debugger windows according to configuration.
-- Save tilesets, maps, memory dumps...
-- Allow to execute one frame.
-- Pause/unpause.
+- Save memory dumps, dissasembly...
+- Allow to execute one frame per press.
 - Cross out unused palette colors in the palette viewer.
 - Detect ROM (GB/GBA) checking the headers?
 - Custom controls. Game controllers.
-- Change all strcpy by s_strncpy, strcat by s_strncat and sprintf by s_snprintf.
-- Fix F1.
 - Enable/disable debug messages based on configuration.
 - Rumble.
 - Speedup button.

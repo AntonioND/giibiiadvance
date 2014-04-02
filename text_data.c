@@ -206,6 +206,7 @@ const char * about_text = {
 "-Sindre Aam" STR_ARING_MINUS "s for Gambatte and its source code (Used for some details about sound emulation).\n"
 "-Beware for BGB.\n"
 "-Normmatt for telling me a few bugs he found in GBA ARM core and sending me Armwrestler ROM for checking the CPU.\n"
+"-wowzaman12 and lioncash for some bugfixes."
 "-Probably a lot of people that i've unfairly forgotten... :)\n"
 "\n"
 "\n"

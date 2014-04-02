@@ -140,7 +140,7 @@ void GBA_DebugClearBreakpointAll(void)
 inline u32 arm_check_condition(u32 cond); // in arm.c
 
 //returns 1 if there is a ';' in the line (previous to this or written by this)
-static inline int gba_dissasemble_add_condition_met(int cond, u32 address, char * dest, int add_comment)
+static inline int gba_dissasemble_add_condition_met(int cond, u32 address, char * dest, int add_comment, int dest_size)
 {
     if(CPU.R[R_PC] == address)
     {
@@ -148,13 +148,13 @@ static inline int gba_dissasemble_add_condition_met(int cond, u32 address, char 
 
         if(add_comment)
         {
-            if(arm_check_condition(cond)) strcat(dest," ; true");
-            else strcat(dest," ; false");
+            if(arm_check_condition(cond)) s_strncat(dest," ; true",dest_size);
+            else s_strncat(dest," ; false",dest_size);
         }
         else
         {
-            if(arm_check_condition(cond)) strcat(dest," - true");
-            else strcat(dest," - false");
+            if(arm_check_condition(cond)) s_strncat(dest," - true",dest_size);
+            else s_strncat(dest," - false",dest_size);
         }
         return 1;
     }
@@ -238,7 +238,7 @@ static struct {
     {NULL, 0}
 };
 
-static int gba_dissasemble_add_io_register_name(int reg_address, char * dest, int add_comment)
+static int gba_dissasemble_add_io_register_name(int reg_address, char * dest, int add_comment, int dest_size)
 {
     int i = 0;
     while(1)
@@ -248,13 +248,13 @@ static int gba_dissasemble_add_io_register_name(int reg_address, char * dest, in
         {
             if(add_comment)
             {
-                strcat(dest," ; ");
-                strcat(dest,gba_io_reg_struct[i].name);
+                s_strncat(dest," ; ",dest_size);
+                s_strncat(dest,gba_io_reg_struct[i].name,dest_size);
             }
             else
             {
-                strcat(dest," - ");
-                strcat(dest,gba_io_reg_struct[i].name);
+                s_strncat(dest," - ",dest_size);
+                s_strncat(dest,gba_io_reg_struct[i].name,dest_size);
             }
             return 1;
         }
@@ -280,7 +280,7 @@ static struct {
   {0,NULL}
 };
 
-static int gba_disassemble_swi_name(int swi_code, char * dest, int add_comment) // swi code = 1 byte
+static int gba_disassemble_swi_name(int swi_code, char * dest, int add_comment, int dest_size) // swi code = 1 byte
 {
     int i = 0;
     while(1)
@@ -290,13 +290,13 @@ static int gba_disassemble_swi_name(int swi_code, char * dest, int add_comment) 
         {
             if(add_comment)
             {
-                strcat(dest," ; ");
-                strcat(dest,swi_name_struct[i].name);
+                s_strncat(dest," ; ",dest_size);
+                s_strncat(dest,swi_name_struct[i].name,dest_size);
             }
             else
             {
-                strcat(dest," - ");
-                strcat(dest,swi_name_struct[i].name);
+                s_strncat(dest," - ",dest_size);
+                s_strncat(dest,swi_name_struct[i].name,dest_size);
             }
             return 1;
         }
@@ -321,7 +321,7 @@ static const char arm_cond[16][6] = {
 
 static const char arm_shift_type[4][4] = { "lsl","lsr","asr","ror" };
 
-void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
+void GBA_DisassembleARM(u32 opcode, u32 address, char * dest, int dest_size)
 {
     int arm_cond_code = (opcode >> 28)&0xF;
     const char * cond = arm_cond[arm_cond_code];
@@ -356,9 +356,9 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
                                 //[Rn, <#{+/-}expression>]{!}
                                 u32 offset = ((opcode>>4)&0xF0)|(opcode&0xF);
                                 if(offset)
-                                    sprintf(addr_text,"[r%d, #%s0x%08X]%s",Rn,sign,offset, writeback);
+                                    s_snprintf(addr_text,sizeof(addr_text),"[r%d, #%s0x%08X]%s",Rn,sign,offset, writeback);
                                 else
-                                    sprintf(addr_text,"[r%d]%s",Rn, writeback);
+                                    s_snprintf(addr_text,sizeof(addr_text),"[r%d]%s",Rn, writeback);
                                 addr += (opcode & BIT(23)) ? offset : -offset;
                             }
                             else //Register as offset
@@ -366,7 +366,7 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
                                 //[Rn, {+/-}Rm]{!}
                                 //11-8 must be 0000
                                 u32 Rm = opcode&0xF; //(not including R15)
-                                sprintf(addr_text,"[r%d, %sr%d]%s",Rn,sign,Rm, writeback);
+                                s_snprintf(addr_text,sizeof(addr_text),"[r%d, %sr%d]%s",Rn,sign,Rm, writeback);
                             }
                         }
                         else //Post-indexed
@@ -376,16 +376,16 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
                                 //[Rn], <#{+/-}expression>
                                 u32 offset = ((opcode>>4)&0xF0)|(opcode&0xF);
                                 if(offset)
-                                    sprintf(addr_text,"[r%d], #%s0x%08X",Rn,sign,offset);
+                                    s_snprintf(addr_text,sizeof(addr_text),"[r%d], #%s0x%08X",Rn,sign,offset);
                                 else
-                                    sprintf(addr_text,"[r%d]",Rn);
+                                    s_snprintf(addr_text,sizeof(addr_text),"[r%d]",Rn);
                             }
                             else //Register as offset
                             {
                                 //[Rn], {+/-}Rm
                                 //11-8 must be 0000
                                 u32 Rm = opcode&0xF; //(not including R15)
-                                sprintf(addr_text,"[r%d], %sr%d",Rn,sign,Rm);
+                                s_snprintf(addr_text,sizeof(addr_text),"[r%d], %sr%d",Rn,sign,Rm);
                             }
                         }
 
@@ -398,14 +398,14 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
                                 // LDR{cond}H  Rd,<Address>  ;Load Unsigned halfword (zero-extended)
                                 if(writeresult)
                                 {
-                                    sprintf(dest,"ldr%sh r%d, =0x%08X",cond,Rd,(u32)GBA_MemoryRead16(addr&~1));
-                                    gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1);
+                                    s_snprintf(dest,dest_size,"ldr%sh r%d, =0x%08X",cond,Rd,(u32)GBA_MemoryRead16(addr&~1));
+                                    gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1,dest_size);
                                 }
                                 else
                                 {
-                                    sprintf(dest,"ldr%sh r%d, %s",cond,Rd,addr_text);
-                                    int comment = gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1);
-                                    gba_dissasemble_add_io_register_name(addr,dest,!comment);
+                                    s_snprintf(dest,dest_size,"ldr%sh r%d, %s",cond,Rd,addr_text);
+                                    int comment = gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1,dest_size);
+                                    gba_dissasemble_add_io_register_name(addr,dest,!comment,dest_size);
                                 }
                                 return;
                             }
@@ -414,14 +414,14 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
                                 // LDR{cond}SB Rd,<Address>  ;Load Signed byte (sign extended)
                                 if(writeresult)
                                 {
-                                    sprintf(dest,"ldr%ssb r%d, =0x%08X",cond,Rd,(s32)(s8)GBA_MemoryRead8(address));
-                                    gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1);
+                                    s_snprintf(dest,dest_size,"ldr%ssb r%d, =0x%08X",cond,Rd,(s32)(s8)GBA_MemoryRead8(address));
+                                    gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1,dest_size);
                                 }
                                 else
                                 {
-                                    sprintf(dest,"ldr%ssb r%d, %s",cond,Rd,addr_text);
-                                    int comment = gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1);
-                                    gba_dissasemble_add_io_register_name(addr,dest,!comment);
+                                    s_snprintf(dest,dest_size,"ldr%ssb r%d, %s",cond,Rd,addr_text);
+                                    int comment = gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1,dest_size);
+                                    gba_dissasemble_add_io_register_name(addr,dest,!comment,dest_size);
                                 }
                                 return;
                             }
@@ -430,14 +430,14 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
                                 // LDR{cond}SH Rd,<Address>  ;Load Signed halfword (sign extended)
                                 if(writeresult)
                                 {
-                                    sprintf(dest,"ldr%ssh r%d, =0x%08X",cond,Rd,(s32)(s16)GBA_MemoryRead16(address&~1));
-                                    gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1);
+                                    s_snprintf(dest,dest_size,"ldr%ssh r%d, =0x%08X",cond,Rd,(s32)(s16)GBA_MemoryRead16(address&~1));
+                                    gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1,dest_size);
                                 }
                                 else
                                 {
-                                    sprintf(dest,"ldr%ssh r%d, %s",cond,Rd,addr_text);
-                                    int comment = gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1);
-                                    gba_dissasemble_add_io_register_name(addr,dest,!comment);
+                                    s_snprintf(dest,dest_size,"ldr%ssh r%d, %s",cond,Rd,addr_text);
+                                    int comment = gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1,dest_size);
+                                    gba_dissasemble_add_io_register_name(addr,dest,!comment,dest_size);
                                 }
                                 return;
                             }
@@ -446,14 +446,14 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
                         {
                             if( ((opcode>>5)&3) > 1 )
                             {
-                                strcpy(dest, "[!] Undefined Instruction #0-4");
+                                s_strncpy(dest, "[!] Undefined Instruction #0-4", dest_size);
                                 return;
                             }
 
                             // STR{cond}H  Rd,<Address>  ;Store halfword
-                            sprintf(dest,"str%sh r%d, %s",cond,Rd,addr_text);
-                            int comment = gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1);
-                            gba_dissasemble_add_io_register_name(addr,dest,!comment);
+                            s_snprintf(dest,dest_size,"str%sh r%d, %s",cond,Rd,addr_text);
+                            int comment = gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1,dest_size);
+                            gba_dissasemble_add_io_register_name(addr,dest,!comment,dest_size);
                             return;
                         }
                         return;
@@ -464,7 +464,7 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
                         {
                             if( opcode & BIT(23) || (opcode & (0xF00|(3<<20))) )
                             {
-                                strcpy(dest, "[!] Undefined Instruction #0-1");
+                                s_strncpy(dest,"[!] Undefined Instruction #0-1",dest_size);
                                 return;
                             }
 
@@ -474,9 +474,9 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
                             u32 Rd = (opcode>>12)&0xF; // | r0 - r14
                             u32 Rm = opcode&0xF;       // |
 
-                            sprintf(dest,"swp%s%s r%d, r%d, [r%d]",cond,bytemode,Rd,Rm,Rn);
-                            int comment = gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1);
-                            gba_dissasemble_add_io_register_name(CPU.R[Rn],dest,!comment);
+                            s_snprintf(dest,dest_size,"swp%s%s r%d, r%d, [r%d]",cond,bytemode,Rd,Rm,Rn);
+                            int comment = gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1,dest_size);
+                            gba_dissasemble_add_io_register_name(CPU.R[Rn],dest,!comment,dest_size);
                             return;
                         }
                         else //Multiplication
@@ -492,17 +492,17 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
 
                             switch(op)
                             {
-                                case 0: sprintf(dest,"mul%s%s r%d, r%d, r%d",cond,setcond,Rd,Rm,Rs); break;
-                                case 1: sprintf(dest,"mla%s%s r%d, r%d, r%d, r%d",cond,setcond,Rd,Rm,Rs,Rn); break;
+                                case 0: s_snprintf(dest,dest_size,"mul%s%s r%d, r%d, r%d",cond,setcond,Rd,Rm,Rs); break;
+                                case 1: s_snprintf(dest,dest_size,"mla%s%s r%d, r%d, r%d, r%d",cond,setcond,Rd,Rm,Rs,Rn); break;
                                 case 2: case 3:
-                                    strcpy(dest, "[!] Undefined Instruction #0-2");
+                                    s_strncpy(dest,"[!] Undefined Instruction #0-2",dest_size);
                                     return;
-                                case 4: sprintf(dest,"umull%s%s r%d, r%d, r%d, r%d",cond,setcond,Rn,Rd,Rm,Rs); break;
-                                case 5: sprintf(dest,"umlal%s%s r%d, r%d, r%d, r%d",cond,setcond,Rn,Rd,Rm,Rs); break;
-                                case 6: sprintf(dest,"smull%s%s r%d, r%d, r%d, r%d",cond,setcond,Rn,Rd,Rm,Rs); break;
-                                case 7: sprintf(dest,"smlal%s%s r%d, r%d, r%d, r%d",cond,setcond,Rn,Rd,Rm,Rs); break;
+                                case 4: s_snprintf(dest,dest_size,"umull%s%s r%d, r%d, r%d, r%d",cond,setcond,Rn,Rd,Rm,Rs); break;
+                                case 5: s_snprintf(dest,dest_size,"umlal%s%s r%d, r%d, r%d, r%d",cond,setcond,Rn,Rd,Rm,Rs); break;
+                                case 6: s_snprintf(dest,dest_size,"smull%s%s r%d, r%d, r%d, r%d",cond,setcond,Rn,Rd,Rm,Rs); break;
+                                case 7: s_snprintf(dest,dest_size,"smlal%s%s r%d, r%d, r%d, r%d",cond,setcond,Rn,Rd,Rm,Rs); break;
                             }
-                            gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1);
+                            gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1,dest_size);
                             return;
                         }
                     }
@@ -515,13 +515,13 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
                         u32 Rn = opcode&0xF;
                         if(CPU.R[Rn] & 1) //Switch to THUMB
                         {
-                            sprintf(dest,"bx%s r%d ; Switch to THUMB",cond,Rn); //PC=Rn-1, T=Rn.0
-                            gba_dissasemble_add_condition_met(arm_cond_code,address,dest,0);
+                            s_snprintf(dest,dest_size,"bx%s r%d ; Switch to THUMB",cond,Rn); //PC=Rn-1, T=Rn.0
+                            gba_dissasemble_add_condition_met(arm_cond_code,address,dest,0,dest_size);
                         }
                         else
                         {
-                            sprintf(dest,"bx%s r%d",cond,Rn); //PC=Rn, T=Rn.0
-                            gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1);
+                            s_snprintf(dest,dest_size,"bx%s r%d",cond,Rn); //PC=Rn, T=Rn.0
+                            gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1,dest_size);
                         }
                         return;
                     }
@@ -532,7 +532,7 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
 
                     if( ((op & 0xC) == 0x8) && ((opcode & BIT(20)) == 0) ) //8<=op<=b
                     {
-                        strcpy(dest, "[!] Undefined Instruction #0-3");
+                        s_strncpy(dest, "[!] Undefined Instruction #0-3",dest_size);
                         return;
                     }
 
@@ -548,24 +548,24 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
 
                     switch(op)
                     {
-                        case 0: sprintf(dest,"and%s%s r%d, r%d, r%d, %s r%d",cond,setcond,Rd,Rn,Rm,shift,Rs); break;
-                        case 1: sprintf(dest,"eor%s%s r%d, r%d, r%d, %s r%d",cond,setcond,Rd,Rn,Rm,shift,Rs); break;
-                        case 2: sprintf(dest,"sub%s%s r%d, r%d, r%d, %s r%d",cond,setcond,Rd,Rn,Rm,shift,Rs); break;
-                        case 3: sprintf(dest,"rsb%s%s r%d, r%d, r%d, %s r%d",cond,setcond,Rd,Rn,Rm,shift,Rs); break;
-                        case 4: sprintf(dest,"add%s%s r%d, r%d, r%d, %s r%d",cond,setcond,Rd,Rn,Rm,shift,Rs); break;
-                        case 5: sprintf(dest,"adc%s%s r%d, r%d, r%d, %s r%d",cond,setcond,Rd,Rn,Rm,shift,Rs); break;
-                        case 6: sprintf(dest,"sbc%s%s r%d, r%d, r%d, %s r%d",cond,setcond,Rd,Rn,Rm,shift,Rs); break;
-                        case 7: sprintf(dest,"rsc%s%s r%d, r%d, r%d, %s r%d",cond,setcond,Rd,Rn,Rm,shift,Rs); break;
-                        case 8: sprintf(dest,"tst%s r%d, r%d, %s r%d",cond,Rn,Rm,shift,Rs); break;
-                        case 9: sprintf(dest,"teq%s r%d, r%d, %s r%d",cond,Rn,Rm,shift,Rs); break;
-                        case 0xA: sprintf(dest,"cmp%s r%d, r%d, %s r%d",cond,Rn,Rm,shift,Rs); break;
-                        case 0xB: sprintf(dest,"cmn%s r%d, r%d, %s r%d",cond,Rn,Rm,shift,Rs); break;
-                        case 0xC: sprintf(dest,"orr%s%s r%d, r%d, r%d, %s r%d",cond,setcond,Rd,Rn,Rm,shift,Rs); break;
-                        case 0xD: sprintf(dest,"mov%s%s r%d, r%d, %s r%d",cond,setcond,Rd,Rm,shift,Rs); break;
-                        case 0xE: sprintf(dest,"bic%s%s r%d, r%d, r%d, %s r%d",cond,setcond,Rd,Rn,Rm,shift,Rs); break;
-                        case 0xF: sprintf(dest,"mvn%s%s r%d, r%d, %s r%d",cond,setcond,Rd,Rm,shift,Rs); break;
+                        case 0: s_snprintf(dest,dest_size,"and%s%s r%d, r%d, r%d, %s r%d",cond,setcond,Rd,Rn,Rm,shift,Rs); break;
+                        case 1: s_snprintf(dest,dest_size,"eor%s%s r%d, r%d, r%d, %s r%d",cond,setcond,Rd,Rn,Rm,shift,Rs); break;
+                        case 2: s_snprintf(dest,dest_size,"sub%s%s r%d, r%d, r%d, %s r%d",cond,setcond,Rd,Rn,Rm,shift,Rs); break;
+                        case 3: s_snprintf(dest,dest_size,"rsb%s%s r%d, r%d, r%d, %s r%d",cond,setcond,Rd,Rn,Rm,shift,Rs); break;
+                        case 4: s_snprintf(dest,dest_size,"add%s%s r%d, r%d, r%d, %s r%d",cond,setcond,Rd,Rn,Rm,shift,Rs); break;
+                        case 5: s_snprintf(dest,dest_size,"adc%s%s r%d, r%d, r%d, %s r%d",cond,setcond,Rd,Rn,Rm,shift,Rs); break;
+                        case 6: s_snprintf(dest,dest_size,"sbc%s%s r%d, r%d, r%d, %s r%d",cond,setcond,Rd,Rn,Rm,shift,Rs); break;
+                        case 7: s_snprintf(dest,dest_size,"rsc%s%s r%d, r%d, r%d, %s r%d",cond,setcond,Rd,Rn,Rm,shift,Rs); break;
+                        case 8: s_snprintf(dest,dest_size,"tst%s r%d, r%d, %s r%d",cond,Rn,Rm,shift,Rs); break;
+                        case 9: s_snprintf(dest,dest_size,"teq%s r%d, r%d, %s r%d",cond,Rn,Rm,shift,Rs); break;
+                        case 0xA: s_snprintf(dest,dest_size,"cmp%s r%d, r%d, %s r%d",cond,Rn,Rm,shift,Rs); break;
+                        case 0xB: s_snprintf(dest,dest_size,"cmn%s r%d, r%d, %s r%d",cond,Rn,Rm,shift,Rs); break;
+                        case 0xC: s_snprintf(dest,dest_size,"orr%s%s r%d, r%d, r%d, %s r%d",cond,setcond,Rd,Rn,Rm,shift,Rs); break;
+                        case 0xD: s_snprintf(dest,dest_size,"mov%s%s r%d, r%d, %s r%d",cond,setcond,Rd,Rm,shift,Rs); break;
+                        case 0xE: s_snprintf(dest,dest_size,"bic%s%s r%d, r%d, r%d, %s r%d",cond,setcond,Rd,Rn,Rm,shift,Rs); break;
+                        case 0xF: s_snprintf(dest,dest_size,"mvn%s%s r%d, r%d, %s r%d",cond,setcond,Rd,Rm,shift,Rs); break;
                     }
-                    gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1);
+                    gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1,dest_size);
                     return;
                 }
             }
@@ -577,14 +577,14 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
 
                     if(opcode & BIT(22)) //MRS{cond} Rd,spsr
                     {
-                        sprintf(dest,"mrs%s r%d,spsr",cond,Rd);
-                        gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1);
+                        s_snprintf(dest,dest_size,"mrs%s r%d,spsr",cond,Rd);
+                        gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1,dest_size);
                         return;
                     }
                     else //MRS{cond} Rd,cpsr
                     {
-                        sprintf(dest,"mrs%s r%d,cpsr",cond,Rd);
-                        gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1);
+                        s_snprintf(dest,dest_size,"mrs%s r%d,cpsr",cond,Rd);
+                        gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1,dest_size);
                         return;
                     }
                 }
@@ -601,8 +601,8 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
                     if(opcode & BIT(16)) fields[cursor++] = 'c'; //7-0
                     fields[cursor] = '\0';
 
-                    sprintf(dest,"msr%s cpsr_%s, r%d",cond,fields,Rm);
-                    gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1);
+                    s_snprintf(dest,dest_size,"msr%s cpsr_%s, r%d",cond,fields,Rm);
+                    gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1,dest_size);
                     return;
                 }
                 else if( val == (0x16<<20) )
@@ -616,8 +616,8 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
                     if(opcode & BIT(16)) fields[cursor++] = 'c'; //7-0
                     fields[cursor] = '\0';
 
-                    sprintf(dest,"msr%s spsr_%s, r%d",cond,fields,Rm);
-                    gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1);
+                    s_snprintf(dest,dest_size,"msr%s spsr_%s, r%d",cond,fields,Rm);
+                    gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1,dest_size);
                     return;
                 }
 
@@ -626,7 +626,7 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
 
                 if( ((op & 0xC) == 0x8) && ((opcode & BIT(20)) == 0) ) //8<=op<=b
                 {
-                    strcpy(dest, "[!] Undefined Instruction #1");
+                    s_strncpy(dest, "[!] Undefined Instruction #1",dest_size);
                     return;
                 }
 
@@ -647,41 +647,42 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
                     switch((opcode>>5)&3)
                     {
                         default:
-                        case 0: strcpy(temp,""); if((opcode & BIT(20)) == 0) canbenop = 1; break;
-                        case 1: case 2: shiftval = 32; sprintf(temp,", %s #0x%02X",shift,shiftval); break;
-                        case 3: strcpy(temp,", rrx"); break;
+                        case 0: temp[0] = '\0'; if((opcode & BIT(20)) == 0) canbenop = 1; break;
+                        case 1: case 2:
+                            shiftval = 32; s_snprintf(temp,sizeof(temp),", %s #0x%02X",shift,shiftval); break;
+                        case 3: s_strncpy(temp,", rrx",sizeof(temp)); break;
                     }
                 }
                 else
                 {
-                    sprintf(temp,", %s #0x%02X",shift,shiftval);
+                    s_snprintf(temp,sizeof(temp),", %s #0x%02X",shift,shiftval);
                 }
 
                 switch(op)
                 {
-                    case 0: sprintf(dest,"and%s%s r%d, r%d, r%d%s",cond,setcond,Rd,Rn,Rm,temp); break;;
-                    case 1: sprintf(dest,"eor%s%s r%d, r%d, r%d%s",cond,setcond,Rd,Rn,Rm,temp); break;
-                    case 2: sprintf(dest,"sub%s%s r%d, r%d, r%d%s",cond,setcond,Rd,Rn,Rm,temp); break;
-                    case 3: sprintf(dest,"rsb%s%s r%d, r%d, r%d%s",cond,setcond,Rd,Rn,Rm,temp); break;
-                    case 4: sprintf(dest,"add%s%s r%d, r%d, r%d%s",cond,setcond,Rd,Rn,Rm,temp); break;
-                    case 5: sprintf(dest,"adc%s%s r%d, r%d, r%d%s",cond,setcond,Rd,Rn,Rm,temp); break;
-                    case 6: sprintf(dest,"sbc%s%s r%d, r%d, r%d%s",cond,setcond,Rd,Rn,Rm,temp); break;
-                    case 7: sprintf(dest,"rsc%s%s r%d, r%d, r%d%s",cond,setcond,Rd,Rn,Rm,temp); break;
-                    case 8: sprintf(dest,"tst%s r%d, r%d%s",cond,Rn,Rm,temp); break;
-                    case 9: sprintf(dest,"teq%s r%d, r%d%s",cond,Rn,Rm,temp); break;
-                    case 0xA: sprintf(dest,"cmp%s r%d, r%d%s",cond,Rn,Rm,temp); break;
-                    case 0xB: sprintf(dest,"cmn%s r%d, r%d%s",cond,Rn,Rm,temp); break;
-                    case 0xC: sprintf(dest,"orr%s%s r%d, r%d, r%d%s",cond,setcond,Rd,Rn,Rm,temp); break;
+                    case 0: s_snprintf(dest,dest_size,"and%s%s r%d, r%d, r%d%s",cond,setcond,Rd,Rn,Rm,temp); break;;
+                    case 1: s_snprintf(dest,dest_size,"eor%s%s r%d, r%d, r%d%s",cond,setcond,Rd,Rn,Rm,temp); break;
+                    case 2: s_snprintf(dest,dest_size,"sub%s%s r%d, r%d, r%d%s",cond,setcond,Rd,Rn,Rm,temp); break;
+                    case 3: s_snprintf(dest,dest_size,"rsb%s%s r%d, r%d, r%d%s",cond,setcond,Rd,Rn,Rm,temp); break;
+                    case 4: s_snprintf(dest,dest_size,"add%s%s r%d, r%d, r%d%s",cond,setcond,Rd,Rn,Rm,temp); break;
+                    case 5: s_snprintf(dest,dest_size,"adc%s%s r%d, r%d, r%d%s",cond,setcond,Rd,Rn,Rm,temp); break;
+                    case 6: s_snprintf(dest,dest_size,"sbc%s%s r%d, r%d, r%d%s",cond,setcond,Rd,Rn,Rm,temp); break;
+                    case 7: s_snprintf(dest,dest_size,"rsc%s%s r%d, r%d, r%d%s",cond,setcond,Rd,Rn,Rm,temp); break;
+                    case 8: s_snprintf(dest,dest_size,"tst%s r%d, r%d%s",cond,Rn,Rm,temp); break;
+                    case 9: s_snprintf(dest,dest_size,"teq%s r%d, r%d%s",cond,Rn,Rm,temp); break;
+                    case 0xA: s_snprintf(dest,dest_size,"cmp%s r%d, r%d%s",cond,Rn,Rm,temp); break;
+                    case 0xB: s_snprintf(dest,dest_size,"cmn%s r%d, r%d%s",cond,Rn,Rm,temp); break;
+                    case 0xC: s_snprintf(dest,dest_size,"orr%s%s r%d, r%d, r%d%s",cond,setcond,Rd,Rn,Rm,temp); break;
                     case 0xD:
                         if( (canbenop) && ((Rd|Rm) == 0) )
-                            sprintf(dest,"nop%s",cond);
+                            s_snprintf(dest,dest_size,"nop%s",cond);
                         else
-                            sprintf(dest,"mov%s%s r%d, r%d%s",cond,setcond,Rd,Rm,temp);
+                            s_snprintf(dest,dest_size,"mov%s%s r%d, r%d%s",cond,setcond,Rd,Rm,temp);
                         break;
-                    case 0xE: sprintf(dest,"bic%s%s r%d, r%d, r%d%s",cond,setcond,Rd,Rn,Rm,temp); break;
-                    case 0xF: sprintf(dest,"mvn%s%s r%d, r%d%s",cond,setcond,Rd,Rm,temp); break;
+                    case 0xE: s_snprintf(dest,dest_size,"bic%s%s r%d, r%d, r%d%s",cond,setcond,Rd,Rn,Rm,temp); break;
+                    case 0xF: s_snprintf(dest,dest_size,"mvn%s%s r%d, r%d%s",cond,setcond,Rd,Rm,temp); break;
                 }
-                gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1);
+                gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1,dest_size);
                 return;
             }
         }
@@ -700,8 +701,8 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
                 if(opcode & BIT(17)) fields[cursor++] = 'x';
                 if(opcode & BIT(16)) fields[cursor++] = 'c'; //7-0
                 fields[cursor] = '\0';
-                sprintf(dest,"msr%s %s_%s, #0x%08X",cond,dst,fields,value);
-                gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1);
+                s_snprintf(dest,dest_size,"msr%s %s_%s, #0x%08X",cond,dst,fields,value);
+                gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1,dest_size);
                 return;
             }
 
@@ -710,7 +711,7 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
 
             if( ((op & 0xC) == 0x8) && ((opcode & BIT(20)) == 0) ) //8<=op<=b
             {
-                strcpy(dest, "[!] Undefined Instruction #1");
+                s_strncpy(dest, "[!] Undefined Instruction #1",dest_size);
                 return;
             }
 
@@ -723,25 +724,25 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
 
             switch(op)
             {
-                case 0: sprintf(dest,"and%s%s r%d, r%d, #0x%08X",cond,setcond,Rd,Rn,val); break;
-                case 1: sprintf(dest,"eor%s%s r%d, r%d, #0x%08X",cond,setcond,Rd,Rn,val); break;
-                case 2: sprintf(dest,"sub%s%s r%d, r%d, #0x%08X",cond,setcond,Rd,Rn,val); break;
-                case 3: sprintf(dest,"rsb%s%s r%d, r%d, #0x%08X",cond,setcond,Rd,Rn,val); break;
-                case 4: sprintf(dest,"add%s%s r%d, r%d, #0x%08X",cond,setcond,Rd,Rn,val); break;
-                case 5: sprintf(dest,"adc%s%s r%d, r%d, #0x%08X",cond,setcond,Rd,Rn,val); break;
-                case 6: sprintf(dest,"sbc%s%s r%d, r%d, #0x%08X",cond,setcond,Rd,Rn,val); break;
-                case 7: sprintf(dest,"rsc%s%s r%d, r%d, #0x%08X",cond,setcond,Rd,Rn,val); break;
-                case 8: sprintf(dest,"tst%s r%d, #0x%08X",cond,Rn,val); break;
-                case 9: sprintf(dest,"teq%s r%d, #0x%08X",cond,Rn,val); break;
-                case 0xA: sprintf(dest,"cmp%s r%d, #0x%08X",cond,Rn,val); break;
-                case 0xB: sprintf(dest,"cmn%s r%d, #0x%08X",cond,Rn,val); break;
-                case 0xC: sprintf(dest,"orr%s%s r%d, r%d, #0x%08X",cond,setcond,Rd,Rn,val); break;
-                case 0xD: sprintf(dest,"mov%s%s r%d, #0x%08X",cond,setcond,Rd,val); break;
-                case 0xE: sprintf(dest,"bic%s%s r%d, r%d, #0x%08X",cond,setcond,Rd,Rn,val); break;
-                case 0xF: sprintf(dest,"mvn%s%s r%d, #0x%08X",cond,setcond,Rd,val); break;
+                case 0: s_snprintf(dest,dest_size,"and%s%s r%d, r%d, #0x%08X",cond,setcond,Rd,Rn,val); break;
+                case 1: s_snprintf(dest,dest_size,"eor%s%s r%d, r%d, #0x%08X",cond,setcond,Rd,Rn,val); break;
+                case 2: s_snprintf(dest,dest_size,"sub%s%s r%d, r%d, #0x%08X",cond,setcond,Rd,Rn,val); break;
+                case 3: s_snprintf(dest,dest_size,"rsb%s%s r%d, r%d, #0x%08X",cond,setcond,Rd,Rn,val); break;
+                case 4: s_snprintf(dest,dest_size,"add%s%s r%d, r%d, #0x%08X",cond,setcond,Rd,Rn,val); break;
+                case 5: s_snprintf(dest,dest_size,"adc%s%s r%d, r%d, #0x%08X",cond,setcond,Rd,Rn,val); break;
+                case 6: s_snprintf(dest,dest_size,"sbc%s%s r%d, r%d, #0x%08X",cond,setcond,Rd,Rn,val); break;
+                case 7: s_snprintf(dest,dest_size,"rsc%s%s r%d, r%d, #0x%08X",cond,setcond,Rd,Rn,val); break;
+                case 8: s_snprintf(dest,dest_size,"tst%s r%d, #0x%08X",cond,Rn,val); break;
+                case 9: s_snprintf(dest,dest_size,"teq%s r%d, #0x%08X",cond,Rn,val); break;
+                case 0xA: s_snprintf(dest,dest_size,"cmp%s r%d, #0x%08X",cond,Rn,val); break;
+                case 0xB: s_snprintf(dest,dest_size,"cmn%s r%d, #0x%08X",cond,Rn,val); break;
+                case 0xC: s_snprintf(dest,dest_size,"orr%s%s r%d, r%d, #0x%08X",cond,setcond,Rd,Rn,val); break;
+                case 0xD: s_snprintf(dest,dest_size,"mov%s%s r%d, #0x%08X",cond,setcond,Rd,val); break;
+                case 0xE: s_snprintf(dest,dest_size,"bic%s%s r%d, r%d, #0x%08X",cond,setcond,Rd,Rn,val); break;
+                case 0xF: s_snprintf(dest,dest_size,"mvn%s%s r%d, #0x%08X",cond,setcond,Rd,val); break;
                 default: break;
             }
-            gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1);
+            gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1,dest_size);
             return;
         }
         case 2:
@@ -761,17 +762,17 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
             if(opcode & BIT(24)) //Pre-indexed
             {
                 if(offset)
-                    sprintf(addr_text,"[r%d, #%s0x%03X]%s",Rn,sign,offset, opcode & BIT(21) ? "!":"");
+                    s_snprintf(addr_text,sizeof(addr_text),"[r%d, #%s0x%03X]%s",Rn,sign,offset, opcode & BIT(21) ? "!":"");
                 else
-                    sprintf(addr_text,"[r%d]%s",Rn, opcode & BIT(21) ? "!":"");
+                    s_snprintf(addr_text,sizeof(addr_text),"[r%d]%s",Rn, opcode & BIT(21) ? "!":"");
             }
             else //Post-indexed
             {
                 forceuser = (opcode & BIT(21)) ? "t" : "";
                 if(offset)
-                    sprintf(addr_text,"[r%d], #%s0x%03X",Rn,sign,offset);
+                    s_snprintf(addr_text,sizeof(addr_text),"[r%d], #%s0x%03X",Rn,sign,offset);
                 else
-                    sprintf(addr_text,"[r%d]",Rn);
+                    s_snprintf(addr_text,sizeof(addr_text),"[r%d]",Rn);
             }
 
             u32 addr = address;
@@ -781,22 +782,22 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
                 if(Rn==R_PC)
                 {
                     if(opcode & BIT(24)) addr += 8 + ( (opcode & BIT(23)) ? offset : -offset); //Pre-indexed
-                    if(opcode & BIT(22)) sprintf(dest,"ldr%s%s%s r%d, =0x%08X",cond,bytemode,forceuser,Rd,GBA_MemoryRead32(addr)&0xFF);
-                    else sprintf(dest,"ldr%s%s%s r%d, =0x%08X",cond,bytemode,forceuser,Rd,GBA_MemoryRead32(addr));
+                    if(opcode & BIT(22)) s_snprintf(dest,dest_size,"ldr%s%s%s r%d, =0x%08X",cond,bytemode,forceuser,Rd,GBA_MemoryRead32(addr)&0xFF);
+                    else s_snprintf(dest,dest_size,"ldr%s%s%s r%d, =0x%08X",cond,bytemode,forceuser,Rd,GBA_MemoryRead32(addr));
                 }
                 else
                 {
                     if(opcode & BIT(24)) addr += ( (opcode & BIT(23)) ? offset : -offset); //Pre-indexed
-                    sprintf(dest,"ldr%s%s%s r%d, %s",cond,bytemode,forceuser,Rd,addr_text);
+                    s_snprintf(dest,dest_size,"ldr%s%s%s r%d, %s",cond,bytemode,forceuser,Rd,addr_text);
                 }
             }
             else // STR{cond}{B}{T} Rd,<Address>
             {
                 if(opcode & BIT(24)) addr += ( (opcode & BIT(23)) ? offset : -offset); //Pre-indexed
-                sprintf(dest,"str%s%s%s r%d, %s",cond,bytemode,forceuser,Rd,addr_text);
+                s_snprintf(dest,dest_size,"str%s%s%s r%d, %s",cond,bytemode,forceuser,Rd,addr_text);
             }
-            int comment = gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1);
-            gba_dissasemble_add_io_register_name(CPU.R[Rn],dest,!comment);
+            int comment = gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1,dest_size);
+            gba_dissasemble_add_io_register_name(CPU.R[Rn],dest,!comment,dest_size);
             return;
 
         }
@@ -806,7 +807,7 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
 
             if(opcode & BIT(4))
             {
-                strcpy(dest, "[!] Undefined Instruction");
+                s_strncpy(dest, "[!] Undefined Instruction",dest_size);
                 return;
             }
 
@@ -828,14 +829,14 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
                 switch((opcode>>5)&3)
                 {
                     default:
-                    case 0: sprintf(shift_text,"r%d",Rm); break;
-                    case 1: case 2: shiftval = 32; sprintf(shift_text,"r%d, %s #%02X",Rm,shift,shiftval); break;
-                    case 3: sprintf(shift_text,"r%d, rrx",Rm); break;
+                    case 0: s_snprintf(shift_text,sizeof(shift_text),"r%d",Rm); break;
+                    case 1: case 2: shiftval = 32; s_snprintf(shift_text,sizeof(shift_text),"r%d, %s #%02X",Rm,shift,shiftval); break;
+                    case 3: s_snprintf(shift_text,sizeof(shift_text),"r%d, rrx",Rm); break;
                 }
             }
             else
             {
-                sprintf(shift_text,"r%d, %s #%02X",Rm,shift,shiftval);
+                s_snprintf(shift_text,sizeof(shift_text),"r%d, %s #%02X",Rm,shift,shiftval);
             }
 
 
@@ -844,7 +845,7 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
             char addr_text[32];
             if(opcode & BIT(24)) //Pre-indexed
             {
-                sprintf(addr_text,"[r%d, %s%s]%s",Rn,sign,shift_text,opcode & BIT(21) ? "!":"");
+                s_snprintf(addr_text,sizeof(addr_text),"[r%d, %s%s]%s",Rn,sign,shift_text,opcode & BIT(21) ? "!":"");
                 s32 offset = cpu_shift_by_reg_no_carry_arm_ldr_str(
                                         (opcode>>5)&3,CPU.R[opcode&0xF],(opcode>>7)&0x1F);
                 addr += (opcode & BIT(23)) ? offset : -offset;
@@ -852,19 +853,19 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
             else //Post-indexed
             {
                 forceuser = (opcode & BIT(21)) ? "t" : "";
-                sprintf(addr_text,"[r%d], %s%s",Rn,sign,shift_text);
+                s_snprintf(addr_text,sizeof(addr_text),"[r%d], %s%s",Rn,sign,shift_text);
             }
 
             if(opcode & BIT(20)) // LDR{cond}{B}{T} Rd,<Address>
             {
-                sprintf(dest,"ldr%s%s%s r%d, %s",cond,bytemode,forceuser,Rd,addr_text);
+                s_snprintf(dest,dest_size,"ldr%s%s%s r%d, %s",cond,bytemode,forceuser,Rd,addr_text);
             }
             else // STR{cond}{B}{T} Rd,<Address>
             {
-                sprintf(dest,"str%s%s%s r%d, %s",cond,bytemode,forceuser,Rd,addr_text);
+                s_snprintf(dest,dest_size,"str%s%s%s r%d, %s",cond,bytemode,forceuser,Rd,addr_text);
             }
-            int comment = gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1);
-            gba_dissasemble_add_io_register_name(addr,dest,!comment);
+            int comment = gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1,dest_size);
+            gba_dissasemble_add_io_register_name(addr,dest,!comment,dest_size);
             return;
         }
         case 4:
@@ -873,7 +874,7 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
             if( (opcode & (3<<21)) == (3<<21) )
             {
                 //Unpredictable
-                strcpy(dest, "[!] Undefined Instruction #4");
+                s_strncpy(dest, "[!] Undefined Instruction #4",dest_size);
                 return;
             }
 */
@@ -899,41 +900,41 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
             {
                 if(opcode & BIT(i))
                 {
-                    char reg[4]; sprintf(reg,"r%d",i);
-                    strcat(reglist,reg);
+                    char reg[4]; s_snprintf(reg,sizeof(reg),"r%d",i);
+                    s_strncat(reglist,reg,sizeof(reglist));
                     if( (opcode & BIT(i+1)) && (opcode & BIT(i+2)) )
                     {
-                        strcat(reglist,"-");
+                        s_strncat(reglist,"-",sizeof(reglist));
                         while(opcode & BIT(i++));
                         i-=2;
-                        sprintf(reg,"r%d",i);
-                        strcat(reglist,reg);
+                        s_snprintf(reg,sizeof(reg),"r%d",i);
+                        s_strncat(reglist,reg,sizeof(reglist));
                     }
 
                     int j = i+1;
                     while((opcode & BIT(j))==0) { j++; if(j == 16) break; }
-                    if(j < 16) strcat(reglist,",");
+                    if(j < 16) s_strncat(reglist,",",sizeof(reglist));
                 }
             }
-            strcat(reglist,"}");
+            s_strncat(reglist,"}",sizeof(reglist));
 
             if(load)
             {
                 // LDM{cond}{amod} Rn{!},<Rlist>{^}
-                sprintf(dest,"ldm%s%s%s r%d%s, %s%s",cond,sign,increment_time,Rn,writeback,
+                s_snprintf(dest,dest_size,"ldm%s%s%s r%d%s, %s%s",cond,sign,increment_time,Rn,writeback,
                         reglist,usrmod);
                 if(is_pop)
-                    strcat(dest," ; pop"); // ldmia r13! == pop
+                    s_strncat(dest," ; pop",dest_size); // ldmia r13! == pop
             }
             else
             {
                 // STM{cond}{amod} Rn{!},<Rlist>{^}
-                sprintf(dest,"stm%s%s%s r%d%s, %s%s",cond,sign,increment_time,Rn,writeback,
+                s_snprintf(dest,dest_size,"stm%s%s%s r%d%s, %s%s",cond,sign,increment_time,Rn,writeback,
                         reglist,usrmod);
                 if(is_push)
-                    strcat(dest," ; push"); // stmdb r13! == push
+                    s_strncat(dest," ; push",dest_size); // stmdb r13! == push
             }
-            gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1);
+            gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1,dest_size);
             return;
         }
         case 5:
@@ -941,21 +942,21 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
             if(opcode & (1<<24)) //BL{cond}
             {
                 u32 nn = (opcode & 0x00FFFFFF);
-                sprintf(dest,"bl%s #0x%08X",cond,address+8+
+                s_snprintf(dest,dest_size,"bl%s #0x%08X",cond,address+8+
                         ( ((nn & BIT(23)) ? (nn|0xFF000000) : nn)*4 ) );
-                strcat(dest," ; ->");
-                gba_dissasemble_add_condition_met(arm_cond_code,address,dest,0);
+                s_strncat(dest," ; ->",dest_size);
+                gba_dissasemble_add_condition_met(arm_cond_code,address,dest,0,dest_size);
                 return;
             }
             else //B{cond}
             {
                 u32 nn = (opcode & 0x00FFFFFF);
                 u32 addr_dest = address+8+ ( ((nn & BIT(23)) ? (nn|0xFF000000) : nn)*4 );
-                sprintf(dest,"b%s #0x%08X",cond,addr_dest);
-                if(addr_dest > address) strcat(dest," ; " STR_SLIM_ARROW_DOWN);
-                else if(addr_dest == address) strcat(dest," ; <-");
-                else strcat(dest," ; " STR_SLIM_ARROW_UP);
-                gba_dissasemble_add_condition_met(arm_cond_code,address,dest,0);
+                s_snprintf(dest,dest_size,"b%s #0x%08X",cond,addr_dest);
+                if(addr_dest > address) s_strncat(dest," ; " STR_SLIM_ARROW_DOWN,dest_size);
+                else if(addr_dest == address) s_strncat(dest," ; <-",dest_size);
+                else s_strncat(dest," ; " STR_SLIM_ARROW_UP,dest_size);
+                gba_dissasemble_add_condition_met(arm_cond_code,address,dest,0,dest_size);
                 return;
             }
         }
@@ -976,29 +977,29 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
             if(opcode & BIT(24)) //Pre
             {
                 if(offset)
-                    sprintf(addr_text,"[r%d, #%s0x%03X]%s",Rn,sign,offset,writeback);
+                    s_snprintf(addr_text,sizeof(addr_text),"[r%d, #%s0x%03X]%s",Rn,sign,offset,writeback);
                 else
-                    sprintf(addr_text,"[r%d]%s",Rn,writeback);
+                    s_snprintf(addr_text,sizeof(addr_text),"[r%d]%s",Rn,writeback);
             }
             else //Post
             {
                 //Always writeback?
                 if(offset)
-                    sprintf(addr_text,"[r%d], #%s0x%03X",Rn,sign,offset);
+                    s_snprintf(addr_text,sizeof(addr_text),"[r%d], #%s0x%03X",Rn,sign,offset);
                 else
-                    sprintf(addr_text,"[r%d]",Rn);
+                    s_snprintf(addr_text,sizeof(addr_text),"[r%d]",Rn);
             }
 
             if(opcode & BIT(20)) // LDC{cond}{L} Pn,Cd,<Address>
             {
-                sprintf(dest,"ldc%s%s p%d, c%d, %s ; [!]",cond,length,Pn,Cd,addr_text);
-                gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1);
+                s_snprintf(dest,dest_size,"ldc%s%s p%d, c%d, %s ; [!]",cond,length,Pn,Cd,addr_text);
+                gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1,dest_size);
                 return;
             }
             else // STC{cond}{L} Pn,Cd,<Address>
             {
-                sprintf(dest,"stc%s%s p%d, c%d, %s ; [!]",cond,length,Pn,Cd,addr_text);
-                gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1);
+                s_snprintf(dest,dest_size,"stc%s%s p%d, c%d, %s ; [!]",cond,length,Pn,Cd,addr_text);
+                gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1,dest_size);
                 return;
             }
         }
@@ -1007,9 +1008,9 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
             if(opcode & BIT(24))
             {
                 //SWI{cond}
-                sprintf(dest,"swi%s #0x%06X",cond,(opcode & 0x00FFFFFF));
-                int comment = gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1);
-                gba_disassemble_swi_name((opcode & 0x00FFFFFF)>>16,dest,!comment);
+                s_snprintf(dest,dest_size,"swi%s #0x%06X",cond,(opcode & 0x00FFFFFF));
+                int comment = gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1,dest_size);
+                gba_disassemble_swi_name((opcode & 0x00FFFFFF)>>16,dest,!comment,dest_size);
                 return;
             }
             else
@@ -1026,14 +1027,14 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
 
                     if(opcode & BIT(20)) // MRC{cond} Pn,<cpopc>,Rd,Cn,Cm{,<cp>}
                     {
-                        sprintf(dest,"mrc%s p%d, #0x%01X, r%d, c%d, c%d, #0x%01X ; [!]",cond,Pn,CP_Opc,Rd,Cn,Cm,CP);
-                        gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1);
+                        s_snprintf(dest,dest_size,"mrc%s p%d, #0x%01X, r%d, c%d, c%d, #0x%01X ; [!]",cond,Pn,CP_Opc,Rd,Cn,Cm,CP);
+                        gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1,dest_size);
                         return;
                     }
                     else // MCR{cond} Pn,<cpopc>,Rd,Cn,Cm{,<cp>}
                     {
-                        sprintf(dest,"mcr%s p%d, #0x%01X, r%d, c%d, c%d, #0x%01X ; [!]",cond,Pn,CP_Opc,Rd,Cn,Cm,CP);
-                        gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1);
+                        s_snprintf(dest,dest_size,"mcr%s p%d, #0x%01X, r%d, c%d, c%d, #0x%01X ; [!]",cond,Pn,CP_Opc,Rd,Cn,Cm,CP);
+                        gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1,dest_size);
                         return;
                     }
                 }
@@ -1047,15 +1048,15 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char * dest)
                     u32 CP = (opcode>>5) & 7;
                     u32 Cm = opcode & 0xF;
 
-                    sprintf(dest,"cdp%s p%d, #0x%01X, c%d, c%d, c%d, #0x%01X ; [!]",cond,Pn,CP_Opc,Cd,Cn,Cm,CP);
-                    gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1);
+                    s_snprintf(dest,dest_size,"cdp%s p%d, #0x%01X, c%d, c%d, c%d, #0x%01X ; [!]",cond,Pn,CP_Opc,Cd,Cn,Cm,CP);
+                    gba_dissasemble_add_condition_met(arm_cond_code,address,dest,1,dest_size);
                     return;
                 }
             }
         }
     }
 
-    strcpy(dest,"Unknown Opcode.");
+    s_strncpy(dest,"Unknown Opcode. [!!!]",dest_size);
     return;
 }
 
@@ -1069,7 +1070,7 @@ static const char thumb_alu_operation[16][4] = {
     "and", "eor", "lsl", "lsr", "asr", "adc", "sbc", "ror", "tst", "neg", "cmp", "cmn", "orr", "mul", "bic", "mvn"
 };
 
-void GBA_DisassembleTHUMB(u16 opcode, u32 address, char * dest)
+void GBA_DisassembleTHUMB(u16 opcode, u32 address, char * dest, int dest_size)
 {
     u16 ident = opcode >> 12;
     opcode &= 0x0FFF;
@@ -1085,13 +1086,13 @@ void GBA_DisassembleTHUMB(u16 opcode, u32 address, char * dest)
             {
                 //LSR Rd,Rs,#Offset
                 if(immed == 0) immed = 32;//LSR#0: Interpreted as LSR#32
-                sprintf(dest,"lsr r%d, r%d, #0x%02X",Rd,Rs,immed);
+                s_snprintf(dest,dest_size,"lsr r%d, r%d, #0x%02X",Rd,Rs,immed);
                 return;
             }
             else
             {
                 //LSL Rd,Rs,#Offset
-                sprintf(dest,"lsl r%d, r%d, #0x%02X",Rd,Rs,immed);
+                s_snprintf(dest,dest_size,"lsl r%d, r%d, #0x%02X",Rd,Rs,immed);
                 return;
             }
             break;
@@ -1108,28 +1109,28 @@ void GBA_DisassembleTHUMB(u16 opcode, u32 address, char * dest)
                     case 0: //ADD Rd,Rs,Rn
                     {
                         u16 Rn = (opcode>>6) & 7;
-                        sprintf(dest,"add r%d, r%d, r%d",Rd,Rs,Rn);
+                        s_snprintf(dest,dest_size,"add r%d, r%d, r%d",Rd,Rs,Rn);
                         return;
                     }
                     case 1: //SUB Rd,Rs,Rn
                     {
                         u16 Rn = (opcode>>6) & 7;
-                        sprintf(dest,"sub r%d, r%d, r%d",Rd,Rs,Rn);
+                        s_snprintf(dest,dest_size,"sub r%d, r%d, r%d",Rd,Rs,Rn);
                         return;
                     }
                     case 2: //ADD Rd,Rs,#nn
                     {
                         u16 immed = (opcode >> 6) & 0x7;
                         if(immed)
-                            sprintf(dest,"add r%d, r%d, #0x%01X",Rd,Rs,immed);
+                            s_snprintf(dest,dest_size,"add r%d, r%d, #0x%01X",Rd,Rs,immed);
                         else
-                            sprintf(dest,"mov r%d, r%d",Rd,Rs);
+                            s_snprintf(dest,dest_size,"mov r%d, r%d",Rd,Rs);
                         return;
                     }
                     case 3: //SUB Rd,Rs,#nn
                     {
                         u16 immed = (opcode >> 6) & 0x7;
-                        sprintf(dest,"sub r%d, r%d, #0x%01X",Rd,Rs,immed);
+                        s_snprintf(dest,dest_size,"sub r%d, r%d, #0x%01X",Rd,Rs,immed);
                         return;
                     }
                 }
@@ -1142,7 +1143,7 @@ void GBA_DisassembleTHUMB(u16 opcode, u32 address, char * dest)
                 u16 immed = (opcode >> 6) & 0x1F;
 
                 if(immed == 0) immed = 32;//ASR#0: Interpreted as ASR#32
-                sprintf(dest,"asr r%d, r%d, #0x%02X",Rd,Rs,immed);
+                s_snprintf(dest,dest_size,"asr r%d, r%d, #0x%02X",Rd,Rs,immed);
                 return;
             }
             break;
@@ -1155,13 +1156,13 @@ void GBA_DisassembleTHUMB(u16 opcode, u32 address, char * dest)
             if(opcode & BIT(11))
             {
                 //CMP Rd,#nn
-                sprintf(dest,"cmp r%d, #0x%02X",Rd,immed);
+                s_snprintf(dest,dest_size,"cmp r%d, #0x%02X",Rd,immed);
                 return;
             }
             else
             {
                 //MOV Rd,#nn
-                sprintf(dest,"mov r%d, #0x%02X",Rd,immed);
+                s_snprintf(dest,dest_size,"mov r%d, #0x%02X",Rd,immed);
                 return;
             }
             break;
@@ -1174,13 +1175,13 @@ void GBA_DisassembleTHUMB(u16 opcode, u32 address, char * dest)
             if(opcode & BIT(11))
             {
                 //SUB Rd,#nn
-                sprintf(dest,"sub r%d, #0x%02X",Rd,immed);
+                s_snprintf(dest,dest_size,"sub r%d, #0x%02X",Rd,immed);
                 return;
             }
             else
             {
                 //ADD Rd,#nn
-                sprintf(dest,"add r%d, #0x%02X",Rd,immed);
+                s_snprintf(dest,dest_size,"add r%d, #0x%02X",Rd,immed);
                 return;
             }
             break;
@@ -1192,9 +1193,9 @@ void GBA_DisassembleTHUMB(u16 opcode, u32 address, char * dest)
                 //LDR Rd,[PC,#nn]
                 u16 Rd = (opcode>>8)&7;
                 u32 offset = (opcode&0xFF)<<2;
-                //sprintf(dest,"ldr r%d, [pc, #%03X]",Rd,offset);
-                //sprintf(dest,"ldr r%d, [pc, #0x%03X] =0x%08X",Rd,offset,GBA_MemoryRead32(((address+4)&(~2))+offset));
-                sprintf(dest,"ldr r%d, =0x%08X",Rd,GBA_MemoryRead32(((address+4)&(~2))+offset));
+                //s_snprintf(dest,dest_size,"ldr r%d, [pc, #%03X]",Rd,offset);
+                //s_snprintf(dest,dest_size,"ldr r%d, [pc, #0x%03X] =0x%08X",Rd,offset,GBA_MemoryRead32(((address+4)&(~2))+offset));
+                s_snprintf(dest,dest_size,"ldr r%d, =0x%08X",Rd,GBA_MemoryRead32(((address+4)&(~2))+offset));
                 return;
             }
             else
@@ -1211,14 +1212,14 @@ void GBA_DisassembleTHUMB(u16 opcode, u32 address, char * dest)
                                 //ADD Rd,Rs
                                 u16 Rd = (opcode&7) | ( (opcode>>4) & 8);
                                 u16 Rs = (opcode>>3)&0xF;
-                                sprintf(dest,"add r%d, r%d",Rd,Rs);
+                                s_snprintf(dest,dest_size,"add r%d, r%d",Rd,Rs);
                                 return;
                             }
                             else
                             {
                                 u16 Rd = (opcode&7) | ( (opcode>>4) & 8);
                                 u16 Rs = (opcode>>3)&0xF;
-                                sprintf(dest,"add r%d, r%d ; [!] (Unused Opcode #4-0)",Rd,Rs);
+                                s_snprintf(dest,dest_size,"add r%d, r%d ; [!] (Unused Opcode #4-0)",Rd,Rs);
                                 return;
                             }
                         }
@@ -1229,7 +1230,7 @@ void GBA_DisassembleTHUMB(u16 opcode, u32 address, char * dest)
                                 //CMP Rd,Rs
                                 u16 Rd = (opcode&7) | ( (opcode>>4) & 8);
                                 u16 Rs = (opcode>>3)&0xF;
-                                sprintf(dest,"cmp r%d, r%d",Rd,Rs);
+                                s_snprintf(dest,dest_size,"cmp r%d, r%d",Rd,Rs);
                                 return;
                             }
                             else
@@ -1237,7 +1238,7 @@ void GBA_DisassembleTHUMB(u16 opcode, u32 address, char * dest)
                                 //CMP Rd,Rs
                                 u16 Rd = (opcode&7) | ( (opcode>>4) & 8);
                                 u16 Rs = (opcode>>3)&0xF;
-                                sprintf(dest,"cmp r%d, r%d ; [!] (Unused Opcode #4-1)",Rd,Rs);
+                                s_snprintf(dest,dest_size,"cmp r%d, r%d ; [!] (Unused Opcode #4-1)",Rd,Rs);
                                 return;
                             }
                         }
@@ -1249,9 +1250,9 @@ void GBA_DisassembleTHUMB(u16 opcode, u32 address, char * dest)
                                 u16 Rd = (opcode&7) | ( (opcode>>4) & 8);
                                 u16 Rs = (opcode>>3)&0xF;
                                 if( (Rd == 8) && (Rs == 8) )
-                                    strcpy(dest,"nop");
+                                    s_strncpy(dest,"nop",dest_size);
                                 else
-                                    sprintf(dest,"mov r%d, r%d",Rd,Rs);
+                                    s_snprintf(dest,dest_size,"mov r%d, r%d",Rd,Rs);
                                 return;
                             }
                             else //Tested in real hardware
@@ -1260,9 +1261,9 @@ void GBA_DisassembleTHUMB(u16 opcode, u32 address, char * dest)
                                 u16 Rd = (opcode&7) | ( (opcode>>4) & 8);
                                 u16 Rs = (opcode>>3)&0xF;
                                 if( (Rd == 8) && (Rs == 8) )
-                                    strcpy(dest,"nop ; [!] (Unused Opcode #4-2)");
+                                    s_strncpy(dest,"nop ; [!] (Unused Opcode #4-2)",dest_size);
                                 else
-                                    sprintf(dest,"mov r%d, r%d ; [!] (Unused Opcode #4-2)",Rd,Rs);
+                                    s_snprintf(dest,dest_size,"mov r%d, r%d ; [!] (Unused Opcode #4-2)",Rd,Rs);
                                 return;
                             }
                         }
@@ -1270,7 +1271,7 @@ void GBA_DisassembleTHUMB(u16 opcode, u32 address, char * dest)
                         {
                             if(opcode & 7)
                             {
-                                strcpy(dest,"[!] BX/BLX Undefined Opcode #4-3");
+                                s_strncpy(dest,"[!] BX/BLX Undefined Opcode #4-3",dest_size);
                                 return;
                             }
                             else
@@ -1278,7 +1279,7 @@ void GBA_DisassembleTHUMB(u16 opcode, u32 address, char * dest)
                                 if(opcode & BIT(7))
                                 {
                                     //(BLX  Rs), Unpredictable
-                                    strcpy(dest,"[!] BLX Rs - Undefined Opcode #4-4");
+                                    s_strncpy(dest,"[!] BLX Rs - Undefined Opcode #4-4",dest_size);
                                     return;
                                 }
                                 else
@@ -1286,9 +1287,9 @@ void GBA_DisassembleTHUMB(u16 opcode, u32 address, char * dest)
                                     //BX  Rs
                                     u16 Rs = (opcode>>3)&0xF;
                                     if(CPU.R[Rs]&BIT(0))
-                                        sprintf(dest,"bx r%d",Rs);
+                                        s_snprintf(dest,dest_size,"bx r%d",Rs);
                                     else
-                                        sprintf(dest,"bx r%d ; Switch to ARM",Rs);
+                                        s_snprintf(dest,dest_size,"bx r%d ; Switch to ARM",Rs);
                                     return;
                                 }
                             }
@@ -1303,7 +1304,7 @@ void GBA_DisassembleTHUMB(u16 opcode, u32 address, char * dest)
                     u16 Rd = opcode&7;
                     u16 Rs = (opcode>>3)&7;
                     u16 op = (opcode>>6)&0xF;
-                    sprintf(dest,"%s r%d, r%d",thumb_alu_operation[op],Rd,Rs);
+                    s_snprintf(dest,dest_size,"%s r%d, r%d",thumb_alu_operation[op],Rd,Rs);
                     return;
                 }
             }
@@ -1321,8 +1322,8 @@ void GBA_DisassembleTHUMB(u16 opcode, u32 address, char * dest)
                 "str", "strh", "strb", "ldsb", "ldr", "ldrh", "ldrb", "ldsh"
             };
 
-            sprintf(dest,"%s r%d, [r%d, r%d]",thumb_mem_ops[op],Rd,Rb,Ro);
-            gba_dissasemble_add_io_register_name(CPU.R[Rb]+CPU.R[Ro],dest,1);
+            s_snprintf(dest,dest_size,"%s r%d, [r%d, r%d]",thumb_mem_ops[op],Rd,Rb,Ro);
+            gba_dissasemble_add_io_register_name(CPU.R[Rb]+CPU.R[Ro],dest,1,dest_size);
             return;
         }
         case 6:
@@ -1334,19 +1335,19 @@ void GBA_DisassembleTHUMB(u16 opcode, u32 address, char * dest)
             {
                 //LDR  Rd,[Rb,#nn]
                 if(offset)
-                    sprintf(dest,"ldr r%d, [r%d, #0x%02X]",Rd,Rb,offset);
+                    s_snprintf(dest,dest_size,"ldr r%d, [r%d, #0x%02X]",Rd,Rb,offset);
                 else
-                    sprintf(dest,"ldr r%d, [r%d]",Rd,Rb);
+                    s_snprintf(dest,dest_size,"ldr r%d, [r%d]",Rd,Rb);
             }
             else
             {
                 //STR  Rd,[Rb,#nn]
                 if(offset)
-                    sprintf(dest,"str r%d, [r%d, #0x%02X]",Rd,Rb,offset);
+                    s_snprintf(dest,dest_size,"str r%d, [r%d, #0x%02X]",Rd,Rb,offset);
                 else
-                    sprintf(dest,"str r%d, [r%d]",Rd,Rb);
+                    s_snprintf(dest,dest_size,"str r%d, [r%d]",Rd,Rb);
             }
-            gba_dissasemble_add_io_register_name(CPU.R[Rb]+offset,dest,1);
+            gba_dissasemble_add_io_register_name(CPU.R[Rb]+offset,dest,1,dest_size);
             return;
         }
         case 7:
@@ -1358,19 +1359,19 @@ void GBA_DisassembleTHUMB(u16 opcode, u32 address, char * dest)
             {
                 //LDRB Rd,[Rb,#nn]
                 if(offset)
-                    sprintf(dest,"ldrb r%d, [r%d, #0x%02X]",Rd,Rb,offset);
+                    s_snprintf(dest,dest_size,"ldrb r%d, [r%d, #0x%02X]",Rd,Rb,offset);
                 else
-                    sprintf(dest,"ldrb r%d, [r%d]",Rd,Rb);
+                    s_snprintf(dest,dest_size,"ldrb r%d, [r%d]",Rd,Rb);
             }
             else
             {
                 //STRB Rd,[Rb,#nn]
                 if(offset)
-                    sprintf(dest,"strb r%d, [r%d, #0x%02X]",Rd,Rb,offset);
+                    s_snprintf(dest,dest_size,"strb r%d, [r%d, #0x%02X]",Rd,Rb,offset);
                 else
-                    sprintf(dest,"strb r%d, [r%d]",Rd,Rb);
+                    s_snprintf(dest,dest_size,"strb r%d, [r%d]",Rd,Rb);
             }
-            gba_dissasemble_add_io_register_name(CPU.R[Rb]+offset,dest,1);
+            gba_dissasemble_add_io_register_name(CPU.R[Rb]+offset,dest,1,dest_size);
             return;
         }
         case 8:
@@ -1382,19 +1383,19 @@ void GBA_DisassembleTHUMB(u16 opcode, u32 address, char * dest)
             {
                 //LDRH Rd,[Rb,#nn]
                 if(offset)
-                    sprintf(dest,"ldrh r%d, [r%d, #0x%02X]",Rd,Rb,offset);
+                    s_snprintf(dest,dest_size,"ldrh r%d, [r%d, #0x%02X]",Rd,Rb,offset);
                 else
-                    sprintf(dest,"ldrh r%d, [r%d]",Rd,Rb);
+                    s_snprintf(dest,dest_size,"ldrh r%d, [r%d]",Rd,Rb);
             }
             else
             {
                 //STRH Rd,[Rb,#nn]
                 if(offset)
-                    sprintf(dest,"strh r%d, [r%d, #0x%02X]",Rd,Rb,offset);
+                    s_snprintf(dest,dest_size,"strh r%d, [r%d, #0x%02X]",Rd,Rb,offset);
                 else
-                    sprintf(dest,"strh r%d, [r%d]",Rd,Rb);
+                    s_snprintf(dest,dest_size,"strh r%d, [r%d]",Rd,Rb);
             }
-            gba_dissasemble_add_io_register_name(CPU.R[Rb]+offset,dest,1);
+            gba_dissasemble_add_io_register_name(CPU.R[Rb]+offset,dest,1,dest_size);
             return;
         }
         case 9:
@@ -1405,18 +1406,18 @@ void GBA_DisassembleTHUMB(u16 opcode, u32 address, char * dest)
             {
                 //LDR  Rd,[SP,#nn]
                 if(offset)
-                    sprintf(dest,"ldr r%d, [sp, #0x%02X]",Rd,offset);
+                    s_snprintf(dest,dest_size,"ldr r%d, [sp, #0x%02X]",Rd,offset);
                 else
-                    sprintf(dest,"ldr r%d, [sp]",Rd);
+                    s_snprintf(dest,dest_size,"ldr r%d, [sp]",Rd);
                 return;
             }
             else
             {
                 //STR  Rd,[SP,#nn]
                 if(offset)
-                    sprintf(dest,"str r%d, [sp, #0x%02X]",Rd,offset);
+                    s_snprintf(dest,dest_size,"str r%d, [sp, #0x%02X]",Rd,offset);
                 else
-                    sprintf(dest,"str r%d, [sp]",Rd);
+                    s_snprintf(dest,dest_size,"str r%d, [sp]",Rd);
                 return;
             }
             break;
@@ -1429,18 +1430,18 @@ void GBA_DisassembleTHUMB(u16 opcode, u32 address, char * dest)
             {
                 //ADD  Rd,SP,#nn
                 if(offset)
-                    sprintf(dest,"add r%d, sp, #0x%03X",Rd,offset);
+                    s_snprintf(dest,dest_size,"add r%d, sp, #0x%03X",Rd,offset);
                 else
-                    sprintf(dest,"mov r%d, sp",Rd);
+                    s_snprintf(dest,dest_size,"mov r%d, sp",Rd);
                 return;
             }
             else
             {
                 //ADD  Rd,PC,#nn
                 if(offset)
-                    sprintf(dest,"add r%d, pc, #0x%03X",Rd,offset);
+                    s_snprintf(dest,dest_size,"add r%d, pc, #0x%03X",Rd,offset);
                 else
-                    sprintf(dest,"mov r%d, pc",Rd);
+                    s_snprintf(dest,dest_size,"mov r%d, pc",Rd);
                 return;
             }
             break;
@@ -1457,12 +1458,12 @@ void GBA_DisassembleTHUMB(u16 opcode, u32 address, char * dest)
                         if(opcode & BIT(7))
                         {
                             //ADD  SP,#-nn
-                            sprintf(dest,"add sp, #-0x%02X",offset);
+                            s_snprintf(dest,dest_size,"add sp, #-0x%02X",offset);
                         }
                         else
                         {
                             //ADD  SP,#nn
-                            sprintf(dest,"add sp, #0x%02X",offset);
+                            s_snprintf(dest,dest_size,"add sp, #0x%02X",offset);
                         }
                         return;
                     }
@@ -1477,23 +1478,23 @@ void GBA_DisassembleTHUMB(u16 opcode, u32 address, char * dest)
                     {
                         if(registers & BIT(i))
                         {
-                            char reg[4]; sprintf(reg,"r%d",i);
-                            strcat(reglist,reg);
+                            char reg[4]; s_snprintf(reg,sizeof(reg),"r%d",i);
+                            s_strncat(reglist,reg,sizeof(reglist));
                             if( (registers & BIT(i+1)) && (registers & BIT(i+2)) )
                             {
-                                strcat(reglist,"-");
+                                s_strncat(reglist,"-",sizeof(reglist));
                                 while(registers & BIT(i++));
                                 i-=2;
-                                sprintf(reg,"r%d",i);
-                                strcat(reglist,reg);
+                                s_snprintf(reg,sizeof(reg),"r%d",i);
+                                s_strncat(reglist,reg,sizeof(reglist));
                             }
                             int j = i+1;
                             while((registers & BIT(j))==0) { j++; if(j == 16) break; }
-                            if(j < 16) strcat(reglist,",");
+                            if(j < 16) s_strncat(reglist,",",sizeof(reglist));
                         }
                     }
-                    strcat(reglist,"}");
-                    sprintf(dest,"push %s",reglist);
+                    s_strncat(reglist,"}",sizeof(reglist));
+                    s_snprintf(dest,dest_size,"push %s",reglist);
                     return;
                 }
                 case 3: break;
@@ -1511,34 +1512,34 @@ void GBA_DisassembleTHUMB(u16 opcode, u32 address, char * dest)
                         if(registers & BIT(i))
                         {
                             count ++;
-                            char reg[4]; sprintf(reg,"r%d",i);
-                            strcat(reglist,reg);
+                            char reg[4]; s_snprintf(reg,sizeof(reg),"r%d",i);
+                            s_strncat(reglist,reg,sizeof(reglist));
                             if( (registers & BIT(i+1)) && (registers & BIT(i+2)) )
                             {
-                                strcat(reglist,"-");
+                                s_strncat(reglist,"-",sizeof(reglist));
                                 while(registers & BIT(i++));
                                 i-=2;
-                                if(i<16) sprintf(reg,"r%d",i);
-                                else strcat(reglist,"pc");
-                                strcat(reglist,reg);
+                                if(i<16) s_snprintf(reg,sizeof(reg),"r%d",i);
+                                else s_strncat(reglist,"pc",sizeof(reglist));
+                                s_strncat(reglist,reg,sizeof(reglist));
                             }
 
                             int j = i+1;
                             while((registers & BIT(j))==0) { j++; if(j == 16) break; }
-                            if(j < 16) strcat(reglist,",");
+                            if(j < 16) s_strncat(reglist,",",sizeof(reglist));
                         }
                     }
-                    strcat(reglist,"}");
-                    sprintf(dest,"pop %s",reglist);
-                    if(count == 0) strcat(dest," ; [!] Undefined opcode!");
+                    s_strncat(reglist,"}",sizeof(reglist));
+                    s_snprintf(dest,dest_size,"pop %s",reglist);
+                    if(count == 0) s_strncat(dest," ; [!] Undefined opcode!",dest_size);
                     return;
                 }
                 case 7:
-                    if((opcode & BIT(8)) == 0) { strcpy(dest,"[!] Undefined Opcode #B"); return; }
+                    if((opcode & BIT(8)) == 0) { s_strncpy(dest,"[!] Undefined Opcode #B",dest_size); return; }
                     else break;
             }
 
-            strcpy(dest,"[!] Undefined Opcode #B");
+            s_strncpy(dest,"[!] Undefined Opcode #B",dest_size);
             return;
         }
         case 0xC:
@@ -1549,37 +1550,37 @@ void GBA_DisassembleTHUMB(u16 opcode, u32 address, char * dest)
             {
                 if(opcode & BIT(i))
                 {
-                    char reg[4]; sprintf(reg,"r%d",i);
-                    strcat(reglist,reg);
+                    char reg[4]; s_snprintf(reg,sizeof(reg),"r%d",i);
+                    s_strncat(reglist,reg,sizeof(reglist));
                     if( (opcode & BIT(i+1)) && (opcode & BIT(i+2)) )
                     {
-                        strcat(reglist,"-");
+                        s_strncat(reglist,"-",sizeof(reglist));
                         while(opcode & BIT(i++));
                         i-=2;
-                        sprintf(reg,"r%d",i);
-                        strcat(reglist,reg);
+                        s_snprintf(reg,sizeof(reg),"r%d",i);
+                        s_strncat(reglist,reg,sizeof(reglist));
                     }
 
                     int j = i+1;
                     while((opcode & BIT(j))==0) { j++; if(j == 8) break; }
-                    if(j < 8) strcat(reglist,",");
+                    if(j < 8) s_strncat(reglist,",",sizeof(reglist));
                 }
             }
-            strcat(reglist,"}");
+            s_strncat(reglist,"}",sizeof(reglist));
 
             u16 Rb = (opcode>>8)&7;
 
             if(opcode & BIT(11))
             {
                 //LDMIA Rb!,{Rlist}
-                sprintf(dest,"ldmia r%d!,%s",Rb,reglist);
-                if((opcode&0xFF) == 0) strcat(dest," ; [!] Undefined opcode");
+                s_snprintf(dest,dest_size,"ldmia r%d!,%s",Rb,reglist);
+                if((opcode&0xFF) == 0) s_strncat(dest," ; [!] Undefined opcode",dest_size);
             }
             else
             {
                 //STMIA Rb!,{Rlist}
-                sprintf(dest,"stmia r%d!,%s",Rb,reglist);
-                if((opcode&0xFF) == 0) strcat(dest," ; [!] Rb += 0x40");
+                s_snprintf(dest,dest_size,"stmia r%d!,%s",Rb,reglist);
+                if((opcode&0xFF) == 0) s_strncat(dest," ; [!] Rb += 0x40",dest_size);
             }
             return;
         }
@@ -1590,29 +1591,29 @@ void GBA_DisassembleTHUMB(u16 opcode, u32 address, char * dest)
             if(cond == 15)
             {
                 //SWI nn
-                sprintf(dest,"swi #0x%02X",data);
-                gba_disassemble_swi_name(data,dest,1);
+                s_snprintf(dest,dest_size,"swi #0x%02X",data);
+                gba_disassemble_swi_name(data,dest,1,dest_size);
                 return;
             }
             else if(cond == 14)
             {
                 //Undefined opcode -- Tested in real hardware
                 u32 addr_dest = address+4+ ( ((s16)(s8)data) << 1 );
-                sprintf(dest,"b{al} #0x%08X ; [!] (Undefined Opcode #D)", addr_dest);
-                if(addr_dest > address) strcat(dest," ; " STR_SLIM_ARROW_DOWN);
-                else if(addr_dest == address) strcat(dest," ; <-");
-                else strcat(dest," ; " STR_SLIM_ARROW_UP);
+                s_snprintf(dest,dest_size,"b{al} #0x%08X ; [!] (Undefined Opcode #D)", addr_dest);
+                if(addr_dest > address) s_strncat(dest," ; " STR_SLIM_ARROW_DOWN,dest_size);
+                else if(addr_dest == address) s_strncat(dest," ; <-",dest_size);
+                else s_strncat(dest," ; " STR_SLIM_ARROW_UP,dest_size);
                 return;
             }
             else
             {
                 //B{cond} label
                 u32 addr_dest = address+4+ ( ((s16)(s8)data) << 1 );
-                sprintf(dest,"b%s #0x%08X",arm_cond[cond], addr_dest);
-                if(addr_dest > address) strcat(dest," ; " STR_SLIM_ARROW_DOWN);
-                else if(addr_dest == address) strcat(dest," ; <-");
-                else strcat(dest," ; " STR_SLIM_ARROW_UP);
-                gba_dissasemble_add_condition_met(cond,address,dest,0);
+                s_snprintf(dest,dest_size,"b%s #0x%08X",arm_cond[cond], addr_dest);
+                if(addr_dest > address) s_strncat(dest," ; " STR_SLIM_ARROW_DOWN,dest_size);
+                else if(addr_dest == address) s_strncat(dest," ; <-",dest_size);
+                else s_strncat(dest," ; " STR_SLIM_ARROW_UP,dest_size);
+                gba_dissasemble_add_condition_met(cond,address,dest,0,dest_size);
                 return;
             }
             break;
@@ -1621,7 +1622,7 @@ void GBA_DisassembleTHUMB(u16 opcode, u32 address, char * dest)
         {
             if(opcode & BIT(11))
             {
-                strcpy(dest,"[!] Undefined Opcode #E");
+                s_strncpy(dest,"[!] Undefined Opcode #E",dest_size);
                 return;
             }
             else
@@ -1630,10 +1631,10 @@ void GBA_DisassembleTHUMB(u16 opcode, u32 address, char * dest)
                 s32 offset = (opcode&0x3FF)<<1;
                 if(offset & BIT(10)) { offset |= 0xFFFFF800; }
                 u32 addr_dest = address+4+offset;
-                sprintf(dest,"b #0x%08X",addr_dest);
-                if(addr_dest > address) strcat(dest," ; "STR_SLIM_ARROW_DOWN);
-                else if(addr_dest == address) strcat(dest," ; <-");
-                else strcat(dest," ; "STR_SLIM_ARROW_UP);
+                s_snprintf(dest,dest_size,"b #0x%08X",addr_dest);
+                if(addr_dest > address) s_strncat(dest," ; "STR_SLIM_ARROW_DOWN,dest_size);
+                else if(addr_dest == address) s_strncat(dest," ; <-",dest_size);
+                else s_strncat(dest," ; "STR_SLIM_ARROW_UP,dest_size);
                 return;
             }
             break;
@@ -1646,12 +1647,12 @@ void GBA_DisassembleTHUMB(u16 opcode, u32 address, char * dest)
                 u16 prev = GBA_MemoryRead16(address - 2);
                 if((prev & 0xF800) == 0xF000)
                 {
-                    strcpy(dest,"bl (2nd part)");
+                    s_strncpy(dest,"bl (2nd part)",dest_size);
                     return;
                 }
                 else
                 {
-                    strcpy(dest,"bl (2nd part) ; [!] corrupted!");
+                    s_strncpy(dest,"bl (2nd part) ; [!] corrupted!",dest_size);
                     return;
                 }
             }
@@ -1661,13 +1662,13 @@ void GBA_DisassembleTHUMB(u16 opcode, u32 address, char * dest)
                 if((next & 0xF800) == 0xF800)
                 {
                     u32 addr = address + 4 + ((((u32)opcode & 0x7FF) << 12) | ((u32)opcode&BIT(10)?0xFF800000:0)) + ((next & 0x7FF) << 1);
-                    sprintf(dest,"bl #0x%08X",addr);
-                    strcat(dest," ; ->");
+                    s_snprintf(dest,dest_size,"bl #0x%08X",addr);
+                    s_strncat(dest," ; ->",dest_size);
                     return;
                 }
                 else
                 {
-                    strcpy(dest,"bl (1st part) ; [!] corrupted!");
+                    s_strncpy(dest,"bl (1st part) ; [!] corrupted!",dest_size);
                     return;
                 }
             }
@@ -1675,7 +1676,7 @@ void GBA_DisassembleTHUMB(u16 opcode, u32 address, char * dest)
         }
     }
 
-    strcpy(dest,"Unknown Opcode.");
+    s_strncpy(dest,"Unknown Opcode. [!!!]",dest_size);
     return;
 }
 

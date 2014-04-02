@@ -633,11 +633,11 @@ void GB_Cartridge_Unload(void)
     }
 
     int i;
-    for(i=0;i<GameBoy.Emulator.RAM_Banks;i++) free(mem->ExternRAM[i]);
+    for(i = 0; i < GameBoy.Emulator.RAM_Banks ; i++) free(mem->ExternRAM[i]);
 
     if(GameBoy.Emulator.CGBEnabled == 1)
     {
-        for(i=0;i<7;i++) free(mem->WorkRAM_Switch[i]);
+        for(i = 0; i < 7; i++) free(mem->WorkRAM_Switch[i]);
     }
     else
     {
@@ -681,22 +681,29 @@ void GB_SRAM_Save(void)
 
     FILE * savefile = fopen (name,"wb+");
 
-    if(!savefile) Debug_ErrorMsgArg("Couldn't save SRAM.");
+    if(!savefile)
+    {
+        Debug_ErrorMsgArg("Couldn't save SRAM.");
+        free(name);
+        return;
+    }
 
     if(GameBoy.Emulator.MemoryController == MEM_MBC2) //512 * 4 bits
     {
-        fwrite(GameBoy.Memory.ExternRAM[0], 1, 512, savefile);
+        int n = fwrite(GameBoy.Memory.ExternRAM[0], 1, 512, savefile);
+        if(n != 512) Debug_ErrorMsgArg("Error while writing SRAM: %d bytes written.",n);
     }
-/*    else if(((_GB_ROM_HEADER_*)GameBoy.Emulator.Rom_Pointer)->ram_size == 1) //2 kb
-    {
-        fwrite(GameBoy.Memory.ExternRAM[0], 1, 2 * 1024, savefile);
-    }
-*/    else //Complete banks
+    //else if(((_GB_ROM_HEADER_*)GameBoy.Emulator.Rom_Pointer)->ram_size == 1) //2 kb
+    //{
+    //    fwrite(GameBoy.Memory.ExternRAM[0], 1, 2 * 1024, savefile);
+    //}
+    else //Complete banks
     {
         u32 a;
         for(a = 0; a < GameBoy.Emulator.RAM_Banks; a++)
         {
-            fwrite(GameBoy.Memory.ExternRAM[a], 1, 8 * 1024, savefile);
+            int n = fwrite(GameBoy.Memory.ExternRAM[a], 1, 8 * 1024, savefile);
+            if(n != (8*1024) ) Debug_ErrorMsgArg("Error while writing SRAM bank %d: %d bytes written",a,n);
         }
     }
 
@@ -726,11 +733,11 @@ void GB_SRAM_Load(void)
 
         if(n != 512) ConsolePrint("Error while reading SRAM: %d bytes read",n);
     }
-/*    else if(((_GB_ROM_HEADER_*)GameBoy.Emulator.Rom_Pointer)->ram_size == 1) //2 kb
-    {
-        fread(GameBoy.Memory.ExternRAM[0], 1, 2 * 1024, savefile);
-    }
-*/    else //Complete banks
+    //else if(((_GB_ROM_HEADER_*)GameBoy.Emulator.Rom_Pointer)->ram_size == 1) //2 kb
+    //{
+    //    fread(GameBoy.Memory.ExternRAM[0], 1, 2 * 1024, savefile);
+    //}
+    else //Complete banks
     {
         u32 a;
         for(a = 0; a < GameBoy.Emulator.RAM_Banks; a++)
@@ -766,8 +773,14 @@ void GB_RTC_Save(void)
         return;
     }
 
-    fwrite(&GameBoy.Emulator.Timer, 1, sizeof(_GB_MB3_TIMER_), savefile);
-    fwrite(&current_time, 1, sizeof(time_t), savefile);
+    int n = fwrite(&GameBoy.Emulator.Timer, 1, sizeof(_GB_MB3_TIMER_), savefile);
+    if(n != sizeof(_GB_MB3_TIMER_))
+        Debug_ErrorMsgArg("Error while saving MBC3 data: %d bytes written",n);
+
+    n = fwrite(&current_time, 1, sizeof(time_t), savefile);
+    if(n != sizeof(time_t))
+        Debug_ErrorMsgArg("Error while saving RTC data: %d bytes written",n);
+
 
     fclose(savefile);
     free(name);
@@ -785,7 +798,11 @@ void GB_RTC_Load(void)
 
     FILE * savefile = fopen (name,"rb");
 
-    if(!savefile) return; // No save file...
+    if(!savefile)
+    {
+        free(name);
+        return; // No save file...
+    }
 
     ConsolePrint("Loading RTC data... ");
 
@@ -794,7 +811,7 @@ void GB_RTC_Load(void)
         ConsolePrint("Error while loading MBC3 data: %d bytes read",n);
 
     n = fread(&old_time, 1, sizeof(time_t), savefile);
-    if(n != sizeof(_GB_MB3_TIMER_))
+    if(n != sizeof(time_t))
         ConsolePrint("Error while loading RTC data: %d bytes read",n);
 
     fclose(savefile);

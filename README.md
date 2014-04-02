@@ -16,7 +16,7 @@ This is the only GB emulator that emulates completely the GB Camera if you have 
 Current goals for 0.2.0
 -----------------------
 
-- Fix broken x86 ASM instructions GBA emulation in Linux. THUMB mode ROR doesn't work right?
+- Nothing, just clean this a bit. :)
 
 For 0.3.0
 ---------
@@ -35,8 +35,9 @@ For 0.3.0
 - Obviously, improve emulation.
  - Implement mosaic correctly (in GBA mode).
  - Correct GBA CPU timings.
- - Rewrite a lot of GB core to speed up emulation.
+ - Rewrite A LOT of GB core to speed up emulation.
  - Auto frameskip.
+ - Fix broken x86 ASM instructions of GBA emulation in Linux. "setc (%%ebx)" seems to be the problem...
 
 Dependencies
 ------------

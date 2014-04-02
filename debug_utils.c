@@ -204,7 +204,7 @@ static void _sys_info_reset(void)
 
     _sys_info_printf("SDL_GetPowerInfo():\n  %s\n  Time left: %d:%02d:%02d\n  Percentage: %3d%%\n\n",
                      st_string,hours,min,secs,pct);
-#ifdef USE_OPENGL
+#ifdef ENABLE_OPENGL
     _sys_info_printf("OpenGL information:\n"
                      "-------------------\n"
                      "\n"

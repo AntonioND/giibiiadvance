@@ -30,7 +30,7 @@
 
 static inline u32 ror_immed_no_carry(u32 value, u8 shift)
 {
-#ifdef USE_ASM
+#ifdef ENABLE_ASM_X86
     asm("ror %%cl,%%eax \n\t" : "=a" (value) : "a" (value), "c" (shift)); // eax = eax ror cl
     return value;
 #else
@@ -42,15 +42,15 @@ static inline u32 ror_immed(u32 value, u8 shift, u8 * carry)
 {
     if(shift)
     {
-#ifdef USE_ASM
-        asm("ror %%cl,%%eax \n\t" // eax = eax ror cl
-            "setc (%%ebx) \n\t"   // (ebx) = carry
-            : "=a" (value) : "a" (value), "b" (carry), "c" (shift));
-        return value;
-#else
+//#ifdef ENABLE_ASM_X86
+//        asm("ror %%cl,%%eax \n\t" // eax = eax ror cl
+//            "setc (%%ebx) \n\t"   // (ebx) = carry
+//            : "=a" (value) : "a" (value), "b" (carry), "c" (shift));
+//        return value;
+//#else
         *carry = (value & BIT(shift-1)) != 0;
         return ( (value >> shift) | (value<<(32-shift)) );
-#endif
+//#endif
     }
     else
     {
@@ -71,15 +71,15 @@ static inline u32 lsl_shift_by_immed(u32 value, u8 shift, u8 * carry)
     if(shift == 0) { *carry = (CPU.CPSR&F_C) != 0; return value; } //lsl #0
     else
     {
-#ifdef USE_ASM
-        asm("shl %%cl,%%eax \n\t"
-            "setc (%%ebx) \n\t"
-            : "=a" (value) : "a" (value), "b" (carry), "c" (shift));
-        return value;
-#else
+//#ifdef ENABLE_ASM_X86
+//        asm("shl %%cl,%%eax \n\t"
+//            "setc (%%ebx) \n\t"
+//            : "=a" (value) : "a" (value), "b" (carry), "c" (shift));
+//        return value;
+//#else
         *carry = (value&BIT(32-shift)) != 0;
         return ( value << shift );
-#endif
+//#endif
     }
 }
 
@@ -88,15 +88,15 @@ static inline u32 lsr_shift_by_immed(u32 value, u8 shift, u8 * carry)
     if(shift == 0) { *carry = (value&BIT(31)) != 0; return 0; } //lsr #32
     else
     {
-#ifdef USE_ASM
-        asm("shr %%cl,%%eax \n\t"
-            "setc (%%ebx) \n\t"
-            : "=a" (value) : "a" (value), "b" (carry), "c" (shift));
-        return value;
-#else
+//#ifdef ENABLE_ASM_X86
+//        asm("shr %%cl,%%eax \n\t"
+//            "setc (%%ebx) \n\t"
+//            : "=a" (value) : "a" (value), "b" (carry), "c" (shift));
+//        return value;
+//#else
         *carry = (value&BIT(shift-1)) != 0;
         return ( value >> shift );
-#endif
+//#endif
     }
 }
 
@@ -105,15 +105,15 @@ static inline u32 asr_shift_by_immed(u32 value, u8 shift, u8 * carry)
     if(shift == 0) { *carry = (value&BIT(31)) != 0; return (*carry) ? 0xFFFFFFFF : 0; } //asr #32
     else
     {
-#ifdef USE_ASM
-        asm("sar %%cl,%%eax \n\t"
-            "setc (%%ebx) \n\t"
-            : "=a" (value) : "a" (value), "b" (carry), "c" (shift));
-        return value;
-#else
+//#ifdef ENABLE_ASM_X86
+//        asm("sar %%cl,%%eax \n\t"
+//            "setc (%%ebx) \n\t"
+//            : "=a" (value) : "a" (value), "b" (carry), "c" (shift));
+//        return value;
+//#else
         *carry = (value&BIT(shift-1)) != 0;
         return (u32)( ((s32)value) >> shift );
-#endif
+//#endif
     }
 }
 
@@ -126,15 +126,15 @@ static inline u32 ror_shift_by_immed(u32 value, u8 shift, u8 * carry)
     }
     else
     {
-#ifdef USE_ASM
-        asm("ror %%cl,%%eax \n\t"
-            "setc (%%ebx) \n\t"
-            : "=a" (value) : "a" (value), "b" (carry), "c" (shift));
-        return value;
-#else
+//#ifdef ENABLE_ASM_X86
+//        asm("ror %%cl,%%eax \n\t"
+//            "setc (%%ebx) \n\t"
+//            : "=a" (value) : "a" (value), "b" (carry), "c" (shift));
+//        return value;
+//#else
         *carry = (value & BIT(shift-1)) != 0;
         return ( (value >> shift) | (value<<(32-shift)) );
-#endif
+//#endif
     }
 }
 
@@ -158,7 +158,7 @@ static inline u32 lsl_shift_by_immed_no_carry(u32 value, u8 shift)
     if(shift == 0) { return value; } //lsl #0
     else
     {
-#ifdef USE_ASM
+#ifdef ENABLE_ASM_X86
         asm("shl %%cl,%%eax \n\t" : "=a" (value) : "a" (value), "c" (shift));
         return value;
 #else
@@ -172,7 +172,7 @@ static inline u32 lsr_shift_by_immed_no_carry(u32 value, u8 shift)
     if(shift == 0) { return 0; } //lsr #32
     else
     {
-#ifdef USE_ASM
+#ifdef ENABLE_ASM_X86
         asm("shr %%cl,%%eax \n\t" : "=a" (value) : "a" (value), "c" (shift));
         return value;
 #else
@@ -186,7 +186,7 @@ static inline u32 asr_shift_by_immed_no_carry(u32 value, u8 shift)
     if(shift == 0) { return (value&BIT(31)) ? 0xFFFFFFFF : 0; } //asr #32
     else
     {
-#ifdef USE_ASM
+#ifdef ENABLE_ASM_X86
         asm("sar %%cl,%%eax \n\t" : "=a" (value) : "a" (value), "c" (shift));
         return value;
 #else
@@ -200,7 +200,7 @@ static inline u32 ror_shift_by_immed_no_carry(u32 value, u8 shift)
     if(shift == 0) { return ( (value >> 1) | ((CPU.CPSR&F_C)?BIT(31):0) ); } //rrx #1
     else
     {
-#ifdef USE_ASM
+#ifdef ENABLE_ASM_X86
         asm("ror %%cl,%%eax \n\t" : "=a" (value) : "a" (value), "c" (shift));
         return value;
 #else
@@ -235,15 +235,15 @@ static inline u32 lsl_shift_by_reg(u32 value, u8 shift, u8 * carry)
     {
         if(shift < 32)
         {
-#ifdef USE_ASM
-            asm("shl %%cl,%%eax \n\t"
-                "setc (%%ebx) \n\t"
-                : "=a" (value) : "a" (value), "b" (carry), "c" (shift));
-            return value;
-#else
+//#ifdef ENABLE_ASM_X86
+//            asm("shl %%cl,%%eax \n\t"
+//                "setc (%%ebx) \n\t"
+//                : "=a" (value) : "a" (value), "b" (carry), "c" (shift));
+//            return value;
+//#else
             *carry = (value&BIT(32-shift)) != 0;
             return value<<shift;
-#endif
+//#endif
         }
         else if(shift == 32) { *carry = (value&BIT(0)) != 0; return 0; }
         else { *carry = 0; return 0; }
@@ -258,15 +258,15 @@ static inline u32 lsr_shift_by_reg(u32 value, u8 shift, u8 * carry)
 
         if(shift < 32)
         {
-#ifdef USE_ASM
-            asm("shr %%cl,%%eax \n\t"
-                "setc (%%ebx) \n\t"
-                : "=a" (value) : "a" (value), "b" (carry), "c" (shift));
-            return value;
-#else
+//#ifdef ENABLE_ASM_X86
+//            asm("shr %%cl,%%eax \n\t"
+//                "setc (%%ebx) \n\t"
+//                : "=a" (value) : "a" (value), "b" (carry), "c" (shift));
+//            return value;
+//#else
             *carry = (value&BIT(shift-1)) != 0;
             return value>>shift;
-#endif
+//#endif
         }
         else if(shift == 32) { *carry = (value&BIT(31)) != 0; return 0; }
         else { *carry = 0; return 0; }
@@ -282,15 +282,15 @@ static inline u32 asr_shift_by_reg(u32 value, u8 shift, u8 * carry)
     {
         if(shift < 32)
         {
-#ifdef USE_ASM
-            asm("sar %%cl,%%eax \n\t"
-                "setc (%%ebx) \n\t"
-                : "=a" (value) : "a" (value), "b" (carry), "c" (shift));
-            return value;
-#else
+//#ifdef ENABLE_ASM_X86
+//            asm("sar %%cl,%%eax \n\t"
+//                "setc (%%ebx) \n\t"
+//                : "=a" (value) : "a" (value), "b" (carry), "c" (shift));
+//            return value;
+//#else
             *carry = (value&BIT(shift-1)) != 0;
             return (u32)(((s32)value)>>shift);
-#endif
+//#endif
         }
         else { *carry = (value&BIT(31)) != 0; return (u32)(((s32)value)>>31); }
     }
@@ -305,15 +305,15 @@ static inline u32 ror_shift_by_reg(u32 value, u8 shift, u8 * carry)
         shift &= 31;
         if(shift)
         {
-#ifdef USE_ASM
-            asm("ror %%cl,%%eax \n\t"
-                "setc (%%ebx) \n\t"
-                : "=a" (value) : "a" (value), "b" (carry), "c" (shift));
-            return value;
-#else
+//#ifdef ENABLE_ASM_X86
+//            asm("ror %%cl,%%eax \n\t"
+//                "setc (%%ebx) \n\t"
+//                : "=a" (value) : "a" (value), "b" (carry), "c" (shift));
+//            return value;
+//#else
             *carry = (value & BIT(shift-1)) != 0;
             return ( (value >> shift) | (value<<(32-shift)) );
-#endif
+//#endif
         }
         else
         {
@@ -384,7 +384,7 @@ static inline u32 ror_shift_by_reg_no_carry(u32 value, u8 shift)
     else return ((CPU.CPSR&F_C)<<2) | (value >> 1);
 */
     shift &= 31;
-#ifdef USE_ASM
+#ifdef ENABLE_ASM_X86
     asm("ror %%cl,%%eax \n\t" : "=a" (value) : "a" (value), "c" (shift));
     return value;
 #else

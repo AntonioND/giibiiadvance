@@ -47,8 +47,8 @@
 //----------------------- EMULATOR DEFINES ----------------------
 //---------------------------------------------------------------
 
-//#define USE_ASM // Broken
-#define USE_OPENGL // Enables OpenGL info in "System Information" window.
+#define ENABLE_ASM_X86
+#define ENABLE_OPENGL // Enables OpenGL info in "System Information" window.
 
 #define BIOS_FOLDER "bios"
 #define SCREENSHOT_FOLDER "screenshots"

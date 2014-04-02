@@ -223,7 +223,7 @@ static inline void thumb_cmp(u16 Rd, u16 Rs)
 
 static inline void thumb_cmn(u16 Rd, u16 Rs)
 {
-#ifdef USE_ASM
+#ifdef ENABLE_ASM_X86
     u8 carry, overflow;
     asm("add %3,%2 \n\t"
         "setc %%al \n\t"
@@ -340,7 +340,7 @@ inline s32 GBA_ExecuteTHUMB(s32 clocks) //returns residual clocks
                 u16 Rd = opcode & 7;
                 u16 Rs = (opcode>>3) & 7;
                 u16 Rn = (opcode>>6) & 7;
-#ifdef USE_ASM
+#ifdef ENABLE_ASM_X86
                 u8 carry, overflow;
                 asm("add %4,%3 \n\t"
                     "mov %3,%0 \n\t"
@@ -381,7 +381,7 @@ inline s32 GBA_ExecuteTHUMB(s32 clocks) //returns residual clocks
                 u16 Rd = opcode & 7;
                 u16 Rs = (opcode>>3) & 7;
                 u32 immed = (opcode >> 6) & 0x7;
-#ifdef USE_ASM
+#ifdef ENABLE_ASM_X86
                 u8 carry, overflow;
                 asm("add %4,%3 \n\t"
                     "mov %3,%0 \n\t"
@@ -455,7 +455,7 @@ inline s32 GBA_ExecuteTHUMB(s32 clocks) //returns residual clocks
             case 0x2E: CMP_REG_IMM(6);
             case 0x2F: CMP_REG_IMM(7);
 
-#ifdef USE_ASM
+#ifdef ENABLE_ASM_X86
 #define ADD_REG_IMM(Rd) \
 { \
     u32 immed = opcode & 0xFF; \

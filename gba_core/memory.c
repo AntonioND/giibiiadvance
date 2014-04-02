@@ -291,7 +291,7 @@ u32 GBA_MemoryRead32(u32 address)
             return 0;
     }
 
-#ifdef USE_ASM
+#ifdef ENABLE_ASM_X86
     asm("and $3,%%eax    \n\t" // eax = address & 3
         "mov $3,%%cl     \n\t" // cl = 3
         "shl %%cl,%%eax  \n\t" // eax = (address & 3) << 3

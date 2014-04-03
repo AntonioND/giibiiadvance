@@ -12,7 +12,6 @@ General
 - Custom controls. Game controllers.
 - Rumble.
 - Cross out things in debugger that can't be used (transparent palette colors, GBA sprites that are hiden?, ...)
-- Remove debug log messages. Make it create the log file only if there is something written.
 
 Game Boy
 --------

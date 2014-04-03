@@ -77,11 +77,11 @@ int main( int argc, char * argv[] )
 
     Win_MainCreate( (argc > 1) ? argv[1] : NULL );
 
-    if(argc > 0) Debug_LogMsgArg("argv[0] = %s",argv[0]);
-    if(argc > 1) Debug_LogMsgArg("argv[1] = %s",argv[1]);
-    Debug_LogMsgArg(DirGetRunningPath());
-    Debug_LogMsgArg(DirGetBiosFolderPath());
-    Debug_LogMsgArg(DirGetScreenshotFolderPath());
+    //if(argc > 0) Debug_LogMsgArg("argv[0] = %s",argv[0]);
+    //if(argc > 1) Debug_LogMsgArg("argv[1] = %s",argv[1]);
+    //Debug_LogMsgArg(DirGetRunningPath());
+    //Debug_LogMsgArg(DirGetBiosFolderPath());
+    //Debug_LogMsgArg(DirGetScreenshotFolderPath());
 
     //if(argc > 1) LOAD_GAME(argv[1]);
 

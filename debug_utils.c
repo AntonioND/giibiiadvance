@@ -33,29 +33,41 @@
 
 //----------------------------------------------------------------------------------
 
-FILE * f_log;
+static FILE * f_log;
+static int log_file_opened = 0;
 
 void Debug_End(void)
 {
-    fclose(f_log);
+    if(log_file_opened)
+        fclose(f_log);
+    log_file_opened = 0;
 }
 
 void Debug_Init(void)
 {
-    char logpath[MAX_PATHLEN];
-    s_snprintf(logpath,sizeof(logpath),"%slog.txt",DirGetRunningPath());
-    f_log = fopen(logpath,"w");
+    log_file_opened = 0;
     atexit(Debug_End);
 }
 
 void Debug_LogMsgArg(const char * msg, ...)
 {
-    va_list args;
-    va_start(args,msg);
-    vfprintf(f_log, msg, args);
-    va_end(args);
-    fputc('\n',f_log);
-    return;
+    if(log_file_opened == 0)
+    {
+        char logpath[MAX_PATHLEN];
+        s_snprintf(logpath,sizeof(logpath),"%slog.txt",DirGetRunningPath());
+        f_log = fopen(logpath,"w");
+        if(f_log)
+            log_file_opened = 1;
+    }
+
+    if(log_file_opened)
+    {
+        va_list args;
+        va_start(args,msg);
+        vfprintf(f_log, msg, args);
+        va_end(args);
+        fputc('\n',f_log);
+    }
 }
 
 void Debug_DebugMsgArg(const char * msg, ...)

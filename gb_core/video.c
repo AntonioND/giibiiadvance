@@ -1262,19 +1262,19 @@ int GB_Screen_Init(void)
     return 0;
 }
 
-inline void GB_Screen_WritePixel(char * buffer, int x, int y, int r, int g, int b)
+static inline void GB_Screen_WritePixel(char * buffer, int x, int y, int r, int g, int b)
 {
     u8 * p = (u8*)buffer + (y*160 + x) * 3;
     *p++ = r; *p++ = g; *p = b;
 }
 
-inline void GB_Screen_WritePixelSGB(char * buffer, int x, int y, int r, int g, int b)
+static inline void GB_Screen_WritePixelSGB(char * buffer, int x, int y, int r, int g, int b)
 {
     u8 * p = (u8*)buffer + (y*(160+96) + x) * 3;
     *p++ = r; *p++ = g; *p = b;
 }
 
-void gb_scr_writebuffer_sgb(char * buffer)
+static void gb_scr_writebuffer_sgb(char * buffer)
 {
     int last_fb = gb_cur_fb ^ 1;
     int i,j;
@@ -1286,7 +1286,7 @@ void gb_scr_writebuffer_sgb(char * buffer)
     }
 }
 
-void gb_scr_writebuffer_dmg_cgb(char * buffer)
+static void gb_scr_writebuffer_dmg_cgb(char * buffer)
 {
     int last_fb = gb_cur_fb ^ 1;
     int i,j;
@@ -1298,7 +1298,7 @@ void gb_scr_writebuffer_dmg_cgb(char * buffer)
     }
 }
 
-void gb_scr_writebuffer_dmg_cgb_blur(char * buffer)
+static void gb_scr_writebuffer_dmg_cgb_blur(char * buffer)
 {
     int i,j;
     for(i = 0; i < 160; i++) for(j = 0; j < 144; j++)
@@ -1317,7 +1317,7 @@ void gb_scr_writebuffer_dmg_cgb_blur(char * buffer)
 // G = ((g * 3 + b) << 1)
 // B = ((r * 3 + g * 2 + b * 11) >> 1)
 
-void gb_scr_writebuffer_dmg_cgb_realcolors(char * buffer)
+static void gb_scr_writebuffer_dmg_cgb_realcolors(char * buffer)
 {
     int last_fb = gb_cur_fb ^ 1;
     int i,j;
@@ -1332,7 +1332,7 @@ void gb_scr_writebuffer_dmg_cgb_realcolors(char * buffer)
     }
 }
 
-void gb_scr_writebuffer_dmg_cgb_blur_realcolors(char * buffer)
+static void gb_scr_writebuffer_dmg_cgb_blur_realcolors(char * buffer)
 {
     int i,j;
     for(i = 0; i < 160; i++) for(j = 0; j < 144; j++)
@@ -1349,30 +1349,79 @@ void gb_scr_writebuffer_dmg_cgb_blur_realcolors(char * buffer)
     }
 }
 
+typedef void (*draw_to_buf_fn)(char *);
+
 void GB_Screen_WriteBuffer_24RGB(char * buffer)
 {
+    draw_to_buf_fn draw_fn = NULL;
+
     if( (GameBoy.Emulator.HardwareType == HW_SGB) || (GameBoy.Emulator.HardwareType == HW_SGB2) )
     {
-        gb_scr_writebuffer_sgb(buffer);
+        draw_fn = &gb_scr_writebuffer_sgb;
+        //gb_scr_writebuffer_sgb(buffer);
     }
     else if(GameBoy.Emulator.HardwareType == HW_GBA)
     {
-        if(gb_blur) gb_scr_writebuffer_dmg_cgb_blur(buffer);
-        else gb_scr_writebuffer_dmg_cgb(buffer);
+        if(gb_blur) draw_fn = &gb_scr_writebuffer_dmg_cgb_blur; //gb_scr_writebuffer_dmg_cgb_blur(buffer);
+        else draw_fn = &gb_scr_writebuffer_dmg_cgb; //gb_scr_writebuffer_dmg_cgb(buffer);
     }
     else
     {
         if(gb_blur)
         {
-            if(gb_realcolors) gb_scr_writebuffer_dmg_cgb_blur_realcolors(buffer);
-            else gb_scr_writebuffer_dmg_cgb_blur(buffer);
+            if(gb_realcolors) draw_fn = &gb_scr_writebuffer_dmg_cgb_blur_realcolors; //gb_scr_writebuffer_dmg_cgb_blur_realcolors(buffer);
+            else draw_fn = &gb_scr_writebuffer_dmg_cgb_blur; //gb_scr_writebuffer_dmg_cgb_blur(buffer);
         }
         else
         {
-            if(gb_realcolors) gb_scr_writebuffer_dmg_cgb_realcolors(buffer);
-            else gb_scr_writebuffer_dmg_cgb(buffer);
+            if(gb_realcolors) draw_fn = &gb_scr_writebuffer_dmg_cgb_realcolors; //gb_scr_writebuffer_dmg_cgb_realcolors(buffer);
+            else draw_fn = &gb_scr_writebuffer_dmg_cgb; //gb_scr_writebuffer_dmg_cgb(buffer);
         }
     }
+
+    if(GameBoy.Emulator.rumble)
+    {
+        int rand_ = rand();
+        int mov_x = (rand_%3)-1;
+        int mov_y = ((rand_>>8)%3)-1;
+
+        int w,h;
+
+        if( (GameBoy.Emulator.HardwareType == HW_SGB) || (GameBoy.Emulator.HardwareType == HW_SGB2) )
+        {
+            w = 256; h = 224;
+        }
+        else
+        {
+            w = 160; h = 144;
+        }
+
+        char * buf = malloc(w*h*3);
+        if(buf == NULL) return;
+        draw_fn(buf);
+
+        int i,j;
+        for(j = 0; j < h; j++) for(i = 0; i < w; i++)
+        {
+            int y_dst = j+mov_y;
+            if( (y_dst >= 0) && (y_dst < h) )
+            {
+                int x_dst = i+mov_x;
+
+                if( (x_dst >= 0) && (x_dst < w) )
+                {
+                    int dst = (y_dst*w+x_dst)*3;
+                    buffer[dst+0] = buf[(j*w+i)*3+0];
+                    buffer[dst+1] = buf[(j*w+i)*3+1];
+                    buffer[dst+2] = buf[(j*w+i)*3+2];
+                }
+            }
+        }
+
+        free(buf);
+    }
+    else
+        draw_fn(buffer);
 }
 
 //-------------------------------------------------------------

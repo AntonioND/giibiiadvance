@@ -10,7 +10,7 @@ General
 - Cross out unused palette colors in the palette viewer.
 - Detect ROM (GB/GBA) checking the headers?
 - Custom controls. Game controllers.
-- Rumble.
+- Rumble in game controller.
 - Cross out things in debugger that can't be used (transparent palette colors, GBA sprites that are hiden?, ...)
 
 Game Boy

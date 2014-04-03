@@ -2,13 +2,10 @@
 General
 -------
 
-- ARM undefined opcodes
 - Autosave.
-- Update memory, I/O viewers...? with F7
+- Update memory, I/O viewers... with F7?
 - Save memory dumps, dissasembly...
 - Allow to execute one frame per press.
-- Cross out unused palette colors in the palette viewer.
-- Detect ROM (GB/GBA) checking the headers?
 - Custom controls. Game controllers.
 - Rumble in game controller.
 - Cross out things in debugger that can't be used (transparent palette colors, GBA sprites that are hiden?, ...)
@@ -19,34 +16,31 @@ Game Boy
 - Measure delay between VBL and VBL IRQ.
 - Make that everything reads FFh except HRAM when DMG DMA is enabled.
 - Check GDMA/HDMA timings in real hardware.
-- Fix reset in GBC mode. (?)
 - Memory after OAM is an OAM mirror?
 - What happens if [DMA] = FFh or any other invalid value?
 - Put wave RAM in the I/O viewer?
-- Rumble.
 - GB Camera.
 - ATTRACTION MODE (SGB). Maybe it is the thing that the system borders can animate in a real SGB. (?)
 
 Game Boy Advance
 ----------------
 
+- ARM undefined opcodes
 - Sound glitches. (Buffer underflow or something?)
 - The NDS7 and GBA allow to access CP14 (unlike as for CP0..CP13 & CP15, access to CP14 doesn't generate any exceptions)
 - What happens with video modes 6 and 7?
 - Emulate weird things with invalid window coordinates.
 - Affine sprites/bgs(mode 7) + mosaic = bad
 - Emulate mosaic effect correctly.
-- Fix sound.
 - Serial port.
 - RTC. I/O registers for external hardware.
 - The correct way of emulating is drawing a pixel every 4 clocks... But maybe it is too slow.
-- Fix memory read (2 least significative bits)
+- Fix memory read (2 least significative bits)?
 - Check ARM interpreter.
-- Emulate pipeline to prevent programs from detecting they are running on an emulator.
+- Emulate pipeline to prevent programs from detecting they are running on an emulator?
 - Fix CPU cycles.
 - Configuration -> Disable GBA layers?
 - THUMB LDMIA/STMIA: Strange Effects on Invalid Rlist's. Empty Rlist: R15 loaded/stored, and Rb=Rb+40h. Writeback with Rb included in Rlist: Store OLD base if Rb is FIRST entry in Rlist, otherwise store NEW base,no writeback.
-- Finish I/O viewer.
 - Caution: A very large OBJ (of 128 pixels vertically, ie. a 64 pixels OBJ in a Double Size area) located at Y>128 will be treated as at Y>-128, the OBJ is then displayed parts offscreen at the TOP of the display, it is then NOT displayed at the bottom.
 - Video Capture Mode (DMA3 only): Intended to copy a bitmap from memory (or from external hardware/camera) to VRAM. When using this transfer mode, set the repeat bit, and write the number of data units (per scanline) to the word count register. Capture works similar like HBlank DMA, however, the transfer is started when VCOUNT=2, it is then repeated each scanline, and it gets stopped when VCOUNT=162.
 - Rumble.

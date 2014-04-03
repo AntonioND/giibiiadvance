@@ -101,7 +101,7 @@ int main( int argc, char * argv[] )
 
         if(Input_Speedup_Enabled())
         {
-            SDL_Delay(1);
+            SDL_Delay(0);
         }
         else
         {

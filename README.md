@@ -3,8 +3,9 @@ GiiBiiAdvance
 
 Another GB, GBC and GBA emulator writen in C. By Antonio Niño Díaz (AntonioND).
 
-http://antoniond_blog.drunkencoders.com/
-http://antoniond.drunkencoders.com/
+[http://antoniond_blog.drunkencoders.com/](http://antoniond_blog.drunkencoders.com/)
+
+[http://antoniond.drunkencoders.com/](http://antoniond.drunkencoders.com/)
 
 This is an emulator I started a few years ago. I haven't released any version in years since 0.1.0, but I've done some changes that have improved compatibility anyway.
 

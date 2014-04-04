@@ -3,20 +3,13 @@ GiiBiiAdvance
 
 Another GB, GBC and GBA emulator writen in C. By Antonio Niño Díaz (AntonioND).
 
-This is an emulator I started a few years ago. I haven't released any version since 0.1.0, but I've done some changes that have improved compatibility anyway.
+This is an emulator I started a few years ago. I haven't released any version in years since 0.1.0, but I've done some changes that have improved compatibility anyway.
 
-I'm currently porting the Win32 GUI to SDL2. The objective is to make it portable, so the only windows outside the main one are the debugger windows. This way, if someone wanted to port this to a machine without window manager, the only thing he would need to do is to remove the debugger.
+For 0.2.0 I've ported the Win32 GUI to SDL2. The objective is to make it portable, so the only windows outside the main one are the debugger windows. This way, if someone wanted to port this to a machine without window manager, the only thing he would need to do is to remove the debugger.
 
 This has been compiled in Linux Mint 16 and Windows 7 succesfuly. Compiling with OpenCV in Linux is a bit tricky, and the emulator can't close nicely, but camera works. SDL windows handler is a bit buggy (?), so expect some glitches when using the debugger.
 
-When the current goals are done, the version 0.2.0 will be released. Until then even though the files say that it is version 0.2.0, it really isn't. It's 0.1.X.
-
 This is the only GB emulator that emulates completely the GB Camera if you have a webcam! :)
-
-Current goals for 0.2.0
------------------------
-
-- Nothing, just clean this a bit. :)
 
 For 0.3.0
 ---------

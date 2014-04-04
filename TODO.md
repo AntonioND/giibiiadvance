@@ -21,12 +21,14 @@ Game Boy
 - Put wave RAM in the I/O viewer?
 - GB Camera.
 - ATTRACTION MODE (SGB). Maybe it is the thing that the system borders can animate in a real SGB. (?)
+- Can disabled cart RAM be read?
 
 Game Boy Advance
 ----------------
 
 - ARM undefined opcodes
 - Sound glitches. (Buffer underflow or something?)
+- Sprite limit (normal or affine) (with or without free HBL interval).
 - The NDS7 and GBA allow to access CP14 (unlike as for CP0..CP13 & CP15, access to CP14 doesn't generate any exceptions)
 - What happens with video modes 6 and 7?
 - Emulate weird things with invalid window coordinates.

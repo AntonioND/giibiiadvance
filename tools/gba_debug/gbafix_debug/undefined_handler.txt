@@ -1,0 +1,32 @@
+save_regs -- 03007FF0 <- r12 r14 spsr cpsr
+
+if (u8)[0x0800009C] == 0xA5
+
+    r14 = ( (u8)[0x080000B4] ) & 0x80;
+
+    if r14 == 0 (eq)
+
+	call 0x09FFC000
+
+    else 
+
+	call 0x09FE2000
+
+    end if
+
+end if
+
+restore regs
+
+return
+
+
+
+
+09Ch Bit 2,7 - Debugging Enable
+This is part of the above Nintendo Logo area, and must be commonly set to 21h,
+however, Bit 2 and Bit 7 may be set to other values.
+When both bits are set (ie. A5h), the FIQ/Undefined Instruction handler in the
+BIOS becomes unlocked, the handler then forwards these exceptions to the user
+handler in cartridge ROM (entry point defined in 80000B4h, see below).
+Other bit combinations currently do not seem to have special functions.

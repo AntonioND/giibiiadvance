@@ -241,7 +241,9 @@ static void GB_MBC3Write(u32 address, u32 value)
             if(mem->RAMEnabled == 0) return;
 
             if(mem->mbc_mode == 1) //RAM mode
+            {
                 mem->RAM_Curr[address-0xA000] = value;
+            }
             else //RTC REGISTER
             {
                 switch(mem->selected_ram)

@@ -40,6 +40,7 @@ void Debug_End(void)
 {
     if(log_file_opened)
         fclose(f_log);
+
     log_file_opened = 0;
 }
 
@@ -47,6 +48,14 @@ void Debug_Init(void)
 {
     log_file_opened = 0;
     atexit(Debug_End);
+
+    // remove previous log files
+    char logpath[MAX_PATHLEN];
+    s_snprintf(logpath,sizeof(logpath),"%slog.txt",DirGetRunningPath());
+    if(FileExists(logpath))
+    {
+        remove(logpath); // if returns 0, ok
+    }
 }
 
 void Debug_LogMsgArg(const char * msg, ...)

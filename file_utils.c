@@ -163,6 +163,14 @@ void FileLoad(const char * filename, void ** buffer, unsigned int * size_)
     fclose(datafile);
 }
 
+int FileExists(const char * filename)
+{
+    FILE * f = fopen(filename, "rb");
+    if(f == NULL) return 0;
+    fclose(f);
+    return 1;
+}
+
 //-------------------------------------------------
 
 int DirCheckExistence(char * path)

@@ -3,6 +3,7 @@
 _releases/
 obj/
 _todo/
+_tools/
 bios/
 screenshots/
 *.gb

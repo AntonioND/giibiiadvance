@@ -27,6 +27,8 @@ char * DirGetScreenshotFolderPath(void);
 void FileLoad_NoError(const char * filename, void ** buffer, unsigned int * size_);
 void FileLoad(const char * filename, void ** buffer, unsigned int * size_);
 
+int FileExists(const char * filename); // returns 1 if file exists
+
 int DirCheckExistence(char * path);
 int DirCreate(char * path);
 

@@ -422,6 +422,8 @@ int WH_Create(int width, int height, int texw, int texh, int scale) // returns -
         }
         else
         {
+            //SDL_RenderSetLogicalSize(w->mRenderer, w->mWidth, w->mHeight);
+
             w->mWindowID = SDL_GetWindowID( w->mWindow ); //Grab window identifier
             w->mShown = 1; //Flag as opened
 

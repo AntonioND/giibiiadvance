@@ -44,10 +44,14 @@ static _gui_element mainwindow_config_input_win_close_btn;
 
 static _gui_element mainwindow_config_input_win_mbc7_groupbox;
 
+static _gui_console mainwindow_config_input_win_controller_con;
+static _gui_element mainwindow_config_input_win_controller_textbox;
+
 //------------------------
 
 static _gui_element * mainwindow_config_input_win_gui_elements[] = {
 
+    &mainwindow_config_input_win_controller_textbox,
     &mainwindow_config_input_win_mbc7_groupbox,
 
     &mainwindow_config_input_win_close_btn,
@@ -63,11 +67,45 @@ static _gui mainwindow_subwindow_config_input_gui = {
 
 //-----------------------------------------------------------------------------------
 
-
 //-----------------------------------------------------------------------------------
 
 void Win_MainCreateConfigInputWindow(void)
 {
+    GUI_SetTextBox(&mainwindow_config_input_win_controller_textbox,&mainwindow_config_input_win_controller_con,
+                   6,6,40*FONT_WIDTH,10*FONT_HEIGHT,
+                   NULL);
+
+    GUI_ConsoleClear(&mainwindow_config_input_win_controller_con);
+
+    int i;
+    for(i = 0; i < SDL_NumJoysticks(); i++)
+    {
+        const char * name = SDL_JoystickNameForIndex(i);
+        GUI_ConsoleModePrintf(&mainwindow_config_input_win_controller_con,0,i,
+                              "Joystick %d: %s\n", i, name ? name : "Unknown Joystick");
+        SDL_Joystick * joystick = SDL_JoystickOpen(i);
+        if(joystick == NULL)
+        {
+            //SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDL_JoystickOpen(%d) failed: %s\n", i,
+            //        SDL_GetError());
+        }
+        else
+        {/*
+            char guid[64];
+            SDL_JoystickGetGUIDString(SDL_JoystickGetGUID(joystick),
+                                      guid, sizeof (guid));
+            SDL_Log("       axes: %d\n", SDL_JoystickNumAxes(joystick));
+            SDL_Log("      balls: %d\n", SDL_JoystickNumBalls(joystick));
+            SDL_Log("       hats: %d\n", SDL_JoystickNumHats(joystick));
+            SDL_Log("    buttons: %d\n", SDL_JoystickNumButtons(joystick));
+            SDL_Log("instance id: %d\n", SDL_JoystickInstanceID(joystick));
+            SDL_Log("       guid: %s\n", guid);*/
+            SDL_JoystickClose(joystick);
+        }
+    }
+
+
+
     //-----------------------------
 
     GUI_SetGroupBox(&mainwindow_config_input_win_mbc7_groupbox,234,195,222,153,"MBC7");

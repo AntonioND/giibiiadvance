@@ -377,6 +377,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="gui/win_main_config.h" />
+		<Unit filename="gui/win_main_config_input.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gui/win_main_config_input.h" />
 		<Unit filename="gui/win_utils.c">
 			<Option compilerVar="CC" />
 		</Unit>

@@ -24,6 +24,7 @@
 #include "win_main.h"
 #include "win_utils.h"
 #include "win_main_config.h"
+#include "win_main_config_input.h"
 
 #include "../config.h"
 #include "../file_explorer.h"
@@ -159,7 +160,8 @@ static int WIN_MAIN_CONFIG_ZOOM = 2;
 
 //------------------------------------------------------------------
 
-static void _win_main_clear_message(void);
+static void _win_main_clear_message(void); // in this file
+static void Win_MainCloseAllSubwindows(void);
 
 //------------------------------------------------------------------
 
@@ -436,8 +438,7 @@ static _gui_element mainwindow_scrollable_text_window;
 
 static void _win_main_scrollable_text_window_show_about(void)
 {
-    _win_main_file_explorer_close();
-    Win_MainCloseConfigWindow();
+    Win_MainCloseAllSubwindows();
 
     extern const char * about_text;
     GUI_SetScrollableTextWindow(&mainwindow_scrollable_text_window,25,25,
@@ -448,8 +449,7 @@ static void _win_main_scrollable_text_window_show_about(void)
 
 static void _win_main_scrollable_text_window_show_license(void)
 {
-    _win_main_file_explorer_close();
-    Win_MainCloseConfigWindow();
+    Win_MainCloseAllSubwindows();
 
     extern const char * license_text;
     GUI_SetScrollableTextWindow(&mainwindow_scrollable_text_window,25,25,
@@ -460,8 +460,7 @@ static void _win_main_scrollable_text_window_show_license(void)
 
 static void _win_main_scrollable_text_window_show_readme(void)
 {
-    _win_main_file_explorer_close();
-    Win_MainCloseConfigWindow();
+    Win_MainCloseAllSubwindows();
 
     extern const char * readme_text;
     GUI_SetScrollableTextWindow(&mainwindow_scrollable_text_window,25,25,
@@ -612,8 +611,7 @@ static void _win_main_file_explorer_create(void)
 
 static void _win_main_file_explorer_load(void)
 {
-    _win_main_scrollable_text_window_close();
-    Win_MainCloseConfigWindow();
+    Win_MainCloseAllSubwindows();
 
     GUI_WindowSetEnabled(&mainwindow_fileexplorer_win,1);
     FileExplorer_SetPath(DirGetRunningPath());
@@ -622,13 +620,13 @@ static void _win_main_file_explorer_load(void)
 
 static void _win_main_menu_close(void)
 {
-    _win_main_file_explorer_close();
+    Win_MainCloseAllSubwindows();
     _win_main_unload_rom(1);
 }
 
 static void _win_main_menu_close_no_save(void)
 {
-    _win_main_file_explorer_close();
+    Win_MainCloseAllSubwindows();
     _win_main_unload_rom(0);
 }
 
@@ -640,7 +638,7 @@ static void _win_main_screenshot(void)
 
 static void _win_main_menu_exit(void)
 {
-    _win_main_file_explorer_close();
+    Win_MainCloseAllSubwindows();
     _win_main_unload_rom(1);
     WH_CloseAll();
 }
@@ -672,8 +670,7 @@ static void _win_main_reset(void)
 
 static void _win_main_show_console(void)
 {
-    _win_main_file_explorer_close();
-    Win_MainCloseConfigWindow();
+    Win_MainCloseAllSubwindows();
     ConsoleShow();
 }
 
@@ -684,9 +681,16 @@ static void _win_main_menu_toggle_mute_sound(void)
 
 static void _win_main_menu_open_configuration_window(void)
 {
-    _win_main_file_explorer_close();
-    _win_main_scrollable_text_window_close();
+    Win_MainCloseAllSubwindows();
+
     Win_MainOpenConfigWindow();
+}
+
+static void _win_main_menu_open_configure_input_window(void)
+{
+    Win_MainCloseAllSubwindows();
+
+    Win_MainOpenConfigInputWindow();
 }
 
 static void _win_main_menu_open_disassembler(void)
@@ -736,8 +740,6 @@ static void _win_main_menu_open_sgb_viewer(void)
     Win_GB_SGBViewerCreate();
 }
 
-
-
 //------------------------------------------------------------------
 
 //Window Menu
@@ -763,11 +765,13 @@ static _gui_menu_list main_menu_file = {
 };
 
 static _gui_menu_entry mmoptions_configuration = {"Configuration" , _win_main_menu_open_configuration_window, 1};
+static _gui_menu_entry mmoptions_configure_joypads = {"Input Configuration" , _win_main_menu_open_configure_input_window, 1};
 static _gui_menu_entry mmoptions_mutesound = {"Mute Sound (CTRL+M)" , _win_main_menu_toggle_mute_sound, 1};
 static _gui_menu_entry mmoptions_sysinfo = {"System Information" , SysInfoShow, 1};
 
 static _gui_menu_entry * mmoptions_elements[] = {
-    &mmoptions_configuration, &mmoptions_mutesound, &mm_separator, &mmoptions_sysinfo, NULL
+    &mmoptions_configuration, &mmoptions_configure_joypads,
+    &mm_separator, &mmoptions_mutesound, &mm_separator, &mmoptions_sysinfo, NULL
 };
 
 static _gui_menu_list main_menu_options = {
@@ -886,6 +890,7 @@ static _gui_element mainwindow_bg;
 static _gui_element * mainwindow_gui_elements[] = {
     &mainwindow_bg,
     &mainwindow_configwin, // in win_main_config.c
+    &mainwindow_config_input_win, // in win_main_config_input.c
     &mainwindow_fileexplorer_win,
     &mainwindow_scrollable_text_window,
     &mainwindow_show_message_win, // least priority = always drawn
@@ -921,6 +926,8 @@ void Win_MainShowMessage(int type, const char * text) // 0 = error, 1 = debug, 2
     }
     else if(type == 2)
     {
+        Win_MainCloseAllSubwindows();
+
     //    GUI_SetMessageBox(&mainwindow_show_message_win,&mainwindow_show_message_con,
     //                  50,50,256*2-100,224*2-100,"Console");
         GUI_SetScrollableTextWindow(&mainwindow_scrollable_text_window,25,25,
@@ -930,6 +937,8 @@ void Win_MainShowMessage(int type, const char * text) // 0 = error, 1 = debug, 2
     }
     else if(type == 3)
     {
+        Win_MainCloseAllSubwindows();
+
         GUI_SetScrollableTextWindow(&mainwindow_scrollable_text_window,25,25,
                                 _win_main_get_menu_texture_width()-50,_win_main_get_menu_texture_height()-50,
                                 text, "System Information");
@@ -951,9 +960,15 @@ int _win_main_background_image_callback(int x, int y)
     return 1;
 }
 
-void _win_main_config_window_close(void)
+//------------------------------------------------------------------
+
+static void Win_MainCloseAllSubwindows(void)
 {
-    GUI_WindowSetEnabled(&mainwindow_configwin,0);
+    _win_main_clear_message();
+    _win_main_file_explorer_close();
+    _win_main_scrollable_text_window_close();
+    Win_MainCloseConfigWindow();
+    Win_MainCloseConfigInputWindow();
 }
 
 //------------------------------------------------------------------
@@ -1161,23 +1176,17 @@ static int Win_MainEventCallback(SDL_Event * e)
     return 0;
 }
 
-
 //@global function
 int Win_MainCreate(char * rom_path)
 {
-    /*
-    GUI_SetButton(&mainwindow_subwindow_btn,10,50,7*FONT_WIDTH,FONT_HEIGHT,"CLOSE",_win_main_config_window_close);
-    GUI_SetButton(&mainwindow_subwindow_btn2,10,70,7*FONT_WIDTH,FONT_HEIGHT,"TEST",NULL);
-
-    GUI_SetButton(&mainwindow_btn,0,0,30*FONT_WIDTH,15*FONT_HEIGHT,"MAIN GUI",mainbtncallback_openwin);
-    GUI_SetWindow(&mainwindow_configwin,100,50,100,200,&mainwindow_subwindow_config_gui,"TEST");
-*/
     _win_main_file_explorer_create();
 
-    Win_MainCreateConfigWindow();
+    Win_MainCreateConfigWindow(); // Only configure positions of elements, this won't open them
+    Win_MainCreateConfigInputWindow();
 
-    _win_main_scrollable_text_window_close();
-    _win_main_clear_message();
+    Win_MainCloseAllSubwindows();
+    //_win_main_scrollable_text_window_close();
+    //_win_main_clear_message();
 
     Win_MainChangeZoom(EmulatorConfig.screen_size);
     Win_MainSetFrameskip(EmulatorConfig.frameskip);

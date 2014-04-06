@@ -697,6 +697,10 @@ static void __gui_draw_element(_gui_element * e, char * buffer, int w, int h)
 
         FU_PrintColor(buffer,w,h,e->x+e->h+FONT_WIDTH/2,e->y,GUI_BACKGROUND_GREY_RGBA,e->info.checkbox.label);
     }
+    else if(e->element_type == GUI_TYPE_INPUTGET)
+    {
+        //Don't draw
+    }
 }
 
 void GUI_Draw(_gui * gui, char * buffer, int w, int h, int clean)

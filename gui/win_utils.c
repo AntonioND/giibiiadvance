@@ -161,6 +161,8 @@ int GUI_InputWindowIsEnabled(_gui_inputwindow * win)
 void GUI_SetTextBox(_gui_element * e, _gui_console * con, int x, int y, int w, int h,
                     _gui_void_arg_int_int_fn callback)
 {
+    if(e == NULL) return;
+
     e->element_type = GUI_TYPE_TEXTBOX;
 
     e->info.textbox.con = con;
@@ -175,6 +177,8 @@ void GUI_SetTextBox(_gui_element * e, _gui_console * con, int x, int y, int w, i
 
 void GUI_SetButton(_gui_element * e, int x, int y, int w, int h, const char * label, _gui_void_arg_void_fn callback)
 {
+    if(e == NULL) return;
+
     e->element_type = GUI_TYPE_BUTTON;
 
     e->x = x;
@@ -188,6 +192,8 @@ void GUI_SetButton(_gui_element * e, int x, int y, int w, int h, const char * la
 void GUI_SetRadioButton(_gui_element * e, int x, int y, int w, int h, const char * label, int group_id, int btn_id,
                         int start_pressed, _gui_void_arg_int_fn callback)
 {
+    if(e == NULL) return;
+
     e->element_type = GUI_TYPE_RADIOBUTTON;
 
     e->x = x;
@@ -204,6 +210,8 @@ void GUI_SetRadioButton(_gui_element * e, int x, int y, int w, int h, const char
 
 void GUI_SetLabel(_gui_element * e, int x, int y, int w, int h, const char * label)
 {
+    if(e == NULL) return;
+
     e->element_type = GUI_TYPE_LABEL;
 
     e->x = x;
@@ -216,6 +224,8 @@ void GUI_SetLabel(_gui_element * e, int x, int y, int w, int h, const char * lab
 
 void GUI_SetBitmap(_gui_element * e, int x, int y, int w, int h, char * bitmap, _gui_int_arg_int_int_fn callback) // 24 bit
 {
+    if(e == NULL) return;
+
     e->element_type = GUI_TYPE_BITMAP;
 
     e->x = x;
@@ -228,6 +238,8 @@ void GUI_SetBitmap(_gui_element * e, int x, int y, int w, int h, char * bitmap, 
 
 void GUI_SetWindow(_gui_element * e, int x, int y, int w, int h, void * gui, const char * caption)
 {
+    if(e == NULL) return;
+
     e->element_type = GUI_TYPE_WINDOW;
 
     e->x = x;
@@ -257,6 +269,8 @@ void GUI_SetWindow(_gui_element * e, int x, int y, int w, int h, void * gui, con
 
 void GUI_SetMessageBox(_gui_element * e, _gui_console * con, int x, int y, int w, int h, const char * caption)
 {
+    if(e == NULL) return;
+
     e->element_type = GUI_TYPE_MESSAGEBOX;
 
     e->info.messagebox.enabled = 0;
@@ -287,6 +301,8 @@ int _gui_word_fits(const char * text, int x_start, int x_end)
 
 void GUI_SetScrollableTextWindow(_gui_element * e, int x, int y, int w, int h, const char * text, const char * caption)
 {
+    if(e == NULL) return;
+
     e->element_type = GUI_TYPE_SCROLLABLETEXTWINDOW;
 
     w = FONT_WIDTH*(w/FONT_WIDTH);
@@ -364,6 +380,8 @@ void GUI_SetScrollableTextWindow(_gui_element * e, int x, int y, int w, int h, c
 void GUI_SetScrollBar(_gui_element * e, int x, int y, int w, int h, int min_value, int max_value,
                       int start_value, _gui_void_arg_int_fn callback)
 {
+    if(e == NULL) return;
+
     e->element_type = GUI_TYPE_SCROLLBAR;
 
     e->x = x;
@@ -382,6 +400,8 @@ void GUI_SetScrollBar(_gui_element * e, int x, int y, int w, int h, int min_valu
 
 void GUI_SetGroupBox(_gui_element * e, int x, int y, int w, int h, const char * label)
 {
+    if(e == NULL) return;
+
     e->element_type = GUI_TYPE_GROUPBOX;
 
     e->x = x;
@@ -394,6 +414,8 @@ void GUI_SetGroupBox(_gui_element * e, int x, int y, int w, int h, const char * 
 void GUI_SetCheckBox(_gui_element * e, int x, int y, int w, int h, const char * label,
                         int start_pressed, _gui_void_arg_int_fn callback)
 {
+    if(e == NULL) return;
+
     e->element_type = GUI_TYPE_CHECKBOX;
 
     e->x = x;
@@ -403,6 +425,15 @@ void GUI_SetCheckBox(_gui_element * e, int x, int y, int w, int h, const char * 
     s_strncpy(e->info.checkbox.label,label,sizeof(e->info.checkbox.label));
     e->info.checkbox.checked = start_pressed;
     e->info.checkbox.callback = callback;
+}
+
+void GUI_SetInputGet(_gui_element * e, _gui_void_arg_sdl_event_fn callback)
+{
+    if(e == NULL) return;
+
+    e->element_type = GUI_TYPE_INPUTGET;
+
+    e->info.inputget.callback = callback;
 }
 
 //----------------------------------------------------------------------------------------------

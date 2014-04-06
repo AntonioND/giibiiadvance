@@ -24,6 +24,33 @@
 
 #include "gba_core/gba.h"
 
+typedef struct {
+    int index;
+} _controller_player_info_;
+
+_controller_player_info_ ControllerPlayerInfo[4];
+
+//TODO: WHEN LOADING CONFIG, DEFAULT index TO -1
+
+// -1 = keyboard, others = number of joypad
+void Input_PlayerSetController(int player, int index)
+{
+    if(player < 0) return;
+    if(player >= 4) return;
+
+    ControllerPlayerInfo[player].index = index;
+}
+
+int Input_PlayerGetController(int player)
+{
+    if(player < 0) return -1;
+    if(player >= 4) return -1;
+
+    return ControllerPlayerInfo[player].index;
+}
+
+//----------------------------------------------------------------------------------------
+
 void Input_Update_GB(void)
 {
     const Uint8 * state = SDL_GetKeyboardState(NULL);

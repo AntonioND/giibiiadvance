@@ -342,12 +342,12 @@ int __gui_send_event_element(_gui_element ** complete_gui, _gui_element * gui, S
         if(gui->info.window.enabled == 0)
             return 0;
 
-        if(_gui_pos_is_inside_rect(e->button.x,e->button.y, gui->x,gui->w, gui->y,gui->h))
-        {
-            _gui * relative_gui = gui->info.window.gui;
-            return GUI_SendEvent(relative_gui,e);
-        }
-        return 0;
+        if(e->type == SDL_MOUSEBUTTONDOWN)
+            if(!_gui_pos_is_inside_rect(e->button.x,e->button.y, gui->x,gui->w, gui->y,gui->h))
+                return 0;
+
+        _gui * relative_gui = gui->info.window.gui;
+        return GUI_SendEvent(relative_gui,e);
     }
     else if(gui->element_type == GUI_TYPE_MESSAGEBOX)
     {
@@ -672,12 +672,36 @@ int __gui_send_event_element(_gui_element ** complete_gui, _gui_element * gui, S
                     gui->info.checkbox.checked = !gui->info.checkbox.checked;
 
                     if(gui->info.checkbox.callback)
-                            gui->info.checkbox.callback(gui->info.checkbox.checked);
+                        gui->info.checkbox.callback(gui->info.checkbox.checked);
 
                     return 1;
                 }
             }
         }
+    }
+    else if(gui->element_type == GUI_TYPE_INPUTGET)
+    {
+        switch(e->type)
+        {
+            case SDL_KEYDOWN:
+            case SDL_KEYUP:
+            case SDL_JOYAXISMOTION:
+            case SDL_JOYBALLMOTION:
+            case SDL_JOYHATMOTION:
+            case SDL_JOYBUTTONDOWN:
+            case SDL_JOYBUTTONUP:
+            {
+                if(gui->info.inputget.callback)
+                    gui->info.inputget.callback(e);
+                break;
+            }
+            default:
+            {
+                break;
+            }
+        }
+
+        return 0;
     }
 
     return 0;

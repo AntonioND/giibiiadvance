@@ -62,12 +62,14 @@ void GUI_ConsoleDrawAt(_gui_console * con, char * buffer, int buf_w, int buf_h, 
 #define GUI_TYPE_SCROLLBAR             9
 #define GUI_TYPE_GROUPBOX             10
 #define GUI_TYPE_CHECKBOX             11
+#define GUI_TYPE_INPUTGET             12 // Helper to get callbacks when pressing keyboard or joypad buttons
 
 typedef void (*_gui_void_arg_void_fn)(void);
 typedef void (*_gui_void_arg_int_fn)(int);
 typedef void (*_gui_void_arg_int_int_fn)(int,int);
 typedef int (*_gui_int_arg_int_int_fn)(int,int);
 typedef void (*_gui_void_arg_pchar_int_fn)(char*,int);
+typedef void (*_gui_void_arg_sdl_event_fn)(SDL_Event*);
 
 typedef struct {
     int element_type;
@@ -130,6 +132,9 @@ typedef struct {
             char label[100];
             _gui_void_arg_int_fn callback; //arg -> 1 = is checked
         } checkbox;
+        struct {
+            _gui_void_arg_sdl_event_fn callback;
+        } inputget;
     } info ;
 } _gui_element;
 
@@ -164,6 +169,8 @@ void GUI_SetGroupBox(_gui_element * e, int x, int y, int w, int h, const char * 
 // w is ignored
 void GUI_SetCheckBox(_gui_element * e, int x, int y, int w, int h, const char * label,
                         int start_pressed, _gui_void_arg_int_fn callback);
+
+void GUI_SetInputGet(_gui_element * e, _gui_void_arg_sdl_event_fn callback);
 
 //----------------------------------------------------------------------------------------------
 

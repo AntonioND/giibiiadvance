@@ -21,6 +21,9 @@
 
 //----------------------------------------------------------------------------------
 
+void Input_PlayerSetController(int player, int index);
+int Input_PlayerGetController(int player);
+
 void Input_Update_GB(void);
 void Input_Update_GBA(void);
 

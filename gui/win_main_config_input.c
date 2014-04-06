@@ -39,7 +39,7 @@ _gui_element mainwindow_config_input_win;
 
 //-----------------------------------------------------------------------------------
 
-//                     mwciw = main window config input window
+// Note: mwciw = main window config input window
 
 static _gui_element mwciw_win_player_groupbox;
 
@@ -65,7 +65,8 @@ static _gui_element mwciw_change_a_btn,
                     mwciw_change_start_btn,
                     mwciw_change_select_btn;
 
-static _gui_element mwciw_change_default_btn;
+static _gui_element mwciw_change_disable_btn,
+                    mwciw_change_default_btn;
 
 static _gui_element mwciw_selected_a_label,
                     mwciw_selected_b_label,
@@ -108,6 +109,7 @@ static _gui_element * mainwindow_config_input_win_gui_elements[] = {
     &mwciw_change_up_btn, &mwciw_change_right_btn, &mwciw_change_down_btn, &mwciw_change_left_btn,
     &mwciw_change_start_btn, &mwciw_change_select_btn,
 
+    &mwciw_change_disable_btn,
     &mwciw_change_default_btn,
 
     &mwciw_selected_a_label, &mwciw_selected_b_label, &mwciw_selected_l_label, &mwciw_selected_r_label,
@@ -142,9 +144,9 @@ static void _win_main_config_input_update_window(void)
     GUI_ConsoleClear(&mwciw_win_controller_con);
 
     int i;
-    for(i = 0; i < 4; i++)
+    for(i = 0; i < SDL_NumJoysticks(); i++)
     {
-        if(i < SDL_NumJoysticks())
+        if(i < 4)
         {
             const char * name = SDL_JoystickNameForIndex(i);
             GUI_ConsoleModePrintf(&mwciw_win_controller_con,0,i,
@@ -164,6 +166,11 @@ static void _win_main_config_input_update_window(void)
         }
     }
 
+    if(i == 0)
+    {
+        GUI_ConsoleModePrintf(&mwciw_win_controller_con,0,0, "No joypads detected!");
+    }
+
     int controller = Input_PlayerGetController(win_main_config_selected_player);
 
     if(controller == -1)
@@ -177,7 +184,33 @@ static void _win_main_config_input_update_window(void)
     else if(controller == 3)
         GUI_RadioButtonSetPressed(&mainwindow_subwindow_config_input_gui,&mwciw_sel_controller3_radbtn);
 
+    GUI_ConsoleClear(&mwciw_win_status_con);
 
+    if(win_main_config_is_changing_button == P_KEY_NONE)
+    {
+        GUI_ConsoleModePrintf(&mwciw_win_status_con,0,0,"Waiting...");
+    }
+    else
+    {
+        char * name = "Unknown (Error)";
+        switch(win_main_config_is_changing_button)
+        {
+            case P_KEY_A: name = "A"; break;
+            case P_KEY_B: name = "B"; break;
+            case P_KEY_L: name = "L"; break;
+            case P_KEY_R: name = "R"; break;
+            case P_KEY_UP: name = "Up"; break;
+            case P_KEY_RIGHT: name = "Right"; break;
+            case P_KEY_DOWN: name = "Down"; break;
+            case P_KEY_LEFT: name = "Left"; break;
+            case P_KEY_START: name = "Start"; break;
+            case P_KEY_SELECT: name = "Select"; break;
+            default: name = "Unknown (Error)"; break;
+        }
+
+        GUI_ConsoleModePrintf(&mwciw_win_status_con,0,0,"Setting key [ %s ] for player %d ...",
+                              name,win_main_config_selected_player);
+    }
     /*
 
     UPDATE THINGS ON THE SCREEN ACCORDING TO THE SELECTED PLAYER
@@ -204,6 +237,8 @@ static void _win_main_config_input_select_controller_radbtn_callback(int num)
 
     // SET DEFAULT CONFIGURATION!!!! ***************************************************
     // IF NOT, IT COULD HAPPEN THAT THE STRUCT MIXES 2 DIFFERENT CONTROLLER BUTTONS
+
+    _win_main_config_input_update_window();
 }
 
 static void _win_main_config_input_inputget_callback(SDL_Event * e)
@@ -229,6 +264,8 @@ static void _win_main_config_input_inputget_callback(SDL_Event * e)
 
 
     win_main_config_is_changing_button = P_KEY_NONE;
+
+    _win_main_config_input_update_window();
 }
 
 //-----------------------------------------------------------------------------------
@@ -236,58 +273,81 @@ static void _win_main_config_input_inputget_callback(SDL_Event * e)
 static void _win_main_config_change_a_btn_callback(void)
 {
     win_main_config_is_changing_button = P_KEY_A;
+    _win_main_config_input_update_window();
 }
 
 static void _win_main_config_change_b_btn_callback(void)
 {
     win_main_config_is_changing_button = P_KEY_B;
+    _win_main_config_input_update_window();
 }
-
 static void _win_main_config_change_l_btn_callback(void)
 {
     win_main_config_is_changing_button = P_KEY_L;
+    _win_main_config_input_update_window();
 }
 
 static void _win_main_config_change_r_btn_callback(void)
 {
     win_main_config_is_changing_button = P_KEY_R;
+    _win_main_config_input_update_window();
 }
 
 static void _win_main_config_change_start_btn_callback(void)
 {
     win_main_config_is_changing_button = P_KEY_START;
+    _win_main_config_input_update_window();
 }
 
 static void _win_main_config_change_select_btn_callback(void)
 {
     win_main_config_is_changing_button = P_KEY_SELECT;
+    _win_main_config_input_update_window();
 }
 
 static void _win_main_config_change_up_btn_callback(void)
 {
     win_main_config_is_changing_button = P_KEY_UP;
+    _win_main_config_input_update_window();
 }
 
 static void _win_main_config_change_down_btn_callback(void)
 {
     win_main_config_is_changing_button = P_KEY_DOWN;
+    _win_main_config_input_update_window();
 }
 
 static void _win_main_config_change_right_btn_callback(void)
 {
     win_main_config_is_changing_button = P_KEY_RIGHT;
+    _win_main_config_input_update_window();
 }
 
 static void _win_main_config_change_left_btn_callback(void)
 {
     win_main_config_is_changing_button = P_KEY_LEFT;
+    _win_main_config_input_update_window();
 }
+
+
+static void _win_main_config_change_disable_btn_callback(void)
+{
+    win_main_config_is_changing_button = P_KEY_NONE;
+
+    //disable player*****************************************************************************
+    //with player 1, set defaults
+
+    _win_main_config_input_update_window();
+}
+
 
 static void _win_main_config_change_default_btn_callback(void)
 {
     win_main_config_is_changing_button = P_KEY_NONE;
 
     //default*****************************************************************************
+
+    _win_main_config_input_update_window();
 }
 
 
@@ -343,6 +403,9 @@ void Win_MainCreateConfigInputWindow(void)
     GUI_SetButton(&mwciw_change_left_btn, (256*2-50)/2,168, 8*FONT_WIDTH, 2*FONT_HEIGHT, "Left",
                   _win_main_config_change_left_btn_callback);
 
+    GUI_SetButton(&mwciw_change_disable_btn, (256*2-50)/2,198, 30*FONT_WIDTH, 2*FONT_HEIGHT, "Disable player",
+                  _win_main_config_change_disable_btn_callback);
+
     GUI_SetButton(&mwciw_change_default_btn, (256*2-50)/2,228, 30*FONT_WIDTH, 2*FONT_HEIGHT, "Default configuration",
                   _win_main_config_change_default_btn_callback);
 
@@ -381,6 +444,7 @@ void Win_MainCreateConfigInputWindow(void)
 
 void Win_MainOpenConfigInputWindow(void)
 {
+    win_main_config_selected_player = 0;
     win_main_config_is_changing_button = P_KEY_NONE;
 
     GUI_WindowSetEnabled(&mainwindow_config_input_win,1);

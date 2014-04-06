@@ -416,6 +416,9 @@ void Config_Load(void)
 
 //---------------------------------------------------------------------
 /*
+
+//default to keyboard the first player, the rest to unused
+
 SDLKey player_key[4][P_NUM_KEYS] = { //This is the default configuration
     { SDLK_x,SDLK_z,SDLK_RETURN,SDLK_RSHIFT,SDLK_RIGHT,SDLK_LEFT,SDLK_UP,SDLK_DOWN },
     { 0,0,0,0,0,0,0,0 },

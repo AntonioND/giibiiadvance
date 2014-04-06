@@ -427,13 +427,13 @@ SDLKey player_key_speedup = SDLK_SPACE;
 
 //----------------------------
 
-inline void Config_Controls_Set_Key(int player, _key_control_enum_ keyindex, SDLKey keysym)
+inline void Config_Controls_Set_Key(int player, _key_config_enum_ keyindex, SDLKey keysym)
 {
     if(keyindex == P_KEY_SPEEDUP) player_key_speedup = keysym;
     else player_key[player][keyindex] = keysym;
 }
 
-inline SDLKey Config_Controls_Get_Key(int player, _key_control_enum_ keyindex)
+inline SDLKey Config_Controls_Get_Key(int player, _key_config_enum_ keyindex)
 {
     if(keyindex == P_KEY_SPEEDUP) return player_key_speedup;
     return player_key[player][keyindex];

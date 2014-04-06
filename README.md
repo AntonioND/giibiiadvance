@@ -19,6 +19,7 @@ For 0.3.0
 ---------
 
 - Improve the GUI:
+ - Another subwindow to configure MBC7 and emulator controls like speedup.
  - GB Camera and GB Printer viewers. GB Camera: Registers, images (let the user see the thumbnails to choose).
  - GBA I/O hardware viewer (RTC, sensors...).
  - Export images from new debugger windows.
@@ -27,7 +28,7 @@ For 0.3.0
  - Video recording?
 
 - Customize controls.
- - Add support for game controllers.
+ - Add support for game controllers. (In progress)
 
 - Obviously, improve emulation.
  - Implement mosaic correctly (in GBA mode).

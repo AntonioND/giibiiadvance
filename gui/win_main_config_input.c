@@ -215,6 +215,8 @@ static void _win_main_config_input_update_window(void)
 
     UPDATE THINGS ON THE SCREEN ACCORDING TO THE SELECTED PLAYER
 
+    IF PLAYER IS DISABLED, EMPTY LABELS
+
     */
 }
 
@@ -241,16 +243,42 @@ static void _win_main_config_input_select_controller_radbtn_callback(int num)
     _win_main_config_input_update_window();
 }
 
-static void _win_main_config_input_inputget_callback(SDL_Event * e)
+static int _win_main_config_input_inputget_callback(SDL_Event * e)
 {
     if(win_main_config_is_changing_button == P_KEY_NONE)
-        return;
+        return 0;
+
+    int redraw_gui = 1;
 
     int controller = Input_PlayerGetController(win_main_config_selected_player);
 
     if(controller == -1)
     {
         //Keyboard
+        if(e->type == SDL_KEYDOWN)
+        {
+            //scancode name
+            const char * name = SDL_GetKeyName(SDL_GetKeyFromScancode(e->key.keysym.scancode));
+
+            switch(win_main_config_is_changing_button)
+            {
+                case P_KEY_A: GUI_SetLabelCaption(&mwciw_selected_a_label,name); break;
+                case P_KEY_B: GUI_SetLabelCaption(&mwciw_selected_b_label,name); break;
+                case P_KEY_L: GUI_SetLabelCaption(&mwciw_selected_l_label,name); break;
+                case P_KEY_R: GUI_SetLabelCaption(&mwciw_selected_r_label,name); break;
+                case P_KEY_UP: GUI_SetLabelCaption(&mwciw_selected_up_label,name); break;
+                case P_KEY_RIGHT: GUI_SetLabelCaption(&mwciw_selected_right_label,name); break;
+                case P_KEY_DOWN: GUI_SetLabelCaption(&mwciw_selected_down_label,name); break;
+                case P_KEY_LEFT: GUI_SetLabelCaption(&mwciw_selected_left_label,name); break;
+                case P_KEY_START: GUI_SetLabelCaption(&mwciw_selected_start_label,name); break;
+                case P_KEY_SELECT: GUI_SetLabelCaption(&mwciw_selected_select_label,name); break;
+                default: redraw_gui = 0; break;
+            }
+        }
+        else
+        {
+            redraw_gui = 0;
+        }
     }
     else
     {
@@ -260,12 +288,16 @@ static void _win_main_config_input_inputget_callback(SDL_Event * e)
         {
 
         }
+
+        redraw_gui = 0;
     }
 
 
     win_main_config_is_changing_button = P_KEY_NONE;
 
     _win_main_config_input_update_window();
+
+    return redraw_gui;
 }
 
 //-----------------------------------------------------------------------------------

@@ -21,8 +21,39 @@
 
 //----------------------------------------------------------------------------------
 
-void Input_PlayerSetController(int player, int index);
+typedef enum {
+
+    P_KEY_A,
+    P_KEY_B,
+    P_KEY_L,
+    P_KEY_R,
+    P_KEY_UP,
+    P_KEY_RIGHT,
+    P_KEY_DOWN,
+    P_KEY_LEFT,
+    P_KEY_START,
+    P_KEY_SELECT,
+
+    P_NUM_KEYS,
+
+    P_KEY_SPEEDUP,
+
+    P_KEY_NONE
+
+} _key_config_enum_;
+
+extern const char * GBKeyNames[P_NUM_KEYS];
+
+void Input_ControlsSetKey(int player, _key_config_enum_ keyindex, SDL_Scancode keyscancode);
+SDL_Scancode Input_ControlsGetKey(int player, _key_config_enum_ keyindex);
+
+void Input_PlayerSetController(int player, int index); // -1 = keyboard, others = number of joypad
 int Input_PlayerGetController(int player);
+
+void Input_PlayerSetEnabled(int player, int enabled);
+int Input_PlayerGetEnabled(int player);
+
+//----------------------------------------------------------------------------------
 
 void Input_Update_GB(void);
 void Input_Update_GBA(void);

@@ -69,7 +69,7 @@ typedef void (*_gui_void_arg_int_fn)(int);
 typedef void (*_gui_void_arg_int_int_fn)(int,int);
 typedef int (*_gui_int_arg_int_int_fn)(int,int);
 typedef void (*_gui_void_arg_pchar_int_fn)(char*,int);
-typedef void (*_gui_void_arg_sdl_event_fn)(SDL_Event*);
+typedef int (*_gui_int_arg_sdl_event_fn)(SDL_Event*);
 
 typedef struct {
     int element_type;
@@ -133,7 +133,7 @@ typedef struct {
             _gui_void_arg_int_fn callback; //arg -> 1 = is checked
         } checkbox;
         struct {
-            _gui_void_arg_sdl_event_fn callback;
+            _gui_int_arg_sdl_event_fn callback; // return 1 if you want to redraw the GUI
         } inputget;
     } info ;
 } _gui_element;
@@ -170,7 +170,8 @@ void GUI_SetGroupBox(_gui_element * e, int x, int y, int w, int h, const char * 
 void GUI_SetCheckBox(_gui_element * e, int x, int y, int w, int h, const char * label,
                         int start_pressed, _gui_void_arg_int_fn callback);
 
-void GUI_SetInputGet(_gui_element * e, _gui_void_arg_sdl_event_fn callback);
+// return 1 from callback if you want to redraw the GUI
+void GUI_SetInputGet(_gui_element * e, _gui_int_arg_sdl_event_fn callback);
 
 //----------------------------------------------------------------------------------------------
 

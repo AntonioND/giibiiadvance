@@ -427,7 +427,7 @@ void GUI_SetCheckBox(_gui_element * e, int x, int y, int w, int h, const char * 
     e->info.checkbox.callback = callback;
 }
 
-void GUI_SetInputGet(_gui_element * e, _gui_void_arg_sdl_event_fn callback)
+void GUI_SetInputGet(_gui_element * e, _gui_int_arg_sdl_event_fn callback)
 {
     if(e == NULL) return;
 

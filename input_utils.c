@@ -24,13 +24,38 @@
 
 #include "gba_core/gba.h"
 
+//----------------------------------------------------------------------------------------
+
 typedef struct {
     int index;
+    int enabled;
 } _controller_player_info_;
 
-_controller_player_info_ ControllerPlayerInfo[4];
+static _controller_player_info_ ControllerPlayerInfo[4] = {
+    { -1, 1}, // keyboard, enabled
+    {  0, 0}, // controller 0, disabled
+    {  1, 0}, // controller 1, disabled
+    {  2, 0}  // controller 2, disabled
+};
 
-//TODO: WHEN LOADING CONFIG, DEFAULT index TO -1
+//default to keyboard the first player, the rest to unused
+
+static SDL_Scancode _player_key_[4][P_NUM_KEYS] = {
+    //This is the default configuration, changed when loading the config file.
+//   P_KEY_A, P_KEY_B, P_KEY_L, P_KEY_R, P_KEY_UP, P_KEY_RIGHT, P_KEY_DOWN, P_KEY_LEFT, P_KEY_START, P_KEY_SELECT,
+    { SDLK_x,SDLK_z,SDLK_a,SDLK_s,SDLK_UP,SDLK_RIGHT,SDLK_DOWN,SDLK_LEFT,SDLK_RETURN,SDLK_RSHIFT },
+    { 0,0,0,0,0,0,0,0 },
+    { 0,0,0,0,0,0,0,0 },
+    { 0,0,0,0,0,0,0,0 }
+};
+
+static SDL_Scancode player_key_speedup = SDLK_SPACE;
+
+const char * GBKeyNames[P_NUM_KEYS] = {
+    "A", "B", "L", "R", "Up", "Right", "Down", "Left", "Start", "Select"
+};
+
+//----------------------------------------------------------------------------------------
 
 // -1 = keyboard, others = number of joypad
 void Input_PlayerSetController(int player, int index)
@@ -47,6 +72,44 @@ int Input_PlayerGetController(int player)
     if(player >= 4) return -1;
 
     return ControllerPlayerInfo[player].index;
+}
+
+//----------------------------
+
+void Input_PlayerSetEnabled(int player, int enabled)
+{
+    if(player < 0) return;
+    if(player >= 4) return;
+
+    ControllerPlayerInfo[player].enabled = enabled;
+}
+
+int Input_PlayerGetEnabled(int player)
+{
+    if(player < 0) return 0;
+    if(player >= 4) return 0;
+
+    return ControllerPlayerInfo[player].enabled;
+}
+
+//----------------------------
+
+void Input_ControlsSetKey(int player, _key_config_enum_ keyindex, SDL_Scancode keyscancode)
+{
+    if(keyindex == P_KEY_NONE) return;
+    if(keyindex == P_NUM_KEYS) return;
+
+    if(keyindex == P_KEY_SPEEDUP) player_key_speedup = keyscancode;
+    else _player_key_[player][keyindex] = keyscancode;
+}
+
+SDL_Scancode Input_ControlsGetKey(int player, _key_config_enum_ keyindex)
+{
+    if(keyindex == P_KEY_NONE) return 0;
+    if(keyindex == P_NUM_KEYS) return 0;
+
+    if(keyindex == P_KEY_SPEEDUP) return player_key_speedup;
+    return _player_key_[player][keyindex];
 }
 
 //----------------------------------------------------------------------------------------

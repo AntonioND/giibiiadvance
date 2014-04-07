@@ -50,12 +50,9 @@ t_config EmulatorConfig = { //Default options...
     0, //realcolors
 
     //gb palette is not stored here, it is stored in gb_main.c
-    //key config not here, either...
-    };
-/*
-const char * GBKeyNames[P_NUM_KEYS] =
-    { "A", "B", "Start", "Select", "Right", "Left", "Up", "Down" };
-*/
+    //key config not here, either... it's in input_utils.c
+};
+
 #define CFG_DB_MSG_ENABLE "debug_msg_enable"
 // "true" - "false"
 
@@ -415,34 +412,4 @@ void Config_Load(void)
 }
 
 //---------------------------------------------------------------------
-/*
-
-//default to keyboard the first player, the rest to unused
-
-SDLKey player_key[4][P_NUM_KEYS] = { //This is the default configuration
-    { SDLK_x,SDLK_z,SDLK_RETURN,SDLK_RSHIFT,SDLK_RIGHT,SDLK_LEFT,SDLK_UP,SDLK_DOWN },
-    { 0,0,0,0,0,0,0,0 },
-    { 0,0,0,0,0,0,0,0 },
-    { 0,0,0,0,0,0,0,0 }
-    };
-
-SDLKey player_key_speedup = SDLK_SPACE;
-
-//----------------------------
-
-inline void Config_Controls_Set_Key(int player, _key_config_enum_ keyindex, SDLKey keysym)
-{
-    if(keyindex == P_KEY_SPEEDUP) player_key_speedup = keysym;
-    else player_key[player][keyindex] = keysym;
-}
-
-inline SDLKey Config_Controls_Get_Key(int player, _key_config_enum_ keyindex)
-{
-    if(keyindex == P_KEY_SPEEDUP) return player_key_speedup;
-    return player_key[player][keyindex];
-}
-
-//---------------------------------------------------------------------
-
-*/
 

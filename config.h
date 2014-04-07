@@ -41,6 +41,9 @@ typedef struct {
     int realcolors;
 
     //gb palette is not stored here, it is stored in gb_main.c
+
+    //key configuration in input_utils.c
+
     } t_config;
 
 extern t_config EmulatorConfig;
@@ -48,31 +51,4 @@ extern t_config EmulatorConfig;
 void Config_Save(void);
 void Config_Load(void);
 
-typedef enum {
-
-    P_KEY_A,
-    P_KEY_B,
-    P_KEY_L,
-    P_KEY_R,
-    P_KEY_UP,
-    P_KEY_RIGHT,
-    P_KEY_DOWN,
-    P_KEY_LEFT,
-    P_KEY_START,
-    P_KEY_SELECT,
-
-    P_NUM_KEYS,
-
-    P_KEY_SPEEDUP,
-
-    P_KEY_NONE
-
-} _key_config_enum_;
-
-/*
-extern const char * GBKeyNames[P_NUM_KEYS];
-
-inline void Config_Controls_Set_Key(int player, _key_config_enum_ keyindex, SDLKey keysym);
-inline SDLKey Config_Controls_Get_Key(int player, _key_config_enum_ keyindex);
-*/
 #endif //__CONFIG_H__

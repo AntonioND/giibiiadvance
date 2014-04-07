@@ -692,7 +692,7 @@ int __gui_send_event_element(_gui_element ** complete_gui, _gui_element * gui, S
             case SDL_JOYBUTTONUP:
             {
                 if(gui->info.inputget.callback)
-                    gui->info.inputget.callback(e);
+                    return gui->info.inputget.callback(e);
                 break;
             }
             default:

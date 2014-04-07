@@ -29,6 +29,7 @@ For 0.3.0
 
 - Customize controls.
  - Add support for game controllers. (In progress)
+ - Save input configuration.
 
 - Obviously, improve emulation.
  - Implement mosaic correctly (in GBA mode).

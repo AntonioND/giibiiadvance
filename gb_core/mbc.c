@@ -691,7 +691,7 @@ static void GB_CameraWrite(u32 address, u32 value)
     switch(address >> 12)
     {
         case 0x0:
-        case 0x1: //Enable WRITING ONLY!
+        case 0x1: //Enable WRITING ONLY! - Reading is always allowed?
             mem->RAMEnabled = ((value & 0x0F) == 0x0A);
             if(GameBoy.Emulator.RAM_Banks == 0) mem->RAMEnabled = 0;
             break;

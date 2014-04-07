@@ -9,6 +9,7 @@ General
 - Custom controls. Game controllers.
 - Rumble in game controller.
 - Cross out things in debugger that can't be used (transparent palette colors, GBA sprites that are hiden?, ...)
+- Emulate MBC7 with Wiimote? How to read the accelerometer from SDL?
 
 Game Boy
 --------

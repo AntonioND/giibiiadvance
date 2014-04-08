@@ -17,12 +17,25 @@
 */
 
 #include <SDL2/SDL.h>
+#include <stdlib.h>
 
 #include "input_utils.h"
 
 #include "gb_core/gb_main.h"
+#include "gb_core/sgb.h"
 
 #include "gba_core/gba.h"
+
+//----------------------------------------------------------------------------------------
+
+typedef struct {
+    int is_opened;
+    SDL_Joystick * joystick;
+    char name[50]; // clamp names to 49 chars... it should be more than enough to identify a joystick
+} _joystick_info_;
+
+static _joystick_info_ Joystick[4];//only 4 joysticks at a time
+static int joystick_number;
 
 //----------------------------------------------------------------------------------------
 
@@ -41,7 +54,10 @@ static _controller_player_info_ ControllerPlayerInfo[4] = {
 //default to keyboard the first player, the rest to unused
 
 static SDL_Scancode _player_key_[4][P_NUM_KEYS] = {
-    //This is the default configuration, changed when loading the config file.
+    //This is the default configuration, changed when loading the config file (if it exists).
+
+    //Each value can be a SDLK_* define or a joystick button number
+
 //   P_KEY_A, P_KEY_B, P_KEY_L, P_KEY_R, P_KEY_UP, P_KEY_RIGHT, P_KEY_DOWN, P_KEY_LEFT, P_KEY_START, P_KEY_SELECT,
     { SDLK_x,SDLK_z,SDLK_a,SDLK_s,SDLK_UP,SDLK_RIGHT,SDLK_DOWN,SDLK_LEFT,SDLK_RETURN,SDLK_RSHIFT },
     { 0,0,0,0,0,0,0,0 },
@@ -114,20 +130,73 @@ SDL_Scancode Input_ControlsGetKey(int player, _key_config_enum_ keyindex)
 
 //----------------------------------------------------------------------------------------
 
+int Input_IsGameBoyKeyPressed(int player, _key_config_enum_ keyindex)
+{
+    if(ControllerPlayerInfo[player].enabled == 0)
+        return 0;
+
+    if(ControllerPlayerInfo[player].index == -1) // keyboard
+    {
+        const Uint8 * state = SDL_GetKeyboardState(NULL);
+        int key = Input_ControlsGetKey(player,keyindex);
+        if(key)
+            return state[SDL_GetScancodeFromKey(Input_ControlsGetKey(player,keyindex))];
+        else
+            return 0;
+    }
+    else // joystick
+    {
+        int joystick_index = ControllerPlayerInfo[player].index;
+        int btn = Input_ControlsGetKey(player,keyindex);
+        if(btn >= 1000) // axis
+        {
+            btn -= 1000; // remove axis flag;
+
+            int is_btn_positive = (btn>=100);
+            if(is_btn_positive) btn -= 100; //remove positive flag
+            int axis_value = SDL_JoystickGetAxis(Joystick[joystick_index].joystick,btn);
+
+            if( is_btn_positive && (axis_value > (16*1024) ) )
+                return 1;
+            else if( (!is_btn_positive) && (axis_value < (-16*1024) ) )
+                return 1;
+            else
+                return 0;
+        }
+        else // button
+        {
+            if(btn != -1)
+                return SDL_JoystickGetButton(Joystick[joystick_index].joystick,btn);
+            else
+                return 0;
+        }
+    }
+
+    return 0;
+}
+
+//----------------------------------------------------------------------------------------
+
 void Input_Update_GB(void)
 {
+    int players = 1;
+    if(SGB_MultiplayerIsEnabled()) players = 4;
+    int i;
+    for(i = 0; i < players; i++)
+    {
+        int a = Input_IsGameBoyKeyPressed(i,P_KEY_A);
+        int b = Input_IsGameBoyKeyPressed(i,P_KEY_B);
+        int st = Input_IsGameBoyKeyPressed(i,P_KEY_START);
+        int se = Input_IsGameBoyKeyPressed(i,P_KEY_SELECT);
+        int dr = Input_IsGameBoyKeyPressed(i,P_KEY_RIGHT);
+        int dl = Input_IsGameBoyKeyPressed(i,P_KEY_LEFT);
+        int du = Input_IsGameBoyKeyPressed(i,P_KEY_UP);
+        int dd = Input_IsGameBoyKeyPressed(i,P_KEY_DOWN);
+
+        GB_InputSet(i, a, b, st, se, dr, dl, du, dd);
+    }
+
     const Uint8 * state = SDL_GetKeyboardState(NULL);
-
-    int a = state[SDL_SCANCODE_X];
-    int b = state[SDL_SCANCODE_Z];
-    int st = state[SDL_SCANCODE_RETURN];
-    int se = state[SDL_SCANCODE_RSHIFT];
-    int dr = state[SDL_SCANCODE_RIGHT];
-    int dl = state[SDL_SCANCODE_LEFT];
-    int du = state[SDL_SCANCODE_UP];
-    int dd = state[SDL_SCANCODE_DOWN];
-
-    GB_InputSet(0, a, b, st, se, dr, dl, du, dd);
 
     int accr = state[SDL_SCANCODE_KP_6];
     int accl = state[SDL_SCANCODE_KP_4];
@@ -135,57 +204,22 @@ void Input_Update_GB(void)
     int accd = state[SDL_SCANCODE_KP_2];
 
     GB_InputSetMBC7Buttons(accu,accd,accr,accl);
-
-    /*
-    Keys[0] = 0; Keys[1] = 0; Keys[2] = 0; Keys[3] = 0;
-
-    if(Keys_Down[VK_LEFT]) Keys[0] |= KEY_LEFT;
-    if(Keys_Down[VK_UP]) Keys[0] |= KEY_UP;
-    if(Keys_Down[VK_RIGHT]) Keys[0] |= KEY_RIGHT;
-    if(Keys_Down[VK_DOWN]) Keys[0] |= KEY_DOWN;
-    if(Keys_Down['X']) Keys[0] |= KEY_A;
-    if(Keys_Down['Z']) Keys[0] |= KEY_B;
-    if(Keys_Down[VK_RETURN]) Keys[0] |= KEY_START;
-    if(Keys_Down[VK_SHIFT]) Keys[0] |= KEY_SELECT;
-
-    if(SGB_MultiplayerIsEnabled())
-    {
-        int i;
-        for(i = 1; i < 4; i++)
-        {
-            if(keystate[Config_Controls_Get_Key(i,P_KEY_LEFT)]) Keys[i] |= KEY_LEFT;
-            if(keystate[Config_Controls_Get_Key(i,P_KEY_UP)]) Keys[i] |= KEY_UP;
-            if(keystate[Config_Controls_Get_Key(i,P_KEY_RIGHT)]) Keys[i] |= KEY_RIGHT;
-            if(keystate[Config_Controls_Get_Key(i,P_KEY_DOWN)]) Keys[i] |= KEY_DOWN;
-            if(keystate[Config_Controls_Get_Key(i,P_KEY_A)]) Keys[i] |= KEY_A;
-            if(keystate[Config_Controls_Get_Key(i,P_KEY_B)]) Keys[i] |= KEY_B;
-            if(keystate[Config_Controls_Get_Key(i,P_KEY_START)]) Keys[i] |= KEY_START;
-            if(keystate[Config_Controls_Get_Key(i,P_KEY_SELECT)]) Keys[i] |= KEY_SELECT;
-        }
-    }
-
-    if(GameBoy.Emulator.MemoryController == MEM_MBC7)
-    {
-        GB_Input_Update_MBC7(Keys_Down[VK_NUMPAD8],Keys_Down[VK_NUMPAD2],
-                            Keys_Down[VK_NUMPAD6],Keys_Down[VK_NUMPAD4]);
-    }
-*/
+//void GB_InputSetMBC7Joystick(int x, int y); // -200 to 200
+//void GB_InputSetMBC7Buttons(int up, int down, int right, int left);
 }
 
 void Input_Update_GBA(void)
 {
-    const Uint8 * state = SDL_GetKeyboardState(NULL);
-
-    int a = state[SDL_SCANCODE_X];
-    int b = state[SDL_SCANCODE_Z];
-    int l = state[SDL_SCANCODE_A];
-    int r = state[SDL_SCANCODE_S];
-    int st = state[SDL_SCANCODE_RETURN];
-    int se = state[SDL_SCANCODE_RSHIFT];
-    int dr = state[SDL_SCANCODE_RIGHT];
-    int dl = state[SDL_SCANCODE_LEFT];
-    int du = state[SDL_SCANCODE_UP];
-    int dd = state[SDL_SCANCODE_DOWN];
+    int a = Input_IsGameBoyKeyPressed(0,P_KEY_A);
+    int b = Input_IsGameBoyKeyPressed(0,P_KEY_B);
+    int l = Input_IsGameBoyKeyPressed(0,P_KEY_L);
+    int r = Input_IsGameBoyKeyPressed(0,P_KEY_R);
+    int st = Input_IsGameBoyKeyPressed(0,P_KEY_START);
+    int se = Input_IsGameBoyKeyPressed(0,P_KEY_SELECT);
+    int dr = Input_IsGameBoyKeyPressed(0,P_KEY_RIGHT);
+    int dl = Input_IsGameBoyKeyPressed(0,P_KEY_LEFT);
+    int du = Input_IsGameBoyKeyPressed(0,P_KEY_UP);
+    int dd = Input_IsGameBoyKeyPressed(0,P_KEY_DOWN);
 
     GBA_HandleInput(a, b, l, r, st, se, dr, dl, du, dd);
 }
@@ -197,6 +231,70 @@ int Input_Speedup_Enabled(void)
     return state[SDL_SCANCODE_SPACE];
 }
 
-//void GB_InputSet(int player, int a, int b, int st, int se, int r, int l, int u, int d);
-//void GB_InputSetMBC7Joystick(int x, int y); // -200 to 200
-//void GB_InputSetMBC7Buttons(int up, int down, int right, int left);
+//----------------------------------------------------------------------------------------
+
+SDL_Joystick * Input_GetJoystick(int index)
+{
+    if(index >= 4) return NULL;
+    if(index < 0) return NULL;
+
+    return Joystick[index].joystick;
+}
+
+char * Input_GetJoystickName(int index)
+{
+    if(index >= 4) return NULL;
+    if(index < 0) return NULL;
+
+    return Joystick[index].name;
+}
+
+static void _Input_CloseSystem(void)
+{
+    int i;
+    for(i = 0; i < 4; i++) if(Joystick[i].is_opened)
+    {
+        Joystick[i].is_opened = 0;
+        SDL_JoystickClose(Joystick[i].joystick);
+        Joystick[i].joystick = NULL;
+    }
+}
+
+int Input_GetJoystickNumber(void)
+{
+    return joystick_number;
+}
+
+void Input_InitSystem(void)
+{
+    atexit(_Input_CloseSystem);
+
+    int i;
+    for(i = 0; i < 4; i++) // clear things
+    {
+        Joystick[i].is_opened = 0;
+        Joystick[i].joystick = NULL;
+    }
+
+    joystick_number = SDL_NumJoysticks();
+
+    for(i = 0; i < 4; i++) // load joysticks
+    {
+        if(i < SDL_NumJoysticks())
+        {
+            Joystick[i].joystick = SDL_JoystickOpen(i);
+            Joystick[i].is_opened = (Joystick[i].joystick != NULL);
+
+            const char * name = SDL_JoystickNameForIndex(i);
+            if(name)
+                s_strncpy(Joystick[i].name,name,sizeof(Joystick[i].name));
+            else
+                s_strncpy(Joystick[i].name,"Unknown Joystick",sizeof(Joystick[i].name));
+        }
+    }
+}
+
+// INIT/USE/CLEAN RUMBLE - DO SOME FUNCTIONS!!! *******************************************************
+
+//----------------------------------------------------------------------------------------
+

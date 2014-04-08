@@ -62,6 +62,14 @@ int Input_Speedup_Enabled(void);
 
 //----------------------------------------------------------------------------------
 
+SDL_Joystick * Input_GetJoystick(int index);
+char * Input_GetJoystickName(int index);
+int Input_GetJoystickNumber(void);
+
+void Input_InitSystem(void); // only work with joypads that are connected when opening the emulator
+
+//----------------------------------------------------------------------------------
+
 #endif // __INPUT_UTILS__
 
 

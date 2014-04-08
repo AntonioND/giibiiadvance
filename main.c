@@ -32,9 +32,6 @@
 
 static int Init(void)
 {
-    Config_Load();
-    atexit(Config_Save);
-
     WH_Init();
 
     //Initialize SDL
@@ -44,6 +41,11 @@ static int Init(void)
         return 1;
     }
     atexit(SDL_Quit);
+
+    Input_InitSystem(); // init this before loading the configuration
+
+    Config_Load();
+    atexit(Config_Save);
 
     //Enable VSync
     //if(!SDL_SetHint( SDL_HINT_RENDER_VSYNC, "1"))

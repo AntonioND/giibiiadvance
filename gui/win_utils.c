@@ -438,6 +438,17 @@ void GUI_SetInputGet(_gui_element * e, _gui_int_arg_sdl_event_fn callback)
 
 //----------------------------------------------------------------------------------------------
 
+void GUI_SetButtonText(_gui_element * e, const char * text)
+{
+    if(e == NULL)
+        return;
+
+    if(e->element_type != GUI_TYPE_BUTTON)
+        return;
+
+    s_strncpy(e->info.button.name,text,sizeof(e->info.button.name));
+}
+
 void GUI_ScrollBarSetValue(_gui_element * e, int value) // clamped to configured range
 {
     if(e == NULL)

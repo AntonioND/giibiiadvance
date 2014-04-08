@@ -29,6 +29,7 @@ For 0.3.0
 
 - Customize controls.
  - Add support for game controllers. (In progress)
+ - Rumble. Show "axis" in labels. Fix some D-pads not working.
  - Save input configuration.
 
 - Obviously, improve emulation.

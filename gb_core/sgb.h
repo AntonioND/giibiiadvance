@@ -31,6 +31,8 @@
 //A 60ms (4 frames) delay should be invoked between each packet transfer.
 #define SGB_PACKET_DELAY (280896)
 
+#include "gameboy.h"
+
 typedef struct {
     u32 delay; // for delay between frames (not used for now)
 

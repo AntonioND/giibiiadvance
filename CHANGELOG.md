@@ -2,6 +2,16 @@
 Version changelog
 =================
 
+
+Version 0.3.0
+-------------
+
+General
+
+- Controls can be configured.
+- Support for game controllers.
+
+
 Version 0.2.0
 -------------
 
@@ -45,6 +55,7 @@ GB emulation
 - Disassembly shows I/O register names that are accesed by memory instructions.
 - Added targets for compiling with GB Camera.
 - GB Camera emulation improved a lot since GiiBii. Contrast, enable/disable dithering, exposure time... There is only one game that use it so it's emulated for that game. Other software will probably fail (there are too many unknown things).
+
 
 Version 0.1.0
 -------------

@@ -185,62 +185,70 @@ static void _win_main_config_input_update_window(void)
 
     if(Input_PlayerGetController(win_main_config_selected_player) == -1)
     {
-        SDL_Scancode scancode;
-        scancode = Input_ControlsGetKey(win_main_config_selected_player,P_KEY_A);
-        GUI_SetLabelCaption(&mwciw_selected_a_label,SDL_GetKeyName(scancode));
-        scancode = Input_ControlsGetKey(win_main_config_selected_player,P_KEY_B);
-        GUI_SetLabelCaption(&mwciw_selected_b_label,SDL_GetKeyName(scancode));
-        scancode = Input_ControlsGetKey(win_main_config_selected_player,P_KEY_L);
-        GUI_SetLabelCaption(&mwciw_selected_l_label,SDL_GetKeyName(scancode));
-        scancode = Input_ControlsGetKey(win_main_config_selected_player,P_KEY_R);
-        GUI_SetLabelCaption(&mwciw_selected_r_label,SDL_GetKeyName(scancode));
-        scancode = Input_ControlsGetKey(win_main_config_selected_player,P_KEY_UP);
-        GUI_SetLabelCaption(&mwciw_selected_up_label,SDL_GetKeyName(scancode));
-        scancode = Input_ControlsGetKey(win_main_config_selected_player,P_KEY_RIGHT);
-        GUI_SetLabelCaption(&mwciw_selected_right_label,SDL_GetKeyName(scancode));
-        scancode = Input_ControlsGetKey(win_main_config_selected_player,P_KEY_DOWN);
-        GUI_SetLabelCaption(&mwciw_selected_down_label,SDL_GetKeyName(scancode));
-        scancode = Input_ControlsGetKey(win_main_config_selected_player,P_KEY_LEFT);
-        GUI_SetLabelCaption(&mwciw_selected_left_label,SDL_GetKeyName(scancode));
-        scancode = Input_ControlsGetKey(win_main_config_selected_player,P_KEY_START);
-        GUI_SetLabelCaption(&mwciw_selected_start_label,SDL_GetKeyName(scancode));
-        scancode = Input_ControlsGetKey(win_main_config_selected_player,P_KEY_SELECT);
-        GUI_SetLabelCaption(&mwciw_selected_select_label,SDL_GetKeyName(scancode));
+        char name[20];
+        int btn = Input_ControlsGetKey(win_main_config_selected_player,P_KEY_A);
+        Input_GetKeyboardElementName(name,sizeof(name),btn);
+        GUI_SetLabelCaption(&mwciw_selected_a_label,name);
+        btn = Input_ControlsGetKey(win_main_config_selected_player,P_KEY_B);
+        Input_GetKeyboardElementName(name,sizeof(name),btn);
+        GUI_SetLabelCaption(&mwciw_selected_b_label,name);
+        btn = Input_ControlsGetKey(win_main_config_selected_player,P_KEY_L);
+        Input_GetKeyboardElementName(name,sizeof(name),btn);
+        GUI_SetLabelCaption(&mwciw_selected_l_label,name);
+        btn = Input_ControlsGetKey(win_main_config_selected_player,P_KEY_R);
+        Input_GetKeyboardElementName(name,sizeof(name),btn);
+        GUI_SetLabelCaption(&mwciw_selected_r_label,name);
+        btn = Input_ControlsGetKey(win_main_config_selected_player,P_KEY_UP);
+        Input_GetKeyboardElementName(name,sizeof(name),btn);
+        GUI_SetLabelCaption(&mwciw_selected_up_label,name);
+        btn = Input_ControlsGetKey(win_main_config_selected_player,P_KEY_RIGHT);
+        Input_GetKeyboardElementName(name,sizeof(name),btn);
+        GUI_SetLabelCaption(&mwciw_selected_right_label,name);
+        btn = Input_ControlsGetKey(win_main_config_selected_player,P_KEY_DOWN);
+        Input_GetKeyboardElementName(name,sizeof(name),btn);
+        GUI_SetLabelCaption(&mwciw_selected_down_label,name);
+        btn = Input_ControlsGetKey(win_main_config_selected_player,P_KEY_LEFT);
+        Input_GetKeyboardElementName(name,sizeof(name),btn);
+        GUI_SetLabelCaption(&mwciw_selected_left_label,name);
+        btn = Input_ControlsGetKey(win_main_config_selected_player,P_KEY_START);
+        Input_GetKeyboardElementName(name,sizeof(name),btn);
+        GUI_SetLabelCaption(&mwciw_selected_start_label,name);
+        btn = Input_ControlsGetKey(win_main_config_selected_player,P_KEY_SELECT);
+        Input_GetKeyboardElementName(name,sizeof(name),btn);
+        GUI_SetLabelCaption(&mwciw_selected_select_label,name);
     }
     else
     {
-        // IF VALUE >= 1000 IT IS AN AXIS, PRINT LABEL AS AXIS!!!!! ***************************
-
         char name[20];
         int btn = Input_ControlsGetKey(win_main_config_selected_player,P_KEY_A);
-        s_snprintf(name,sizeof(name),"Button %d",btn);
+        Input_GetJoystickElementName(name,sizeof(name),btn);
         GUI_SetLabelCaption(&mwciw_selected_a_label,name);
         btn = Input_ControlsGetKey(win_main_config_selected_player,P_KEY_B);
-        s_snprintf(name,sizeof(name),"Button %d",btn);
+        Input_GetJoystickElementName(name,sizeof(name),btn);
         GUI_SetLabelCaption(&mwciw_selected_b_label,name);
         btn = Input_ControlsGetKey(win_main_config_selected_player,P_KEY_L);
-        s_snprintf(name,sizeof(name),"Button %d",btn);
+        Input_GetJoystickElementName(name,sizeof(name),btn);
         GUI_SetLabelCaption(&mwciw_selected_l_label,name);
         btn = Input_ControlsGetKey(win_main_config_selected_player,P_KEY_R);
-        s_snprintf(name,sizeof(name),"Button %d",btn);
+        Input_GetJoystickElementName(name,sizeof(name),btn);
         GUI_SetLabelCaption(&mwciw_selected_r_label,name);
         btn = Input_ControlsGetKey(win_main_config_selected_player,P_KEY_UP);
-        s_snprintf(name,sizeof(name),"Button %d",btn);
+        Input_GetJoystickElementName(name,sizeof(name),btn);
         GUI_SetLabelCaption(&mwciw_selected_up_label,name);
         btn = Input_ControlsGetKey(win_main_config_selected_player,P_KEY_RIGHT);
-        s_snprintf(name,sizeof(name),"Button %d",btn);
+        Input_GetJoystickElementName(name,sizeof(name),btn);
         GUI_SetLabelCaption(&mwciw_selected_right_label,name);
         btn = Input_ControlsGetKey(win_main_config_selected_player,P_KEY_DOWN);
-        s_snprintf(name,sizeof(name),"Button %d",btn);
+        Input_GetJoystickElementName(name,sizeof(name),btn);
         GUI_SetLabelCaption(&mwciw_selected_down_label,name);
         btn = Input_ControlsGetKey(win_main_config_selected_player,P_KEY_LEFT);
-        s_snprintf(name,sizeof(name),"Button %d",btn);
+        Input_GetJoystickElementName(name,sizeof(name),btn);
         GUI_SetLabelCaption(&mwciw_selected_left_label,name);
         btn = Input_ControlsGetKey(win_main_config_selected_player,P_KEY_START);
-        s_snprintf(name,sizeof(name),"Button %d",btn);
+        Input_GetJoystickElementName(name,sizeof(name),btn);
         GUI_SetLabelCaption(&mwciw_selected_start_label,name);
         btn = Input_ControlsGetKey(win_main_config_selected_player,P_KEY_SELECT);
-        s_snprintf(name,sizeof(name),"Button %d",btn);
+        Input_GetJoystickElementName(name,sizeof(name),btn);
         GUI_SetLabelCaption(&mwciw_selected_select_label,name);
     }
 }
@@ -353,7 +361,21 @@ static int _win_main_config_input_inputget_callback(SDL_Event * e)
         }
         else if(e->type == SDL_JOYAXISMOTION)
         {
-            int btn = 1000 + ( (e->jaxis.value > 0) ? 1 : 0 ) * 100 + e->jaxis.axis;
+            int btn = KEYCODE_IS_AXIS + ( (e->jaxis.value > 0) ? KEYCODE_POSITIVE_AXIS : 0 ) + e->jaxis.axis;
+
+            if(win_main_config_is_changing_button < P_NUM_KEYS)
+            {
+                Input_ControlsSetKey(win_main_config_selected_player,win_main_config_is_changing_button,btn);
+                redraw_gui = 1;
+            }
+            else
+            {
+                redraw_gui = 0;
+            }
+        }
+        else if(e->type == SDL_JOYHATMOTION)
+        {
+            int btn = KEYCODE_IS_HAT + (e->jhat.value << 4) + e->jhat.hat;
 
             if(win_main_config_is_changing_button < P_NUM_KEYS)
             {
@@ -466,7 +488,7 @@ static void _win_main_config_change_default_btn_callback(void)
         Input_PlayerSetController(win_main_config_selected_player,win_main_config_selected_player - 1);
         int i;
         for(i = 0; i < P_NUM_KEYS; i++)
-            Input_ControlsSetKey(win_main_config_selected_player,i,0);
+            Input_ControlsSetKey(win_main_config_selected_player,i,-1);
     }
 
     _win_main_config_input_update_window();

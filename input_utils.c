@@ -20,6 +20,7 @@
 #include <stdlib.h>
 
 #include "input_utils.h"
+#include "debug_utils.h"
 
 #include "gb_core/gb_main.h"
 #include "gb_core/sgb.h"
@@ -32,6 +33,7 @@ typedef struct {
     int is_opened;
     SDL_Joystick * joystick;
     char name[50]; // clamp names to 49 chars... it should be more than enough to identify a joystick
+    SDL_Haptic * haptic;
 } _joystick_info_;
 
 static _joystick_info_ Joystick[4];//only 4 joysticks at a time
@@ -60,9 +62,9 @@ static SDL_Scancode _player_key_[4][P_NUM_KEYS] = {
 
 //   P_KEY_A, P_KEY_B, P_KEY_L, P_KEY_R, P_KEY_UP, P_KEY_RIGHT, P_KEY_DOWN, P_KEY_LEFT, P_KEY_START, P_KEY_SELECT,
     { SDLK_x,SDLK_z,SDLK_a,SDLK_s,SDLK_UP,SDLK_RIGHT,SDLK_DOWN,SDLK_LEFT,SDLK_RETURN,SDLK_RSHIFT },
-    { 0,0,0,0,0,0,0,0 },
-    { 0,0,0,0,0,0,0,0 },
-    { 0,0,0,0,0,0,0,0 }
+    { -1,-1,-1,-1,-1,-1,-1,-1,-1,-1 },
+    { -1,-1,-1,-1,-1,-1,-1,-1,-1,-1 },
+    { -1,-1,-1,-1,-1,-1,-1,-1,-1,-1 }
 };
 
 static SDL_Scancode player_key_speedup = SDLK_SPACE;
@@ -148,17 +150,31 @@ int Input_IsGameBoyKeyPressed(int player, _key_config_enum_ keyindex)
     {
         int joystick_index = ControllerPlayerInfo[player].index;
         int btn = Input_ControlsGetKey(player,keyindex);
-        if(btn >= 1000) // axis
+        if(btn & KEYCODE_IS_AXIS) // axis
         {
-            btn -= 1000; // remove axis flag;
+            btn &= ~KEYCODE_IS_AXIS; // remove axis flag
 
-            int is_btn_positive = (btn>=100);
-            if(is_btn_positive) btn -= 100; //remove positive flag
+            int is_btn_positive = (btn&KEYCODE_POSITIVE_AXIS);
+            btn &= ~KEYCODE_POSITIVE_AXIS; //remove positive flag
+
             int axis_value = SDL_JoystickGetAxis(Joystick[joystick_index].joystick,btn);
 
             if( is_btn_positive && (axis_value > (16*1024) ) )
                 return 1;
             else if( (!is_btn_positive) && (axis_value < (-16*1024) ) )
+                return 1;
+            else
+                return 0;
+        }
+        else if(btn & KEYCODE_IS_HAT) // axis
+        {
+            btn &= ~KEYCODE_IS_HAT; // remove hat flag
+
+            int position = (btn >> 4);
+
+            int hat_index = btn & 0xF;
+
+            if(position & SDL_JoystickGetHat(Joystick[joystick_index].joystick,hat_index))
                 return 1;
             else
                 return 0;
@@ -173,6 +189,55 @@ int Input_IsGameBoyKeyPressed(int player, _key_config_enum_ keyindex)
     }
 
     return 0;
+}
+
+void Input_GetKeyboardElementName(char * name, int namelen, int btncode)
+{
+    if(btncode <= 0)
+    {
+        s_strncpy(name,"None",namelen);
+    }
+    else
+    {
+        s_strncpy(name,SDL_GetKeyName(btncode),namelen);
+    }
+}
+
+void Input_GetJoystickElementName(char * name, int namelen, int btncode)
+{
+    if(btncode == -1)
+    {
+        s_strncpy(name,"None",namelen);
+    }
+    else if(btncode & KEYCODE_IS_AXIS) // axis
+    {
+        btncode &= ~KEYCODE_IS_AXIS; // remove axis flag
+
+        int is_btn_positive = (btncode&KEYCODE_POSITIVE_AXIS);
+        btncode &= ~KEYCODE_POSITIVE_AXIS; //remove positive flag
+
+        s_snprintf(name,namelen,"Axis %d%c",btncode,is_btn_positive?'+':'-');
+    }
+    else if(btncode & KEYCODE_IS_HAT) // axis
+    {
+        btncode &= ~KEYCODE_IS_HAT; // remove hat flag
+
+        int position = (btncode >> 4);
+
+        int hat_index = btncode & 0xF;
+
+        char * dir = "Centered [!]";
+        if(position & SDL_HAT_UP) dir = "Up";
+        else if(position & SDL_HAT_RIGHT) dir = "Right";
+        else if(position & SDL_HAT_DOWN) dir = "Down";
+        else if(position & SDL_HAT_LEFT) dir = "Left";
+
+        s_snprintf(name,namelen,"Hat %d %s",hat_index,dir);
+    }
+    else // button
+    {
+        s_snprintf(name,namelen,"Button %d",btncode);
+    }
 }
 
 //----------------------------------------------------------------------------------------
@@ -257,6 +322,9 @@ static void _Input_CloseSystem(void)
         Joystick[i].is_opened = 0;
         SDL_JoystickClose(Joystick[i].joystick);
         Joystick[i].joystick = NULL;
+
+        if(Joystick[i].haptic)
+            SDL_HapticClose(Joystick[i].haptic);
     }
 }
 
@@ -290,11 +358,38 @@ void Input_InitSystem(void)
                 s_strncpy(Joystick[i].name,name,sizeof(Joystick[i].name));
             else
                 s_strncpy(Joystick[i].name,"Unknown Joystick",sizeof(Joystick[i].name));
+
+            if(Joystick[i].joystick)
+            {
+                //create rumble functions
+
+                Joystick[i].haptic = SDL_HapticOpenFromJoystick(Joystick[i].joystick);
+                if(Joystick[i].haptic)
+                {
+                    if(SDL_HapticRumbleInit(Joystick[i].haptic) == 0)
+                    {
+                        SDL_HapticClose(Joystick[i].haptic);
+                        Joystick[i].haptic = NULL;
+                    }
+
+                       //else SDL_HapticRumblePlay( Joystick[0].haptic, 0.5, 1000 ); // rumble for 1 ms for player 0
+
+                }
+                else
+                {
+                    Debug_LogMsgArg("Couldn't open haptic for joystick %d: %s",i,SDL_GetError());
+                }
+            }
         }
     }
 }
 
-// INIT/USE/CLEAN RUMBLE - DO SOME FUNCTIONS!!! *******************************************************
+void Input_RumbleEnable(void)
+{
+    int controller = ControllerPlayerInfo[0].index; // player 0 only
+    if(controller >= 0)
+        SDL_HapticRumblePlay( Joystick[controller].haptic, 0.5, 16 ); // rumble for 16 ms (one frame)
+}
 
 //----------------------------------------------------------------------------------------
 

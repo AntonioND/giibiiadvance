@@ -1321,6 +1321,10 @@ void Win_MainLoopHandle(void)
             GB_SkipFrame(_win_main_has_to_frameskip());
 
             Input_Update_GB();
+
+            if(GB_RumbleEnabled())
+                Input_RumbleEnable();
+
             GB_RunForOneFrame();
             if(_win_main_has_to_frameskip() == 0)
                 GB_Screen_WriteBuffer_24RGB(WIN_MAIN_GAME_SCREEN_BUFFER);

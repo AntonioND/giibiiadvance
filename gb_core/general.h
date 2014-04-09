@@ -25,5 +25,7 @@ void GB_HardReset(void);
 
 int GB_EmulatorIsEnabledSGB(void);
 
+int GB_RumbleEnabled(void);
+
 #endif //__GENERAL__
 

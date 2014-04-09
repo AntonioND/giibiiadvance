@@ -98,3 +98,7 @@ int GB_EmulatorIsEnabledSGB(void)
     return GameBoy.Emulator.SGBEnabled;
 }
 
+int GB_RumbleEnabled(void)
+{
+    return GameBoy.Emulator.rumble;
+}

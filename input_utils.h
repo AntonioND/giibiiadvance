@@ -42,6 +42,10 @@ typedef enum {
 
 } _key_config_enum_;
 
+#define KEYCODE_POSITIVE_AXIS (1<<8)
+#define KEYCODE_IS_AXIS       (1<<9)
+#define KEYCODE_IS_HAT        (1<<10)
+
 extern const char * GBKeyNames[P_NUM_KEYS];
 
 void Input_ControlsSetKey(int player, _key_config_enum_ keyindex, SDL_Scancode keyscancode);
@@ -62,11 +66,18 @@ int Input_Speedup_Enabled(void);
 
 //----------------------------------------------------------------------------------
 
+void Input_GetKeyboardElementName(char * name, int namelen, int btncode); //btncode is a SDL_Scancode
+void Input_GetJoystickElementName(char * name, int namelen, int btncode);
+
+//----------------------------------------------------------------------------------
+
 SDL_Joystick * Input_GetJoystick(int index);
 char * Input_GetJoystickName(int index);
 int Input_GetJoystickNumber(void);
 
 void Input_InitSystem(void); // only work with joypads that are connected when opening the emulator
+
+void Input_RumbleEnable(void);
 
 //----------------------------------------------------------------------------------
 

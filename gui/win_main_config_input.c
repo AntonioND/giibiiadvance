@@ -130,7 +130,8 @@ static void _win_main_config_input_update_window(void)
         {
             const char * name = Input_GetJoystickName(i);
             GUI_ConsoleModePrintf(&mwciw_win_controller_con,0,i,
-                                  "Joystick %d: %s\n", i, name ? name : "Unknown Joystick");
+                                  "Joystick %d: %s%s\n", i, name ? name : "Unknown Joystick",
+                                  Input_JoystickHasRumble(i) ? " (Rumble)": "");
         }
     }
 
@@ -345,14 +346,21 @@ static int _win_main_config_input_inputget_callback(SDL_Event * e)
     }
     else //Joypad
     {
-        if( (e->type == SDL_JOYBUTTONDOWN) || (e->type == SDL_JOYBUTTONUP) )
+        if(e->type == SDL_JOYBUTTONDOWN)
         {
-            int btn = e->jbutton.button;
-
-            if(win_main_config_is_changing_button < P_NUM_KEYS)
+            if(e->jbutton.which == controller)
             {
-                Input_ControlsSetKey(win_main_config_selected_player,win_main_config_is_changing_button,btn);
-                redraw_gui = 1;
+                int btn = e->jbutton.button;
+
+                if(win_main_config_is_changing_button < P_NUM_KEYS)
+                {
+                    Input_ControlsSetKey(win_main_config_selected_player,win_main_config_is_changing_button,btn);
+                    redraw_gui = 1;
+                }
+                else
+                {
+                    redraw_gui = 0;
+                }
             }
             else
             {
@@ -361,12 +369,19 @@ static int _win_main_config_input_inputget_callback(SDL_Event * e)
         }
         else if(e->type == SDL_JOYAXISMOTION)
         {
-            int btn = KEYCODE_IS_AXIS + ( (e->jaxis.value > 0) ? KEYCODE_POSITIVE_AXIS : 0 ) + e->jaxis.axis;
-
-            if(win_main_config_is_changing_button < P_NUM_KEYS)
+            if(e->jbutton.which == controller)
             {
-                Input_ControlsSetKey(win_main_config_selected_player,win_main_config_is_changing_button,btn);
-                redraw_gui = 1;
+                int btn = KEYCODE_IS_AXIS + ( (e->jaxis.value > 0) ? KEYCODE_POSITIVE_AXIS : 0 ) + e->jaxis.axis;
+
+                if(win_main_config_is_changing_button < P_NUM_KEYS)
+                {
+                    Input_ControlsSetKey(win_main_config_selected_player,win_main_config_is_changing_button,btn);
+                    redraw_gui = 1;
+                }
+                else
+                {
+                    redraw_gui = 0;
+                }
             }
             else
             {
@@ -375,12 +390,19 @@ static int _win_main_config_input_inputget_callback(SDL_Event * e)
         }
         else if(e->type == SDL_JOYHATMOTION)
         {
-            int btn = KEYCODE_IS_HAT + (e->jhat.value << 4) + e->jhat.hat;
-
-            if(win_main_config_is_changing_button < P_NUM_KEYS)
+            if(e->jbutton.which == controller)
             {
-                Input_ControlsSetKey(win_main_config_selected_player,win_main_config_is_changing_button,btn);
-                redraw_gui = 1;
+                int btn = KEYCODE_IS_HAT + (e->jhat.value << 4) + e->jhat.hat;
+
+                if(win_main_config_is_changing_button < P_NUM_KEYS)
+                {
+                    Input_ControlsSetKey(win_main_config_selected_player,win_main_config_is_changing_button,btn);
+                    redraw_gui = 1;
+                }
+                else
+                {
+                    redraw_gui = 0;
+                }
             }
             else
             {
@@ -580,17 +602,17 @@ void Win_MainCreateConfigInputWindow(void)
     GUI_SetButton(&mwciw_change_default_btn, (256*2-50)/2,228, 30*FONT_WIDTH, 2*FONT_HEIGHT, "Default configuration",
                   _win_main_config_change_default_btn_callback);
 
-    GUI_SetLabel(&mwciw_selected_a_label,18+6+8*FONT_WIDTH,78+6,20*FONT_WIDTH,FONT_HEIGHT,"01234567890123456789");
-    GUI_SetLabel(&mwciw_selected_b_label,18+6+8*FONT_WIDTH,108+6,20*FONT_WIDTH,FONT_HEIGHT,"01234567890123456789");
-    GUI_SetLabel(&mwciw_selected_l_label,18+6+8*FONT_WIDTH,138+6,20*FONT_WIDTH,FONT_HEIGHT,"01234567890123456789");
-    GUI_SetLabel(&mwciw_selected_r_label,18+6+8*FONT_WIDTH,168+6,20*FONT_WIDTH,FONT_HEIGHT,"01234567890123456789");
-    GUI_SetLabel(&mwciw_selected_start_label,18+6+8*FONT_WIDTH,198+6,20*FONT_WIDTH,FONT_HEIGHT,"01234567890123456789");
-    GUI_SetLabel(&mwciw_selected_select_label,18+6+8*FONT_WIDTH,228+6,20*FONT_WIDTH,FONT_HEIGHT,"01234567890123456789");
+    GUI_SetLabel(&mwciw_selected_a_label,18+6+8*FONT_WIDTH,78+6,20*FONT_WIDTH,FONT_HEIGHT,"-");
+    GUI_SetLabel(&mwciw_selected_b_label,18+6+8*FONT_WIDTH,108+6,20*FONT_WIDTH,FONT_HEIGHT,"-");
+    GUI_SetLabel(&mwciw_selected_l_label,18+6+8*FONT_WIDTH,138+6,20*FONT_WIDTH,FONT_HEIGHT,"-");
+    GUI_SetLabel(&mwciw_selected_r_label,18+6+8*FONT_WIDTH,168+6,20*FONT_WIDTH,FONT_HEIGHT,"-");
+    GUI_SetLabel(&mwciw_selected_start_label,18+6+8*FONT_WIDTH,198+6,20*FONT_WIDTH,FONT_HEIGHT,"-");
+    GUI_SetLabel(&mwciw_selected_select_label,18+6+8*FONT_WIDTH,228+6,20*FONT_WIDTH,FONT_HEIGHT,"-");
 
-    GUI_SetLabel(&mwciw_selected_up_label,(256*2-50)/2+6+8*FONT_WIDTH,78+6,20*FONT_WIDTH,FONT_HEIGHT,"01234567890123456789");
-    GUI_SetLabel(&mwciw_selected_right_label,(256*2-50)/2+6+8*FONT_WIDTH,108+6,20*FONT_WIDTH,FONT_HEIGHT,"01234567890123456789");
-    GUI_SetLabel(&mwciw_selected_down_label,(256*2-50)/2+6+8*FONT_WIDTH,138+6,20*FONT_WIDTH,FONT_HEIGHT,"01234567890123456789");
-    GUI_SetLabel(&mwciw_selected_left_label,(256*2-50)/2+6+8*FONT_WIDTH,168+6,20*FONT_WIDTH,FONT_HEIGHT,"01234567890123456789");
+    GUI_SetLabel(&mwciw_selected_up_label,(256*2-50)/2+6+8*FONT_WIDTH,78+6,20*FONT_WIDTH,FONT_HEIGHT,"-");
+    GUI_SetLabel(&mwciw_selected_right_label,(256*2-50)/2+6+8*FONT_WIDTH,108+6,20*FONT_WIDTH,FONT_HEIGHT,"-");
+    GUI_SetLabel(&mwciw_selected_down_label,(256*2-50)/2+6+8*FONT_WIDTH,138+6,20*FONT_WIDTH,FONT_HEIGHT,"-");
+    GUI_SetLabel(&mwciw_selected_left_label,(256*2-50)/2+6+8*FONT_WIDTH,168+6,20*FONT_WIDTH,FONT_HEIGHT,"-");
 
     GUI_SetTextBox(&mwciw_win_controller_textbox,&mwciw_win_controller_con,
                    7,270,64*FONT_WIDTH,4*FONT_HEIGHT, NULL);

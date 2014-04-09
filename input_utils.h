@@ -78,6 +78,7 @@ int Input_GetJoystickNumber(void);
 void Input_InitSystem(void); // only work with joypads that are connected when opening the emulator
 
 void Input_RumbleEnable(void);
+int Input_JoystickHasRumble(int index);
 
 //----------------------------------------------------------------------------------
 

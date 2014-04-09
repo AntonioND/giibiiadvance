@@ -378,7 +378,7 @@ void Input_InitSystem(void)
                         else
                         {
                             // rumble for a bit to tell the user that everything is OK.
-                            SDL_HapticRumblePlay( Joystick[0].haptic, 0.5, 500 );
+                            SDL_HapticRumblePlay( Joystick[i].haptic, 0.5, 500 );
                         }
                     }
                     else
@@ -402,6 +402,11 @@ void Input_RumbleEnable(void)
     int controller = ControllerPlayerInfo[0].index; // player 0 only
     if(controller >= 0)
         SDL_HapticRumblePlay( Joystick[controller].haptic, 1.0, 16 ); // rumble for 16 ms (one frame)
+}
+
+int Input_JoystickHasRumble(int index)
+{
+    return (Joystick[index].haptic != NULL);
 }
 
 //----------------------------------------------------------------------------------------

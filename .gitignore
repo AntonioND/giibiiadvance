@@ -4,6 +4,7 @@ _releases/
 obj/
 _todo/
 bios/
+_roms/
 screenshots/
 *.gb
 *.gbc

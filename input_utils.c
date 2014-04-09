@@ -363,17 +363,20 @@ void Input_InitSystem(void)
             {
                 //create rumble functions
 
-                Joystick[i].haptic = SDL_HapticOpenFromJoystick(Joystick[i].joystick);
+                Joystick[i].haptic = SDL_HapticOpen(0); //SDL_HapticOpenFromJoystick(Joystick[i].joystick);
                 if(Joystick[i].haptic)
                 {
-                    if(SDL_HapticRumbleInit(Joystick[i].haptic) == 0)
+                    if(SDL_HapticRumbleInit(Joystick[i].haptic) != 0)
                     {
+                        Debug_LogMsgArg("SDL_HapticRumbleInit() error for joystick %d: %s",i,SDL_GetError());
                         SDL_HapticClose(Joystick[i].haptic);
                         Joystick[i].haptic = NULL;
                     }
-
-                       //else SDL_HapticRumblePlay( Joystick[0].haptic, 0.5, 1000 ); // rumble for 1 ms for player 0
-
+                    else
+                    {
+                        // rumble for a bit to tell the user that everything is OK.
+                        SDL_HapticRumblePlay( Joystick[0].haptic, 0.5, 500 );
+                    }
                 }
                 else
                 {
@@ -388,7 +391,7 @@ void Input_RumbleEnable(void)
 {
     int controller = ControllerPlayerInfo[0].index; // player 0 only
     if(controller >= 0)
-        SDL_HapticRumblePlay( Joystick[controller].haptic, 0.5, 16 ); // rumble for 16 ms (one frame)
+        SDL_HapticRumblePlay( Joystick[controller].haptic, 1.0, 16 ); // rumble for 16 ms (one frame)
 }
 
 //----------------------------------------------------------------------------------------

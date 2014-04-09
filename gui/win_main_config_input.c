@@ -129,15 +129,19 @@ static void _win_main_config_input_update_window(void)
         if(i < 4)
         {
             const char * name = Input_GetJoystickName(i);
+            char * rumble;
+            if((int)Input_JoystickHasRumble(i) == -1) rumble = " (Rumble error)";
+            else if(Input_JoystickHasRumble(i) == 0) rumble = " (No Rumble)";
+            else rumble = " (Rumble)";
+
             GUI_ConsoleModePrintf(&mwciw_win_controller_con,0,i,
-                                  "Joystick %d: %s%s\n", i, name ? name : "Unknown Joystick",
-                                  Input_JoystickHasRumble(i) ? " (Rumble)": "");
+                                  "Joystick %d: %s%s\n", i, name ? name : "Unknown Joystick",rumble);
         }
     }
 
     if(i == 0)
     {
-        GUI_ConsoleModePrintf(&mwciw_win_controller_con,0,0, "No joypads detected!");
+        GUI_ConsoleModePrintf(&mwciw_win_controller_con,0,0, "No joysticks detected!");
     }
 
     int controller = Input_PlayerGetController(win_main_config_selected_player);
@@ -300,8 +304,8 @@ static void _win_main_config_input_select_controller_radbtn_callback(int num)
         }
         else
         {
-            if(win_main_config_selected_player != 0) // default: disable joypads for players 2-4
-                Input_PlayerSetEnabled(win_main_config_selected_player,0);
+            //if(win_main_config_selected_player != 0) // default: disable joysticks for players 2-4
+            //    Input_PlayerSetEnabled(win_main_config_selected_player,0);
 
             int i;
             for(i = 0; i < P_NUM_KEYS; i++)
@@ -416,7 +420,10 @@ static int _win_main_config_input_inputget_callback(SDL_Event * e)
     }
 
     if(redraw_gui) // key changed
+    {
         win_main_config_is_changing_button = P_KEY_NONE;
+        Input_PlayerSetEnabled(win_main_config_selected_player,1);
+    }
 
     _win_main_config_input_update_window();
 
@@ -532,7 +539,7 @@ static void _win_main_config_change_disable_btn_callback(void)
         Input_PlayerSetController(win_main_config_selected_player,win_main_config_selected_player - 1);
         int i;
         for(i = 0; i < P_NUM_KEYS; i++)
-            Input_ControlsSetKey(win_main_config_selected_player,i,0);
+            Input_ControlsSetKey(win_main_config_selected_player,i,-1);
 
         _win_main_config_input_update_window();
     }
@@ -563,16 +570,16 @@ void Win_MainCreateConfigInputWindow(void)
 
     int controller = Input_PlayerGetController(0);
 
-    GUI_SetRadioButton(&mwciw_sel_keyboard_radbtn,  18,48,11*FONT_WIDTH,18,
+    GUI_SetRadioButton(&mwciw_sel_keyboard_radbtn,  26,48,11*FONT_WIDTH,18,
                   "Keyboard", 1, -1, controller==-1, _win_main_config_input_select_controller_radbtn_callback);
-    GUI_SetRadioButton(&mwciw_sel_controller0_radbtn,  24+11*FONT_WIDTH,48,11*FONT_WIDTH,18,
-                  "Joypad 0",  1, 0, controller==0, _win_main_config_input_select_controller_radbtn_callback);
-    GUI_SetRadioButton(&mwciw_sel_controller1_radbtn,  30+22*FONT_WIDTH,48,11*FONT_WIDTH,18,
-                  "Joypad 1",  1, 1, controller==1, _win_main_config_input_select_controller_radbtn_callback);
-    GUI_SetRadioButton(&mwciw_sel_controller2_radbtn,  36+33*FONT_WIDTH,48,11*FONT_WIDTH,18,
-                  "Joypad 2",  1, 2, controller==2, _win_main_config_input_select_controller_radbtn_callback);
-    GUI_SetRadioButton(&mwciw_sel_controller3_radbtn,  42+44*FONT_WIDTH,48,11*FONT_WIDTH,18,
-                  "Joypad 3",  1, 3, controller==3, _win_main_config_input_select_controller_radbtn_callback);
+    GUI_SetRadioButton(&mwciw_sel_controller0_radbtn,  32+11*FONT_WIDTH,48,11*FONT_WIDTH,18,
+                  "Joystick 0",  1, 0, controller==0, _win_main_config_input_select_controller_radbtn_callback);
+    GUI_SetRadioButton(&mwciw_sel_controller1_radbtn,  38+22*FONT_WIDTH,48,11*FONT_WIDTH,18,
+                  "Joystick 1",  1, 1, controller==1, _win_main_config_input_select_controller_radbtn_callback);
+    GUI_SetRadioButton(&mwciw_sel_controller2_radbtn,  44+33*FONT_WIDTH,48,11*FONT_WIDTH,18,
+                  "Joystick 2",  1, 2, controller==2, _win_main_config_input_select_controller_radbtn_callback);
+    GUI_SetRadioButton(&mwciw_sel_controller3_radbtn,  50+44*FONT_WIDTH,48,11*FONT_WIDTH,18,
+                  "Joystick 3",  1, 3, controller==3, _win_main_config_input_select_controller_radbtn_callback);
 
     GUI_SetButton(&mwciw_change_a_btn, 18,78, 8*FONT_WIDTH, 2*FONT_HEIGHT, "A",
                   _win_main_config_change_a_btn_callback);

@@ -62,7 +62,7 @@ void GUI_ConsoleDrawAt(_gui_console * con, char * buffer, int buf_w, int buf_h, 
 #define GUI_TYPE_SCROLLBAR             9
 #define GUI_TYPE_GROUPBOX             10
 #define GUI_TYPE_CHECKBOX             11
-#define GUI_TYPE_INPUTGET             12 // Helper to get callbacks when pressing keyboard or joypad buttons
+#define GUI_TYPE_INPUTGET             12 // Helper to get callbacks when pressing keyboard or joystick buttons
 
 typedef void (*_gui_void_arg_void_fn)(void);
 typedef void (*_gui_void_arg_int_fn)(int);

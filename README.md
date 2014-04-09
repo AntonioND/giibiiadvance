@@ -28,9 +28,7 @@ For 0.3.0
  - Video recording?
 
 - Customize controls.
- - Add support for game controllers. (In progress)
- - Rumble.
- - Save input configuration.
+ - Load input configuration from ini file.
 
 - Obviously, improve emulation.
  - Implement mosaic correctly (in GBA mode).

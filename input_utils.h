@@ -19,6 +19,8 @@
 #ifndef __INPUT_UTILS__
 #define __INPUT_UTILS__
 
+#include <SDL2/SDL.h>
+
 //----------------------------------------------------------------------------------
 
 typedef enum {
@@ -51,7 +53,7 @@ extern const char * GBKeyNames[P_NUM_KEYS];
 void Input_ControlsSetKey(int player, _key_config_enum_ keyindex, SDL_Scancode keyscancode);
 SDL_Scancode Input_ControlsGetKey(int player, _key_config_enum_ keyindex);
 
-void Input_PlayerSetController(int player, int index); // -1 = keyboard, others = number of joypad
+void Input_PlayerSetController(int player, int index); // -1 = keyboard, others = number of joystick
 int Input_PlayerGetController(int player);
 
 void Input_PlayerSetEnabled(int player, int enabled);
@@ -75,10 +77,10 @@ SDL_Joystick * Input_GetJoystick(int index);
 char * Input_GetJoystickName(int index);
 int Input_GetJoystickNumber(void);
 
-void Input_InitSystem(void); // only work with joypads that are connected when opening the emulator
+void Input_InitSystem(void); // only work with joysticks that are connected when opening the emulator
 
 void Input_RumbleEnable(void);
-int Input_JoystickHasRumble(int index);
+int Input_JoystickHasRumble(int index); // -1 if error opening haptic, 0 if there isn't haptic, if not, correct
 
 //----------------------------------------------------------------------------------
 

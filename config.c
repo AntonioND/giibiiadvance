@@ -24,6 +24,7 @@
 #include "build_options.h"
 #include "file_utils.h"
 #include "config.h"
+#include "input_utils.h"
 
 #include "gb_core/gameboy.h"
 #include "gb_core/sound.h"
@@ -131,15 +132,53 @@ void Config_Save(void)
     fprintf(ini_file,CFG_GB_PALETTE "=#%02X%02X%02X\n",r,g,b);
     fprintf(ini_file,"\n");
 
-/*
     fprintf(ini_file,"[Controls]\n");
     int player, key;
-    for(player = 0; player < 4; player ++) for(key = 0; key < P_NUM_KEYS; key ++)
+    for(player = 0; player < 4; player ++)
     {
-        char * keyname = SDL_GetKeyName(Config_Controls_Get_Key(player,key));
-        if(strcmp(keyname,"unknown key") != 0)
-            fprintf(ini_file,"P%d_%s=%s\n",player+1,GBKeyNames[key],keyname);
+        if(Input_PlayerGetEnabled(player) || (player == 0)) // P1 always enabled
+        {
+            int controller = Input_PlayerGetController(player);
+
+            int save_keys = 0;
+
+            if(controller != -1) // joystick
+            {
+                char * controllername = Input_GetJoystickName(Input_PlayerGetController(player));
+                if(strlen(controllername) > 0)
+                {
+                    fprintf(ini_file,"P%d_Enabled=1\n",player+1);
+                    fprintf(ini_file,"P%d_Controller=[%s]\n",player+1,controllername);
+                    save_keys = 1;
+                }
+                else
+                {
+                    fprintf(ini_file,"P%d_Enabled=0\n",player+1);
+                    save_keys = 0;
+                }
+            }
+            else // keyboard
+            {
+                fprintf(ini_file,"P%d_Enabled=1\n",player+1);
+                fprintf(ini_file,"P%d_Controller=[Keyboard]\n",player+1);
+                save_keys = 1;
+            }
+
+            if(save_keys)
+            {
+                for(key = 0; key < P_NUM_KEYS; key ++)
+                {
+                    SDL_Scancode code = Input_ControlsGetKey(player,key);
+                    fprintf(ini_file,"P%d_%s=%d\n",player+1,GBKeyNames[key],code);
+                }
+            }
+        }
+        else // player disabled
+        {
+            fprintf(ini_file,"P%d_enabled=0\n",player+1);
+        }
     }
+/*
     if(Config_Controls_Get_Key(0,P_KEY_SPEEDUP) != 0)
         fprintf(ini_file,"SpeedUp=%s\n",SDL_GetKeyName(Config_Controls_Get_Key(0,P_KEY_SPEEDUP)));
     else
@@ -342,7 +381,6 @@ void Config_Load(void)
             GB_ConfigSetPalette(r,g,b);
         }
     }
-
 /*
     int player, key;
     for(player = 0; player < 4; player ++) for(key = 0; key < P_NUM_KEYS; key ++)

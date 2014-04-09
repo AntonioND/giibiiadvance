@@ -75,7 +75,7 @@ const char * GBKeyNames[P_NUM_KEYS] = {
 
 //----------------------------------------------------------------------------------------
 
-// -1 = keyboard, others = number of joypad
+// -1 = keyboard, others = number of joystick
 void Input_PlayerSetController(int player, int index)
 {
     if(player < 0) return;
@@ -373,19 +373,19 @@ void Input_InitSystem(void)
                         {
                             Debug_LogMsgArg("SDL_HapticRumbleInit() error for joystick %d: %s",i,SDL_GetError());
                             SDL_HapticClose(Joystick[i].haptic);
-                            Joystick[i].haptic = NULL;
+                            Joystick[i].haptic = (void*)-1;
                         }
                         else
                         {
                             // rumble for a bit to tell the user that everything is OK.
-                            SDL_HapticRumblePlay( Joystick[i].haptic, 0.5, 500 );
+                            SDL_HapticRumblePlay(Joystick[i].haptic, 0.5, 500);
                         }
                     }
                     else
                     {
                         Debug_LogMsgArg("Rumble not supported by joystick %d",i);
                         SDL_HapticClose(Joystick[i].haptic);
-                        Joystick[i].haptic = NULL;
+                        Joystick[i].haptic = (void*)-1;
                     }
                 }
                 else
@@ -406,7 +406,7 @@ void Input_RumbleEnable(void)
 
 int Input_JoystickHasRumble(int index)
 {
-    return (Joystick[index].haptic != NULL);
+    return (int)Joystick[index].haptic;
 }
 
 //----------------------------------------------------------------------------------------

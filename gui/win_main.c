@@ -765,12 +765,12 @@ static _gui_menu_list main_menu_file = {
 };
 
 static _gui_menu_entry mmoptions_configuration = {"Configuration" , _win_main_menu_open_configuration_window, 1};
-static _gui_menu_entry mmoptions_configure_joypads = {"Input Configuration" , _win_main_menu_open_configure_input_window, 1};
+static _gui_menu_entry mmoptions_configure_joysticks = {"Input Configuration" , _win_main_menu_open_configure_input_window, 1};
 static _gui_menu_entry mmoptions_mutesound = {"Mute Sound (CTRL+M)" , _win_main_menu_toggle_mute_sound, 1};
 static _gui_menu_entry mmoptions_sysinfo = {"System Information" , SysInfoShow, 1};
 
 static _gui_menu_entry * mmoptions_elements[] = {
-    &mmoptions_configuration, &mmoptions_configure_joypads,
+    &mmoptions_configuration, &mmoptions_configure_joysticks,
     &mm_separator, &mmoptions_mutesound, &mm_separator, &mmoptions_sysinfo, NULL
 };
 

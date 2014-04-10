@@ -77,6 +77,8 @@ SDL_Joystick * Input_GetJoystick(int index);
 char * Input_GetJoystickName(int index);
 int Input_GetJoystickNumber(void);
 
+int Input_GetJoystickFromName(char * name); // -1 = keyboard, 0-3 = controller index, -2 = error
+
 void Input_InitSystem(void); // only work with joysticks that are connected when opening the emulator
 
 void Input_RumbleEnable(void);

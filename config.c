@@ -147,19 +147,19 @@ void Config_Save(void)
                 char * controllername = Input_GetJoystickName(Input_PlayerGetController(player));
                 if(strlen(controllername) > 0)
                 {
-                    fprintf(ini_file,"P%d_Enabled=1\n",player+1);
+                    fprintf(ini_file,"P%d_Enabled=true\n",player+1);
                     fprintf(ini_file,"P%d_Controller=[%s]\n",player+1,controllername);
                     save_keys = 1;
                 }
                 else
                 {
-                    fprintf(ini_file,"P%d_Enabled=0\n",player+1);
+                    fprintf(ini_file,"P%d_Enabled=false\n",player+1);
                     save_keys = 0;
                 }
             }
             else // keyboard
             {
-                fprintf(ini_file,"P%d_Enabled=1\n",player+1);
+                fprintf(ini_file,"P%d_Enabled=true\n",player+1);
                 fprintf(ini_file,"P%d_Controller=[Keyboard]\n",player+1);
                 save_keys = 1;
             }
@@ -175,7 +175,7 @@ void Config_Save(void)
         }
         else // player disabled
         {
-            fprintf(ini_file,"P%d_enabled=0\n",player+1);
+            fprintf(ini_file,"P%d_Enabled=false\n",player+1);
         }
     }
 /*
@@ -200,7 +200,14 @@ void Config_Load(void)
     unsigned int size;
     FileLoad_NoError(path,(void*)&ini,&size);
     if(ini == NULL) return;
-    ini = realloc(ini,size+1);
+    char * new_ini = realloc(ini,size+1);
+    if(new_ini) ini = new_ini;
+    else
+    {
+        free(ini);
+        return;
+    }
+
     ini[size] = '\0';
 
     char * tmp = strstr(ini,CFG_DB_MSG_ENABLE);
@@ -381,40 +388,84 @@ void Config_Load(void)
             GB_ConfigSetPalette(r,g,b);
         }
     }
-/*
+
     int player, key;
-    for(player = 0; player < 4; player ++) for(key = 0; key < P_NUM_KEYS; key ++)
+    for(player = 0; player < 4; player ++)
     {
+        int player_enabled = 0;
+
         char temp_str[64];
-        s_snprintf(temp_str,sizeof(temp_str),"P%d_%s",player+1,GBKeyNames[key]);
-
-        tmp = strstr(ini,temp_str);
-        if(tmp)
+        if(player > 0)
         {
-            tmp += strlen(temp_str) + 1;
-
-            SDLKey k;
-            SDLKey result = SDLK_LAST; int result_len = 0;
-
-            for(k = SDLK_FIRST; k < SDLK_LAST; k++)
+            s_snprintf(temp_str,sizeof(temp_str),"P%d_Enabled=",player+1);
+            tmp = strstr(ini,temp_str);
+            if(tmp)
             {
-                int len = strlen(SDL_GetKeyName(k));
-                if(strncmp(tmp,SDL_GetKeyName(k),len) == 0)
+                tmp += strlen(temp_str);
+                if(strncmp(tmp,"true",strlen("true")) == 0)
+                    player_enabled = 1;
+            }
+        }
+        else // player 1 always enabled
+        {
+            player_enabled = 1;
+        }
+
+        Input_PlayerSetEnabled(player, player_enabled);
+
+        if(player_enabled) // read the rest of the configuration
+        {
+            s_snprintf(temp_str,sizeof(temp_str),"P%d_Controller=[",player+1);
+            tmp = strstr(ini,temp_str);
+            if(tmp)
+            {
+                tmp += strlen(temp_str);
+                s_strncpy(temp_str,tmp,sizeof(temp_str));
+                int i;
+                for(i = 0; i < sizeof(temp_str); i++) if(temp_str[i] == ']') temp_str[i] = '\0';
+                //temp_str now has the name of the controller
+
+                int index = Input_GetJoystickFromName(temp_str);
+                if(index == -2) // didn't find that name, don't load the controller configuration
                 {
-                    if(len > result_len)
+                    // default player 1, disable other players
+                    if(player != 0)
+                        Input_PlayerSetEnabled(player, 0);
+                }
+                else
+                {
+                    Input_PlayerSetController(player,index);
+
+                    //now, read keys
+                    for(key = 0; key < P_NUM_KEYS; key ++)
                     {
-                        result_len = len;
-                        result = k;
+                        s_snprintf(temp_str,sizeof(temp_str),"P%d_%s=",player+1,GBKeyNames[key]);
+                        tmp = strstr(ini,temp_str);
+                        if(tmp)
+                        {
+                            tmp += strlen(temp_str);
+
+                            int btn;
+                            if(sscanf(tmp,"%d",&btn) == 1)
+                            {
+                                Input_ControlsSetKey(player,key,btn);
+                            }
+                        }
                     }
                 }
-            }
 
-            if(result < SDLK_LAST)
+            }
+            else
             {
-                Config_Controls_Set_Key(player,key,result);
+                //Configuration not found: disable player
+                if(player != 0)
+                    Input_PlayerSetEnabled(player, 0);
             }
         }
     }
+
+
+/*
     tmp = strstr(ini,"SpeedUp");
     if(tmp)
     {

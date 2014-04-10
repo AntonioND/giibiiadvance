@@ -44,7 +44,7 @@ typedef struct {
 
     //key configuration in input_utils.c
 
-    } t_config;
+} t_config;
 
 extern t_config EmulatorConfig;
 

@@ -27,16 +27,12 @@ For 0.3.0
  - Wav recording.
  - Video recording?
 
-- Customize controls.
- - Load input configuration from ini file.
-
 - Obviously, improve emulation.
  - Implement mosaic correctly (in GBA mode).
  - Correct GBA CPU timings.
  - Rewrite A LOT of GB core to speed up emulation.
  - Auto frameskip.
  - Fix broken x86 ASM instructions of GBA emulation in Linux. "setc (%%ebx)" seems to be the problem...
- - If webcam is removed while it is being used, stop reading from it.
 
 Dependencies
 ------------

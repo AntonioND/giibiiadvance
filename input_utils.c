@@ -18,6 +18,7 @@
 
 #include <SDL2/SDL.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "input_utils.h"
 #include "debug_utils.h"
@@ -312,6 +313,21 @@ char * Input_GetJoystickName(int index)
     if(index < 0) return NULL;
 
     return Joystick[index].name;
+}
+
+int Input_GetJoystickFromName(char * name)
+{
+    int i;
+    for(i = 0; i < 4; i++)
+    {
+        if(strncmp(name,Joystick[i].name,sizeof(Joystick[i].name)) == 0)
+            return i;
+    }
+
+    if(strncmp(name,"Keyboard",strlen("Keyboard")) == 0)
+        return -1;
+
+    return -2;
 }
 
 static void _Input_CloseSystem(void)

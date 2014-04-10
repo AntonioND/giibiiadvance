@@ -6,10 +6,7 @@ General
 - Update memory, I/O viewers... with F7?
 - Save memory dumps, dissasembly...
 - Allow to execute one frame per press.
-- Custom controls. Game controllers.
-- Rumble in game controller.
 - Cross out things in debugger that can't be used (transparent palette colors, GBA sprites that are hiden?, ...)
-- Emulate MBC7 with Wiimote? How to read the accelerometer from SDL?
 
 Game Boy
 --------
@@ -20,7 +17,7 @@ Game Boy
 - Memory after OAM is an OAM mirror?
 - What happens if [DMA] = FFh or any other invalid value?
 - Put wave RAM in the I/O viewer?
-- GB Camera.
+- Reverse engineer GB Camera.
 - ATTRACTION MODE (SGB). Maybe it is the thing that the system borders can animate in a real SGB. (?)
 - Can disabled cart RAM be read?
 

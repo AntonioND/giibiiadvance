@@ -369,4 +369,4 @@ JAPAN
 T 0 7300 8 10 0 1 0 0 1
 device=RAM_TC55V1001
 T 0 7000 8 10 1 1 0 0 1
-refdes=X?
+refdes=U?

@@ -368,4 +368,4 @@ GBD-PCAX-0 F
 T 0 7300 8 10 0 1 0 0 1
 device=ROM_M538011E-08
 T 0 7000 8 10 1 1 0 0 1
-refdes=X?
+refdes=U?

@@ -30,6 +30,7 @@
 #include "debug_video.h"
 #include "memory.h"
 #include "video.h"
+#include "gb_camera.h"
 
 //------------------------------------------------------------------------------------------------
 
@@ -1019,7 +1020,6 @@ void GB_Debug_MapPrintBW(char * buffer, int bufw, int bufh, int map, int tile_ba
 
 //------------------------------------------------------------------------------------------------
 
-
 void GB_Debug_GBCameraMiniPhotoPrint(char * buffer, int bufw, int bufh, int posx, int posy, int index)
 {
     int ramaddr = index * 0x1000 + 0x2E00;
@@ -1052,6 +1052,9 @@ void GB_Debug_GBCameraMiniPhotoPrint(char * buffer, int bufw, int bufh, int posx
 void GB_Debug_GBCameraPhotoPrint(char * buffer, int bufw, int bufh, int index)
 {
     int ramaddr = index * 0x1000 + 0x2000;
+    if(index == -1)
+        ramaddr = 0x0100;
+
     int bank = (ramaddr & 0x1E000)>>13;
     int bankaddr = ramaddr & 0x1FFF;
 
@@ -1094,6 +1097,32 @@ void GB_Debug_GBCameraMiniPhotoPrintAll(char * buf)
         int x_ = (i%6)*(32+8)+8;
         int y_ = (i/6)*(32+8)+8;
         GB_Debug_GBCameraMiniPhotoPrint(buf, 248,208, x_,y_, i);
+    }
+}
+
+void GB_Debug_GBCameraWebcamOutputPrint(char * buffer, int bufw, int bufh)
+{
+    u32 y, x;
+    for(y = 0; y < 14*8; y ++) for(x = 0; x < 16*8; x ++)
+    {
+        int color = GB_CameraWebcamImageGetPixel(x,y);
+        int bufindex = (y*bufw+x)*3;
+        buffer[bufindex+0] = color;
+        buffer[bufindex+1] = color;
+        buffer[bufindex+2] = color;
+    }
+}
+
+void GB_Debug_GBCameraRetinaProcessedPrint(char * buffer, int bufw, int bufh)
+{
+    u32 y, x;
+    for(y = 0; y < 14*8; y ++) for(x = 0; x < 16*8; x ++)
+    {
+        int color = GB_CameraRetinaProcessedImageGetPixel(x,y);
+        int bufindex = (y*bufw+x)*3;
+        buffer[bufindex+0] = color;
+        buffer[bufindex+1] = color;
+        buffer[bufindex+2] = color;
     }
 }
 

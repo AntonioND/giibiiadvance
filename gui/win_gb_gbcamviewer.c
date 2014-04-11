@@ -44,8 +44,8 @@ extern _GB_CONTEXT_ GameBoy;
 
 static int WinIDGBCameraViewer;
 
-#define WIN_GB_CAMERAVIEWER_WIDTH  500
-#define WIN_GB_CAMERAVIEWER_HEIGHT 400
+#define WIN_GB_CAMERAVIEWER_WIDTH  800
+#define WIN_GB_CAMERAVIEWER_HEIGHT 600
 
 static int GBCameraViewerCreated = 0;
 
@@ -58,24 +58,40 @@ static u32 gb_cameraview_selected_photo_index = 0;
 
 static char gb_allphotos_buffer[GB_CAMERA_ALLPHOTOS_BUFFER_WIDTH*GB_CAMERA_ALLPHOTOS_BUFFER_HEIGHT*3];
 
-static char gb_map_zoomed_tile_buffer[128*112*3];
+static char gb_photo_zoomed_buffer[128*112*3];
+
+static char gb_camera_webcam_output_buffer[128*112*3];
+static char gb_camera_retina_processed_buffer[128*112*3];
+static char gb_camera_scratch_photo_buffer[128*112*3];
 
 //-----------------------------------------------------------------------------------
 
+static _gui_element gb_camview_photos_groupbox;
 static _gui_console gb_camview_con;
 static _gui_element gb_camview_textbox;
+static _gui_element gb_camview_photos_all_bmp;
+static _gui_element gb_camview_photos_zoomed_bmp;
+static _gui_element gb_camview_dumpbtn; // add "dump all", "dump this" and "dump all mini" buttons
 
-static _gui_element gb_camview_dumpbtn;
-
-static _gui_element gb_camview_map_bmp;
-
-static _gui_element gb_camview_zoomed_tile_bmp;
+static _gui_element gb_camview_cam_output_groupbox;
+static _gui_element gb_camview_webcam_output_bmp;
+static _gui_element gb_camview_retina_processed_bmp;
+static _gui_element gb_camview_scratch_photo_bmp;
+static _gui_element gb_camview_cam_output_dump_btn;
 
 static _gui_element * gb_camviwer_window_gui_elements[] = {
-    &gb_camview_map_bmp,
-    &gb_camview_zoomed_tile_bmp,
+    &gb_camview_photos_groupbox,
+    &gb_camview_photos_all_bmp,
+    &gb_camview_photos_zoomed_bmp,
     &gb_camview_textbox,
     &gb_camview_dumpbtn,
+
+    &gb_camview_cam_output_groupbox,
+    &gb_camview_webcam_output_bmp,
+    &gb_camview_retina_processed_bmp,
+    &gb_camview_scratch_photo_bmp,
+    &gb_camview_cam_output_dump_btn,
+
     NULL
 };
 
@@ -124,7 +140,13 @@ void Win_GB_GBCameraViewerUpdate(void)
     l--; t--; r++; b++;
     GUI_Draw_Rect(gb_allphotos_buffer,GB_CAMERA_ALLPHOTOS_BUFFER_WIDTH,GB_CAMERA_ALLPHOTOS_BUFFER_HEIGHT,l,r,t,b);
 
-    GB_Debug_GBCameraPhotoPrint(gb_map_zoomed_tile_buffer,128,114,gb_cameraview_selected_photo_index);
+    GB_Debug_GBCameraPhotoPrint(gb_photo_zoomed_buffer,128,114,gb_cameraview_selected_photo_index);
+
+    //---------------------------
+
+    GB_Debug_GBCameraWebcamOutputPrint(gb_camera_webcam_output_buffer, 128,112);
+    GB_Debug_GBCameraRetinaProcessedPrint(gb_camera_retina_processed_buffer, 128,112);
+    GB_Debug_GBCameraPhotoPrint(gb_camera_scratch_photo_buffer, 128,112, -1);
 
 }
 
@@ -242,14 +264,33 @@ int Win_GB_GBCameraViewerCreate(void)
     //GUI_SetTextBox(&gb_camview_textbox,&gb_camview_con,
     //               6,108, 19*FONT_WIDTH,6*FONT_HEIGHT, NULL);
 
-    GUI_SetBitmap(&gb_camview_map_bmp,6,6,GB_CAMERA_ALLPHOTOS_BUFFER_WIDTH,GB_CAMERA_ALLPHOTOS_BUFFER_HEIGHT,
+    //-------------------------------------------------------------------
+
+    GUI_SetGroupBox(&gb_camview_photos_groupbox,6,6,6+GB_CAMERA_ALLPHOTOS_BUFFER_WIDTH+6+128+6,300,"Photos");
+
+    GUI_SetBitmap(&gb_camview_photos_all_bmp,12,18,GB_CAMERA_ALLPHOTOS_BUFFER_WIDTH,GB_CAMERA_ALLPHOTOS_BUFFER_HEIGHT,
                   gb_allphotos_buffer, _win_gb_camviewer_allphotos_bmp_callback);
 
-    GUI_SetBitmap(&gb_camview_zoomed_tile_bmp,6+GB_CAMERA_ALLPHOTOS_BUFFER_WIDTH+6,6, 128,112,
-                  gb_map_zoomed_tile_buffer, NULL);
+    GUI_SetBitmap(&gb_camview_photos_zoomed_bmp,12+GB_CAMERA_ALLPHOTOS_BUFFER_WIDTH+6,18, 128,112,
+                  gb_photo_zoomed_buffer, NULL);
 
-    GUI_SetButton(&gb_camview_dumpbtn,6+GB_CAMERA_ALLPHOTOS_BUFFER_WIDTH+6,238,FONT_WIDTH*6,FONT_HEIGHT*2,"Dump",
+    GUI_SetButton(&gb_camview_dumpbtn,12+GB_CAMERA_ALLPHOTOS_BUFFER_WIDTH+6,238,FONT_WIDTH*6,FONT_HEIGHT*2,"Dump",
                   _win_gb_mapviewer_dump_btn_callback);
+
+    //-------------------------------------------------------------------
+
+    GUI_SetGroupBox(&gb_camview_cam_output_groupbox,406,6,
+                    6+128+6,400,"Camera");
+
+    GUI_SetBitmap(&gb_camview_webcam_output_bmp,412,18, 128,112, gb_camera_webcam_output_buffer, NULL);
+
+    GUI_SetBitmap(&gb_camview_retina_processed_bmp,412,18+112+6, 128,112, gb_camera_retina_processed_buffer, NULL);
+
+    GUI_SetBitmap(&gb_camview_scratch_photo_bmp,412,18+224+12, 128,112, gb_camera_scratch_photo_buffer, NULL);
+
+    //gb_camview_cam_output_dump_btn
+
+    //-------------------------------------------------------------------
 
     GBCameraViewerCreated = 1;
 

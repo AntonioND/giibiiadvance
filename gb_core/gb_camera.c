@@ -52,8 +52,8 @@ static int gbcamerafactor = 1;
 
 //----------------------------------------------------------------------------
 
-static int gb_camera_retina_output[16*8][14*8];
-static int gb_cam_shoot_buf[16*8][14*8];
+static int gb_camera_webcam_output[16*8][14*8]; // image processed by retina chip
+static int gb_cam_retina_output_buf[16*8][14*8]; // webcam image
 
 void GB_CameraEnd(void)
 {
@@ -152,7 +152,7 @@ void GB_CameraShoot(void)
     {
 #endif
         //just some random output...
-        for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++) gb_camera_retina_output[i][j] = rand();
+        for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++) gb_camera_webcam_output[i][j] = rand();
 #ifndef NO_CAMERA_EMULATION
     }
     else
@@ -175,7 +175,7 @@ void GB_CameraShoot(void)
                     u8 * data = &( ((u8*)frame->imageData)
                             [((j*gbcamerafactor)*frame->widthStep)+((i*gbcamerafactor)*3)] );
                     s16 value = ((u32)data[0]+(u32)data[1]+(u32)data[2])/3;
-                    gb_camera_retina_output[i][j] = value;
+                    gb_camera_webcam_output[i][j] = value;
                     //if(gbcamwindow) { data[0] = ~data[0]; data[1] = ~data[1]; data[2] = ~data[2]; }
                 }
             }
@@ -242,36 +242,36 @@ static void GB_CameraTakePicture(u32 exposure_time, int offset, int dithering_en
 /*
         // Horizontal edge
         if( (i > 0) && (i < 16*8-1))
-            gb_cam_shoot_buf[i][j] =
-                gb_clamp_int( 0, (2 * gb_camera_retina_output[i][j]) -
-                ( (gb_camera_retina_output[i-1][j] + gb_camera_retina_output[i+1][j]) / 2 ),
+            gb_cam_retina_output_buf[i][j] =
+                gb_clamp_int( 0, (2 * gb_camera_webcam_output[i][j]) -
+                ( (gb_camera_webcam_output[i-1][j] + gb_camera_webcam_output[i+1][j]) / 2 ),
                              255);
         else
-            gb_cam_shoot_buf[i][j] = gb_camera_retina_output[i][j];
+            gb_cam_retina_output_buf[i][j] = gb_camera_webcam_output[i][j];
 */
         // 2D edge
-        int ms = gb_camera_retina_output[i][gb_min_int(j+1,14*8-1)];
-        int mn = gb_camera_retina_output[i][gb_max_int(0,j-1)];
-        int mw = gb_camera_retina_output[gb_max_int(0,i-1)][j];
-        int me = gb_camera_retina_output[gb_min_int(i+1,16*8-1)][j];
-        gb_cam_shoot_buf[i][j] =
-            gb_clamp_int( 0, (3*gb_camera_retina_output[i][j]) - (ms+mn+mw+me)/2 , 255);
+        int ms = gb_camera_webcam_output[i][gb_min_int(j+1,14*8-1)];
+        int mn = gb_camera_webcam_output[i][gb_max_int(0,j-1)];
+        int mw = gb_camera_webcam_output[gb_max_int(0,i-1)][j];
+        int me = gb_camera_webcam_output[gb_min_int(i+1,16*8-1)][j];
+        gb_cam_retina_output_buf[i][j] =
+            gb_clamp_int( 0, (3*gb_camera_webcam_output[i][j]) - (ms+mn+mw+me)/2 , 255);
     }
 
     //Apply exposure time
     for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
     {
-        int result = gb_cam_shoot_buf[i][j];
+        int result = gb_cam_retina_output_buf[i][j];
         result = ( ( (result + (exposure_time>>8)) * exposure_time ) / 0x800 );
-        gb_cam_shoot_buf[i][j] = gb_clamp_int(0,result,255);
+        gb_cam_retina_output_buf[i][j] = gb_clamp_int(0,result,255);
     }
 
 /*
     //Apply offset
     for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
     {
-        gb_cam_shoot_buf[i][j] = gb_clamp_int(0,
-                            gb_cam_shoot_buf[i][j] + offset,
+        gb_cam_retina_output_buf[i][j] = gb_clamp_int(0,
+                            gb_cam_retina_output_buf[i][j] + offset,
                             255);
     }
 */
@@ -311,7 +311,7 @@ static void GB_CameraTakePicture(u32 exposure_time, int offset, int dithering_en
     }
 
     for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
-        gb_cam_shoot_buf[i][j] = contrast_lookup[gb_cam_shoot_buf[i][j]];
+        gb_cam_retina_output_buf[i][j] = contrast_lookup[gb_cam_retina_output_buf[i][j]];
 
     if(dithering_enabled)
     {
@@ -319,7 +319,7 @@ static void GB_CameraTakePicture(u32 exposure_time, int offset, int dithering_en
         // Floyd–Steinberg dithering - Wikipedia
         for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
         {
-            int oldpixel = gb_cam_shoot_buf[i][j]; // oldpixel  := pixel[x][y]
+            int oldpixel = gb_cam_retina_output_buf[i][j]; // oldpixel  := pixel[x][y]
             int newpixel = oldpixel & 0xC0;   // newpixel  := find_closest_palette_color(oldpixel)
             inbuffer[i][j] = (u8)newpixel;    // pixel[x][y]  := newpixel
             int error = oldpixel - newpixel;  // quant_error  := oldpixel - newpixel
@@ -329,15 +329,15 @@ static void GB_CameraTakePicture(u32 exposure_time, int offset, int dithering_en
             //pixel[x+1][y+1] := pixel[x+1][y+1] + 1/16 * quant_error
             if(i < (16*8-1))
             {
-                gb_cam_shoot_buf[i+1][j] = gb_clamp_int(0,gb_cam_shoot_buf[i+1][j] + (7*error)/16,255);
+                gb_cam_retina_output_buf[i+1][j] = gb_clamp_int(0,gb_cam_retina_output_buf[i+1][j] + (7*error)/16,255);
                 if(j < (14*8-1))
-                    gb_cam_shoot_buf[i+1][j+1] = gb_clamp_int(0,gb_cam_shoot_buf[i+1][j+1] + (1*error)/16,255);
+                    gb_cam_retina_output_buf[i+1][j+1] = gb_clamp_int(0,gb_cam_retina_output_buf[i+1][j+1] + (1*error)/16,255);
             }
             if(j < (14*8-1))
             {
-                gb_cam_shoot_buf[i][j+1] = gb_clamp_int(0,gb_cam_shoot_buf[i][j+1] + (5*error)/16,255);
+                gb_cam_retina_output_buf[i][j+1] = gb_clamp_int(0,gb_cam_retina_output_buf[i][j+1] + (5*error)/16,255);
                 if(i > 0)
-                    gb_cam_shoot_buf[i-1][j+1] = gb_clamp_int(0,gb_cam_shoot_buf[i-1][j+1] + (3*error)/16,255);
+                    gb_cam_retina_output_buf[i-1][j+1] = gb_clamp_int(0,gb_cam_retina_output_buf[i-1][j+1] + (3*error)/16,255);
             }
         }
 */
@@ -353,7 +353,7 @@ static void GB_CameraTakePicture(u32 exposure_time, int offset, int dithering_en
         int treshold = 256/4;
         for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
         {
-            int oldpixel = gb_cam_shoot_buf[i][j];
+            int oldpixel = gb_cam_retina_output_buf[i][j];
             //int matrix_value = matrix[(i & 7) + ((j & 7) << 3)];
             int matrix_value = matrix[(i & 3) + ((j & 3) << 2)];
             int newpixel = gb_clamp_int(0, oldpixel + ( (matrix_value * treshold) / matrix_div), 255 ) & 0xC0;
@@ -365,7 +365,7 @@ static void GB_CameraTakePicture(u32 exposure_time, int offset, int dithering_en
         // No dithering
         for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
         {
-            inbuffer[i][j] = (u8)(gb_cam_shoot_buf[i][j] & 0xC0);
+            inbuffer[i][j] = (u8)(gb_cam_retina_output_buf[i][j] & 0xC0);
         }
     }
 
@@ -479,6 +479,16 @@ int GB_CameraClock(int clocks)
 int GB_MapperIsGBCamera(void)
 {
     return (GameBoy.Emulator.MemoryController == MEM_CAMERA);
+}
+
+int GB_CameraWebcamImageGetPixel(int x, int y)
+{
+    return gb_camera_webcam_output[x][y];
+}
+
+int GB_CameraRetinaProcessedImageGetPixel(int x, int y)
+{
+    return gb_cam_retina_output_buf[x][y];
 }
 
 //----------------------------------------------------------------------------

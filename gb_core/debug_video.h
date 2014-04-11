@@ -49,9 +49,16 @@ void GB_Debug_MapPrintBW(char * buffer, int bufw, int bufh, int map, int tile_ba
 
 //---------------------------------------------------------------------------------
 
-void GB_Debug_GBCameraMiniPhotoPrint(char * buffer, int bufw, int bufh, int posx, int posy, int index); // index: 0-29
-void GB_Debug_GBCameraPhotoPrint(char * buffer, int bufw, int bufh, int index); // index: 0-29
+// index: 0-29
+void GB_Debug_GBCameraMiniPhotoPrint(char * buffer, int bufw, int bufh, int posx, int posy, int index);
+
+// index: 0-29. if index == -1, current camera output
+void GB_Debug_GBCameraPhotoPrint(char * buffer, int bufw, int bufh, int index);
+
 void GB_Debug_GBCameraMiniPhotoPrintAll(char * buf);
+
+void GB_Debug_GBCameraWebcamOutputPrint(char * buffer, int bufw, int bufh);
+void GB_Debug_GBCameraRetinaProcessedPrint(char * buffer, int bufw, int bufh);
 
 //---------------------------------------------------------------------------------
 

@@ -11,7 +11,7 @@ General
 - Controls can be configured.
 - Support for game controllers.
 - Rumble supported. In my joystick it doesn't work in Windows 7, but it works in Linux Mint 16...
-
+- Added GB Camera viewer.
 
 Version 0.2.0
 -------------

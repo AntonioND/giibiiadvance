@@ -27,6 +27,8 @@ void GB_CameraWriteRegister(int address, int value);
 int GB_CameraClock(int clocks); // returns clocks to next event
 
 int GB_MapperIsGBCamera(void); // returns 1 if mapper is the GB Camera
+int GB_CameraWebcamImageGetPixel(int x, int y); // webcam image
+int GB_CameraRetinaProcessedImageGetPixel(int x, int y); // image processed by retina chip
 
 #endif // __GB_CAMERA__
 

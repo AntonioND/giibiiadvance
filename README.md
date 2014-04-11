@@ -7,6 +7,10 @@ Another GB, GBC and GBA emulator writen in C. By Antonio Niño Díaz (AntonioND).
 
 [http://antoniond.drunkencoders.com/](http://antoniond.drunkencoders.com/)
 
+Source code:
+
+[https://github.com/AntonioND/giibiiadvance](https://github.com/AntonioND/giibiiadvance)
+
 This is an emulator I started a few years ago. I haven't released any version in years since 0.1.0, but I've done some changes that have improved compatibility anyway.
 
 For 0.2.0 I've ported the Win32 GUI to SDL2. The objective is to make it portable, so the only windows outside the main one are the debugger windows. This way, if someone wanted to port this to a machine without window manager, the only thing he would need to do is to remove the debugger.

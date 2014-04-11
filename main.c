@@ -102,7 +102,7 @@ int main( int argc, char * argv[] )
 
     float waitforticks = 0;
 
-    while( !WH_AreAllWindowsClosed() )
+    while(!WH_AreAllWindowsClosed())
     {
         //Handle events for all windows
         WH_HandleEvents();

@@ -1018,3 +1018,86 @@ void GB_Debug_MapPrintBW(char * buffer, int bufw, int bufh, int map, int tile_ba
 
 
 //------------------------------------------------------------------------------------------------
+
+
+void GB_Debug_GBCameraMiniPhotoPrint(char * buffer, int bufw, int bufh, int posx, int posy, int index)
+{
+    int ramaddr = index * 0x1000 + 0x2E00;
+    int bank = (ramaddr & 0x1E000)>>13;
+    int bankaddr = ramaddr & 0x1FFF;
+
+	_GB_MEMORY_ * mem = &GameBoy.Memory;
+
+	u32 y, x;
+    for(y = 0; y < 4*8; y ++) for(x = 0; x < 4*8; x ++)
+    {
+        int basetileaddr = bankaddr + ( ((y>>3)*4+(x>>3)) * 16 );
+
+        int baselineaddr = basetileaddr + ((y&7) << 1);
+
+        u8 data = mem->ExternRAM[bank][baselineaddr];
+        u8 data2 = mem->ExternRAM[bank][baselineaddr+1];
+
+        u32 x_ = 7-(x&7);
+
+        u32 color = ( (data >> x_) & 1 ) |  ( ( (data2 >> x_)  << 1) & 2);
+
+        int bufindex = ((y+posy)*bufw+(x+posx))*3;
+        buffer[bufindex+0] = gb_pal_colors[color][0];
+        buffer[bufindex+1] = gb_pal_colors[color][0];
+        buffer[bufindex+2] = gb_pal_colors[color][0];
+    }
+}
+
+void GB_Debug_GBCameraPhotoPrint(char * buffer, int bufw, int bufh, int index)
+{
+    int ramaddr = index * 0x1000 + 0x2000;
+    int bank = (ramaddr & 0x1E000)>>13;
+    int bankaddr = ramaddr & 0x1FFF;
+
+	_GB_MEMORY_ * mem = &GameBoy.Memory;
+
+    u32 y, x;
+    for(y = 0; y < 14*8; y ++) for(x = 0; x < 16*8; x ++)
+    {
+        int basetileaddr = bankaddr + ( ((y>>3)*16+(x>>3)) * 16 );
+
+        int baselineaddr = basetileaddr + ((y&7) << 1);
+
+        u8 data = mem->ExternRAM[bank][baselineaddr];
+        u8 data2 = mem->ExternRAM[bank][baselineaddr+1];
+
+        u32 x_ = 7-(x&7);
+
+        u32 color = ( (data >> x_) & 1 ) |  ( ( (data2 >> x_)  << 1) & 2);
+
+        int bufindex = (y*bufw+x)*3;
+        buffer[bufindex+0] = gb_pal_colors[color][0];
+        buffer[bufindex+1] = gb_pal_colors[color][0];
+        buffer[bufindex+2] = gb_pal_colors[color][0];
+    }
+}
+
+void GB_Debug_GBCameraMiniPhotoPrintAll(char * buf)
+{
+    u32 x, y;
+    for(y = 0; y < 208; y ++) for(x = 0; x < 248; x++)
+    {
+        buf[(y*248+x)*3 + 0] = ((x^y)&4)?192:128;
+        buf[(y*248+x)*3 + 1] = ((x^y)&4)?192:128;
+        buf[(y*248+x)*3 + 2] = ((x^y)&4)?192:128;
+    }
+
+    int i;
+    for(i = 0; i < 30; i++)
+    {
+        int x_ = (i%6)*(32+8)+8;
+        int y_ = (i/6)*(32+8)+8;
+        GB_Debug_GBCameraMiniPhotoPrint(buf, 248,208, x_,y_, i);
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------

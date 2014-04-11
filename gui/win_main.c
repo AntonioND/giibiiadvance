@@ -44,6 +44,7 @@
 #include "../gb_core/video.h"
 #include "../gb_core/general.h"
 #include "../gb_core/rom.h"
+#include "../gb_core/gb_camera.h"
 
 #include "../gba_core/gba.h"
 #include "../gba_core/bios.h"
@@ -61,6 +62,7 @@
 #include "win_gb_sprviewer.h"
 #include "win_gb_palviewer.h"
 #include "win_gb_sgbviewer.h"
+#include "win_gb_gbcamviewer.h"
 
 #include "win_gba_disassembler.h"
 #include "win_gba_memviewer.h"
@@ -740,6 +742,12 @@ static void _win_main_menu_open_sgb_viewer(void)
     Win_GB_SGBViewerCreate();
 }
 
+static void _win_main_menu_open_gbcamera_viewer(void)
+{
+    Win_GB_GBCameraViewerCreate();
+}
+
+
 //------------------------------------------------------------------
 
 //Window Menu
@@ -788,10 +796,11 @@ static _gui_menu_entry mmdebug_sprview = {"Sprite Viewer" , _win_main_menu_open_
 static _gui_menu_entry mmdebug_palview = {"Palette Viewer" , _win_main_menu_open_pal_viewer, 1};
 
 static _gui_menu_entry mmdebug_sgbview = {"SGB Viewer" , _win_main_menu_open_sgb_viewer, 1};
+static _gui_menu_entry mmdebug_gbcameraview = {"GB Camera Viewer" , _win_main_menu_open_gbcamera_viewer, 1};
 
 static _gui_menu_entry * mmdisas_elements[] = {
     &mmdebug_disas, &mmdebug_memview, &mmdebug_ioview, &mm_separator, &mmdebug_tileview, &mmdebug_mapview,
-    &mmdebug_sprview, &mmdebug_palview, &mm_separator, &mmdebug_sgbview, NULL
+    &mmdebug_sprview, &mmdebug_palview, &mm_separator, &mmdebug_sgbview, &mmdebug_gbcameraview, NULL
 };
 
 static _gui_menu_list main_menu_debug = {
@@ -842,6 +851,7 @@ static void _win_main_menu_update_elements_enabled(void)
         mmdebug_palview.enabled = 0;
 
         mmdebug_sgbview.enabled = 0;
+        mmdebug_gbcameraview.enabled = 0;
     }
     else
     {
@@ -868,6 +878,11 @@ static void _win_main_menu_update_elements_enabled(void)
                 mmdebug_sgbview.enabled = 1;
             else
                 mmdebug_sgbview.enabled = 0;
+
+            if(GB_MapperIsGBCamera())
+                mmdebug_gbcameraview.enabled = 1;
+            else
+                mmdebug_gbcameraview.enabled = 0;
         }
         else if(WIN_MAIN_RUNNING == RUNNING_GBA)
         {

@@ -16,17 +16,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __GB_CAMERA__
-#define __GB_CAMERA__
+#ifndef __WIN_GB_GBCAMERAVIEWER__
+#define __WIN_GB_GBCAMERAVIEWER__
 
-int GB_CameraInit(void);
-void GB_CameraEnd(void);
+int Win_GB_GBCameraViewerCreate(void); // returns 1 if error
+void Win_GB_GBCameraViewerUpdate(void);
+void Win_GB_GBCameraViewerClose(void);
 
-int GB_CameraReadRegister(int address);
-void GB_CameraWriteRegister(int address, int value);
-int GB_CameraClock(int clocks); // returns clocks to next event
+#endif // __WIN_GB_GBCAMERAVIEWER__
 
-int GB_MapperIsGBCamera(void); // returns 1 if mapper is the GB Camera
-
-#endif // __GB_CAMERA__
 

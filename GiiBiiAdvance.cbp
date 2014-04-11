@@ -313,6 +313,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="gui/win_gb_disassembler.h" />
+		<Unit filename="gui/win_gb_gbcamviewer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gui/win_gb_gbcamviewer.h" />
 		<Unit filename="gui/win_gb_ioviewer.c">
 			<Option compilerVar="CC" />
 		</Unit>

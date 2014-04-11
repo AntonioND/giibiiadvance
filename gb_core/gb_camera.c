@@ -475,3 +475,10 @@ int GB_CameraClock(int clocks)
 }
 
 //----------------------------------------------------------------------------
+
+int GB_MapperIsGBCamera(void)
+{
+    return (GameBoy.Emulator.MemoryController == MEM_CAMERA);
+}
+
+//----------------------------------------------------------------------------

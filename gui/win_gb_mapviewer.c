@@ -82,7 +82,7 @@ static _gui_element gb_mapview_mapbase9800_radbtn, gb_mapview_mapbase9C00_radbtn
 static _gui_element gb_mapview_zoomed_tile_bmp;
 static _gui_element gb_mapview_zoomed_tile_bw_radbtn, gb_mapview_zoomed_tile_pal_radbtn;
 
-static _gui_element * gb_tileviwer_window_gui_elements[] = {
+static _gui_element * gb_mapviwer_window_gui_elements[] = {
     &gb_mapview_tilebase_label,
     &gb_mapview_mapbase_label,
     &gb_mapview_tilebase8000_radbtn,
@@ -99,7 +99,7 @@ static _gui_element * gb_tileviwer_window_gui_elements[] = {
 };
 
 static _gui gb_mapviewer_window_gui = {
-    gb_tileviwer_window_gui_elements,
+    gb_mapviwer_window_gui_elements,
     NULL,
     NULL
 };

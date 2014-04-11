@@ -280,7 +280,7 @@ int Win_GB_GBCameraViewerCreate(void)
     //-------------------------------------------------------------------
 
     GUI_SetGroupBox(&gb_camview_cam_output_groupbox,406,6,
-                    6+128+6,400,"Camera");
+                    6+128+6,400,"Webcam|Retina|RAM");
 
     GUI_SetBitmap(&gb_camview_webcam_output_bmp,412,18, 128,112, gb_camera_webcam_output_buffer, NULL);
 

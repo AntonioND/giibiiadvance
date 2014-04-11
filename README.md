@@ -28,6 +28,7 @@ For 0.3.0
  - Video recording?
 
 - Obviously, improve emulation.
+ - Fix sound.
  - Implement mosaic correctly (in GBA mode).
  - Correct GBA CPU timings.
  - Rewrite A LOT of GB core to speed up emulation.

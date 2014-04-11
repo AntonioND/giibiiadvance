@@ -68,8 +68,21 @@ static int Init(void)
 
 int main( int argc, char * argv[] )
 {
+#if SDL_VERSION_ATLEAST(2,0,1)
+    char * base_path = SDL_GetBasePath();
+    if(base_path)
+    {
+        DirSetRunningPath(base_path);
+        SDL_free(base_path);
+    }
+    else
+    {
+        DirSetRunningPath(argv[0]); // whatever...
+    }
+#else
     if(argc > 0)
         DirSetRunningPath(argv[0]); // whatever...
+#endif // SDL_VERSION_ATLEAST
 
     Debug_Init();
     atexit(Debug_End);

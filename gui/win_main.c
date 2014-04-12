@@ -872,21 +872,20 @@ static void _win_main_menu_update_elements_enabled(void)
         mmdebug_sprview.enabled = 1;
         mmdebug_palview.enabled = 1;
 
+        mmdebug_sgbview.enabled = 0;
+        mmdebug_gbcameraview.enabled = 0;
+
         if(WIN_MAIN_RUNNING == RUNNING_GB)
         {
             if(GB_EmulatorIsEnabledSGB())
                 mmdebug_sgbview.enabled = 1;
-            else
-                mmdebug_sgbview.enabled = 0;
 
             if(GB_MapperIsGBCamera())
                 mmdebug_gbcameraview.enabled = 1;
-            else
-                mmdebug_gbcameraview.enabled = 0;
         }
         else if(WIN_MAIN_RUNNING == RUNNING_GBA)
         {
-            mmdebug_sgbview.enabled = 0;
+            // other debugger windows for gba
         }
     }
 }

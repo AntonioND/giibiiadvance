@@ -7,6 +7,7 @@ General
 - Save memory dumps, dissasembly...
 - Allow to execute one frame per press.
 - Cross out things in debugger that can't be used (transparent palette colors, GBA sprites that are hiden?, ...)
+- Little screens in sprite viewers to indicate the position of a sprite?
 
 Game Boy
 --------
@@ -18,7 +19,6 @@ Game Boy
 - What happens if [DMA] = FFh or any other invalid value?
 - Put wave RAM in the I/O viewer?
 - Reverse engineer GB Camera.
-- ATTRACTION MODE (SGB). Maybe it is the thing that the system borders can animate in a real SGB. (?)
 - Can disabled cart RAM be read?
 
 Game Boy Advance

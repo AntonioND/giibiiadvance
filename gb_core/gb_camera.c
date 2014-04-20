@@ -137,7 +137,7 @@ int GB_CameraInit(void) // (int createwindow)
 
     return 1;
 #else
-    Debug_ErrorMsgArg("GiiBiiAdvance was compiled without camera features.");
+    Debug_ErrorMsgArg("This version of GiiBiiAdvance was compiled without webcam support.");
     return 0;
 #endif
 }

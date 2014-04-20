@@ -91,6 +91,8 @@ int GBA_InitRom(void * bios_ptr, void * rom_ptr, u32 romsize)
 
     inited = 1;
 
+    //GBA_DebugAddBreakpoint(0x1954); // BIOS switch to GBC mode - Never used in real hardware
+
     return 1;
 }
 

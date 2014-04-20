@@ -115,7 +115,7 @@ int GB_CameraInit(void) // (int createwindow)
     IplImage * frame = cvQueryFrame(capture);
     if(!frame)
     {
-        Debug_ErrorMsgArg("OpenCV ERROR: frame is NULL");
+        Debug_DebugMsgArg("OpenCV ERROR: frame is NULL");
         GB_CameraEnd();
         return 0;
     }
@@ -161,7 +161,6 @@ void GB_CameraShoot(void)
         IplImage * frame = cvQueryFrame(capture);
         if(!frame)
         {
-            // it can't be detected if the webcam is disconnected...
             GB_CameraEnd();
             Debug_ErrorMsgArg("OpenCV ERROR: frame is null...\n");
         }

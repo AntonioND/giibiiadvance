@@ -129,18 +129,21 @@ void Win_GB_GBCameraViewerUpdate(void)
 
     //_GB_MEMORY_ * mem = &GameBoy.Memory;
 
-    GB_Debug_GBCameraMiniPhotoPrintAll(gb_allphotos_buffer);
+    if(GameBoy.Emulator.RAM_Banks == 4) // if this is official GB Camera software
+    {
+        GB_Debug_GBCameraMiniPhotoPrintAll(gb_allphotos_buffer);
 
-    GUI_Draw_SetDrawingColor(255,0,0);
-    int l = (gb_cameraview_selected_photo_index%6)*(32+8)+8-1; //left
-    int t = (gb_cameraview_selected_photo_index/6)*(32+8)+8-1; // top
-    int r = l + 32+1; // right
-    int b = t + 32+1; // bottom
-    GUI_Draw_Rect(gb_allphotos_buffer,GB_CAMERA_ALLPHOTOS_BUFFER_WIDTH,GB_CAMERA_ALLPHOTOS_BUFFER_HEIGHT,l,r,t,b);
-    l--; t--; r++; b++;
-    GUI_Draw_Rect(gb_allphotos_buffer,GB_CAMERA_ALLPHOTOS_BUFFER_WIDTH,GB_CAMERA_ALLPHOTOS_BUFFER_HEIGHT,l,r,t,b);
+        GUI_Draw_SetDrawingColor(255,0,0);
+        int l = (gb_cameraview_selected_photo_index%6)*(32+8)+8-1; //left
+        int t = (gb_cameraview_selected_photo_index/6)*(32+8)+8-1; // top
+        int r = l + 32+1; // right
+        int b = t + 32+1; // bottom
+        GUI_Draw_Rect(gb_allphotos_buffer,GB_CAMERA_ALLPHOTOS_BUFFER_WIDTH,GB_CAMERA_ALLPHOTOS_BUFFER_HEIGHT,l,r,t,b);
+        l--; t--; r++; b++;
+        GUI_Draw_Rect(gb_allphotos_buffer,GB_CAMERA_ALLPHOTOS_BUFFER_WIDTH,GB_CAMERA_ALLPHOTOS_BUFFER_HEIGHT,l,r,t,b);
 
-    GB_Debug_GBCameraPhotoPrint(gb_photo_zoomed_buffer,128,114,gb_cameraview_selected_photo_index);
+        GB_Debug_GBCameraPhotoPrint(gb_photo_zoomed_buffer,128,114,gb_cameraview_selected_photo_index);
+    }
 
     //---------------------------
 

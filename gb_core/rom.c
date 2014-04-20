@@ -458,6 +458,10 @@ int GB_CartridgeLoad(const u8 * pointer, const u32 rom_size)
     if(GameBoy.Emulator.MemoryController == MEM_MBC7)
         GameBoy.Emulator.RAM_Banks = 1;
 
+    if(GameBoy.Emulator.MemoryController == MEM_CAMERA)
+        if(GameBoy.Emulator.RAM_Banks < 1) // in case any other software uses GB Camera...
+            GameBoy.Emulator.RAM_Banks = 1; // shouldn't be needed.
+
     ConsolePrint("RAM size %02X -- %d banks\n",GB_Header->ram_size,GameBoy.Emulator.RAM_Banks);
 
     //      ROM

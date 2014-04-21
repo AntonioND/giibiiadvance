@@ -519,13 +519,18 @@ void GB_MemWriteReg8(u32 address, u32 value)
 
         //Undocumented registers...
 
-        // GBC BIOS:
-        //GB game:     [FF6C]=FE, [FF4C]=04, [FF6C]=01
-        //GB+GBC game: [FF6C]=FE, [FF4C]=80
-        //GBC game:    [FF6C]=FE, [FF4C]=C0
+        // DMG ROM: [FF50]=01
 
-        //Change is done when disabling boot rom.
+        // MGB ROM: [FF50]=FF
 
+        // SGB ROM: [FF50]=01
+
+        // CGB ROM: [FF50]=11
+        //  GB game:     [FF6C]=FE, [FF4C]=04, [FF6C]=01
+        //  GB+GBC game: [FF6C]=FE, [FF4C]=80
+        //  GBC game:    [FF6C]=FE, [FF4C]=C0
+
+        //Change is done when disabling boot ROM.
 
         case 0xFF4C: // change to gb mode ?
             if(GameBoy.Emulator.CGBEnabled == 0) return;
@@ -549,11 +554,15 @@ void GB_MemWriteReg8(u32 address, u32 value)
         case 0xFF50: //Disable boot rom
             if(GameBoy.Emulator.enable_boot_rom)
             {
-                //if(value == 1) //?
-                    GameBoy.Emulator.enable_boot_rom = 0;
+                //if(value == 1) // DMG or SGB
+                //if(value == 0xFF) // MGB
+
+                GameBoy.Emulator.enable_boot_rom = 0;
 
                 if(GameBoy.Emulator.CGBEnabled && (mem->IO_Ports[0xFF6C-0xFF00] & 1))
                 {
+                    //if(value == 0x11) // CGB
+
                     GameBoy.Emulator.CGBEnabled = 0;
                     GameBoy.Emulator.gbc_in_gb_mode = 1;
                     GameBoy.Emulator.DrawScanlineFn = &GBC_GB_ScreenDrawScanline;

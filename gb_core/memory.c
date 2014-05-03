@@ -90,6 +90,9 @@ void GB_MemInit(void)
         GB_MemWrite8(SVBK_REG,0xF8);
         GB_MemWrite8(VBK_REG,0xFE);
 
+        //GB_MemWrite8(KEY1_REG,0x7E);
+        mem->IO_Ports[KEY1_REG-0xFF00] = 0x7E;
+
         mem->IO_Ports[DIV_REG-0xFF00] = 0x22;
 
         mem->IO_Ports[HDMA5_REG-0xFF00] = 0xFF;

@@ -565,6 +565,8 @@ void GB_SoundUpdate(u32 clocks) //Every 16384 clocks update hardware, every ~190
                     Sound.Chn1.sweepfreq -= Sound.Chn1.sweepfreq / (1<<Sound.Chn1.sweepshift);
                 }
 
+                Sound.Chn1.sweepfreq &= 2047; // not ok, but it prevents a "divide by zero" exception
+
                 Sound.Chn1.outfreq = 131072/(2048-Sound.Chn1.sweepfreq);
             }
             else Sound.Chn1.sweepstepsleft --;

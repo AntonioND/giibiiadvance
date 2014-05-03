@@ -199,7 +199,7 @@ void GB_Debug_PrintSprite(char * buf, int bufw, int bufh, int buff_x, int buff_y
         }
         else
         {
-            if((GB_Sprite->Y > 8) && (GB_Sprite->Y < 152)) isvisible = true;
+            if((GB_Sprite->Y > 8) && (GB_Sprite->Y < 160)) isvisible = true;
         }
     }
 

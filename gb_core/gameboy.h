@@ -91,7 +91,7 @@
 //--                                                                          --
 //------------------------------------------------------------------------------
 
-//compiler doesn't like to have the same names here than in gba
+//compiler doesn't like having the same names here than in gba
 #ifdef F_CARRY
 #undef F_CARRY
 #endif
@@ -108,54 +108,41 @@
 #define PACKED __attribute__ ((packed))
 #endif
 
-#define KEY_A      BIT(0)
-#define KEY_B      BIT(1)
-#define KEY_SELECT BIT(2)
-#define KEY_START  BIT(3)
-#define KEY_UP     BIT(4)
-#define KEY_RIGHT  BIT(5)
-#define KEY_DOWN   BIT(6)
-#define KEY_LEFT   BIT(7)
+#define KEY_A       BIT(0)
+#define KEY_B       BIT(1)
+#define KEY_SELECT  BIT(2)
+#define KEY_START   BIT(3)
+#define KEY_UP      BIT(4)
+#define KEY_RIGHT   BIT(5)
+#define KEY_DOWN    BIT(6)
+#define KEY_LEFT    BIT(7)
 
 #define KEY_SPEEDUP BIT(10)
 
-typedef struct PACKED {
-    u8 F, A; //F can't be accesed by CPU in a normal way
-    u8 dummy1[2];
-    u8 C, B;
-    u8 dummy2[2];
-    u8 E, D;
-    u8 dummy3[2];
-    u8 L, H;
-    u8 dummy4[2];
-    u8 SPL, SPH;
-    u8 dummy5[2];
-    u8 PCL, PCH;
-} _GB_CPU_8BIT_;
-
-typedef struct PACKED {
-    u32 AF;
-    u32 BC;
-    u32 DE;
-    u32 HL;
-    u32 SP; //Stack Pointer
-    u32 PC; //Program Counter
-} _GB_CPU_16BIT_;
-
-typedef struct {
-    u8   allwayszero  :4;
-    bool Carry        :1;
-    bool HalfCarry    :1;
-    bool Substract    :1;
-    bool Zero         :1;
-    u8 dummy[21];
-} _GB_CPU_FLAGS_;
-
-
 typedef union {
-    _GB_CPU_8BIT_  Reg8;
-    _GB_CPU_16BIT_ Reg16;
-    _GB_CPU_FLAGS_ Flags;
+    struct PACKED {
+        u8 F, A; //F can't be accesed by CPU in a normal way
+        u8 C, B;
+        u8 E, D;
+        u8 L, H;
+        u8 SPL, SPH;
+        u8 PCL, PCH;
+    } R8;
+    struct PACKED {
+        u16 AF;
+        u16 BC;
+        u16 DE;
+        u16 HL;
+        u16 SP; //Stack Pointer
+        u16 PC; //Program Counter
+    } R16;
+    struct PACKED {
+        u8   zero :4;
+        bool C    :1; // carry
+        bool H    :1; // half carry
+        bool N    :1; // subtract
+        bool Z    :1; // zero
+    } F;
 } _GB_CPU_;
 
 //------------------------------------------------------------------------------

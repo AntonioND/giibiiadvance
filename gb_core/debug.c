@@ -438,7 +438,7 @@ int gb_dissasemble_add_io_register_name(int reg_address, char * dest, int add_co
 static char text[128];
 char * GB_Dissasemble(u16 addr, int * step)
 {
-    if((addr == GameBoy.CPU.Reg16.PC) || gb_debug_get_address_is_code(addr))
+    if((addr == GameBoy.CPU.R16.PC) || gb_debug_get_address_is_code(addr))
     {
         u16 op_addr = addr;
 
@@ -530,16 +530,16 @@ char * GB_Dissasemble(u16 addr, int * step)
             case OP_NONE:
                 break;
             case RW_BC:
-                comment_added = gb_dissasemble_add_io_register_name(GameBoy.CPU.Reg16.BC,text,1,sizeof(text));
+                comment_added = gb_dissasemble_add_io_register_name(GameBoy.CPU.R16.BC,text,1,sizeof(text));
                 break;
             case RW_DE:
-                comment_added = gb_dissasemble_add_io_register_name(GameBoy.CPU.Reg16.DE,text,1,sizeof(text));
+                comment_added = gb_dissasemble_add_io_register_name(GameBoy.CPU.R16.DE,text,1,sizeof(text));
                 break;
             case RW_HL:
-                comment_added = gb_dissasemble_add_io_register_name(GameBoy.CPU.Reg16.HL,text,1,sizeof(text));
+                comment_added = gb_dissasemble_add_io_register_name(GameBoy.CPU.R16.HL,text,1,sizeof(text));
                 break;
             case RW_SP:
-                comment_added = gb_dissasemble_add_io_register_name(GameBoy.CPU.Reg16.SP,text,1,sizeof(text));
+                comment_added = gb_dissasemble_add_io_register_name(GameBoy.CPU.R16.SP,text,1,sizeof(text));
                 break;
             case RW_INST:
                 comment_added = gb_dissasemble_add_io_register_name(param,text,1,sizeof(text));
@@ -548,10 +548,10 @@ char * GB_Dissasemble(u16 addr, int * step)
                 comment_added = gb_dissasemble_add_io_register_name(param|0xFF00,text,1,sizeof(text));
                 break;
             case RW_FF_C:
-                comment_added = gb_dissasemble_add_io_register_name(((int)(u8)GameBoy.CPU.Reg8.C)|0xFF00,text,1,sizeof(text));
+                comment_added = gb_dissasemble_add_io_register_name(((int)(u8)GameBoy.CPU.R8.C)|0xFF00,text,1,sizeof(text));
                 break;
             case JMP_HL:
-                param = (int)(u16)GameBoy.CPU.Reg16.HL;
+                param = (int)(u16)GameBoy.CPU.R16.HL;
             case JMP_REL:
             case JMP_ABS:
                 if(param > op_addr) s_strncat(text," ; " STR_SLIM_ARROW_DOWN,sizeof(text));
@@ -565,20 +565,20 @@ char * GB_Dissasemble(u16 addr, int * step)
                 break;
         }
 
-        if(op_addr == GameBoy.CPU.Reg16.PC)
+        if(op_addr == GameBoy.CPU.R16.PC)
         {
             int cond = info & 0xFFFF0000;
             if(cond)
             {
                 int cond_true = 0;
                 if(cond == COND_NZ)
-                    cond_true = GameBoy.CPU.Flags.Zero == false;
+                    cond_true = GameBoy.CPU.F.Z == false;
                 else if(cond == COND_Z)
-                    cond_true = GameBoy.CPU.Flags.Zero == true;
+                    cond_true = GameBoy.CPU.F.Z == true;
                 else if(cond == COND_NC)
-                    cond_true = GameBoy.CPU.Flags.Carry == false;
+                    cond_true = GameBoy.CPU.F.C == false;
                 else if(cond == COND_C)
-                    cond_true = GameBoy.CPU.Flags.Carry == true;
+                    cond_true = GameBoy.CPU.F.C == true;
 
                 if(comment_added)
                 {

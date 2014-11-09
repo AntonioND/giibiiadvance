@@ -199,7 +199,7 @@ void GB_MemWrite8(u32 address, u32 value)
             return;
         default:
             Debug_DebugMsgArg("Wrote address %04x\nPC: %04x\nROM: %d",
-                        address,GameBoy.CPU.Reg16.PC,GameBoy.Memory.selected_rom);
+                        address,GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
             GB_MemWrite8(address&0xFFFF,value);
             return;
     }
@@ -673,7 +673,7 @@ u32 GB_MemRead8(u32 address)
             return mem->HighRAM[address-0xFF80];
         default:
             Debug_DebugMsgArg("Read address %04X\nPC: %04X\nROM: %d",
-                        address,GameBoy.CPU.Reg16.PC,GameBoy.Memory.selected_rom);
+                        address,GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
             return GB_MemReadReg8(address&0xFFFF);
     }
 

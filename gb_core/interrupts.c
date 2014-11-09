@@ -149,36 +149,36 @@ inline int GB_CPUHandleInterrupts(void)
 
     GameBoy.Memory.InterruptMasterEnable = 0;
 
-    cpu->Reg16.SP -= 2;
-    GB_MemWrite16(cpu->Reg16.SP,cpu->Reg16.PC);
+    cpu->R16.SP -= 2;
+    GB_MemWrite16(cpu->R16.SP,cpu->R16.PC);
 
     if(interrupts & I_VBLANK)
     {
-        cpu->Reg16.PC = 0x0040;
+        cpu->R16.PC = 0x0040;
         mem->IO_Ports[IF_REG-0xFF00] &= ~I_VBLANK;
         return 1;
     }
     else if(interrupts & I_STAT)
     {
-        cpu->Reg16.PC = 0x0048;
+        cpu->R16.PC = 0x0048;
         mem->IO_Ports[IF_REG-0xFF00] &= ~I_STAT;
         return 1;
     }
     else if(interrupts & I_TIMER)
     {
-        cpu->Reg16.PC = 0x0050;
+        cpu->R16.PC = 0x0050;
         mem->IO_Ports[IF_REG-0xFF00] &= ~I_TIMER;
         return 1;
     }
     else if(interrupts & I_SERIAL)
     {
-        cpu->Reg16.PC = 0x0058;
+        cpu->R16.PC = 0x0058;
         mem->IO_Ports[IF_REG-0xFF00] &= ~I_SERIAL;
         return 1;
     }
     else //if(interrupts & I_JOYPAD)
     {
-        cpu->Reg16.PC = 0x0060;
+        cpu->R16.PC = 0x0060;
         mem->IO_Ports[IF_REG-0xFF00] &= ~I_JOYPAD;
         return 1;
     }

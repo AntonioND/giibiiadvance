@@ -101,16 +101,16 @@ void Win_GBDisassemblerUpdate(void)
     GUI_ConsoleClear(&gb_disassembly_con);
 
     //REGISTERS
-    GUI_ConsoleModePrintf(&gb_regs_con,0,0,"af: %04X",GameBoy.CPU.Reg16.AF);
-    GUI_ConsoleModePrintf(&gb_regs_con,0,1,"bc: %04X",GameBoy.CPU.Reg16.BC);
-    GUI_ConsoleModePrintf(&gb_regs_con,0,2,"de: %04X",GameBoy.CPU.Reg16.DE);
-    GUI_ConsoleModePrintf(&gb_regs_con,0,3,"hl: %04X",GameBoy.CPU.Reg16.HL);
-    GUI_ConsoleModePrintf(&gb_regs_con,0,4,"sp: %04X",GameBoy.CPU.Reg16.SP);
-    GUI_ConsoleModePrintf(&gb_regs_con,0,5,"pc: %04X",GameBoy.CPU.Reg16.PC);
+    GUI_ConsoleModePrintf(&gb_regs_con,0,0,"af: %04X",GameBoy.CPU.R16.AF);
+    GUI_ConsoleModePrintf(&gb_regs_con,0,1,"bc: %04X",GameBoy.CPU.R16.BC);
+    GUI_ConsoleModePrintf(&gb_regs_con,0,2,"de: %04X",GameBoy.CPU.R16.DE);
+    GUI_ConsoleModePrintf(&gb_regs_con,0,3,"hl: %04X",GameBoy.CPU.R16.HL);
+    GUI_ConsoleModePrintf(&gb_regs_con,0,4,"sp: %04X",GameBoy.CPU.R16.SP);
+    GUI_ConsoleModePrintf(&gb_regs_con,0,5,"pc: %04X",GameBoy.CPU.R16.PC);
 
     GUI_ConsoleModePrintf(&gb_regs_con,0,6,"        ");
 
-    int flags = GameBoy.CPU.Reg16.AF;
+    int flags = GameBoy.CPU.R16.AF;
     GUI_ConsoleModePrintf(&gb_regs_con,0,7,"C:%d H:%d", (flags&F_CARRY) != 0, (flags&F_HALFCARRY) != 0);
     GUI_ConsoleModePrintf(&gb_regs_con,0,8,"N:%d Z:%d", (flags&F_SUBSTRACT) != 0, (flags&F_ZERO) != 0);
 
@@ -121,7 +121,7 @@ void Win_GBDisassemblerUpdate(void)
         gb_disassembler_set_default_address = 0;
 #if 0
         //DOESN'T WORK
-        address = GameBoy.CPU.Reg16.PC;
+        address = GameBoy.CPU.R16.PC;
         while(address > 0x0001)
         {
             //If there are 2 possible instructions that are 1 byte long, the next byte is an instruction.
@@ -134,12 +134,12 @@ void Win_GBDisassemblerUpdate(void)
         }
 #endif
         u16 address = 0x0000; //Dissasemble everytime from the beggining... :S
-        if(GameBoy.CPU.Reg16.PC > 0x0120) address = 0x0100;
-        if(GameBoy.CPU.Reg16.PC > 0x4020) address = 0x4000;
+        if(GameBoy.CPU.R16.PC > 0x0120) address = 0x0100;
+        if(GameBoy.CPU.R16.PC > 0x4020) address = 0x4000;
 
-        if(GameBoy.CPU.Reg16.PC > 10)
+        if(GameBoy.CPU.R16.PC > 10)
         {
-            int start_address = GameBoy.CPU.Reg16.PC - 24;
+            int start_address = GameBoy.CPU.R16.PC - 24;
             if(start_address < 0) start_address = 0;
 
             while(address < start_address)
@@ -148,7 +148,7 @@ void Win_GBDisassemblerUpdate(void)
             while(1) //To fix cursor at one line.
             {
                 int tempaddr = address, commands = 0;
-                while(tempaddr < GameBoy.CPU.Reg16.PC)
+                while(tempaddr < GameBoy.CPU.R16.PC)
                 {
                     commands ++;
                     tempaddr += gb_debug_get_address_increment(tempaddr);
@@ -174,23 +174,23 @@ void Win_GBDisassemblerUpdate(void)
 
         if(GB_DebugIsBreakpoint(address))
         {
-            if(address == GameBoy.CPU.Reg16.PC)
+            if(address == GameBoy.CPU.R16.PC)
                 GUI_ConsoleColorizeLine(&gb_disassembly_con, i, 0xFFFF8000);
             else
                 GUI_ConsoleColorizeLine(&gb_disassembly_con, i, 0xFF0000FF);
         }
-        else if(address == GameBoy.CPU.Reg16.PC)
+        else if(address == GameBoy.CPU.R16.PC)
                 GUI_ConsoleColorizeLine(&gb_disassembly_con, i, 0xFFFFFF00);
 
         address += step;
     }
 
-    address = GameBoy.CPU.Reg16.SP - ((CPU_STACK_MAX_LINES/2)*2);
+    address = GameBoy.CPU.R16.SP - ((CPU_STACK_MAX_LINES/2)*2);
     for(i = 0; i < CPU_STACK_MAX_LINES; i++)
     {
         GUI_ConsoleModePrintf(&gb_stack_con,0,i,"%04X:%04X",address,GB_MemRead16(address));
 
-        if(address == GameBoy.CPU.Reg16.SP)
+        if(address == GameBoy.CPU.R16.SP)
             GUI_ConsoleColorizeLine(&gb_stack_con, i, 0xFFFFFF00);
 
         address += 2;
@@ -313,17 +313,17 @@ static void _win_gb_disassembly_inputwindow_callback(char * text, int is_valid)
         u32 newvalue = asciihex_to_int(text);
 
         if(gb_debugger_register_to_change == 0)
-            GameBoy.CPU.Reg16.AF = newvalue & 0xFFF0;
+            GameBoy.CPU.R16.AF = newvalue & 0xFFF0;
         else if(gb_debugger_register_to_change == 1)
-            GameBoy.CPU.Reg16.BC = newvalue;
+            GameBoy.CPU.R16.BC = newvalue;
         else if(gb_debugger_register_to_change == 2)
-            GameBoy.CPU.Reg16.DE = newvalue;
+            GameBoy.CPU.R16.DE = newvalue;
         else if(gb_debugger_register_to_change == 3)
-            GameBoy.CPU.Reg16.HL = newvalue;
+            GameBoy.CPU.R16.HL = newvalue;
         else if(gb_debugger_register_to_change == 4)
-            GameBoy.CPU.Reg16.SP = newvalue;
+            GameBoy.CPU.R16.SP = newvalue;
         else if(gb_debugger_register_to_change == 5)
-            GameBoy.CPU.Reg16.PC = newvalue;
+            GameBoy.CPU.R16.PC = newvalue;
         else if(gb_debugger_register_to_change == 100)
         {
             gb_disassembler_start_address = newvalue - CPU_DISASSEMBLER_MAX_INSTRUCTIONS / 2;

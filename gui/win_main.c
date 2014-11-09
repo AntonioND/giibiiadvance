@@ -1083,7 +1083,7 @@ static int Win_MainEventCallback(SDL_Event * e)
                     _win_main_file_explorer_up();
                     WIN_MAIN_MENU_HAS_TO_UPDATE = 1;
                 }
-
+                break;
             case SDLK_p:
                 if(SDL_GetModState()&KMOD_CTRL) _win_main_menu_toggle_pause();
                 break;

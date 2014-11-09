@@ -101,7 +101,7 @@
 
 #define F_CARRY     (1<<4)
 #define F_HALFCARRY (1<<5)
-#define F_SUBSTRACT (1<<6)
+#define F_SUBTRACT (1<<6)
 #define F_ZERO      (1<<7)
 
 #ifndef PACKED
@@ -122,19 +122,25 @@
 typedef union {
     struct PACKED {
         u8 F, A; //F can't be accesed by CPU in a normal way
+        u8 dummy1[2];
         u8 C, B;
+        u8 dummy2[2];
         u8 E, D;
+        u8 dummy3[2];
         u8 L, H;
+        u8 dummy4[2];
         u8 SPL, SPH;
+        u8 dummy5[2];
         u8 PCL, PCH;
+        u8 dummy6[2];
     } R8;
     struct PACKED {
-        u16 AF;
-        u16 BC;
-        u16 DE;
-        u16 HL;
-        u16 SP; //Stack Pointer
-        u16 PC; //Program Counter
+        u32 AF;
+        u32 BC;
+        u32 DE;
+        u32 HL;
+        u32 SP; //Stack Pointer
+        u32 PC; //Program Counter
     } R16;
     struct PACKED {
         u8   zero :4;

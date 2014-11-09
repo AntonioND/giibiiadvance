@@ -112,7 +112,7 @@ void Win_GBDisassemblerUpdate(void)
 
     int flags = GameBoy.CPU.R16.AF;
     GUI_ConsoleModePrintf(&gb_regs_con,0,7,"C:%d H:%d", (flags&F_CARRY) != 0, (flags&F_HALFCARRY) != 0);
-    GUI_ConsoleModePrintf(&gb_regs_con,0,8,"N:%d Z:%d", (flags&F_SUBSTRACT) != 0, (flags&F_ZERO) != 0);
+    GUI_ConsoleModePrintf(&gb_regs_con,0,8,"N:%d Z:%d", (flags&F_SUBTRACT) != 0, (flags&F_ZERO) != 0);
 
     //DISASSEMBLER
 

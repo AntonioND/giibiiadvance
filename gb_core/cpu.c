@@ -411,13 +411,13 @@ void GB_CPUMicroinstructionStep(void)
                 cpu->R16.BC = (cpu->R16.BC+1) & 0xFFFF;
             break;
         case 0x04: //INC B
-            cpu->R16.AF &= ~F_SUBSTRACT;
+            cpu->R16.AF &= ~F_SUBTRACT;
             cpu->F.H = ( (cpu->R8.B & 0xF) == 0xF);
             cpu->R8.B ++;
             cpu->F.Z = (cpu->R8.B == 0);
             break;
         case 0x05: //DEC B
-            cpu->R16.AF |= F_SUBSTRACT;
+            cpu->R16.AF |= F_SUBTRACT;
             cpu->F.H = ( (cpu->R8.B & 0xF) == 0x0);
             cpu->R8.B --;
             cpu->F.Z = (cpu->R8.B == 0);
@@ -427,7 +427,7 @@ void GB_CPUMicroinstructionStep(void)
                 cpu->R8.B = GB_MemRead8(cpu->R16.PC++);
             break;
         case 0x07: //RLCA
-            cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY|F_ZERO);
+            cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY|F_ZERO);
             cpu->F.C = (cpu->R8.A & 0x80) != 0;
             cpu->R8.A = (cpu->R8.A << 1) | cpu->F.C;
             break;
@@ -444,7 +444,7 @@ void GB_CPUMicroinstructionStep(void)
         case 0x09: //ADD HL,BC
             if(emu->cpu_microinstruction == 1)
             {
-                cpu->R16.AF &= ~F_SUBSTRACT;
+                cpu->R16.AF &= ~F_SUBTRACT;
                 u32 temp = cpu->R16.HL + cpu->R16.BC;
                 cpu->F.C = (temp > 0xFFFF);
                 cpu->F.H = ( ( (cpu->R16.HL & 0x0FFF) + (cpu->R16.BC & 0x0FFF) ) > 0x0FFF );
@@ -460,13 +460,13 @@ void GB_CPUMicroinstructionStep(void)
                 cpu->R16.BC = (cpu->R16.BC-1) & 0xFFFF;
             break;
         case 0x0C: //INC C
-            cpu->R16.AF &= ~F_SUBSTRACT;
+            cpu->R16.AF &= ~F_SUBTRACT;
             cpu->F.H = ( (cpu->R8.C & 0xF) == 0xF);
             cpu->R8.C ++;
             cpu->F.Z = (cpu->R8.C == 0);
             break;
         case 0x0D: //DEC C
-            cpu->R16.AF |= F_SUBSTRACT;
+            cpu->R16.AF |= F_SUBTRACT;
             cpu->F.H = ( (cpu->R8.C & 0xF) == 0x0);
             cpu->R8.C --;
             cpu->F.Z = (cpu->R8.C == 0);
@@ -476,7 +476,7 @@ void GB_CPUMicroinstructionStep(void)
                 cpu->R8.C = GB_MemRead8(cpu->R16.PC++);
             break;
         case 0x0F: //RRCA
-            cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY|F_ZERO);
+            cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY|F_ZERO);
             cpu->F.C = (cpu->R8.A & 0x01) != 0;
             cpu->R8.A = (cpu->R8.A >> 1) | (cpu->F.C << 7);
             break;
@@ -520,13 +520,13 @@ void GB_CPUMicroinstructionStep(void)
                 cpu->R16.DE = (cpu->R16.DE+1) & 0xFFFF;
             break;
         case 0x14: //INC D
-            cpu->R16.AF &= ~(F_SUBSTRACT);
+            cpu->R16.AF &= ~(F_SUBTRACT);
             cpu->F.H = ( (cpu->R8.D & 0xF) == 0xF);
             cpu->R8.D ++;
             cpu->F.Z = (cpu->R8.D == 0);
             break;
         case 0x15: //DEC D
-            cpu->R16.AF |= F_SUBSTRACT;
+            cpu->R16.AF |= F_SUBTRACT;
             cpu->F.H = ( (cpu->R8.D & 0xF) == 0x0);
             cpu->R8.D --;
             cpu->F.Z = (cpu->R8.D == 0);
@@ -537,7 +537,7 @@ void GB_CPUMicroinstructionStep(void)
             break;
         case 0x17: //RLA
         {
-            cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY|F_ZERO);
+            cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY|F_ZERO);
             u32 temp = cpu->F.C; //old carry flag
             cpu->F.C = (cpu->R8.A & 0x80) != 0;
             cpu->R8.A = (cpu->R8.A << 1) | temp;
@@ -552,7 +552,7 @@ void GB_CPUMicroinstructionStep(void)
         case 0x19: //ADD HL,DE
             if(emu->cpu_microinstruction == 1)
             {
-                cpu->R16.AF &= ~F_SUBSTRACT;
+                cpu->R16.AF &= ~F_SUBTRACT;
                 u32 temp = cpu->R16.HL + cpu->R16.DE;
                 cpu->F.C = ( temp > 0xFFFF );
                 cpu->F.H = ( ( (cpu->R16.HL & 0xFFF) + (cpu->R16.DE & 0xFFF) ) > 0xFFF );
@@ -568,13 +568,13 @@ void GB_CPUMicroinstructionStep(void)
                 cpu->R16.DE = (cpu->R16.DE-1) & 0xFFFF;
             break;
         case 0x1C: //INC E
-            cpu->R16.AF &= ~F_SUBSTRACT;
+            cpu->R16.AF &= ~F_SUBTRACT;
             cpu->F.H = ( (cpu->R8.E & 0xF) == 0xF);
             cpu->R8.E ++;
             cpu->F.Z = (cpu->R8.E == 0);
             break;
         case 0x1D: //DEC E
-            cpu->R16.AF |= F_SUBSTRACT;
+            cpu->R16.AF |= F_SUBTRACT;
             cpu->F.H = ( (cpu->R8.E & 0xF) == 0x0);
             cpu->R8.E --;
             cpu->F.Z = (cpu->R8.E == 0);
@@ -585,7 +585,7 @@ void GB_CPUMicroinstructionStep(void)
             break;
         case 0x1F: //RRA
         {
-            cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY|F_ZERO);
+            cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY|F_ZERO);
             u32 temp = cpu->F.C; //old carry flag
             cpu->F.C = cpu->R8.A & 0x01;
             cpu->R8.A = (cpu->R8.A >> 1) | (temp << 7);
@@ -627,13 +627,13 @@ void GB_CPUMicroinstructionStep(void)
                 cpu->R16.HL = (cpu->R16.HL+1) & 0xFFFF;
             break;
         case 0x24: //INC H
-            cpu->R16.AF &= ~F_SUBSTRACT;
+            cpu->R16.AF &= ~F_SUBTRACT;
             cpu->F.H = ( (cpu->R8.H & 0xF) == 0xF);
             cpu->R8.H ++;
             cpu->F.Z = (cpu->R8.H == 0);
             break;
         case 0x25: //DEC H
-            cpu->R16.AF |= F_SUBSTRACT;
+            cpu->R16.AF |= F_SUBTRACT;
             cpu->F.H = ( (cpu->R8.H & 0xF) == 0x0);
             cpu->R8.H --;
             cpu->F.Z = (cpu->R8.H == 0);
@@ -670,7 +670,7 @@ void GB_CPUMicroinstructionStep(void)
         case 0x29: //ADD HL,HL
             if(emu->cpu_microinstruction == 1)
             {
-                cpu->R16.AF &= ~F_SUBSTRACT;
+                cpu->R16.AF &= ~F_SUBTRACT;
                 cpu->F.C = (cpu->R16.HL & 0x8000) != 0;
                 cpu->F.H = (cpu->R16.HL & 0x0800) != 0;
                 cpu->R16.HL = (cpu->R16.HL << 1) & 0xFFFF;
@@ -688,13 +688,13 @@ void GB_CPUMicroinstructionStep(void)
                 cpu->R16.HL = (cpu->R16.HL-1) & 0xFFFF;
             break;
         case 0x2C: //INC L
-            cpu->R16.AF &= ~F_SUBSTRACT;
+            cpu->R16.AF &= ~F_SUBTRACT;
             cpu->F.H = ( (cpu->R8.L & 0xF) == 0xF);
             cpu->R8.L ++;
             cpu->F.Z = (cpu->R8.L == 0);
             break;
         case 0x2D: //DEC L
-            cpu->R16.AF |= F_SUBSTRACT;
+            cpu->R16.AF |= F_SUBTRACT;
             cpu->F.H = ( (cpu->R8.L & 0xF) == 0x0);
             cpu->R8.L --;
             cpu->F.Z = (cpu->R8.L == 0);
@@ -704,7 +704,7 @@ void GB_CPUMicroinstructionStep(void)
                 cpu->R8.L = GB_MemRead8(cpu->R16.PC++);
             break;
         case 0x2F: //CPL
-            cpu->R16.AF |= (F_SUBSTRACT|F_HALFCARRY);
+            cpu->R16.AF |= (F_SUBTRACT|F_HALFCARRY);
             cpu->R8.A = ~cpu->R8.A;
             break;
         case 0x30: //JR NC,n
@@ -750,7 +750,7 @@ void GB_CPUMicroinstructionStep(void)
             else if(emu->cpu_microinstruction == 2)
             {
                 u32 temp = emu->cpu_temp_16;
-                cpu->R16.AF &= ~F_SUBSTRACT;
+                cpu->R16.AF &= ~F_SUBTRACT;
                 cpu->F.H = ( (temp & 0xF) == 0xF);
                 temp = (temp + 1) & 0xFF;
                 cpu->F.Z = (temp == 0);
@@ -765,7 +765,7 @@ void GB_CPUMicroinstructionStep(void)
             else if(emu->cpu_microinstruction == 2)
             {
                 u32 temp = emu->cpu_temp_16;
-                cpu->R16.AF |= F_SUBSTRACT;
+                cpu->R16.AF |= F_SUBTRACT;
                 cpu->F.H = ( (temp & 0xF) == 0x0);
                 temp  = (temp - 1) & 0xFF;
                 cpu->F.Z = (temp == 0);
@@ -779,7 +779,7 @@ void GB_CPUMicroinstructionStep(void)
                 GB_MemWrite8(cpu->R16.HL,emu->cpu_temp_16);
             break;
         case 0x37: //SCF
-            cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+            cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
             cpu->R16.AF |= F_CARRY;
             break;
         case 0x38: //JR C,n
@@ -803,7 +803,7 @@ void GB_CPUMicroinstructionStep(void)
         case 0x39: //ADD HL,SP
             if(emu->cpu_microinstruction == 1)
             {
-                cpu->R16.AF &= ~F_SUBSTRACT;
+                cpu->R16.AF &= ~F_SUBTRACT;
                 u32 temp = cpu->R16.HL + cpu->R16.SP;
                 cpu->F.C = (temp > 0xFFFF);
                 cpu->F.H = ( ( (cpu->R16.HL & 0x0FFF) + (cpu->R16.SP & 0x0FFF) ) > 0x0FFF );
@@ -822,13 +822,13 @@ void GB_CPUMicroinstructionStep(void)
                 cpu->R16.SP = (cpu->R16.SP-1) & 0xFFFF;
             break;
         case 0x3C: //INC A
-            cpu->R16.AF &= ~F_SUBSTRACT;
+            cpu->R16.AF &= ~F_SUBTRACT;
             cpu->F.H = ( (cpu->R8.A & 0xF) == 0xF);
             cpu->R8.A ++;
             cpu->F.Z = (cpu->R8.A == 0);
             break;
         case 0x3D: //DEC A
-            cpu->R16.AF |= F_SUBSTRACT;
+            cpu->R16.AF |= F_SUBTRACT;
             cpu->F.H = ( (cpu->R8.A & 0xF) == 0x0);
             cpu->R8.A --;
             cpu->F.Z = (cpu->R8.A == 0);
@@ -838,7 +838,7 @@ void GB_CPUMicroinstructionStep(void)
                 cpu->R8.A = GB_MemRead8(cpu->R16.PC++);
             break;
         case 0x3F: //CCF
-            cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+            cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
             cpu->F.C = !cpu->F.C;
             break;
         case 0x40: //LD B,B
@@ -1074,7 +1074,7 @@ void GB_CPUMicroinstructionStep(void)
             break;
         case 0x80: //ADD A,B
         {
-            cpu->R16.AF &= ~F_SUBSTRACT;
+            cpu->R16.AF &= ~F_SUBTRACT;
 
             u32 temp = cpu->R8.A;
 
@@ -1088,7 +1088,7 @@ void GB_CPUMicroinstructionStep(void)
         }
         case 0x81: //ADD A,C
         {
-            cpu->R16.AF &= ~F_SUBSTRACT;
+            cpu->R16.AF &= ~F_SUBTRACT;
 
             u32 temp = cpu->R8.A;
 
@@ -1102,7 +1102,7 @@ void GB_CPUMicroinstructionStep(void)
         }
         case 0x82: //ADD A,D
         {
-            cpu->R16.AF &= ~F_SUBSTRACT;
+            cpu->R16.AF &= ~F_SUBTRACT;
 
             u32 temp = cpu->R8.A;
 
@@ -1116,7 +1116,7 @@ void GB_CPUMicroinstructionStep(void)
         }
         case 0x83: //ADD A,E
         {
-            cpu->R16.AF &= ~F_SUBSTRACT;
+            cpu->R16.AF &= ~F_SUBTRACT;
 
             u32 temp = cpu->R8.A;
 
@@ -1130,7 +1130,7 @@ void GB_CPUMicroinstructionStep(void)
         }
         case 0x84: //ADD A,H
         {
-            cpu->R16.AF &= ~F_SUBSTRACT;
+            cpu->R16.AF &= ~F_SUBTRACT;
 
             u32 temp = cpu->R8.A;
 
@@ -1144,7 +1144,7 @@ void GB_CPUMicroinstructionStep(void)
         }
         case 0x85: //ADD A,L
         {
-            cpu->R16.AF &= ~F_SUBSTRACT;
+            cpu->R16.AF &= ~F_SUBTRACT;
 
             u32 temp = cpu->R8.A;
 
@@ -1159,7 +1159,7 @@ void GB_CPUMicroinstructionStep(void)
         case 0x86: //ADD A,(HL)
             if(emu->cpu_microinstruction == 1)
             {
-                cpu->R16.AF &= ~F_SUBSTRACT;
+                cpu->R16.AF &= ~F_SUBTRACT;
 
                 u32 temp = cpu->R8.A;
                 u32 temp2 = GB_MemRead8(cpu->R16.HL);
@@ -1173,7 +1173,7 @@ void GB_CPUMicroinstructionStep(void)
             }
             break;
         case 0x87: //ADD A,A
-            cpu->R16.AF &= ~F_SUBSTRACT;
+            cpu->R16.AF &= ~F_SUBTRACT;
 
             cpu->F.H = (cpu->R8.A & BIT(3)) != 0;
             cpu->F.C = (cpu->R8.A & BIT(7)) != 0;
@@ -1183,7 +1183,7 @@ void GB_CPUMicroinstructionStep(void)
             break;
         case 0x88: //ADC A,B
         {
-            cpu->R16.AF &= ~F_SUBSTRACT;
+            cpu->R16.AF &= ~F_SUBTRACT;
 
             u32 temp = cpu->R8.A + cpu->R8.B + cpu->F.C;
 
@@ -1198,7 +1198,7 @@ void GB_CPUMicroinstructionStep(void)
         }
         case 0x89: //ADC A,C
         {
-            cpu->R16.AF &= ~F_SUBSTRACT;
+            cpu->R16.AF &= ~F_SUBTRACT;
 
             u32 temp = cpu->R8.A + cpu->R8.C + cpu->F.C;
 
@@ -1213,7 +1213,7 @@ void GB_CPUMicroinstructionStep(void)
         }
         case 0x8A: //ADC A,D
         {
-            cpu->R16.AF &= ~F_SUBSTRACT;
+            cpu->R16.AF &= ~F_SUBTRACT;
 
             u32 temp = cpu->R8.A + cpu->R8.D + cpu->F.C;
 
@@ -1228,7 +1228,7 @@ void GB_CPUMicroinstructionStep(void)
         }
         case 0x8B: //ADC A,E
         {
-            cpu->R16.AF &= ~F_SUBSTRACT;
+            cpu->R16.AF &= ~F_SUBTRACT;
 
             u32 temp = cpu->R8.A + cpu->R8.E + cpu->F.C;
 
@@ -1243,7 +1243,7 @@ void GB_CPUMicroinstructionStep(void)
         }
         case 0x8C: //ADC A,H
         {
-            cpu->R16.AF &= ~F_SUBSTRACT;
+            cpu->R16.AF &= ~F_SUBTRACT;
 
             u32 temp = cpu->R8.A + cpu->R8.H + cpu->F.C;
 
@@ -1258,7 +1258,7 @@ void GB_CPUMicroinstructionStep(void)
         }
         case 0x8D: //ADC A,L
         {
-            cpu->R16.AF &= ~F_SUBSTRACT;
+            cpu->R16.AF &= ~F_SUBTRACT;
 
             u32 temp = cpu->R8.A + cpu->R8.L + cpu->F.C;
 
@@ -1274,7 +1274,7 @@ void GB_CPUMicroinstructionStep(void)
         case 0x8E: //ADC A,(HL)
             if(emu->cpu_microinstruction == 1)
             {
-                cpu->R16.AF &= ~F_SUBSTRACT;
+                cpu->R16.AF &= ~F_SUBTRACT;
                 u32 temp = GB_MemRead8(cpu->R16.HL);
                 u32 temp2 = cpu->R8.A + temp + cpu->F.C;
 
@@ -1289,7 +1289,7 @@ void GB_CPUMicroinstructionStep(void)
             break;
         case 0x8F: //ADC A,A
         {
-            cpu->R16.AF &= ~F_SUBSTRACT;
+            cpu->R16.AF &= ~F_SUBTRACT;
 
             u32 temp = ( ((u32)cpu->R8.A) << 1 ) + cpu->F.C;
 
@@ -1305,7 +1305,7 @@ void GB_CPUMicroinstructionStep(void)
             break;
         }
         case 0x90: //SUB B
-            cpu->R8.F = F_SUBSTRACT;
+            cpu->R8.F = F_SUBTRACT;
 
             cpu->F.H = (cpu->R8.A & 0xF) < (cpu->R8.B & 0xF);
             cpu->F.C = (u32)cpu->R8.A < (u32)cpu->R8.B;
@@ -1315,7 +1315,7 @@ void GB_CPUMicroinstructionStep(void)
             cpu->F.Z = (cpu->R8.A == 0);
             break;
         case 0x91: //SUB C
-            cpu->R8.F = F_SUBSTRACT;
+            cpu->R8.F = F_SUBTRACT;
 
             cpu->F.H = (cpu->R8.A & 0xF) < (cpu->R8.C & 0xF);
             cpu->F.C = (u32)cpu->R8.A < (u32)cpu->R8.C;
@@ -1325,7 +1325,7 @@ void GB_CPUMicroinstructionStep(void)
             cpu->F.Z = (cpu->R8.A == 0);
             break;
         case 0x92: //SUB D
-            cpu->R8.F = F_SUBSTRACT;
+            cpu->R8.F = F_SUBTRACT;
 
             cpu->F.H = (cpu->R8.A & 0xF) < (cpu->R8.D & 0xF);
             cpu->F.C = (u32)cpu->R8.A < (u32)cpu->R8.D;
@@ -1335,7 +1335,7 @@ void GB_CPUMicroinstructionStep(void)
             cpu->F.Z = (cpu->R8.A == 0);
             break;
         case 0x93: //SUB E
-            cpu->R8.F = F_SUBSTRACT;
+            cpu->R8.F = F_SUBTRACT;
 
             cpu->F.H = (cpu->R8.A & 0xF) < (cpu->R8.E & 0xF);
             cpu->F.C = (u32)cpu->R8.A < (u32)cpu->R8.E;
@@ -1345,7 +1345,7 @@ void GB_CPUMicroinstructionStep(void)
             cpu->F.Z = (cpu->R8.A == 0);
             break;
         case 0x94: //SUB H
-            cpu->R8.F = F_SUBSTRACT;
+            cpu->R8.F = F_SUBTRACT;
 
             cpu->F.H = (cpu->R8.A & 0xF) < (cpu->R8.H & 0xF);
             cpu->F.C = (u32)cpu->R8.A < (u32)cpu->R8.H;
@@ -1355,7 +1355,7 @@ void GB_CPUMicroinstructionStep(void)
             cpu->F.Z = (cpu->R8.A == 0);
             break;
         case 0x95: //SUB L
-            cpu->R8.F = F_SUBSTRACT;
+            cpu->R8.F = F_SUBTRACT;
 
             cpu->F.H = (cpu->R8.A & 0xF) < (cpu->R8.L & 0xF);
             cpu->F.C = (u32)cpu->R8.A < (u32)cpu->R8.L;
@@ -1368,7 +1368,7 @@ void GB_CPUMicroinstructionStep(void)
             if(emu->cpu_microinstruction == 1)
             {
                 u32 temp = GB_MemRead8(cpu->R16.HL);
-                cpu->R8.F = F_SUBSTRACT;
+                cpu->R8.F = F_SUBTRACT;
 
                 cpu->F.H = (cpu->R8.A & 0xF) < (temp & 0xF);
                 cpu->F.C = (u32)cpu->R8.A < (u32)temp;
@@ -1379,13 +1379,13 @@ void GB_CPUMicroinstructionStep(void)
             }
             break;
         case 0x97: //SUB A
-            cpu->R8.F = F_SUBSTRACT|F_ZERO;
+            cpu->R8.F = F_SUBTRACT|F_ZERO;
             cpu->R8.A = 0;
             break;
         case 0x98: //SBC A,B
         {
             u32 temp = cpu->R8.A - cpu->R8.B - ((cpu->R8.F&F_CARRY)?1:0);
-            cpu->R8.F = ((temp & ~0xFF)?F_CARRY:0)|((temp&0xFF)?0:F_ZERO)|F_SUBSTRACT;
+            cpu->R8.F = ((temp & ~0xFF)?F_CARRY:0)|((temp&0xFF)?0:F_ZERO)|F_SUBTRACT;
             cpu->F.H = ( (cpu->R8.A^cpu->R8.B^temp) & 0x10 ) != 0 ;
             cpu->R8.A = temp;
             break;
@@ -1393,7 +1393,7 @@ void GB_CPUMicroinstructionStep(void)
         case 0x99: //SBC A,C
         {
             u32 temp = cpu->R8.A - cpu->R8.C - ((cpu->R8.F&F_CARRY)?1:0);
-            cpu->R8.F = ((temp & ~0xFF)?F_CARRY:0)|((temp&0xFF)?0:F_ZERO)|F_SUBSTRACT;
+            cpu->R8.F = ((temp & ~0xFF)?F_CARRY:0)|((temp&0xFF)?0:F_ZERO)|F_SUBTRACT;
             cpu->F.H = ( (cpu->R8.A^cpu->R8.C^temp) & 0x10 ) != 0 ;
             cpu->R8.A = temp;
             break;
@@ -1401,7 +1401,7 @@ void GB_CPUMicroinstructionStep(void)
         case 0x9A: //SBC A,D
         {
             u32 temp = cpu->R8.A - cpu->R8.D - ((cpu->R8.F&F_CARRY)?1:0);
-            cpu->R8.F = ((temp & ~0xFF)?F_CARRY:0)|((temp&0xFF)?0:F_ZERO)|F_SUBSTRACT;
+            cpu->R8.F = ((temp & ~0xFF)?F_CARRY:0)|((temp&0xFF)?0:F_ZERO)|F_SUBTRACT;
             cpu->F.H = ( (cpu->R8.A^cpu->R8.D^temp) & 0x10 ) != 0 ;
             cpu->R8.A = temp;
             break;
@@ -1409,7 +1409,7 @@ void GB_CPUMicroinstructionStep(void)
         case 0x9B: //SBC A,E
         {
             u32 temp = cpu->R8.A - cpu->R8.E - ((cpu->R8.F&F_CARRY)?1:0);
-            cpu->R8.F = ((temp & ~0xFF)?F_CARRY:0)|((temp&0xFF)?0:F_ZERO)|F_SUBSTRACT;
+            cpu->R8.F = ((temp & ~0xFF)?F_CARRY:0)|((temp&0xFF)?0:F_ZERO)|F_SUBTRACT;
             cpu->F.H = ( (cpu->R8.A^cpu->R8.E^temp) & 0x10 ) != 0 ;
             cpu->R8.A = temp;
             break;
@@ -1417,7 +1417,7 @@ void GB_CPUMicroinstructionStep(void)
         case 0x9C: //SBC A,H
         {
             u32 temp = cpu->R8.A - cpu->R8.H - ((cpu->R8.F&F_CARRY)?1:0);
-            cpu->R8.F = ((temp & ~0xFF)?F_CARRY:0)|((temp&0xFF)?0:F_ZERO)|F_SUBSTRACT;
+            cpu->R8.F = ((temp & ~0xFF)?F_CARRY:0)|((temp&0xFF)?0:F_ZERO)|F_SUBTRACT;
             cpu->F.H = ( (cpu->R8.A^cpu->R8.H^temp) & 0x10 ) != 0 ;
             cpu->R8.A = temp;
             break;
@@ -1425,7 +1425,7 @@ void GB_CPUMicroinstructionStep(void)
         case 0x9D: //SBC A,L
         {
             u32 temp = cpu->R8.A - cpu->R8.L - ((cpu->R8.F&F_CARRY)?1:0);
-            cpu->R8.F = ((temp & ~0xFF)?F_CARRY:0)|((temp&0xFF)?0:F_ZERO)|F_SUBSTRACT;
+            cpu->R8.F = ((temp & ~0xFF)?F_CARRY:0)|((temp&0xFF)?0:F_ZERO)|F_SUBTRACT;
             cpu->F.H = ( (cpu->R8.A^cpu->R8.L^temp) & 0x10 ) != 0 ;
             cpu->R8.A = temp;
             break;
@@ -1435,48 +1435,48 @@ void GB_CPUMicroinstructionStep(void)
             {
                 u32 temp2 = GB_MemRead8(cpu->R16.HL);
                 u32 temp = cpu->R8.A - temp2 - ((cpu->R8.F&F_CARRY)?1:0);
-                cpu->R8.F = ((temp & ~0xFF)?F_CARRY:0)|((temp&0xFF)?0:F_ZERO)|F_SUBSTRACT;
+                cpu->R8.F = ((temp & ~0xFF)?F_CARRY:0)|((temp&0xFF)?0:F_ZERO)|F_SUBTRACT;
                 cpu->F.H = ( (cpu->R8.A^temp2^temp) & 0x10 ) != 0 ;
                 cpu->R8.A = temp;
             }
             break;
         case 0x9F: //SBC A,A
             cpu->R16.AF = cpu->R8.F&F_CARRY ?
-                    ( (0xFF<<8)|F_CARRY|F_HALFCARRY|F_SUBSTRACT ) : (F_ZERO|F_SUBSTRACT) ;
+                    ( (0xFF<<8)|F_CARRY|F_HALFCARRY|F_SUBTRACT ) : (F_ZERO|F_SUBTRACT) ;
             break;
         case 0xA0: //AND B
             cpu->R16.AF |= F_HALFCARRY;
-            cpu->R16.AF &= ~(F_SUBSTRACT|F_CARRY);
+            cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY);
             cpu->R8.A &= cpu->R8.B;
             cpu->F.Z = (cpu->R8.A == 0);
             break;
         case 0xA1: //AND C
             cpu->R16.AF |= F_HALFCARRY;
-            cpu->R16.AF &= ~(F_SUBSTRACT|F_CARRY);
+            cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY);
             cpu->R8.A &= cpu->R8.C;
             cpu->F.Z = (cpu->R8.A == 0);
             break;
         case 0xA2: //AND D
             cpu->R16.AF |= F_HALFCARRY;
-            cpu->R16.AF &= ~(F_SUBSTRACT|F_CARRY);
+            cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY);
             cpu->R8.A &= cpu->R8.D;
             cpu->F.Z = (cpu->R8.A == 0);
             break;
         case 0xA3: //AND E
             cpu->R16.AF |= F_HALFCARRY;
-            cpu->R16.AF &= ~(F_SUBSTRACT|F_CARRY);
+            cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY);
             cpu->R8.A &= cpu->R8.E;
             cpu->F.Z = (cpu->R8.A == 0);
             break;
         case 0xA4: //AND H
             cpu->R16.AF |= F_HALFCARRY;
-            cpu->R16.AF &= ~(F_SUBSTRACT|F_CARRY);
+            cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY);
             cpu->R8.A &= cpu->R8.H;
             cpu->F.Z = (cpu->R8.A == 0);
             break;
         case 0xA5: //AND L
             cpu->R16.AF |= F_HALFCARRY;
-            cpu->R16.AF &= ~(F_SUBSTRACT|F_CARRY);
+            cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY);
             cpu->R8.A &= cpu->R8.L;
             cpu->F.Z = (cpu->R8.A == 0);
             break;
@@ -1484,54 +1484,54 @@ void GB_CPUMicroinstructionStep(void)
             if(emu->cpu_microinstruction == 1)
             {
                 cpu->R16.AF |= F_HALFCARRY;
-                cpu->R16.AF &= ~(F_SUBSTRACT|F_CARRY);
+                cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY);
                 cpu->R8.A &= GB_MemRead8(cpu->R16.HL);
                 cpu->F.Z = (cpu->R8.A == 0);
             }
             break;
         case 0xA7: //AND A
             cpu->R16.AF |= F_HALFCARRY;
-            cpu->R16.AF &= ~(F_SUBSTRACT|F_CARRY);
+            cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY);
             //cpu->R8.A &= cpu->R8.A;
             cpu->F.Z = (cpu->R8.A == 0);
             break;
         case 0xA8: //XOR B
-            cpu->R16.AF &= ~(F_SUBSTRACT|F_CARRY|F_HALFCARRY);
+            cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY|F_HALFCARRY);
 
             cpu->R8.A ^= cpu->R8.B;
 
             cpu->F.Z = (cpu->R8.A == 0);
             break;
         case 0xA9: //XOR C
-            cpu->R16.AF &= ~(F_SUBSTRACT|F_CARRY|F_HALFCARRY);
+            cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY|F_HALFCARRY);
 
             cpu->R8.A ^= cpu->R8.C;
 
             cpu->F.Z = (cpu->R8.A == 0);
             break;
         case 0xAA: //XOR D
-            cpu->R16.AF &= ~(F_SUBSTRACT|F_CARRY|F_HALFCARRY);
+            cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY|F_HALFCARRY);
 
             cpu->R8.A ^= cpu->R8.D;
 
             cpu->F.Z = (cpu->R8.A == 0);
             break;
         case 0xAB: //XOR E
-            cpu->R16.AF &= ~(F_SUBSTRACT|F_CARRY|F_HALFCARRY);
+            cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY|F_HALFCARRY);
 
             cpu->R8.A ^= cpu->R8.E;
 
             cpu->F.Z = (cpu->R8.A == 0);
             break;
         case 0xAC: //XOR H
-            cpu->R16.AF &= ~(F_SUBSTRACT|F_CARRY|F_HALFCARRY);
+            cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY|F_HALFCARRY);
 
             cpu->R8.A ^= cpu->R8.H;
 
             cpu->F.Z = (cpu->R8.A == 0);
             break;
         case 0xAD: //XOR L
-            cpu->R16.AF &= ~(F_SUBSTRACT|F_CARRY|F_HALFCARRY);
+            cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY|F_HALFCARRY);
 
             cpu->R8.A ^= cpu->R8.L;
 
@@ -1540,7 +1540,7 @@ void GB_CPUMicroinstructionStep(void)
         case 0xAE: //XOR (HL)
             if(emu->cpu_microinstruction == 1)
             {
-                cpu->R16.AF &= ~(F_SUBSTRACT|F_CARRY|F_HALFCARRY);
+                cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY|F_HALFCARRY);
 
                 cpu->R8.A ^= GB_MemRead8(cpu->R16.HL);
 
@@ -1551,42 +1551,42 @@ void GB_CPUMicroinstructionStep(void)
             cpu->R16.AF = F_ZERO;
             break;
         case 0xB0: //OR B
-            cpu->R16.AF &= ~(F_SUBSTRACT|F_CARRY|F_HALFCARRY);
+            cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY|F_HALFCARRY);
 
             cpu->R8.A |= cpu->R8.B;
 
             cpu->F.Z = (cpu->R8.A == 0);
             break;
         case 0xB1: //OR C
-            cpu->R16.AF &= ~(F_SUBSTRACT|F_CARRY|F_HALFCARRY);
+            cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY|F_HALFCARRY);
 
             cpu->R8.A |= cpu->R8.C;
 
             cpu->F.Z = (cpu->R8.A == 0);
             break;
         case 0xB2: //OR D
-            cpu->R16.AF &= ~(F_SUBSTRACT|F_CARRY|F_HALFCARRY);
+            cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY|F_HALFCARRY);
 
             cpu->R8.A |= cpu->R8.D;
 
             cpu->F.Z = (cpu->R8.A == 0);
             break;
         case 0xB3: //OR E
-            cpu->R16.AF &= ~(F_SUBSTRACT|F_CARRY|F_HALFCARRY);
+            cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY|F_HALFCARRY);
 
             cpu->R8.A |= cpu->R8.E;
 
             cpu->F.Z = (cpu->R8.A == 0);
             break;
         case 0xB4: //OR H
-            cpu->R16.AF &= ~(F_SUBSTRACT|F_CARRY|F_HALFCARRY);
+            cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY|F_HALFCARRY);
 
             cpu->R8.A |= cpu->R8.H;
 
             cpu->F.Z = (cpu->R8.A == 0);
             break;
         case 0xB5: //OR L
-            cpu->R16.AF &= ~(F_SUBSTRACT|F_CARRY|F_HALFCARRY);
+            cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY|F_HALFCARRY);
 
             cpu->R8.A |= cpu->R8.L;
 
@@ -1595,7 +1595,7 @@ void GB_CPUMicroinstructionStep(void)
         case 0xB6: //OR (HL)
             if(emu->cpu_microinstruction == 1)
             {
-                cpu->R16.AF &= ~(F_SUBSTRACT|F_CARRY|F_HALFCARRY);
+                cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY|F_HALFCARRY);
 
                 cpu->R8.A |= GB_MemRead8(cpu->R16.HL);
 
@@ -1603,44 +1603,44 @@ void GB_CPUMicroinstructionStep(void)
             }
             break;
         case 0xB7: //OR A
-            cpu->R16.AF &= ~(F_SUBSTRACT|F_CARRY|F_HALFCARRY);
+            cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY|F_HALFCARRY);
 
             //cpu->R8.A |= cpu->R8.A;
 
             cpu->F.Z = (cpu->R8.A == 0);
             break;
         case 0xB8: //CP B
-            cpu->R16.AF |= F_SUBSTRACT;
+            cpu->R16.AF |= F_SUBTRACT;
             cpu->F.H = (cpu->R8.A & 0xF) < (cpu->R8.B & 0xF);
             cpu->F.C = (u32)cpu->R8.A < (u32)cpu->R8.B;
             cpu->F.Z = (cpu->R8.A == cpu->R8.B);
             break;
         case 0xB9: //CP C
-            cpu->R16.AF |= F_SUBSTRACT;
+            cpu->R16.AF |= F_SUBTRACT;
             cpu->F.H = (cpu->R8.A & 0xF) < (cpu->R8.C & 0xF);
             cpu->F.C = (u32)cpu->R8.A < (u32)cpu->R8.C;
             cpu->F.Z = (cpu->R8.A == cpu->R8.C);
             break;
         case 0xBA: //CP D
-            cpu->R16.AF |= F_SUBSTRACT;
+            cpu->R16.AF |= F_SUBTRACT;
             cpu->F.H = (cpu->R8.A & 0xF) < (cpu->R8.D & 0xF);
             cpu->F.C = (u32)cpu->R8.A < (u32)cpu->R8.D;
             cpu->F.Z = (cpu->R8.A == cpu->R8.D);
             break;
         case 0xBB: //CP E
-            cpu->R16.AF |= F_SUBSTRACT;
+            cpu->R16.AF |= F_SUBTRACT;
             cpu->F.H = (cpu->R8.A & 0xF) < (cpu->R8.E & 0xF);
             cpu->F.C = (u32)cpu->R8.A < (u32)cpu->R8.E;
             cpu->F.Z = (cpu->R8.A == cpu->R8.E);
             break;
         case 0xBC: //CP H
-            cpu->R16.AF |= F_SUBSTRACT;
+            cpu->R16.AF |= F_SUBTRACT;
             cpu->F.H = (cpu->R8.A & 0xF) < (cpu->R8.H & 0xF);
             cpu->F.C = (u32)cpu->R8.A < (u32)cpu->R8.H;
             cpu->F.Z = (cpu->R8.A == cpu->R8.H);
             break;
         case 0xBD: //CP L
-            cpu->R16.AF |= F_SUBSTRACT;
+            cpu->R16.AF |= F_SUBTRACT;
             cpu->F.H = (cpu->R8.A & 0xF) < (cpu->R8.L & 0xF);
             cpu->F.C = (u32)cpu->R8.A < (u32)cpu->R8.L;
             cpu->F.Z = (cpu->R8.A == cpu->R8.L);
@@ -1648,7 +1648,7 @@ void GB_CPUMicroinstructionStep(void)
         case 0xBE: //CP (HL)
             if(emu->cpu_microinstruction == 1)
             {
-                cpu->R16.AF |= F_SUBSTRACT;
+                cpu->R16.AF |= F_SUBTRACT;
                 u32 temp = GB_MemRead8(cpu->R16.HL);
                 cpu->F.H = (cpu->R8.A & 0xF) < (temp & 0xF);
                 cpu->F.C = (u32)cpu->R8.A < temp;
@@ -1656,7 +1656,7 @@ void GB_CPUMicroinstructionStep(void)
             }
             break;
         case 0xBF: //CP A
-            cpu->R16.AF |= (F_SUBSTRACT|F_ZERO);
+            cpu->R16.AF |= (F_SUBTRACT|F_ZERO);
             cpu->R16.AF &= ~(F_HALFCARRY|F_CARRY);
             break;
         case 0xC0: //RET NZ
@@ -1787,7 +1787,7 @@ void GB_CPUMicroinstructionStep(void)
         case 0xC6: //ADD A,n
             if(emu->cpu_microinstruction == 1)
             {
-                cpu->R16.AF &= ~F_SUBSTRACT;
+                cpu->R16.AF &= ~F_SUBTRACT;
 
                 u32 temp = cpu->R8.A;
                 u32 temp2 = GB_MemRead8(cpu->R16.PC++);
@@ -1892,37 +1892,37 @@ void GB_CPUMicroinstructionStep(void)
             switch(emu->cb_opcode)
             {
                 case 0x00: //RLC B
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.B & 0x80) != 0;
                     cpu->R8.B = (cpu->R8.B << 1) | cpu->F.C;
                     cpu->F.Z = (cpu->R8.B == 0);
                     break;
                 case 0x01: //RLC C
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.C & 0x80) != 0;
                     cpu->R8.C = (cpu->R8.C << 1) | cpu->F.C;
                     cpu->F.Z = (cpu->R8.C == 0);
                     break;
                 case 0x02: //RLC D
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.D & 0x80) != 0;
                     cpu->R8.D = (cpu->R8.D << 1) | cpu->F.C;
                     cpu->F.Z = (cpu->R8.D == 0);
                     break;
                 case 0x03: //RLC E
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.E & 0x80) != 0;
                     cpu->R8.E = (cpu->R8.E << 1) | cpu->F.C;
                     cpu->F.Z = (cpu->R8.E == 0);
                     break;
                 case 0x04: //RLC H
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.H & 0x80) != 0;
                     cpu->R8.H = (cpu->R8.H << 1) | cpu->F.C;
                     cpu->F.Z = (cpu->R8.H == 0);
                     break;
                 case 0x05: //RLC L
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.L & 0x80) != 0;
                     cpu->R8.L = (cpu->R8.L << 1) | cpu->F.C;
                     cpu->F.Z = (cpu->R8.L == 0);
@@ -1935,7 +1935,7 @@ void GB_CPUMicroinstructionStep(void)
                     else if(emu->cpu_microinstruction == 3)
                     {
                         u32 temp = emu->cpu_temp_16;
-                        cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                         cpu->F.C = (temp & 0x80) != 0;
                         temp = (temp << 1) | cpu->F.C;
                         cpu->F.Z = (temp == 0);
@@ -1943,44 +1943,44 @@ void GB_CPUMicroinstructionStep(void)
                     }
                     break;
                 case 0x07: //RLC A
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.A & 0x80) != 0;
                     cpu->R8.A = (cpu->R8.A << 1) | cpu->F.C;
                     cpu->F.Z = (cpu->R8.A == 0);
                     break;
 
                 case 0x08: //RRC B
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.B & 0x01) != 0;
                     cpu->R8.B = (cpu->R8.B >> 1) | (cpu->F.C << 7);
                     cpu->F.Z = (cpu->R8.B == 0);
                     break;
                 case 0x09: //RRC C
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.C & 0x01) != 0;
                     cpu->R8.C = (cpu->R8.C >> 1) | (cpu->F.C << 7);
                     cpu->F.Z = (cpu->R8.C == 0);
                     break;
                 case 0x0A: //RRC D
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.D & 0x01) != 0;
                     cpu->R8.D = (cpu->R8.D >> 1) | (cpu->F.C << 7);
                     cpu->F.Z = (cpu->R8.D == 0);
                     break;
                 case 0x0B: //RRC E
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.E & 0x01) != 0;
                     cpu->R8.E = (cpu->R8.E >> 1) | (cpu->F.C << 7);
                     cpu->F.Z = (cpu->R8.E == 0);
                     break;
                 case 0x0C: //RRC H
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.H & 0x01) != 0;
                     cpu->R8.H = (cpu->R8.H >> 1) | (cpu->F.C << 7);
                     cpu->F.Z = (cpu->R8.H == 0);
                     break;
                 case 0x0D: //RRC L
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.L & 0x01) != 0;
                     cpu->R8.L = (cpu->R8.L >> 1) | (cpu->F.C << 7);
                     cpu->F.Z = (cpu->R8.L == 0);
@@ -1993,7 +1993,7 @@ void GB_CPUMicroinstructionStep(void)
                     else if(emu->cpu_microinstruction == 3)
                     {
                         u32 temp = emu->cpu_temp_16;
-                        cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                         cpu->F.C = (temp & 0x01) != 0;
                         temp = (temp >> 1) | (cpu->F.C << 7);
                         cpu->F.Z = (temp == 0);
@@ -2001,7 +2001,7 @@ void GB_CPUMicroinstructionStep(void)
                     }
                     break;
                 case 0x0F: //RRC A
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.A & 0x01) != 0;
                     cpu->R8.A = (cpu->R8.A >> 1) | (cpu->F.C << 7);
                     cpu->F.Z = (cpu->R8.A == 0);
@@ -2009,7 +2009,7 @@ void GB_CPUMicroinstructionStep(void)
 
                 case 0x10: //RL B
                 {
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     u32 temp = cpu->F.C; //old carry flag
                     cpu->F.C = (cpu->R8.B & 0x80) != 0;
                     cpu->R8.B = (cpu->R8.B << 1) | temp;
@@ -2018,7 +2018,7 @@ void GB_CPUMicroinstructionStep(void)
                 }
                 case 0x11: //RL C
                 {
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     u32 temp = cpu->F.C; //old carry flag
                     cpu->F.C = (cpu->R8.C & 0x80) != 0;
                     cpu->R8.C = (cpu->R8.C << 1) | temp;
@@ -2027,7 +2027,7 @@ void GB_CPUMicroinstructionStep(void)
                 }
                 case 0x12: //RL D
                 {
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     u32 temp = cpu->F.C; //old carry flag
                     cpu->F.C = (cpu->R8.D & 0x80) != 0;
                     cpu->R8.D = (cpu->R8.D << 1) | temp;
@@ -2036,7 +2036,7 @@ void GB_CPUMicroinstructionStep(void)
                 }
                 case 0x13: //RL E
                 {
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     u32 temp = cpu->F.C; //old carry flag
                     cpu->F.C = (cpu->R8.E & 0x80) != 0;
                     cpu->R8.E = (cpu->R8.E << 1) | temp;
@@ -2045,7 +2045,7 @@ void GB_CPUMicroinstructionStep(void)
                 }
                 case 0x14: //RL H
                 {
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     u32 temp = cpu->F.C; //old carry flag
                     cpu->F.C = (cpu->R8.H & 0x80) != 0;
                     cpu->R8.H = (cpu->R8.H << 1) | temp;
@@ -2054,7 +2054,7 @@ void GB_CPUMicroinstructionStep(void)
                 }
                 case 0x15: //RL L
                 {
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     u32 temp = cpu->F.C; //old carry flag
                     cpu->F.C = (cpu->R8.L & 0x80) != 0;
                     cpu->R8.L = (cpu->R8.L << 1) | temp;
@@ -2069,7 +2069,7 @@ void GB_CPUMicroinstructionStep(void)
                     else if(emu->cpu_microinstruction == 3)
                     {
                         u32 temp2 = emu->cpu_temp_16;
-                        cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                         u32 temp = cpu->F.C; //old carry flag
                         cpu->F.C = (temp2 & 0x80) != 0;
                         temp2 = ((temp2 << 1) | temp) & 0xFF;
@@ -2079,7 +2079,7 @@ void GB_CPUMicroinstructionStep(void)
                     break;
                 case 0x17: //RL A
                 {
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     u32 temp = cpu->F.C; //old carry flag
                     cpu->F.C = (cpu->R8.A & 0x80) != 0;
                     cpu->R8.A = (cpu->R8.A << 1) | temp;
@@ -2089,7 +2089,7 @@ void GB_CPUMicroinstructionStep(void)
 
                 case 0x18: //RR B
                 {
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     u32 temp = cpu->F.C; //old carry flag
                     cpu->F.C = (cpu->R8.B & 0x01) != 0;
                     cpu->R8.B = (cpu->R8.B >> 1) | (temp << 7);
@@ -2098,7 +2098,7 @@ void GB_CPUMicroinstructionStep(void)
                 }
                 case 0x19: //RR C
                 {
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     u32 temp = cpu->F.C; //old carry flag
                     cpu->F.C = (cpu->R8.C & 0x01) != 0;
                     cpu->R8.C = (cpu->R8.C >> 1) | (temp << 7);
@@ -2107,7 +2107,7 @@ void GB_CPUMicroinstructionStep(void)
                 }
                 case 0x1A: //RR D
                 {
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     u32 temp = cpu->F.C; //old carry flag
                     cpu->F.C = (cpu->R8.D & 0x01) != 0;
                     cpu->R8.D = (cpu->R8.D >> 1) | (temp << 7);
@@ -2116,7 +2116,7 @@ void GB_CPUMicroinstructionStep(void)
                 }
                 case 0x1B: //RR E
                 {
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     u32 temp = cpu->F.C; //old carry flag
                     cpu->F.C = (cpu->R8.E & 0x01) != 0;
                     cpu->R8.E = (cpu->R8.E >> 1) | (temp << 7);
@@ -2125,7 +2125,7 @@ void GB_CPUMicroinstructionStep(void)
                 }
                 case 0x1C: //RR H
                 {
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     u32 temp = cpu->F.C; //old carry flag
                     cpu->F.C = (cpu->R8.H & 0x01) != 0;
                     cpu->R8.H = (cpu->R8.H >> 1) | (temp << 7);
@@ -2134,7 +2134,7 @@ void GB_CPUMicroinstructionStep(void)
                 }
                 case 0x1D: //RR L
                 {
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     u32 temp = cpu->F.C; //old carry flag
                     cpu->F.C = (cpu->R8.L & 0x01) != 0;
                     cpu->R8.L = (cpu->R8.L >> 1) | (temp << 7);
@@ -2149,7 +2149,7 @@ void GB_CPUMicroinstructionStep(void)
                     else if(emu->cpu_microinstruction == 3)
                     {
                         u32 temp2 = emu->cpu_temp_16;
-                        cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                         u32 temp = cpu->F.C; //old carry flag
                         cpu->F.C = (temp2 & 0x01) != 0;
                         temp2 = (temp2 >> 1) | (temp << 7);
@@ -2159,7 +2159,7 @@ void GB_CPUMicroinstructionStep(void)
                     break;
                 case 0x1F: //RR A
                 {
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     u32 temp = cpu->F.C; //old carry flag
                     cpu->F.C = (cpu->R8.A & 0x01) != 0;
                     cpu->R8.A = (cpu->R8.A >> 1) | (temp << 7);
@@ -2168,37 +2168,37 @@ void GB_CPUMicroinstructionStep(void)
                 }
 
                 case 0x20: //SLA B
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.B & 0x80) != 0;
                     cpu->R8.B = cpu->R8.B << 1;
                     cpu->F.Z = (cpu->R8.B == 0);
                     break;
                 case 0x21: //SLA C
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.C & 0x80) != 0;
                     cpu->R8.C = cpu->R8.C << 1;
                     cpu->F.Z = (cpu->R8.C == 0);
                     break;
                 case 0x22: //SLA D
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.D & 0x80) != 0;
                     cpu->R8.D = cpu->R8.D << 1;
                     cpu->F.Z = (cpu->R8.D == 0);
                     break;
                 case 0x23: //SLA E
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.E & 0x80) != 0;
                     cpu->R8.E = cpu->R8.E << 1;
                     cpu->F.Z = (cpu->R8.E == 0);
                     break;
                 case 0x24: //SLA H
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.H & 0x80) != 0;
                     cpu->R8.H = cpu->R8.H << 1;
                     cpu->F.Z = (cpu->R8.H == 0);
                     break;
                 case 0x25: //SLA L
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.L & 0x80) != 0;
                     cpu->R8.L = cpu->R8.L << 1;
                     cpu->F.Z = (cpu->R8.L == 0);
@@ -2211,7 +2211,7 @@ void GB_CPUMicroinstructionStep(void)
                     else if(emu->cpu_microinstruction == 3)
                     {
                         u32 temp = emu->cpu_temp_16;
-                        cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                         cpu->F.C = (temp & 0x80) != 0;
                         temp = (temp << 1) & 0xFF;
                         cpu->F.Z = (temp == 0);
@@ -2219,44 +2219,44 @@ void GB_CPUMicroinstructionStep(void)
                     }
                     break;
                 case 0x27: //SLA A
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.A & 0x80) != 0;
                     cpu->R8.A = cpu->R8.A << 1;
                     cpu->F.Z = (cpu->R8.A == 0);
                     break;
 
                 case 0x28: //SRA B
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.B & 0x01) != 0;
                     cpu->R8.B = (cpu->R8.B & 0x80) | (cpu->R8.B >> 1);
                     cpu->F.Z = (cpu->R8.B == 0);
                     break;
                 case 0x29: //SRA C
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.C & 0x01) != 0;
                     cpu->R8.C = (cpu->R8.C & 0x80) | (cpu->R8.C >> 1);
                     cpu->F.Z = (cpu->R8.C == 0);
                     break;
                 case 0x2A: //SRA D
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.D & 0x01) != 0;
                     cpu->R8.D = (cpu->R8.D & 0x80) | (cpu->R8.D >> 1);
                     cpu->F.Z = (cpu->R8.D == 0);
                     break;
                 case 0x2B: //SRA E
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.E & 0x01) != 0;
                     cpu->R8.E = (cpu->R8.E & 0x80) | (cpu->R8.E >> 1);
                     cpu->F.Z = (cpu->R8.E == 0);
                     break;
                 case 0x2C: //SRA H
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.H & 0x01) != 0;
                     cpu->R8.H = (cpu->R8.H & 0x80) | (cpu->R8.H >> 1);
                     cpu->F.Z = (cpu->R8.H == 0);
                     break;
                 case 0x2D: //SRA L
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.L & 0x01) != 0;
                     cpu->R8.L = (cpu->R8.L & 0x80) | (cpu->R8.L >> 1);
                     cpu->F.Z = (cpu->R8.L == 0);
@@ -2269,7 +2269,7 @@ void GB_CPUMicroinstructionStep(void)
                     else if(emu->cpu_microinstruction == 3)
                     {
                         u32 temp = emu->cpu_temp_16;
-                        cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                         cpu->F.C = (temp & 0x01) != 0;
                         temp = (temp & 0x80) | (temp >> 1);
                         cpu->F.Z = (temp == 0);
@@ -2277,39 +2277,39 @@ void GB_CPUMicroinstructionStep(void)
                     }
                     break;
                 case 0x2F: //SRA A
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.A & 0x01) != 0;
                     cpu->R8.A = (cpu->R8.A & 0x80) | (cpu->R8.A >> 1);
                     cpu->F.Z = (cpu->R8.A == 0);
                     break;
 
                 case 0x30: //SWAP B
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY|F_CARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY|F_CARRY);
                     cpu->R8.B = ((cpu->R8.B >> 4) | (cpu->R8.B << 4));
                     cpu->F.Z = (cpu->R8.B == 0);
                     break;
                 case 0x31: //SWAP C
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY|F_CARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY|F_CARRY);
                     cpu->R8.C = ((cpu->R8.C >> 4) | (cpu->R8.C << 4));
                     cpu->F.Z = (cpu->R8.C == 0);
                     break;
                 case 0x32: //SWAP D
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY|F_CARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY|F_CARRY);
                     cpu->R8.D = ((cpu->R8.D >> 4) | (cpu->R8.D << 4));
                     cpu->F.Z = (cpu->R8.D == 0);
                     break;
                 case 0x33: //SWAP E
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY|F_CARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY|F_CARRY);
                     cpu->R8.E = ((cpu->R8.E >> 4) | (cpu->R8.E << 4));
                     cpu->F.Z = (cpu->R8.E == 0);
                     break;
                 case 0x34: //SWAP H
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY|F_CARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY|F_CARRY);
                     cpu->R8.H = ((cpu->R8.H >> 4) | (cpu->R8.H << 4));
                     cpu->F.Z = (cpu->R8.H == 0);
                     break;
                 case 0x35: //SWAP L
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY|F_CARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY|F_CARRY);
                     cpu->R8.L = ((cpu->R8.L >> 4) | (cpu->R8.L << 4));
                     cpu->F.Z = (cpu->R8.L == 0);
                     break;
@@ -2321,50 +2321,50 @@ void GB_CPUMicroinstructionStep(void)
                     else if(emu->cpu_microinstruction == 3)
                     {
                         u32 temp = emu->cpu_temp_16;
-                        cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY|F_CARRY);
+                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY|F_CARRY);
                         temp = ((temp >> 4) | (temp << 4)) & 0xFF;
                         GB_MemWrite8(cpu->R16.HL,temp);
                         cpu->F.Z = (temp == 0);
                     }
                     break;
                 case 0x37: //SWAP A
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY|F_CARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY|F_CARRY);
                     cpu->R8.A = ((cpu->R8.A & 0xF0) >> 4) | ((cpu->R8.A & 0x0F) << 4);
                     cpu->F.Z = (cpu->R8.A == 0);
                     break;
 
                 case 0x38: //SRL B
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.B & 0x01) != 0;
                     cpu->R8.B = cpu->R8.B >> 1;
                     cpu->F.Z = (cpu->R8.B == 0);
                     break;
                 case 0x39: //SRL C
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.C & 0x01) != 0;
                     cpu->R8.C = cpu->R8.C >> 1;
                     cpu->F.Z = (cpu->R8.C == 0);
                     break;
                 case 0x3A: //SRL D
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.D & 0x01) != 0;
                     cpu->R8.D = cpu->R8.D >> 1;
                     cpu->F.Z = (cpu->R8.D == 0);
                     break;
                 case 0x3B: //SRL E
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.E & 0x01) != 0;
                     cpu->R8.E = cpu->R8.E >> 1;
                     cpu->F.Z = (cpu->R8.E == 0);
                     break;
                 case 0x3C: //SRL H
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.H & 0x01) != 0;
                     cpu->R8.H = cpu->R8.H >> 1;
                     cpu->F.Z = (cpu->R8.H == 0);
                     break;
                 case 0x3D: //SRL L
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.L & 0x01) != 0;
                     cpu->R8.L = cpu->R8.L >> 1;
                     cpu->F.Z = (cpu->R8.L == 0);
@@ -2377,7 +2377,7 @@ void GB_CPUMicroinstructionStep(void)
                     else if(emu->cpu_microinstruction == 3)
                     {
                         u32 temp = emu->cpu_temp_16;
-                        cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                         cpu->F.C = (temp & 0x01) != 0;
                         temp = temp >> 1;
                         cpu->F.Z = (temp == 0);
@@ -2385,354 +2385,354 @@ void GB_CPUMicroinstructionStep(void)
                     }
                     break;
                 case 0x3F: //SRL A
-                    cpu->R16.AF &= ~(F_SUBSTRACT|F_HALFCARRY);
+                    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
                     cpu->F.C = (cpu->R8.A & 0x01) != 0;
                     cpu->R8.A = cpu->R8.A >> 1;
                     cpu->F.Z = (cpu->R8.A == 0);
                     break;
 
                 case 0x40: //BIT 0,B
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.B & (1<<0)) == 0;
                     break;
                 case 0x41: //BIT 0,C
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.C & (1<<0)) == 0;
                     break;
                 case 0x42: //BIT 0,D
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.D & (1<<0)) == 0;
                     break;
                 case 0x43: //BIT 0,E
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.E & (1<<0)) == 0;
                     break;
                 case 0x44: //BIT 0,H
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.H & (1<<0)) == 0;
                     break;
                 case 0x45: //BIT 0,L
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.L & (1<<0)) == 0;
                     break;
                 case 0x46: //BIT 0,(HL)
                     if(emu->cpu_microinstruction == 2)
                     {
-                        cpu->R16.AF &= ~F_SUBSTRACT;
+                        cpu->R16.AF &= ~F_SUBTRACT;
                         cpu->R16.AF |= F_HALFCARRY;
                         cpu->F.Z = (GB_MemRead8(cpu->R16.HL) & (1<<0)) == 0;
                     }
                     break;
                 case 0x47: //BIT 0,A
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.A & (1<<0)) == 0;
                     break;
 
                 case 0x48: //BIT 1,B
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.B & (1<<1)) == 0;
                     break;
                 case 0x49: //BIT 1,C
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.C & (1<<1)) == 0;
                     break;
                 case 0x4A: //BIT 1,D
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.D & (1<<1)) == 0;
                     break;
                 case 0x4B: //BIT 1,E
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.E & (1<<1)) == 0;
                     break;
                 case 0x4C: //BIT 1,H
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.H & (1<<1)) == 0;
                     break;
                 case 0x4D: //BIT 1,L
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.L & (1<<1)) == 0;
                     break;
                 case 0x4E: //BIT 1,(HL)
                     if(emu->cpu_microinstruction == 2)
                     {
-                        cpu->R16.AF &= ~F_SUBSTRACT;
+                        cpu->R16.AF &= ~F_SUBTRACT;
                         cpu->R16.AF |= F_HALFCARRY;
                         cpu->F.Z = (GB_MemRead8(cpu->R16.HL) & (1<<1)) == 0;
                     }
                     break;
                 case 0x4F: //BIT 1,A
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.A & (1<<1)) == 0;
                     break;
                 case 0x50: //BIT 2,B
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.B & (1<<2)) == 0;
                     break;
                 case 0x51: //BIT 2,C
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.C & (1<<2)) == 0;
                     break;
                 case 0x52: //BIT 2,D
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.D & (1<<2)) == 0;
                     break;
                 case 0x53: //BIT 2,E
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.E & (1<<2)) == 0;
                     break;
                 case 0x54: //BIT 2,H
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.H & (1<<2)) == 0;
                     break;
                 case 0x55: //BIT 2,L
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.L & (1<<2)) == 0;
                     break;
                 case 0x56: //BIT 2,(HL)
                     if(emu->cpu_microinstruction == 2)
                     {
-                        cpu->R16.AF &= ~F_SUBSTRACT;
+                        cpu->R16.AF &= ~F_SUBTRACT;
                         cpu->R16.AF |= F_HALFCARRY;
                         cpu->F.Z = (GB_MemRead8(cpu->R16.HL) & (1<<2)) == 0;
                     }
                     break;
                 case 0x57: //BIT 2,A
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.A & (1<<2)) == 0;
                     break;
                 case 0x58: //BIT 3,B
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.B & (1<<3)) == 0;
                     break;
                 case 0x59: //BIT 3,C
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.C & (1<<3)) == 0;
                     break;
                 case 0x5A: //BIT 3,D
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.D & (1<<3)) == 0;
                     break;
                 case 0x5B: //BIT 3,E
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.E & (1<<3)) == 0;
                     break;
                 case 0x5C: //BIT 3,H
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.H & (1<<3)) == 0;
                     break;
                 case 0x5D: //BIT 3,L
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.L & (1<<3)) == 0;
                     break;
                 case 0x5E: //BIT 3,(HL)
                     if(emu->cpu_microinstruction == 2)
                     {
-                        cpu->R16.AF &= ~F_SUBSTRACT;
+                        cpu->R16.AF &= ~F_SUBTRACT;
                         cpu->R16.AF |= F_HALFCARRY;
                         cpu->F.Z = (GB_MemRead8(cpu->R16.HL) & (1<<3)) == 0;
                     }
                     break;
                 case 0x5F: //BIT 3,A
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.A & (1<<3)) == 0;
                     break;
                 case 0x60: //BIT 4,B
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.B & (1<<4)) == 0;
                     break;
                 case 0x61: //BIT 4,C
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.C & (1<<4)) == 0;
                     break;
                 case 0x62: //BIT 4,D
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.D & (1<<4)) == 0;
                     break;
                 case 0x63: //BIT 4,E
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.E & (1<<4)) == 0;
                     break;
                 case 0x64: //BIT 4,H
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.H & (1<<4)) == 0;
                     break;
                 case 0x65: //BIT 4,L
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.L & (1<<4)) == 0;
                     break;
                 case 0x66: //BIT 4,(HL)
                     if(emu->cpu_microinstruction == 2)
                     {
-                        cpu->R16.AF &= ~F_SUBSTRACT;
+                        cpu->R16.AF &= ~F_SUBTRACT;
                         cpu->R16.AF |= F_HALFCARRY;
                         cpu->F.Z = (GB_MemRead8(cpu->R16.HL) & (1<<4)) == 0;
                     }
                     break;
                 case 0x67: //BIT 4,A
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.A & (1<<4)) == 0;
                     break;
                 case 0x68: //BIT 5,B
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.B & (1<<5)) == 0;
                     break;
                 case 0x69: //BIT 5,C
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.C & (1<<5)) == 0;
                     break;
                 case 0x6A: //BIT 5,D
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.D & (1<<5)) == 0;
                     break;
                 case 0x6B: //BIT 5,E
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.E & (1<<5)) == 0;
                     break;
                 case 0x6C: //BIT 5,H
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.H & (1<<5)) == 0;
                     break;
                 case 0x6D: //BIT 5,L
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.L & (1<<5)) == 0;
                     break;
                 case 0x6E: //BIT 5,(HL)
                     if(emu->cpu_microinstruction == 2)
                     {
-                        cpu->R16.AF &= ~F_SUBSTRACT;
+                        cpu->R16.AF &= ~F_SUBTRACT;
                         cpu->R16.AF |= F_HALFCARRY;
                         cpu->F.Z = (GB_MemRead8(cpu->R16.HL) & (1<<5)) == 0;
                     }
                     break;
                 case 0x6F: //BIT 5,A
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.A & (1<<5)) == 0;
                     break;
                 case 0x70: //BIT 6,B
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.B & (1<<6)) == 0;
                     break;
                 case 0x71: //BIT 6,C
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.C & (1<<6)) == 0;
                     break;
                 case 0x72: //BIT 6,D
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.D & (1<<6)) == 0;
                     break;
                 case 0x73: //BIT 6,E
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.E & (1<<6)) == 0;
                     break;
                 case 0x74: //BIT 6,H
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.H & (1<<6)) == 0;
                     break;
                 case 0x75: //BIT 6,L
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.L & (1<<6)) == 0;
                     break;
                 case 0x76: //BIT 6,(HL)
                     if(emu->cpu_microinstruction == 2)
                     {
-                        cpu->R16.AF &= ~F_SUBSTRACT;
+                        cpu->R16.AF &= ~F_SUBTRACT;
                         cpu->R16.AF |= F_HALFCARRY;
                         cpu->F.Z = (GB_MemRead8(cpu->R16.HL) & (1<<6)) == 0;
                     }
                     break;
                 case 0x77: //BIT 6,A
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.A & (1<<6)) == 0;
                     break;
                 case 0x78: //BIT 7,B
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.B & (1<<7)) == 0;
                     break;
                 case 0x79: //BIT 7,C
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.C & (1<<7)) == 0;
                     break;
                 case 0x7A: //BIT 7,D
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.D & (1<<7)) == 0;
                     break;
                 case 0x7B: //BIT 7,E
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.E & (1<<7)) == 0;
                     break;
                 case 0x7C: //BIT 7,H
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.H & (1<<7)) == 0;
                     break;
                 case 0x7D: //BIT 7,L
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.L & (1<<7)) == 0;
                     break;
                 case 0x7E: //BIT 7,(HL)
                     if(emu->cpu_microinstruction == 2)
                     {
-                        cpu->R16.AF &= ~F_SUBSTRACT;
+                        cpu->R16.AF &= ~F_SUBTRACT;
                         cpu->R16.AF |= F_HALFCARRY;
                         cpu->F.Z = (GB_MemRead8(cpu->R16.HL) & (1<<7)) == 0;
                     }
                     break;
                 case 0x7F: //BIT 7,A
-                    cpu->R16.AF &= ~F_SUBSTRACT;
+                    cpu->R16.AF &= ~F_SUBTRACT;
                     cpu->R16.AF |= F_HALFCARRY;
                     cpu->F.Z = (cpu->R8.A & (1<<7)) == 0;
                     break;
@@ -3310,7 +3310,7 @@ void GB_CPUMicroinstructionStep(void)
         case 0xCE: //ADC A,n
             if(emu->cpu_microinstruction == 1)
             {
-                cpu->R16.AF &= ~F_SUBSTRACT;
+                cpu->R16.AF &= ~F_SUBTRACT;
                 u32 temp = GB_MemRead8(cpu->R16.PC++);
                 u32 temp2 = cpu->R8.A + temp + cpu->F.C;
 
@@ -3457,7 +3457,7 @@ void GB_CPUMicroinstructionStep(void)
             if(emu->cpu_microinstruction == 1)
             {
                 u32 temp = GB_MemRead8(cpu->R16.PC++);
-                cpu->R16.AF |= F_SUBSTRACT;
+                cpu->R16.AF |= F_SUBTRACT;
 
                 cpu->F.H = (cpu->R8.A & 0xF) < (temp & 0xF);
                 cpu->F.C = (u32)cpu->R8.A < temp;
@@ -3599,7 +3599,7 @@ void GB_CPUMicroinstructionStep(void)
             {
                 u32 temp2 = GB_MemRead8(cpu->R16.PC++);
                 u32 temp = cpu->R8.A - temp2 - ((cpu->R8.F&F_CARRY)?1:0);
-                cpu->R8.F = ((temp & ~0xFF)?F_CARRY:0)|((temp&0xFF)?0:F_ZERO)|F_SUBSTRACT;
+                cpu->R8.F = ((temp & ~0xFF)?F_CARRY:0)|((temp&0xFF)?0:F_ZERO)|F_SUBTRACT;
                 cpu->F.H = ( (cpu->R8.A^temp2^temp) & 0x10 ) != 0 ;
                 cpu->R8.A = temp;
             }
@@ -3670,7 +3670,7 @@ void GB_CPUMicroinstructionStep(void)
         case 0xE6: //AND n
             if(emu->cpu_microinstruction == 1)
             {
-                cpu->R16.AF &= ~(F_SUBSTRACT|F_CARRY);
+                cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY);
                 cpu->R16.AF |= F_HALFCARRY;
 
                 cpu->R8.A &= GB_MemRead8(cpu->R16.PC++);
@@ -3744,7 +3744,7 @@ void GB_CPUMicroinstructionStep(void)
         case 0xEE: //XOR n
             if(emu->cpu_microinstruction == 1)
             {
-                cpu->R16.AF &= ~(F_SUBSTRACT|F_CARRY|F_HALFCARRY);
+                cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY|F_HALFCARRY);
 
                 cpu->R8.A ^= GB_MemRead8(cpu->R16.PC++);
 
@@ -3816,7 +3816,7 @@ void GB_CPUMicroinstructionStep(void)
         case 0xF6: //OR n
             if(emu->cpu_microinstruction == 1)
             {
-                cpu->R16.AF &= ~(F_SUBSTRACT|F_CARRY|F_HALFCARRY);
+                cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY|F_HALFCARRY);
                 cpu->R8.A |= GB_MemRead8(cpu->R16.PC++);
                 cpu->F.Z = (cpu->R8.A == 0);
             }
@@ -3890,7 +3890,7 @@ void GB_CPUMicroinstructionStep(void)
         case 0xFE: //CP n
             if(emu->cpu_microinstruction == 1)
             {
-                cpu->R16.AF |= F_SUBSTRACT;
+                cpu->R16.AF |= F_SUBTRACT;
                 u32 temp = GB_MemRead8(cpu->R16.PC++);
                 u32 temp2 = cpu->R8.A;
                 cpu->F.H = (temp2 & 0xF) < (temp & 0xF);

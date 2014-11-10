@@ -46,7 +46,6 @@ extern _GB_CONTEXT_ GameBoy;
 ** 230230230230...11111111...230230230....1111111...  **
 *******************************************************/
 
-
 void GB_HandleTime(void)
 {
     //GameBoy.Emulator.FPS = GameBoy.Emulator.FrameCount;

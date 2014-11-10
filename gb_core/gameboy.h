@@ -333,12 +333,6 @@ typedef struct {
     u32 CGBEnabled;
     u32 DoubleSpeed;
 
-    u32 opcode; // current opcode
-    u32 cb_opcode;
-    u32 cpu_temp_16;
-
-    s32 cpu_oscillator_clocks; // for microinstructions emulation
-    s32 cpu_microinstruction; // current microinstruction being executed
     s32 LCD_clocks; //for screen.
 
     s32 interrupt_executing; // 1 if an interrupt is being executed

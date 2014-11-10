@@ -87,24 +87,19 @@ void GB_End(int save)
 }
 
 //---------------------------------------------------------------------------
-//---------------------------------------------------------------------------
-//---------------------------------------------------------------------------
-
-static int __gb_get_framedrawn_and_clear_flag(void)
-{
-    int ret = GameBoy.Emulator.FrameDrawn;
-    GameBoy.Emulator.FrameDrawn = 0;
-    return ret;
-}
-
-void GB_RunForOneFrame(void)
-{
-    while(__gb_get_framedrawn_and_clear_flag() == 0) GB_RunForInstruction();
-}
 
 int GB_IsEnabledSGB(void)
 {
     return GameBoy.Emulator.SGBEnabled;
+}
+
+//---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+
+void GB_RunForOneFrame(void)
+{
+    GB_RunFor(70224 << GameBoy.Emulator.DoubleSpeed);
 }
 
 //---------------------------------------------------------------------------

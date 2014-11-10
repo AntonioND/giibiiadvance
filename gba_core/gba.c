@@ -187,10 +187,13 @@ u32 GBA_RunFor(s32 totalclocks)
         }
 
         clocks_to_next_event = GBA_UpdateScreenTimings(executedclocks);
-        clocks_to_next_event = min(GBA_DMAUpdate(executedclocks),clocks_to_next_event);
-        clocks_to_next_event = min(GBA_TimersUpdate(executedclocks),clocks_to_next_event);
-        clocks_to_next_event = min(GBA_SoundUpdate(executedclocks),clocks_to_next_event);
-        //mirar si otros eventos van a suceder antes y cambiar clocks por eso
+        int tmp = GBA_DMAUpdate(executedclocks);
+        clocks_to_next_event = min(tmp,clocks_to_next_event);
+        tmp = GBA_TimersUpdate(executedclocks);
+        clocks_to_next_event = min(tmp,clocks_to_next_event);
+        tmp = GBA_SoundUpdate(executedclocks);
+        clocks_to_next_event = min(tmp,clocks_to_next_event);
+        //check if any other event is going to happen before
 
         totalclocks -= executedclocks;
 

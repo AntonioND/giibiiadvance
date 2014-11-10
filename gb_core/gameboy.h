@@ -335,8 +335,6 @@ typedef struct {
 
     s32 LCD_clocks; //for screen.
 
-    s32 interrupt_executing; // 1 if an interrupt is being executed
-
     u32 TimerClocks;
     u32 timer_total_clocks;
     u32 timer_enabled;
@@ -345,8 +343,6 @@ typedef struct {
     u32 ScreenMode; //for vblank, hblank...
     u32 CurrentScanLine;
     s32 VBL_clocks_delay; //wait 24 clocks of vblank before vblank interrupt
-    //int mode0len; //they depend on the number of sprites displayed in the current scanline
-    //int mode3len;
 
     u32 serial_clocks; //count
     u32 serial_enabled;
@@ -358,8 +354,6 @@ typedef struct {
     u32 stat_signal; //when this goes from 0 to 1, STAT interrupt is triggered.
 
     u32 FrameDrawn;
-    //u32 FrameCount; //This counts the number of frames drawn in this second.
-    //u32 FPS; //This holds the current framerate
 } _EMULATOR_INFO_;
 
 //------------------------------------------------------------------------------

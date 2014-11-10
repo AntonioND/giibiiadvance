@@ -35,13 +35,18 @@
 
 #include "../gui/win_gb_disassembler.h"
 
-extern _GB_CONTEXT_ GameBoy;
+// Single Speed
+// 4194304 Hz
+// 0.2384185791015625 us per clock
+//
+// Double Speed
+// 8388608 Hz
+// 0.11920928955078125 us per clock
+//
+// Screen refresh:
+// 59.73 Hz
 
-static int gb_last_residual_clocks;
-
-extern const u8 gb_daa_table[256*8*2]; // In file daa_table.c
-
-/* TO DO
+/* TODO
 
 Sprite RAM Bug
 --------------
@@ -56,10 +61,30 @@ Only sprites 1 & 2 ($FE00 & $FE04) are not affected by these instructions.
 
 */
 
+//----------------------------------------------------------------
+
+extern _GB_CONTEXT_ GameBoy;
+
+static int gb_last_residual_clocks;
+
+extern const u8 gb_daa_table[256*8*2]; // In file daa_table.c
+
+//----------------------------------------------------------------
+
+int gb_break_cpu_loop = 0;
+
+inline void GB_CPUBreakLoop(void) // call when writing to a register that can generate an event!!!
+{
+    gb_break_cpu_loop = 1;
+}
+
+//----------------------------------------------------------------
+
 void GB_CPUInit(void)
 {
     GB_CPUInterruptsInit();
 
+    gb_break_cpu_loop = 0;
     gb_last_residual_clocks = 0;
 
     GameBoy.Emulator.ScreenMode = 2;
@@ -135,228 +160,23 @@ inline void _gb_break_to_debugger(void)
     gb_break_execution = 1;
 }
 
-// Single Speed
-// 4194304 Hz
-// 0.2384185791015625 us per cycle
-//
-// Double Speed
-// 8388608 Hz
-// 0.11920928955078125 us per cycle
-//
-// Screen refresh:
-// 59.73 Hz
-
-void GB_CPUExecuteOscillatorClock(void)
-{
-#if 0
-    _GB_CPU_ * cpu = &GameBoy.CPU;
-    _GB_MEMORY_ * mem = &GameBoy.Memory;
-    _EMULATOR_INFO_ * emu = &GameBoy.Emulator;
-
-    if(emu->cpu_microinstruction == 0)
-    {
-        if(GB_DebugCPUIsBreakpoint(cpu->R16.PC))
-        {
-            _gb_break_to_debugger();
-            Win_GBDisassemblerSetFocus();
-            return;
-        }
-    }
-
-    int gbc_dma_working = 0;
-
-    if(GameBoy.Emulator.CGBEnabled)
-        if(emu->cpu_oscillator_clocks == 0) // wait until the instruction has finished
-            if(GBC_HDMAcopy()) gbc_dma_working = 1;
-
-    if(gbc_dma_working == 0)
-        emu->cpu_oscillator_clocks ++;
-
-    // Next instruction step every 4 clocks (2 in double speed) -- LAST THING IN THIS FUNCTION
-    if( emu->cpu_oscillator_clocks >= (4 >> emu->DoubleSpeed) )
-    {
-        emu->cpu_oscillator_clocks -= (4 >> emu->DoubleSpeed);
-
-        if(mem->interrupts_enable_count) // EI interrupt enable delay
-        {
-            mem->interrupts_enable_count = 0;
-            mem->InterruptMasterEnable = 1;
-        }
-
-        //INTERRUPT HANDLING
-        if(emu->cpu_microinstruction == 0)
-        {
-            //only enter an interrupt if last instruction has ended
-            int interrupts = mem->IO_Ports[IF_REG-0xFF00] & mem->HighRAM[IE_REG-0xFF80] & 0x1F;
-            if(interrupts != 0)
-            {
-                GameBoy.Emulator.CPUHalt = 0;
-
-                if(mem->InterruptMasterEnable)
-                {
-                    emu->interrupt_executing = 1;
-                }
-            }
-        }
-
-        int interrupt_executed = 0;
-
-        if(emu->interrupt_executing) // interrupts should need the same time in dual speed or normal speed!!
-        {
-            interrupt_executed = 1;
-
-            switch(emu->cpu_microinstruction)
-            {
-                case 0:
-                    GameBoy.Memory.InterruptMasterEnable = 0;
-                    emu->cpu_microinstruction ++;
-                    break;
-                case 1:
-                    cpu->R16.SP --;
-                    cpu->R16.SP &= 0xFFFF;
-                    GB_MemWrite8(cpu->R16.SP,cpu->R8.PCH);
-                    emu->cpu_microinstruction ++;
-                    break;
-                case 2:
-                    cpu->R16.SP --;
-                    cpu->R16.SP &= 0xFFFF;
-                    GB_MemWrite8(cpu->R16.SP,cpu->R8.PCL);
-                    emu->cpu_microinstruction ++;
-                    break;
-                case 3:
-                {
-                    int interrupts = mem->IO_Ports[IF_REG-0xFF00] & mem->HighRAM[IE_REG-0xFF80] & 0x1F;
-                    if(interrupts & I_VBLANK)
-                    { cpu->R16.PC = 0x0040; mem->IO_Ports[IF_REG-0xFF00] &= ~I_VBLANK; }
-                    else if(interrupts & I_STAT)
-                    { cpu->R16.PC = 0x0048; mem->IO_Ports[IF_REG-0xFF00] &= ~I_STAT; }
-                    else if(interrupts & I_TIMER)
-                    { cpu->R16.PC = 0x0050; mem->IO_Ports[IF_REG-0xFF00] &= ~I_TIMER; }
-                    else if(interrupts & I_SERIAL)
-                    { cpu->R16.PC = 0x0058; mem->IO_Ports[IF_REG-0xFF00] &= ~I_SERIAL; }
-                    else //if(interrupts & I_JOYPAD)
-                    { cpu->R16.PC = 0x0060; mem->IO_Ports[IF_REG-0xFF00] &= ~I_JOYPAD; }
-                    emu->cpu_microinstruction ++;
-                    break;
-                }
-                case 4:
-                    emu->interrupt_executing = 0;
-                    emu->cpu_microinstruction = 0;
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        if(interrupt_executed == 0)
-        {
-            if(emu->halt_not_executed && mem->InterruptMasterEnable)
-            {
-                emu->CPUHalt = 1;
-                emu->halt_not_executed = 0;
-            }
-
-            if(GameBoy.Emulator.CPUHalt == 1) // halt
-            {
-                // HALT = Do nothing
-            }
-            else if(GameBoy.Emulator.CPUHalt == 2) // stop
-            {
-                //GameBoy.Emulator.FrameDrawn = 1; // The GB does nothing in stop mode, so
-                //GameBoy.Emulator.FrameCount ++; //let's just skip frame...
-
-                //GameBoy.Emulator.CPUHalt = 2; //Interrupts doesn't work, at least, VBL.
-
-                u32 i = mem->IO_Ports[P1_REG-0xFF00];
-                u32 result = 0;
-
-                //if((i & 0x30) == 0x30)
-                //{
-                //    Debug_DebugMsgArg("STOP with no possible exit, ignored.\nPC: %04x\nROM: %d",
-                //           GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
-                //    GameBoy.Emulator.CPUHalt = 0;
-                //    return;
-                //}
-                int Keys = GB_Input_Get(0);
-                if((i & (1<<5)) == 0) //A-B-SEL-STA
-                    result |= Keys & (KEY_A|KEY_B|KEY_SELECT|KEY_START);
-                if((i & (1<<4)) == 0) //PAD
-                    result |= Keys & (KEY_UP|KEY_DOWN|KEY_LEFT|KEY_RIGHT);
-
-                if(result) GameBoy.Emulator.CPUHalt = 0;
-            }
-
-            if(GameBoy.Emulator.CPUHalt == 0)
-            {
-                GB_CPUMicroinstructionStep(); //Execute microinstructions
-            }
-        }
-    }
-
-    //GB_CPUClock(1); // update everything
-#endif // 0
-}
-
-//----------------------------------------------------------------
-
-static inline int GB_ClocksForNextEvent(void)
-{
-/*
-    int clocks_to_next_event = GB_VideoClocksToNextEvent();
-    int tmp = GB_IRQClocksToNextEvent();
-    clocks_to_next_event = min(tmp,clocks_to_next_event);
-    tmp = GB_SoundClocksToNextEvent();
-    clocks_to_next_event = min(tmp,clocks_to_next_event);
-    tmp = GB_TimersClocksToNextEvent();
-    clocks_to_next_event = min(tmp,clocks_to_next_event);
-    //tmp = GB_SerialClocksToNextEvent();
-    //clocks_to_next_event = min(tmp,clocks_to_next_event);
-    tmp = GB_DMAClocksToNextEvent();
-    clocks_to_next_event = min(tmp,clocks_to_next_event);
-    return clocks_to_next_event;
-*/
-    return 100;
-}
-
 //----------------------------------------------------------------
 
 static int gb_cpu_clock_counter = 0;
 
-void GB_CPUClockCounterReset(void)
+inline void GB_CPUClockCounterReset(void)
 {
     gb_cpu_clock_counter = 0;
 }
 
-int GB_CPUClockCounterGet(void)
+inline int GB_CPUClockCounterGet(void)
 {
     return gb_cpu_clock_counter;
 }
 
-void GB_CPUClockCounterAdd(int value)
+static inline void GB_CPUClockCounterAdd(int value)
 {
     gb_cpu_clock_counter += value;
-}
-
-//----------------------------------------------------------------
-
-static inline void GB_ClockCountersReset(void)
-{
-    GB_CPUClockCounterReset();
-    //..();
-}
-
-static inline void GB_UpdateCounterToClocks(int clocks)
-{
-/*
-    GB_VideoUpdate(clocks);
-    GB_TimersUpdate(clocks);
-    GB_SoundUpdate(clocks);
-    GB_DMAUpdate(clocks);
-    //GB_SerialUpdate(clocks);
-    //SGB_Update(clocks);
-    //GB_CameraUpdate(clocks);
-    GB_IRQUpdate(clocks); // this is the last to update!!!
-*/
 }
 
 //----------------------------------------------------------------
@@ -366,93 +186,106 @@ static inline int min(int a, int b)
     return (a < b) ? a : b;
 }
 
-int GB_RunFor(s32 run_for_clocks) // 1 frame = 70224 clocks
+//----------------------------------------------------------------
+
+static inline int GB_ClocksForNextEvent(void)
 {
-    gb_break_execution = 0;
+    int clocks_to_next_event = GB_TimersGetClocksToNextEvent();
+    int tmp = GB_PPUGetClocksToNextEvent();
+    clocks_to_next_event = min(tmp,clocks_to_next_event);
+/*
+    tmp = GB_SoundClocksToNextEvent();
+    clocks_to_next_event = min(tmp,clocks_to_next_event);
+    tmp = GB_TimersClocksToNextEvent();
+    clocks_to_next_event = min(tmp,clocks_to_next_event);
+    //tmp = GB_SerialClocksToNextEvent();
+    //clocks_to_next_event = min(tmp,clocks_to_next_event);
+    tmp = GB_DMAClocksToNextEvent();
+    clocks_to_next_event = min(tmp,clocks_to_next_event);
+*/
+    return clocks_to_next_event;
+}
 
-    Win_GBDisassemblerStartAddressSetDefault();
-    run_for_clocks += gb_last_residual_clocks;
-    if(run_for_clocks < 0) run_for_clocks = 1;
+static inline void GB_ClockCountersReset(void)
+{
+    GB_CPUClockCounterReset();
+    GB_TimersClockCounterReset();
+    GB_PPUClockCounterReset();
+    //GB_<...>ClockCounterReset();
+}
 
-    GB_ClockCountersReset();
+static inline void GB_UpdateCounterToClocks(int reference_clocks)
+{
+    GB_TimersUpdate(reference_clocks);
+    GB_PPUUpdate(reference_clocks);
+/*
+    GB_SoundUpdate(reference_clocks);
+    GB_DMAUpdate(reference_clocks);
+    //GB_SerialUpdate(reference_clocks);
+    //SGB_Update(reference_clocks);
+    //GB_CameraUpdate(reference_clocks);
+*/
+}
 
-    while(1)
+//----------------------------------------------------------------
+
+static int GB_IRQExecute(void)
+{
+    _GB_CPU_ * cpu = &GameBoy.CPU;
+    _GB_MEMORY_ * mem = &GameBoy.Memory;
+
+    int executed_clocks = 0;
+
+    int interrupts = mem->IO_Ports[IF_REG-0xFF00] & mem->HighRAM[IE_REG-0xFF80] & 0x1F;
+    if(interrupts != 0)
     {
-        int clocks_to_next_event = GB_ClocksForNextEvent();
-        clocks_to_next_event = min(clocks_to_next_event, run_for_clocks);
-
-        // DMA NOT WORKING -> PLACE HERE!!!
-        int executed_clocks = GB_Execute(clocks_to_next_event);
-
-        GB_UpdateCounterToClocks(GB_CPUClockCounterGet());
-
-        run_for_clocks -= executed_clocks;
-
-        if( (run_for_clocks <= 0)  || GameBoy.Emulator.FrameDrawn )
+        if(mem->InterruptMasterEnable) // Execute interrupt
         {
-            gb_last_residual_clocks = run_for_clocks;
-            GameBoy.Emulator.FrameDrawn = 0;
-            return 0;
-        }
+            GameBoy.Emulator.CPUHalt = 0;
 
-        if(gb_break_execution)
-        {
-            gb_last_residual_clocks = 0;
-            return 0;
+            // interrupts should need the same time in dual speed or normal speed!!
+
+            GB_CPUClockCounterAdd(4 << GameBoy.Emulator.DoubleSpeed);
+            GameBoy.Memory.InterruptMasterEnable = 0;
+            GB_CPUClockCounterAdd(4 << GameBoy.Emulator.DoubleSpeed);
+            cpu->R16.SP --;
+            cpu->R16.SP &= 0xFFFF;
+            GB_MemWrite8(cpu->R16.SP,cpu->R8.PCH);
+            GB_CPUClockCounterAdd(4 << GameBoy.Emulator.DoubleSpeed);
+            cpu->R16.SP --;
+            cpu->R16.SP &= 0xFFFF;
+            GB_MemWrite8(cpu->R16.SP,cpu->R8.PCL);
+            GB_CPUClockCounterAdd(4 << GameBoy.Emulator.DoubleSpeed);
+            {
+                if(interrupts & I_VBLANK)
+                { cpu->R16.PC = 0x0040; mem->IO_Ports[IF_REG-0xFF00] &= ~I_VBLANK; }
+                else if(interrupts & I_STAT)
+                { cpu->R16.PC = 0x0048; mem->IO_Ports[IF_REG-0xFF00] &= ~I_STAT; }
+                else if(interrupts & I_TIMER)
+                { cpu->R16.PC = 0x0050; mem->IO_Ports[IF_REG-0xFF00] &= ~I_TIMER; }
+                else if(interrupts & I_SERIAL)
+                { cpu->R16.PC = 0x0058; mem->IO_Ports[IF_REG-0xFF00] &= ~I_SERIAL; }
+                else //if(interrupts & I_JOYPAD)
+                { cpu->R16.PC = 0x0060; mem->IO_Ports[IF_REG-0xFF00] &= ~I_JOYPAD; }
+            }
+            GB_CPUClockCounterAdd(4 << GameBoy.Emulator.DoubleSpeed);
+
+            executed_clocks = 20 << GameBoy.Emulator.DoubleSpeed;
         }
     }
+
+    if(GameBoy.Emulator.halt_not_executed && mem->InterruptMasterEnable)
+    {
+        GameBoy.Emulator.CPUHalt = 1;
+        GameBoy.Emulator.halt_not_executed = 0;
+    }
+
+    return executed_clocks;
 }
 
-void GB_RunForInstruction(void)
-{
-    GB_RunFor(1);
-}
-/*
-static const u32 gb_cycles_table[256] = {
-    1, 3, 2, 2, 1, 1, 2, 1,  5, 2, 2, 2, 1, 1, 2, 1,
-    2, 3, 2, 2, 1, 1, 2, 1,  3, 2, 2, 2, 1, 1, 2, 1,
-    3, 3, 2, 2, 1, 1, 2, 1,  3, 2, 2, 2, 1, 1, 2, 1,
-    3, 3, 2, 2, 3, 3, 3, 1,  3, 2, 2, 2, 1, 1, 2, 1,
+//----------------------------------------------------------------
 
-    1, 1, 1, 1, 1, 1, 2, 1,  1, 1, 1, 1, 1, 1, 2, 1,
-    1, 1, 1, 1, 1, 1, 2, 1,  1, 1, 1, 1, 1, 1, 2, 1,
-    1, 1, 1, 1, 1, 1, 2, 1,  1, 1, 1, 1, 1, 1, 2, 1,
-    2, 2, 2, 2, 2, 2, 1, 2,  1, 1, 1, 1, 1, 1, 2, 1,
-
-    1, 1, 1, 1, 1, 1, 2, 1,  1, 1, 1, 1, 1, 1, 2, 1,
-    1, 1, 1, 1, 1, 1, 2, 1,  1, 1, 1, 1, 1, 1, 2, 1,
-    1, 1, 1, 1, 1, 1, 2, 1,  1, 1, 1, 1, 1, 1, 2, 1,
-    1, 1, 1, 1, 1, 1, 2, 1,  1, 1, 1, 1, 1, 1, 2, 1,
-
-    5, 3, 4, 4, 6, 4, 2, 4,  5, 4, 4, 2, 6, 6, 2, 4, // CB = 2 at least
-    5, 3, 4, 0, 6, 4, 2, 4,  5, 4, 4, 0, 6, 0, 2, 4,
-    3, 3, 2, 0, 0, 4, 2, 4,  4, 1, 4, 0, 0, 0, 2, 4,
-    3, 3, 2, 1, 0, 4, 2, 4,  3, 2, 4, 1, 0, 0, 2, 4
-};
-
-static const u32 gb_cycles_table_cb[256] = {
-    2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
-    2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
-    2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
-    2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
-
-    2, 2, 2, 2, 2, 2,  3, 2, 2, 2, 2, 2, 2, 2,  3, 2,
-    2, 2, 2, 2, 2, 2,  3, 2, 2, 2, 2, 2, 2, 2,  3, 2,
-    2, 2, 2, 2, 2, 2,  3, 2, 2, 2, 2, 2, 2, 2,  3, 2,
-    2, 2, 2, 2, 2, 2,  3, 2, 2, 2, 2, 2, 2, 2,  3, 2,
-
-    2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
-    2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
-    2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
-    2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
-
-    2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
-    2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
-    2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2,
-    2, 2, 2, 2, 2, 2,  4, 2, 2, 2, 2, 2, 2, 2,  4, 2
-};
-*/
-int GB_Execute(int clocks) // returns executed clocks
+static int GB_CPUExecute(int clocks) // returns executed clocks
 {
     _GB_CPU_ * cpu = &GameBoy.CPU;
     _GB_MEMORY_ * mem = &GameBoy.Memory;
@@ -462,6 +295,20 @@ int GB_Execute(int clocks) // returns executed clocks
 
     while(GB_CPUClockCounterGet() < finish_clocks)
     {
+        if(GB_DebugCPUIsBreakpoint(cpu->R16.PC))
+        {
+            _gb_break_to_debugger();
+            Win_GBDisassemblerSetFocus();
+            break;
+        }
+
+        if(mem->interrupts_enable_count) // EI interrupt enable delay
+        {
+            mem->interrupts_enable_count = 0;
+            mem->InterruptMasterEnable = 1;
+            GB_CPUBreakLoop(); // don't break right now, break after this instruction
+        }
+
         u8 opcode = (u8)GB_MemRead8(cpu->R16.PC++);
         cpu->R16.PC &= 0xFFFF;
 
@@ -1172,7 +1019,9 @@ int GB_Execute(int clocks) // returns executed clocks
                 }
                 else
                 {
-            /*        if(mem->IO_Ports[IF_REG-0xFF00] & mem->HighRAM[IE_REG-0xFF80] & 0x1F)
+            /*
+                    TODO:
+                    if(mem->IO_Ports[IF_REG-0xFF00] & mem->HighRAM[IE_REG-0xFF80] & 0x1F)
                     {
 
                         The first byte of the next instruction
@@ -3691,6 +3540,7 @@ int GB_Execute(int clocks) // returns executed clocks
                 cpu->R16.PC = temp;
                 GameBoy.Memory.InterruptMasterEnable = 1;
                 GB_CPUClockCounterAdd(4);
+                GB_CPUBreakLoop();
                 break;
             }
             case 0xDA: //JP C,nn - 4/3
@@ -4057,10 +3907,80 @@ int GB_Execute(int clocks) // returns executed clocks
                 break;
         } //end switch
 
-        if(gb_break_execution) // something important has happened - handle it
+        if(gb_break_cpu_loop) // some event happened - handle it outside
+        {
+            gb_break_cpu_loop = 0;
+            break;
+        }
+
+        //debug break function
+        if(gb_break_execution) // something important has happened - exit from execution. Don't set this flag to 0 here!
             break;
 
     } // end while
 
     return GB_CPUClockCounterGet() - previous_clocks_counter;
 }
+
+//----------------------------------------------------------------
+
+//returns 1 if breakpoint executed
+int GB_RunFor(s32 run_for_clocks) // 1 frame = 70224 clocks
+{
+    gb_break_execution = 0;
+
+    Win_GBDisassemblerStartAddressSetDefault();
+    run_for_clocks += gb_last_residual_clocks;
+    if(run_for_clocks < 0) run_for_clocks = 1;
+
+    GB_ClockCountersReset();
+
+    while(1)
+    {
+        int clocks_to_next_event = GB_ClocksForNextEvent();
+        clocks_to_next_event = min(clocks_to_next_event, run_for_clocks);
+
+        int executed_clocks = 0;
+
+        // DMA NOT WORKING NOW -> PLACE HERE!!!
+
+        int irq_executed_clocks = GB_IRQExecute();
+        if(irq_executed_clocks == 0)
+        {
+            if(GameBoy.Emulator.CPUHalt == 0)
+                executed_clocks = GB_CPUExecute(clocks_to_next_event);
+            else
+                executed_clocks = clocks_to_next_event;
+        }
+        else
+            executed_clocks = irq_executed_clocks;
+
+        GB_UpdateCounterToClocks(GB_CPUClockCounterGet());
+
+        run_for_clocks -= executed_clocks;
+
+        if( (run_for_clocks <= 0) || GameBoy.Emulator.FrameDrawn )
+        {
+            gb_last_residual_clocks = run_for_clocks;
+            GameBoy.Emulator.FrameDrawn = 0;
+            return 0;
+        }
+
+        if(gb_break_execution)
+        {
+            gb_last_residual_clocks = 0;
+            return 1;
+        }
+    }
+
+    //Should never reach this point
+    return 0;
+}
+
+void GB_RunForInstruction(void)
+{
+    gb_last_residual_clocks = 0;
+    GB_RunFor(1);
+}
+
+//----------------------------------------------------------------

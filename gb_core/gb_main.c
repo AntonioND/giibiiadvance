@@ -33,6 +33,7 @@
 #include "sound.h"
 #include "sgb.h"
 #include "gb_main.h"
+#include "interrupts.h"
 
 extern _GB_CONTEXT_ GameBoy;
 
@@ -99,6 +100,7 @@ int GB_IsEnabledSGB(void)
 
 void GB_RunForOneFrame(void)
 {
+    GB_CheckJoypadInterrupt();
     GB_RunFor(70224 << GameBoy.Emulator.DoubleSpeed);
 }
 

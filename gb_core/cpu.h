@@ -19,12 +19,24 @@
 #ifndef __GB_CPU__
 #define __GB_CPU__
 
+//----------------------------------------------------------------
+
 void GB_CPUInit(void);
+
+//----------------------------------------------------------------
+
+//This will make the execution to exit the CPU loop and update the other systems of the GB
+//Call when writing to a register that can generate an event!!!
+inline void GB_CPUBreakLoop(void);
+
+//----------------------------------------------------------------
 
 int GB_RunFor(s32 clocks); // 1 frame = 70224 clocks
 //returns 1 if breakpoint executed
 
 void GB_RunForInstruction(void);
+
+//----------------------------------------------------------------
 
 #endif //__GB_CPU__
 

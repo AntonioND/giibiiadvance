@@ -30,8 +30,6 @@
 #include "interrupts.h"
 #include "gb_main.h"
 
-extern _GB_CONTEXT_ GameBoy;
-
 /*******************************************************
 ** Mode 2 -  80 clks \                                **
 ** Mode 3 - 172 clks |- 456 clks  -  144 times        **
@@ -46,11 +44,14 @@ extern _GB_CONTEXT_ GameBoy;
 ** 230230230230...11111111...230230230....1111111...  **
 *******************************************************/
 
-void GB_HandleTime(void)
-{
-    //GameBoy.Emulator.FPS = GameBoy.Emulator.FrameCount;
-    //GameBoy.Emulator.FrameCount = 0;
+//----------------------------------------------------------------
 
+extern _GB_CONTEXT_ GameBoy;
+
+//----------------------------------------------------------------
+
+void GB_HandleRTC(void)
+{
     if(GameBoy.Emulator.HasTimer) //Handle time...
     {
         if(GameBoy.Emulator.Timer.halt == 0) //Increase timer...
@@ -84,19 +85,16 @@ void GB_HandleTime(void)
     }
 }
 
+//----------------------------------------------------------------
+
 void GB_CPUInterruptsInit(void)
 {
-//    GameBoy.Emulator.mode3len = 172;
-//    GameBoy.Emulator.mode0len = 204;
-
     GameBoy.Emulator.FrameDrawn = 0;
-    //GameBoy.Emulator.FrameCount = 0;
     GameBoy.Emulator.LCD_clocks = 0;
     GameBoy.Emulator.TimerClocks = 0;
     GameBoy.Emulator.timer_total_clocks = 0;
     GameBoy.Emulator.timer_enabled = 0;
     GameBoy.Emulator.DivClocks = 0;
-    GameBoy.Emulator.interrupt_executing = 0;
 
     if(GameBoy.Emulator.HasTimer)
     {
@@ -111,77 +109,10 @@ void GB_CPUInterruptsInit(void)
 
 void GB_CPUInterruptsEnd(void)
 {
-
+    // Nothing to do
 }
 
-void GB_TimersUpdate(int clocks)
-{
-    if(GameBoy.Emulator.timer_enabled) GameBoy.Emulator.TimerClocks += clocks;
-    GameBoy.Emulator.DivClocks += clocks;
-}
-
-void GB_LCDUpdate(int clocks)
-{
-    GameBoy.Emulator.LCD_clocks += clocks;
-
-    if(GameBoy.Emulator.VBL_clocks_delay)
-    {
-        GameBoy.Emulator.VBL_clocks_delay -= clocks;
-
-        if(GameBoy.Emulator.VBL_clocks_delay <= 0)
-        {
-            GB_SetInterrupt(I_VBLANK);
-            GameBoy.Emulator.VBL_clocks_delay = 0;
-        }
-    }
-}
-
-inline int GB_CPUHandleInterrupts(void)
-{
-    _GB_MEMORY_ * mem = &GameBoy.Memory;
-    _GB_CPU_ * cpu = &GameBoy.CPU;
-    int interrupts = mem->IO_Ports[IF_REG-0xFF00] & mem->HighRAM[IE_REG-0xFF80] & 0x1F;
-
-    if(interrupts == 0) return 0;
-
-    if(mem->InterruptMasterEnable == 0 || GameBoy.Emulator.CPUHalt) return 0;
-
-    GameBoy.Memory.InterruptMasterEnable = 0;
-
-    cpu->R16.SP -= 2;
-    GB_MemWrite16(cpu->R16.SP,cpu->R16.PC);
-
-    if(interrupts & I_VBLANK)
-    {
-        cpu->R16.PC = 0x0040;
-        mem->IO_Ports[IF_REG-0xFF00] &= ~I_VBLANK;
-        return 1;
-    }
-    else if(interrupts & I_STAT)
-    {
-        cpu->R16.PC = 0x0048;
-        mem->IO_Ports[IF_REG-0xFF00] &= ~I_STAT;
-        return 1;
-    }
-    else if(interrupts & I_TIMER)
-    {
-        cpu->R16.PC = 0x0050;
-        mem->IO_Ports[IF_REG-0xFF00] &= ~I_TIMER;
-        return 1;
-    }
-    else if(interrupts & I_SERIAL)
-    {
-        cpu->R16.PC = 0x0058;
-        mem->IO_Ports[IF_REG-0xFF00] &= ~I_SERIAL;
-        return 1;
-    }
-    else //if(interrupts & I_JOYPAD)
-    {
-        cpu->R16.PC = 0x0060;
-        mem->IO_Ports[IF_REG-0xFF00] &= ~I_JOYPAD;
-        return 1;
-    }
-}
+//----------------------------------------------------------------
 
 inline void GB_SetInterrupt(int flag)
 {
@@ -190,82 +121,43 @@ inline void GB_SetInterrupt(int flag)
         GameBoy.Emulator.CPUHalt = 0;
 }
 
-inline void GB_CheckStatSignal(void)
-{
-    if(GameBoy.Emulator.lcd_on == 0)
-    {
-        GameBoy.Emulator.stat_signal = 0;
-        return;
-    }
+//----------------------------------------------------------------
 
+static int gb_ppu_clock_counter = 0;
+
+inline void GB_PPUClockCounterReset(void)
+{
+    gb_ppu_clock_counter = 0;
+}
+
+static inline int GB_PPUClockCounterGet(void)
+{
+    return gb_ppu_clock_counter;
+}
+
+static inline void GB_PPUClockCounterSet(int new_reference_clocks)
+{
+    gb_ppu_clock_counter = new_reference_clocks;
+}
+
+void GB_PPUUpdate(int reference_clocks)
+{
     _GB_MEMORY_ * mem = &GameBoy.Memory;
-    u32 screenmode = GameBoy.Emulator.ScreenMode;
-    int stat = mem->IO_Ports[STAT_REG-0xFF00];
 
-    if(    (mem->IO_Ports[LY_REG-0xFF00] == mem->IO_Ports[LYC_REG-0xFF00] &&
-                                                stat & IENABLE_LY_COMPARE)  ||
-        (stat & IENABLE_HBL && screenmode == 0) ||
-        (stat & IENABLE_OAM && screenmode == 2)  ||
-        (stat & (IENABLE_VBL|IENABLE_OAM) && screenmode == 1)
-    //    (stat & IENABLE_VBL && screenmode == 1)
-    )
+    int increment_clocks = reference_clocks - GB_PPUClockCounterGet();
 
+    if(GameBoy.Emulator.VBL_clocks_delay)
     {
-        if(GameBoy.Emulator.stat_signal == 0 /*&& mem->HighRAM[IE_REG-0xFF80] & I_STAT*/)
-            GB_SetInterrupt(I_STAT);
+        GameBoy.Emulator.VBL_clocks_delay -= increment_clocks;
 
-        GameBoy.Emulator.stat_signal = 1;
-
-        return;
-    }
-
-    GameBoy.Emulator.stat_signal = 0;
-}
-
-inline void GB_CheckLYC(void)
-{
-    if(GameBoy.Memory.IO_Ports[LY_REG-0xFF00] == GameBoy.Memory.IO_Ports[LYC_REG-0xFF00])
-        GameBoy.Memory.IO_Ports[STAT_REG-0xFF00] |= I_LY_EQUALS_LYC;
-    else
-        GameBoy.Memory.IO_Ports[STAT_REG-0xFF00] &= ~I_LY_EQUALS_LYC;
-}
-/*
-inline int GB_SpriteCount(int scanline)
-{
-    if((GameBoy.Memory.IO_Ports[LCDC_REG-0xFF00] & (1<<1)) == 0) return 0;
-
-    _GB_OAM_ * GB_OAM = (_GB_OAM_*)GameBoy.Memory.ObjAttrMem;
-
-    int count = 0;
-    int spriteheight =  8 << ((GameBoy.Memory.IO_Ports[LCDC_REG-0xFF00] & (1<<2)) != 0);
-
-    int i;
-    for(i = 0; i < 40; i ++)
-    {
-        int real_y = (GB_OAM->Sprite[i].Y-16);
-        if( (real_y <= scanline) && ((real_y+spriteheight) > scanline) )
+        if(GameBoy.Emulator.VBL_clocks_delay <= 0)
         {
-            count++;
-            if(count == 10) return 10; //can't draw more than 10 sprites...
+            GB_SetInterrupt(I_VBLANK);
+            GameBoy.Emulator.VBL_clocks_delay = 0;
         }
     }
 
-    return count;
-}
-
-
-inline void GB_Mode03UpdateLenght(void)
-{
-    int clocks = 0; //GB_SpriteCount(GameBoy.Emulator.CurrentScanLine) * 12;
-
-    GameBoy.Emulator.mode3len = 172 + clocks;
-    GameBoy.Emulator.mode0len = 204 - clocks;
-}
-*/
-
-inline void GB_CPUHandleClockEvents(void)
-{
-    _GB_MEMORY_ * mem = &GameBoy.Memory;
+    GameBoy.Emulator.LCD_clocks += increment_clocks;
 
     //SCREEN
     switch(GameBoy.Emulator.ScreenMode)
@@ -371,9 +263,124 @@ inline void GB_CPUHandleClockEvents(void)
             break;
     }
 
-    //TIMERS
+    GB_PPUClockCounterSet(reference_clocks);
+}
+
+int GB_PPUGetClocksToNextEvent(void)
+{
+    int clocks_to_next_event = 0x7FFFFFFF;
+
+    switch(GameBoy.Emulator.ScreenMode)
+    {
+        case 2:
+            clocks_to_next_event = 80 - GameBoy.Emulator.LCD_clocks;
+            break;
+        case 3:
+            clocks_to_next_event = 172 - GameBoy.Emulator.LCD_clocks;
+            break;
+        case 0:
+            clocks_to_next_event = 204 - GameBoy.Emulator.LCD_clocks;
+            break;
+        case 1:
+            clocks_to_next_event = 456 - GameBoy.Emulator.LCD_clocks;
+            break;
+        default:
+            break;
+    }
+
+    if(GameBoy.Emulator.VBL_clocks_delay)
+    {
+        if(clocks_to_next_event > GameBoy.Emulator.VBL_clocks_delay)
+            clocks_to_next_event = GameBoy.Emulator.VBL_clocks_delay;
+    }
+
+    return clocks_to_next_event;
+}
+
+//----------------------------------------------------------------
+
+// START OF TODO :
+
+inline void GB_CheckStatSignal(void)
+{
+    if(GameBoy.Emulator.lcd_on == 0)
+    {
+        GameBoy.Emulator.stat_signal = 0;
+        return;
+    }
+
+    _GB_MEMORY_ * mem = &GameBoy.Memory;
+    u32 screenmode = GameBoy.Emulator.ScreenMode;
+    int stat = mem->IO_Ports[STAT_REG-0xFF00];
+
+    if(    (mem->IO_Ports[LY_REG-0xFF00] == mem->IO_Ports[LYC_REG-0xFF00] &&
+                                                stat & IENABLE_LY_COMPARE)  ||
+        (stat & IENABLE_HBL && screenmode == 0) ||
+        (stat & IENABLE_OAM && screenmode == 2)  ||
+        (stat & (IENABLE_VBL|IENABLE_OAM) && screenmode == 1)
+    //    (stat & IENABLE_VBL && screenmode == 1)
+    )
+
+    {
+        if(GameBoy.Emulator.stat_signal == 0 /*&& mem->HighRAM[IE_REG-0xFF80] & I_STAT*/)
+            GB_SetInterrupt(I_STAT);
+
+        GameBoy.Emulator.stat_signal = 1;
+
+        return;
+    }
+
+    GameBoy.Emulator.stat_signal = 0;
+}
+
+inline void GB_CheckLYC(void)
+{
+    if(GameBoy.Memory.IO_Ports[LY_REG-0xFF00] == GameBoy.Memory.IO_Ports[LYC_REG-0xFF00])
+        GameBoy.Memory.IO_Ports[STAT_REG-0xFF00] |= I_LY_EQUALS_LYC;
+    else
+        GameBoy.Memory.IO_Ports[STAT_REG-0xFF00] &= ~I_LY_EQUALS_LYC;
+}
+
+/*
+
+inline void GB_Mode03UpdateLenght(void)
+{
+    int clocks = 0; //GB_SpriteCount(GameBoy.Emulator.CurrentScanLine) * 12;
+
+    GameBoy.Emulator.mode3len = 172 + clocks;
+    GameBoy.Emulator.mode0len = 204 - clocks;
+}
+*/
+
+// END OF TODO :
+
+//----------------------------------------------------------------
+
+static int gb_timer_clock_counter = 0;
+
+inline void GB_TimersClockCounterReset(void)
+{
+    gb_timer_clock_counter = 0;
+}
+
+static inline int GB_TimersClockCounterGet(void)
+{
+    return gb_timer_clock_counter;
+}
+
+static inline void GB_TimersClockCounterSet(int new_reference_clocks)
+{
+    gb_timer_clock_counter = new_reference_clocks;
+}
+
+void GB_TimersUpdate(int reference_clocks)
+{
+    _GB_MEMORY_ * mem = &GameBoy.Memory;
+
+    int increment_clocks = reference_clocks - GB_TimersClockCounterGet();
 
     //DIV -- EVERY 256 CLOCKS
+    GameBoy.Emulator.DivClocks += increment_clocks;
     while(GameBoy.Emulator.DivClocks > 255)
     {
         mem->IO_Ports[DIV_REG-0xFF00] ++;
@@ -383,6 +390,8 @@ inline void GB_CPUHandleClockEvents(void)
     //TIMA
     if(GameBoy.Emulator.timer_enabled)
     {
+        GameBoy.Emulator.TimerClocks += increment_clocks;
+
         while(GameBoy.Emulator.TimerClocks > (GameBoy.Emulator.timer_total_clocks-1))
         {
             if(mem->IO_Ports[TIMA_REG-0xFF00] == 0xFF) //overflow
@@ -397,8 +406,29 @@ inline void GB_CPUHandleClockEvents(void)
         }
     }
 
-    //This could be checked less frequently...
-    //JOYPAD
+    GB_TimersClockCounterSet(reference_clocks);
+}
+
+int GB_TimersGetClocksToNextEvent(void)
+{
+    int clocks_to_next_event = 256 - GameBoy.Emulator.DivClocks; // DIV
+
+    if(GameBoy.Emulator.timer_enabled)
+    {
+        int clocks_left_for_timer = GameBoy.Emulator.timer_total_clocks - GameBoy.Emulator.TimerClocks;
+        if(clocks_left_for_timer < clocks_to_next_event)
+            clocks_to_next_event = clocks_left_for_timer;
+    }
+
+    return clocks_to_next_event;
+}
+
+//----------------------------------------------------------------
+
+void GB_CheckJoypadInterrupt(void)
+{
+    _GB_MEMORY_ * mem = &GameBoy.Memory;
+
     if( (GameBoy.Emulator.HardwareType == HW_GBC) || (GameBoy.Emulator.HardwareType == HW_GBA) )
         return; //No joypad interrupt in GBA/GBC
 
@@ -413,8 +443,15 @@ inline void GB_CPUHandleClockEvents(void)
     if((i & (1<<4)) == 0) //PAD
         result |= Keys & (KEY_UP|KEY_DOWN|KEY_LEFT|KEY_RIGHT);
 
-    if(result) GB_SetInterrupt(I_JOYPAD);
+    if(result)
+    {
+        GB_SetInterrupt(I_JOYPAD);
+        if(GameBoy.Emulator.CPUHalt == 2) // stop
+            GameBoy.Emulator.CPUHalt = 0;
+    }
 
     return;
 }
 
+//----------------------------------------------------------------
+//----------------------------------------------------------------

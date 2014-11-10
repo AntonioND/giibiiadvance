@@ -123,7 +123,7 @@ static SDL_TimerID WinMain_FPS_timer;
 static Uint32 _fps_callback_function(Uint32 interval, void *param)
 {
     if(WIN_MAIN_RUNNING == RUNNING_GB)
-        GB_HandleTime();
+        GB_HandleRTC();
 
     WinMain_FPS = WinMain_frames_drawn;
     WinMain_frames_drawn = 0;

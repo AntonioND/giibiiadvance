@@ -19,7 +19,11 @@
 #ifndef __INTERRUPTS__
 #define __INTERRUPTS__
 
+//----------------------------------------------------------------
+
 #include "gameboy.h"
+
+//----------------------------------------------------------------
 
 //STAT_REG
 #define IENABLE_LY_COMPARE (1<<6)
@@ -36,17 +40,45 @@
 #define I_SERIAL (1<<3)
 #define I_JOYPAD (1<<4)
 
-void GB_HandleTime(void);
+//----------------------------------------------------------------
+
+void GB_HandleRTC(void);
+
+//----------------------------------------------------------------
+
 void GB_CPUInterruptsInit(void);
 void GB_CPUInterruptsEnd(void);
-void GB_ChecStatSignal(void);
-void GB_TimersUpdate(int clocks);
-void GB_LCDUpdate(int clocks);
+
+//----------------------------------------------------------------
+
 inline void GB_SetInterrupt(int flag);
+
+//----------------------------------------------------------------
+
+inline void GB_PPUClockCounterReset(void);
+void GB_PPUUpdate(int reference_clocks);
+int GB_PPUGetClocksToNextEvent(void);
+
+//----------------------------------------------------------------
+
+// TODO :
+/*
+void GB_CheckStatSignal(void);
 inline void GB_CheckStatSignal(void);
 inline void GB_CheckLYC(void);
 inline void GB_CPUHandleClockEvents(void);
-inline int GB_CPUHandleInterrupts(void);
+*/
+//----------------------------------------------------------------
+
+inline void GB_TimersClockCounterReset(void);
+void GB_TimersUpdate(int reference_clocks);
+int GB_TimersGetClocksToNextEvent(void);
+
+//----------------------------------------------------------------
+
+void GB_CheckJoypadInterrupt(void);
+
+//----------------------------------------------------------------
 
 #endif //__INTERRUPTS__
 

@@ -211,6 +211,8 @@ void GB_MemWriteReg8(u32 address, u32 value)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
+    GB_CPUBreakLoop();
+
     switch(address)
     {
         case SB_REG:

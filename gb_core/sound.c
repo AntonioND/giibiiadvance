@@ -254,6 +254,16 @@ void GB_SoundResetBufferPointers(void)
     Sound.samples_left_to_output = 0;
 }
 
+void GB_SoundClockCounterReset(void)
+{
+
+}
+
+void GB_SoundUpdateClocksClounterReference(int reference_clocks)
+{
+
+}
+
 void GB_SoundInit(void)
 {
     memset(&Sound,0,sizeof(Sound));

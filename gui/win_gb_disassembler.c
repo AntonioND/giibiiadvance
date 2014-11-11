@@ -26,6 +26,8 @@
 #include "../general_utils.h"
 
 #include "win_gb_disassembler.h"
+#include "win_gb_memviewer.h"
+#include "win_gb_ioviewer.h"
 #include "win_main.h"
 #include "win_utils.h"
 
@@ -361,6 +363,12 @@ static void _win_gb_disassembler_step(void)
     Win_GBDisassemblerStartAddressSetDefault();
 
     GB_RunForInstruction();
+
+    Win_GBMemViewerUpdate();
+    Win_GBMemViewerRender();
+
+    Win_GBIOViewerUpdate();
+    Win_GBIOViewerRender();
 }
 
 static void _win_gb_disassembler_goto(void)

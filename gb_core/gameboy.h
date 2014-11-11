@@ -324,8 +324,9 @@ typedef struct {
     s32 gdma_preparation_time_countdown;
     s32 gbc_dma_working_for; //2 bytes per clock (?)
 
-    u32 halt_not_executed;
+    //u32 halt_not_executed;
     u32 CPUHalt;
+    u32 halt_dmg_bug;
 
     u32 SGBEnabled;
     u32 wait_cycles;

@@ -21,6 +21,7 @@
 
 int Win_GBIOViewerCreate(void); // returns 1 if error
 void Win_GBIOViewerUpdate(void);
+void Win_GBIOViewerRender(void);
 void Win_GBIOViewerClose(void);
 
 #endif // __WIN_GB_IOVIEWER__

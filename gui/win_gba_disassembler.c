@@ -26,6 +26,8 @@
 #include "../general_utils.h"
 
 #include "win_gba_disassembler.h"
+#include "win_gba_memviewer.h"
+#include "win_gba_ioviewer.h"
 #include "win_main.h"
 #include "win_utils.h"
 
@@ -436,6 +438,12 @@ static void _win_gba_disassembler_step(void)
     Win_GBADisassemblerStartAddressSetDefault();
 
     GBA_DebugStep();
+
+    Win_GBAMemViewerUpdate();
+    Win_GBAMemViewerRender();
+
+    Win_GBAIOViewerUpdate();
+    Win_GBAIOViewerRender();
 }
 
 static void _win_gba_disassembler_goto(void)

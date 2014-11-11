@@ -19,12 +19,22 @@
 #ifndef __SERIAL__
 #define __SERIAL__
 
+//--------------------------------------------------------------------------------
+
+void GB_SerialClockCounterReset(void);
+void GB_SerialUpdateClocksClounterReference(int reference_clocks);
+int GB_SerialGetClocksToNextEvent(void);
+
+//--------------------------------------------------------------------------------
+
 void GB_SerialInit(void);
 void GB_SerialEnd(void);
 
-inline void GB_SerialClocks(int _clocks);
+//--------------------------------------------------------------------------------
 
 void GB_SerialPlug(int device);
+
+//--------------------------------------------------------------------------------
 
 #endif //__SERIAL__
 

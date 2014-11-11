@@ -908,7 +908,7 @@ static void _win_gba_ioviewer_tabnum_radbtn_callback(int num)
 
 //----------------------------------------------------------------
 
-static void _win_gba_io_viewer_render(void)
+void Win_GBAIOViewerRender(void)
 {
     if(GBAIOViewerCreated == 0) return;
 
@@ -958,7 +958,7 @@ static int _win_gba_io_viewer_callback(SDL_Event * e)
     if(redraw)
     {
         Win_GBAIOViewerUpdate();
-        _win_gba_io_viewer_render();
+        Win_GBAIOViewerRender();
         return 1;
     }
 
@@ -1141,7 +1141,7 @@ int Win_GBAIOViewerCreate(void)
     WH_SetEventCallback(WinIDGBAIOViewer,_win_gba_io_viewer_callback);
 
     Win_GBAIOViewerUpdate();
-    _win_gba_io_viewer_render();
+    Win_GBAIOViewerRender();
 
     return 1;
 }

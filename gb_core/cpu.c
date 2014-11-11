@@ -109,16 +109,11 @@ static inline int min(int a, int b)
 static inline int GB_ClocksForNextEvent(void)
 {
     int clocks_to_next_event = GB_TimersGetClocksToNextEvent();
-    int tmp = GB_PPUGetClocksToNextEvent();
-    clocks_to_next_event = min(tmp,clocks_to_next_event);
+    int tmp = GB_PPUGetClocksToNextEvent(); clocks_to_next_event = min(tmp,clocks_to_next_event);
+    tmp = GB_SerialGetClocksToNextEvent();  clocks_to_next_event = min(tmp,clocks_to_next_event);
+
 /*
     tmp = GB_SoundClocksToNextEvent();
-    clocks_to_next_event = min(tmp,clocks_to_next_event);
-    tmp = GB_TimersClocksToNextEvent();
-    clocks_to_next_event = min(tmp,clocks_to_next_event);
-    //tmp = GB_SerialClocksToNextEvent();
-    //clocks_to_next_event = min(tmp,clocks_to_next_event);
-    tmp = GB_DMAClocksToNextEvent();
     clocks_to_next_event = min(tmp,clocks_to_next_event);
 */
     return clocks_to_next_event;
@@ -129,17 +124,18 @@ static inline void GB_ClockCountersReset(void)
     GB_CPUClockCounterReset();
     GB_TimersClockCounterReset();
     GB_PPUClockCounterReset();
+    GB_SerialClockCounterReset();
+    GB_SoundClockCounterReset();
     //GB_<...>ClockCounterReset();
 }
 
-static inline void GB_UpdateCounterToClocks(int reference_clocks)
+inline void GB_UpdateCounterToClocks(int reference_clocks)
 {
-    GB_TimersUpdate(reference_clocks);
-    GB_PPUUpdate(reference_clocks);
+    GB_TimersUpdateClocksClounterReference(reference_clocks);
+    GB_PPUUpdateClocksClounterReference(reference_clocks);
+    GB_SerialUpdateClocksClounterReference(reference_clocks);
+    GB_SoundUpdateClocksClounterReference(reference_clocks);
 /*
-    GB_SoundUpdate(reference_clocks);
-    GB_DMAUpdate(reference_clocks);
-    //GB_SerialUpdate(reference_clocks);
     //SGB_Update(reference_clocks);
     //GB_CameraUpdate(reference_clocks);
 */
@@ -161,7 +157,8 @@ void GB_CPUInit(void)
     GameBoy.Emulator.CurrentScanLine = 0;
     GameBoy.Emulator.CPUHalt = 0;
     GameBoy.Emulator.DoubleSpeed = 0;
-    GameBoy.Emulator.halt_not_executed = 0;
+    //GameBoy.Emulator.halt_not_executed = 0;
+    GameBoy.Emulator.halt_dmg_bug = 0;
 
     if(GameBoy.Emulator.CGBEnabled == 1)
     {
@@ -276,11 +273,11 @@ static int GB_IRQExecute(void)
         }
     }
 
-    if(GameBoy.Emulator.halt_not_executed && mem->InterruptMasterEnable)
-    {
-        GameBoy.Emulator.CPUHalt = 1;
-        GameBoy.Emulator.halt_not_executed = 0;
-    }
+    //if(GameBoy.Emulator.halt_not_executed && mem->InterruptMasterEnable)
+    //{
+    //    GameBoy.Emulator.CPUHalt = 1;
+    //    GameBoy.Emulator.halt_not_executed = 0;
+    //}
 
     return executed_clocks;
 }
@@ -313,6 +310,13 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
 
         u8 opcode = (u8)GB_MemRead8(cpu->R16.PC++);
         cpu->R16.PC &= 0xFFFF;
+
+        if(GameBoy.Emulator.halt_dmg_bug)
+        {
+            GameBoy.Emulator.halt_dmg_bug = 0;
+            cpu->R16.PC--;
+            cpu->R16.PC &= 0xFFFF;
+        }
 
         switch(opcode)
         {
@@ -1021,24 +1025,22 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 }
                 else
                 {
-            /*
-                    TODO:
-                    if(mem->IO_Ports[IF_REG-0xFF00] & mem->HighRAM[IE_REG-0xFF80] & 0x1F)
+                    if(GameBoy.Emulator.CGBEnabled == 0)
                     {
-
-                        The first byte of the next instruction
-                    after HALT is read. The Program Counter (PC) fails to
-                    increment to the next memory location. As a results, the
-                    first byte after HALT is read again. From this point on
-                    the Program Counter once again operates normally
-
+                        if(mem->IO_Ports[IF_REG-0xFF00] & mem->HighRAM[IE_REG-0xFF80] & 0x1F)
+                        {
+                            GameBoy.Emulator.halt_dmg_bug = 1;
+                        }
+                        else
+                        {
+                            //Nothing
+                            //GameBoy.Emulator.halt_not_executed = 1;
+                        }
                     }
                     else
                     {
-                        //Nothing
+                        //GameBoy.Emulator.halt_not_executed = 1;
                     }
-            */
-                    GameBoy.Emulator.halt_not_executed = 1;
                 }
                 break;
             case 0x77: //LD (HL),A - 2
@@ -3946,11 +3948,11 @@ int GB_RunFor(s32 run_for_clocks) // 1 frame = 70224 clocks
 
         // DMA NOT WORKING NOW -> PLACE HERE!!!
 
-        int irq_executed_clocks = GB_IRQExecute();
+        int irq_executed_clocks = GB_IRQExecute(); // GB_CPUClockCounterAdd() internal
         if(irq_executed_clocks == 0)
         {
             if(GameBoy.Emulator.CPUHalt == 0)
-                executed_clocks = GB_CPUExecute(clocks_to_next_event);
+                executed_clocks = GB_CPUExecute(clocks_to_next_event); // GB_CPUClockCounterAdd() internal
             else
             {
                 executed_clocks = clocks_to_next_event;
@@ -3985,7 +3987,7 @@ int GB_RunFor(s32 run_for_clocks) // 1 frame = 70224 clocks
 void GB_RunForInstruction(void)
 {
     gb_last_residual_clocks = 0;
-    GB_RunFor(1);
+    GB_RunFor(4);
 }
 
 //----------------------------------------------------------------

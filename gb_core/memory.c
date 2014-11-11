@@ -34,6 +34,7 @@
 #include "sgb.h"
 #include "video.h"
 #include "gb_main.h"
+#include "serial.h"
 
 extern _GB_CONTEXT_ GameBoy;
 
@@ -213,13 +214,20 @@ void GB_MemWriteReg8(u32 address, u32 value)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
-    GB_CPUBreakLoop();
-
     switch(address)
     {
         case SB_REG:
+            GB_SerialUpdateClocksClounterReference(GB_CPUClockCounterGet());
+            mem->IO_Ports[address-0xFF00] = value;
+            return;
+
         case TIMA_REG:
         case TMA_REG:
+            GB_TimersUpdateClocksClounterReference(GB_CPUClockCounterGet());
+            mem->IO_Ports[address-0xFF00] = value;
+            GB_CPUBreakLoop();
+            return;
+
         case SCY_REG:
         case SCX_REG:
         case BGP_REG:
@@ -227,11 +235,13 @@ void GB_MemWriteReg8(u32 address, u32 value)
         case OBP1_REG:
         case WY_REG:
         case WX_REG:
+            GB_PPUUpdateClocksClounterReference(GB_CPUClockCounterGet());
             mem->IO_Ports[address-0xFF00] = value;
             return;
 
         case IF_REG:
             mem->IO_Ports[address-0xFF00] = value | (0xE0);
+            GB_CPUBreakLoop();
             return;
 
         case STAT_REG:
@@ -255,11 +265,14 @@ void GB_MemWriteReg8(u32 address, u32 value)
             //    GB_SetInterrupt(I_STAT);
             //}
 
-        //    if(value & IENABLE_OAM) Debug_DebugMsgArg("Wrote STAT - ENABLE OAM INT");
+            //if(value & IENABLE_OAM) Debug_DebugMsgArg("Wrote STAT - ENABLE OAM INT");
 
+            GB_CPUBreakLoop();
             return;
 
         case LCDC_REG:
+            GB_PPUUpdateClocksClounterReference(GB_CPUClockCounterGet());
+
             if( (mem->IO_Ports[LCDC_REG-0xFF00] ^ value) & (1<<7) )
             {
                 mem->IO_Ports[LY_REG-0xFF00] = 0x00;
@@ -268,7 +281,7 @@ void GB_MemWriteReg8(u32 address, u32 value)
                 GameBoy.Emulator.ScreenMode = 0;
 
                 if(value & (1<<7)) GameBoy.Emulator.LCD_clocks = 0; //- (4560 - 204);
-                else GameBoy.Emulator.LCD_clocks = 204;// - (456 - 48);
+                else GameBoy.Emulator.LCD_clocks = (204<<GameBoy.Emulator.DoubleSpeed);// - (456 - 48);
 
                 GB_CheckStatSignal();
                 mem->IO_Ports[IF_REG-0xFF00] &= ~I_STAT;
@@ -277,12 +290,16 @@ void GB_MemWriteReg8(u32 address, u32 value)
             GameBoy.Emulator.lcd_on = value >> 7;
 
             mem->IO_Ports[LCDC_REG-0xFF00] = value;
+
+            GB_CPUBreakLoop();
             return;
 
         case LY_REG: //Read only
             return;
 
         case TAC_REG:
+            GB_TimersUpdateClocksClounterReference(GB_CPUClockCounterGet());
+
             GameBoy.Emulator.TimerClocks = 0;
 
             if(value & (1<<2))
@@ -300,10 +317,12 @@ void GB_MemWriteReg8(u32 address, u32 value)
             }
 
             mem->IO_Ports[TAC_REG-0xFF00] = value;
+            GB_CPUBreakLoop();
             return;
 
         case DIV_REG:
-    //        GameBoy.Emulator.DivClocks = 0; // ????
+            //GameBoy.Emulator.DivClocks = 0; // ????
+            GB_TimersUpdateClocksClounterReference(GB_CPUClockCounterGet());
             mem->IO_Ports[DIV_REG-0xFF00] = 0;
             return;
 
@@ -313,20 +332,22 @@ void GB_MemWriteReg8(u32 address, u32 value)
             {
                 GB_CheckLYC();
                 GB_CheckStatSignal();
+                GB_CPUBreakLoop();
             }
             return;
 
         case P1_REG:
+            //GB_SGBUpdate(GB_CPUClockCounterGet()); TODO
             if(GameBoy.Emulator.SGBEnabled == 1)
                 SGB_WriteP1(value);
             mem->IO_Ports[P1_REG-0xFF00] = value & 0xF0;
             return;
 
         case DMA_REG:
+            //TODO
             //This should be asynchronous...
             //It should disable non-highram memory (if source is VRAM, VRAM is disabled
             //instead of other ram)... etc...
-            //Anyway, it doesn't seem to matter...
 
             mem->IO_Ports[DMA_REG-0xFF00] = value;
 
@@ -342,6 +363,7 @@ void GB_MemWriteReg8(u32 address, u32 value)
 #endif
                         mem->ObjAttrMem[i] = GB_MemRead8( (value<<8) | i ) ;
             }
+            GB_CPUBreakLoop();
             return;
         //                   Sound...
         case NR10_REG: case NR11_REG: case NR12_REG: case NR13_REG: case NR14_REG:
@@ -349,10 +371,12 @@ void GB_MemWriteReg8(u32 address, u32 value)
         case NR30_REG: case NR31_REG: case NR32_REG: case NR33_REG: case NR34_REG:
         case NR41_REG: case NR42_REG: case NR43_REG: case NR44_REG:
         case NR50_REG: case NR51_REG:
+            GB_SoundUpdateClocksClounterReference(GB_CPUClockCounterGet());
             mem->IO_Ports[address-0xFF00] = value;
             GB_SoundRegWrite(address, value);
             return;
         case NR52_REG:
+            GB_SoundUpdateClocksClounterReference(GB_CPUClockCounterGet());
             mem->IO_Ports[NR52_REG-0xFF00] &= 0x0F; //Status flags
             mem->IO_Ports[NR52_REG-0xFF00] |= (value & 0xF0);
             GB_SoundRegWrite(address, value);
@@ -362,11 +386,13 @@ void GB_MemWriteReg8(u32 address, u32 value)
         case 0xFF34: case 0xFF35: case 0xFF36: case 0xFF37:
         case 0xFF38: case 0xFF39: case 0xFF3A: case 0xFF3B:
         case 0xFF3C: case 0xFF3D: case 0xFF3E: case 0xFF3F:
+            GB_SoundUpdateClocksClounterReference(GB_CPUClockCounterGet());
             if((mem->IO_Ports[NR52_REG-0xFF00] & (1<<2)) == 0) //If not playing...
                 mem->IO_Ports[address-0xFF00] = value;
             return;
 
         case SC_REG:
+            GB_SerialUpdateClocksClounterReference(GB_CPUClockCounterGet());
             mem->IO_Ports[SC_REG-0xFF00]  = value;
             if(value & 0x80)
             {
@@ -386,6 +412,7 @@ void GB_MemWriteReg8(u32 address, u32 value)
                 // (*) see serial.c
                 //GameBoy.Emulator.SerialSend_Fn(mem->IO_Ports[SB_REG-0xFF00]);
             }
+            GB_CPUBreakLoop();
             return;
 
         //                   GAMEBOY COLOR REGISTERS
@@ -506,6 +533,8 @@ void GB_MemWriteReg8(u32 address, u32 value)
                     //    (mem->IO_Ports[HDMA1_REG-0xFF00]<<8) | mem->IO_Ports[HDMA2_REG-0xFF00],
                     //    ((mem->IO_Ports[HDMA3_REG-0xFF00]<<8) | mem->IO_Ports[HDMA4_REG-0xFF00]) + 0x8000, size);
                 }
+
+                GB_CPUBreakLoop();
             }
             else
             {
@@ -695,15 +724,26 @@ u32 GB_MemReadReg8(u32 address)
         case HDMA2_REG:
         case HDMA3_REG:
         case HDMA4_REG:
-        case HDMA5_REG:
+        case HDMA5_REG: // Updated in execution loop
         case BCPS_REG:
         case OCPS_REG:
         case SVBK_REG:
             if(GameBoy.Emulator.CGBEnabled == 0) return 0xFF;
+            return mem->IO_Ports[address-0xFF00];
+
         case IF_REG:
+            GB_UpdateCounterToClocks(GB_CPUClockCounterGet());
+            return mem->IO_Ports[IF_REG-0xFF00];
+
         case SB_REG:
+            GB_SerialUpdateClocksClounterReference(GB_CPUClockCounterGet());
+            return mem->IO_Ports[SB_REG-0xFF00];
+
         case DIV_REG:
         case TIMA_REG:
+            GB_TimersUpdateClocksClounterReference(GB_CPUClockCounterGet());
+            return mem->IO_Ports[address-0xFF00];
+
         case TMA_REG:
         case LCDC_REG:
         case SCY_REG:
@@ -723,14 +763,17 @@ u32 GB_MemReadReg8(u32 address)
             return mem->IO_Ports[address-0xFF00];
 
         case DMA_REG:
-            //return 0xFF; //Not really write-only, at least on my gbc
+            //return 0xFF; //Not really write-only, at least on my gbc -> TODO: test
             return mem->IO_Ports[address-0xFF00];
 
         case STAT_REG:
+            GB_PPUUpdateClocksClounterReference(GB_CPUClockCounterGet());
             if(GameBoy.Emulator.lcd_on) return mem->IO_Ports[STAT_REG-0xFF00] | (0x80);
             return (mem->IO_Ports[STAT_REG-0xFF00] | 0x80) & 0xFC;
 
         case P1_REG:
+            //GB_SGBUpdate(GB_CPUClockCounterGet()); TODO
+
             if(GameBoy.Emulator.SGBEnabled == 1)
                 return SGB_ReadP1();
 
@@ -782,6 +825,7 @@ u32 GB_MemReadReg8(u32 address)
         case NR41_REG:
             return 0xFF;
         case NR52_REG:
+            GB_SoundUpdateClocksClounterReference(GB_CPUClockCounterGet());
             return mem->IO_Ports[NR52_REG-0xFF00] | 0x70;
 
         //Wave pattern for channel 3
@@ -789,6 +833,8 @@ u32 GB_MemReadReg8(u32 address)
         case 0xFF34: case 0xFF35: case 0xFF36: case 0xFF37:
         case 0xFF38: case 0xFF39: case 0xFF3A: case 0xFF3B:
         case 0xFF3C: case 0xFF3D: case 0xFF3E: case 0xFF3F:
+            GB_SoundUpdateClocksClounterReference(GB_CPUClockCounterGet());
+
             //if(GameBoy.Emulator.CGBEnabled == 1) //gbc enabled or gbc hardware?
             //    return mem->IO_Ports[address-0xFF00];
             //Demotronic says that it can't be read... :S
@@ -800,7 +846,11 @@ u32 GB_MemReadReg8(u32 address)
             else return mem->IO_Ports[address-0xFF00];
 
         case LY_REG:
-            if(GameBoy.Emulator.lcd_on) return mem->IO_Ports[LY_REG-0xFF00];
+            if(GameBoy.Emulator.lcd_on)
+            {
+                GB_PPUUpdateClocksClounterReference(GB_CPUClockCounterGet());
+                return mem->IO_Ports[LY_REG-0xFF00];
+            }
             else return 0;
 
         case TAC_REG:
@@ -813,10 +863,12 @@ u32 GB_MemReadReg8(u32 address)
 
         case RP_REG:
             if(GameBoy.Emulator.CGBEnabled == 0) return 0xFF;
+            GB_PPUUpdateClocksClounterReference(GB_CPUClockCounterGet());
             return (mem->IO_Ports[RP_REG-0xFF00] | 0x3C) | 0x02; //0x02 = no recieve signal
 
         case BCPD_REG:
             if(GameBoy.Emulator.CGBEnabled == 0) return 0xFF;
+            GB_PPUUpdateClocksClounterReference(GB_CPUClockCounterGet());
 #ifdef VRAM_MEM_CHECKING
             if(GameBoy.Emulator.lcd_on && GameBoy.Emulator.ScreenMode == 3) return 0xFF;
 #endif
@@ -824,6 +876,7 @@ u32 GB_MemReadReg8(u32 address)
 
         case OCPD_REG:
             if(GameBoy.Emulator.CGBEnabled == 0) return 0xFF;
+            GB_PPUUpdateClocksClounterReference(GB_CPUClockCounterGet());
 #ifdef VRAM_MEM_CHECKING
             if(GameBoy.Emulator.lcd_on && GameBoy.Emulator.ScreenMode == 3) return 0xFF;
 #endif

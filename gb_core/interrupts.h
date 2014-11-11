@@ -56,22 +56,19 @@ inline void GB_SetInterrupt(int flag);
 //----------------------------------------------------------------
 
 inline void GB_PPUClockCounterReset(void);
-void GB_PPUUpdate(int reference_clocks);
+void GB_PPUUpdateClocksClounterReference(int reference_clocks);
 int GB_PPUGetClocksToNextEvent(void);
 
 //----------------------------------------------------------------
 
 // TODO :
-/*
-void GB_CheckStatSignal(void);
 inline void GB_CheckStatSignal(void);
 inline void GB_CheckLYC(void);
-inline void GB_CPUHandleClockEvents(void);
-*/
+
 //----------------------------------------------------------------
 
 inline void GB_TimersClockCounterReset(void);
-void GB_TimersUpdate(int reference_clocks);
+void GB_TimersUpdateClocksClounterReference(int reference_clocks);
 int GB_TimersGetClocksToNextEvent(void);
 
 //----------------------------------------------------------------

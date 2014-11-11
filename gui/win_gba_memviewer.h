@@ -21,6 +21,7 @@
 
 int Win_GBAMemViewerCreate(void); // returns 1 if error
 void Win_GBAMemViewerUpdate(void);
+void Win_GBAMemViewerRender(void);
 void Win_GBAMemViewerClose(void);
 
 #endif // __WIN_GBA_MEMVIEWER__

@@ -38,45 +38,71 @@
 
 extern _GB_CONTEXT_ GameBoy;
 
-//FILE * debug;
+//--------------------------------------------------------------------------------
 
-void GB_SerialInit(void)
+static int gb_serial_clock_counter = 0;
+
+void GB_SerialClockCounterReset(void)
 {
-    GameBoy.Emulator.serial_clocks = 0;
-    GameBoy.Emulator.serial_enabled = 0;
-
-    GameBoy.Emulator.serial_device = SERIAL_NONE;
-    GB_SerialPlug(EmulatorConfig.serial_device);
-
-//    debug = fopen("serial.bin","wb");
+    gb_serial_clock_counter = 0;
 }
 
-inline void GB_SerialClocks(int _clocks)
+static inline int GB_SerialClockCounterGet(void)
 {
-    if(GameBoy.Emulator.serial_enabled == 0) return;
+    return gb_serial_clock_counter;
+}
 
+static inline void GB_SerialClockCounterSet(int new_reference_clocks)
+{
+    gb_serial_clock_counter = new_reference_clocks;
+}
+
+void GB_SerialUpdateClocksClounterReference(int reference_clocks)
+{
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
-    if(mem->IO_Ports[SC_REG-0xFF00] & 0x01) //Internal clock
+    int increment_clocks = reference_clocks - GB_SerialClockCounterGet();
+
+    if(GameBoy.Emulator.serial_enabled)
     {
-        GameBoy.Emulator.serial_clocks += _clocks;
-
-        if(GameBoy.Emulator.serial_clocks > GameBoy.Emulator.serial_total_clocks)
+        if(mem->IO_Ports[SC_REG-0xFF00] & 0x01) //Internal clock
         {
-            GameBoy.Emulator.serial_enabled = 0;
+            GameBoy.Emulator.serial_clocks += increment_clocks;
 
-            GB_SetInterrupt(I_SERIAL);
+            if(GameBoy.Emulator.serial_clocks >= GameBoy.Emulator.serial_total_clocks)
+            {
+                GameBoy.Emulator.serial_enabled = 0;
+                GameBoy.Emulator.serial_total_clocks = 0;
+                GameBoy.Emulator.serial_clocks = 0;
 
-            // (*) see memory.c
-            GameBoy.Emulator.SerialSend_Fn(mem->IO_Ports[SB_REG-0xFF00]);
+                GB_SetInterrupt(I_SERIAL);
 
-            mem->IO_Ports[SC_REG-0xFF00] &= ~0x80;
-            mem->IO_Ports[SB_REG-0xFF00] = GameBoy.Emulator.SerialRecv_Fn();
+                // (*) see memory.c
+                GameBoy.Emulator.SerialSend_Fn(mem->IO_Ports[SB_REG-0xFF00]);
+
+                mem->IO_Ports[SC_REG-0xFF00] &= ~0x80;
+                mem->IO_Ports[SB_REG-0xFF00] = GameBoy.Emulator.SerialRecv_Fn();
+            }
         }
     }
+
+    GB_SerialClockCounterSet(reference_clocks);
 }
 
-//--------------------------------------------------------------------------------
+int GB_SerialGetClocksToNextEvent(void)
+{
+    _GB_MEMORY_ * mem = &GameBoy.Memory;
+
+    if(GameBoy.Emulator.serial_enabled)
+    {
+        if(mem->IO_Ports[SC_REG-0xFF00] & 0x01) //Internal clock
+        {
+            return GameBoy.Emulator.serial_total_clocks - GameBoy.Emulator.serial_clocks;
+        }
+    }
+
+    return 0x7FFFFFFF;
+}
 
 //--------------------------------------------------------------------------------
 //                                NO DEVICE
@@ -84,8 +110,6 @@ inline void GB_SerialClocks(int _clocks)
 static void GB_SendNone(u32 data) { return; }
 
 static u32 GB_RecvNone(void) { return 0xFF; }
-
-//--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------
 //                                GB PRINTER
@@ -339,9 +363,6 @@ static void GB_SendPrinter(u32 data)
             break;
     }
 
-//    u8 tempss = data;
-//    if( temp) fwrite(&tempss,1,1,debug);
-//    Debug_DebugMsgArg("GB Printer - Received %02x",data);
     return;
 }
 
@@ -349,8 +370,6 @@ static u32 GB_RecvPrinter(void)
 {
     return GB_Printer.output;
 }
-
-//--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------
 
@@ -380,6 +399,17 @@ void GB_SerialPlug(int device)
     }
 }
 
+//--------------------------------------------------------------------------------
+
+void GB_SerialInit(void)
+{
+    GameBoy.Emulator.serial_clocks = 0;
+    GameBoy.Emulator.serial_enabled = 0;
+
+    GameBoy.Emulator.serial_device = SERIAL_NONE;
+    GB_SerialPlug(EmulatorConfig.serial_device);
+}
+
 void GB_SerialEnd(void)
 {
     if(GameBoy.Emulator.serial_device == SERIAL_GBPRINTER) GB_PrinterReset();
@@ -388,8 +418,7 @@ void GB_SerialEnd(void)
     {
 
     }
-
-//    fclose(debug);
 }
 
+//--------------------------------------------------------------------------------
 

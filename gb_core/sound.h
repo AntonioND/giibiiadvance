@@ -23,6 +23,9 @@
 
 void GB_SoundInit(void);
 
+void GB_SoundClockCounterReset(void);
+void GB_SoundUpdateClocksClounterReference(int reference_clocks);
+
 inline int GB_SoundHardwareIsOn(void);
 
 void GB_ToggleSound(void);

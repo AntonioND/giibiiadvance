@@ -207,7 +207,7 @@ static void _win_gba_mem_viewer_goto(void);
 
 //----------------------------------------------------------------
 
-static void _win_gba_mem_viewer_render(void)
+void Win_GBAMemViewerRender(void)
 {
     if(GBAMemViewerCreated == 0) return;
 
@@ -292,7 +292,7 @@ static int _win_gba_mem_viewer_callback(SDL_Event * e)
     if(redraw)
     {
         Win_GBAMemViewerUpdate();
-        _win_gba_mem_viewer_render();
+        Win_GBAMemViewerRender();
         return 1;
     }
 
@@ -465,7 +465,7 @@ int Win_GBAMemViewerCreate(void)
     WH_SetEventCallback(WinIDGBAMemViewer,_win_gba_mem_viewer_callback);
 
     Win_GBAMemViewerUpdate();
-    _win_gba_mem_viewer_render();
+    Win_GBAMemViewerRender();
 
     return 1;
 }

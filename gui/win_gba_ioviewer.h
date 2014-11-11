@@ -21,6 +21,7 @@
 
 int Win_GBAIOViewerCreate(void); // returns 1 if error
 void Win_GBAIOViewerUpdate(void);
+void Win_GBAIOViewerRender(void);
 void Win_GBAIOViewerClose(void);
 
 #endif // __WIN_GBA_IOVIEWER__

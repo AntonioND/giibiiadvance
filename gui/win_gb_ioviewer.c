@@ -240,7 +240,8 @@ void Win_GBIOViewerUpdate(void)
                           ((GameBoy.Emulator.DoubleSpeed == 1) ? "Speed: 8Mhz (double)" : "Speed: 4Mhz (normal)"));
 
     //IRQs
-    GUI_ConsoleModePrintf(&gb_ioview_irq_con,0,0,"IME: %d",GameBoy.Memory.InterruptMasterEnable);
+    GUI_ConsoleModePrintf(&gb_ioview_irq_con,0,0,"IME: %d HLT: %d",GameBoy.Memory.InterruptMasterEnable,
+                          GameBoy.Emulator.CPUHalt);
     int __ie = GB_MemRead8(IE_REG);
     int __if = GB_MemRead8(IF_REG);
     GUI_ConsoleModePrintf(&gb_ioview_irq_con,0,1,"       IE IF");
@@ -261,7 +262,7 @@ void Win_GBIOViewerUpdate(void)
 
 //----------------------------------------------------------------
 
-static void _win_gb_io_viewer_render(void)
+void Win_GBIOViewerRender(void)
 {
     if(GBIOViewerCreated == 0) return;
 
@@ -310,7 +311,7 @@ static int _win_gb_io_viewer_callback(SDL_Event * e)
     if(redraw)
     {
         Win_GBIOViewerUpdate();
-        _win_gb_io_viewer_render();
+        Win_GBIOViewerRender();
         return 1;
     }
 
@@ -410,7 +411,7 @@ int Win_GBIOViewerCreate(void)
     WH_SetEventCallback(WinIDGBIOViewer,_win_gb_io_viewer_callback);
 
     Win_GBIOViewerUpdate();
-    _win_gb_io_viewer_render();
+    Win_GBIOViewerRender();
 
     return 1;
 }

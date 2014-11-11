@@ -1257,8 +1257,7 @@ void SGB_ScreenDrawScanline(s32 y)
 
 int GB_Screen_Init(void)
 {
-    memset(gb_framebuffer[0],0,sizeof(gb_framebuffer[0]));
-    memset(gb_framebuffer[1],0,sizeof(gb_framebuffer[1]));
+    memset(gb_framebuffer,0,sizeof(gb_framebuffer));
     return 0;
 }
 

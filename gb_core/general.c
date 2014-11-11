@@ -38,7 +38,7 @@ _GB_CONTEXT_ GameBoy;
 
 void GB_PowerOn(void)
 {
-    GB_CPUInit();
+    GB_CPUInit(); // This goes first - It resets the clock counters of all subsystems
     GB_MemInit();
     GB_SoundInit();
     GB_Screen_Init();

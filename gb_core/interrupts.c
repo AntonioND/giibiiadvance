@@ -270,22 +270,25 @@ int GB_PPUGetClocksToNextEvent(void)
 {
     int clocks_to_next_event = 0x7FFFFFFF;
 
-    switch(GameBoy.Emulator.ScreenMode)
+    if(GameBoy.Emulator.lcd_on)
     {
-        case 2:
-            clocks_to_next_event = 80 - GameBoy.Emulator.LCD_clocks;
-            break;
-        case 3:
-            clocks_to_next_event = 172 - GameBoy.Emulator.LCD_clocks;
-            break;
-        case 0:
-            clocks_to_next_event = 204 - GameBoy.Emulator.LCD_clocks;
-            break;
-        case 1:
-            clocks_to_next_event = 456 - GameBoy.Emulator.LCD_clocks;
-            break;
-        default:
-            break;
+        switch(GameBoy.Emulator.ScreenMode)
+        {
+            case 2:
+                clocks_to_next_event = 80 - GameBoy.Emulator.LCD_clocks;
+                break;
+            case 3:
+                clocks_to_next_event = 172 - GameBoy.Emulator.LCD_clocks;
+                break;
+            case 0:
+                clocks_to_next_event = 204 - GameBoy.Emulator.LCD_clocks;
+                break;
+            case 1:
+                clocks_to_next_event = 456 - GameBoy.Emulator.LCD_clocks;
+                break;
+            default:
+                break;
+        }
     }
 
     if(GameBoy.Emulator.VBL_clocks_delay)

@@ -109,6 +109,8 @@ void GB_MemInit(void)
             GameBoy.Emulator.spr_pal[i] = rand() & 0xFF;
         }
     }
+
+    //All those writes will generate a GB_CPUBreakLoop(), but it doesn't matter.
 }
 
 inline void GB_MemWrite16(u32 address, u32 value)
@@ -265,7 +267,7 @@ void GB_MemWriteReg8(u32 address, u32 value)
                 mem->IO_Ports[STAT_REG-0xFF00] &= 0xFC;
                 GameBoy.Emulator.ScreenMode = 0;
 
-                if(value & (1<<7)) GameBoy.Emulator.LCD_clocks = - (4560 - 204);
+                if(value & (1<<7)) GameBoy.Emulator.LCD_clocks = 0; //- (4560 - 204);
                 else GameBoy.Emulator.LCD_clocks = 204;// - (456 - 48);
 
                 GB_CheckStatSignal();

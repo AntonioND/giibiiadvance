@@ -71,7 +71,7 @@ extern const u8 gb_daa_table[256*8*2]; // In file daa_table.c
 
 //----------------------------------------------------------------
 
-int gb_break_cpu_loop = 0;
+static int gb_break_cpu_loop = 0;
 
 inline void GB_CPUBreakLoop(void) // call when writing to a register that can generate an event!!!
 {
@@ -80,8 +80,77 @@ inline void GB_CPUBreakLoop(void) // call when writing to a register that can ge
 
 //----------------------------------------------------------------
 
+static int gb_cpu_clock_counter = 0;
+
+inline void GB_CPUClockCounterReset(void)
+{
+    gb_cpu_clock_counter = 0;
+}
+
+inline int GB_CPUClockCounterGet(void)
+{
+    return gb_cpu_clock_counter;
+}
+
+static inline void GB_CPUClockCounterAdd(int value)
+{
+    gb_cpu_clock_counter += value;
+}
+
+//----------------------------------------------------------------
+
+static inline int min(int a, int b)
+{
+    return (a < b) ? a : b;
+}
+
+//----------------------------------------------------------------
+
+static inline int GB_ClocksForNextEvent(void)
+{
+    int clocks_to_next_event = GB_TimersGetClocksToNextEvent();
+    int tmp = GB_PPUGetClocksToNextEvent();
+    clocks_to_next_event = min(tmp,clocks_to_next_event);
+/*
+    tmp = GB_SoundClocksToNextEvent();
+    clocks_to_next_event = min(tmp,clocks_to_next_event);
+    tmp = GB_TimersClocksToNextEvent();
+    clocks_to_next_event = min(tmp,clocks_to_next_event);
+    //tmp = GB_SerialClocksToNextEvent();
+    //clocks_to_next_event = min(tmp,clocks_to_next_event);
+    tmp = GB_DMAClocksToNextEvent();
+    clocks_to_next_event = min(tmp,clocks_to_next_event);
+*/
+    return clocks_to_next_event;
+}
+
+static inline void GB_ClockCountersReset(void)
+{
+    GB_CPUClockCounterReset();
+    GB_TimersClockCounterReset();
+    GB_PPUClockCounterReset();
+    //GB_<...>ClockCounterReset();
+}
+
+static inline void GB_UpdateCounterToClocks(int reference_clocks)
+{
+    GB_TimersUpdate(reference_clocks);
+    GB_PPUUpdate(reference_clocks);
+/*
+    GB_SoundUpdate(reference_clocks);
+    GB_DMAUpdate(reference_clocks);
+    //GB_SerialUpdate(reference_clocks);
+    //SGB_Update(reference_clocks);
+    //GB_CameraUpdate(reference_clocks);
+*/
+}
+
+//----------------------------------------------------------------
+
 void GB_CPUInit(void)
 {
+    GB_ClockCountersReset();
+
     GB_CPUInterruptsInit();
 
     gb_break_cpu_loop = 0;
@@ -158,73 +227,6 @@ int gb_break_execution = 0;
 inline void _gb_break_to_debugger(void)
 {
     gb_break_execution = 1;
-}
-
-//----------------------------------------------------------------
-
-static int gb_cpu_clock_counter = 0;
-
-inline void GB_CPUClockCounterReset(void)
-{
-    gb_cpu_clock_counter = 0;
-}
-
-inline int GB_CPUClockCounterGet(void)
-{
-    return gb_cpu_clock_counter;
-}
-
-static inline void GB_CPUClockCounterAdd(int value)
-{
-    gb_cpu_clock_counter += value;
-}
-
-//----------------------------------------------------------------
-
-static inline int min(int a, int b)
-{
-    return (a < b) ? a : b;
-}
-
-//----------------------------------------------------------------
-
-static inline int GB_ClocksForNextEvent(void)
-{
-    int clocks_to_next_event = GB_TimersGetClocksToNextEvent();
-    int tmp = GB_PPUGetClocksToNextEvent();
-    clocks_to_next_event = min(tmp,clocks_to_next_event);
-/*
-    tmp = GB_SoundClocksToNextEvent();
-    clocks_to_next_event = min(tmp,clocks_to_next_event);
-    tmp = GB_TimersClocksToNextEvent();
-    clocks_to_next_event = min(tmp,clocks_to_next_event);
-    //tmp = GB_SerialClocksToNextEvent();
-    //clocks_to_next_event = min(tmp,clocks_to_next_event);
-    tmp = GB_DMAClocksToNextEvent();
-    clocks_to_next_event = min(tmp,clocks_to_next_event);
-*/
-    return clocks_to_next_event;
-}
-
-static inline void GB_ClockCountersReset(void)
-{
-    GB_CPUClockCounterReset();
-    GB_TimersClockCounterReset();
-    GB_PPUClockCounterReset();
-    //GB_<...>ClockCounterReset();
-}
-
-static inline void GB_UpdateCounterToClocks(int reference_clocks)
-{
-    GB_TimersUpdate(reference_clocks);
-    GB_PPUUpdate(reference_clocks);
-/*
-    GB_SoundUpdate(reference_clocks);
-    GB_DMAUpdate(reference_clocks);
-    //GB_SerialUpdate(reference_clocks);
-    //SGB_Update(reference_clocks);
-    //GB_CameraUpdate(reference_clocks);
-*/
 }
 
 //----------------------------------------------------------------
@@ -3950,7 +3952,10 @@ int GB_RunFor(s32 run_for_clocks) // 1 frame = 70224 clocks
             if(GameBoy.Emulator.CPUHalt == 0)
                 executed_clocks = GB_CPUExecute(clocks_to_next_event);
             else
+            {
                 executed_clocks = clocks_to_next_event;
+                GB_CPUClockCounterAdd(clocks_to_next_event);
+            }
         }
         else
             executed_clocks = irq_executed_clocks;

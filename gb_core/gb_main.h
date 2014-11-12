@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __GB_MAIN__
-#define __GB_MAIN__
+#ifndef __GB_GB_MAIN__
+#define __GB_GB_MAIN__
 
 void GB_Input_Update(void);
 
@@ -37,4 +37,4 @@ void GB_InputSetMBC7Buttons(int up, int down, int right, int left);
 int GB_Input_Get(int player);
 
 
-#endif //__GB_MAIN__
+#endif //__GB_GB_MAIN__

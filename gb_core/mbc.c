@@ -35,7 +35,7 @@
 #include "sgb.h"
 #include "video.h"
 #include "gb_main.h"
-#include "gb_camera.h"
+#include "camera.h"
 
 //------------------------------------------------------------------------------
 

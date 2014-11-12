@@ -16,14 +16,29 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __WIN_GB_IOVIEWER__
-#define __WIN_GB_IOVIEWER__
+#ifndef __GB_DMA__
+#define __GB_DMA__
 
-int Win_GBIOViewerCreate(void); // returns 1 if error
-void Win_GBIOViewerUpdate(void);
-void Win_GBIOViewerRender(void);
-void Win_GBIOViewerClose(void);
+//----------------------------------------------------------------
 
-#endif // __WIN_GB_IOVIEWER__
+#include "gameboy.h"
 
+//----------------------------------------------------------------
+
+void GB_DMAInit(void);
+void GB_DMAEnd(void);
+
+//----------------------------------------------------------------
+
+inline void GB_DMAClockCounterReset(void);
+void GB_DMAUpdateClocksClounterReference(int reference_clocks);
+int GB_DMAGetClocksToNextEvent(void);
+
+//----------------------------------------------------------------
+
+int GB_DMAExecute(void);
+
+//----------------------------------------------------------------
+
+#endif // __GB_DMA__
 

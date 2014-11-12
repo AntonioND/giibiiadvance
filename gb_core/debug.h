@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __DEBUG__
-#define __DEBUG__
+#ifndef __GB_DEBUG__
+#define __GB_DEBUG__
 
 //---------------------------------------------------------------------------------
 
@@ -35,5 +35,5 @@ char * GB_Dissasemble(u16 addr, int * step);
 
 //---------------------------------------------------------------------------------
 
-#endif //__DEBUG__
+#endif //__GB_DEBUG__
 

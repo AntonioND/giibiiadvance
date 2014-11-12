@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __GENERAL__
-#define __GENERAL__
+#ifndef __GB_GENERAL__
+#define __GB_GENERAL__
 
 void GB_PowerOn(void);
 void GB_PowerOff(void);
@@ -27,5 +27,5 @@ int GB_EmulatorIsEnabledSGB(void);
 
 int GB_RumbleEnabled(void);
 
-#endif //__GENERAL__
+#endif //__GB_GENERAL__
 

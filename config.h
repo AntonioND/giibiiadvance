@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __CONFIG_H__
-#define __CONFIG_H__
+#ifndef __CONFIG__
+#define __CONFIG__
 
 typedef struct {
     int debug_msg_enable;
@@ -51,4 +51,4 @@ extern t_config EmulatorConfig;
 void Config_Save(void);
 void Config_Load(void);
 
-#endif //__CONFIG_H__
+#endif //__CONFIG__

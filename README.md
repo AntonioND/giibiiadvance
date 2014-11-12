@@ -35,10 +35,10 @@ For 0.3.0
  - Fix sound.
  - Implement mosaic correctly (in GBA mode).
  - Correct GBA CPU timings.
- - Rewrite A LOT of GB core to speed up emulation.
+ - Rewrite A LOT of GB core to speed up emulation. (In progress)
  - Auto frameskip.
  - Fix broken x86 ASM instructions of GBA emulation in Linux. "setc (%%ebx)" seems to be the problem...
- - HuC3 and TAMA5 mappers for GB.
+ - HuC3, MMM01 and TAMA5 mappers for GB.
  
 Dependencies
 ------------

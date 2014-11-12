@@ -16,11 +16,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __MBC__
-#define __MBC__
+#ifndef __GB_MBC__
+#define __GB_MBC__
 
 void GB_MapperSet(int type);
 
-#endif //__MBC__
+#endif //__GB_MBC__
 
 

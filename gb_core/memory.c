@@ -31,6 +31,7 @@
 #include "interrupts.h"
 #include "general.h"
 #include "sound.h"
+#include "ppu.h"
 #include "sgb.h"
 #include "video.h"
 #include "gb_main.h"
@@ -245,13 +246,15 @@ void GB_MemWriteReg8(u32 address, u32 value)
             return;
 
         case STAT_REG:
+            GB_CPUBreakLoop();
+
             mem->IO_Ports[STAT_REG-0xFF00] &= (0x07);
             mem->IO_Ports[STAT_REG-0xFF00] |= (value & 0xF8);
 
             GB_CheckStatSignal();
 
             if( (GameBoy.Emulator.HardwareType == HW_GBC) || (GameBoy.Emulator.HardwareType == HW_GBA) )
-                return;
+                return; // the next bug doesn't exist in GBC/GBA
 
             if(GameBoy.Emulator.lcd_on && ((GameBoy.Emulator.ScreenMode == 0) || (GameBoy.Emulator.ScreenMode == 1)))
             {
@@ -266,8 +269,6 @@ void GB_MemWriteReg8(u32 address, u32 value)
             //}
 
             //if(value & IENABLE_OAM) Debug_DebugMsgArg("Wrote STAT - ENABLE OAM INT");
-
-            GB_CPUBreakLoop();
             return;
 
         case LCDC_REG:

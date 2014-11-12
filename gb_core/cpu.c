@@ -29,11 +29,13 @@
 #include "sound.h"
 #include "general.h"
 #include "sgb.h"
+#include "ppu.h"
 #include "serial.h"
 #include "gb_main.h"
-#include "gb_camera.h"
+#include "camera.h"
+#include "dma.h"
 
-#include "../gui/win_gb_disassembler.h"
+#include "../gui/win_gb_debugger.h"
 
 // Single Speed
 // 4194304 Hz
@@ -92,7 +94,7 @@ inline int GB_CPUClockCounterGet(void)
     return gb_cpu_clock_counter;
 }
 
-static inline void GB_CPUClockCounterAdd(int value)
+inline void GB_CPUClockCounterAdd(int value)
 {
     gb_cpu_clock_counter += value;
 }
@@ -104,18 +106,13 @@ static inline int min(int a, int b)
     return (a < b) ? a : b;
 }
 
-//----------------------------------------------------------------
-
 static inline int GB_ClocksForNextEvent(void)
 {
     int clocks_to_next_event = GB_TimersGetClocksToNextEvent();
-    int tmp = GB_PPUGetClocksToNextEvent(); clocks_to_next_event = min(tmp,clocks_to_next_event);
-    tmp = GB_SerialGetClocksToNextEvent();  clocks_to_next_event = min(tmp,clocks_to_next_event);
-
-/*
-    tmp = GB_SoundClocksToNextEvent();
-    clocks_to_next_event = min(tmp,clocks_to_next_event);
-*/
+    clocks_to_next_event = min(clocks_to_next_event,GB_PPUGetClocksToNextEvent());
+    clocks_to_next_event = min(clocks_to_next_event,GB_SerialGetClocksToNextEvent());
+    clocks_to_next_event = min(clocks_to_next_event,GB_DMAGetClocksToNextEvent());
+    //clocks_to_next_event = min(clocks_to_next_event,GB_SoundClocksToNextEvent());
     return clocks_to_next_event;
 }
 
@@ -126,6 +123,7 @@ static inline void GB_ClockCountersReset(void)
     GB_PPUClockCounterReset();
     GB_SerialClockCounterReset();
     GB_SoundClockCounterReset();
+    GB_DMAClockCounterReset();
     //GB_<...>ClockCounterReset();
 }
 
@@ -135,10 +133,9 @@ inline void GB_UpdateCounterToClocks(int reference_clocks)
     GB_PPUUpdateClocksClounterReference(reference_clocks);
     GB_SerialUpdateClocksClounterReference(reference_clocks);
     GB_SoundUpdateClocksClounterReference(reference_clocks);
-/*
+    GB_DMAUpdateClocksClounterReference(reference_clocks);
     //SGB_Update(reference_clocks);
     //GB_CameraUpdate(reference_clocks);
-*/
 }
 
 //----------------------------------------------------------------
@@ -218,6 +215,8 @@ void GB_CPUInit(void)
         GameBoy.CPU.R16.SP = 0x0000;
     }
 }
+
+//----------------------------------------------------------------
 
 int gb_break_execution = 0;
 
@@ -1025,7 +1024,8 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 }
                 else
                 {
-                    if(GameBoy.Emulator.CGBEnabled == 0)
+                    if( ! ( (GameBoy.Emulator.HardwareType == HW_GBC) || (GameBoy.Emulator.HardwareType == HW_GBA) ) )
+                    //if(GameBoy.Emulator.CGBEnabled == 0)
                     {
                         if(mem->IO_Ports[IF_REG-0xFF00] & mem->HighRAM[IE_REG-0xFF80] & 0x1F)
                         {
@@ -3944,27 +3944,40 @@ int GB_RunFor(s32 run_for_clocks) // 1 frame = 70224 clocks
         int clocks_to_next_event = GB_ClocksForNextEvent();
         clocks_to_next_event = min(clocks_to_next_event, run_for_clocks);
 
-        int executed_clocks = 0;
-
-        // DMA NOT WORKING NOW -> PLACE HERE!!!
-
-        int irq_executed_clocks = GB_IRQExecute(); // GB_CPUClockCounterAdd() internal
-        if(irq_executed_clocks == 0)
+        if(clocks_to_next_event > 0)
         {
-            if(GameBoy.Emulator.CPUHalt == 0)
-                executed_clocks = GB_CPUExecute(clocks_to_next_event); // GB_CPUClockCounterAdd() internal
+            int executed_clocks = 0;
+
+            int dma_executed_clocks = GB_DMAExecute(); // GB_CPUClockCounterAdd() internal
+            if(dma_executed_clocks == 0)
+            {
+                int irq_executed_clocks = GB_IRQExecute(); // GB_CPUClockCounterAdd() internal
+                if(irq_executed_clocks == 0)
+                {
+                    if(GameBoy.Emulator.CPUHalt == 0)
+                    {
+                        executed_clocks = GB_CPUExecute(clocks_to_next_event); // GB_CPUClockCounterAdd() internal
+                    }
+                    else
+                    {
+                        executed_clocks = clocks_to_next_event;
+                        GB_CPUClockCounterAdd(clocks_to_next_event);
+                    }
+                }
+                else
+                {
+                    executed_clocks = irq_executed_clocks;
+                }
+            }
             else
             {
-                executed_clocks = clocks_to_next_event;
-                GB_CPUClockCounterAdd(clocks_to_next_event);
+                executed_clocks = dma_executed_clocks;
             }
+
+            run_for_clocks -= executed_clocks;
         }
-        else
-            executed_clocks = irq_executed_clocks;
 
         GB_UpdateCounterToClocks(GB_CPUClockCounterGet());
-
-        run_for_clocks -= executed_clocks;
 
         if( (run_for_clocks <= 0) || GameBoy.Emulator.FrameDrawn )
         {

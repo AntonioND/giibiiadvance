@@ -26,13 +26,13 @@
 #include "../general_utils.h"
 #include "../file_utils.h"
 
-#include "win_gb_gbcamviewer.h"
+#include "win_gb_debugger.h"
 #include "win_main.h"
 #include "win_utils.h"
 
 #include "../gb_core/gameboy.h"
 #include "../gb_core/debug_video.h"
-#include "../gb_core/gb_camera.h"
+#include "../gb_core/camera.h"
 
 #include "../png/png_utils.h"
 

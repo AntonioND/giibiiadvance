@@ -27,6 +27,7 @@ void GB_CPUInit(void);
 
 inline void GB_CPUClockCounterReset(void);
 inline int GB_CPUClockCounterGet(void);
+inline void GB_CPUClockCounterAdd(int value);
 
 inline void GB_UpdateCounterToClocks(int reference_clocks);
 

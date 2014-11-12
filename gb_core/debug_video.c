@@ -30,7 +30,7 @@
 #include "debug_video.h"
 #include "memory.h"
 #include "video.h"
-#include "gb_camera.h"
+#include "camera.h"
 
 //------------------------------------------------------------------------------------------------
 

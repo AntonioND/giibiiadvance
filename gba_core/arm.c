@@ -27,7 +27,7 @@
 #include "interrupts.h"
 #include "disassembler.h"
 
-#include "../gui/win_gba_disassembler.h"
+#include "../gui/win_gba_debugger.h"
 
 //-----------------------------------------------------------------------------------------------
 

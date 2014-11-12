@@ -44,7 +44,7 @@
 #include "../gb_core/video.h"
 #include "../gb_core/general.h"
 #include "../gb_core/rom.h"
-#include "../gb_core/gb_camera.h"
+#include "../gb_core/camera.h"
 
 #include "../gba_core/gba.h"
 #include "../gba_core/bios.h"
@@ -54,23 +54,9 @@
 #include "../gba_core/rom.h"
 #include "../gba_core/sound.h"
 
-#include "win_gb_disassembler.h"
-#include "win_gb_memviewer.h"
-#include "win_gb_ioviewer.h"
-#include "win_gb_tileviewer.h"
-#include "win_gb_mapviewer.h"
-#include "win_gb_sprviewer.h"
-#include "win_gb_palviewer.h"
-#include "win_gb_sgbviewer.h"
-#include "win_gb_gbcamviewer.h"
+#include "win_gb_debugger.h"
 
-#include "win_gba_disassembler.h"
-#include "win_gba_memviewer.h"
-#include "win_gba_ioviewer.h"
-#include "win_gba_tileviewer.h"
-#include "win_gba_mapviewer.h"
-#include "win_gba_sprviewer.h"
-#include "win_gba_palviewer.h"
+#include "win_gba_debugger.h"
 
 //------------------------------------------------------------------
 

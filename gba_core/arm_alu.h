@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __ARM_ALU__
-#define __ARM_ALU__
+#ifndef __GBA_ARM_ALU__
+#define __GBA_ARM_ALU__
 
 //#define POS(n) ((~(u32)(n))>>31)
 //#define NEG(n) (((u32)(n))>>31)
@@ -1012,5 +1012,5 @@ static inline void arm_smlals(u32 RdLo, u32 RdHi, u32 Rm, u32 Rs)
     CPU.CPSR |= (temp?0:F_Z) | (CPU.R[RdHi]&F_N);
 }
 
-#endif //__ARM_ALU__
+#endif //__GBA_ARM_ALU__
 

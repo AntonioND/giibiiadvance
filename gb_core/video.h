@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __VIDEO__
-#define __VIDEO__
+#ifndef __GB_VIDEO__
+#define __GB_VIDEO__
 
 #include "gameboy.h"
 
@@ -56,5 +56,5 @@ void GB_Screenshot(void);
 
 //----------------------------------------------------
 
-#endif //__VIDEO__
+#endif //__GB_VIDEO__
 

@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __LOAD_ROM__
-#define __LOAD_ROM__
+#ifndef __GB_ROM__
+#define __GB_ROM__
 
 #include "gameboy.h"
 
@@ -90,5 +90,5 @@ void GB_SRAM_Load(void);
 void GB_RTC_Save(void);
 void GB_RTC_Load(void);
 
-#endif //__LOAD_ROM__
+#endif //__GB_ROM__
 

@@ -16,11 +16,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __LICENSEES__
-#define __LICENSEES__
+#ifndef __GB_LICENSEES__
+#define __GB_LICENSEES__
 
 const char * GB_GetLicenseeName(char byte1, char byte2);
 
-#endif //__LICENSEES__
+#endif //__GB_LICENSEES__
 
 

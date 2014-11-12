@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __SERIAL__
-#define __SERIAL__
+#ifndef __GB_SERIAL__
+#define __GB_SERIAL__
 
 //--------------------------------------------------------------------------------
 
@@ -36,5 +36,5 @@ void GB_SerialPlug(int device);
 
 //--------------------------------------------------------------------------------
 
-#endif //__SERIAL__
+#endif //__GB_SERIAL__
 

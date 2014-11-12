@@ -3,7 +3,6 @@ General
 -------
 
 - Autosave.
-- Update memory, I/O viewers... with F7?
 - Save memory dumps, dissasembly...
 - Allow to execute one frame per press.
 - Cross out things in debugger that can't be used (transparent palette colors, GBA sprites that are hiden?, ...)

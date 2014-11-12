@@ -178,6 +178,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="font_utils.h" />
+		<Unit filename="gb_core/camera.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gb_core/camera.h" />
 		<Unit filename="gb_core/cpu.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -193,11 +197,11 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="gb_core/debug_video.h" />
-		<Unit filename="gb_core/gameboy.h" />
-		<Unit filename="gb_core/gb_camera.c">
+		<Unit filename="gb_core/dma.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="gb_core/gb_camera.h" />
+		<Unit filename="gb_core/dma.h" />
+		<Unit filename="gb_core/gameboy.h" />
 		<Unit filename="gb_core/gb_main.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -225,6 +229,10 @@
 		<Unit filename="gb_core/noise.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="gb_core/ppu.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gb_core/ppu.h" />
 		<Unit filename="gb_core/rom.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -309,70 +317,56 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="general_utils.h" />
+		<Unit filename="gui/win_gb_debugger.h" />
 		<Unit filename="gui/win_gb_disassembler.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="gui/win_gb_disassembler.h" />
 		<Unit filename="gui/win_gb_gbcamviewer.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="gui/win_gb_gbcamviewer.h" />
 		<Unit filename="gui/win_gb_ioviewer.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="gui/win_gb_ioviewer.h" />
 		<Unit filename="gui/win_gb_mapviewer.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="gui/win_gb_mapviewer.h" />
 		<Unit filename="gui/win_gb_memviewer.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="gui/win_gb_memviewer.h" />
 		<Unit filename="gui/win_gb_palviewer.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="gui/win_gb_palviewer.h" />
 		<Unit filename="gui/win_gb_sgbviewer.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="gui/win_gb_sgbviewer.h" />
 		<Unit filename="gui/win_gb_sprviewer.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="gui/win_gb_sprviewer.h" />
 		<Unit filename="gui/win_gb_tileviewer.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="gui/win_gb_tileviewer.h" />
+		<Unit filename="gui/win_gba_debugger.h" />
 		<Unit filename="gui/win_gba_disassembler.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="gui/win_gba_disassembler.h" />
 		<Unit filename="gui/win_gba_ioviewer.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="gui/win_gba_ioviewer.h" />
 		<Unit filename="gui/win_gba_mapviewer.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="gui/win_gba_mapviewer.h" />
 		<Unit filename="gui/win_gba_memviewer.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="gui/win_gba_memviewer.h" />
 		<Unit filename="gui/win_gba_palviewer.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="gui/win_gba_palviewer.h" />
 		<Unit filename="gui/win_gba_sprviewer.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="gui/win_gba_sprviewer.h" />
 		<Unit filename="gui/win_gba_tileviewer.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="gui/win_gba_tileviewer.h" />
 		<Unit filename="gui/win_main.c">
 			<Option compilerVar="CC" />
 		</Unit>

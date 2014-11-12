@@ -1,3 +1,4 @@
+
 /*
     GiiBiiAdvance - GBA/GB  emulator
     Copyright (C) 2011-2014 Antonio Niño Díaz (AntonioND)
@@ -16,54 +17,80 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __GB_INTERRUPTS__
-#define __GB_INTERRUPTS__
-
 //----------------------------------------------------------------
 
 #include "gameboy.h"
 
-//----------------------------------------------------------------
-
-//STAT_REG
-#define IENABLE_LY_COMPARE (1<<6)
-#define IENABLE_OAM        (1<<5)
-#define IENABLE_VBL        (1<<4)
-#define IENABLE_HBL        (1<<3)
-#define I_LY_EQUALS_LYC    (1<<2)
-//0-1 = screen mode
-
-//(IE/IF)_REG
-#define I_VBLANK (1<<0)
-#define I_STAT   (1<<1)
-#define I_TIMER  (1<<2)
-#define I_SERIAL (1<<3)
-#define I_JOYPAD (1<<4)
+#include "cpu.h"
+#include "memory.h"
 
 //----------------------------------------------------------------
 
-void GB_HandleRTC(void);
+extern _GB_CONTEXT_ GameBoy;
 
 //----------------------------------------------------------------
 
-void GB_CPUInterruptsInit(void);
-void GB_CPUInterruptsEnd(void);
+void GB_DMAInit(void)
+{
+
+}
+
+void GB_DMAEnd(void)
+{
+
+}
 
 //----------------------------------------------------------------
 
-inline void GB_SetInterrupt(int flag);
+static int gb_dma_clock_counter = 0;
+
+inline void GB_DMAClockCounterReset(void)
+{
+    gb_dma_clock_counter = 0;
+}
+
+static inline int GB_DMAClockCounterGet(void)
+{
+    return gb_dma_clock_counter;
+}
+
+static inline void GB_DMAClockCounterSet(int new_reference_clocks)
+{
+    gb_dma_clock_counter = new_reference_clocks;
+}
+
+void GB_DMAUpdateClocksClounterReference(int reference_clocks)
+{
+    _GB_MEMORY_ * mem = &GameBoy.Memory;
+
+    int increment_clocks = reference_clocks - GB_DMAClockCounterGet();
+
+
+
+    GB_DMAClockCounterSet(reference_clocks);
+}
+
+int GB_DMAGetClocksToNextEvent(void)
+{
+    int clocks_to_next_event = 256;
+
+
+
+    return clocks_to_next_event;
+}
 
 //----------------------------------------------------------------
 
-inline void GB_TimersClockCounterReset(void);
-void GB_TimersUpdateClocksClounterReference(int reference_clocks);
-int GB_TimersGetClocksToNextEvent(void);
+int GB_DMAExecute(void)
+{
+    _GB_CPU_ * cpu = &GameBoy.CPU;
+    _GB_MEMORY_ * mem = &GameBoy.Memory;
+
+    int executed_clocks = 0;
+
+    //GB_CPUClockCounterAdd()
+
+    return executed_clocks;
+}
 
 //----------------------------------------------------------------
-
-void GB_CheckJoypadInterrupt(void);
-
-//----------------------------------------------------------------
-
-#endif //__GB_INTERRUPTS__
-

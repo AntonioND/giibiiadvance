@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __SGB__
-#define __SGB__
+#ifndef __GB_SGB__
+#define __GB_SGB__
 
 #define SGB_MAX_PACKETS       (7)
 #define SGB_BYTES_PER_PACKET  (16)
@@ -98,5 +98,5 @@ inline int SGB_MultiplayerIsEnabled(void); // returns 0 if disabled, mode if ena
 void SGB_WriteP1(u32 value);
 u32  SGB_ReadP1(void);
 
-#endif //__SGB__
+#endif //__GB_SGB__
 

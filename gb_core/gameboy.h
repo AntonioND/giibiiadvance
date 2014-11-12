@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __GAMEBOY__
-#define __GAMEBOY__
+#ifndef __GB_GAMEBOY__
+#define __GB_GAMEBOY__
 
 #include <stdbool.h>
 #include "../general_utils.h"
@@ -369,5 +369,5 @@ typedef struct {
     _EMULATOR_INFO_ Emulator;
 } _GB_CONTEXT_;
 
-#endif //__GAMEBOY__
+#endif //__GB_GAMEBOY__
 

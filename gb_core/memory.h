@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __MEMORY__
-#define __MEMORY__
+#ifndef __GB_MEMORY__
+#define __GB_MEMORY__
 
 void GB_MemInit(void);
 
@@ -31,5 +31,5 @@ u32 GB_MemReadReg8(u32 address);
 
 inline u32 GBC_HDMAcopy(void);
 
-#endif //__MEMORY__
+#endif //__GB_MEMORY__
 

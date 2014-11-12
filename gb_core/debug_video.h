@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __DEBUG_VIDEO__
-#define __DEBUG_VIDEO__
+#ifndef __GB_DEBUG_VIDEO__
+#define __GB_DEBUG_VIDEO__
 
 //---------------------------------------------------------------------------------
 
@@ -62,5 +62,5 @@ void GB_Debug_GBCameraRetinaProcessedPrint(char * buffer, int bufw, int bufh);
 
 //---------------------------------------------------------------------------------
 
-#endif //__DEBUG_VIDEO__
+#endif //__GB_DEBUG_VIDEO__
 

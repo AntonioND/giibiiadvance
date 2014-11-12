@@ -27,7 +27,7 @@
 #include "../general_utils.h"
 #include "../file_utils.h"
 
-#include "win_gb_sgbviewer.h"
+#include "win_gb_debugger.h"
 #include "win_main.h"
 #include "win_utils.h"
 

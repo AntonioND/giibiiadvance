@@ -18,7 +18,7 @@
 
 #include "../build_options.h"
 #include "../debug_utils.h"
-#include "../gui/win_gba_disassembler.h"
+#include "../gui/win_gba_debugger.h"
 
 #include "gba.h"
 #include "bios.h"

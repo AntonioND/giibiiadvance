@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __TYPE_UTILS__
-#define __TYPE_UTILS__
+#ifndef __GENERAL_UTILS__
+#define __GENERAL_UTILS__
 
 //----------------------------------------------------------------------------------
 
@@ -50,5 +50,5 @@ void ScaleImage24RGB(int zoom, char * srcbuf, int srcw, int srch, char * dstbuf,
 
 //----------------------------------------------------------------------------------
 
-#endif // __TYPE_UTILS__
+#endif // __GENERAL_UTILS__
 

@@ -16,14 +16,30 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __WIN_GBA_IOVIEWER__
-#define __WIN_GBA_IOVIEWER__
+#ifndef __GB_PPU__
+#define __GB_PPU__
 
-int Win_GBAIOViewerCreate(void); // returns 1 if error
-void Win_GBAIOViewerUpdate(void);
-void Win_GBAIOViewerRender(void);
-void Win_GBAIOViewerClose(void);
+//----------------------------------------------------------------
 
-#endif // __WIN_GBA_IOVIEWER__
+#include "gameboy.h"
 
+//----------------------------------------------------------------
 
+void GB_PPUInit(void);
+void GB_PPUEnd(void);
+
+//----------------------------------------------------------------
+
+inline void GB_PPUClockCounterReset(void);
+void GB_PPUUpdateClocksClounterReference(int reference_clocks);
+int GB_PPUGetClocksToNextEvent(void);
+
+//----------------------------------------------------------------
+
+// TODO :
+inline void GB_CheckStatSignal(void);
+inline void GB_CheckLYC(void);
+
+//----------------------------------------------------------------
+
+#endif // __GB_PPU__

@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __SOUND__
-#define __SOUND__
+#ifndef __GB_SOUND__
+#define __GB_SOUND__
 
 #include "gameboy.h"
 
@@ -48,5 +48,5 @@ void GB_SoundSetConfig(int vol, int chn_flags);
 
 //---------------------------------
 
-#endif //__SOUND__
+#endif //__GB_SOUND__
 

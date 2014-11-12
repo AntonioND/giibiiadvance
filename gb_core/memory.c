@@ -36,6 +36,7 @@
 #include "video.h"
 #include "gb_main.h"
 #include "serial.h"
+#include "dma.h"
 
 extern _GB_CONTEXT_ GameBoy;
 
@@ -98,10 +99,6 @@ void GB_MemInit(void)
         mem->IO_Ports[DIV_REG-0xFF00] = 0x22;
 
         mem->IO_Ports[HDMA5_REG-0xFF00] = 0xFF;
-        GameBoy.Emulator.HDMAenabled = HDMA_NONE;
-        GameBoy.Emulator.HBlankHDMAdone = 0;
-        GameBoy.Emulator.gdma_preparation_time_countdown = -1;
-        GameBoy.Emulator.gbc_dma_working_for = 0;
 
         //PALETTE RAM
         u32 i;
@@ -346,25 +343,17 @@ void GB_MemWriteReg8(u32 address, u32 value)
 
         case DMA_REG:
             //TODO
-            //This should be asynchronous...
             //It should disable non-highram memory (if source is VRAM, VRAM is disabled
             //instead of other ram)... etc...
 
             mem->IO_Ports[DMA_REG-0xFF00] = value;
 
-            if(value > 0xF1) return; // ??
-            else
+            if(value <= 0xF1)
             {
-                u32 i;
-                // Source:      XX00-XX9F   ;XX in range from 00-F1h
-                // Destination: FE00-FE9F
-                for(i = 0; i <= 0x9F; i++)
-#ifdef VRAM_MEM_CHECKING
-                    if(!(GameBoy.Emulator.ScreenMode & 0x02 && GameBoy.Emulator.lcd_on)) // ??
-#endif
-                        mem->ObjAttrMem[i] = GB_MemRead8( (value<<8) | i ) ;
+                GB_DMAInitOAMCopy(value);
+                GB_CPUBreakLoop();
             }
-            GB_CPUBreakLoop();
+
             return;
         //                   Sound...
         case NR10_REG: case NR11_REG: case NR12_REG: case NR13_REG: case NR14_REG:
@@ -495,19 +484,19 @@ void GB_MemWriteReg8(u32 address, u32 value)
         case HDMA4_REG:
             if(GameBoy.Emulator.CGBEnabled == 0) return;
 
-            if(GameBoy.Emulator.HDMAenabled == HDMA_NONE)
+            if(GameBoy.Emulator.GBC_DMA_enabled == GBC_DMA_NONE)
                 mem->IO_Ports[address-0xFF00] = value & 0xF0; //4 lower bits ignored
             return;
         case HDMA3_REG:
             if(GameBoy.Emulator.CGBEnabled == 0) return;
 
-            if(GameBoy.Emulator.HDMAenabled == HDMA_NONE)
+            if(GameBoy.Emulator.GBC_DMA_enabled == GBC_DMA_NONE)
                 mem->IO_Ports[HDMA3_REG-0xFF00] = value&0x1F; //Dest is VRAM
             return;
         case HDMA1_REG:
             if(GameBoy.Emulator.CGBEnabled == 0) return;
 
-            if(GameBoy.Emulator.HDMAenabled == HDMA_NONE)
+            if(GameBoy.Emulator.GBC_DMA_enabled == GBC_DMA_NONE)
                 mem->IO_Ports[HDMA1_REG-0xFF00] = value;
             return;
 
@@ -517,35 +506,19 @@ void GB_MemWriteReg8(u32 address, u32 value)
             //Start/Stop HDMA copy
             mem->IO_Ports[HDMA5_REG-0xFF00] = value;
 
-            if(GameBoy.Emulator.HDMAenabled == HDMA_NONE)
+            if(GameBoy.Emulator.GBC_DMA_enabled == GBC_DMA_NONE)
             {
-                GameBoy.Emulator.HDMAenabled = (value & (1<<7)) ? HDMA_HBLANK : HDMA_GENERAL;
-                if(GameBoy.Emulator.HDMAenabled == HDMA_HBLANK)
-                {
-                    GameBoy.Emulator.HBlankHDMAdone = 0;
-                    mem->IO_Ports[HDMA5_REG-0xFF00] &= 0x7F;
-                }
-                else
-                {
-                    u32 size = ( ((u32)value) & 0x7F ) + 1;
-                    GameBoy.Emulator.gdma_preparation_time_countdown = 220; // 220 cycles, half in double speed mode
-                    GameBoy.Emulator.gbc_dma_working_for = ( size * 16 ) / 2; // 2 bytes per clock (?)
-                    //Debug_DebugMsgArg("GDMA\nSRC = %04X\nDST = %04X\nSIZE = %d",
-                    //    (mem->IO_Ports[HDMA1_REG-0xFF00]<<8) | mem->IO_Ports[HDMA2_REG-0xFF00],
-                    //    ((mem->IO_Ports[HDMA3_REG-0xFF00]<<8) | mem->IO_Ports[HDMA4_REG-0xFF00]) + 0x8000, size);
-                }
-
+                GB_DMAInitGBCCopy(value);
                 GB_CPUBreakLoop();
             }
-            else
+            else //if(GameBoy.Emulator.GBC_DMA_enabled == GBC_DMA_HBLANK)
             {
+                // If HDMA_GENERAL the CPU is blocked, not needed to check
                 if(!(value & (1<<7)))
                 {
-                    GameBoy.Emulator.HDMAenabled = HDMA_NONE;
-                    mem->IO_Ports[HDMA5_REG-0xFF00] |= (1<<7);
+                    GB_DMAStopGBCCopy();
                 }
             }
-
             return;
 
         case RP_REG:
@@ -909,104 +882,4 @@ u32 GB_MemReadReg8(u32 address)
 
     return 0xFF;
 }
-
-inline u32 GBC_HDMAcopy(void)
-{
-    _GB_MEMORY_ * mem = &GameBoy.Memory;
-
-    if(GameBoy.Emulator.HDMAenabled == HDMA_NONE) return 0;
-    else if(GameBoy.Emulator.HDMAenabled == HDMA_HBLANK)
-    {
-        if(GameBoy.Emulator.lcd_on == 0) return 0; //Screen OFF, nothing happens
-        if(GameBoy.Emulator.CPUHalt) return 0; //Halt mode, nothing happens
-
-        if(GameBoy.Emulator.ScreenMode != 0) // Not hblank period
-        {
-            GameBoy.Emulator.HBlankHDMAdone = 0;
-            GameBoy.Emulator.gbc_dma_working_for = 16 / 2;
-            return 0;
-        }
-
-        if(GameBoy.Emulator.HBlankHDMAdone)
-            return 0; //0x10 bytes copied before
-
-        u32 source = (mem->IO_Ports[HDMA1_REG-0xFF00]<<8) | mem->IO_Ports[HDMA2_REG-0xFF00];
-        u32 dest = ((mem->IO_Ports[HDMA3_REG-0xFF00]<<8) | mem->IO_Ports[HDMA4_REG-0xFF00]) + 0x8000;
-
-        GB_MemWrite8(dest++,GB_MemRead8(source++));
-        GB_MemWrite8(dest++,GB_MemRead8(source++));
-
-        mem->IO_Ports[HDMA1_REG-0xFF00] = source >> 8;
-        mem->IO_Ports[HDMA2_REG-0xFF00] = source & 0xFF;
-        mem->IO_Ports[HDMA3_REG-0xFF00] = (dest >> 8) & 0x1F;
-        mem->IO_Ports[HDMA4_REG-0xFF00] = dest & 0xFF;
-
-        GameBoy.Emulator.gbc_dma_working_for--;
-        if(GameBoy.Emulator.gbc_dma_working_for == 0)
-        {
-            GameBoy.Emulator.HBlankHDMAdone = 1;
-
-            if(mem->IO_Ports[HDMA5_REG-0xFF00] == 0)
-            {
-                GameBoy.Emulator.HDMAenabled = HDMA_NONE;
-                GameBoy.Emulator.HBlankHDMAdone = 0;
-                mem->IO_Ports[HDMA5_REG-0xFF00] = 0xFF;
-            }
-            else
-            {
-                mem->IO_Ports[HDMA5_REG-0xFF00] = (mem->IO_Ports[HDMA5_REG-0xFF00] - 1) & 0x7F;
-            }
-        }
-
-        return 1;
-    }
-    else if(GameBoy.Emulator.HDMAenabled == HDMA_GENERAL)
-    {
-//It takes (220 + (n * 7.63)) microseconds in single speed and (110 + (n * 7.63)) microseconds
-//in double speed mode. (Where n = 0 is 16 bytes, n = 1 is 32 bytes, n=2 is 48 bytes, etc... )
-//This translates to a transfer rate of 2097152 bytes/sec if you don't consider the initial
-//startup delay of 220uS (110uS in double speed mode.) The value 110uS is accurate within +/-5uS.
-//The value 220uS is accurate within +/- 10uS.
-        if(GameBoy.Emulator.gdma_preparation_time_countdown > 0) // 220 to 0
-        {
-            GameBoy.Emulator.gdma_preparation_time_countdown -= 1 << GameBoy.Emulator.DoubleSpeed;
-            return 1;
-        }
-
-        if(GameBoy.Emulator.gbc_dma_working_for)
-        {
-            u32 source = (mem->IO_Ports[HDMA1_REG-0xFF00]<<8) | mem->IO_Ports[HDMA2_REG-0xFF00];
-            u32 dest = ((mem->IO_Ports[HDMA3_REG-0xFF00]<<8) | mem->IO_Ports[HDMA4_REG-0xFF00]) + 0x8000;
-
-            GB_MemWrite8(dest++,GB_MemRead8(source++));
-            GB_MemWrite8(dest++,GB_MemRead8(source++));
-
-            mem->IO_Ports[HDMA1_REG-0xFF00] = source >> 8;
-            mem->IO_Ports[HDMA2_REG-0xFF00] = source & 0xFF;
-            mem->IO_Ports[HDMA3_REG-0xFF00] = (dest >> 8) & 0x1F;
-            mem->IO_Ports[HDMA4_REG-0xFF00] = dest & 0xFF;
-
-            GameBoy.Emulator.gbc_dma_working_for--;
-
-            if( (GameBoy.Emulator.gbc_dma_working_for & 7) == 0)
-            {
-                if(mem->IO_Ports[HDMA5_REG-0xFF00] == 0)
-                {
-                    GameBoy.Emulator.HDMAenabled = HDMA_NONE;
-                    mem->IO_Ports[HDMA5_REG-0xFF00] = 0xFF;
-                }
-                else
-                {
-                    mem->IO_Ports[HDMA5_REG-0xFF00] = (mem->IO_Ports[HDMA5_REG-0xFF00] - 1) & 0x7F;
-                }
-            }
-
-            return 1;
-        }
-
-    }
-
-    return 0;
-}
-
 

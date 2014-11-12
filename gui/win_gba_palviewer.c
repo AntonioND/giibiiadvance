@@ -26,7 +26,7 @@
 #include "../general_utils.h"
 #include "../file_utils.h"
 
-#include "win_gba_palviewer.h"
+#include "win_gba_debugger.h"
 #include "win_main.h"
 #include "win_utils.h"
 

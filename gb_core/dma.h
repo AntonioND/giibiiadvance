@@ -30,6 +30,12 @@ void GB_DMAEnd(void);
 
 //----------------------------------------------------------------
 
+void GB_DMAInitOAMCopy(int src_addr_high_byte);
+void GB_DMAInitGBCCopy(int register_value);
+void GB_DMAStopGBCCopy(void);
+
+//----------------------------------------------------------------
+
 inline void GB_DMAClockCounterReset(void);
 void GB_DMAUpdateClocksClounterReference(int reference_clocks);
 int GB_DMAGetClocksToNextEvent(void);

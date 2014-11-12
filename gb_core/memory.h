@@ -29,7 +29,5 @@ inline u32 GB_MemRead16(u32 address);
 u32 GB_MemRead8(u32 address);
 u32 GB_MemReadReg8(u32 address);
 
-inline u32 GBC_HDMAcopy(void);
-
 #endif //__GB_MEMORY__
 

@@ -221,8 +221,8 @@ void Win_GBIOViewerUpdate(void)
     u32 source = (__io[HDMA1_REG-0xFF00]<<8) | __io[HDMA2_REG-0xFF00];
     u32 dest = ((__io[HDMA3_REG-0xFF00]<<8) | __io[HDMA4_REG-0xFF00]) + 0x8000;
     u32 size = (((__io[HDMA5_REG-0xFF00]<<8)+1)&0x7F)<<4;
-    char * mode = ((GameBoy.Emulator.HDMAenabled==0) ? "None" :
-                    ( (GameBoy.Emulator.HDMAenabled==1) ? "GDMA" : "HDMA" ));
+    char * mode = ((GameBoy.Emulator.GBC_DMA_enabled==GBC_DMA_NONE) ? "None" :
+                    ( (GameBoy.Emulator.GBC_DMA_enabled==GBC_DMA_GENERAL) ? "GDMA" : "HDMA" ));
     GUI_ConsoleModePrintf(&gb_ioview_dmainfo_con,0,0,"Mode:   %s",mode);
     GUI_ConsoleModePrintf(&gb_ioview_dmainfo_con,0,1,"Source: %04X",source);
     GUI_ConsoleModePrintf(&gb_ioview_dmainfo_con,0,2,"Dest:   %04X",dest);

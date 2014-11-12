@@ -34,6 +34,7 @@
 #include "gb_main.h"
 #include "camera.h"
 #include "ppu.h"
+#include "dma.h"
 
 _GB_CONTEXT_ GameBoy;
 
@@ -45,6 +46,7 @@ void GB_PowerOn(void)
     GB_Screen_Init();
     GB_PPUInit();
     GB_SerialInit();
+    GB_DMAInit();
 
     if(GameBoy.Emulator.SGBEnabled) SGB_Init();
 
@@ -67,6 +69,7 @@ void GB_PowerOff(void)
 
     if(GameBoy.Emulator.SGBEnabled) SGB_End();
 
+    GB_DMAEnd();
     GB_SerialEnd();
     GB_SoundEnd();
     GB_PPUEnd();

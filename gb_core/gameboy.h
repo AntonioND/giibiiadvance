@@ -240,9 +240,9 @@ typedef struct {
 #define HW_GBC  (4)
 #define HW_GBA  (5)
 
-#define HDMA_NONE    (0)
-#define HDMA_GENERAL (1)
-#define HDMA_HBLANK  (2)
+#define GBC_DMA_NONE    (0)
+#define GBC_DMA_GENERAL (1)
+#define GBC_DMA_HBLANK  (2)
 
 #define SERIAL_NONE      (0)
 #define SERIAL_GBPRINTER (1)
@@ -319,10 +319,19 @@ typedef struct {
     u32 lcd_on;
     draw_scanline_fn_ptr DrawScanlineFn;
 
-    u32 HDMAenabled; //HDMA_*** defines
+    // OAM DMA
+    u32 OAM_DMA_bytes_left;
+    u32 OAM_DMA_clocks_elapsed;
+    u32 OAM_DMA_src; // pointers to current positions to read and copy
+    u32 OAM_DMA_dst;
+
+    // GBC DMA
+    u32 GBC_DMA_enabled; //GBC_DMA_<***> defines
+
+    s32 gdma_preparation_clocks_left;
+    s32 gdma_copy_clocks_left;
+
     u32 HBlankHDMAdone; //To limit to 0x10 bytes per HBlank
-    s32 gdma_preparation_time_countdown;
-    s32 gbc_dma_working_for; //2 bytes per clock (?)
 
     //u32 halt_not_executed;
     u32 CPUHalt;

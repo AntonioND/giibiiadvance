@@ -100,101 +100,124 @@ void GB_PPUUpdateClocksClounterReference(int reference_clocks)
     {
         GameBoy.Emulator.LCD_clocks += increment_clocks;
 
-        //SCREEN
-        switch(GameBoy.Emulator.ScreenMode)
+        int done = 0;
+        while(done == 0)
         {
-            case 2:
-                if(GameBoy.Emulator.LCD_clocks >= (80<<GameBoy.Emulator.DoubleSpeed) )
-                {
-                    GameBoy.Emulator.LCD_clocks -= (80<<GameBoy.Emulator.DoubleSpeed);
-
-                    GameBoy.Emulator.ScreenMode = 3;
-                    mem->IO_Ports[STAT_REG-0xFF00] |= 0x03;
-
-                    GB_CheckStatSignal();
-                }
-                break;
-            case 3:
-                if(GameBoy.Emulator.LCD_clocks >= (172<<GameBoy.Emulator.DoubleSpeed) )
-                {
-                    GameBoy.Emulator.LCD_clocks -= (172<<GameBoy.Emulator.DoubleSpeed);
-
-                    GameBoy.Emulator.DrawScanlineFn(GameBoy.Emulator.CurrentScanLine);
-
-                    GameBoy.Emulator.ScreenMode = 0;
-                    mem->IO_Ports[STAT_REG-0xFF00] &= 0xFC;
-
-                    GB_CheckStatSignal();
-                }
-                break;
-            case 0:
-                if(GameBoy.Emulator.LCD_clocks >= (204<<GameBoy.Emulator.DoubleSpeed) )
-                {
-                    GameBoy.Emulator.LCD_clocks -= (204<<GameBoy.Emulator.DoubleSpeed);
-
-                    GameBoy.Emulator.CurrentScanLine ++;
-
-                    mem->IO_Ports[LY_REG-0xFF00] = GameBoy.Emulator.CurrentScanLine;
-
-                    GB_CheckLYC();
-
-                    if(GameBoy.Emulator.CurrentScanLine == 144)
+            switch(GameBoy.Emulator.ScreenMode)
+            {
+                case 2:
+                    if(GameBoy.Emulator.LCD_clocks >= (80<<GameBoy.Emulator.DoubleSpeed) )
                     {
-                        GameBoy.Emulator.ScreenMode = 1;
-                        mem->IO_Ports[STAT_REG-0xFF00] &= 0xFC;
-                        mem->IO_Ports[STAT_REG-0xFF00] |= 0x01;
+                        GameBoy.Emulator.LCD_clocks -= (80<<GameBoy.Emulator.DoubleSpeed);
 
-                        //Call VBL interrupt...
-                        //if(mem->HighRAM[IE_REG-0xFF80] & I_VBLANK)
-                        //    GB_SetInterrupt(I_VBLANK);
-                        GameBoy.Emulator.VBL_clocks_delay = 24 - GameBoy.Emulator.LCD_clocks;
+                        GameBoy.Emulator.ScreenMode = 3;
+                        mem->IO_Ports[STAT_REG-0xFF00] |= 0x03;
+
+                        GB_CheckStatSignal();
                     }
                     else
                     {
-                        GameBoy.Emulator.ScreenMode = 2;
-                        mem->IO_Ports[STAT_REG-0xFF00] &= 0xFC;
-                        mem->IO_Ports[STAT_REG-0xFF00] |= 0x02;
+                        done = 1;
                     }
-
-                    GB_CheckStatSignal();
-                }
-                break;
-            case 1:
-                if(GameBoy.Emulator.LCD_clocks >= (456<<GameBoy.Emulator.DoubleSpeed) )
-                {
-                    GameBoy.Emulator.LCD_clocks -= (456<<GameBoy.Emulator.DoubleSpeed);
-
-                    if(GameBoy.Emulator.CurrentScanLine == 0)
+                    break;
+                case 3:
+                    if(GameBoy.Emulator.LCD_clocks >= (172<<GameBoy.Emulator.DoubleSpeed) )
                     {
-                        GameBoy.Emulator.ScreenMode = 2;
+                        GameBoy.Emulator.LCD_clocks -= (172<<GameBoy.Emulator.DoubleSpeed);
+
+                        GameBoy.Emulator.DrawScanlineFn(GameBoy.Emulator.CurrentScanLine);
+
+                        GameBoy.Emulator.ScreenMode = 0;
                         mem->IO_Ports[STAT_REG-0xFF00] &= 0xFC;
-                        mem->IO_Ports[STAT_REG-0xFF00] |= 0x02;
+
                         GB_CheckStatSignal();
-                        break;
                     }
-
-                    GameBoy.Emulator.CurrentScanLine ++;
-
-                    if(GameBoy.Emulator.CurrentScanLine == 153)
+                    else
                     {
-                        GameBoy.Emulator.LCD_clocks += ((456-8)<<GameBoy.Emulator.DoubleSpeed); // 8 clocks this scanline
+                        done = 1;
                     }
-                    else if(GameBoy.Emulator.CurrentScanLine == 154)
+                    break;
+                case 0:
+                    if(GameBoy.Emulator.LCD_clocks >= (204<<GameBoy.Emulator.DoubleSpeed) )
                     {
-                        GameBoy.Emulator.CurrentScanLine = 0;
-                        GameBoy.Emulator.FrameDrawn = 1;
+                        GameBoy.Emulator.LCD_clocks -= (204<<GameBoy.Emulator.DoubleSpeed);
 
-                        GameBoy.Emulator.LCD_clocks += (8<<GameBoy.Emulator.DoubleSpeed); // 456 - 8 cycles left of vblank...
+                        GameBoy.Emulator.CurrentScanLine ++;
+
+                        mem->IO_Ports[LY_REG-0xFF00] = GameBoy.Emulator.CurrentScanLine;
+
+                        GB_CheckLYC();
+
+                        if(GameBoy.Emulator.CurrentScanLine == 144)
+                        {
+                            GameBoy.Emulator.ScreenMode = 1;
+                            mem->IO_Ports[STAT_REG-0xFF00] &= 0xFC;
+                            mem->IO_Ports[STAT_REG-0xFF00] |= 0x01;
+
+                            //Call VBL interrupt...
+                            //if(mem->HighRAM[IE_REG-0xFF80] & I_VBLANK)
+                            //    GB_SetInterrupt(I_VBLANK);
+                            GameBoy.Emulator.VBL_clocks_delay = 24 - GameBoy.Emulator.LCD_clocks;
+                        }
+                        else
+                        {
+                            GameBoy.Emulator.ScreenMode = 2;
+                            mem->IO_Ports[STAT_REG-0xFF00] &= 0xFC;
+                            mem->IO_Ports[STAT_REG-0xFF00] |= 0x02;
+                        }
+
+                        GB_CheckStatSignal();
                     }
+                    else
+                    {
+                        done = 1;
+                    }
+                    break;
+                case 1:
+                    if(GameBoy.Emulator.LCD_clocks >= (456<<GameBoy.Emulator.DoubleSpeed) )
+                    {
+                        GameBoy.Emulator.LCD_clocks -= (456<<GameBoy.Emulator.DoubleSpeed);
 
-                    mem->IO_Ports[LY_REG-0xFF00] = GameBoy.Emulator.CurrentScanLine;
+                        if(GameBoy.Emulator.CurrentScanLine == 0)
+                        {
+                            GameBoy.Emulator.ScreenMode = 2;
+                            mem->IO_Ports[STAT_REG-0xFF00] &= 0xFC;
+                            mem->IO_Ports[STAT_REG-0xFF00] |= 0x02;
+                            GB_CheckStatSignal();
+                            break;
+                        }
 
-                    GB_CheckLYC();
+                        GameBoy.Emulator.CurrentScanLine ++;
 
-                    GB_CheckStatSignal();
-                }
-                break;
+                        if(GameBoy.Emulator.CurrentScanLine == 153)
+                        {
+                            GameBoy.Emulator.LCD_clocks += ((456-8)<<GameBoy.Emulator.DoubleSpeed); // 8 clocks this scanline
+                        }
+                        else if(GameBoy.Emulator.CurrentScanLine == 154)
+                        {
+                            GameBoy.Emulator.CurrentScanLine = 0;
+                            GameBoy.Emulator.FrameDrawn = 1;
+
+                            GameBoy.Emulator.LCD_clocks += (8<<GameBoy.Emulator.DoubleSpeed); // 456 - 8 cycles left of vblank...
+                        }
+
+                        mem->IO_Ports[LY_REG-0xFF00] = GameBoy.Emulator.CurrentScanLine;
+
+                        GB_CheckLYC();
+
+                        GB_CheckStatSignal();
+                    }
+                    else
+                    {
+                        done = 1;
+                    }
+                    break;
+                default:
+                    done = 1;
+                    break;
+            }
         }
+
     }
 
     GB_PPUClockCounterSet(reference_clocks);

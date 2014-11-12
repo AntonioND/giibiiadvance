@@ -25,7 +25,7 @@
 #include "../font_utils.h"
 #include "../general_utils.h"
 
-#include "win_gba_ioviewer.h"
+#include "win_gba_debugger.h"
 #include "win_main.h"
 #include "win_utils.h"
 

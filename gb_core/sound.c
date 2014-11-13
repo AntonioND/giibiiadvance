@@ -58,7 +58,6 @@ static s8 GB_WavePattern[32];
 extern const u8 gb_noise_7[16]; // In file noise.c
 extern const u8 gb_noise_15[4096]; // In file noise.c
 
-
 typedef struct {
     struct { //Tone & Sweep
         u8 reg[5];
@@ -254,16 +253,6 @@ void GB_SoundResetBufferPointers(void)
     Sound.samples_left_to_output = 0;
 }
 
-void GB_SoundClockCounterReset(void)
-{
-
-}
-
-void GB_SoundUpdateClocksClounterReference(int reference_clocks)
-{
-
-}
-
 void GB_SoundInit(void)
 {
     memset(&Sound,0,sizeof(Sound));
@@ -399,7 +388,7 @@ void GB_ToggleSound(void)
 
 void GB_SoundMix(void)
 {
-    //if(output_enabled == 0) return;
+    //if(output_enabled == 0) return; // Not needed here
     if(EmulatorConfig.snd_mute) return;
 
     if(Sound.samples_left_to_input < 1) return;
@@ -475,212 +464,6 @@ void GB_SoundMix(void)
     Sound.buffer[Sound.buffer_next_input_sample++] = (outvalue_left * EmulatorConfig.volume) / 128;
     Sound.buffer[Sound.buffer_next_input_sample++] = (outvalue_right * EmulatorConfig.volume) / 128;
     Sound.buffer_next_input_sample &= GB_BUFFER_SAMPLES-1;
-/*
-    if(f== NULL) createwavheader();
-    s16 a = outvalue_left, b = outvalue_right;
-    fwrite(&a,sizeof(a),1,f);
-    fwrite(&b,sizeof(b),1,f);
-*/
-}
-
-void GB_SoundUpdate(u32 clocks) //Every 16384 clocks update hardware, every ~190 generate output
-{
-    _GB_MEMORY_ * mem = &GameBoy.Memory;
-
-    Sound.clocks += clocks;
-
-    if(output_enabled)
-    {
-        Sound.nextsample_clocks += clocks;
-
-        //4194304 Hz CPU / 22050 Hz sound output.
-        if(Sound.samples_left_to_output > Sound.samples_left_to_input-(GB_BUFFER_SAMPLES/2))
-        {
-            if(Sound.nextsample_clocks > (190 + (4<<GameBoy.Emulator.DoubleSpeed)))
-            {
-                Sound.nextsample_clocks -= (190 + (4<<GameBoy.Emulator.DoubleSpeed));
-                GB_SoundMix();
-            }
-        }               //This is an ugly hack to make sound buffer not overflow or underflow...
-        else
-        {
-            if(Sound.nextsample_clocks > (191 - (4<<GameBoy.Emulator.DoubleSpeed)))
-            {
-                Sound.nextsample_clocks -= (191 - (4<<GameBoy.Emulator.DoubleSpeed));
-                GB_SoundMix();
-            }
-        }
-    }
-
-    //4194304 Hz CPU / 256 Steps per second
-    if(Sound.clocks > 16383) Sound.clocks -= 16384;
-    else return;
-
-    if(Sound.master_enable == 0) return;
-
-    //Channel 1
-    if(Sound.Chn1.running)
-    {
-        if(Sound.Chn1.limittime)
-        {
-            if(Sound.Chn1.stepsleft > 0) Sound.Chn1.stepsleft --;
-            else
-            {
-                Sound.Chn1.running = 0;
-                Sound.Chn1.envactive = 0;
-                mem->IO_Ports[NR52_REG-0xFF00] &= ~(1<<0);
-            }
-        }
-        if(Sound.Chn1.envactive && Sound.Chn1.envelope)
-        {
-            if(Sound.Chn1.envstepstochange == 0)
-            {
-                Sound.Chn1.envstepstochange = Sound.Chn1.envelope << 2;
-
-                if(Sound.Chn1.envincrease)
-                {
-                    if(Sound.Chn1.vol < 0x0F)
-                    {
-                        Sound.Chn1.vol ++;
-                        Sound.leftvol_1 = Sound.Chn1.speakerleft ? (Sound.Chn1.vol * Sound.leftvol) : 0;
-                        Sound.rightvol_1 = Sound.Chn1.speakerright ? (Sound.Chn1.vol * Sound.rightvol) : 0;
-                    }
-                    else Sound.Chn1.envactive = 0;
-                }
-                else
-                {
-                    if(Sound.Chn1.vol > 0)
-                    {
-                        Sound.Chn1.vol --;
-                        Sound.leftvol_1 = Sound.Chn1.speakerleft ? (Sound.Chn1.vol * Sound.leftvol) : 0;
-                        Sound.rightvol_1 = Sound.Chn1.speakerright ? (Sound.Chn1.vol * Sound.rightvol) : 0;
-                    }
-                    else Sound.Chn1.envactive = 0;
-                }
-            }
-            else Sound.Chn1.envstepstochange --;
-        }
-        if(Sound.Chn1.sweeptime > 0)
-        {
-            if(Sound.Chn1.sweepstepsleft == 0)
-            {
-                Sound.Chn1.sweepstepsleft = Sound.Chn1.sweeptime << 1;
-
-                if(Sound.Chn1.sweepinc)
-                {
-                    Sound.Chn1.sweepfreq += Sound.Chn1.sweepfreq / (1<<Sound.Chn1.sweepshift);
-                }
-                else
-                {
-                    Sound.Chn1.sweepfreq -= Sound.Chn1.sweepfreq / (1<<Sound.Chn1.sweepshift);
-                }
-
-                Sound.Chn1.sweepfreq &= 2047; // not ok, but it prevents a "divide by zero" exception
-
-                Sound.Chn1.outfreq = 131072/(2048-Sound.Chn1.sweepfreq);
-            }
-            else Sound.Chn1.sweepstepsleft --;
-        }
-    }
-
-    //Channel 2
-    if(Sound.Chn2.running)
-    {
-        if(Sound.Chn2.limittime)
-        {
-            if(Sound.Chn2.stepsleft > 0) Sound.Chn2.stepsleft --;
-            else
-            {
-                Sound.Chn2.running = 0;
-                Sound.Chn2.envactive = 0;
-                mem->IO_Ports[NR52_REG-0xFF00] &= ~(1<<1);
-            }
-        }
-        if(Sound.Chn2.envactive && Sound.Chn2.envelope)
-        {
-            if(Sound.Chn2.envstepstochange == 0)
-            {
-                Sound.Chn2.envstepstochange = Sound.Chn2.envelope << 2;
-
-                if(Sound.Chn2.envincrease)
-                {
-                    if(Sound.Chn2.vol < 0x0F)
-                    {
-                        Sound.Chn2.vol ++;
-                        Sound.leftvol_2 = Sound.Chn2.speakerleft ? (Sound.Chn2.vol * Sound.leftvol) : 0;
-                        Sound.rightvol_2 = Sound.Chn2.speakerright ? (Sound.Chn2.vol * Sound.rightvol) : 0;
-                    }
-                    else Sound.Chn2.envactive = 0;
-                }
-                else
-                {
-                    if(Sound.Chn2.vol > 0)
-                    {
-                        Sound.Chn2.vol --;
-                        Sound.leftvol_2 = Sound.Chn2.speakerleft ? (Sound.Chn2.vol * Sound.leftvol) : 0;
-                        Sound.rightvol_2 = Sound.Chn2.speakerright ? (Sound.Chn2.vol * Sound.rightvol) : 0;
-                    }
-                    else Sound.Chn2.envactive = 0;
-                }
-            }
-            else Sound.Chn2.envstepstochange --;
-        }
-    }
-
-    //Channel 3
-    if(Sound.Chn3.running)
-    {
-        if(Sound.Chn3.stepsleft > 0) Sound.Chn3.stepsleft --;
-        else if(Sound.Chn3.limittime)
-        {
-            Sound.Chn3.running = 0;
-            mem->IO_Ports[NR52_REG-0xFF00] &= ~(1<<2);
-        }
-    }
-
-    //Channel 4
-    if(Sound.Chn4.running)
-    {
-        if(Sound.Chn4.limittime)
-        {
-            if(Sound.Chn4.stepsleft > 0) Sound.Chn4.stepsleft --;
-            else
-            {
-                Sound.Chn4.running = 0;
-                Sound.Chn4.envactive = 0;
-                mem->IO_Ports[NR52_REG-0xFF00] &= ~(1<<3);
-            }
-        }
-        if(Sound.Chn4.envactive && Sound.Chn4.envelope)
-        {
-            if(Sound.Chn4.envstepstochange == 0)
-            {
-                Sound.Chn4.envstepstochange = Sound.Chn4.envelope << 2;
-
-                if(Sound.Chn4.envincrease)
-                {
-                    if(Sound.Chn4.vol < 0x0F)
-                    {
-                        Sound.Chn4.vol ++;
-                        Sound.leftvol_4 = Sound.Chn4.speakerleft ? (Sound.Chn4.vol * Sound.leftvol) : 0;
-                        Sound.rightvol_4 = Sound.Chn4.speakerright ? (Sound.Chn4.vol * Sound.rightvol) : 0;
-                    }
-                    else Sound.Chn4.envactive = 0;
-                }
-                else
-                {
-                    if(Sound.Chn4.vol > 0)
-                    {
-                        Sound.Chn4.vol --;
-                        Sound.leftvol_4 = Sound.Chn4.speakerleft ? (Sound.Chn4.vol * Sound.leftvol) : 0;
-                        Sound.rightvol_4 = Sound.Chn4.speakerright ? (Sound.Chn4.vol * Sound.rightvol) : 0;
-                    }
-                    else Sound.Chn4.envactive = 0;
-                }
-            }
-            else Sound.Chn4.envstepstochange --;
-        }
-    }
 }
 
 void GB_SoundRegWrite(u32 address, u32 value)
@@ -1039,7 +822,240 @@ void GB_SoundEnd(void)
 
 }
 
-//-----------------------------------------------
+
+//----------------------------------------------------------------
+
+static int gb_sound_clock_counter = 0;
+
+inline void GB_SoundClockCounterReset(void)
+{
+    gb_sound_clock_counter = 0;
+}
+
+static inline int GB_SoundClockCounterGet(void)
+{
+    return gb_sound_clock_counter;
+}
+
+static inline void GB_SoundClockCounterSet(int new_reference_clocks)
+{
+    gb_sound_clock_counter = new_reference_clocks;
+}
+
+void GB_SoundUpdateClocksClounterReference(int reference_clocks)
+{
+    _GB_MEMORY_ * mem = &GameBoy.Memory;
+
+    int increment_clocks = reference_clocks - GB_SoundClockCounterGet();
+
+    //Every 16384 clocks update hardware, every ~190 generate output
+
+    Sound.clocks += increment_clocks;
+
+    if(output_enabled)
+    {
+        Sound.nextsample_clocks += increment_clocks;
+
+        //4194304 Hz CPU / 22050 Hz sound output.
+        if(Sound.samples_left_to_output > Sound.samples_left_to_input-(GB_BUFFER_SAMPLES/2))
+        {
+            if(Sound.nextsample_clocks > (190 + (4<<GameBoy.Emulator.DoubleSpeed)))
+            {
+                Sound.nextsample_clocks -= (190 + (4<<GameBoy.Emulator.DoubleSpeed));
+                GB_SoundMix();
+            }
+        }               //This is an ugly hack to make sound buffer not overflow or underflow...
+        else
+        {
+            if(Sound.nextsample_clocks > (191 - (4<<GameBoy.Emulator.DoubleSpeed)))
+            {
+                Sound.nextsample_clocks -= (191 - (4<<GameBoy.Emulator.DoubleSpeed));
+                GB_SoundMix();
+            }
+        }
+    }
+
+    //4194304 Hz CPU / 256 Steps per second
+    if(Sound.clocks >= 16384)
+    {
+        Sound.clocks -= 16384;
+        if(Sound.master_enable)
+        {
+            if(Sound.Chn1.running) //Channel 1
+            {
+                if(Sound.Chn1.limittime)
+                {
+                    if(Sound.Chn1.stepsleft > 0) Sound.Chn1.stepsleft --;
+                    else
+                    {
+                        Sound.Chn1.running = 0;
+                        Sound.Chn1.envactive = 0;
+                        mem->IO_Ports[NR52_REG-0xFF00] &= ~(1<<0);
+                    }
+                }
+                if(Sound.Chn1.envactive && Sound.Chn1.envelope)
+                {
+                    if(Sound.Chn1.envstepstochange == 0)
+                    {
+                        Sound.Chn1.envstepstochange = Sound.Chn1.envelope << 2;
+
+                        if(Sound.Chn1.envincrease)
+                        {
+                            if(Sound.Chn1.vol < 0x0F)
+                            {
+                                Sound.Chn1.vol ++;
+                                Sound.leftvol_1 = Sound.Chn1.speakerleft ? (Sound.Chn1.vol * Sound.leftvol) : 0;
+                                Sound.rightvol_1 = Sound.Chn1.speakerright ? (Sound.Chn1.vol * Sound.rightvol) : 0;
+                            }
+                            else Sound.Chn1.envactive = 0;
+                        }
+                        else
+                        {
+                            if(Sound.Chn1.vol > 0)
+                            {
+                                Sound.Chn1.vol --;
+                                Sound.leftvol_1 = Sound.Chn1.speakerleft ? (Sound.Chn1.vol * Sound.leftvol) : 0;
+                                Sound.rightvol_1 = Sound.Chn1.speakerright ? (Sound.Chn1.vol * Sound.rightvol) : 0;
+                            }
+                            else Sound.Chn1.envactive = 0;
+                        }
+                    }
+                    else Sound.Chn1.envstepstochange --;
+                }
+                if(Sound.Chn1.sweeptime > 0)
+                {
+                    if(Sound.Chn1.sweepstepsleft == 0)
+                    {
+                        Sound.Chn1.sweepstepsleft = Sound.Chn1.sweeptime << 1;
+
+                        if(Sound.Chn1.sweepinc)
+                        {
+                            Sound.Chn1.sweepfreq += Sound.Chn1.sweepfreq / (1<<Sound.Chn1.sweepshift);
+                        }
+                        else
+                        {
+                            Sound.Chn1.sweepfreq -= Sound.Chn1.sweepfreq / (1<<Sound.Chn1.sweepshift);
+                        }
+
+                        Sound.Chn1.sweepfreq &= 2047; // not ok, but it prevents a "divide by zero" exception
+
+                        Sound.Chn1.outfreq = 131072/(2048-Sound.Chn1.sweepfreq);
+                    }
+                    else Sound.Chn1.sweepstepsleft --;
+                }
+            }
+
+            if(Sound.Chn2.running) //Channel 2
+            {
+                if(Sound.Chn2.limittime)
+                {
+                    if(Sound.Chn2.stepsleft > 0) Sound.Chn2.stepsleft --;
+                    else
+                    {
+                        Sound.Chn2.running = 0;
+                        Sound.Chn2.envactive = 0;
+                        mem->IO_Ports[NR52_REG-0xFF00] &= ~(1<<1);
+                    }
+                }
+                if(Sound.Chn2.envactive && Sound.Chn2.envelope)
+                {
+                    if(Sound.Chn2.envstepstochange == 0)
+                    {
+                        Sound.Chn2.envstepstochange = Sound.Chn2.envelope << 2;
+
+                        if(Sound.Chn2.envincrease)
+                        {
+                            if(Sound.Chn2.vol < 0x0F)
+                            {
+                                Sound.Chn2.vol ++;
+                                Sound.leftvol_2 = Sound.Chn2.speakerleft ? (Sound.Chn2.vol * Sound.leftvol) : 0;
+                                Sound.rightvol_2 = Sound.Chn2.speakerright ? (Sound.Chn2.vol * Sound.rightvol) : 0;
+                            }
+                            else Sound.Chn2.envactive = 0;
+                        }
+                        else
+                        {
+                            if(Sound.Chn2.vol > 0)
+                            {
+                                Sound.Chn2.vol --;
+                                Sound.leftvol_2 = Sound.Chn2.speakerleft ? (Sound.Chn2.vol * Sound.leftvol) : 0;
+                                Sound.rightvol_2 = Sound.Chn2.speakerright ? (Sound.Chn2.vol * Sound.rightvol) : 0;
+                            }
+                            else Sound.Chn2.envactive = 0;
+                        }
+                    }
+                    else Sound.Chn2.envstepstochange --;
+                }
+            }
+
+            if(Sound.Chn3.running) //Channel 3
+            {
+                if(Sound.Chn3.stepsleft > 0) Sound.Chn3.stepsleft --;
+                else if(Sound.Chn3.limittime)
+                {
+                    Sound.Chn3.running = 0;
+                    mem->IO_Ports[NR52_REG-0xFF00] &= ~(1<<2);
+                }
+            }
+
+            if(Sound.Chn4.running) //Channel 4
+            {
+                if(Sound.Chn4.limittime)
+                {
+                    if(Sound.Chn4.stepsleft > 0) Sound.Chn4.stepsleft --;
+                    else
+                    {
+                        Sound.Chn4.running = 0;
+                        Sound.Chn4.envactive = 0;
+                        mem->IO_Ports[NR52_REG-0xFF00] &= ~(1<<3);
+                    }
+                }
+                if(Sound.Chn4.envactive && Sound.Chn4.envelope)
+                {
+                    if(Sound.Chn4.envstepstochange == 0)
+                    {
+                        Sound.Chn4.envstepstochange = Sound.Chn4.envelope << 2;
+
+                        if(Sound.Chn4.envincrease)
+                        {
+                            if(Sound.Chn4.vol < 0x0F)
+                            {
+                                Sound.Chn4.vol ++;
+                                Sound.leftvol_4 = Sound.Chn4.speakerleft ? (Sound.Chn4.vol * Sound.leftvol) : 0;
+                                Sound.rightvol_4 = Sound.Chn4.speakerright ? (Sound.Chn4.vol * Sound.rightvol) : 0;
+                            }
+                            else Sound.Chn4.envactive = 0;
+                        }
+                        else
+                        {
+                            if(Sound.Chn4.vol > 0)
+                            {
+                                Sound.Chn4.vol --;
+                                Sound.leftvol_4 = Sound.Chn4.speakerleft ? (Sound.Chn4.vol * Sound.leftvol) : 0;
+                                Sound.rightvol_4 = Sound.Chn4.speakerright ? (Sound.Chn4.vol * Sound.rightvol) : 0;
+                            }
+                            else Sound.Chn4.envactive = 0;
+                        }
+                    }
+                    else Sound.Chn4.envstepstochange --;
+                }
+            }
+        }
+    }
+
+    GB_SoundClockCounterSet(reference_clocks);
+}
+
+int GB_SoundGetClocksToNextEvent(void)
+{
+    int clocks_to_next_event = 0x7FFFFFFF;
+
+    //TODO
+
+    return clocks_to_next_event;
+}
+
+//----------------------------------------------------------------
 
 void GB_SoundGetConfig(int * vol, int * chn_flags)
 {
@@ -1054,5 +1070,5 @@ void GB_SoundSetConfig(int vol, int chn_flags)
     EmulatorConfig.chn_flags |= chn_flags;
 }
 
-//-------------------------------------------------
+//----------------------------------------------------------------
 

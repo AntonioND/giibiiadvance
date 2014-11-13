@@ -259,8 +259,6 @@ int GB_PPUGetClocksToNextEvent(void)
 
 //----------------------------------------------------------------
 
-// START OF TODO :
-
 inline void GB_CheckStatSignal(void)
 {
     if(GameBoy.Emulator.lcd_on == 0)
@@ -311,7 +309,5 @@ inline void GB_Mode03UpdateLenght(void)
     GameBoy.Emulator.mode0len = 204 - clocks;
 }
 */
-
-// END OF TODO :
 
 //----------------------------------------------------------------

@@ -36,7 +36,6 @@ int GB_PPUGetClocksToNextEvent(void);
 
 //----------------------------------------------------------------
 
-// TODO :
 inline void GB_CheckStatSignal(void);
 inline void GB_CheckLYC(void);
 

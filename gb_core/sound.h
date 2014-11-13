@@ -23,9 +23,6 @@
 
 void GB_SoundInit(void);
 
-void GB_SoundClockCounterReset(void);
-void GB_SoundUpdateClocksClounterReference(int reference_clocks);
-
 inline int GB_SoundHardwareIsOn(void);
 
 void GB_ToggleSound(void);
@@ -40,13 +37,21 @@ void GB_SoundEnd(void);
 
 void GB_SoundCallback(void * buffer, long len);
 
-//---------------------------------
+//----------------------------------------------------------------
+
+inline void GB_SoundClockCounterReset(void);
+
+void GB_SoundUpdateClocksClounterReference(int reference_clocks);
+
+int GB_SoundGetClocksToNextEvent(void);
+
+//----------------------------------------------------------------
 
 void GB_SoundGetConfig(int * vol, int * chn_flags);
 
 void GB_SoundSetConfig(int vol, int chn_flags);
 
-//---------------------------------
+//----------------------------------------------------------------
 
 #endif //__GB_SOUND__
 

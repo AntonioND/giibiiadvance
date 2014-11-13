@@ -114,7 +114,8 @@ static inline int GB_ClocksForNextEvent(void)
     clocks_to_next_event = min(clocks_to_next_event,GB_PPUGetClocksToNextEvent());
     clocks_to_next_event = min(clocks_to_next_event,GB_SerialGetClocksToNextEvent());
     clocks_to_next_event = min(clocks_to_next_event,GB_DMAGetClocksToNextEvent());
-    //clocks_to_next_event = min(clocks_to_next_event,GB_SoundClocksToNextEvent());
+    clocks_to_next_event = min(clocks_to_next_event,GB_SoundGetClocksToNextEvent());
+    //SGB?, CAMERA?
     return clocks_to_next_event;
 }
 
@@ -126,7 +127,7 @@ static inline void GB_ClockCountersReset(void)
     GB_SerialClockCounterReset();
     GB_SoundClockCounterReset();
     GB_DMAClockCounterReset();
-    //GB_<...>ClockCounterReset();
+    //SGB?, CAMERA?
 }
 
 inline void GB_UpdateCounterToClocks(int reference_clocks)

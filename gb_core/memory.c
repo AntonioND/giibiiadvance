@@ -345,15 +345,9 @@ void GB_MemWriteReg8(u32 address, u32 value)
             //TODO
             //It should disable non-highram memory (if source is VRAM, VRAM is disabled
             //instead of other ram)... etc...
-
             mem->IO_Ports[DMA_REG-0xFF00] = value;
-
-            if(value <= 0xF1)
-            {
-                GB_DMAInitOAMCopy(value);
-                GB_CPUBreakLoop();
-            }
-
+            GB_DMAInitOAMCopy(value);
+            GB_CPUBreakLoop();
             return;
         //                   Sound...
         case NR10_REG: case NR11_REG: case NR12_REG: case NR13_REG: case NR14_REG:
@@ -503,17 +497,18 @@ void GB_MemWriteReg8(u32 address, u32 value)
         case HDMA5_REG:
             if(GameBoy.Emulator.CGBEnabled == 0) return;
 
-            //Start/Stop HDMA copy
-            mem->IO_Ports[HDMA5_REG-0xFF00] = value;
+            //Start/Stop GBC DMA copy
 
             if(GameBoy.Emulator.GBC_DMA_enabled == GBC_DMA_NONE)
             {
+                mem->IO_Ports[HDMA5_REG-0xFF00] = value;
                 GB_DMAInitGBCCopy(value);
                 GB_CPUBreakLoop();
             }
             else //if(GameBoy.Emulator.GBC_DMA_enabled == GBC_DMA_HBLANK)
             {
-                // If HDMA_GENERAL the CPU is blocked, not needed to check
+                //mem->IO_Ports[HDMA5_REG-0xFF00] = value; ??
+                // If GBC_DMA_GENERAL the CPU is blocked, not needed to check if that is the current mode
                 if(!(value & (1<<7)))
                 {
                     GB_DMAStopGBCCopy();
@@ -736,8 +731,7 @@ u32 GB_MemReadReg8(u32 address)
         case NR51_REG:
             return mem->IO_Ports[address-0xFF00];
 
-        case DMA_REG:
-            //return 0xFF; //Not really write-only, at least on my gbc -> TODO: test
+        case DMA_REG: // This is R/W in all GB models I have (DMG, MGB, GBC, GBA)
             return mem->IO_Ports[address-0xFF00];
 
         case STAT_REG:
@@ -837,8 +831,7 @@ u32 GB_MemReadReg8(u32 address)
 
         case RP_REG:
             if(GameBoy.Emulator.CGBEnabled == 0) return 0xFF;
-            GB_PPUUpdateClocksClounterReference(GB_CPUClockCounterGet());
-            return (mem->IO_Ports[RP_REG-0xFF00] | 0x3C) | 0x02; //0x02 = no recieve signal
+            return (mem->IO_Ports[RP_REG-0xFF00] | 0x3C) | 0x02; //0x02 = no receive signal
 
         case BCPD_REG:
             if(GameBoy.Emulator.CGBEnabled == 0) return 0xFF;

@@ -330,8 +330,13 @@ typedef struct {
 
     s32 gdma_preparation_clocks_left;
     s32 gdma_copy_clocks_left;
+    u32 gdma_src;
+    u32 gdma_dst;
+    u32 gdma_bytes_left;
 
-    u32 HBlankHDMAdone; //To limit to 0x10 bytes per HBlank
+    u32 hdma_last_ly_copied; //To limit to 0x10 bytes per HBlank
+
+    //Other things
 
     //u32 halt_not_executed;
     u32 CPUHalt;

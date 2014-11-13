@@ -42,7 +42,7 @@ int GB_DMAGetClocksToNextEvent(void);
 
 //----------------------------------------------------------------
 
-int GB_DMAExecute(void);
+int GB_DMAExecute(int clocks);
 
 //----------------------------------------------------------------
 

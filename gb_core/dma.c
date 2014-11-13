@@ -41,8 +41,11 @@ void GB_DMAInit(void)
 
     GameBoy.Emulator.gdma_preparation_clocks_left = 0;
     GameBoy.Emulator.gdma_copy_clocks_left = 0;
+    GameBoy.Emulator.gdma_src = 0;
+    GameBoy.Emulator.gdma_dst = 0;
+    GameBoy.Emulator.gdma_bytes_left = 0;
 
-    GameBoy.Emulator.HBlankHDMAdone = 0;
+    GameBoy.Emulator.hdma_last_ly_copied = -1;
 }
 
 void GB_DMAEnd(void)
@@ -68,8 +71,16 @@ void GB_DMAInitGBCCopy(int register_value)
 
     if(GameBoy.Emulator.GBC_DMA_enabled == GBC_DMA_HBLANK)
     {
-        GameBoy.Emulator.HBlankHDMAdone = 0;
         mem->IO_Ports[HDMA5_REG-0xFF00] &= 0x7F;
+
+        u32 blocks = ( ((u32)register_value) & 0x7F ) + 1;
+        GameBoy.Emulator.gdma_src = (mem->IO_Ports[HDMA1_REG-0xFF00]<<8) | mem->IO_Ports[HDMA2_REG-0xFF00];
+        GameBoy.Emulator.gdma_dst = ((mem->IO_Ports[HDMA3_REG-0xFF00]<<8) | mem->IO_Ports[HDMA4_REG-0xFF00]) + 0x8000;
+        GameBoy.Emulator.gdma_bytes_left = blocks * 16;
+        GameBoy.Emulator.hdma_last_ly_copied = -1; // reset
+
+        //Debug_DebugMsgArg("HDMA\nSRC = %04X\nDST = %04X\nBYTES = %d",
+        //                  GameBoy.Emulator.gdma_src,GameBoy.Emulator.gdma_dst,GameBoy.Emulator.gdma_bytes_left);
     }
     else
     {
@@ -79,25 +90,31 @@ void GB_DMAInitGBCCopy(int register_value)
 
         if(GameBoy.Emulator.DoubleSpeed)
         {
-            GameBoy.Emulator.gdma_preparation_clocks_left = 890;
+            GameBoy.Emulator.gdma_preparation_clocks_left = 858;
             GameBoy.Emulator.gdma_copy_clocks_left = blocks * 64;
         }
         else
         {
-            GameBoy.Emulator.gdma_preparation_clocks_left = 858;
+            GameBoy.Emulator.gdma_preparation_clocks_left = 890;
             GameBoy.Emulator.gdma_copy_clocks_left = blocks * 32;
         }
 
-        //Debug_DebugMsgArg("GDMA\nSRC = %04X\nDST = %04X\nBLOCKS = %d",
-        //    (mem->IO_Ports[HDMA1_REG-0xFF00]<<8) | mem->IO_Ports[HDMA2_REG-0xFF00],
-        //    ((mem->IO_Ports[HDMA3_REG-0xFF00]<<8) | mem->IO_Ports[HDMA4_REG-0xFF00]) + 0x8000, blocks);
+        GameBoy.Emulator.gdma_src = (mem->IO_Ports[HDMA1_REG-0xFF00]<<8) | mem->IO_Ports[HDMA2_REG-0xFF00];
+        GameBoy.Emulator.gdma_dst = ((mem->IO_Ports[HDMA3_REG-0xFF00]<<8) | mem->IO_Ports[HDMA4_REG-0xFF00]) + 0x8000;
+        GameBoy.Emulator.gdma_bytes_left = blocks * 16;
+
+        //Debug_DebugMsgArg("GDMA\nSRC = %04X\nDST = %04X\nBYTES = %d",
+        //    GameBoy.Emulator.gdma_src,GameBoy.Emulator.gdma_dst,GameBoy.Emulator.gdma_bytes_left);
     }
 }
 
 void GB_DMAStopGBCCopy(void)
 {
+    GameBoy.Emulator.gdma_bytes_left = 0;
+    GameBoy.Emulator.hdma_last_ly_copied = -1; // reset
+
     GameBoy.Emulator.GBC_DMA_enabled = GBC_DMA_NONE;
-    GameBoy.Memory.IO_Ports[HDMA5_REG-0xFF00] |= (1<<7);
+    GameBoy.Memory.IO_Ports[HDMA5_REG-0xFF00] |= (1<<7); // keep the lower bytes ?
 }
 
 //----------------------------------------------------------------
@@ -155,24 +172,34 @@ void GB_DMAUpdateClocksClounterReference(int reference_clocks)
 
 int GB_DMAGetClocksToNextEvent(void)
 {
-    int clocks_to_next_event = 256;
+    int clocks_to_next_event = 0x7FFFFFFF;
 
-#warning "TODO"
-
+    if(GameBoy.Emulator.GBC_DMA_enabled == GBC_DMA_GENERAL)
+    {
+        if(GameBoy.Emulator.gdma_preparation_clocks_left > 0)
+            clocks_to_next_event = GameBoy.Emulator.gdma_preparation_clocks_left;
+        else if(GameBoy.Emulator.gdma_copy_clocks_left > 0)
+            clocks_to_next_event = GameBoy.Emulator.gdma_copy_clocks_left;
+    }
+    //else if(GameBoy.Emulator.GBC_DMA_enabled == GBC_DMA_HBLANK)
+    //{
+    //    return clocks to video mode 0. That is done already in GB_PPUGetClocksToNextEvent()
+    //}
 
     return clocks_to_next_event;
 }
 
 //----------------------------------------------------------------
 
-int GB_DMAExecute(void)
+int GB_DMAExecute(int clocks)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
     int executed_clocks = 0;
 
     //This code assumes that this function is called as soon as the CPU has requested a GDMA,
-    //or as soon as entering mode 0 if there is a HDMA copy running.
+    //or as soon as entering mode 0 if there is a HDMA copy running. The only possible delay is
+    //the one caused by finishing the CPU instruction or IRQ handling.
 
     if(GameBoy.Emulator.GBC_DMA_enabled == GBC_DMA_GENERAL)
     {
@@ -194,37 +221,70 @@ int GB_DMAExecute(void)
         // Preparation clocks = 922 - 64 = 858 (?)
         // Clocks per byte = 64/16 = 4
 
-#warning "TODO"
-/*
-GameBoy.Emulator.gdma_preparation_clocks_left = 890;
-GameBoy.Emulator.gdma_copy_clocks_left
-*/
+        //This copy has to be divided. Only execute the specified clocks.
+        //The CPU can force to end an instruction because the worst case is about 30 clocks off, but
+        //GDMA worst case is about 9050 clocks
+
         int start_clocks = GB_CPUClockCounterGet();
 
-        //Preparation time
-        if(GameBoy.Emulator.DoubleSpeed)
-            GB_CPUClockCounterAdd(890);
-        else
-            GB_CPUClockCounterAdd(858);
-
-        u32 source = (mem->IO_Ports[HDMA1_REG-0xFF00]<<8) | mem->IO_Ports[HDMA2_REG-0xFF00];
-        u32 dest = ((mem->IO_Ports[HDMA3_REG-0xFF00]<<8) | mem->IO_Ports[HDMA4_REG-0xFF00]) + 0x8000;
-        u32 bytes = ( (mem->IO_Ports[HDMA5_REG-0xFF00] & 0x7F) + 1 ) * 16;
-
-        while(bytes)
+        while(clocks > 0)
         {
-            GB_MemWrite8(dest++,GB_MemRead8(source++));
-            GB_CPUClockCounterAdd(2<<GameBoy.Emulator.DoubleSpeed);
-            bytes --;
+            if(GameBoy.Emulator.gdma_preparation_clocks_left > 0)
+            {
+                if(clocks >= GameBoy.Emulator.gdma_preparation_clocks_left)
+                {
+                    GB_CPUClockCounterAdd(GameBoy.Emulator.gdma_preparation_clocks_left);
+                    clocks -= GameBoy.Emulator.gdma_preparation_clocks_left;
+                    GameBoy.Emulator.gdma_preparation_clocks_left = 0;
+                }
+                else
+                {
+                    GB_CPUClockCounterAdd(clocks);
+                    GameBoy.Emulator.gdma_preparation_clocks_left -= clocks;
+                    clocks = 0;
+                }
+            }
+            else if(GameBoy.Emulator.gdma_copy_clocks_left > 0)
+            {
+                int execute_now_clocks = (clocks < GameBoy.Emulator.gdma_copy_clocks_left) ?
+                                          clocks : GameBoy.Emulator.gdma_copy_clocks_left;
+
+                int clocks_per_byte_mask = (2<<GameBoy.Emulator.DoubleSpeed)-1;
+
+                u32 bytes = GameBoy.Emulator.gdma_bytes_left;
+
+                while(execute_now_clocks--)
+                {
+                    GameBoy.Emulator.gdma_copy_clocks_left --;
+                    GB_CPUClockCounterAdd(1);
+
+                    if( (GameBoy.Emulator.gdma_copy_clocks_left & clocks_per_byte_mask) == 0 )
+                    {
+                        GB_MemWrite8(GameBoy.Emulator.gdma_dst++,GB_MemRead8(GameBoy.Emulator.gdma_src++));
+                        bytes --;
+                        if(bytes == 0)
+                        {
+                            GameBoy.Emulator.GBC_DMA_enabled = GBC_DMA_NONE;
+                            break;
+                        }
+                    }
+                }
+
+                GameBoy.Emulator.gdma_bytes_left = bytes;
+
+                mem->IO_Ports[HDMA1_REG-0xFF00] = GameBoy.Emulator.gdma_src >> 8;
+                mem->IO_Ports[HDMA2_REG-0xFF00] = GameBoy.Emulator.gdma_src & 0xFF;
+                mem->IO_Ports[HDMA3_REG-0xFF00] = (GameBoy.Emulator.gdma_dst >> 8) & 0x1F;
+                mem->IO_Ports[HDMA4_REG-0xFF00] = GameBoy.Emulator.gdma_dst & 0xFF;
+
+                if(GameBoy.Emulator.gdma_bytes_left > 0)
+                    mem->IO_Ports[HDMA5_REG-0xFF00] = ( (GameBoy.Emulator.gdma_bytes_left-1) / 16);
+                else
+                    mem->IO_Ports[HDMA5_REG-0xFF00] = 0xFF; // when finished, block count = -1
+
+                clocks = 0; // exit loop
+            }
         }
-
-        mem->IO_Ports[HDMA1_REG-0xFF00] = source >> 8;
-        mem->IO_Ports[HDMA2_REG-0xFF00] = source & 0xFF;
-        mem->IO_Ports[HDMA3_REG-0xFF00] = (dest >> 8) & 0x1F;
-        mem->IO_Ports[HDMA4_REG-0xFF00] = dest & 0xFF;
-        mem->IO_Ports[HDMA5_REG-0xFF00] = 0;
-
-        GameBoy.Emulator.GBC_DMA_enabled = GBC_DMA_NONE;
 
         int end_clocks = GB_CPUClockCounterGet();
 
@@ -232,109 +292,56 @@ GameBoy.Emulator.gdma_copy_clocks_left
     }
     else if(GameBoy.Emulator.GBC_DMA_enabled == GBC_DMA_HBLANK)
     {
-        executed_clocks = 0;
+        //This doesn't need to be divided. Worst case is 64 clocks.
+
+        if(GameBoy.Emulator.lcd_on) if(GameBoy.Emulator.CPUHalt == 0) // ?
+        {
+            int current_ly = mem->IO_Ports[LY_REG-0xFF00];
+            if(GameBoy.Emulator.hdma_last_ly_copied != current_ly)
+            {
+                if(GameBoy.Emulator.ScreenMode == 0)
+                {
+                    GameBoy.Emulator.hdma_last_ly_copied = current_ly;
+                    if(current_ly < 144)
+                    {
+                        int start_clocks = GB_CPUClockCounterGet();
+
+                        int i;
+                        for(i = 0; i < 16; i++)
+                        {
+                            //The copy needs the same TIME in single and double speeds mode.
+                            GB_CPUClockCounterAdd(2<<GameBoy.Emulator.DoubleSpeed);
+                            GB_MemWrite8(GameBoy.Emulator.gdma_dst++,GB_MemRead8(GameBoy.Emulator.gdma_src++));
+                        }
+
+                        mem->IO_Ports[HDMA1_REG-0xFF00] = GameBoy.Emulator.gdma_src >> 8;
+                        mem->IO_Ports[HDMA2_REG-0xFF00] = GameBoy.Emulator.gdma_src & 0xFF;
+                        mem->IO_Ports[HDMA3_REG-0xFF00] = (GameBoy.Emulator.gdma_dst >> 8) & 0x1F;
+                        mem->IO_Ports[HDMA4_REG-0xFF00] = GameBoy.Emulator.gdma_dst & 0xFF;
+
+                        GameBoy.Emulator.gdma_bytes_left -= 16;
+
+                        if(GameBoy.Emulator.gdma_bytes_left == 0)
+                        {
+                            GameBoy.Emulator.GBC_DMA_enabled = GBC_DMA_NONE;
+                            GameBoy.Emulator.hdma_last_ly_copied = -1;
+                            mem->IO_Ports[HDMA5_REG-0xFF00] = 0xFF;
+                        }
+                        else
+                        {
+                            mem->IO_Ports[HDMA5_REG-0xFF00] = (GameBoy.Emulator.gdma_bytes_left-1)/16;
+                        }
+
+                        int end_clocks = GB_CPUClockCounterGet();
+
+                        executed_clocks = end_clocks - start_clocks;
+                    }
+                }
+            }
+        }
     }
 
     return executed_clocks;
 }
 
-/*
-
-inline u32 GBC_HDMAcopy(void)
-{
-    _GB_MEMORY_ * mem = &GameBoy.Memory;
-
-    if(GameBoy.Emulator.HDMAenabled == HDMA_NONE) return 0;
-    else if(GameBoy.Emulator.HDMAenabled == HDMA_HBLANK)
-    {
-        if(GameBoy.Emulator.lcd_on == 0) return 0; //Screen OFF, nothing happens
-        if(GameBoy.Emulator.CPUHalt) return 0; //Halt mode, nothing happens
-
-        if(GameBoy.Emulator.ScreenMode != 0) // Not hblank period
-        {
-            GameBoy.Emulator.HBlankHDMAdone = 0;
-            GameBoy.Emulator.gbc_dma_working_for = 16 / 2;
-            return 0;
-        }
-
-        if(GameBoy.Emulator.HBlankHDMAdone)
-            return 0; //0x10 bytes copied before
-
-        u32 source = (mem->IO_Ports[HDMA1_REG-0xFF00]<<8) | mem->IO_Ports[HDMA2_REG-0xFF00];
-        u32 dest = ((mem->IO_Ports[HDMA3_REG-0xFF00]<<8) | mem->IO_Ports[HDMA4_REG-0xFF00]) + 0x8000;
-
-        GB_MemWrite8(dest++,GB_MemRead8(source++));
-        GB_MemWrite8(dest++,GB_MemRead8(source++));
-
-        mem->IO_Ports[HDMA1_REG-0xFF00] = source >> 8;
-        mem->IO_Ports[HDMA2_REG-0xFF00] = source & 0xFF;
-        mem->IO_Ports[HDMA3_REG-0xFF00] = (dest >> 8) & 0x1F;
-        mem->IO_Ports[HDMA4_REG-0xFF00] = dest & 0xFF;
-
-        GameBoy.Emulator.gbc_dma_working_for--;
-        if(GameBoy.Emulator.gbc_dma_working_for == 0)
-        {
-            GameBoy.Emulator.HBlankHDMAdone = 1;
-
-            if(mem->IO_Ports[HDMA5_REG-0xFF00] == 0)
-            {
-                GameBoy.Emulator.HDMAenabled = HDMA_NONE;
-                GameBoy.Emulator.HBlankHDMAdone = 0;
-                mem->IO_Ports[HDMA5_REG-0xFF00] = 0xFF;
-            }
-            else
-            {
-                mem->IO_Ports[HDMA5_REG-0xFF00] = (mem->IO_Ports[HDMA5_REG-0xFF00] - 1) & 0x7F;
-            }
-        }
-
-        return 1;
-    }
-    else if(GameBoy.Emulator.HDMAenabled == HDMA_GENERAL)
-    {
-
-        if(GameBoy.Emulator.gdma_preparation_time_countdown > 0) // 220 to 0
-        {
-            GameBoy.Emulator.gdma_preparation_time_countdown -= 1 << GameBoy.Emulator.DoubleSpeed;
-            return 1;
-        }
-
-        if(GameBoy.Emulator.gbc_dma_working_for)
-        {
-            u32 source = (mem->IO_Ports[HDMA1_REG-0xFF00]<<8) | mem->IO_Ports[HDMA2_REG-0xFF00];
-            u32 dest = ((mem->IO_Ports[HDMA3_REG-0xFF00]<<8) | mem->IO_Ports[HDMA4_REG-0xFF00]) + 0x8000;
-
-            GB_MemWrite8(dest++,GB_MemRead8(source++));
-            GB_MemWrite8(dest++,GB_MemRead8(source++));
-
-            mem->IO_Ports[HDMA1_REG-0xFF00] = source >> 8;
-            mem->IO_Ports[HDMA2_REG-0xFF00] = source & 0xFF;
-            mem->IO_Ports[HDMA3_REG-0xFF00] = (dest >> 8) & 0x1F;
-            mem->IO_Ports[HDMA4_REG-0xFF00] = dest & 0xFF;
-
-            GameBoy.Emulator.gbc_dma_working_for--;
-
-            if( (GameBoy.Emulator.gbc_dma_working_for & 7) == 0)
-            {
-                if(mem->IO_Ports[HDMA5_REG-0xFF00] == 0)
-                {
-                    GameBoy.Emulator.HDMAenabled = HDMA_NONE;
-                    mem->IO_Ports[HDMA5_REG-0xFF00] = 0xFF;
-                }
-                else
-                {
-                    mem->IO_Ports[HDMA5_REG-0xFF00] = (mem->IO_Ports[HDMA5_REG-0xFF00] - 1) & 0x7F;
-                }
-            }
-
-            return 1;
-        }
-
-    }
-
-    return 0;
-}
-
-
-*/
 //----------------------------------------------------------------

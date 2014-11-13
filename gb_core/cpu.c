@@ -82,6 +82,8 @@ inline void GB_CPUBreakLoop(void) // call when writing to a register that can ge
 
 //----------------------------------------------------------------
 
+//This is used for CPU, IRQ and GBC DMA
+
 static int gb_cpu_clock_counter = 0;
 
 inline void GB_CPUClockCounterReset(void)
@@ -3948,7 +3950,7 @@ int GB_RunFor(s32 run_for_clocks) // 1 frame = 70224 clocks
         {
             int executed_clocks = 0;
 
-            int dma_executed_clocks = GB_DMAExecute(); // GB_CPUClockCounterAdd() internal
+            int dma_executed_clocks = GB_DMAExecute(clocks_to_next_event); // GB_CPUClockCounterAdd() internal
             if(dma_executed_clocks == 0)
             {
                 int irq_executed_clocks = GB_IRQExecute(); // GB_CPUClockCounterAdd() internal

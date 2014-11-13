@@ -7,6 +7,7 @@ General
 - Allow to execute one frame per press.
 - Cross out things in debugger that can't be used (transparent palette colors, GBA sprites that are hiden?, ...)
 - Little screens in sprite viewers to indicate the position of a sprite?
+- Update debugger windows when focusing the disassembler.
 
 Game Boy
 --------

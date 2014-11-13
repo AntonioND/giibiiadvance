@@ -115,6 +115,7 @@ static inline int GB_ClocksForNextEvent(void)
     clocks_to_next_event = min(clocks_to_next_event,GB_SerialGetClocksToNextEvent());
     clocks_to_next_event = min(clocks_to_next_event,GB_DMAGetClocksToNextEvent());
     clocks_to_next_event = min(clocks_to_next_event,GB_SoundGetClocksToNextEvent());
+    clocks_to_next_event = min(clocks_to_next_event,GB_SoundGetClocksToNextEvent());
     //SGB?, CAMERA?
     return clocks_to_next_event;
 }
@@ -3325,7 +3326,7 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                         // ...wtf??
                         GB_CPUClockCounterAdd(4);
                         _gb_break_to_debugger();
-                        Debug_ErrorMsgArg("Unidentified opcode. CB %x\nPC: %04x\nROM: %d",
+                        Debug_ErrorMsgArg("Unidentified opcode. CB %2X\nPC: %04X\nROM: %d",
                             opcode,GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
                         break;
                 } //end of inner switch
@@ -3452,7 +3453,7 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
             case 0xD3: // Undefined - *
                 GB_CPUClockCounterAdd(4);
                 _gb_break_to_debugger();
-                Debug_ErrorMsgArg("Unidentified opcode. D3\nPC: %04x\nROM: %d",
+                Debug_ErrorMsgArg("Unidentified opcode. D3\nPC: %04X\nROM: %d",
                             GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
                 break;
             case 0xD4: //CALL NC,nn - 6/3
@@ -3571,7 +3572,7 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
             case 0xDB: // Undefined - *
                 GB_CPUClockCounterAdd(4);
                 _gb_break_to_debugger();
-                Debug_ErrorMsgArg("Unidentified opcode. DB\nPC: %04x\nROM: %d",
+                Debug_ErrorMsgArg("Unidentified opcode. DB\nPC: %04X\nROM: %d",
                             GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
                 break;
             case 0xDC: //CALL C,nn - 6/3
@@ -3603,7 +3604,7 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
             case 0xDD: // Undefined - *
                 GB_CPUClockCounterAdd(4);
                 _gb_break_to_debugger();
-                Debug_ErrorMsgArg("Unidentified opcode. DD\nPC: %04x\nROM: %d",
+                Debug_ErrorMsgArg("Unidentified opcode. DD\nPC: %04X\nROM: %d",
                             GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
                 break;
             case 0xDE: //SBC A,n - 2
@@ -3656,13 +3657,13 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
             case 0xE3: // Undefined - *
                 GB_CPUClockCounterAdd(4);
                 _gb_break_to_debugger();
-                Debug_ErrorMsgArg("Unidentified opcode. E3\nPC: %04x\nROM: %d",
+                Debug_ErrorMsgArg("Unidentified opcode. E3\nPC: %04X\nROM: %d",
                             GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
                 break;
             case 0xE4: // Undefined - *
                 GB_CPUClockCounterAdd(4);
                 _gb_break_to_debugger();
-                Debug_ErrorMsgArg("Unidentified opcode. E4\nPC: %04x\nROM: %d",
+                Debug_ErrorMsgArg("Unidentified opcode. E4\nPC: %04X\nROM: %d",
                             GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
                 break;
             case 0xE5: //PUSH HL - 4
@@ -3731,19 +3732,19 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
             case 0xEB: // Undefined - *
                 GB_CPUClockCounterAdd(4);
                 _gb_break_to_debugger();
-                Debug_ErrorMsgArg("Unidentified opcode. EB\nPC: %04x\nROM: %d",
+                Debug_ErrorMsgArg("Unidentified opcode. EB\nPC: %04X\nROM: %d",
                             GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
                 break;
             case 0xEC: // Undefined - *
                 GB_CPUClockCounterAdd(4);
                 _gb_break_to_debugger();
-                Debug_ErrorMsgArg("Unidentified opcode. EC\nPC: %04x\nROM: %d",
+                Debug_ErrorMsgArg("Unidentified opcode. EC\nPC: %04X\nROM: %d",
                             GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
                 break;
             case 0xED: // Undefined - *
                 GB_CPUClockCounterAdd(4);
                 _gb_break_to_debugger();
-                Debug_ErrorMsgArg("Unidentified opcode. ED\nPC: %04x\nROM: %d",
+                Debug_ErrorMsgArg("Unidentified opcode. ED\nPC: %04X\nROM: %d",
                             GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
                 break;
             case 0xEE: //XOR n - 2
@@ -3797,7 +3798,7 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
             case 0xF4: // Undefined - *
                 GB_CPUClockCounterAdd(4);
                 _gb_break_to_debugger();
-                Debug_ErrorMsgArg("Unidentified opcode. F4\nPC: %04x\nROM: %d",
+                Debug_ErrorMsgArg("Unidentified opcode. F4\nPC: %04X\nROM: %d",
                             GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
                 break;
             case 0xF5: //PUSH AF - 4
@@ -3871,13 +3872,13 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
             case 0xFC: // Undefined - *
                 GB_CPUClockCounterAdd(4);
                 _gb_break_to_debugger();
-                Debug_ErrorMsgArg("Unidentified opcode. FC\nPC: %04x\nROM: %d",
+                Debug_ErrorMsgArg("Unidentified opcode. FC\nPC: %04X\nROM: %d",
                             GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
                 break;
             case 0xFD: // Undefined - *
                 GB_CPUClockCounterAdd(4);
                 _gb_break_to_debugger();
-                Debug_ErrorMsgArg("Unidentified opcode. FD\nPC: %04x\nROM: %d",
+                Debug_ErrorMsgArg("Unidentified opcode. FD\nPC: %04X\nROM: %d",
                             GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
                 break;
             case 0xFE: //CP n - 2
@@ -3909,7 +3910,7 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
             default: //wtf...?
                 GB_CPUClockCounterAdd(4);
                 _gb_break_to_debugger();
-                Debug_ErrorMsgArg("Unidentified opcode. %x\nPC: %04x\nROM: %d",
+                Debug_ErrorMsgArg("Unidentified opcode. %02X\nPC: %04X\nROM: %d",
                             opcode,GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
                 break;
         } //end switch

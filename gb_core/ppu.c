@@ -52,7 +52,8 @@ extern _GB_CONTEXT_ GameBoy;
 
 void GB_PPUInit(void)
 {
-
+    GameBoy.Emulator.FrameDrawn = 0;
+    GameBoy.Emulator.LCD_clocks = 0;
 }
 
 void GB_PPUEnd(void)
@@ -84,17 +85,6 @@ void GB_PPUUpdateClocksClounterReference(int reference_clocks)
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
     int increment_clocks = reference_clocks - GB_PPUClockCounterGet();
-
-    if(GameBoy.Emulator.VBL_clocks_delay)
-    {
-        GameBoy.Emulator.VBL_clocks_delay -= increment_clocks;
-
-        if(GameBoy.Emulator.VBL_clocks_delay <= 0)
-        {
-            GB_SetInterrupt(I_VBLANK);
-            GameBoy.Emulator.VBL_clocks_delay = 0;
-        }
-    }
 
     if(GameBoy.Emulator.lcd_on)
     {
@@ -155,9 +145,7 @@ void GB_PPUUpdateClocksClounterReference(int reference_clocks)
                             mem->IO_Ports[STAT_REG-0xFF00] |= 0x01;
 
                             //Call VBL interrupt...
-                            //if(mem->HighRAM[IE_REG-0xFF80] & I_VBLANK)
-                            //    GB_SetInterrupt(I_VBLANK);
-                            GameBoy.Emulator.VBL_clocks_delay = 24 - GameBoy.Emulator.LCD_clocks;
+                            GB_SetInterrupt(I_VBLANK);
                         }
                         else
                         {
@@ -248,12 +236,6 @@ int GB_PPUGetClocksToNextEvent(void)
         }
     }
 
-    if(GameBoy.Emulator.VBL_clocks_delay)
-    {
-        if(clocks_to_next_event > GameBoy.Emulator.VBL_clocks_delay)
-            clocks_to_next_event = GameBoy.Emulator.VBL_clocks_delay;
-    }
-
     return clocks_to_next_event;
 }
 
@@ -271,32 +253,36 @@ inline void GB_CheckStatSignal(void)
     u32 screenmode = GameBoy.Emulator.ScreenMode;
     int stat = mem->IO_Ports[STAT_REG-0xFF00];
 
-    if(    (mem->IO_Ports[LY_REG-0xFF00] == mem->IO_Ports[LYC_REG-0xFF00] &&
-                                                stat & IENABLE_LY_COMPARE)  ||
-        (stat & IENABLE_HBL && screenmode == 0) ||
-        (stat & IENABLE_OAM && screenmode == 2)  ||
-        (stat & (IENABLE_VBL|IENABLE_OAM) && screenmode == 1)
-    //    (stat & IENABLE_VBL && screenmode == 1)
-    )
+    int any_condition_met =
+            ( (mem->IO_Ports[LY_REG-0xFF00] == mem->IO_Ports[LYC_REG-0xFF00]) && (stat & IENABLE_LY_COMPARE) ) ||
+            ( (screenmode == 0) && (stat & IENABLE_HBL) ) ||
+            ( (screenmode == 2) && (stat & IENABLE_OAM) ) ||
+            ( (screenmode == 1) && (stat & (IENABLE_VBL|IENABLE_OAM)) ); // Not just IENABLE_VBL
 
+    if(any_condition_met)
     {
-        if(GameBoy.Emulator.stat_signal == 0 /*&& mem->HighRAM[IE_REG-0xFF80] & I_STAT*/)
-            GB_SetInterrupt(I_STAT);
-
+        if(GameBoy.Emulator.stat_signal == 0) GB_SetInterrupt(I_STAT); // rising edge
         GameBoy.Emulator.stat_signal = 1;
-
-        return;
     }
-
-    GameBoy.Emulator.stat_signal = 0;
+    else
+    {
+        GameBoy.Emulator.stat_signal = 0;
+    }
 }
 
 inline void GB_CheckLYC(void)
 {
-    if(GameBoy.Memory.IO_Ports[LY_REG-0xFF00] == GameBoy.Memory.IO_Ports[LYC_REG-0xFF00])
-        GameBoy.Memory.IO_Ports[STAT_REG-0xFF00] |= I_LY_EQUALS_LYC;
+    if(GameBoy.Emulator.lcd_on)
+    {
+        if(GameBoy.Memory.IO_Ports[LY_REG-0xFF00] == GameBoy.Memory.IO_Ports[LYC_REG-0xFF00])
+            GameBoy.Memory.IO_Ports[STAT_REG-0xFF00] |= I_LY_EQUALS_LYC;
+        else
+            GameBoy.Memory.IO_Ports[STAT_REG-0xFF00] &= ~I_LY_EQUALS_LYC;
+    }
     else
+    {
         GameBoy.Memory.IO_Ports[STAT_REG-0xFF00] &= ~I_LY_EQUALS_LYC;
+    }
 }
 
 /*

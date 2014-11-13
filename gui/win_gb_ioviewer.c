@@ -217,16 +217,12 @@ void Win_GBIOViewerUpdate(void)
     GUI_ConsoleModePrintf(&gb_ioview_sndcontrol_con,0,2,"26h NR52 - %02X",GB_MemReadReg8(0xFF26));
 
     //GBC DMA Information
-    u8 * __io = GameBoy.Memory.IO_Ports;
-    u32 source = (__io[HDMA1_REG-0xFF00]<<8) | __io[HDMA2_REG-0xFF00];
-    u32 dest = ((__io[HDMA3_REG-0xFF00]<<8) | __io[HDMA4_REG-0xFF00]) + 0x8000;
-    u32 size = (((__io[HDMA5_REG-0xFF00]<<8)+1)&0x7F)<<4;
     char * mode = ((GameBoy.Emulator.GBC_DMA_enabled==GBC_DMA_NONE) ? "None" :
                     ( (GameBoy.Emulator.GBC_DMA_enabled==GBC_DMA_GENERAL) ? "GDMA" : "HDMA" ));
     GUI_ConsoleModePrintf(&gb_ioview_dmainfo_con,0,0,"Mode:   %s",mode);
-    GUI_ConsoleModePrintf(&gb_ioview_dmainfo_con,0,1,"Source: %04X",source);
-    GUI_ConsoleModePrintf(&gb_ioview_dmainfo_con,0,2,"Dest:   %04X",dest);
-    GUI_ConsoleModePrintf(&gb_ioview_dmainfo_con,0,3,"Size:   %04X",size);
+    GUI_ConsoleModePrintf(&gb_ioview_dmainfo_con,0,1,"Source: %04X",GameBoy.Emulator.gdma_src);
+    GUI_ConsoleModePrintf(&gb_ioview_dmainfo_con,0,2,"Dest:   %04X",GameBoy.Emulator.gdma_dst);
+    GUI_ConsoleModePrintf(&gb_ioview_dmainfo_con,0,3,"Size:   %04X",GameBoy.Emulator.gdma_bytes_left);
 
     //MBC Information
     GUI_ConsoleModePrintf(&gb_ioview_mbc_con,0,0,"MBC: %d",GameBoy.Emulator.MemoryController);

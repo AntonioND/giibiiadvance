@@ -357,7 +357,6 @@ typedef struct {
     u32 DivClocks; // for DIV_REG
     u32 ScreenMode; //for vblank, hblank...
     u32 CurrentScanLine;
-    s32 VBL_clocks_delay; //wait 24 clocks of vblank before vblank interrupt
 
     u32 serial_clocks; //count
     u32 serial_enabled;

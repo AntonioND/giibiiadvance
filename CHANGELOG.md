@@ -19,6 +19,7 @@ General
 GB emulation
 
 - GB core rewritten.
+- Removed stupid hack that made the VBL IRQ delay a few clocks after entering VBL mode. Tested on real hardware.
 - Fixed KEY1 register when doing a hard reset.
 
 Version 0.2.0

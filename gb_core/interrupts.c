@@ -75,8 +75,6 @@ void GB_HandleRTC(void)
 
 void GB_CPUInterruptsInit(void)
 {
-    GameBoy.Emulator.FrameDrawn = 0;
-    GameBoy.Emulator.LCD_clocks = 0;
     GameBoy.Emulator.TimerClocks = 0;
     GameBoy.Emulator.timer_total_clocks = 0;
     GameBoy.Emulator.timer_enabled = 0;
@@ -134,7 +132,7 @@ void GB_TimersUpdateClocksClounterReference(int reference_clocks)
 
     //DIV -- EVERY 256 CLOCKS
     GameBoy.Emulator.DivClocks += increment_clocks;
-    while(GameBoy.Emulator.DivClocks > 255)
+    while(GameBoy.Emulator.DivClocks >= 256)
     {
         mem->IO_Ports[DIV_REG-0xFF00] ++;
         GameBoy.Emulator.DivClocks -= 256;
@@ -145,7 +143,7 @@ void GB_TimersUpdateClocksClounterReference(int reference_clocks)
     {
         GameBoy.Emulator.TimerClocks += increment_clocks;
 
-        while(GameBoy.Emulator.TimerClocks > (GameBoy.Emulator.timer_total_clocks-1))
+        while(GameBoy.Emulator.TimerClocks >= GameBoy.Emulator.timer_total_clocks)
         {
             if(mem->IO_Ports[TIMA_REG-0xFF00] == 0xFF) //overflow
             {
@@ -193,7 +191,7 @@ void GB_CheckJoypadInterrupt(void)
     if(result)
     {
         if( ! ( (GameBoy.Emulator.HardwareType == HW_GBC) || (GameBoy.Emulator.HardwareType == HW_GBA) ) )
-            GB_SetInterrupt(I_JOYPAD); //No joypad interrupt in GBA/GBC
+            GB_SetInterrupt(I_JOYPAD); //No joypad interrupt in GBA/GBC? TODO: TEST
 
         if(GameBoy.Emulator.CPUHalt == 2) // Exit stop mode in any hardware
             GameBoy.Emulator.CPUHalt = 0;

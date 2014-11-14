@@ -101,7 +101,7 @@ void GB_CPUInterruptsEnd(void)
 inline void GB_SetInterrupt(int flag)
 {
     GameBoy.Memory.IO_Ports[IF_REG-0xFF00] |= flag;
-    if(GameBoy.Memory.HighRAM[IE_REG-0xFF80] & flag)
+    //if(GameBoy.Memory.HighRAM[IE_REG-0xFF80] & flag)
         GameBoy.Emulator.CPUHalt = 0;
 }
 

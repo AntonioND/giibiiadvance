@@ -338,7 +338,6 @@ typedef struct {
 
     //Other things
 
-    //u32 halt_not_executed;
     u32 CPUHalt;
     u32 halt_dmg_bug;
 

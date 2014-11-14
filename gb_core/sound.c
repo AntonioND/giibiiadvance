@@ -859,26 +859,26 @@ void GB_SoundUpdateClocksClounterReference(int reference_clocks)
         //4194304 Hz CPU / 22050 Hz sound output.
         if(Sound.samples_left_to_output > Sound.samples_left_to_input-(GB_BUFFER_SAMPLES/2))
         {
-            if(Sound.nextsample_clocks > (190 + (4<<GameBoy.Emulator.DoubleSpeed)))
+            if(Sound.nextsample_clocks > ((191+4)<<GameBoy.Emulator.DoubleSpeed) )
             {
-                Sound.nextsample_clocks -= (190 + (4<<GameBoy.Emulator.DoubleSpeed));
+                Sound.nextsample_clocks -= ((191+4)<<GameBoy.Emulator.DoubleSpeed);
                 GB_SoundMix();
             }
         }               //This is an ugly hack to make sound buffer not overflow or underflow...
         else
         {
-            if(Sound.nextsample_clocks > (191 - (4<<GameBoy.Emulator.DoubleSpeed)))
+            if(Sound.nextsample_clocks > ((191-4)<<GameBoy.Emulator.DoubleSpeed) )
             {
-                Sound.nextsample_clocks -= (191 - (4<<GameBoy.Emulator.DoubleSpeed));
+                Sound.nextsample_clocks -= ((191-4)<<GameBoy.Emulator.DoubleSpeed);
                 GB_SoundMix();
             }
         }
     }
 
     //4194304 Hz CPU / 256 Steps per second
-    if(Sound.clocks >= 16384)
+    if(Sound.clocks >= (16384<<GameBoy.Emulator.DoubleSpeed))
     {
-        Sound.clocks -= 16384;
+        Sound.clocks -= (16384<<GameBoy.Emulator.DoubleSpeed);
         if(Sound.master_enable)
         {
             if(Sound.Chn1.running) //Channel 1

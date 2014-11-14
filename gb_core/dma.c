@@ -114,7 +114,7 @@ void GB_DMAStopGBCCopy(void)
     GameBoy.Emulator.hdma_last_ly_copied = -1; // reset
 
     GameBoy.Emulator.GBC_DMA_enabled = GBC_DMA_NONE;
-    GameBoy.Memory.IO_Ports[HDMA5_REG-0xFF00] |= (1<<7); // keep the lower bytes ?
+    GameBoy.Memory.IO_Ports[HDMA5_REG-0xFF00] |= 0x80; //verified on hardware (GBC and GBA SP)
 }
 
 //----------------------------------------------------------------
@@ -294,9 +294,15 @@ int GB_DMAExecute(int clocks)
     {
         //This doesn't need to be divided. Worst case is 64 clocks.
 
-        if(GameBoy.Emulator.lcd_on) if(GameBoy.Emulator.CPUHalt == 0) // ?
+        if(GameBoy.Emulator.CPUHalt == 0) // TODO: TEST ?
         {
-            int current_ly = mem->IO_Ports[LY_REG-0xFF00];
+            int current_ly = -1;
+
+            if(GameBoy.Emulator.lcd_on)
+                current_ly = mem->IO_Ports[LY_REG-0xFF00];
+            else
+                current_ly = -2; // if screen is off, copy one block, continue when screen is switched on
+
             if(GameBoy.Emulator.hdma_last_ly_copied != current_ly)
             {
                 if(GameBoy.Emulator.ScreenMode == 0)

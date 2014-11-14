@@ -12,17 +12,20 @@ General
 Game Boy
 --------
 
-- Measure delay between VBL and VBL IRQ.
 - Make that everything reads FFh except HRAM when DMG DMA is enabled.
 - Check GDMA/HDMA timings in real hardware.
-- HDMA when HALT?
-- What value is in HDMA5 when HBL mode is stopped?
-- What happens if HBL DMA is enabled during HBL? It is copied right then (No memory conflicts because it will end before mode 3), or waits until the next HBL?
 - Memory after OAM is an OAM mirror?
 - Put wave RAM in the I/O viewer?
 - Reverse engineer GB Camera.
 - Can disabled cart RAM be read?
 - Check DIV write. What happens when timer registers are changed while timer is working.
+- What happens if rHDMA5 is changed during a copy?
+- What STAT mode is the GBC when the LCD is switched on?
+- HDMA copies when HALT is enabled? HALT is ignored if called when HDMA is active?
+- Check what memory areas do OAM DMA copy from depending on hardware (DMG/GBC).
+- Check what happens if HDMA1-4 are modified during HDMA copy.
+- HALT when IME=0. Halt not executed? Executed after IME is set to 1?
+- HALT is disabled when any flag of IF is set to 1 or it needs the corresponding flag in IE? IME=1 only needed to jump to IRQ vectors?
 
 Game Boy Advance
 ----------------

@@ -499,17 +499,22 @@ void GB_MemWriteReg8(u32 address, u32 value)
 
             //Start/Stop GBC DMA copy
 
+            GB_CPUBreakLoop();
+
+            mem->IO_Ports[HDMA5_REG-0xFF00] = value;
+
             if(GameBoy.Emulator.GBC_DMA_enabled == GBC_DMA_NONE)
             {
-                mem->IO_Ports[HDMA5_REG-0xFF00] = value;
                 GB_DMAInitGBCCopy(value);
-                GB_CPUBreakLoop();
             }
             else //if(GameBoy.Emulator.GBC_DMA_enabled == GBC_DMA_HBLANK)
             {
-                //mem->IO_Ports[HDMA5_REG-0xFF00] = value; ??
                 // If GBC_DMA_GENERAL the CPU is blocked, not needed to check if that is the current mode
-                if(!(value & (1<<7)))
+                if(value & BIT(7))
+                {
+                    GB_DMAInitGBCCopy(value); // update copy with new size - continue HDMA mode, not GDMA
+                }
+                else
                 {
                     GB_DMAStopGBCCopy();
                 }
@@ -689,11 +694,7 @@ u32 GB_MemReadReg8(u32 address)
     switch(address)
     {
         case VBK_REG:
-        case HDMA1_REG:
-        case HDMA2_REG:
-        case HDMA3_REG:
-        case HDMA4_REG:
-        case HDMA5_REG: // Updated in execution loop
+        case HDMA5_REG: // Updated in execution loop. The others are write only
         case BCPS_REG:
         case OCPS_REG:
         case SVBK_REG:
@@ -819,7 +820,7 @@ u32 GB_MemReadReg8(u32 address)
                 GB_PPUUpdateClocksClounterReference(GB_CPUClockCounterGet());
                 return mem->IO_Ports[LY_REG-0xFF00];
             }
-            else return 0;
+            else return 0; // verified on hardware (GBC and GBA SP)
 
         case TAC_REG:
             return mem->IO_Ports[TAC_REG-0xFF00] | (0xF8);

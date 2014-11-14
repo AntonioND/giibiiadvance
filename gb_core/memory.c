@@ -305,8 +305,7 @@ void GB_MemWriteReg8(u32 address, u32 value)
                 const u32 gb_timer_clocks[4] = {1024,16,64,256};
 
                 GameBoy.Emulator.timer_enabled = 1;
-                GameBoy.Emulator.timer_total_clocks =
-                    gb_timer_clocks[value&3] >> GameBoy.Emulator.DoubleSpeed;
+                GameBoy.Emulator.timer_total_clocks = gb_timer_clocks[value&3];
             }
             else
             {
@@ -319,9 +318,11 @@ void GB_MemWriteReg8(u32 address, u32 value)
             return;
 
         case DIV_REG:
-            //GameBoy.Emulator.DivClocks = 0; // ????
             GB_TimersUpdateClocksClounterReference(GB_CPUClockCounterGet());
             mem->IO_Ports[DIV_REG-0xFF00] = 0;
+            GameBoy.Emulator.DivClocks = 0;
+            GameBoy.Emulator.TimerClocks = 0;
+            GB_CPUBreakLoop();
             return;
 
         case LYC_REG:

@@ -12,13 +12,12 @@ General
 Game Boy
 --------
 
-- Make that everything reads FFh except HRAM when DMG DMA is enabled.
+- Make that everything read FFh except HRAM when DMG DMA is enabled.
 - Check GDMA/HDMA timings in real hardware.
 - Memory after OAM is an OAM mirror?
 - Put wave RAM in the I/O viewer?
 - Reverse engineer GB Camera.
 - Can disabled cart RAM be read?
-- Check DIV write. What happens when timer registers are changed while timer is working.
 - What happens if rHDMA5 is changed during a copy?
 - What STAT mode is the GBC when the LCD is switched on?
 - HDMA copies when HALT is enabled? HALT is ignored if called when HDMA is active?
@@ -26,6 +25,11 @@ Game Boy
 - Check what happens if HDMA1-4 are modified during HDMA copy.
 - HALT when IME=0. Halt not executed? Executed after IME is set to 1?
 - HALT is disabled when any flag of IF is set to 1 or it needs the corresponding flag in IE? IME=1 only needed to jump to IRQ vectors?
+- GBC OAM start values are incorrect!
+- When an interrupt occurs while in HALT, the CPU starts back up and pushes the Program Counter onto the stack before servicing the interrupt(s). Except it doesn't push the address after HALT as one might expect but rather the address of HALT itself?
+- Reseting DIV affects sound?
+- What happens when timer registers are changed while timer is working.
+- Timer/DIV counter keeps increasing even if the timer is disabled. Timer can increase just when enabled or it can need the specified clocks. Emulate this!
 
 Game Boy Advance
 ----------------

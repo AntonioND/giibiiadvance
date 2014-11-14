@@ -1,0 +1,18 @@
+DIV register
+------------
+
+Increases every 256 oscilator clocks.
+
+If writen, its value is reseted to 0, as well as the internal counter.
+
+-Interaction with timer explained below.
+-Interaction with sound hardware to be determined.
+
+TIMER
+-----
+
+Shares the internal counter with DIV register. If DIV register is writen, DIV internal counter is reseted, so TIMER is affected. For example, if a program configures the timer to increase every 64 clocks but it keeps writing to DIV register each 20 clocks, the timer will never increase its value.
+
+-Timer/DIV counter keeps increasing even if the timer is disabled. TIMA can increase just when the timer is enabled or it can need the specified clocks by TAC. TODO: TEST SPECIFICALLY THIS ON HARDWARE!!
+
+

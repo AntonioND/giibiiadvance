@@ -219,13 +219,6 @@ void GB_MemWriteReg8(u32 address, u32 value)
             mem->IO_Ports[address-0xFF00] = value;
             return;
 
-        case TIMA_REG:
-        case TMA_REG:
-            GB_TimersUpdateClocksClounterReference(GB_CPUClockCounterGet());
-            mem->IO_Ports[address-0xFF00] = value;
-            GB_CPUBreakLoop();
-            return;
-
         case SCY_REG:
         case SCX_REG:
         case BGP_REG:
@@ -295,33 +288,39 @@ void GB_MemWriteReg8(u32 address, u32 value)
         case LY_REG: //Read only
             return;
 
+        case TIMA_REG:
+            GB_TimersUpdateClocksClounterReference(GB_CPUClockCounterGet());
+            mem->IO_Ports[TIMA_REG-0xFF00] = value;
+            GB_CPUBreakLoop();
+            return;
+
+        case TMA_REG:
+            GB_TimersUpdateClocksClounterReference(GB_CPUClockCounterGet());
+            mem->IO_Ports[TMA_REG-0xFF00] = value;
+            GB_CPUBreakLoop();
+            return;
+
         case TAC_REG:
             GB_TimersUpdateClocksClounterReference(GB_CPUClockCounterGet());
-
-            GameBoy.Emulator.TimerClocks = 0;
-
             if(value & (1<<2))
             {
-                const u32 gb_timer_clocks[4] = {1024,16,64,256};
-
+                const u32 gb_timer_clock_mask[4] = {1024-1, 16-1, 64-1, 256-1};
                 GameBoy.Emulator.timer_enabled = 1;
-                GameBoy.Emulator.timer_total_clocks = gb_timer_clocks[value&3];
+                GameBoy.Emulator.timer_overflow_mask = gb_timer_clock_mask[value&3];
             }
             else
             {
                 GameBoy.Emulator.timer_enabled = 0;
-                GameBoy.Emulator.timer_total_clocks = 0;
+                GameBoy.Emulator.timer_overflow_mask = -1;
             }
-
             mem->IO_Ports[TAC_REG-0xFF00] = value;
             GB_CPUBreakLoop();
             return;
 
         case DIV_REG:
             GB_TimersUpdateClocksClounterReference(GB_CPUClockCounterGet());
+            GameBoy.Emulator.sys_clocks = 0;
             mem->IO_Ports[DIV_REG-0xFF00] = 0;
-            GameBoy.Emulator.DivClocks = 0;
-            GameBoy.Emulator.TimerClocks = 0;
             GB_CPUBreakLoop();
             return;
 

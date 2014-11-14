@@ -148,8 +148,6 @@ void GB_CPUInit(void)
 {
     GB_ClockCountersReset();
 
-    GB_CPUInterruptsInit();
-
     gb_break_cpu_loop = 0;
     gb_last_residual_clocks = 0;
 
@@ -244,21 +242,19 @@ static int GB_IRQExecute(void)
         {
             GameBoy.Emulator.CPUHalt = 0;
 
-            // interrupts should need the same time in dual speed or normal speed!!
-
             int start_clocks = GB_CPUClockCounterGet();
 
-            GB_CPUClockCounterAdd(4 << GameBoy.Emulator.DoubleSpeed);
+            GB_CPUClockCounterAdd(4);
             GameBoy.Memory.InterruptMasterEnable = 0;
-            GB_CPUClockCounterAdd(4 << GameBoy.Emulator.DoubleSpeed);
+            GB_CPUClockCounterAdd(4);
             cpu->R16.SP --;
             cpu->R16.SP &= 0xFFFF;
             GB_MemWrite8(cpu->R16.SP,cpu->R8.PCH);
-            GB_CPUClockCounterAdd(4 << GameBoy.Emulator.DoubleSpeed);
+            GB_CPUClockCounterAdd(4);
             cpu->R16.SP --;
             cpu->R16.SP &= 0xFFFF;
             GB_MemWrite8(cpu->R16.SP,cpu->R8.PCL);
-            GB_CPUClockCounterAdd(4 << GameBoy.Emulator.DoubleSpeed);
+            GB_CPUClockCounterAdd(4);
             {
                 if(interrupts & I_VBLANK)
                 { cpu->R16.PC = 0x0040; mem->IO_Ports[IF_REG-0xFF00] &= ~I_VBLANK; }
@@ -271,7 +267,7 @@ static int GB_IRQExecute(void)
                 else //if(interrupts & I_JOYPAD)
                 { cpu->R16.PC = 0x0060; mem->IO_Ports[IF_REG-0xFF00] &= ~I_JOYPAD; }
             }
-            GB_CPUClockCounterAdd(4 << GameBoy.Emulator.DoubleSpeed);
+            GB_CPUClockCounterAdd(4);
 
             int end_clocks = GB_CPUClockCounterGet();
 

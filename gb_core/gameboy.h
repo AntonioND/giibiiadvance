@@ -337,7 +337,6 @@ typedef struct {
     u32 hdma_last_ly_copied; //To limit to 0x10 bytes per HBlank
 
     //Other things
-
     u32 CPUHalt;
     u32 halt_dmg_bug;
 
@@ -347,15 +346,16 @@ typedef struct {
     u32 CGBEnabled;
     u32 DoubleSpeed;
 
+    //LCD
     s32 LCD_clocks; //for screen.
-
-    u32 TimerClocks;
-    u32 timer_total_clocks;
-    u32 timer_enabled;
-
-    u32 DivClocks; // for DIV_REG
     u32 ScreenMode; //for vblank, hblank...
     u32 CurrentScanLine;
+    u32 stat_signal; //when this goes from 0 to 1, STAT interrupt is triggered.
+
+    //DIV, Timer, Sound
+    u32 sys_clocks; // 16 bit register. The 8 most significative bits are DIV_REG
+    u32 timer_overflow_mask;
+    u32 timer_enabled;
 
     u32 serial_clocks; //count
     u32 serial_enabled;
@@ -363,8 +363,6 @@ typedef struct {
     u32 serial_device;
     serial_send_fn_ptr SerialSend_Fn;
     serial_recv_fn_ptr SerialRecv_Fn;
-
-    u32 stat_signal; //when this goes from 0 to 1, STAT interrupt is triggered.
 
     u32 FrameDrawn;
 } _EMULATOR_INFO_;

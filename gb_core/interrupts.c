@@ -75,10 +75,9 @@ void GB_HandleRTC(void)
 
 void GB_CPUInterruptsInit(void)
 {
-    GameBoy.Emulator.TimerClocks = 0;
-    GameBoy.Emulator.timer_total_clocks = 0;
+    GameBoy.Emulator.sys_clocks = 0;
+    GameBoy.Emulator.timer_overflow_mask = -1;
     GameBoy.Emulator.timer_enabled = 0;
-    GameBoy.Emulator.DivClocks = 0;
 
     if(GameBoy.Emulator.HasTimer)
     {
@@ -130,20 +129,23 @@ void GB_TimersUpdateClocksClounterReference(int reference_clocks)
 
     int increment_clocks = reference_clocks - GB_TimersClockCounterGet();
 
-    //DIV -- EVERY 256 CLOCKS
-    GameBoy.Emulator.DivClocks += increment_clocks;
-    while(GameBoy.Emulator.DivClocks >= 256)
-    {
-        mem->IO_Ports[DIV_REG-0xFF00] ++;
-        GameBoy.Emulator.DivClocks -= 256;
-    }
+    //Don't assume that this function will increase just a few clocks. Timer can be increased up to 4 times
+    //just because of HDMA needing 64 clocks in double speed mode (min. timer period is 16 clocks).
+
+    int old_sys_clocks = GameBoy.Emulator.sys_clocks;
+
+    GameBoy.Emulator.sys_clocks = (increment_clocks+GameBoy.Emulator.sys_clocks)&0xFFFF;
+
+    //DIV -- Upper 8 bits of the 16 register sys_clocks
+    mem->IO_Ports[DIV_REG-0xFF00] = (GameBoy.Emulator.sys_clocks>>8);
 
     //TIMA
     if(GameBoy.Emulator.timer_enabled)
     {
-        GameBoy.Emulator.TimerClocks += increment_clocks;
+        int timer_mask = GameBoy.Emulator.timer_overflow_mask;
+        int timer_update_clocks = (old_sys_clocks & timer_mask) + increment_clocks;
 
-        while(GameBoy.Emulator.TimerClocks >= GameBoy.Emulator.timer_total_clocks)
+        while(timer_update_clocks > timer_mask)
         {
             if(mem->IO_Ports[TIMA_REG-0xFF00] == 0xFF) //overflow
             {
@@ -152,20 +154,25 @@ void GB_TimersUpdateClocksClounterReference(int reference_clocks)
             }
             else mem->IO_Ports[TIMA_REG-0xFF00]++;
 
-            GameBoy.Emulator.TimerClocks -= GameBoy.Emulator.timer_total_clocks;
+            timer_update_clocks -= (timer_mask+1);
         }
     }
+
+    //TODO : SOUND UPDATE PROBABLY GOES HERE!!
 
     GB_TimersClockCounterSet(reference_clocks);
 }
 
 int GB_TimersGetClocksToNextEvent(void)
 {
-    int clocks_to_next_event = 256 - GameBoy.Emulator.DivClocks; // DIV
+    int clocks_to_next_event = 256 - (GameBoy.Emulator.sys_clocks&0xFF); // DIV
 
     if(GameBoy.Emulator.timer_enabled)
     {
-        int clocks_left_for_timer = GameBoy.Emulator.timer_total_clocks - GameBoy.Emulator.TimerClocks;
+        int timer_mask = GameBoy.Emulator.timer_overflow_mask;
+        int timer_update_clocks = (GameBoy.Emulator.sys_clocks & timer_mask);
+        int clocks_left_for_timer = (timer_mask+1) - timer_update_clocks;
+
         if(clocks_left_for_timer < clocks_to_next_event)
             clocks_to_next_event = clocks_left_for_timer;
     }

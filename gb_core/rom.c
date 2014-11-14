@@ -597,7 +597,11 @@ int GB_CartridgeLoad(const u8 * pointer, const u32 rom_size)
         memset_rand(mem->WorkRAM_Switch[0], 4 * 1024);
     }
 
-    memset_rand(mem->ObjAttrMem,0xA0);
+    if( (GameBoy.Emulator.HardwareType == HW_GBC) || (GameBoy.Emulator.HardwareType == HW_GBA) )
+        memset(mem->ObjAttrMem,0,0xA0);
+    else
+        memset_rand(mem->ObjAttrMem,0xA0);
+
     memset(mem->IO_Ports,0,0x80);
     memset(mem->HighRAM,0,0x80);
 

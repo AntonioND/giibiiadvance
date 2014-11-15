@@ -1,0 +1,1 @@
+VBL IRQ is not delayed, it's executed the same clock as PPU enters VBL screen mode.

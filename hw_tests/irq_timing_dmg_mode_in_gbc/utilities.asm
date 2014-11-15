@@ -29,15 +29,7 @@ memset::
 
 memset_rand::
 	
-	push	hl
-	call	GetRandom
-	pop	hl
-	ld	[hl+],a
-	dec	bc
-	ld	a,b
-	or	a,c
-	jr	nz,memset_rand
-	
+
 	ret
 	
 ;--------------------------------------------------------------------------

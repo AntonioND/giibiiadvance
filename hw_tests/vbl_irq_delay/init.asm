@@ -38,26 +38,36 @@
 	SECTION	"Interrupt Vectors",HOME[$0040]
 	
 ;	SECTION	"VBL Interrupt Vector",HOME[$0040]
-	push	hl
-	ld	hl,_is_vbl_flag
-	ld	[hl],1
-	jr	irq_VBlank
+	ld	[hl+],a
+	ret ; don't enable again!
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
 	
 ;	SECTION	"LCD Interrupt Vector",HOME[$0048]
-	push	hl
-	ld	hl,LCD_handler
-	jr	irq_Common
+	xor	a,a
+	reti
+	nop
+	nop
+	nop
+	nop
 	nop
 	nop
 	
 ;	SECTION	"TIM Interrupt Vector",HOME[$0050]
-	push	hl
-	ld	hl,TIM_handler
-	jr	irq_Common
+	reti
 	nop
 	nop
-	
-;	SECTION	"SIO Interrupt Vector",HOME[$0058]
+	nop
+	nop
+	nop
+	nop
+	nop
+
+;	SECTION	"SIO Interrupt Vector",HOME[$0058]	
 	push	hl
 	ld	hl,SIO_handler
 	jr	irq_Common
@@ -166,29 +176,10 @@ StartPoint:
 	xor	a,a
 	ld	[rNR52],a ; Switch off sound
 	
-	; Add all ram values to get a random seed
-	ld	hl,_RAM
-	ld	bc,$2000
-	ld	e,$00
-.random_seed_loop:
-	ld	a,e
-	add	a,[hl]
-	ld	e,a
-	inc	hl
-	dec	bc
-	ld	a,b
-	or	a,c
-	jr	nz,.random_seed_loop
-	ld	a,e
-	push	af ; Save seed
-	
 	ld	hl,_RAM ; Clear RAM
 	ld	bc,$2000
 	ld	d,$00
 	call	memset
-	
-	pop	af ; Get random seed
-	call	SetRandomSeed
 	
 	pop	bc ; Get CPU type
 	pop	af

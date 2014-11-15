@@ -3,9 +3,9 @@ DMG DMA transfer
 
 rDMA is (R/W)
 
--Copy from VRAM or external RAM doesn't disable WRAM or ROM.
+- Copy from VRAM or external RAM doesn't disable WRAM or ROM.
 
--Source address to trigger the DMA copy can be 0x0000-0xFF00.
+- Source address to trigger the DMA copy can be 0x0000-0xFF00.
 
 
 GBC DMA transfer
@@ -14,10 +14,18 @@ GBC DMA transfer
 rHDMA1-rHDMA4 are (W) - They read FFh.
 rHDMA5 is (R/W)
 
--If a HDMA transfer is inited when the screen is off, when it is turned on it will start. It will copy 1 block when the screen is off.
+- If a HDMA transfer is inited when the screen is off, when it is turned on it will start. It will copy 1 block when the screen is off.
 
--When a HDMA transfer is inited during HBL it will start right away. There is no problem of copying while VRAM is inaccesible, mode 2 is long enough to allow the HDMA copy the 16 bytes.
+- When a HDMA transfer is inited during HBL it will start right away. There is no problem of copying while VRAM is inaccesible, mode 2 is long enough to allow the HDMA copy the 16 bytes.
 
 -If rHDMA5 is written during a HDMA copy:
     -Bit 7 of rHDMA5 is 0: Stop copy. rHDMA5 reads (80h OR written_value).
     -Bit 7 of rHDMA5 is 1: Restart copy. New size is the value of rHDMA5 bits 0-6.
+ This means that HDMA can't switch to GDMA with only one write.
+
+Timing:
+
+    blocks = (register_value & 0x7F) + 1
+
+    Double Speed -> ( 20 + blocks*64 ) clocks
+    Single Speed -> ( 20 + blocks*32 ) clocks

@@ -88,14 +88,14 @@ void GB_DMAInitGBCCopy(int register_value)
 
         u32 blocks = ( ((u32)register_value) & 0x7F ) + 1;
 
-        if(GameBoy.Emulator.DoubleSpeed)
+        if(GameBoy.Emulator.DoubleSpeed) // Tested on hardware
         {
-            GameBoy.Emulator.gdma_preparation_clocks_left = 858;
+            GameBoy.Emulator.gdma_preparation_clocks_left = 20;
             GameBoy.Emulator.gdma_copy_clocks_left = blocks * 64;
         }
         else
         {
-            GameBoy.Emulator.gdma_preparation_clocks_left = 890;
+            GameBoy.Emulator.gdma_preparation_clocks_left = 20;
             GameBoy.Emulator.gdma_copy_clocks_left = blocks * 32;
         }
 

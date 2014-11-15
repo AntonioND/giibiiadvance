@@ -26,7 +26,7 @@ Game Boy
 - HALT is disabled when any flag of IF is set to 1 or it needs the corresponding flag in IE? IME=1 only needed to jump to IRQ vectors?
 - Start values are incorrect!
 - When an interrupt occurs while in HALT, the CPU starts back up and pushes the Program Counter onto the stack before servicing the interrupt(s). Except it doesn't push the address after HALT as one might expect but rather the address of HALT itself?
-- Reseting DIV affects sound or serial?
+- Reseting DIV affects serial? I doubt it, but...
 - What happens when timer registers are changed while timer is working.
 - What happens to everything when switching speed?
 

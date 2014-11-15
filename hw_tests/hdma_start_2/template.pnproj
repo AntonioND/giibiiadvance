@@ -1,0 +1,1 @@
+<Project name="template"><File path="utilities.asm"></File><File path="video.asm"></File><File path="hardware.inc"></File><File path="header.inc"></File><File path="init.asm"></File><File path="luts.asm"></File><File path="main.asm"></File><File path="Makefile"></File></Project>

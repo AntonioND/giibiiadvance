@@ -123,6 +123,39 @@ static inline void GB_TimersClockCounterSet(int new_reference_clocks)
     gb_timer_clock_counter = new_reference_clocks;
 }
 
+void GB_TimersWriteTIMA(int reference_clocks, int value)
+{
+    _GB_MEMORY_ * mem = &GameBoy.Memory;
+
+    int old_if = GameBoy.Memory.IO_Ports[IF_REG-0xFF00];
+
+    GB_TimersUpdateClocksClounterReference(reference_clocks);
+
+    if( (GameBoy.Emulator.sys_clocks&GameBoy.Emulator.timer_overflow_mask) == 0)
+    {
+        //If TIMA is written the same clock as incrementing itself prevent the timer IF flag from being set
+        mem->IO_Ports[IF_REG-0xFF00] = old_if;
+    }
+
+    mem->IO_Ports[TIMA_REG-0xFF00] = value;
+}
+
+void GB_TimersWriteTMA(int reference_clocks, int value)
+{
+    _GB_MEMORY_ * mem = &GameBoy.Memory;
+
+    GB_TimersUpdateClocksClounterReference(reference_clocks);
+
+    if( (GameBoy.Emulator.sys_clocks&GameBoy.Emulator.timer_overflow_mask) == 0)
+    {
+        //If TMA is written the same clock as reloading TIMA from TMA, load TIMA from writen value
+        if(mem->IO_Ports[TIMA_REG-0xFF00] == 0)
+            mem->IO_Ports[TIMA_REG-0xFF00] = value;
+    }
+
+    mem->IO_Ports[TMA_REG-0xFF00] = value;
+}
+
 void GB_TimersUpdateClocksClounterReference(int reference_clocks)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;

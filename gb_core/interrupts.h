@@ -55,6 +55,11 @@ inline void GB_SetInterrupt(int flag);
 
 //----------------------------------------------------------------
 
+void GB_TimersWriteTIMA(int reference_clocks, int value);
+void GB_TimersWriteTMA(int reference_clocks, int value);
+
+//----------------------------------------------------------------
+
 inline void GB_TimersClockCounterReset(void);
 void GB_TimersUpdateClocksClounterReference(int reference_clocks);
 int GB_TimersGetClocksToNextEvent(void);

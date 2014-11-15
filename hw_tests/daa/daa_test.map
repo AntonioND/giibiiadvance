@@ -1,0 +1,903 @@
+Bank #0 (HOME):
+  SECTION: $0000-$0000 ($0001 bytes)
+  SECTION: $0008-$0008 ($0001 bytes)
+  SECTION: $0010-$0010 ($0001 bytes)
+  SECTION: $0018-$0018 ($0001 bytes)
+  SECTION: $0020-$0020 ($0001 bytes)
+  SECTION: $0028-$0028 ($0001 bytes)
+  SECTION: $0030-$0030 ($0001 bytes)
+  SECTION: $0038-$003A ($0003 bytes)
+  SECTION: $0040-$0083 ($0044 bytes)
+           $0077 = irq_Common.goto_irq_handler
+           $0078 = wait_vbl
+  SECTION: $0100-$014F ($0050 bytes)
+  SECTION: $0150-$01F5 ($00A6 bytes)
+           $01AF = Reset
+           $0150 = StartPoint
+           $01CD = irq_set_JOY
+           $01D4 = CPU_fast
+           $01BE = irq_set_LCD
+           $01DB = CPU_slow
+           $01B9 = irq_set_VBL
+           $01C3 = irq_set_TIM
+           $01C8 = irq_set_SIO
+  SECTION: $3E00-$3EFF ($0100 bytes)
+  SECTION: $3F00-$3FFF ($0100 bytes)
+  SECTION: $3D00-$3DFF ($0100 bytes)
+           $3D00 = _Random
+  SECTION: $0084-$0097 ($0014 bytes)
+           $0084 = GetRandom
+           $0094 = SetRandomSeed
+  SECTION: $0098-$00DF ($0048 bytes)
+           $00C1 = NotColorGB
+           $0098 = Main
+  SECTION: $01F6-$021E ($0029 bytes)
+           $0213 = memcopy_inc
+           $020A = memcopy
+           $01F6 = memset
+           $01FE = memset_rand
+  SECTION: $021F-$0264 ($0046 bytes)
+           $0231 = div_u8u8u8
+           $021F = mul_u8u8u16
+           $0244 = div_s8s8s8
+  SECTION: $0265-$029A ($0036 bytes)
+           $0265 = scan_keys
+  SECTION: $029B-$02ED ($0053 bytes)
+           $02BD = rom_bank_set
+           $02CD = rom_bank_push_set
+           $02ED = ___long_call._jump_to_function
+           $02A5 = rom_bank_pop
+           $029B = rom_handler_init
+           $02E1 = ___long_call
+           $02B8 = rom_bank_push
+  SECTION: $02EE-$034A ($005D bytes)
+           $02EE = wait_ly
+           $0312 = vram_copy
+           $02F5 = wait_frames
+           $032F = vram_copy_tiles
+           $0321 = vram_memset
+           $02FC = screen_off
+           $030B = wait_screen_blank
+  SECTION: $034B-$03A6 ($005C bytes)
+           $034B = sprite_get_base_pointer
+           $039F = __refresh_OAM_end
+           $0397 = __refresh_OAM
+           $0362 = sprite_set_params
+           $03A4 = refresh_custom_OAM
+           $036A = spr_set_palette
+           $035B = sprite_set_tile
+           $038A = init_OAM
+           $0354 = sprite_set_xy
+           $039F = refresh_OAM
+  SECTION: $03A7-$03DE ($0038 bytes)
+           $03C7 = bg_set_tile_wrap
+           $03A7 = bg_set_palette
+           $03D1 = bg_set_tile
+    SLACK: $3977 bytes
+
+Bank #256:
+  EMPTY
+
+Bank #257:
+  EMPTY
+
+Bank #258:
+  EMPTY
+
+Bank #259:
+  EMPTY
+
+Bank #260:
+  EMPTY
+
+Bank #261:
+  EMPTY
+
+Bank #262:
+  EMPTY
+
+Bank #263:
+  EMPTY
+
+Bank #264:
+  EMPTY
+
+Bank #265:
+  EMPTY
+
+Bank #266:
+  EMPTY
+
+Bank #267:
+  EMPTY
+
+Bank #268:
+  EMPTY
+
+Bank #269:
+  EMPTY
+
+Bank #270:
+  EMPTY
+
+Bank #271:
+  EMPTY
+
+Bank #272:
+  EMPTY
+
+Bank #273:
+  EMPTY
+
+Bank #274:
+  EMPTY
+
+Bank #275:
+  EMPTY
+
+Bank #276:
+  EMPTY
+
+Bank #277:
+  EMPTY
+
+Bank #278:
+  EMPTY
+
+Bank #279:
+  EMPTY
+
+Bank #280:
+  EMPTY
+
+Bank #281:
+  EMPTY
+
+Bank #282:
+  EMPTY
+
+Bank #283:
+  EMPTY
+
+Bank #284:
+  EMPTY
+
+Bank #285:
+  EMPTY
+
+Bank #286:
+  EMPTY
+
+Bank #287:
+  EMPTY
+
+Bank #288:
+  EMPTY
+
+Bank #289:
+  EMPTY
+
+Bank #290:
+  EMPTY
+
+Bank #291:
+  EMPTY
+
+Bank #292:
+  EMPTY
+
+Bank #293:
+  EMPTY
+
+Bank #294:
+  EMPTY
+
+Bank #295:
+  EMPTY
+
+Bank #296:
+  EMPTY
+
+Bank #297:
+  EMPTY
+
+Bank #298:
+  EMPTY
+
+Bank #299:
+  EMPTY
+
+Bank #300:
+  EMPTY
+
+Bank #301:
+  EMPTY
+
+Bank #302:
+  EMPTY
+
+Bank #303:
+  EMPTY
+
+Bank #304:
+  EMPTY
+
+Bank #305:
+  EMPTY
+
+Bank #306:
+  EMPTY
+
+Bank #307:
+  EMPTY
+
+Bank #308:
+  EMPTY
+
+Bank #309:
+  EMPTY
+
+Bank #310:
+  EMPTY
+
+Bank #311:
+  EMPTY
+
+Bank #312:
+  EMPTY
+
+Bank #313:
+  EMPTY
+
+Bank #314:
+  EMPTY
+
+Bank #315:
+  EMPTY
+
+Bank #316:
+  EMPTY
+
+Bank #317:
+  EMPTY
+
+Bank #318:
+  EMPTY
+
+Bank #319:
+  EMPTY
+
+Bank #320:
+  EMPTY
+
+Bank #321:
+  EMPTY
+
+Bank #322:
+  EMPTY
+
+Bank #323:
+  EMPTY
+
+Bank #324:
+  EMPTY
+
+Bank #325:
+  EMPTY
+
+Bank #326:
+  EMPTY
+
+Bank #327:
+  EMPTY
+
+Bank #328:
+  EMPTY
+
+Bank #329:
+  EMPTY
+
+Bank #330:
+  EMPTY
+
+Bank #331:
+  EMPTY
+
+Bank #332:
+  EMPTY
+
+Bank #333:
+  EMPTY
+
+Bank #334:
+  EMPTY
+
+Bank #335:
+  EMPTY
+
+Bank #336:
+  EMPTY
+
+Bank #337:
+  EMPTY
+
+Bank #338:
+  EMPTY
+
+Bank #339:
+  EMPTY
+
+Bank #340:
+  EMPTY
+
+Bank #341:
+  EMPTY
+
+Bank #342:
+  EMPTY
+
+Bank #343:
+  EMPTY
+
+Bank #344:
+  EMPTY
+
+Bank #345:
+  EMPTY
+
+Bank #346:
+  EMPTY
+
+Bank #347:
+  EMPTY
+
+Bank #348:
+  EMPTY
+
+Bank #349:
+  EMPTY
+
+Bank #350:
+  EMPTY
+
+Bank #351:
+  EMPTY
+
+Bank #352:
+  EMPTY
+
+Bank #353:
+  EMPTY
+
+Bank #354:
+  EMPTY
+
+Bank #355:
+  EMPTY
+
+Bank #356:
+  EMPTY
+
+Bank #357:
+  EMPTY
+
+Bank #358:
+  EMPTY
+
+Bank #359:
+  EMPTY
+
+Bank #360:
+  EMPTY
+
+Bank #361:
+  EMPTY
+
+Bank #362:
+  EMPTY
+
+Bank #363:
+  EMPTY
+
+Bank #364:
+  EMPTY
+
+Bank #365:
+  EMPTY
+
+Bank #366:
+  EMPTY
+
+Bank #367:
+  EMPTY
+
+Bank #368:
+  EMPTY
+
+Bank #369:
+  EMPTY
+
+Bank #370:
+  EMPTY
+
+Bank #371:
+  EMPTY
+
+Bank #372:
+  EMPTY
+
+Bank #373:
+  EMPTY
+
+Bank #374:
+  EMPTY
+
+Bank #375:
+  EMPTY
+
+Bank #376:
+  EMPTY
+
+Bank #377:
+  EMPTY
+
+Bank #378:
+  EMPTY
+
+Bank #379:
+  EMPTY
+
+Bank #380:
+  EMPTY
+
+Bank #381:
+  EMPTY
+
+Bank #382:
+  EMPTY
+
+Bank #383:
+  EMPTY
+
+Bank #384:
+  EMPTY
+
+Bank #385:
+  EMPTY
+
+Bank #386:
+  EMPTY
+
+Bank #387:
+  EMPTY
+
+Bank #388:
+  EMPTY
+
+Bank #389:
+  EMPTY
+
+Bank #390:
+  EMPTY
+
+Bank #391:
+  EMPTY
+
+Bank #392:
+  EMPTY
+
+Bank #393:
+  EMPTY
+
+Bank #394:
+  EMPTY
+
+Bank #395:
+  EMPTY
+
+Bank #396:
+  EMPTY
+
+Bank #397:
+  EMPTY
+
+Bank #398:
+  EMPTY
+
+Bank #399:
+  EMPTY
+
+Bank #400:
+  EMPTY
+
+Bank #401:
+  EMPTY
+
+Bank #402:
+  EMPTY
+
+Bank #403:
+  EMPTY
+
+Bank #404:
+  EMPTY
+
+Bank #405:
+  EMPTY
+
+Bank #406:
+  EMPTY
+
+Bank #407:
+  EMPTY
+
+Bank #408:
+  EMPTY
+
+Bank #409:
+  EMPTY
+
+Bank #410:
+  EMPTY
+
+Bank #411:
+  EMPTY
+
+Bank #412:
+  EMPTY
+
+Bank #413:
+  EMPTY
+
+Bank #414:
+  EMPTY
+
+Bank #415:
+  EMPTY
+
+Bank #416:
+  EMPTY
+
+Bank #417:
+  EMPTY
+
+Bank #418:
+  EMPTY
+
+Bank #419:
+  EMPTY
+
+Bank #420:
+  EMPTY
+
+Bank #421:
+  EMPTY
+
+Bank #422:
+  EMPTY
+
+Bank #423:
+  EMPTY
+
+Bank #424:
+  EMPTY
+
+Bank #425:
+  EMPTY
+
+Bank #426:
+  EMPTY
+
+Bank #427:
+  EMPTY
+
+Bank #428:
+  EMPTY
+
+Bank #429:
+  EMPTY
+
+Bank #430:
+  EMPTY
+
+Bank #431:
+  EMPTY
+
+Bank #432:
+  EMPTY
+
+Bank #433:
+  EMPTY
+
+Bank #434:
+  EMPTY
+
+Bank #435:
+  EMPTY
+
+Bank #436:
+  EMPTY
+
+Bank #437:
+  EMPTY
+
+Bank #438:
+  EMPTY
+
+Bank #439:
+  EMPTY
+
+Bank #440:
+  EMPTY
+
+Bank #441:
+  EMPTY
+
+Bank #442:
+  EMPTY
+
+Bank #443:
+  EMPTY
+
+Bank #444:
+  EMPTY
+
+Bank #445:
+  EMPTY
+
+Bank #446:
+  EMPTY
+
+Bank #447:
+  EMPTY
+
+Bank #448:
+  EMPTY
+
+Bank #449:
+  EMPTY
+
+Bank #450:
+  EMPTY
+
+Bank #451:
+  EMPTY
+
+Bank #452:
+  EMPTY
+
+Bank #453:
+  EMPTY
+
+Bank #454:
+  EMPTY
+
+Bank #455:
+  EMPTY
+
+Bank #456:
+  EMPTY
+
+Bank #457:
+  EMPTY
+
+Bank #458:
+  EMPTY
+
+Bank #459:
+  EMPTY
+
+Bank #460:
+  EMPTY
+
+Bank #461:
+  EMPTY
+
+Bank #462:
+  EMPTY
+
+Bank #463:
+  EMPTY
+
+Bank #464:
+  EMPTY
+
+Bank #465:
+  EMPTY
+
+Bank #466:
+  EMPTY
+
+Bank #467:
+  EMPTY
+
+Bank #468:
+  EMPTY
+
+Bank #469:
+  EMPTY
+
+Bank #470:
+  EMPTY
+
+Bank #471:
+  EMPTY
+
+Bank #472:
+  EMPTY
+
+Bank #473:
+  EMPTY
+
+Bank #474:
+  EMPTY
+
+Bank #475:
+  EMPTY
+
+Bank #476:
+  EMPTY
+
+Bank #477:
+  EMPTY
+
+Bank #478:
+  EMPTY
+
+Bank #479:
+  EMPTY
+
+Bank #480:
+  EMPTY
+
+Bank #481:
+  EMPTY
+
+Bank #482:
+  EMPTY
+
+Bank #483:
+  EMPTY
+
+Bank #484:
+  EMPTY
+
+Bank #485:
+  EMPTY
+
+Bank #486:
+  EMPTY
+
+Bank #487:
+  EMPTY
+
+Bank #488:
+  EMPTY
+
+Bank #489:
+  EMPTY
+
+Bank #490:
+  EMPTY
+
+Bank #491:
+  EMPTY
+
+Bank #492:
+  EMPTY
+
+Bank #493:
+  EMPTY
+
+Bank #494:
+  EMPTY
+
+Bank #495:
+  EMPTY
+
+Bank #496:
+  EMPTY
+
+Bank #497:
+  EMPTY
+
+Bank #498:
+  EMPTY
+
+Bank #499:
+  EMPTY
+
+Bank #500:
+  EMPTY
+
+Bank #501:
+  EMPTY
+
+Bank #502:
+  EMPTY
+
+Bank #503:
+  EMPTY
+
+Bank #504:
+  EMPTY
+
+Bank #505:
+  EMPTY
+
+Bank #506:
+  EMPTY
+
+Bank #507:
+  EMPTY
+
+Bank #508:
+  EMPTY
+
+Bank #509:
+  EMPTY
+
+Bank #510:
+  EMPTY
+
+Bank #511:
+  EMPTY
+
+WRAM0:
+  SECTION: $C0A0-$C0AC ($000D bytes)
+           $C0A2 = _is_vbl_flag
+           $C0A5 = LCD_handler
+           $C0A7 = TIM_handler
+           $C0A9 = SIO_handler
+           $C0AB = JOY_handler
+           $C0A3 = VBL_handler
+           $C0A0 = Init_Reg_A
+           $C0A1 = Init_Reg_B
+  SECTION: $CE00-$CFFF ($0200 bytes)
+           $D000 = StackTop
+  SECTION: $C0AD-$C0AD ($0001 bytes)
+           $C0AD = random_ptr
+  SECTION: $C0AE-$C0CE ($0021 bytes)
+           $C0CE = rom_position
+           $C0AE = rom_stack
+  SECTION: $C000-$C09F ($00A0 bytes)
+           $C000 = OAM_Copy
+    SLACK: $0D31 bytes
+
+  EMPTY
+
+  EMPTY
+
+  EMPTY
+
+  EMPTY
+
+  EMPTY
+
+  EMPTY
+
+  EMPTY
+
+VRAM Bank #0:
+  EMPTY
+
+VRAM Bank #1:
+  EMPTY
+
+HRAM:
+  SECTION: $FF88-$FF8A ($0003 bytes)
+           $FF89 = joy_held
+           $FF88 = _joy_old
+           $FF8A = joy_pressed
+  SECTION: $FF80-$FF87 ($0008 bytes)
+           $FF80 = refresh_OAM_HRAM
+    SLACK: $0074 bytes
+
+  EMPTY
+
+  EMPTY
+
+  EMPTY
+
+  EMPTY
+

@@ -4,20 +4,26 @@ DIV register
 It works by using an internal 16 bit counter. The counter increases each clock (4 clocks per nop) and
 the value of DIV is the 8 MSB of the counter: Increases every 256 oscilator clocks.
 
+The value of DIV is the actual bits of the internal counter, not a mirror, not a register that increases with the internal counter: The actual bits of the counter mapped to memory.
+
 DIV overflows at 64 Hz in normal speed mode, 128 Hz in double speed mode.
 
-If writen, its value is reseted to 0, as well as the internal counter.
+If written, its value is reseted to 0, as well as the internal counter.
 
--Interaction with timer and APU explained below.
+- Interaction with timer and APU explained below.
 
 TIMER
 -----
 
-Shares the internal counter with DIV register. If DIV register is writen, DIV internal counter is reseted, so TIMER is affected. For example, if a program configures the timer to increase every 64 clocks but it keeps writing to DIV register each 20 clocks, the timer will never increase its value.
+Shares the internal counter with DIV register. If DIV register is written, DIV internal counter is reseted, so TIMER is affected. For example, if a program configures the timer to increase every 64 clocks but it keeps writing to DIV register each 20 clocks, the timer will never increase its value.
 
 That doesn't happen the other way. When writing to TAC to enable the timer the only thing that happens is that the register TIMA is allowed to increase, but it doesn't change the internal counter that increases TIMA.
 
--Timer/DIV counter keeps increasing even if the timer is disabled. TIMA can increase just when the timer is enabled or it can need all the specified clocks by TAC, there is no way to know it without reseting DIV a few instructions before.
+- Timer/DIV counter keeps increasing even if the timer is disabled. TIMA can increase just when the timer is enabled or it can need all the specified clocks by TAC, there is no way to know it without reseting DIV a few instructions before.
+
+- If TIMA is written at the same time of its increment, the IRQ is not triggered (if it would overflow) and the written value is stored in TIMA, not the incremented one.
+
+- If TMA is written at the same time of the increment of TIMA, if TIMA overflows, TIMA is not loaded from the current value of TMA, but the value written to TMA in this exact clock.
 
 DIV interaction with APU
 ------------------------

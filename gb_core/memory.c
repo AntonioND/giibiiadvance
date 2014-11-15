@@ -289,14 +289,12 @@ void GB_MemWriteReg8(u32 address, u32 value)
             return;
 
         case TIMA_REG:
-            GB_TimersUpdateClocksClounterReference(GB_CPUClockCounterGet());
-            mem->IO_Ports[TIMA_REG-0xFF00] = value;
+            GB_TimersWriteTIMA(GB_CPUClockCounterGet(),value);
             GB_CPUBreakLoop();
             return;
 
         case TMA_REG:
-            GB_TimersUpdateClocksClounterReference(GB_CPUClockCounterGet());
-            mem->IO_Ports[TMA_REG-0xFF00] = value;
+            GB_TimersWriteTMA(GB_CPUClockCounterGet(),value);
             GB_CPUBreakLoop();
             return;
 

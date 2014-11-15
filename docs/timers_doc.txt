@@ -4,10 +4,11 @@ DIV register
 It works by using an internal 16 bit counter. The counter increases each clock (4 clocks per nop) and
 the value of DIV is the 8 MSB of the counter: Increases every 256 oscilator clocks.
 
+DIV overflows at 64 Hz in normal speed mode, 128 Hz in double speed mode.
+
 If writen, its value is reseted to 0, as well as the internal counter.
 
--Interaction with timer explained below.
--Interaction with sound hardware to be determined. TEST IN HARDWARE PENDING!!
+-Interaction with timer and APU explained below.
 
 TIMER
 -----
@@ -18,4 +19,13 @@ That doesn't happen the other way. When writing to TAC to enable the timer the o
 
 -Timer/DIV counter keeps increasing even if the timer is disabled. TIMA can increase just when the timer is enabled or it can need all the specified clocks by TAC, there is no way to know it without reseting DIV a few instructions before.
 
+DIV interaction with APU
+------------------------
 
+- The APU uses the same internal counter as DIV to update sweep (channel 1), fade in/out and time out.
+
+- In normal speed mode the APU updates when bit 5 of DIV overflows, in double speed when bit 6 overflows (256 Hz).
+
+- Writing to DIV every instruction, for example, will make the APU produce the same frequency with the same volume even if sweep and fade out are enabled.
+
+- Writing to DIV doesn't affect the frequency itself. The waveform generation is driven by another timer.

@@ -19,5 +19,5 @@ rHDMA5 is (R/W)
 -When a HDMA transfer is inited during HBL it will start right away. There is no problem of copying while VRAM is inaccesible, mode 2 is long enough to allow the HDMA copy the 16 bytes.
 
 -If rHDMA5 is writen during a HDMA copy:
-    -Bit 7 of rHDMA5 is 0: Stop copy. rHDMA5 reads FFh always, regardless of the other written bits.
+    -Bit 7 of rHDMA5 is 0: Stop copy. rHDMA5 reads (80h OR writen_value).
     -Bit 7 of rHDMA5 is 1: Restart copy. New size is the value of rHDMA5 bits 0-6.

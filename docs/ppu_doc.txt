@@ -1,1 +1,3 @@
-VBL IRQ is not delayed, it's executed the same clock as PPU enters VBL screen mode.
+- VBL IRQ is not delayed, it's executed the same clock as PPU enters VBL screen mode.
+
+- LY number 154 lasts 8 clocks, LY 0 starts in mode 0 during (456-8) clocks.

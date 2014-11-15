@@ -19,7 +19,7 @@ General
 GB emulation
 
 - GB core rewritten.
-- Removed stupid hack that made the VBL IRQ delay a few clocks after entering VBL mode. Tested on real hardware.
+- Emulated timer IRQ correctly. Writing to TIMA while overflowing will prevent the IRQ. IRQ is also delayed 1 clock from overflow.
 - Fixed KEY1 register when doing a hard reset.
 
 Version 0.2.0

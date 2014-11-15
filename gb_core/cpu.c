@@ -240,13 +240,12 @@ static int GB_IRQExecute(void)
     {
         if(mem->InterruptMasterEnable) // Execute interrupt
         {
-            GameBoy.Emulator.CPUHalt = 0;
-
             int start_clocks = GB_CPUClockCounterGet();
 
-            GB_CPUClockCounterAdd(4);
+            GameBoy.Emulator.CPUHalt = 0;
+
             GameBoy.Memory.InterruptMasterEnable = 0;
-            GB_CPUClockCounterAdd(4);
+            GB_CPUClockCounterAdd(8);
             cpu->R16.SP --;
             cpu->R16.SP &= 0xFFFF;
             GB_MemWrite8(cpu->R16.SP,cpu->R8.PCH);
@@ -254,7 +253,6 @@ static int GB_IRQExecute(void)
             cpu->R16.SP --;
             cpu->R16.SP &= 0xFFFF;
             GB_MemWrite8(cpu->R16.SP,cpu->R8.PCL);
-            GB_CPUClockCounterAdd(4);
             {
                 if(interrupts & I_VBLANK)
                 { cpu->R16.PC = 0x0040; mem->IO_Ports[IF_REG-0xFF00] &= ~I_VBLANK; }
@@ -267,7 +265,7 @@ static int GB_IRQExecute(void)
                 else //if(interrupts & I_JOYPAD)
                 { cpu->R16.PC = 0x0060; mem->IO_Ports[IF_REG-0xFF00] &= ~I_JOYPAD; }
             }
-            GB_CPUClockCounterAdd(4);
+            GB_CPUClockCounterAdd(8);
 
             int end_clocks = GB_CPUClockCounterGet();
 
@@ -433,6 +431,11 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                     {
                         GameBoy.Emulator.DoubleSpeed ^= 1;
                         mem->IO_Ports[KEY1_REG-0xFF00] = GameBoy.Emulator.DoubleSpeed<<7;
+
+                        //TODO: Stop needs a lot of clocks to complete. During that time some IRQs can be triggered!
+                        //DIV counter keeps counting so all things that use that counter are affected
+                        if(GameBoy.Emulator.timer_enabled)
+                            GB_SetInterrupt(I_TIMER);
                     }
                     else
                     {

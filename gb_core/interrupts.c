@@ -78,6 +78,7 @@ void GB_CPUInterruptsInit(void)
     GameBoy.Emulator.sys_clocks = 0;
     GameBoy.Emulator.timer_overflow_mask = -1;
     GameBoy.Emulator.timer_enabled = 0;
+    GameBoy.Emulator.timer_irq_delay_active = 0;
 
     if(GameBoy.Emulator.HasTimer)
     {
@@ -127,14 +128,14 @@ void GB_TimersWriteTIMA(int reference_clocks, int value)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
-    int old_if = GameBoy.Memory.IO_Ports[IF_REG-0xFF00];
+    int old_flag = GameBoy.Emulator.timer_irq_delay_active;
 
     GB_TimersUpdateClocksClounterReference(reference_clocks);
 
     if( (GameBoy.Emulator.sys_clocks&GameBoy.Emulator.timer_overflow_mask) == 0)
     {
         //If TIMA is written the same clock as incrementing itself prevent the timer IF flag from being set
-        mem->IO_Ports[IF_REG-0xFF00] = old_if;
+        GameBoy.Emulator.timer_irq_delay_active = old_flag;
     }
 
     mem->IO_Ports[TIMA_REG-0xFF00] = value;
@@ -173,6 +174,13 @@ void GB_TimersUpdateClocksClounterReference(int reference_clocks)
     mem->IO_Ports[DIV_REG-0xFF00] = (GameBoy.Emulator.sys_clocks>>8);
 
     //TIMA
+    //if(GameBoy.Emulator.timer_enabled) ??
+        if(GameBoy.Emulator.timer_irq_delay_active)
+        {
+            GameBoy.Emulator.timer_irq_delay_active = 0;
+            GB_SetInterrupt(I_TIMER);
+        }
+
     if(GameBoy.Emulator.timer_enabled)
     {
         int timer_mask = GameBoy.Emulator.timer_overflow_mask;
@@ -182,7 +190,7 @@ void GB_TimersUpdateClocksClounterReference(int reference_clocks)
         {
             if(mem->IO_Ports[TIMA_REG-0xFF00] == 0xFF) //overflow
             {
-                GB_SetInterrupt(I_TIMER);
+                GameBoy.Emulator.timer_irq_delay_active = 1;
                 mem->IO_Ports[TIMA_REG-0xFF00] = mem->IO_Ports[TMA_REG-0xFF00];
             }
             else mem->IO_Ports[TIMA_REG-0xFF00]++;
@@ -191,7 +199,7 @@ void GB_TimersUpdateClocksClounterReference(int reference_clocks)
         }
     }
 
-    //TODO : SOUND UPDATE PROBABLY GOES HERE!!
+    //TODO : SOUND UPDATE GOES HERE!!
 
     GB_TimersClockCounterSet(reference_clocks);
 }
@@ -199,6 +207,12 @@ void GB_TimersUpdateClocksClounterReference(int reference_clocks)
 int GB_TimersGetClocksToNextEvent(void)
 {
     int clocks_to_next_event = 256 - (GameBoy.Emulator.sys_clocks&0xFF); // DIV
+
+    //if(GameBoy.Emulator.timer_enabled) ??
+        if(GameBoy.Emulator.timer_irq_delay_active)
+        {
+            return 4; // break right now!
+        }
 
     if(GameBoy.Emulator.timer_enabled)
     {

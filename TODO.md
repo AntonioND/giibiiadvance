@@ -26,9 +26,10 @@ Game Boy
 - HALT is disabled when any flag of IF is set to 1 or it needs the corresponding flag in IE? IME=1 only needed to jump to IRQ vectors?
 - Start values are incorrect!
 - When an interrupt occurs while in HALT, the CPU starts back up and pushes the Program Counter onto the stack before servicing the interrupt(s). Except it doesn't push the address after HALT as one might expect but rather the address of HALT itself?
-- Reseting DIV affects serial? I doubt it, but...
-- What happens when timer registers are changed while timer is working.
-- What happens to everything when switching speed?
+- Reseting DIV affects serial? I doubt it, but better check it...
+- What happens when TAC is changed while timer is working/not working.
+- Stop needs a lot of clocks to complete. During that time some IRQs can be triggered! DIV counter keeps counting so all things that use that counter are affected
+- Timer IRQ is delayed 1 nop. Check if it can be read 00 before IRQ.
 
 Game Boy Advance
 ----------------

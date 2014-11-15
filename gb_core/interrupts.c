@@ -148,7 +148,7 @@ void GB_TimersWriteTMA(int reference_clocks, int value)
 
     if( (GameBoy.Emulator.sys_clocks&GameBoy.Emulator.timer_overflow_mask) == 0)
     {
-        //If TMA is written the same clock as reloading TIMA from TMA, load TIMA from writen value
+        //If TMA is written the same clock as reloading TIMA from TMA, load TIMA from written value
         if(mem->IO_Ports[TIMA_REG-0xFF00] == 0)
             mem->IO_Ports[TIMA_REG-0xFF00] = value;
     }

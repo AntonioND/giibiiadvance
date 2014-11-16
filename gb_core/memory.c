@@ -207,7 +207,9 @@ void GB_MemWriteReg8(u32 address, u32 value)
             return;
 
         case IF_REG:
+            GB_PPUUpdateClocksClounterReference(GB_CPUClockCounterGet());
             mem->IO_Ports[address-0xFF00] = value | (0xE0);
+            if(!(value & BIT(2))) GameBoy.Emulator.timer_irq_delay_active = 0;
             GB_CPUBreakLoop();
             return;
 
@@ -282,26 +284,12 @@ void GB_MemWriteReg8(u32 address, u32 value)
             return;
 
         case TAC_REG:
-            GB_TimersUpdateClocksClounterReference(GB_CPUClockCounterGet());
-            if(value & (1<<2))
-            {
-                const u32 gb_timer_clock_mask[4] = {1024-1, 16-1, 64-1, 256-1};
-                GameBoy.Emulator.timer_enabled = 1;
-                GameBoy.Emulator.timer_overflow_mask = gb_timer_clock_mask[value&3];
-            }
-            else
-            {
-                GameBoy.Emulator.timer_enabled = 0;
-                GameBoy.Emulator.timer_overflow_mask = -1;
-            }
-            mem->IO_Ports[TAC_REG-0xFF00] = value;
+            GB_TimersWriteTAC(GB_CPUClockCounterGet(),value);
             GB_CPUBreakLoop();
             return;
 
         case DIV_REG:
-            GB_TimersUpdateClocksClounterReference(GB_CPUClockCounterGet());
-            GameBoy.Emulator.sys_clocks = 0;
-            mem->IO_Ports[DIV_REG-0xFF00] = 0;
+            GB_TimersWriteDIV(GB_CPUClockCounterGet(),value);
             GB_CPUBreakLoop();
             return;
 

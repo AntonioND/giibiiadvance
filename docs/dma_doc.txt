@@ -14,9 +14,11 @@ GBC DMA transfer
 rHDMA1-rHDMA4 are (W) - They read FFh.
 rHDMA5 is (R/W)
 
+- When a GDMA/HDMA transfer is finished/stopped, triggering another one without setting source/destination will use as source/destination the continuation of last copy.
+
 - If a HDMA transfer is inited when the screen is off, when it is turned on it will start.
 
-- HDMA will only copy 1 block when the screen is off. It will continue after the screen is turned on.
+- HDMA will only copy 1 block when the screen is off. It will continue after the screen is turned on. When triggering the copy the CPU will wait the setup time and one copy time together.
 
 - When a HDMA transfer is inited during HBL it will start right away. There is no problem of copying while VRAM is inaccesible, mode 2 is long enough to allow the HDMA copy the 16 bytes.
 

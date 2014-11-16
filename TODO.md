@@ -14,13 +14,9 @@ Game Boy
 
 - Make that everything read FFh except HRAM when DMG DMA is enabled.
 - HDMA copies when HALT is enabled? HALT is ignored if called when HDMA is active?
-- If HDMA is interrupted by switching off the screen, does it copy one block after turning it off? Continue after turning on?
-- GDMA/HDMA can be continued triggering another copy after finishing the previous one (using the src/dst continuation of the previous one)?
 - Memory after OAM is an OAM mirror?
-- Put wave RAM in the I/O viewer?
-- Reverse engineer GB Camera.
 - Can disabled cart RAM be read?
-- What STAT mode is the GBC when the LCD is switched on? 0?
+- What STAT mode is the GBC when the LCD is switched on. 0?
 - Check what memory areas do OAM DMA copy from depending on hardware (DMG/GBC).
 - Check what happens if HDMA1-4 are modified during HDMA copy.
 - HALT when IME=0. Halt not executed? Executed after IME is set to 1?
@@ -29,7 +25,7 @@ Game Boy
 - When an interrupt occurs while in HALT, the CPU starts back up and pushes the Program Counter onto the stack before servicing the interrupt(s). Except it doesn't push the address after HALT as one might expect but rather the address of HALT itself?
 - Reseting DIV affects serial? I doubt it, but better check it...
 - What happens when TAC is changed while timer is working/not working.
-- Stop needs a lot of clocks to complete. During that time some IRQs can be triggered! DIV counter keeps counting so all things that use that counter are affected
+- Switch speed needs a lot of clocks to complete. During that time some IRQs can be triggered! DIV counter keeps counting so all things that use that counter are affected
 
 Game Boy Advance
 ----------------
@@ -65,10 +61,12 @@ Random things
 -------------
 
 - Add a Makefile.
-- Final Fantasy Tactics Advance. Mateus Totema LY effect is wrong.
-- Reading a 32 bit value in ROM from EWRAM: 10 cycles (wait, wait, read instruction, compute address, wait, wait, wait, read low bits, wait, read high bits)
-- Reading a 32 bit value in EWRAM from EWRAM: 10 cycles (wait, wait, read instruction, compute address, wait, wait, read low bits, wait, wait, read high bits)
-- Loading a 16 bit value using mov/lsl/mov/orr: 12 cycles ( (wait, wait, read instruction) * 3 )
+- [GB] Reverse engineer GB Camera. 
+- [GB] Put wave RAM in the I/O viewer?
+- [GBA] Final Fantasy Tactics Advance. Mateus Totema LY effect is wrong.
+- [GBA] Reading a 32 bit value in ROM from EWRAM: 10 cycles (wait, wait, read instruction, compute address, wait, wait, wait, read low bits, wait, read high bits)
+- [GBA] Reading a 32 bit value in EWRAM from EWRAM: 10 cycles (wait, wait, read instruction, compute address, wait, wait, read low bits, wait, wait, read high bits)
+- [GBA] Loading a 16 bit value using mov/lsl/mov/orr: 12 cycles ( (wait, wait, read instruction) * 3 )
 
 
 

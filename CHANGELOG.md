@@ -21,6 +21,7 @@ GB emulation
 - GB core rewritten.
 - Removed stupid hack that delayed 24 clocks the VBL IRQ.
 - Emulated timer IRQ correctly. Writing to TIMA while overflowing will prevent the IRQ. IRQ is also delayed 1 clock from overflow.
+- HDMA/GDMA timings corrected. HDMA setup time added.
 - Fixed KEY1 register when doing a hard reset.
 
 Version 0.2.0

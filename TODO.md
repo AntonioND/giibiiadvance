@@ -13,13 +13,14 @@ Game Boy
 --------
 
 - Make that everything read FFh except HRAM when DMG DMA is enabled.
-- Check GDMA/HDMA timings in real hardware.
+- HDMA copies when HALT is enabled? HALT is ignored if called when HDMA is active?
+- If HDMA is interrupted by switching off the screen, does it copy one block after turning it off? Continue after turning on?
+- GDMA/HDMA can be continued triggering another copy after finishing the previous one (using the src/dst continuation of the previous one)?
 - Memory after OAM is an OAM mirror?
 - Put wave RAM in the I/O viewer?
 - Reverse engineer GB Camera.
 - Can disabled cart RAM be read?
 - What STAT mode is the GBC when the LCD is switched on? 0?
-- HDMA copies when HALT is enabled? HALT is ignored if called when HDMA is active?
 - Check what memory areas do OAM DMA copy from depending on hardware (DMG/GBC).
 - Check what happens if HDMA1-4 are modified during HDMA copy.
 - HALT when IME=0. Halt not executed? Executed after IME is set to 1?
@@ -29,7 +30,6 @@ Game Boy
 - Reseting DIV affects serial? I doubt it, but better check it...
 - What happens when TAC is changed while timer is working/not working.
 - Stop needs a lot of clocks to complete. During that time some IRQs can be triggered! DIV counter keeps counting so all things that use that counter are affected
-- Timer IRQ is delayed 1 nop. Check if it can be read 00 before IRQ.
 
 Game Boy Advance
 ----------------

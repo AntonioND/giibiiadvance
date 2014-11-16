@@ -44,32 +44,15 @@ void GB_MemInit(void)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
-    GB_MemWrite8(IF_REG,0xE0); //Load mask
-
     //LOAD INITIAL VALUES TO RAM
 
-    GB_MemWrite8(TIMA_REG,0x00);
-    GB_MemWrite8(TMA_REG,0x00);
-    GB_MemWrite8(TAC_REG,0x00);
+    //Interrupt/timer registers are inited in GB_CPUInterruptsInit()
 
     //Sound registers are inited in GB_SoundInit()
 
-    GB_MemWrite8(LCDC_REG,0x91);
+    //PPU registers in GB_PPUInit()
 
-    GB_MemWrite8(SCY_REG,0x00);
-    GB_MemWrite8(SCX_REG,0x00);
-
-    GB_MemWrite8(LYC_REG,0x00);
-
-    GB_MemWrite8(BGP_REG,0xFC);
-    GB_MemWrite8(OBP0_REG,0xFF);
-    GB_MemWrite8(OBP1_REG,0xFF);
-
-    GB_MemWrite8(WY_REG,0x00);
-    GB_MemWrite8(WX_REG,0x00);
-
-    GameBoy.Memory.InterruptMasterEnable = 0;
-    GameBoy.Memory.RAMEnabled = 0;
+    GameBoy.Memory.RAMEnabled = 0; // MBC
 
     GB_MemWrite8(0xFF72,0x00);
     GB_MemWrite8(0xFF73,0x00);
@@ -81,13 +64,8 @@ void GB_MemInit(void)
     GB_MemWrite8(0xFF76,0x00);
     GB_MemWrite8(0xFF77,0x00);
 
-    mem->IO_Ports[DIV_REG-0xFF00] = 0xAF;
-    mem->IO_Ports[LY_REG-0xFF00] = 0x00;
-
     if(GameBoy.Emulator.CGBEnabled == 1)
     {
-        mem->IO_Ports[LY_REG-0xFF00] = 0x90;
-
         GB_MemWrite8(0xFF74,0x00);
 
         GB_MemWrite8(SVBK_REG,0xF8);
@@ -95,8 +73,6 @@ void GB_MemInit(void)
 
         //GB_MemWrite8(KEY1_REG,0x7E);
         mem->IO_Ports[KEY1_REG-0xFF00] = 0x7E;
-
-        mem->IO_Ports[DIV_REG-0xFF00] = 0x22;
 
         mem->IO_Ports[HDMA5_REG-0xFF00] = 0xFF;
 
@@ -271,8 +247,15 @@ void GB_MemWriteReg8(u32 address, u32 value)
                 mem->IO_Ports[STAT_REG-0xFF00] &= 0xFC;
                 GameBoy.Emulator.ScreenMode = 0;
 
-                if(value & (1<<7)) GameBoy.Emulator.LCD_clocks = 0; //- (4560 - 204);
-                else GameBoy.Emulator.LCD_clocks = (204<<GameBoy.Emulator.DoubleSpeed);// - (456 - 48);
+                if(value & (1<<7))
+                {
+                    GameBoy.Emulator.LCD_clocks = 456;
+                    GameBoy.Emulator.CurrentScanLine = 0;
+                    GameBoy.Emulator.ScreenMode = 1;
+                    mem->IO_Ports[STAT_REG-0xFF00] &= 0xFC;
+                    mem->IO_Ports[STAT_REG-0xFF00] |= 1;
+                }
+                else GameBoy.Emulator.LCD_clocks = 0;
 
                 GB_CheckStatSignal();
                 mem->IO_Ports[IF_REG-0xFF00] &= ~I_STAT;

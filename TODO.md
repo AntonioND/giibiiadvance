@@ -13,12 +13,12 @@ Game Boy
 --------
 
 - Make that everything read FFh except HRAM when DMG DMA is enabled.
-- HDMA copies when HALT is enabled? HALT is ignored if called when HDMA is active?
+- HDMA copies when HALT is enabled? HALT is ignored if called when HDMA is active? STOP disables it? Switching speeds disables it?
+- Check what happens if HDMA1-4 are modified during HDMA copy.
 - Memory after OAM is an OAM mirror?
 - Can disabled cart RAM be read?
 - What STAT mode is the GBC when the LCD is switched on. 0?
 - Check what memory areas do OAM DMA copy from depending on hardware (DMG/GBC).
-- Check what happens if HDMA1-4 are modified during HDMA copy.
 - HALT when IME=0. Halt not executed? Executed after IME is set to 1?
 - HALT is disabled when any flag of IF is set to 1 or it needs the corresponding flag in IE? IME=1 only needed to jump to IRQ vectors?
 - Start values are incorrect!

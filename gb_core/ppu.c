@@ -19,6 +19,7 @@
 #include <malloc.h>
 
 #include "../build_options.h"
+#include "../debug_utils.h"
 
 #include "gameboy.h"
 #include "cpu.h"
@@ -53,7 +54,122 @@ extern _GB_CONTEXT_ GameBoy;
 void GB_PPUInit(void)
 {
     GameBoy.Emulator.FrameDrawn = 0;
-    GameBoy.Emulator.LCD_clocks = 0;
+    GameBoy.Emulator.stat_signal = 0;
+
+    if(GameBoy.Emulator.enable_boot_rom)
+    {
+        GameBoy.Emulator.lcd_on = 0;
+        GameBoy.Memory.IO_Ports[LCDC_REG-0xFF00] = 0x00;
+
+        GameBoy.Memory.IO_Ports[SCY_REG-0xFF00] = 0x00;
+        GameBoy.Memory.IO_Ports[SCX_REG-0xFF00] = 0x00;
+
+        GameBoy.Memory.IO_Ports[LYC_REG-0xFF00] = 0x00;
+
+        GameBoy.Memory.IO_Ports[BGP_REG-0xFF00] = 0x00;
+        GameBoy.Memory.IO_Ports[OBP0_REG-0xFF00] = 0x00;
+        GameBoy.Memory.IO_Ports[OBP1_REG-0xFF00] = 0x00;
+
+        GameBoy.Memory.IO_Ports[WY_REG-0xFF00] = 0x00;
+        GameBoy.Memory.IO_Ports[WX_REG-0xFF00] = 0x00;
+
+        switch(GameBoy.Emulator.HardwareType)
+        {
+            case HW_GB:
+            case HW_GBP: // Not verified yet
+            {
+                GameBoy.Emulator.LCD_clocks = 0;
+                GameBoy.Emulator.ScreenMode = 1;
+                GameBoy.Emulator.CurrentScanLine = 0;
+                GameBoy.Memory.IO_Ports[STAT_REG-0xFF00] = GameBoy.Emulator.ScreenMode;
+                break;
+            }
+            case HW_SGB:
+            case HW_SGB2: // Unknown. Can't test.
+            {
+                GameBoy.Emulator.LCD_clocks = 0;
+                GameBoy.Emulator.ScreenMode = 1;
+                GameBoy.Emulator.CurrentScanLine = 0;
+                GameBoy.Memory.IO_Ports[STAT_REG-0xFF00] = GameBoy.Emulator.ScreenMode;
+                break;
+            }
+            case HW_GBC:
+            case HW_GBA: // Not verified yet
+            {
+                GameBoy.Emulator.LCD_clocks = 0;
+                GameBoy.Emulator.ScreenMode = 1;
+                GameBoy.Emulator.CurrentScanLine = 0;
+                GameBoy.Memory.IO_Ports[STAT_REG-0xFF00] = GameBoy.Emulator.ScreenMode;
+                break;
+            }
+            default:
+            {
+                GameBoy.Emulator.LCD_clocks = 0;
+                GameBoy.Emulator.ScreenMode = 1;
+                GameBoy.Emulator.CurrentScanLine = 0;
+                GameBoy.Memory.IO_Ports[STAT_REG-0xFF00] = GameBoy.Emulator.ScreenMode;
+                Debug_ErrorMsg("GB_PPUInit():\nUnknown hardware");
+            }
+        }
+    }
+    else
+    {
+        GameBoy.Emulator.lcd_on = 1;
+        GameBoy.Memory.IO_Ports[LCDC_REG-0xFF00] = 0x91;
+
+        GameBoy.Memory.IO_Ports[SCY_REG-0xFF00] = 0x00;
+        GameBoy.Memory.IO_Ports[SCX_REG-0xFF00] = 0x00;
+
+        GameBoy.Memory.IO_Ports[LYC_REG-0xFF00] = 0x00;  // Verified on hardware
+
+        GameBoy.Memory.IO_Ports[BGP_REG-0xFF00] = 0xFC;
+        GameBoy.Memory.IO_Ports[OBP0_REG-0xFF00] = 0xFF;
+        GameBoy.Memory.IO_Ports[OBP1_REG-0xFF00] = 0xFF;
+
+        GameBoy.Memory.IO_Ports[WY_REG-0xFF00] = 0x00;
+        GameBoy.Memory.IO_Ports[WX_REG-0xFF00] = 0x00;
+
+        switch(GameBoy.Emulator.HardwareType)
+        {
+            case HW_GB:
+            case HW_GBP:
+            {
+                GameBoy.Emulator.LCD_clocks = (456-8)-52; // Verified on hardware
+                GameBoy.Emulator.ScreenMode = 1;
+                GameBoy.Emulator.CurrentScanLine = 0;
+                GameBoy.Memory.IO_Ports[STAT_REG-0xFF00] = GameBoy.Emulator.ScreenMode | BIT(2);
+                break;
+            }
+            case HW_SGB:
+            case HW_SGB2: // Unknown. Can't test.
+            {
+                GameBoy.Emulator.LCD_clocks = 0;
+                GameBoy.Emulator.ScreenMode = 1;
+                GameBoy.Emulator.CurrentScanLine = 0;
+                GameBoy.Memory.IO_Ports[STAT_REG-0xFF00] = GameBoy.Emulator.ScreenMode;
+                break;
+            }
+            case HW_GBC:
+            case HW_GBA: // Not verified yet
+            {
+                GameBoy.Emulator.LCD_clocks = 0;
+                GameBoy.Emulator.ScreenMode = 1;
+                GameBoy.Emulator.CurrentScanLine = 0x90;
+                GameBoy.Memory.IO_Ports[STAT_REG-0xFF00] = GameBoy.Emulator.ScreenMode;
+                break;
+            }
+            default:
+            {
+                GameBoy.Emulator.LCD_clocks = 0;
+                GameBoy.Emulator.ScreenMode = 0;
+                GameBoy.Emulator.CurrentScanLine = 0;
+                GameBoy.Memory.IO_Ports[STAT_REG-0xFF00] = GameBoy.Emulator.ScreenMode;
+                Debug_ErrorMsg("GB_PPUInit():\nUnknown hardware");
+            }
+        }
+    }
+
+    GameBoy.Memory.IO_Ports[LY_REG-0xFF00] = GameBoy.Emulator.CurrentScanLine;
 }
 
 void GB_PPUEnd(void)

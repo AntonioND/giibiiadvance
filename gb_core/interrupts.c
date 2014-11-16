@@ -20,6 +20,7 @@
 #include <time.h>
 
 #include "../build_options.h"
+#include "../debug_utils.h"
 
 #include "gameboy.h"
 #include "cpu.h"
@@ -75,7 +76,68 @@ void GB_HandleRTC(void)
 
 void GB_CPUInterruptsInit(void)
 {
-    GameBoy.Emulator.sys_clocks = 0;
+    GameBoy.Memory.InterruptMasterEnable = 0;
+
+    GameBoy.Memory.IO_Ports[IF_REG-0xFF00] = 0xE0;
+
+    GameBoy.Memory.IO_Ports[TIMA_REG-0xFF00] = 0x00; // Verified on hardware
+    GameBoy.Memory.IO_Ports[TMA_REG-0xFF00] = 0x00; // Verified on hardware
+
+    GB_MemWrite8(TAC_REG,0x00); // Verified on hardware
+
+    if(GameBoy.Emulator.enable_boot_rom) // unknown
+    {
+        switch(GameBoy.Emulator.HardwareType)
+        {
+            case HW_GB:
+            case HW_GBP:
+                GameBoy.Emulator.sys_clocks = 8; // Verified on hardware
+                break;
+
+            case HW_SGB:
+            case HW_SGB2:
+                GameBoy.Emulator.sys_clocks = 0; // Unknown. Can't test.
+                break;
+
+            case HW_GBC:
+            case HW_GBA:
+                GameBoy.Emulator.sys_clocks = 0; // Not verified yet
+                break;
+
+            default:
+                GameBoy.Emulator.sys_clocks = 0;
+                Debug_ErrorMsg("GB_CPUInterruptsInit():\nUnknown hardware\n(boot ROM enabled)");
+                break;
+        }
+    }
+    else
+    {
+        switch(GameBoy.Emulator.HardwareType)
+        {
+            case HW_GB:
+            case HW_GBP:
+                GameBoy.Emulator.sys_clocks = 0xAF0C; // Verified on hardware
+                break;
+
+            case HW_SGB:
+            case HW_SGB2:
+                GameBoy.Emulator.sys_clocks = 0; // Unknown. Can't test.
+                break;
+
+            case HW_GBC:
+            case HW_GBA:
+                GameBoy.Emulator.sys_clocks = 0x2200; // Not verified yet
+                break;
+
+            default:
+                GameBoy.Emulator.sys_clocks = 0;
+                Debug_ErrorMsg("GB_CPUInterruptsInit():\nUnknown hardware");
+                break;
+        }
+    }
+
+    GameBoy.Memory.IO_Ports[DIV_REG-0xFF00] = GameBoy.Emulator.sys_clocks >> 8;
+
     GameBoy.Emulator.timer_overflow_mask = -1;
     GameBoy.Emulator.timer_enabled = 0;
     GameBoy.Emulator.timer_irq_delay_active = 0;

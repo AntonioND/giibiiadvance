@@ -9,8 +9,8 @@ screenshots/
 *.gb
 *.gbc
 *.gba
-*.sav
-*.rtc
+./*.sav
+./*.rtc
 *.bin
 log.txt
 *.depend

@@ -35,7 +35,7 @@
 
 extern _GB_CONTEXT_ GameBoy;
 
-#define SHARED_BITS_TIMA_DIV (4)
+#define SHARED_BITS_TIMA_DIV (5)
 #define SHARED_TIMA_DIV_COUNT_MAX (1<<SHARED_BITS_TIMA_DIV)
 #define SHARED_TIMA_DIV_COUNT_MASK (SHARED_TIMA_DIV_COUNT_MAX-1)
 
@@ -214,20 +214,27 @@ void GB_TimersWriteDIV(int reference_clocks, int value)
 
     GB_TimersUpdateClocksClounterReference(reference_clocks);
     GameBoy.Emulator.sys_clocks = 0;
-    GameBoy.Emulator.timer_clocks &= ~SHARED_TIMA_DIV_COUNT_MASK;
     mem->IO_Ports[DIV_REG-0xFF00] = 0;
 
-//    if(GameBoy.Emulator.timer_clocks == 0)
-//    {
-//        GB_TimerIncreaseTIMA();
-//    }
+    //if(GameBoy.Emulator.timer_enabled)
+    {
+        //if(GameBoy.Emulator.timer_clocks&SHARED_TIMA_DIV_COUNT_MASK)
+        {
+            GameBoy.Emulator.timer_clocks &= ~SHARED_TIMA_DIV_COUNT_MASK; // clear shared bits
+            GameBoy.Emulator.timer_clocks |= (1<<SHARED_BITS_TIMA_DIV);
+
+        //    //if( ( GameBoy.Emulator.timer_clocks & (5<<(SHARED_BITS_TIMA_DIV+1)) ) == (1<<(SHARED_BITS_TIMA_DIV+1)) )
+        //    if( ( GameBoy.Emulator.timer_clocks & (1<<(SHARED_BITS_TIMA_DIV+1)) )
+        //        GB_TimerIncreaseTIMA();
+        }
+    }
 }
 
 void GB_TimersWriteTIMA(int reference_clocks, int value)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
-    int old_flag = GameBoy.Emulator.timer_irq_delay_active;
+//    int old_flag = GameBoy.Emulator.timer_irq_delay_active;
 
     GB_TimersUpdateClocksClounterReference(reference_clocks);
 /*
@@ -237,7 +244,8 @@ void GB_TimersWriteTIMA(int reference_clocks, int value)
         GameBoy.Emulator.timer_irq_delay_active = old_flag;
     }
 */
-    GameBoy.Emulator.timer_clocks &= SHARED_TIMA_DIV_COUNT_MASK; // ??
+
+
     mem->IO_Ports[TIMA_REG-0xFF00] = value;
 }
 
@@ -327,7 +335,7 @@ void GB_TimersWriteTAC(int reference_clocks, int value)
         const u32 gb_timer_clock_overflow[4] = {1024, 16, 64, 256};
         GameBoy.Emulator.timer_enabled = 1;
         GameBoy.Emulator.timer_overflow_count = gb_timer_clock_overflow[value&3];
-        GameBoy.Emulator.timer_clocks = GameBoy.Emulator.sys_clocks&(GameBoy.Emulator.timer_overflow_count-1);
+        GameBoy.Emulator.timer_clocks = GameBoy.Emulator.sys_clocks&SHARED_TIMA_DIV_COUNT_MASK; //(GameBoy.Emulator.timer_overflow_count-1);
     }
     else
     {
@@ -383,7 +391,6 @@ void GB_TimersUpdateClocksClounterReference(int reference_clocks)
     //else
     //    GameBoy.Emulator.timer_irq_delay_active = 0;
 
-
     if(GameBoy.Emulator.timer_enabled)
     {
         int timer_update_clocks =
@@ -399,7 +406,9 @@ void GB_TimersUpdateClocksClounterReference(int reference_clocks)
         }
     }
 
+    //if(GameBoy.Emulator.timer_enabled) //?
     GameBoy.Emulator.timer_clocks = (GameBoy.Emulator.timer_clocks+increment_clocks) & TIMER_COUNT_MAX_MASK;
+
 
     // SOUND
     // -----

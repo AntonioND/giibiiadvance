@@ -56,15 +56,18 @@ REPETITIONS SET 0
 	ld	[rTIMA],a
 	ld	[rTMA],a
 	ld	[rDIV],a
+	ld	c,rDIV & $FF
+	ld	de,rTIMA
 	
 	ld	a,TACF_STOP|TACF_65KHZ
 	ld	[rTAC],a
 	ld	a,TACF_START|TACF_65KHZ
 	ld	[rTAC],a
 	
-	ld	a,[rTIMA]
-	ld	[hl+],a
-	ld	[rDIV],a
+	xor	a,a
+	ld	[$FF00+c],a
+	ld	[de],a
+	ld	[$FF00+c],a
 	
 	REPT	15
 	
@@ -72,11 +75,11 @@ REPETITIONS SET 0
 	nop
 	ENDR
 	
-	ld	[rDIV],a
+	ld	[$FF00+c],a
 	
 	ENDR
 	
-	ld	a,[rTIMA]
+	ld	a,[de]
 	ld	[hl+],a
 
 REPETITIONS SET REPETITIONS+1
@@ -93,25 +96,28 @@ REPETITIONS SET 0
 	ld	[rTIMA],a
 	ld	[rTMA],a
 	ld	[rDIV],a
+	ld	c,rDIV & $FF
+	ld	de,rTIMA
 	
 	ld	a,TACF_STOP|TACF_65KHZ
 	ld	[rTAC],a
 	ld	a,TACF_START|TACF_65KHZ
 	ld	[rTAC],a
 	
-	ld	a,[rTIMA]
-	ld	[hl+],a
-	ld	[rDIV],a
+	xor	a,a
+	ld	[$FF00+c],a
+	ld	[de],a
+	ld	[$FF00+c],a
 	
-	REPT	15
+	REPT	16
 	
 	REPT REPETITIONS
 	nop
 	ENDR
 	
-	ld	a,[rTIMA]
+	ld	a,[de]
 	ld	[hl+],a
-	ld	[rDIV],a
+	ld	[$FF00+c],a
 	
 	ENDR
 

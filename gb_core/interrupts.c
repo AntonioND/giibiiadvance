@@ -244,7 +244,7 @@ void GB_TimersWriteTIMA(int reference_clocks, int value)
         GameBoy.Emulator.timer_irq_delay_active = old_flag;
     }
 */
-
+    GameBoy.Emulator.timer_clocks = GameBoy.Emulator.sys_clocks&SHARED_TIMA_DIV_COUNT_MASK; //(GameBoy.Emulator.timer_overflow_count-1);
 
     mem->IO_Ports[TIMA_REG-0xFF00] = value;
 }
@@ -335,7 +335,6 @@ void GB_TimersWriteTAC(int reference_clocks, int value)
         const u32 gb_timer_clock_overflow[4] = {1024, 16, 64, 256};
         GameBoy.Emulator.timer_enabled = 1;
         GameBoy.Emulator.timer_overflow_count = gb_timer_clock_overflow[value&3];
-        GameBoy.Emulator.timer_clocks = GameBoy.Emulator.sys_clocks&SHARED_TIMA_DIV_COUNT_MASK; //(GameBoy.Emulator.timer_overflow_count-1);
     }
     else
     {
@@ -343,6 +342,8 @@ void GB_TimersWriteTAC(int reference_clocks, int value)
         GameBoy.Emulator.timer_enabled = 0;
         GameBoy.Emulator.timer_overflow_count = 0;
     }
+
+    GameBoy.Emulator.timer_clocks = GameBoy.Emulator.sys_clocks&SHARED_TIMA_DIV_COUNT_MASK; //(GameBoy.Emulator.timer_overflow_count-1);
 
     mem->IO_Ports[TAC_REG-0xFF00] = value;
 }

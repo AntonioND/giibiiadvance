@@ -353,9 +353,8 @@ typedef struct {
     u32 stat_signal; //when this goes from 0 to 1, STAT interrupt is triggered.
 
     //DIV, Timer, Sound
-    u32 sys_clocks; // 16 bit register. The 8 most significative bits are DIV_REG
-    u32 timer_clocks;
-    u32 timer_overflow_count;
+    u32 sys_clocks; // 16 bit register. The 8 most significant bits are DIV_REG
+    u32 timer_overflow_mask;
     u32 timer_enabled;
     u32 timer_irq_delay_active;
 

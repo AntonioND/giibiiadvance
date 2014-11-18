@@ -28,6 +28,7 @@ Game Boy
 - Initial register values (including hidden ones). Test with and without boot ROM.
 - Initial memory values. Test with and without boot ROM.
 - PPU state after powering on the screen. Any register is reseted?
+- When LCD is off, are LYC=0 or ScreenMode=0 IRQs triggered?
 
 Game Boy Advance
 ----------------

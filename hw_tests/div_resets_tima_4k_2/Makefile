@@ -1,7 +1,7 @@
 #####################################################################
 ##                           ROM NAME                              ##
 
-NAME = div_resets_tima
+NAME = div_resets_tima_4k_2
 EXT	 = gbc
 
 ##                                                                 ##

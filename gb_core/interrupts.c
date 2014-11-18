@@ -35,11 +35,10 @@
 
 extern _GB_CONTEXT_ GameBoy;
 
-#define SHARED_BITS_TIMA_DIV (5)
-#define SHARED_TIMA_DIV_COUNT_MAX (1<<SHARED_BITS_TIMA_DIV)
-#define SHARED_TIMA_DIV_COUNT_MASK (SHARED_TIMA_DIV_COUNT_MAX-1)
-
 #define TIMER_COUNT_MAX_MASK (1024-1)
+
+static const u32 gb_timer_clock_overflow[4] = {1024, 16, 64, 256};
+//static const u32 gb_timer_restart_value[4] = { 1<<9, 1<<3, 1<<5, 1<<7};
 
 //----------------------------------------------------------------
 
@@ -142,12 +141,12 @@ void GB_CPUInterruptsInit(void)
         }
     }
 
-    GameBoy.Emulator.timer_clocks = GameBoy.Emulator.sys_clocks & TIMER_COUNT_MAX_MASK;
-    GameBoy.Memory.IO_Ports[DIV_REG-0xFF00] = GameBoy.Emulator.sys_clocks >> 8;
-
-    GameBoy.Emulator.timer_overflow_count = 0;
+    GameBoy.Emulator.timer_overflow_count = gb_timer_clock_overflow[0];
     GameBoy.Emulator.timer_enabled = 0;
     GameBoy.Emulator.timer_irq_delay_active = 0;
+
+    GameBoy.Emulator.timer_clocks = GameBoy.Emulator.sys_clocks & (GameBoy.Emulator.timer_overflow_count-1);
+    GameBoy.Memory.IO_Ports[DIV_REG-0xFF00] = GameBoy.Emulator.sys_clocks >> 8;
 
     if(GameBoy.Emulator.HasTimer)
     {
@@ -214,20 +213,8 @@ void GB_TimersWriteDIV(int reference_clocks, int value)
 
     GB_TimersUpdateClocksClounterReference(reference_clocks);
     GameBoy.Emulator.sys_clocks = 0;
+    GameBoy.Emulator.timer_clocks = 0;
     mem->IO_Ports[DIV_REG-0xFF00] = 0;
-
-    //if(GameBoy.Emulator.timer_enabled)
-    {
-        //if(GameBoy.Emulator.timer_clocks&SHARED_TIMA_DIV_COUNT_MASK)
-        {
-            GameBoy.Emulator.timer_clocks &= ~SHARED_TIMA_DIV_COUNT_MASK; // clear shared bits
-            GameBoy.Emulator.timer_clocks |= (1<<SHARED_BITS_TIMA_DIV);
-
-        //    //if( ( GameBoy.Emulator.timer_clocks & (5<<(SHARED_BITS_TIMA_DIV+1)) ) == (1<<(SHARED_BITS_TIMA_DIV+1)) )
-        //    if( ( GameBoy.Emulator.timer_clocks & (1<<(SHARED_BITS_TIMA_DIV+1)) )
-        //        GB_TimerIncreaseTIMA();
-        }
-    }
 }
 
 void GB_TimersWriteTIMA(int reference_clocks, int value)
@@ -244,7 +231,7 @@ void GB_TimersWriteTIMA(int reference_clocks, int value)
         GameBoy.Emulator.timer_irq_delay_active = old_flag;
     }
 */
-    GameBoy.Emulator.timer_clocks = GameBoy.Emulator.sys_clocks&SHARED_TIMA_DIV_COUNT_MASK; //(GameBoy.Emulator.timer_overflow_count-1);
+    //GameBoy.Emulator.timer_clocks = GameBoy.Emulator.sys_clocks&SHARED_TIMA_DIV_COUNT_MASK; //(GameBoy.Emulator.timer_overflow_count-1);
 
     mem->IO_Ports[TIMA_REG-0xFF00] = value;
 }
@@ -271,79 +258,21 @@ void GB_TimersWriteTAC(int reference_clocks, int value)
 
     GB_TimersUpdateClocksClounterReference(reference_clocks);
 
-    // Strange things
-#if 0
-    int old_value = mem->IO_Ports[TAC_REG-0xFF00] & 7;
-    int new_value = value & 7;
-
-    int extra_increment = 0;
-
-    if( old_value&BIT(2) ) // enabled
-    {/*
-        if( (old_value&3) == 2 ) // 64 clocks
-        {
-            extra_increment = 1;
-        }
-        else if( (old_value&3) == 1 ) // 16 clocks
-        {
-            const int inc_table[4][8] = {
-                { 2,2,2,2, 2,1,2,2 }, // NO INC, 00
-                { 1,1,1,1, 1,0,1,1 }, // NO INC, FF
-                { 1,1,1,1, 1,1,1,1 }, // INC, 00
-                { 0,0,0,0, 0,0,0,0 }  // INC, FF
-            };
-
-            int if_flag_set = (mem->IO_Ports[IF_REG-0xFF00] & BIT(2)) != 0;
-
-            int just_incrementing = (GameBoy.Emulator.sys_clocks & (16-1)) == 0;
-
-            extra_increment = inc_table[just_incrementing*2 + if_flag_set][new_value&7];
-        }*/
-    }
-    else // disabled
-    {
-        if(GameBoy.Emulator.HardwareType == HW_GBA)
-        {
-            if( (old_value&3) == 1 ) // 16 clocks
-            {
-                if( new_value == (BIT(2)|3) ) // 256 clocks, enabled
-                {
-                    int just_incrementing = (GameBoy.Emulator.sys_clocks & (16-1)) == 0;
-                    if(just_incrementing == 0) extra_increment = 1;
-                    // maybe this only happens if written the clock before incrementing
-                }
-            }
-        }
-    }
-
-    while(extra_increment)
-    {
-        if(mem->IO_Ports[TIMA_REG-0xFF00] == 0xFF) //overflow
-        {
-            GameBoy.Emulator.timer_irq_delay_active = 1;
-            mem->IO_Ports[TIMA_REG-0xFF00] = mem->IO_Ports[TMA_REG-0xFF00];
-        }
-        else mem->IO_Ports[TIMA_REG-0xFF00]++;
-
-        extra_increment--;
-    }
-#endif // 0
     // Normal behavior
 
-    if(value & (1<<2))
+    if(value & BIT(2))
     {
-        const u32 gb_timer_clock_overflow[4] = {1024, 16, 64, 256};
         GameBoy.Emulator.timer_enabled = 1;
-        GameBoy.Emulator.timer_overflow_count = gb_timer_clock_overflow[value&3];
     }
     else
     {
         //GameBoy.Emulator.timer_irq_delay_active = 0;
         GameBoy.Emulator.timer_enabled = 0;
-        GameBoy.Emulator.timer_overflow_count = 0;
     }
 
-    GameBoy.Emulator.timer_clocks = GameBoy.Emulator.sys_clocks&SHARED_TIMA_DIV_COUNT_MASK; //(GameBoy.Emulator.timer_overflow_count-1);
+    GameBoy.Emulator.timer_overflow_count = gb_timer_clock_overflow[value&3];
+
+    GameBoy.Emulator.timer_clocks = GameBoy.Emulator.timer_clocks & (GameBoy.Emulator.timer_overflow_count-1);
 
     mem->IO_Ports[TAC_REG-0xFF00] = value;
 }
@@ -369,8 +298,6 @@ void GB_TimersUpdateClocksClounterReference(int reference_clocks)
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
     int increment_clocks = reference_clocks - GB_TimersClockCounterGet();
-
-    //int old_sys_clocks = GameBoy.Emulator.sys_clocks;
 
     //Don't assume that this function will increase just a few clocks. Timer can be increased up to 4 times
     //just because of HDMA needing 64 clocks in double speed mode (min. timer period is 16 clocks).
@@ -427,7 +354,7 @@ int GB_TimersGetClocksToNextEvent(void)
 {
     int clocks_to_next_event = 256 - (GameBoy.Emulator.sys_clocks&0xFF); // DIV
 
-    //if(GameBoy.Emulator.timer_enabled) ??
+    //if(GameBoy.Emulator.timer_enabled) //TODO : this goes here ??
         if(GameBoy.Emulator.timer_irq_delay_active)
         {
             return 4; // break right now!
@@ -435,13 +362,10 @@ int GB_TimersGetClocksToNextEvent(void)
 
     if(GameBoy.Emulator.timer_enabled)
     {
-        return 4;/*
-        int timer_mask = GameBoy.Emulator.timer_overflow_mask;
-        int timer_update_clocks = (GameBoy.Emulator.sys_clocks & timer_mask);
-        int clocks_left_for_timer = (timer_mask+1) - timer_update_clocks;
-
+        int clocks_left_for_timer = GameBoy.Emulator.timer_overflow_count -
+                                    (GameBoy.Emulator.timer_clocks&(GameBoy.Emulator.timer_overflow_count-1));
         if(clocks_left_for_timer < clocks_to_next_event)
-            clocks_to_next_event = clocks_left_for_timer;*/
+            clocks_to_next_event = clocks_left_for_timer;
     }
 
     return clocks_to_next_event;

@@ -7,7 +7,7 @@
 	
 repeat_loop:	DS 1
 
-	SECTION	"Main",HOME
+	SECTION	"Main",ROM0
 
 ;--------------------------------------------------------------------------
 ;- Main()                                                                 -
@@ -25,7 +25,7 @@ Main:
 	call	CPU_slow
 .skip1:
 
-.repeat_all:
+repeat_all:
 	
 	; -------------------------------------------------------
 	
@@ -45,45 +45,13 @@ Main:
 ;	inc	a
 ;	ENDR
 
-	; -------------------------------------------------------
-	
-REPETITIONS SET 0
-	REPT	16
-	
-	xor	a,a
-	ld	[rTAC],a
-	ld	[rDIV],a
-	ld	[rTIMA],a
-	ld	[rTMA],a
-	ld	[rDIV],a
-	ld	c,rDIV & $FF
-	ld	de,rTIMA
-	
-	ld	a,TACF_STOP|TACF_65KHZ
-	ld	[rTAC],a
-	ld	a,TACF_START|TACF_65KHZ
-	ld	[rTAC],a
-	
-	xor	a,a
-	ld	[$FF00+c],a
-	ld	[de],a
-	ld	[$FF00+c],a
-	
-	REPT	15
-	
-	REPT REPETITIONS
-	nop
-	ENDR
-	
-	ld	[$FF00+c],a
-	
-	ENDR
-	
-	ld	a,[de]
-	ld	[hl+],a
-
-REPETITIONS SET REPETITIONS+1
-	ENDR
+WAIT_237 : MACRO
+	ld	b,59		; 2
+.loop\@:
+	dec	b			; 1
+	jr	nz,.loop\@	; 3/2
+	; 2 + (1+3)*58 + (1+2) = 237
+ENDM
 	
 	; -------------------------------------------------------
 	
@@ -99,9 +67,56 @@ REPETITIONS SET 0
 	ld	c,rDIV & $FF
 	ld	de,rTIMA
 	
-	ld	a,TACF_STOP|TACF_65KHZ
+	ld	a,TACF_STOP|TACF_4KHZ
 	ld	[rTAC],a
-	ld	a,TACF_START|TACF_65KHZ
+	ld	a,TACF_START|TACF_4KHZ
+	ld	[rTAC],a
+	
+	xor	a,a
+	ld	[$FF00+c],a
+	ld	[de],a
+	ld	[$FF00+c],a
+	
+	REPT	15
+	
+	WAIT_237
+	REPT REPETITIONS
+	nop
+	ENDR
+	
+	ld	[$FF00+c],a
+	
+	ENDR
+	
+	ld	a,[de]
+	ld	[hl+],a
+
+REPETITIONS SET REPETITIONS+1
+	ENDR
+	
+	jp	Main2
+
+	; -------------------------------------------------------
+	
+	SECTION	"Main2",ROMX
+	
+Main2:
+
+REPETITIONS SET 0
+	REPT	32
+	
+	xor	a,a
+	ld	[rTAC],a
+	ld	[rDIV],a
+	ld	[rTIMA],a
+	ld	[rTMA],a
+	ld	[rDIV],a
+	ld	c,rDIV & $FF
+	ld	de,rTIMA
+	
+	ld	a,TACF_STOP|TACF_4KHZ
+	ld	[rTAC],a
+	ld	a,TACF_START|TACF_4KHZ
 	ld	[rTAC],a
 	
 	xor	a,a
@@ -111,6 +126,7 @@ REPETITIONS SET 0
 	
 	REPT	16
 	
+	WAIT_237
 	REPT REPETITIONS
 	nop
 	ENDR
@@ -152,7 +168,7 @@ REPETITIONS SET REPETITIONS+1
 	call	CPU_fast
 	ld	a,1
 	ld	[repeat_loop],a
-	jp	.repeat_all
+	jp	repeat_all
 .dontchange:
 	
 .endloop:

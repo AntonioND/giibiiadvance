@@ -250,8 +250,7 @@ void Win_GBIOViewerUpdate(void)
     //Clocks
     GUI_ConsoleModePrintf(&gb_ioview_clocks_con,0,0,"LCD: %d",GameBoy.Emulator.LCD_clocks);
     GUI_ConsoleModePrintf(&gb_ioview_clocks_con,0,1,"Timer: %d",
-                                (GameBoy.Emulator.timer_overflow_count != 0) ?
-                                    GameBoy.Emulator.timer_clocks&(GameBoy.Emulator.timer_overflow_count-1) : 0);
+                                    GameBoy.Emulator.timer_clocks&(GameBoy.Emulator.timer_overflow_count-1));
     GUI_ConsoleModePrintf(&gb_ioview_clocks_con,0,2,"  out of %d",GameBoy.Emulator.timer_overflow_count);
     GUI_ConsoleModePrintf(&gb_ioview_clocks_con,0,3,"DIV: %d",GameBoy.Emulator.sys_clocks&0xFF);
     GUI_ConsoleModePrintf(&gb_ioview_clocks_con,0,4,"Serial: %d",GameBoy.Emulator.serial_clocks);

@@ -102,16 +102,6 @@ ENDM
 ;+---------------------------------------------------------------------------------+
 
 ;--------------------------------------------------------------------------
-;- mul_u8u8u16()    hl = returned value    a,c = initial values           -
-;- div_u8u8u8()     c = a / b     a = a % b                               -
-;- div_s8s8s8()     a / b -> c     a % b -> a     destroys e              -
-;--------------------------------------------------------------------------
-
-	GLOBAL	mul_u8u8u16
-	GLOBAL	div_u8u8u8
-	GLOBAL	div_s8s8s8
-
-;--------------------------------------------------------------------------
 ;- memset()    d = value    hl = start address    bc = size               -
 ;- memset_rand()    hl = start address    bc = size                       -
 ;- memcopy()    bc = size    hl = source address    de = dest address     -

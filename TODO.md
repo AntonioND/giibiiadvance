@@ -22,12 +22,11 @@ Game Boy
 - HALT when IME=0. Halt not executed? Executed after IME is set to 1?
 - HALT is disabled when any flag of IF is set to 1 or it needs the corresponding flag in IE? IME=1 only needed to jump to IRQ vectors?
 - When an interrupt occurs while in HALT, the CPU starts back up and pushes the Program Counter onto the stack before servicing the interrupt(s). Except it doesn't push the address after HALT as one might expect but rather the address of HALT itself?
-- Reseting DIV affects serial? I doubt it, but better check it...
 - What happens when TAC is changed while timer is working/not working.
-- Switch speed needs a lot of clocks to complete. During that time some IRQs can be triggered! DIV counter keeps counting so all things that use that counter are affected
+- Switch speed needs a lot of clocks to complete. During that time some IRQs can be triggered! DIV counter keeps counting so all things that use that counter are affected (DIV, timer, sound?). Serial?
 - Initial register values (including hidden ones). Test with and without boot ROM.
 - Initial memory values. Test with and without boot ROM.
-- PPU state after powering on the screen. Any register is reseted?
+- PPU state after powering on the screen. Is Any register reseted?
 - When LCD is off, are LYC=0 or ScreenMode=0 IRQs triggered?
 - Recalculate GDMA/HDMA timings.
 

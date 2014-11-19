@@ -14,6 +14,8 @@ If written, its value is reseted to 0, as well as the internal counter.
 
 - Interaction with timer and APU explained below.
 
+- Serial clock is not derived from this internal counter, it is not affected by DIV register.
+
 TIMER
 -----
 
@@ -25,9 +27,9 @@ That doesn't happen the other way. When writing to TAC to enable the timer the o
 
 - Timer/DIV counter keeps increasing even if the timer is disabled. TIMA can increase just when the timer is enabled or it can need all the specified clocks by TAC, there is no way to know it without reseting DIV a few instructions before.
 
-- If TIMA is written at the same time of its increment, the IRQ is not triggered (if it would overflow) and the written value is stored in TIMA, not the incremented one.
+- If TIMA is written at the same time of its increment, the IRQ is not triggered (if it would overflow) and the written value is stored in TIMA, not the incremented one. (?)
 
-- If TMA is written at the same time of the increment of TIMA, if TIMA overflows, TIMA is not loaded from the current value of TMA, but the value written to TMA in this exact clock.
+- If TMA is written at the same time of the increment of TIMA, if TIMA overflows, TIMA is not loaded from the current value of TMA, but the value written to TMA in this exact clock. (Delay?)
 
 DIV interaction with APU
 ------------------------

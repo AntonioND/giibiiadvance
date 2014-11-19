@@ -31,8 +31,8 @@ Timing for GDMA:
 
     blocks = (register_value & 0x7F) + 1
 
-    Double Speed -> ( 20 + blocks*64 ) clocks
-    Single Speed -> ( 20 + blocks*32 ) clocks
+    Double Speed -> ( 20 + blocks*64 ) clocks (Verify?)
+    Single Speed -> ( 20 + blocks*32 ) clocks (Verify?)
 
 Timing for HDMA:
 
@@ -42,6 +42,6 @@ Timing for HDMA:
         16 clocks (double and single speed)
 
     Copy time (per HBL):
-        Double Speed -> ( 4 + 64 ) clocks
-        Single Speed -> ( 4 + 32 ) clocks
+        Double Speed -> ( 4 + 64 ) clocks (Verify?)
+        Single Speed -> ( 4 + 32 ) clocks (Verify?)
 

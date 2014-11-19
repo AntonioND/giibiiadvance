@@ -93,7 +93,7 @@ void GB_CPUInterruptsInit(void)
         {
             case HW_GB:
             case HW_GBP:
-                GameBoy.Emulator.sys_clocks = 8; // Verified on hardware
+                GameBoy.Emulator.sys_clocks = 8; // TODO: Can't verify until PPU is emulated correctly
                 break;
 
             case HW_SGB:
@@ -103,7 +103,7 @@ void GB_CPUInterruptsInit(void)
 
             case HW_GBC:
             case HW_GBA:
-                GameBoy.Emulator.sys_clocks = 0; // TODO: Not verified yet
+                GameBoy.Emulator.sys_clocks = 0; // TODO: Can't verify until PPU is emulated correctly
                 break;
 
             default:

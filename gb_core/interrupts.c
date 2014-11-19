@@ -98,12 +98,12 @@ void GB_CPUInterruptsInit(void)
 
             case HW_SGB:
             case HW_SGB2:
-                GameBoy.Emulator.sys_clocks = 0; // Unknown. Can't test.
+                GameBoy.Emulator.sys_clocks = 0; // TODO: Unknown. Can't test.
                 break;
 
             case HW_GBC:
             case HW_GBA:
-                GameBoy.Emulator.sys_clocks = 0; // Not verified yet
+                GameBoy.Emulator.sys_clocks = 0; // TODO: Not verified yet
                 break;
 
             default:
@@ -123,12 +123,12 @@ void GB_CPUInterruptsInit(void)
 
             case HW_SGB:
             case HW_SGB2:
-                GameBoy.Emulator.sys_clocks = 0; // Unknown. Can't test.
+                GameBoy.Emulator.sys_clocks = 0; // TODO: Unknown. Can't test.
                 break;
 
             case HW_GBC:
             case HW_GBA:
-                GameBoy.Emulator.sys_clocks = 0x2200; // Not verified yet
+                GameBoy.Emulator.sys_clocks = 0x2200; // TODO: Not verified yet
                 break;
 
             default:
@@ -166,6 +166,7 @@ inline void GB_SetInterrupt(int flag)
 {
     GameBoy.Memory.IO_Ports[IF_REG-0xFF00] |= flag;
     GameBoy.Emulator.CPUHalt = 0;
+    GB_CPUBreakLoop();
 }
 
 //----------------------------------------------------------------
@@ -208,6 +209,15 @@ void GB_TimersWriteDIV(int reference_clocks, int value)
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
     GB_TimersUpdateClocksClounterReference(reference_clocks);
+
+    if(GameBoy.Emulator.timer_enabled)
+    {
+        if(GameBoy.Emulator.sys_clocks & ((GameBoy.Emulator.timer_overflow_mask+1)>>1))
+        {
+            GB_TimerIncreaseTIMA();
+        }
+    }
+
     GameBoy.Emulator.sys_clocks = 0;
     mem->IO_Ports[DIV_REG-0xFF00] = 0;
 }
@@ -220,11 +230,12 @@ void GB_TimersWriteTIMA(int reference_clocks, int value)
 
     GB_TimersUpdateClocksClounterReference(reference_clocks);
 /*
-    if( (GameBoy.Emulator.sys_clocks&GameBoy.Emulator.timer_overflow_mask) == 0)
-    {
-        //If TIMA is written the same clock as incrementing itself prevent the timer IF flag from being set
-        GameBoy.Emulator.timer_irq_delay_active = old_flag;
-    }
+    if(GameBoy.Emulator.timer_enabled)
+        if( (GameBoy.Emulator.sys_clocks&GameBoy.Emulator.timer_overflow_mask) == 0)
+        {
+            //If TIMA is written the same clock as incrementing itself prevent the timer IF flag from being set
+            GameBoy.Emulator.timer_irq_delay_active = old_flag;
+        }
 */
     mem->IO_Ports[TIMA_REG-0xFF00] = value;
 }
@@ -233,22 +244,21 @@ void GB_TimersWriteTMA(int reference_clocks, int value)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
-//    u32 old_tima = (u32)(u8)mem->IO_Ports[TIMA_REG-0xFF00];
+    GB_TimersUpdateClocksClounterReference(reference_clocks); // First, update as normal
 
-    GB_TimersUpdateClocksClounterReference(reference_clocks);
-/*
-    if( (GameBoy.Emulator.timer_clocks&(GameBoy.Emulator.timer_overflow_count-1)) == 0)
+    if(GameBoy.Emulator.timer_enabled)
     {
-        u32 new_tima = (u32)(u8)mem->IO_Ports[TIMA_REG-0xFF00];
-
-        if(new_tima < old_tima)
+        if( (GameBoy.Emulator.sys_clocks&GameBoy.Emulator.timer_overflow_mask) == 0) // Just changed?
         {
-            //If TMA is written the same clock as reloading TIMA from TMA, load TIMA from written value,
-            //but handle IRQ flag before.
-            mem->IO_Ports[TIMA_REG-0xFF00] = value;
+            if(mem->IO_Ports[TIMA_REG-0xFF00] == mem->IO_Ports[TMA_REG-0xFF00]) // Just reloaded?
+            {
+                //If TMA is written the same clock as reloading TIMA from TMA, load TIMA from written value,
+                //but handle IRQ flag before.
+                mem->IO_Ports[TIMA_REG-0xFF00] = value;
+            }
         }
     }
-*/
+
     mem->IO_Ports[TMA_REG-0xFF00] = value;
 }
 
@@ -269,7 +279,18 @@ void GB_TimersWriteTAC(int reference_clocks, int value)
     }
 
     GameBoy.Emulator.timer_overflow_mask = gb_timer_clock_overflow_mask[value&3];
-
+/*
+    if((mem->IO_Ports[TAC_REG-0xFF00]&BIT(2)) && GameBoy.Emulator.timer_enabled)
+    {
+        //if( (GameBoy.Emulator.sys_clocks & GameBoy.Emulator.timer_overflow_mask) == 0)
+        {
+            if(GameBoy.Emulator.sys_clocks & ((GameBoy.Emulator.timer_overflow_mask+1)>>1))
+            {
+                GB_TimerIncreaseTIMA();
+            }
+        }
+    }
+*/
     mem->IO_Ports[TAC_REG-0xFF00] = value;
 }
 

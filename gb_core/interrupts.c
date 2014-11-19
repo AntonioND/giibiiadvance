@@ -196,6 +196,7 @@ static void GB_TimerIncreaseTIMA(void)
 
     if(mem->IO_Ports[TIMA_REG-0xFF00] == 0xFF) //overflow
     {
+        //GB_SetInterrupt(I_TIMER); // Don't, there's a 4 clock delay between overflow and IF flag being set
         GameBoy.Emulator.timer_irq_delay_active = 4;
         mem->IO_Ports[TIMA_REG-0xFF00] = mem->IO_Ports[TMA_REG-0xFF00];
     }

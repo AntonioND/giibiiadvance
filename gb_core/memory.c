@@ -207,9 +207,11 @@ void GB_MemWriteReg8(u32 address, u32 value)
             return;
 
         case IF_REG:
+            //GB_UpdateCounterToClocks(GB_CPUClockCounterGet());
             GB_PPUUpdateClocksClounterReference(GB_CPUClockCounterGet());
+            GB_TimersUpdateClocksClounterReference(GB_CPUClockCounterGet());
+            GB_SerialUpdateClocksClounterReference(GB_CPUClockCounterGet());
             mem->IO_Ports[address-0xFF00] = value | (0xE0);
-            if(!(value & BIT(2))) GameBoy.Emulator.timer_irq_delay_active = 0;
             GB_CPUBreakLoop();
             return;
 
@@ -671,7 +673,10 @@ u32 GB_MemReadReg8(u32 address)
             return mem->IO_Ports[address-0xFF00];
 
         case IF_REG:
-            GB_UpdateCounterToClocks(GB_CPUClockCounterGet());
+            //GB_UpdateCounterToClocks(GB_CPUClockCounterGet());
+            GB_PPUUpdateClocksClounterReference(GB_CPUClockCounterGet());
+            GB_TimersUpdateClocksClounterReference(GB_CPUClockCounterGet());
+            GB_SerialUpdateClocksClounterReference(GB_CPUClockCounterGet());
             return mem->IO_Ports[IF_REG-0xFF00];
 
         case SB_REG:

@@ -102,7 +102,7 @@ void GB_CPUInterruptsInit(void)
                 break;
 
             case HW_GBC:
-            case HW_GBA:
+            case HW_GBA: // Same value for GBC in GB mode. The boot ROM starts the same way.
                 GameBoy.Emulator.sys_clocks = 0; // TODO: Can't verify until PPU is emulated correctly
                 break;
 
@@ -129,6 +129,7 @@ void GB_CPUInterruptsInit(void)
             case HW_GBC:
             case HW_GBA:
                 GameBoy.Emulator.sys_clocks = 0x2200; // TODO: Not verified yet
+				//TODO: GBC in GB mode? Use value corresponding to a boot without any user interaction.
                 break;
 
             default:
@@ -227,17 +228,17 @@ void GB_TimersWriteTIMA(int reference_clocks, int value)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
-//    int old_flag = GameBoy.Emulator.timer_irq_delay_active;
-
     GB_TimersUpdateClocksClounterReference(reference_clocks);
-/*
+
     if(GameBoy.Emulator.timer_enabled)
+    {
         if( (GameBoy.Emulator.sys_clocks&GameBoy.Emulator.timer_overflow_mask) == 0)
         {
             //If TIMA is written the same clock as incrementing itself prevent the timer IF flag from being set
-            GameBoy.Emulator.timer_irq_delay_active = old_flag;
+            GameBoy.Emulator.timer_irq_delay_active = 0;
         }
-*/
+    }
+
     mem->IO_Ports[TIMA_REG-0xFF00] = value;
 }
 
@@ -269,6 +270,17 @@ void GB_TimersWriteTAC(int reference_clocks, int value)
 
     GB_TimersUpdateClocksClounterReference(reference_clocks);
 
+    if(GameBoy.Emulator.timer_enabled)
+    {
+        if( (value & 7) != (mem->IO_Ports[TAC_REG-0xFF00] & 7) )
+        {
+            if(GameBoy.Emulator.sys_clocks & ((GameBoy.Emulator.timer_overflow_mask+1)>>1))
+            {
+                GB_TimerIncreaseTIMA();
+            }
+        }
+    }
+
     if(value & BIT(2))
     {
         GameBoy.Emulator.timer_enabled = 1;
@@ -280,18 +292,7 @@ void GB_TimersWriteTAC(int reference_clocks, int value)
     }
 
     GameBoy.Emulator.timer_overflow_mask = gb_timer_clock_overflow_mask[value&3];
-/*
-    if((mem->IO_Ports[TAC_REG-0xFF00]&BIT(2)) && GameBoy.Emulator.timer_enabled)
-    {
-        //if( (GameBoy.Emulator.sys_clocks & GameBoy.Emulator.timer_overflow_mask) == 0)
-        {
-            if(GameBoy.Emulator.sys_clocks & ((GameBoy.Emulator.timer_overflow_mask+1)>>1))
-            {
-                GB_TimerIncreaseTIMA();
-            }
-        }
-    }
-*/
+
     mem->IO_Ports[TAC_REG-0xFF00] = value;
 }
 

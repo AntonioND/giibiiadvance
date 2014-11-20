@@ -23,13 +23,36 @@ Shares the internal counter with DIV register. If DIV register is written, DIV i
 
 That doesn't happen the other way. When writing to TAC to enable the timer the only thing that happens is that the register TIMA is allowed to increase, but it doesn't change the internal counter that increases TIMA.
 
-- Timer IRQ is delayed 1 nop (4 clocks) from the TIMA overflow.
+- For example, if timer is configured to overflow every 256 clocks. If DIV is written when
+    system_clocks & (256>>1) then the TIMA counter will increase once.
 
 - Timer/DIV counter keeps increasing even if the timer is disabled. TIMA can increase just when the timer is enabled or it can need all the specified clocks by TAC, there is no way to know it without reseting DIV a few instructions before.
 
-- If TIMA is written at the same time of its increment, the IRQ is not triggered (if it would overflow) and the written value is stored in TIMA, not the incremented one. (?)
+- Timer IRQ is delayed 1 nop (4 clocks) from the TIMA overflow. The TMA reload to TIMA is also delayed. For example (SYS is divided by 4 for easier understanding, each increment of the graph is 1 nop, not 1 clock):
 
-- If TMA is written at the same time of the increment of TIMA, if TIMA overflows, TIMA is not loaded from the current value of TMA, but the value written to TMA in this exact clock. (Delay?)
+  Timer overflows:
+                  [A] [B]
+    SYS  FD FE FF |00| 01 02
+    TIMA FF FF FF |00| 23 23
+    TMA  23 23 23 |23| 23 23
+    IF   E0 E0 E0 |E0| E4 E4
+
+  Timer doesn't overflow:
+
+    SYS  FD FE FF 00 01 02
+    TIMA 45 45 45 46 46 46
+    TMA  23 23 23 23 23 23
+    IF   E0 E0 E0 E0 E0 E0
+
+During that strange cycle [A] you can prevent the IF flag from being set and prevent the TIMA from being reloaded from TMA by writing a value to TIMA. That new value will be the one that stays in the TIMA register after the instruction.
+
+- If you write to TIMA during the cycle that TMA is being loaded to it [B], the write will be ignored and TMA value will be written to TIMA instead.
+
+- If TMA is written the same cycle it is loaded to TIMA [B], TIMA is also loaded with that value.
+
+- Writing to TAC doesn't reset the system counter.
+
+- TAC: TODO: TEST
 
 DIV interaction with APU
 ------------------------

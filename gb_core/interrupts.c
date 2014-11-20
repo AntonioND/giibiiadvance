@@ -142,6 +142,8 @@ void GB_CPUInterruptsInit(void)
     GameBoy.Emulator.timer_overflow_mask = gb_timer_clock_overflow_mask[0];
     GameBoy.Emulator.timer_enabled = 0;
     GameBoy.Emulator.timer_irq_delay_active = 0;
+    GameBoy.Emulator.timer_reload_delay_active = 0;
+    GameBoy.Emulator.tima_just_reloaded = 0;
 
     GameBoy.Memory.IO_Ports[DIV_REG-0xFF00] = GameBoy.Emulator.sys_clocks >> 8;
 
@@ -199,7 +201,9 @@ static void GB_TimerIncreaseTIMA(void)
     {
         //GB_SetInterrupt(I_TIMER); // Don't, there's a 4 clock delay between overflow and IF flag being set
         GameBoy.Emulator.timer_irq_delay_active = 4;
-        mem->IO_Ports[TIMA_REG-0xFF00] = mem->IO_Ports[TMA_REG-0xFF00];
+
+        mem->IO_Ports[TIMA_REG-0xFF00] = 0; //mem->IO_Ports[TMA_REG-0xFF00];
+        GameBoy.Emulator.timer_reload_delay_active = 4;
     }
     else mem->IO_Ports[TIMA_REG-0xFF00]++;
 }
@@ -250,14 +254,11 @@ void GB_TimersWriteTMA(int reference_clocks, int value)
 
     if(GameBoy.Emulator.timer_enabled)
     {
-        if( (GameBoy.Emulator.sys_clocks&GameBoy.Emulator.timer_overflow_mask) == 0) // Just changed?
+        if(GameBoy.Emulator.tima_just_reloaded)
         {
-            if(mem->IO_Ports[TIMA_REG-0xFF00] == mem->IO_Ports[TMA_REG-0xFF00]) // Just reloaded?
-            {
-                //If TMA is written the same clock as reloading TIMA from TMA, load TIMA from written value,
-                //but handle IRQ flag before.
-                mem->IO_Ports[TIMA_REG-0xFF00] = value;
-            }
+            //If TMA is written the same clock as reloading TIMA from TMA, load TIMA from written value,
+            //but handle IRQ flag before.
+            mem->IO_Ports[TIMA_REG-0xFF00] = value;
         }
     }
 
@@ -296,7 +297,7 @@ void GB_TimersWriteTAC(int reference_clocks, int value)
     mem->IO_Ports[TAC_REG-0xFF00] = value;
 }
 
-static void GB_TimersUpdateDelayTimerIRQ(int increment_clocks)
+static void GB_TimersUpdateDelays(int increment_clocks)
 {
     if(GameBoy.Emulator.timer_irq_delay_active)
     {
@@ -308,6 +309,22 @@ static void GB_TimersUpdateDelayTimerIRQ(int increment_clocks)
         {
             GameBoy.Emulator.timer_irq_delay_active = 0;
             GB_SetInterrupt(I_TIMER);
+        }
+    }
+
+    if(GameBoy.Emulator.timer_reload_delay_active)
+    {
+        if(GameBoy.Emulator.timer_reload_delay_active > increment_clocks)
+        {
+            GameBoy.Emulator.timer_reload_delay_active -= increment_clocks;
+        }
+        else
+        {
+            if( (increment_clocks - GameBoy.Emulator.timer_reload_delay_active) < 4 )
+                GameBoy.Emulator.tima_just_reloaded = 1;
+
+            GameBoy.Emulator.timer_reload_delay_active = 0;
+            GameBoy.Memory.IO_Ports[TIMA_REG-0xFF00] = GameBoy.Memory.IO_Ports[TMA_REG-0xFF00];
         }
     }
 }
@@ -332,8 +349,10 @@ void GB_TimersUpdateClocksClounterReference(int reference_clocks)
     // Timer
     // -----
 
+    GameBoy.Emulator.tima_just_reloaded = 0;
+
     //if(GameBoy.Emulator.timer_enabled)
-        GB_TimersUpdateDelayTimerIRQ(increment_clocks);
+        GB_TimersUpdateDelays(increment_clocks);
     //else
     //    GameBoy.Emulator.timer_irq_delay_active = 0;
 
@@ -344,13 +363,20 @@ void GB_TimersUpdateClocksClounterReference(int reference_clocks)
 
         int timer_overflow_count = GameBoy.Emulator.timer_overflow_mask + 1;
 
-        while(timer_update_clocks >= timer_overflow_count)
+        if(timer_update_clocks >= timer_overflow_count)
         {
-            GB_TimerIncreaseTIMA();
+            while(timer_update_clocks >= timer_overflow_count)
+            {
+                GB_TimerIncreaseTIMA();
 
-            timer_update_clocks -= timer_overflow_count;
+                timer_update_clocks -= timer_overflow_count;
 
-            GB_TimersUpdateDelayTimerIRQ(timer_update_clocks);
+                GB_TimersUpdateDelays(timer_update_clocks);
+            }
+        }
+        else
+        {
+            GB_TimersUpdateDelays(timer_update_clocks);
         }
     }
 
@@ -372,17 +398,25 @@ int GB_TimersGetClocksToNextEvent(void)
     int clocks_to_next_event = 256 - (GameBoy.Emulator.sys_clocks&0xFF); // DIV
 
     //if(GameBoy.Emulator.timer_enabled) //TODO : this goes here ??
+    {
         if(GameBoy.Emulator.timer_irq_delay_active)
         {
-            return 4; // break right now!
+            if(GameBoy.Emulator.timer_irq_delay_active < clocks_to_next_event)
+                clocks_to_next_event = GameBoy.Emulator.timer_irq_delay_active;
         }
-
+    }
     if(GameBoy.Emulator.timer_enabled)
     {
         int timer_counter = GameBoy.Emulator.sys_clocks&GameBoy.Emulator.timer_overflow_mask;
         int clocks_left_for_timer = (GameBoy.Emulator.timer_overflow_mask+1) - timer_counter;
         if(clocks_left_for_timer < clocks_to_next_event)
             clocks_to_next_event = clocks_left_for_timer;
+
+        if(GameBoy.Emulator.timer_reload_delay_active)
+        {
+            if(GameBoy.Emulator.timer_reload_delay_active < clocks_to_next_event)
+                clocks_to_next_event = GameBoy.Emulator.timer_reload_delay_active;
+        }
     }
 
     return clocks_to_next_event;

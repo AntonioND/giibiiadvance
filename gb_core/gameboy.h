@@ -355,8 +355,10 @@ typedef struct {
     //DIV, Timer, Sound
     u32 sys_clocks; // 16 bit register. The 8 most significant bits are DIV_REG
     u32 timer_overflow_mask;
-    u32 timer_enabled;
-    u32 timer_irq_delay_active;
+    u32 timer_enabled; // enable TIMA to increment
+    u32 timer_irq_delay_active; // to trigger IF flag
+    u32 timer_reload_delay_active; // to reload TIMA from TMA
+    u32 tima_just_reloaded;
 
     u32 serial_clocks; //count
     u32 serial_enabled;

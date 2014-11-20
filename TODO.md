@@ -12,6 +12,7 @@ General
 Game Boy
 --------
 
+- Emulate joypad bounce.
 - Make that everything read FFh except HRAM when DMG DMA is enabled.
 - HDMA copies when HALT is enabled? HALT is ignored if called when HDMA is active? STOP disables it? Switching speeds disables it?
 - Check what happens if HDMA1-4 are modified during HDMA copy.

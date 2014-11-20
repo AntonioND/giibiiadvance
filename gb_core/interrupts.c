@@ -212,6 +212,8 @@ static void GB_TimerIncreaseTIMA(void)
 
 void GB_TimersWriteDIV(int reference_clocks, int value)
 {
+    GB_CPUBreakLoop();
+
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
     GB_TimersUpdateClocksClounterReference(reference_clocks);
@@ -230,6 +232,8 @@ void GB_TimersWriteDIV(int reference_clocks, int value)
 
 void GB_TimersWriteTIMA(int reference_clocks, int value)
 {
+    GB_CPUBreakLoop();
+
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
     GB_TimersUpdateClocksClounterReference(reference_clocks);
@@ -240,14 +244,20 @@ void GB_TimersWriteTIMA(int reference_clocks, int value)
         {
             //If TIMA is written the same clock as incrementing itself prevent the timer IF flag from being set
             GameBoy.Emulator.timer_irq_delay_active = 0;
+            //Also prevent TIMA being loaded from TMA
+            GameBoy.Emulator.timer_reload_delay_active = 0;
         }
     }
 
-    mem->IO_Ports[TIMA_REG-0xFF00] = value;
+    //the same clock it is reloaded from TMA, it has higher priority than writing to it
+    if(GameBoy.Emulator.tima_just_reloaded == 0)
+        mem->IO_Ports[TIMA_REG-0xFF00] = value;
 }
 
 void GB_TimersWriteTMA(int reference_clocks, int value)
 {
+    GB_CPUBreakLoop();
+
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
     GB_TimersUpdateClocksClounterReference(reference_clocks); // First, update as normal
@@ -267,6 +277,8 @@ void GB_TimersWriteTMA(int reference_clocks, int value)
 
 void GB_TimersWriteTAC(int reference_clocks, int value)
 {
+    GB_CPUBreakLoop();
+
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
     GB_TimersUpdateClocksClounterReference(reference_clocks);

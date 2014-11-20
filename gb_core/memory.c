@@ -277,22 +277,18 @@ void GB_MemWriteReg8(u32 address, u32 value)
 
         case TIMA_REG:
             GB_TimersWriteTIMA(GB_CPUClockCounterGet(),value);
-            GB_CPUBreakLoop();
             return;
 
         case TMA_REG:
             GB_TimersWriteTMA(GB_CPUClockCounterGet(),value);
-            GB_CPUBreakLoop();
             return;
 
         case TAC_REG:
             GB_TimersWriteTAC(GB_CPUClockCounterGet(),value);
-            GB_CPUBreakLoop();
             return;
 
         case DIV_REG:
             GB_TimersWriteDIV(GB_CPUClockCounterGet(),value);
-            GB_CPUBreakLoop();
             return;
 
         case LYC_REG:

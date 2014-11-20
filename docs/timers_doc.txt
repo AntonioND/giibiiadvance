@@ -23,8 +23,7 @@ Shares the internal counter with DIV register. If DIV register is written, DIV i
 
 That doesn't happen the other way. When writing to TAC to enable the timer the only thing that happens is that the register TIMA is allowed to increase, but it doesn't change the internal counter that increases TIMA.
 
-- For example, if timer is configured to overflow every 256 clocks. If DIV is written when
-    system_clocks & (256>>1) then the TIMA counter will increase once.
+- There's a glitch with DIV register. For example, if timer is configured to overflow every 256 clocks. If DIV is written when ( ( system_clocks & (256>>1) ) != 0 ) then the TIMA counter will increase once.
 
 - Timer/DIV counter keeps increasing even if the timer is disabled. TIMA can increase just when the timer is enabled or it can need all the specified clocks by TAC, there is no way to know it without reseting DIV a few instructions before.
 

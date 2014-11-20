@@ -6,12 +6,13 @@ _todo/
 bios/
 _roms/
 screenshots/
-*.gb
-*.gbc
-*.gba
+./*.gb
+./*.gbc
+./tools/*.gba
+./*.gba
 ./*.sav
 ./*.rtc
-*.bin
+./*.bin
 log.txt
 *.depend
 *.layout

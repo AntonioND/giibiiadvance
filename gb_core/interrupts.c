@@ -101,8 +101,11 @@ void GB_CPUInterruptsInit(void)
                 GameBoy.Emulator.sys_clocks = 0; // TODO: Unknown. Can't test.
                 break;
 
-            case HW_GBC:
-            case HW_GBA: // Same value for GBC in GB mode. The boot ROM starts the same way.
+            case HW_GBC: // Same value for GBC in GB mode. The boot ROM starts the same way!
+                GameBoy.Emulator.sys_clocks = 0; // TODO: Can't verify until PPU is emulated correctly
+                break;
+
+            case HW_GBA: // Same value for GBC in GB mode. The boot ROM starts the same way!
                 GameBoy.Emulator.sys_clocks = 0; // TODO: Can't verify until PPU is emulated correctly
                 break;
 
@@ -127,8 +130,12 @@ void GB_CPUInterruptsInit(void)
                 break;
 
             case HW_GBC:
+                GameBoy.Emulator.sys_clocks = 0x21E0; // Verified on hardware
+				//TODO: GBC in GB mode? Use value corresponding to a boot without any user interaction.
+                break;
+
             case HW_GBA:
-                GameBoy.Emulator.sys_clocks = 0x2200; // TODO: Not verified yet
+                GameBoy.Emulator.sys_clocks = 0x21E4; // Verified on hardware (GBA SP) TODO: different in GBA?
 				//TODO: GBC in GB mode? Use value corresponding to a boot without any user interaction.
                 break;
 
@@ -168,7 +175,7 @@ void GB_CPUInterruptsEnd(void)
 inline void GB_SetInterrupt(int flag)
 {
     GameBoy.Memory.IO_Ports[IF_REG-0xFF00] |= flag;
-    GameBoy.Emulator.CPUHalt = 0;
+    GameBoy.Emulator.CPUHalt = 0; // Clear halt regardless of IME
     GB_CPUBreakLoop();
 }
 
@@ -244,7 +251,7 @@ void GB_TimersWriteTIMA(int reference_clocks, int value)
         {
             //If TIMA is written the same clock as incrementing itself prevent the timer IF flag from being set
             GameBoy.Emulator.timer_irq_delay_active = 0;
-            //Also prevent TIMA being loaded from TMA
+            //Also, prevent TIMA being loaded from TMA
             GameBoy.Emulator.timer_reload_delay_active = 0;
         }
     }
@@ -283,24 +290,57 @@ void GB_TimersWriteTAC(int reference_clocks, int value)
 
     GB_TimersUpdateClocksClounterReference(reference_clocks);
 
-    if(GameBoy.Emulator.timer_enabled)
+    //Okay, so this register works differently in each hardware... Try to emulate each one.
+
+    if( (GameBoy.Emulator.HardwareType == HW_GB) || (GameBoy.Emulator.HardwareType == HW_GBP) )
     {
-        if( (value & 7) != (mem->IO_Ports[TAC_REG-0xFF00] & 7) )
-        {
-            if(GameBoy.Emulator.sys_clocks & ((GameBoy.Emulator.timer_overflow_mask+1)>>1))
+        if(GameBoy.Emulator.timer_enabled)
+        {/*
+            //Weird things happen only when timer is enabled before
+            if( (value & 3) != (mem->IO_Ports[TAC_REG-0xFF00] & 3) )
             {
-                GB_TimerIncreaseTIMA();
+                if(value & BIT(2))
+                {
+                    if(GameBoy.Emulator.sys_clocks & GameBoy.Emulator.timer_overflow_mask)
+                    {
+                        mem->IO_Ports[TIMA_REG-0xFF00] = 0x50;
+                    //    GB_TimerIncreaseTIMA();
+                    }
+                }
+            }*/
+        }
+    }
+    else if(GameBoy.Emulator.HardwareType == HW_GBC)
+    {
+
+    }
+    else if(GameBoy.Emulator.HardwareType == HW_GBA)
+    {
+
+    }
+    //Can't test SGB or SGB2!
+
+/*
+    if(GameBoy.Emulator.timer_enabled == 0)
+    {
+        if( (value & 3) != (mem->IO_Ports[TAC_REG-0xFF00] & 3) )
+        {
+            if(value & BIT(2))
+            {
+                if(GameBoy.Emulator.sys_clocks & ((GameBoy.Emulator.timer_overflow_mask+1)>>1))
+                {
+                    GB_TimerIncreaseTIMA();
+                }
             }
         }
     }
-
+*/
     if(value & BIT(2))
     {
         GameBoy.Emulator.timer_enabled = 1;
     }
     else
     {
-        //GameBoy.Emulator.timer_irq_delay_active = 0;
         GameBoy.Emulator.timer_enabled = 0;
     }
 
@@ -409,14 +449,12 @@ int GB_TimersGetClocksToNextEvent(void)
 {
     int clocks_to_next_event = 256 - (GameBoy.Emulator.sys_clocks&0xFF); // DIV
 
-    //if(GameBoy.Emulator.timer_enabled) //TODO : this goes here ??
+    if(GameBoy.Emulator.timer_irq_delay_active) // Seems that TAC can't disable the IRQ once it is prepared
     {
-        if(GameBoy.Emulator.timer_irq_delay_active)
-        {
-            if(GameBoy.Emulator.timer_irq_delay_active < clocks_to_next_event)
-                clocks_to_next_event = GameBoy.Emulator.timer_irq_delay_active;
-        }
+        if(GameBoy.Emulator.timer_irq_delay_active < clocks_to_next_event)
+            clocks_to_next_event = GameBoy.Emulator.timer_irq_delay_active;
     }
+
     if(GameBoy.Emulator.timer_enabled)
     {
         int timer_counter = GameBoy.Emulator.sys_clocks&GameBoy.Emulator.timer_overflow_mask;

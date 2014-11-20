@@ -16,7 +16,7 @@ rHDMA5 is (R/W)
 
 - When a GDMA/HDMA transfer is finished/stopped, triggering another one without setting source/destination will use as source/destination the continuation of last copy.
 
-- If a HDMA transfer is inited when the screen is off, when it is turned on it will start.
+- If a HDMA transfer is inited when the screen is off, one block is copied. The transfer is continued after switching the screen on.
 
 - HDMA will only copy 1 block when the screen is off. It will continue after the screen is turned on. When triggering the copy the CPU will wait the setup time and one copy time together.
 
@@ -31,17 +31,16 @@ Timing for GDMA:
 
     blocks = (register_value & 0x7F) + 1
 
-    Double Speed -> ( 20 + blocks*64 ) clocks (Verify?)
-    Single Speed -> ( 20 + blocks*32 ) clocks (Verify?)
+    Double Speed -> ( 4 + blocks*64 ) clocks
+    Single Speed -> ( 4 + blocks*32 ) clocks
 
 Timing for HDMA:
 
     blocks = (register_value & 0x7F) + 1
 
-    Setup timing (when writing to rHDMA5):
-        16 clocks (double and single speed)
+    No setup timing (when writing to rHDMA5).
 
     Copy time (per HBL):
-        Double Speed -> ( 4 + 64 ) clocks (Verify?)
-        Single Speed -> ( 4 + 32 ) clocks (Verify?)
+        Double Speed -> ( 4 + 64 ) clocks
+        Single Speed -> ( 4 + 32 ) clocks
 

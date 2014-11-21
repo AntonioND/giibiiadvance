@@ -85,7 +85,8 @@ static _gui_element mainwindow_configwin_gameboy_hard_type_auto_radbtn,
                     mainwindow_configwin_gameboy_hard_type_sgb_radbtn,
                     mainwindow_configwin_gameboy_hard_type_sgb2_radbtn,
                     mainwindow_configwin_gameboy_hard_type_gbc_radbtn,
-                    mainwindow_configwin_gameboy_hard_type_gba_radbtn;
+                    mainwindow_configwin_gameboy_hard_type_gba_radbtn,
+                    mainwindow_configwin_gameboy_hard_type_gba_sp_radbtn;
 static _gui_element mainwindow_configwin_gameboy_serial_device_label;
 static _gui_element mainwindow_configwin_gameboy_serial_device_none_radbtn,
                     mainwindow_configwin_gameboy_serial_device_gbprinter_radbtn,
@@ -134,7 +135,7 @@ static _gui_element * mainwindow_configwin_gui_elements[] = {
     &mainwindow_configwin_gameboy_hard_type_auto_radbtn, &mainwindow_configwin_gameboy_hard_type_gb_radbtn,
     &mainwindow_configwin_gameboy_hard_type_gbp_radbtn, &mainwindow_configwin_gameboy_hard_type_sgb_radbtn,
     &mainwindow_configwin_gameboy_hard_type_sgb2_radbtn, &mainwindow_configwin_gameboy_hard_type_gbc_radbtn,
-    &mainwindow_configwin_gameboy_hard_type_gba_radbtn,
+    &mainwindow_configwin_gameboy_hard_type_gba_radbtn, &mainwindow_configwin_gameboy_hard_type_gba_sp_radbtn,
     &mainwindow_configwin_gameboy_serial_device_label, &mainwindow_configwin_gameboy_serial_device_none_radbtn,
     &mainwindow_configwin_gameboy_serial_device_gbprinter_radbtn, &mainwindow_configwin_gameboy_serial_device_gameboy_radbtn,
     &mainwindow_configwin_gameboy_enableblur_checkbox,
@@ -386,20 +387,22 @@ void Win_MainCreateConfigWindow(void)
     GUI_SetGroupBox(&mainwindow_configwin_gameboy_groupbox,6,195,222,183,"Game Boy");
 
     GUI_SetLabel(&mainwindow_configwin_gameboy_hard_type_label,12,213,-1,FONT_HEIGHT,"Hardware type:");
-    GUI_SetRadioButton(&mainwindow_configwin_gameboy_hard_type_auto_radbtn, 12+15*FONT_WIDTH+18,210, 5*FONT_WIDTH,18,
+    GUI_SetRadioButton(&mainwindow_configwin_gameboy_hard_type_auto_radbtn,   12+15*FONT_WIDTH+18, 210,5*FONT_WIDTH,18,
                   "Auto", 3, -1, EmulatorConfig.hardware_type==-1,_win_main_config_hardware_type_radbtn_callback);
-    GUI_SetRadioButton(&mainwindow_configwin_gameboy_hard_type_gb_radbtn,   12+20*FONT_WIDTH+24,210,5*FONT_WIDTH,18,
+    GUI_SetRadioButton(&mainwindow_configwin_gameboy_hard_type_gb_radbtn,     12+20*FONT_WIDTH+24, 210,4*FONT_WIDTH,18,
                   "DMG",   3,  0, EmulatorConfig.hardware_type==0,_win_main_config_hardware_type_radbtn_callback);
-    GUI_SetRadioButton(&mainwindow_configwin_gameboy_hard_type_gbp_radbtn,  12,231,5*FONT_WIDTH,18,
+    GUI_SetRadioButton(&mainwindow_configwin_gameboy_hard_type_gbp_radbtn,    12,                  231,4*FONT_WIDTH,18,
                   "MGB",  3,  1, EmulatorConfig.hardware_type==1,_win_main_config_hardware_type_radbtn_callback);
-    GUI_SetRadioButton(&mainwindow_configwin_gameboy_hard_type_sgb_radbtn,  12+5*FONT_WIDTH+6,231,5*FONT_WIDTH,18,
+    GUI_SetRadioButton(&mainwindow_configwin_gameboy_hard_type_sgb_radbtn,    12+4*FONT_WIDTH+6,   231,4*FONT_WIDTH,18,
                   "SGB",  3,  2, EmulatorConfig.hardware_type==2,_win_main_config_hardware_type_radbtn_callback);
-    GUI_SetRadioButton(&mainwindow_configwin_gameboy_hard_type_sgb2_radbtn, 12+10*FONT_WIDTH+12,231,5*FONT_WIDTH,18,
-                  "SGB2", 3,  3, EmulatorConfig.hardware_type==3,_win_main_config_hardware_type_radbtn_callback);
-    GUI_SetRadioButton(&mainwindow_configwin_gameboy_hard_type_gbc_radbtn,  12+15*FONT_WIDTH+18,231, 5*FONT_WIDTH,18,
+    GUI_SetRadioButton(&mainwindow_configwin_gameboy_hard_type_sgb2_radbtn,   12+8*FONT_WIDTH+12,  231,4*FONT_WIDTH,18,
+                  "SG2", 3,  3, EmulatorConfig.hardware_type==3,_win_main_config_hardware_type_radbtn_callback);
+    GUI_SetRadioButton(&mainwindow_configwin_gameboy_hard_type_gbc_radbtn,    12+12*FONT_WIDTH+18, 231,4*FONT_WIDTH,18,
                   "CGB",  3,  4, EmulatorConfig.hardware_type==4,_win_main_config_hardware_type_radbtn_callback);
-    GUI_SetRadioButton(&mainwindow_configwin_gameboy_hard_type_gba_radbtn,  12+20*FONT_WIDTH+24,231,5*FONT_WIDTH,18,
+    GUI_SetRadioButton(&mainwindow_configwin_gameboy_hard_type_gba_radbtn,    12+16*FONT_WIDTH+24, 231,4*FONT_WIDTH,18,
                   "AGB",  3,  5, EmulatorConfig.hardware_type==5,_win_main_config_hardware_type_radbtn_callback);
+    GUI_SetRadioButton(&mainwindow_configwin_gameboy_hard_type_gba_sp_radbtn, 12+20*FONT_WIDTH+30, 231,4*FONT_WIDTH,18,
+                  "AGS",  3,  6, EmulatorConfig.hardware_type==6,_win_main_config_hardware_type_radbtn_callback);
 
     GUI_SetLabel(&mainwindow_configwin_gameboy_serial_device_label,12,260,-1,FONT_HEIGHT,"Serial device:");
     GUI_SetRadioButton(&mainwindow_configwin_gameboy_serial_device_none_radbtn,

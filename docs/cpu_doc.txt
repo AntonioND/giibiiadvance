@@ -1,0 +1,3 @@
+Undefined opcodes hang the CPU, but sound (even fade in/out and that kind of things) and video hardware keep working.
+
+TODO: Test if serial keeps working too, but 2 GB are needed for that.

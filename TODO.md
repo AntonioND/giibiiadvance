@@ -29,7 +29,7 @@ Game Boy
 - Initial memory values. Test with and without boot ROM.
 - PPU state after powering on the screen. Is Any register reseted?
 - When LCD is off, are LYC=0 or ScreenMode=0 IRQs triggered?
-- Recalculate GDMA/HDMA timings.
+- Has DI any delay? Test with timers.
 
 Game Boy Advance
 ----------------

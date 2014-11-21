@@ -105,7 +105,8 @@ void GB_CPUInterruptsInit(void)
                 GameBoy.Emulator.sys_clocks = 0; // TODO: Can't verify until PPU is emulated correctly
                 break;
 
-            case HW_GBA: // Same value for GBC in GB mode. The boot ROM starts the same way!
+            case HW_GBA:
+            case HW_GBA_SP: // Same value for GBC in GB mode. The boot ROM starts the same way!
                 GameBoy.Emulator.sys_clocks = 0; // TODO: Can't verify until PPU is emulated correctly
                 break;
 
@@ -135,7 +136,8 @@ void GB_CPUInterruptsInit(void)
                 break;
 
             case HW_GBA:
-                GameBoy.Emulator.sys_clocks = 0x21E4; // Verified on hardware (GBA SP) TODO: different in GBA?
+            case HW_GBA_SP:
+                GameBoy.Emulator.sys_clocks = 0x21E4; // Verified on hardware
 				//TODO: GBC in GB mode? Use value corresponding to a boot without any user interaction.
                 break;
 
@@ -175,7 +177,8 @@ void GB_CPUInterruptsEnd(void)
 inline void GB_SetInterrupt(int flag)
 {
     GameBoy.Memory.IO_Ports[IF_REG-0xFF00] |= flag;
-    GameBoy.Emulator.CPUHalt = 0; // Clear halt regardless of IME
+    if(GameBoy.Memory.HighRAM[IE_REG-0xFF80] & flag)
+       GameBoy.Emulator.CPUHalt = 0; // Clear halt regardless of IME
     GB_CPUBreakLoop();
 }
 
@@ -318,23 +321,12 @@ void GB_TimersWriteTAC(int reference_clocks, int value)
     {
 
     }
+    else if(GameBoy.Emulator.HardwareType == HW_GBA_SP)
+    {
+
+    }
     //Can't test SGB or SGB2!
 
-/*
-    if(GameBoy.Emulator.timer_enabled == 0)
-    {
-        if( (value & 3) != (mem->IO_Ports[TAC_REG-0xFF00] & 3) )
-        {
-            if(value & BIT(2))
-            {
-                if(GameBoy.Emulator.sys_clocks & ((GameBoy.Emulator.timer_overflow_mask+1)>>1))
-                {
-                    GB_TimerIncreaseTIMA();
-                }
-            }
-        }
-    }
-*/
     if(value & BIT(2))
     {
         GameBoy.Emulator.timer_enabled = 1;
@@ -489,7 +481,8 @@ void GB_CheckJoypadInterrupt(void)
 
     if(result)
     {
-        if( ! ( (GameBoy.Emulator.HardwareType == HW_GBC) || (GameBoy.Emulator.HardwareType == HW_GBA) ) )
+        if( ! ( (GameBoy.Emulator.HardwareType == HW_GBC) || (GameBoy.Emulator.HardwareType == HW_GBA) ||
+                (GameBoy.Emulator.HardwareType == HW_GBA_SP)) )
             GB_SetInterrupt(I_JOYPAD); //No joypad interrupt in GBA/GBC? TODO: TEST
 
         if(GameBoy.Emulator.CPUHalt == 2) // Exit stop mode in any hardware

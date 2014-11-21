@@ -94,7 +94,8 @@ void GB_PPUInit(void)
                 break;
             }
             case HW_GBC:
-            case HW_GBA: // Not verified yet
+            case HW_GBA:
+            case HW_GBA_SP: // Not verified yet
             {
                 GameBoy.Emulator.LCD_clocks = 0;
                 GameBoy.Emulator.ScreenMode = 1;
@@ -150,7 +151,8 @@ void GB_PPUInit(void)
                 break;
             }
             case HW_GBC:
-            case HW_GBA: // Not verified yet
+            case HW_GBA:
+            case HW_GBA_SP: // Not verified yet
             {
                 GameBoy.Emulator.LCD_clocks = 0;
                 GameBoy.Emulator.ScreenMode = 1;

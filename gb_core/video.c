@@ -1359,7 +1359,7 @@ void GB_Screen_WriteBuffer_24RGB(char * buffer)
         draw_fn = &gb_scr_writebuffer_sgb;
         //gb_scr_writebuffer_sgb(buffer);
     }
-    else if(GameBoy.Emulator.HardwareType == HW_GBA)
+    else if( (GameBoy.Emulator.HardwareType == HW_GBA) || (GameBoy.Emulator.HardwareType == HW_GBA_SP) )
     {
         if(gb_blur) draw_fn = &gb_scr_writebuffer_dmg_cgb_blur; //gb_scr_writebuffer_dmg_cgb_blur(buffer);
         else draw_fn = &gb_scr_writebuffer_dmg_cgb; //gb_scr_writebuffer_dmg_cgb(buffer);

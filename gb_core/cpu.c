@@ -197,6 +197,7 @@ void GB_CPUInit(void)
                 GameBoy.CPU.R8.A = 0xFF; // SGB2 or Pocket Gameboy
                 break;
             case HW_GBA:
+            case HW_GBA_SP:
                 GameBoy.CPU.R8.B |= 0x01; // GBA
                 //NO BREAK
             case HW_GBC:
@@ -1021,7 +1022,8 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 }
                 else
                 {
-                    if( ! ( (GameBoy.Emulator.HardwareType == HW_GBC) || (GameBoy.Emulator.HardwareType == HW_GBA) ) )
+                    if( ! ( (GameBoy.Emulator.HardwareType == HW_GBC) || (GameBoy.Emulator.HardwareType == HW_GBA) ||
+                            (GameBoy.Emulator.HardwareType == HW_GBA_SP)) )
                     //if(GameBoy.Emulator.CGBEnabled == 0)
                     {
                         if(mem->IO_Ports[IF_REG-0xFF00] & mem->HighRAM[IE_REG-0xFF80] & 0x1F)

@@ -342,8 +342,9 @@ void GB_SoundInit(void)
             mem->IO_Ports[0x3F] = 0xFF;
             break;
 
-        case HW_GBA:
         case HW_GBC:
+        case HW_GBA:
+        case HW_GBA_SP:
             mem->IO_Ports[0x30] = 0x00;
             mem->IO_Ports[0x31] = 0xFF;
             mem->IO_Ports[0x32] = 0x00;

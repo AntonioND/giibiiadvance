@@ -223,7 +223,8 @@ void GB_MemWriteReg8(u32 address, u32 value)
 
             GB_CheckStatSignal();
 
-            if( (GameBoy.Emulator.HardwareType == HW_GBC) || (GameBoy.Emulator.HardwareType == HW_GBA) )
+            if( (GameBoy.Emulator.HardwareType == HW_GBC) || (GameBoy.Emulator.HardwareType == HW_GBA) ||
+                (GameBoy.Emulator.HardwareType == HW_GBA_SP))
                 return; // the next bug doesn't exist in GBC/GBA
 
             if(GameBoy.Emulator.lcd_on && ((GameBoy.Emulator.ScreenMode == 0) || (GameBoy.Emulator.ScreenMode == 1)))
@@ -348,18 +349,16 @@ void GB_MemWriteReg8(u32 address, u32 value)
             if(value & 0x80)
             {
                 GameBoy.Emulator.serial_enabled = 1;
-                GameBoy.Emulator.serial_clocks = 0;
-
-                u32 clocks = 512 * 8; // clocks per bit * number of bits;
 
                 if(GameBoy.Emulator.CGBEnabled == 1)
                 {
-                    if(value & 0x02) clocks /= 32;
-                    clocks >>= GameBoy.Emulator.DoubleSpeed;
+                    if(value & 0x02) GameBoy.Emulator.serial_total_clocks = 16 * 8; // clocks per bit * number of bits;
+                    else GameBoy.Emulator.serial_total_clocks = 512 * 8; // clocks per bit * number of bits;
                 }
-
-                GameBoy.Emulator.serial_total_clocks = clocks;
-
+                else
+                {
+                    GameBoy.Emulator.serial_total_clocks = 512 * 8; // clocks per bit * number of bits;
+                }
                 // (*) see serial.c
                 //GameBoy.Emulator.SerialSend_Fn(mem->IO_Ports[SB_REG-0xFF00]);
             }

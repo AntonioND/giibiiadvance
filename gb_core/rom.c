@@ -221,6 +221,9 @@ int GB_CartridgeLoad(const u8 * pointer, const u32 rom_size)
         case HW_GBA:
             ConsolePrint("Loading in GBA mode...\n");
             break;
+        case HW_GBA_SP:
+            ConsolePrint("Loading in GBA SP mode...\n");
+            break;
         case HW_SGB:
             ConsolePrint("Loading in SGB mode...\n");
             break;
@@ -256,7 +259,7 @@ int GB_CartridgeLoad(const u8 * pointer, const u32 rom_size)
         GameBoy.Emulator.SGBEnabled = 0;
         GameBoy.Emulator.DrawScanlineFn = &GBC_ScreenDrawScanline;
     }
-    else if(GameBoy.Emulator.HardwareType == HW_GBA)
+    else if( (GameBoy.Emulator.HardwareType == HW_GBA) || (GameBoy.Emulator.HardwareType == HW_GBA_SP) )
     {
         //Video_EnableBlur(false);
         GameBoy.Emulator.CGBEnabled = 1;
@@ -279,6 +282,7 @@ int GB_CartridgeLoad(const u8 * pointer, const u32 rom_size)
             case HW_SGB2: boot_rom_filename = SGB2_ROM_FILENAME; break;
             case HW_GBC: boot_rom_filename = CGB_ROM_FILENAME; break;
             case HW_GBA: boot_rom_filename = AGB_ROM_FILENAME; break;
+            case HW_GBA_SP: boot_rom_filename = AGB_ROM_FILENAME; break;
         }
         if(boot_rom_filename != NULL)
         {
@@ -597,7 +601,8 @@ int GB_CartridgeLoad(const u8 * pointer, const u32 rom_size)
         memset_rand(mem->WorkRAM_Switch[0], 4 * 1024);
     }
 
-    if( (GameBoy.Emulator.HardwareType == HW_GBC) || (GameBoy.Emulator.HardwareType == HW_GBA) )
+    if( (GameBoy.Emulator.HardwareType == HW_GBC) || (GameBoy.Emulator.HardwareType == HW_GBA) ||
+        (GameBoy.Emulator.HardwareType == HW_GBA_SP) )
         memset(mem->ObjAttrMem,0,0xA0);
     else
         memset_rand(mem->ObjAttrMem,0xA0);

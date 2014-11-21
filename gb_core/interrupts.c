@@ -298,24 +298,38 @@ void GB_TimersWriteTAC(int reference_clocks, int value)
     if( (GameBoy.Emulator.HardwareType == HW_GB) || (GameBoy.Emulator.HardwareType == HW_GBP) )
     {
         if(GameBoy.Emulator.timer_enabled)
-        {/*
-            //Weird things happen only when timer is enabled before
-            if( (value & 3) != (mem->IO_Ports[TAC_REG-0xFF00] & 3) )
-            {
-                if(value & BIT(2))
-                {
-                    if(GameBoy.Emulator.sys_clocks & GameBoy.Emulator.timer_overflow_mask)
-                    {
-                        mem->IO_Ports[TIMA_REG-0xFF00] = 0x50;
-                    //    GB_TimerIncreaseTIMA();
-                    }
-                }
-            }*/
+        {
+            //Weird things happen to GB/GBP only when timer is enabled before
+
         }
     }
     else if(GameBoy.Emulator.HardwareType == HW_GBC)
     {
+        if(GameBoy.Emulator.timer_enabled == 0)
+        {
+            if( (mem->IO_Ports[TAC_REG-0xFF00] & 7) == 2)
+            {
+                if( (value & 7) == 7)
+                {
+                    if(mem->IO_Ports[TIMA_REG-0xFF00]&1)
+                    {
+                        //Sys 1x1x00
+                        if( (GameBoy.Emulator.sys_clocks & 0x2B) == 0x28)
+                            GB_TimerIncreaseTIMA();
+                    }
+                    else
+                    {
+                        //Sys 1xxx00
+                        if( (GameBoy.Emulator.sys_clocks & 0x23) == 0x20)
+                            GB_TimerIncreaseTIMA();
+                    }
+                }
+            }
+        }
+        else
+        {
 
+        }
     }
     else if(GameBoy.Emulator.HardwareType == HW_GBA)
     {
@@ -325,7 +339,7 @@ void GB_TimersWriteTAC(int reference_clocks, int value)
     {
 
     }
-    //Can't test SGB or SGB2!
+    //TODO: I can't test SGB or SGB2!
 
     if(value & BIT(2))
     {

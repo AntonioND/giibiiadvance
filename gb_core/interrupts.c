@@ -177,7 +177,7 @@ void GB_CPUInterruptsEnd(void)
 inline void GB_SetInterrupt(int flag)
 {
     GameBoy.Memory.IO_Ports[IF_REG-0xFF00] |= flag;
-    if(GameBoy.Memory.HighRAM[IE_REG-0xFF80] & flag)
+    //if(GameBoy.Memory.HighRAM[IE_REG-0xFF80] & flag)
        GameBoy.Emulator.CPUHalt = 0; // Clear halt regardless of IME
     GB_CPUBreakLoop();
 }
@@ -307,7 +307,7 @@ void GB_TimersWriteTAC(int reference_clocks, int value)
     {
         if(GameBoy.Emulator.timer_enabled == 0)
         {
-            if( (mem->IO_Ports[TAC_REG-0xFF00] & 7) == 2)
+            if( (mem->IO_Ports[TAC_REG-0xFF00] & 7) == 2) // The same as: ( (x & 3) == 2 )
             {
                 if( (value & 7) == 7)
                 {

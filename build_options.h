@@ -37,7 +37,7 @@
 #define GIIBIIADVANCE_VERSION ((GIIBIIADVANCE_VERSION_MAJOR<<16) | (GIIBIIADVANCE_VERSION_MINOR<<8) | \
                              (GIIBIIADVANCE_VERSION_PATCH))
 
-#define GIIBIIADVANCE_VERSION_STRING "0.2.0"
+#define GIIBIIADVANCE_VERSION_STRING "0.2.X"
 
 #define GIIBIIADVANCE_COPYRIGHT_STRING "Copyright (C) 2011-2014 Antonio Niño Díaz (AntonioND)"
 #define GIIBIIADVANCE_COPYRIGHT_STRING_ASCII "Copyright (C) 2011-2014 Antonio Ni" STR_NTILDE_MINUS "o D" \
@@ -66,6 +66,7 @@
 #define SGB2_ROM_FILENAME "sgb2_rom.bin"
 #define CGB_ROM_FILENAME "cgb_rom.bin"
 #define AGB_ROM_FILENAME "agb_rom.bin"
+#define AGS_ROM_FILENAME "ags_rom.bin"
 
 //-------------------------------------------------
 //----------- GAMEBOY ADVANCE EMULATION -----------

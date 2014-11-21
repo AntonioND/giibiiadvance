@@ -82,7 +82,7 @@ char * oglfiltertype[] = { "nearest", "linear" };
 // "true" - "false"
 
 #define CFG_HW_TYPE "hardware_type"
-char * hwtype[] = { "Auto", "DMG", "MGB", "SGB", "SGB2", "CGB", "AGB" };
+char * hwtype[] = { "Auto", "DMG", "MGB", "SGB", "SG2", "CGB", "AGB", "AGS" };
 
 #define CFG_SERIAL_DEVICE "serial_device"
 char * serialdevice[] = { "None", "GBPrinter" }; //, "Gameboy" };

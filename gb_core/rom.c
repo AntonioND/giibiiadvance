@@ -282,7 +282,8 @@ int GB_CartridgeLoad(const u8 * pointer, const u32 rom_size)
             case HW_SGB2: boot_rom_filename = SGB2_ROM_FILENAME; break;
             case HW_GBC: boot_rom_filename = CGB_ROM_FILENAME; break;
             case HW_GBA: boot_rom_filename = AGB_ROM_FILENAME; break;
-            case HW_GBA_SP: boot_rom_filename = AGB_ROM_FILENAME; break;
+            case HW_GBA_SP: boot_rom_filename = AGS_ROM_FILENAME; break;
+            default: break;
         }
         if(boot_rom_filename != NULL)
         {

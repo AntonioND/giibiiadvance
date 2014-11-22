@@ -1,0 +1,181 @@
+                DMG
+                ---
+
+OLD_TAC, NEW_TAC
+
+NOTE: OLD_TAC.clocks = clocks to increment TIMA
+
+if OLD_TAC disabled
+   GLITCH = 0
+else
+  if NEW_TAC disabled
+      GLITCH = (SYS & OLD_TAC.clocks/2) != 0
+   else
+      GLITCH = (SYS & OLD_TAC.clocks/2) != 0 && (SYS & NEW_TAC.clocks/2) == 0
+   end if
+end if
+
+TAC 0/1/2/3 -> 0/.../7 (D1024/D16/D64/D256 -> ...)
+----------------------
+
+ ... OK
+
+TAC 4 -> 0/1/2/3 (E1024 -> D1024/D16/D64/D256)
+----------------
+
+ ... OK
+ 508 OK
+ 512 GLITCH   -> (SYS & 512) != 0
+ ... GLITCH
+1020 GLITCH
+   0 OK
+ ... OK
+
+TAC 4 -> 4 (E1024 -> E1024)
+----------
+
+ ... OK  -> (SYS & 1024) != 0 && (SYS & 1024) == 0  =>  0 ALWAYS
+
+TAC 4 -> 5 (E1024 -> E16)
+----------
+
+ ... OK
+ 508 OK
+ 512 GLITCH 1000000000 -> (SYS & 512) != 0 && (SYS & 8) == 0
+ 516 GLITCH 1000000100
+ 520 OK
+ 524 OK
+ 528 GLITCH 1000010000
+ 532 GLITCH 1000010100
+ 536 OK
+ 540 OK
+ ... ETC
+1008 GLITCH 1111110000
+1012 GLITCH 1111110100
+1016 OK
+1020 OK
+   0 OK
+ ... OK
+
+TAC 4 -> 6 (E1024 -> E64)
+----------
+
+ ... OK
+ 508 OK
+ 512 GLITCH 1000000000 -> (SYS & 512) != 0 && (SYS & 32) == 0
+ 516 GLITCH
+ 520 GLITCH
+ 524 GLITCH
+ 528 GLITCH 10000xxxxx
+ 532 GLITCH
+ 536 GLITCH 
+ 540 GLITCH 1000011100
+ 544 OK
+ 548 OK
+ 552 OK
+ 556 OK
+ 560 OK
+ 564 OK
+ 568 OK
+ 572 OK
+ 576 GLITCH 10010xxxxx
+ ... ETC
+1008 OK
+1012 OK
+1016 OK
+1020 OK
+ ... OK
+
+TAC 4 -> 7 (E1024 -> E256)
+----------
+
+ ... OK
+ 508 OK
+ 512 GLITCH 1000000000  -> (SYS & 512) != 0 && (SYS & 32) == 0
+ ... (x32)  100xxxxxxx
+ 636 GLITCH 1001111100
+ 640 OK
+ ... (x32)
+ 764 OK
+ 768 GLITCH 1100000000
+ ... (x32)  110xxxxxxx
+ 892 GLITCH 1101111100
+ 896 OK
+     (x32)
+1020 OK
+ ... OK
+
+TAC 5 -> 0/1/2/3  (E16 -> D1024/D16/D64/D256)
+----------------
+
+   0 OK
+   4 OK
+   8 GLITCH -> (SYS & 8) != 0
+  12 GLITCH
+ ... ETC
+
+TAC 5 -> 4  (E16 -> E1024)
+----------
+
+   0 OK   -> (SYS & 8) != 0 && (SYS & 512) == 0
+   4 OK
+   8 GLITCH 0000001000
+  12 GLITCH 0000001100
+ ... ETC
+ 492 GLITCH 0111101100
+ 496 OK
+ 500 OK
+ 504 GLITCH 0111111000
+ 508 GLITCH 0111111100
+ 512 OK     1xxxxxxxxx
+ ... OK
+
+TAC 5 -> 5  (E16 -> E16)
+----------
+
+ ... OK   -> (SYS & 8) != 0 && (SYS & 8) == 0  =>  0 ALWAYS
+
+TAC 5 -> 6  (E16 -> E64)
+----------
+
+   0 OK   -> (SYS & 8) != 0 && (SYS & 32) == 0
+   4 OK
+   8 GLITCH 0000001000
+  12 GLITCH 0000001100
+  16 OK
+  20 OK
+  24 GLITCH 0000011000
+  28 GLITCH 0000011100
+  32 OK
+ ... OK     00001xxxx0
+  68 OK
+  72 GLITCH 0001001000
+ ... ETC
+
+TAC 5 -> 7  (E16 -> E256)
+----------
+
+   0 OK   -> (SYS & 8) != 0 && (SYS & 128) == 0
+   4 OK
+   8 GLITCH
+  12 GLITCH
+  16 OK
+  20 OK
+  24 GLITCH
+  28 GLITCH
+  32 OK
+  36 OK
+  40 GLITCH
+  44 GLITCH
+  48 OK
+ ... (x8 patterns)
+ 124 GLITCH
+ 128 OK
+ ... OK (x32)
+ 252 OK
+ ... REPEAT FROM 0
+
+TAC 6 -> 0
+----------
+
+0x3000h (B000h bank 1)

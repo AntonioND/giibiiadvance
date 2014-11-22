@@ -295,92 +295,70 @@ void GB_TimersWriteTAC(int reference_clocks, int value)
 
     //Okay, so this register works differently in each hardware... Try to emulate each one.
 
-    if( (GameBoy.Emulator.HardwareType == HW_GB) || (GameBoy.Emulator.HardwareType == HW_GBP) )
-    {
-        if(GameBoy.Emulator.timer_enabled)
-        {
-            //Weird things happen to GB/GBP only when timer is enabled before
+    int old_tac = mem->IO_Ports[TAC_REG-0xFF00];
+    int new_tac = value;
 
+    int old_enable = old_tac & BIT(2);
+    int new_enable = new_tac & BIT(2);
+
+    int old_clocks_half = (gb_timer_clock_overflow_mask[old_tac & 3]+1) >> 1;
+    int new_clocks_half = (gb_timer_clock_overflow_mask[new_tac & 3]+1) >> 1;
+
+    int sys_clocks = GameBoy.Emulator.sys_clocks;
+
+    int glitch = 0;
+
+    //TODO: I can't test SGB or SGB2! I suppose they work the same way as DMG
+    if( (GameBoy.Emulator.HardwareType == HW_GB) || (GameBoy.Emulator.HardwareType == HW_GBP) ||
+        (GameBoy.Emulator.HardwareType == HW_SGB) || (GameBoy.Emulator.HardwareType == HW_SGB2) )
+    {
+        if(old_enable == 0)
+        {
+            glitch = 0;
+        }
+        else
+        {
+            if(new_enable == 0)
+            {
+                glitch = sys_clocks & old_clocks_half;
+            }
+            else
+            {
+                glitch = (sys_clocks & old_clocks_half) && ( (sys_clocks & new_clocks_half) == 0 );
+            }
         }
     }
     else if(GameBoy.Emulator.HardwareType == HW_GBC)
-    {/*
-        if(GameBoy.Emulator.timer_enabled == 0)
+    {
+        if(old_enable == 0)
         {
-            if( (mem->IO_Ports[TAC_REG-0xFF00] & 3) == 2)
-            {
-                if( (value & 7) == 7)
-                {
-                    if(mem->IO_Ports[TIMA_REG-0xFF00]&1)
-                    {
-                        //Sys 1x1x00
-                        if( (GameBoy.Emulator.sys_clocks & 0x2B) == 0x28)
-                            GB_TimerIncreaseTIMA();
-                    }
-                    else
-                    {
-                        //Sys 1xxx00
-                        if( (GameBoy.Emulator.sys_clocks & 0x23) == 0x20)
-                            GB_TimerIncreaseTIMA();
-                    }
-                }
-            }
+            glitch = 0;
         }
         else
         {
-
-        }*/
+            if(new_enable == 0)
+            {
+                glitch = sys_clocks & old_clocks_half;
+            }
+            else
+            {
+                glitch = (sys_clocks & old_clocks_half) && ( (sys_clocks & new_clocks_half) == 0 );
+            }
+        }
     }
     else if(GameBoy.Emulator.HardwareType == HW_GBA)
     {
-        /*
-        if(GameBoy.Emulator.timer_enabled == 0)
-        {
-            if( (mem->IO_Ports[TAC_REG-0xFF00] & 3) == 1)
-            {
-                if( ((value & 7) == 4) || ((value & 7) == 6) )
-                {
-                    //Sys xxx1x00
-                    if( (GameBoy.Emulator.sys_clocks & 0xB) == 0x8)
-                        GB_TimerIncreaseTIMA();
-                }
-            }
-            else if( (mem->IO_Ports[TAC_REG-0xFF00] & 3) == 2)
-            {
-                if( ((value & 7) == 4) || ((value & 7) == 7) )
-                {
-                    //Sys xxx1x00
-                    if( (GameBoy.Emulator.sys_clocks & 0x23) == 0x20)
-                        GB_TimerIncreaseTIMA();
-                }
-                else if((value & 7) == 5)
-                {
-                    //Sys xxx1x00
-                    if( (GameBoy.Emulator.sys_clocks & 0x2B) == 0x20)
-                        GB_TimerIncreaseTIMA();
-                }
-            }
-        }
-        else
-        {
-
-        }
-        */
     }
     else if(GameBoy.Emulator.HardwareType == HW_GBA_SP)
     {
+    }
 
-    }
-    //TODO: I can't test SGB or SGB2!
 
-    if(value & BIT(2))
-    {
-        GameBoy.Emulator.timer_enabled = 1;
-    }
-    else
-    {
-        GameBoy.Emulator.timer_enabled = 0;
-    }
+    if(glitch)
+        GB_TimerIncreaseTIMA();
+
+    if(value & BIT(2)) GameBoy.Emulator.timer_enabled = 1;
+    else GameBoy.Emulator.timer_enabled = 0;
 
     GameBoy.Emulator.timer_overflow_mask = gb_timer_clock_overflow_mask[value&3];
 

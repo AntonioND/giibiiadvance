@@ -230,6 +230,7 @@ void GB_TimersWriteDIV(int reference_clocks, int value)
 
     if(GameBoy.Emulator.timer_enabled)
     {
+        //falling edge in timer bit
         if(GameBoy.Emulator.sys_clocks & ((GameBoy.Emulator.timer_overflow_mask+1)>>1))
         {
             GB_TimerIncreaseTIMA();
@@ -332,7 +333,87 @@ void GB_TimersWriteTAC(int reference_clocks, int value)
     {
         if(old_enable == 0)
         {
-            glitch = 0;
+            // This part is different from DMG. A lot glitchier, too...
+            if(new_enable == 0)
+            {
+                glitch = 0;
+            }
+            else
+            {
+#if 0
+                //Hardware simulation?
+                int sysb3 = (sys_clocks & BIT(3)) != 0;
+                int sysb5 = (sys_clocks & BIT(5)) != 0;
+                int sysb7 = (sys_clocks & BIT(7)) != 0;
+                int sysb9 = (sys_clocks & BIT(9)) != 0;
+
+                int step0 = (old_tac&2) ?
+                                ( (old_tac&1) ? (sysb7) : (sysb5) ) :  // 11 10
+                                ( (old_tac&1) ? (sysb3) : (sysb9) );   // 01 00
+
+                int step1 = (new_tac&2) ?
+                                ( (old_tac&1) ? (sysb7) : (sysb5) ) :  // 11 10
+                                ( (old_tac&1) ? (sysb3) : (sysb9) );   // 01 00
+
+                int step2 = (new_tac&2) ?
+                                ( (new_tac&1) ? (sysb7) : (sysb5) ) :  // 11 10
+                                ( (new_tac&1) ? (sysb3) : (sysb9) );   // 01 00
+
+                glitch = (step0 && !step1) ^ (step1 && !step2);
+
+                //Approximate
+                //glitch = (sys_clocks & old_clocks_half) && ( (sys_clocks & new_clocks_half) == 0 );
+#endif // 0
+                //Exact?
+#if 1
+                if(old_clocks_half == new_clocks_half)
+                {
+                    glitch = 0;
+                }
+                else
+                {
+                    int new_tac_bits = new_tac & 7;
+
+                    switch(old_tac & 3)
+                    {
+                        case 0:
+                            if(new_tac_bits == 5)
+                                glitch = (sys_clocks & old_clocks_half) && ( (sys_clocks & new_clocks_half) == 0 );
+                            else if(new_tac_bits == 7)
+                                glitch = (sys_clocks & old_clocks_half) && ( (sys_clocks & new_clocks_half) == 0 ) &&
+                                         (sys_clocks & 32); // ????
+                            else
+                                glitch = 0;
+                            break;
+
+                        case 1:
+                            glitch = 0;
+                            break;
+
+                        case 2:
+                            if(new_tac_bits == 5)
+                                glitch = (sys_clocks & old_clocks_half) && ( (sys_clocks & new_clocks_half) == 0 ) &&
+                                         (sys_clocks & 512); // ????
+                            else if(new_tac_bits == 7)
+                                glitch = (sys_clocks & old_clocks_half) && ( (sys_clocks & new_clocks_half) == 0 );
+                            else
+                                glitch = 0;
+                            break;
+
+                        case 3:
+                            if(new_tac_bits == 6)
+                                glitch = (sys_clocks & old_clocks_half) && ( (sys_clocks & new_clocks_half) == 0 );
+                            else
+                                glitch = 0;
+                            break;
+
+                        default:
+                            glitch = 0;
+                            break;
+                    }
+                }
+#endif // 0
+            }
         }
         else
         {
@@ -352,7 +433,6 @@ void GB_TimersWriteTAC(int reference_clocks, int value)
     else if(GameBoy.Emulator.HardwareType == HW_GBA_SP)
     {
     }
-
 
     if(glitch)
         GB_TimerIncreaseTIMA();

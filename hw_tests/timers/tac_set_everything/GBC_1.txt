@@ -1,0 +1,194 @@
+                GBC
+                ---
+
+OLD_TAC, NEW_TAC
+
+NOTE: OLD_TAC.clocks = clocks to increment TIMA
+
+if OLD_TAC disabled
+   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+else // Same as DMG
+  if NEW_TAC disabled
+      GLITCH = (SYS & OLD_TAC.clocks/2) != 0
+   else
+      GLITCH = (SYS & OLD_TAC.clocks/2) != 0 && (SYS & NEW_TAC.clocks/2) == 0
+   end if
+end if
+
+TAC 0 -> 0/1/2/3 (D1024 -> D1024/D16/D64/D256)
+----------------
+
+ ... OK
+
+TAC 0 -> 4 (D1024 -> E1024)
+----------
+
+ ... OK
+
+TAC 0 -> 5 (D1024 -> E16)
+----------
+
+   0 OK  -> (SYS & 512) != 0 && (SYS & 8) == 0
+ ... OK
+ 508 OK
+ 512 GLITCH
+ 516 GLITCH
+ 520 OK
+ 524 OK
+ 528 GLITCH
+ 532 GLITCH
+ 536 OK
+ 540 OK
+ ... REPEAT
+1020 OK
+
+TAC 0 -> 6 (D1024 -> E64)
+----------
+
+ ... OK
+ 
+TAC 0 -> 7 (D1024 -> E256)
+----------
+
+   0 OK  -> (SYS & 512) != 0 && (SYS & 128) == 0 && (SYS & 32) != 0
+ ... OK
+ 508 OK
+ ... OK
+ 540 OK
+ 544 GLITCH 1000100000
+ ... (x 8)  10001xxx00 -> 10001xxx00
+ 572 GLITCH 1000111100    10011xxx00
+ 576 OK                   11001xxx00    1000000000 512
+ ... (x 8)                11011xxx00 -> 1x0x1xxxxx
+ 604 OK                                   10000000 128
+ 608 GLITCH 1001100000                      100000  32
+ ... (x 8)  10011xxx00
+ 636 GLITCH 1001111100
+ 640 OK
+ ... (x 8)
+ 668 OK
+ ... (x 32)
+ 796 OK
+ 800 GLITCH 1100100000
+ ... (x 8)  11001xxx00
+ 828 GLITCH 1100111100
+ 832 OK
+ ... (x 8)
+ 860 OK
+ 864 GLITCH 1101100000
+ ... (x 8)  11011xxx00
+ 892 GLITCH 1101111100
+ 896 OK
+ ... OK
+1020 OK
+
+*SAV ADDR 0800h
+
+TAC 1 -> 0/.../7 (D16 -> ...)
+----------------
+
+ ... OK
+
+*SAV ADDR 1000h
+
+TAC 2 -> 0/1/2/3 (D64 -> D1024/D16/D64/D256)
+----------------
+
+ ... OK
+
+TAC 2 -> 4 (D64 -> E1024)
+----------
+
+ ... OK
+
+TAC 2 -> 5 (D64 -> E16)
+----------
+
+   0 OK  -> (SYS & 32) != 0 && (SYS & 8) == 0 && (SYS & 512) != 0
+ ... OK
+ 508 OK
+ ... OK
+ 540 OK
+ 544 GLITCH 1000100000 - 1xxxxx0xxx
+ 548 GLITCH 1000100100
+ 552 OK
+ 556 OK
+ 560 GLITCH 1000110000
+ 564 GLITCH 1000110100
+ ... REPEAT
+1020 OK
+
+TAC 2 -> 6 (D64 -> E64)
+----------
+
+ ... OK
+
+TAC 2 -> 7 (D64 -> E256)
+----------
+
+   0 OK  -> (SYS & 32) != 0 && (SYS & 128) == 0
+ ... OK
+  28 OK
+  32 GLITCH 00100000
+ ... GLITCH 001xxxxx -> x0x1xxxxx
+  60 GLITCH 00111100
+  64 OK
+ ... OK
+  92 OK
+  96 GLITCH 01100000
+ ... GLITCH 011xxxxx
+ 124 GLITCH 01111100
+ 128 OK
+ ... OK     10000000
+ 256 OK
+ ... REPEAT FROM 0
+
+*SAV ADDR 1800h
+
+TAC 3 -> 0/1/2/3 (D256 -> D1024/D16/D64/D256)
+----------------
+
+ ... OK
+
+TAC 3 -> 4 (D256 -> E1024)
+----------
+
+ ... OK
+
+TAC 3 -> 5 (D256 -> E16)
+----------
+
+ ... OK
+
+TAC 3 -> 6 (D256 -> E64)
+----------
+
+   0 OK  -> (SYS & 128) != 0 && (SYS & 32) == 0
+ ... OK
+ 124 OK
+ 128 GLITCH 10000000
+ ... (x8)   100xxxxx -> x100xxxxx
+ 156 GLITCH 10011100    x110xxxxx -> x1x0xxxxx
+ 160 OK
+ ... (x8)
+ 188 OK
+ 192 GLITCH 11000000
+ ... (x8)   110xxxxx
+ 220 GLITCH 11011100
+ 224 OK
+ ... (x8)
+ 252 OK
+ 256 OK
+ ... REPEAT FROM 0
+
+TAC 3 -> 7 (D256 -> E256)
+----------
+
+ ... OK
+
+*SAV ADDR 2000h
+
+THE REST
+--------
+
+   Same as DMG.

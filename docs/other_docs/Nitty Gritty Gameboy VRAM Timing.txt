@@ -1,0 +1,482 @@
+                  Nitty Gritty Gameboy Cycle Timing
+                  ---------------------------------
+                  
+                  
+A document about the down and dirty timing of the Gameboy's video hardware.
+
+Written by:  Kevin Horton
+Version: 0.01 (preliminary)
+
+My findings here are based on the original DMG, Super Gameboy, and GB
+Pocket.  All three appear to behave identically during testing, and the
+SGB was used for all the reverse engineering.
+
+An HP54645D mixed signal oscilloscope/logic analyzer was connected to the
+SGB using a 16 wire pod.  A 20 pin ribbon cable with IDC plug on the end
+was soldered to various points on the SGB, and a pin header was inserted
+into the IDC plug so that the pod connectors could be plugged in to 
+monitor the goings-on of the hardware.
+
+---
+
+
+I have discovered some interesting things about how the Gameboy fetches
+VRAM data in general.  First, it will actually stop clocking the LCD and
+stall it if it needs to fetch something and is not ready to send the
+data out quite yet.
+
+Secondly, the window function is a restarting of the data fetching
+state machine, which is used to read the background tiles.  The window
+is triggered N clocks after the start of rendering, where N is determined
+by the value in the xwindow register.
+
+So, without further delay...
+
+Scanline timing
+---------------
+
+During the discussion of scanline timing, I will be ignoring Y timing
+totally, since Y timing is unrelated to VRAM access patterns.  The Y
+timing only affects WHICH KIND of VRAM access occurs, and does not
+affect it in any other way.
+
+There are a couple cases that will be discussed, from simplest to most
+complex.
+
+* * * * *
+
+The first case is what I call the degenerate case: xwindow is set to 0ffh
+which disables the window totally, and then xscroll is adjusted.
+
+There are only 8 different possible cases.
+
+These types of access take from 173.5 to 180.5 cycles.  The reasoning for
+the half cycle will be described later.
+
+The access pattern looks like this:
+
+B01   - (6 cycles) fetch Background nametable byte, then 2 tile planes
+B01s  - (167.5 + (xscroll % 7) cycles) fetch another tile and sprite
+			window.
+
+Where:
+B = reading the background tile # (i.e. out of 1800h from the first
+nametable)
+0,1 = where the tile graphics are fetched.  bitplanes 0 and 1.
+s = sprite window.  the sprite hardware will insert reads here if needed.
+
+Each access to VRAM (B, 0, 1, s) takes 2 cycles to occur.  A "cycle" is
+exactly 1 period of the main input clock to the gameboy CPU chip.  This
+is nominally 4.19MHz approximately.
+
+The last four accesses (B01s) is repeated until the proper number of
+cycles has elapsed.  
+
+In the xscroll = 0 case, it will run for 167.5 cycles.  This has an
+interesting side effect- any tile access that is not complete just
+gets unceremoniously cut off. This means that there will be 20 complete
+tile accesses (B01s) and then 7.5 clocks worth of a 21st access,
+cutting off the last half cycle of the sprite window.
+
+In the xscroll = 2 case, it will run for 169.5 cycles. Similar to above,
+this will result in 21 complete B01s accesses, and then 1.5 cycles of the 
+B fetch on a 22nd access.
+
+This pattern repeats until xscroll = 7 (taking a total of 180.5 cycles)
+until snapping back to 173.5 cycles when xscroll = 8.
+
+The total number of cycles taken is (173.5 + (xscroll % 7)).
+
+Now, you have been wondering what this extra 1/2 cycle business is about.
+Well, it has to do with how the display clock is generated.  The display
+clock is generated via inverting the main input clock.  I suspect it was
+done so that the video hardware can get the data to the LCD ready on the
+falling edge of the main clock.  The display clocks data in on the RISING
+edge of the display clock, thus necessitating the inverted display clock
+relative to the main clock.
+
+That causes the vram access pattern to be extended 1/2 clock on the end
+to accommodate the inverted clock.
+
+* * * * *
+
+So, that takes care of the easy case.  Now for what happens when the
+window is used.
+
+NOTE: When xwindow = 00h or xwindow = 0a6h, different things happen.
+I will explain them later on.  For now, the following information
+holds when ((xwindow > 00h) && (xwindow < 0a6h)).
+
+Interestingly, adding the window does not change a whole lot- in fact,
+it simply restarts the whole fetch sequence over again, no matter where
+it was!  The timing is generated like so:
+
+B01   (6 cycles) fetch background tile nametable+bitplanes
+B01_  (1 to 172 cycles) ((xscroll % 7) + xwindow + 1)
+W01   (6 cycles) fetch window tile nametable+bitplanes
+W01_  (1.5 to 166.5 cycles)  (166.5 - xwindow)
+
+As can be seen, it's very similar to the first case.  Only now,
+the number of B12_ accesses is controlled by the xscroll value
+and the xwindow value.  As before, when the number of cycles has
+elapsed, the access pattern is just cut short, and the W12 (W = window
+nametable entry) access starts.
+
+This window access pattern is identical to the background one, except
+the window nametable is being accessed instead.
+
+Turning on the window incurs a 6 cycle penalty, so the total number of
+cycles taken is (173.5 + 6 + (xscroll % 7)).
+
+* * * * *
+
+OK, now things get slightly strange.  When xwindow = 0, some slightly
+different rules come into effect.
+
+When (xscroll % 7) = 0 to 6, things work a bit different.  Timing 
+looks like this:
+
+B01B (7 cycles) technically the last B is part of the B01s pattern.
+W01  (6 cycles) as above, the start of the window access pattern
+W01s (167.5 to 173.5 cycles) (167.5 + (scroll % 7))
+
+As before, the W01s pattern is repeated for the required number of 
+cycles.  When the count has expired, the access pattern is just cut off.
+
+This takes 180.5 to 186.5 cycles. 
+
+When (xscroll % 7) = 7, then the timing is slightly modified version
+of the above.  The access pattern is identical to when (xscroll % 7) = 6
+except an extra cycle is inserted in the first sprite window, causing
+the total amount to be 187.5 cycles.
+
+* * * * *
+
+When xwindow = 0a6h, then timing is identical to when the window is 
+disabled, i.e. 173.5 to 180.5 cycles.  The difference is the window
+nametable is used instead of the background nametable.  Rendering
+starts from the SECOND tile of each line, however.  The net effect of
+this is, the window register appears to be scrolled 8 pixels to the right
+(if xscroll = 0).
+
+Only the lower 3 bits of the xscroll register are used in this mode.
+It shifts the the window left 0-7 cycles.   Taking into account the first
+paragraph above about the nametable, the net effect is the window appears
+to be xscrolled 8 to 15 pixels left.
+
+Effective xscroll = (xscroll % 7) + 8
+
+The top scanline of the screen is ALWAYS reflecting the very first
+scanline of the window, when ywindow is less than or equal to 08fh.
+
+The second scanline of the screen will reflect the second scanline of
+the window, but ONLY when ywindow = 00h.  Any other ywindow value will
+result in the background showing for the first scanline.
+
+The other scanlines of the screen (lines 3-144) will show the window,
+*starting from the third window scanline* depending on the ywindow value.
+
+This is hard to describe, but the effect is simple:
+
+GB line:   (ywindow = 0)
+1   window 1
+2   window 2
+3   window 3
+4   window 4
+
+GB line:   (ywindow = 1)
+1   window 1
+2   background 2
+3   window 3
+4   window 4
+
+GB line:   (ywindow = 2)
+1   window 1
+2   background 2
+3   background 3
+4   window 3
+5   window 4
+6   window 5
+
+GB line:   (ywindow = 3)
+1   window 1
+2   background 2
+3   background 3
+4   background 4
+5   window 3
+6   window 4
+
+----
+
+
+What addresses are read during rendering
+----------------------------------------
+
+Referring back to the fetch patterns above, I will go through what
+addresses are read.
+
+For the degenerate case, the access pattern looks like this:
+
+B01 
+B01s (repeated 20-22x)
+
+Assuming that xscroll = 0, and yscroll = 0, and we have the background
+reading the 9800h nametable:
+
+B01  (reads 9800h)
+B01s (reads 9800h, 9801h, 9802h, 9803h...9814h)
+
+This is fairly simple: it just starts at the very upper left char of the
+nametable and starts reading.   It ends up reading 9800h TWICE.  The
+first access is just thrown away and is never used.  It's here, because
+it helps during windowing (I will describe later in the window section).
+
+The way the characters are read is performed something like this:
+
+At the start of the scanline:
+
+1) latch the current character address
+2) read a character from the address
+3) read another character from the SAME address
+4) increment address
+5) read another character
+6) repeat 4 and 5 20-22 times.
+
+In step 1, the address we latch is calculated like this:
+
+yscroll is the yscroll register on the GB CPU
+xscroll is the xscroll register on the GB CPU
+ycounter is the current scanline we are rendering (0-143)
+whichnt is bit 3 of the LCD control reg on the GB CPU
+
+ybase = (yscroll + ycounter)   // calculates the effective vis. scanline
+
+charaddr = (0x9800 | (whichnt << 10) | ((ybase & 0xf8) << 2) |
+		   ((xscroll & 0xf8) >> 3)
+
+Another way to represent this address:
+
+15                0
+-------------------
+1001 1NYY YYYX XXXX
+
+N = nametable #
+Y = upper 5 bits of ybase
+X = upper 5 bits of xscroll (which is then incremented between chars)
+
+
+In step 2, we read from charaddr,  and throw the result away
+In step 3, we read from charaddr again and use it for the first vis. char
+In step 4, *only the lower 5 bits* of charaddr is incremented 
+In step 5, we read the next character
+
+Then, we repeat it enough times to fill out the scanline.
+
+Once the nametable entry is fetched, we have to fetch the tile planes.
+
+Depending on the state of the "BG & Window Tile Data Select" register,
+which is LCD control bit 4, tile accesses are done one of two ways.
+
+
+ntbyte = the nametable byte we read from the above NT address.
+
+if (lcdcontrol[4]) tileaddr = (ntbyte << 4) | ((ysub & 0x7) << 1)
+else tileaddr = (0x1000 - (ntbyte << 4)) | ((ysub & 0x7) << 1)
+
+We will read the desired bytes for the tile data from tileaddr and
+tileaddr+1
+
+Notice that xscroll's lower 3 bits don't SEEM to play into any of the
+calculations above... this is because xscroll[2:0] does not affect
+which characters are fetched in any way.  Fine xscroll (lower 3 bits
+of xscroll) only adjust the timing during LCD writing (explained
+below).
+
+
+* * * * *
+
+So, this is all fine and good.. but what happens during windowing?
+It's not much different than the above.  
+
+During a typical VRAM access pattern with the window, it looks something
+like this:
+
+B01
+B01s (repeated N times)
+W01
+W01s (repeated M times)
+
+The background rendering sequence is identical to the background only
+sequence described previously.
+
+When the window accesses start, the address calculation is similar...
+
+First, a typical reading sequence:
+
+B01  (9800h)
+B01s (9800h, 9801h, 9802h, ...)
+W01  (9C00h)
+W01s (9C01h, 9C02h, ...)
+
+The first change is that the first W01 access is NOT thrown away.
+There is no duplicated read here as in the background read.
+
+The nametable read is calculated like so:
+
+windnt = the window nametable (LCD control bit 6)
+
+basew = (ycount - yscroll)   // calculates the effective window scanline
+
+charaddr = (0x9800 | (windnt << 10) | ((basew & 0xf8) << 2)
+
+Another way to represent this address:
+
+15                0
+-------------------
+1001 1NYY YYY0 0000
+
+N = nametable #
+Y = upper 5 bits of basew
+
+
+We simply read characters starting from the charaddr address, and 
+increment it each time we read a character until the scanline is
+finished.
+
+The tile plane address is calculated the same as it is calculated for
+the background reads.
+
+
+That wraps up the actual VRAM access patterns.
+
+---
+
+LCD write timing
+----------------
+
+Before I can describe how the LCD timing works, I have to first explain
+how the LCD itself works.
+
+The LCD is composed of a 2 bit wide by 159 bit deep shift register,
+where the input pixels are shifted.  Each rising edge of the display
+clock, data is shifted one stage down the register. 
+
+When the display latch signal is activated, this shift register's value
+is latched into the LCD column drivers.
+
+The shift register is only 159 bits- the input data is used as the 160th
+bit for latching into the LCD column drivers.
+
+* The first pixel shifted into the register appears on the first column
+* The last pixel shifted in appears on the second to last column
+* The input pixel data on the input lines appears on the first column
+
+Terrible ASCII:
+
+
+DCLK:    the display pixel clock
+data0/1: the 2 bit pixel data
+lat:     the latch signal.  when pulsed, latches the shift reg. data
+bias:    the LCD bias voltage (contrast wheel adjusts this)
+inv:     the LCD inverse signal (explained later)
+
+
+                 +-----------------+
+LCD DCLK o-------|CLK              |
+                 |                 |
+                 |  159*2 bit S/R  |
+LCD data0 o---*--|D0               |
+LCD data1 o-*-+--|D1               |
+            | |  |   pix 1 ->  159 |
+            | |  +-----------------+
+            | |    | ........... |
+          +--------------------------+
+          | pix 0     pix 1 ->  159  |
+          |                          |
+LCD lat o-|latch    160*2 bit latch  |
+          |                          |
+          |      160*2 outputs       |
+          +--------------------------+
+            | .................... |
+          +--------------------------+
+          |                          |
+          |    160 output drivers    |
+LCDbias o-|bias                      |
+LCD inv o-|invert                    |
+          |                          |
+          |        LCD outputs       |
+          +--------------------------+
+            ||||||||||||||||||||||||
+       +---------------------------------+
+       |      col 159   <-    col 0      |     
+       |           LCD columns           |     
+       |                                 |     
+       |                                 |     
+       |           LCD display           |     
+       |                                 |     
+       |                                 |     
+       |                                 |     
+       |                                 |     
+       |                                 |     
+       +---------------------------------+
+       
+       
+So now that the LCD column driving and latching has been explained,
+the display timing that follows should make a bit more sense.
+
+Because the LCD is clocked, unlike a CRT, this means that the hardware
+has the ability to stop clocking the LCD for awhile if it feels like it.
+The GB video hardware indeed does do this, and even uses it to advantage
+during scrolling, sprite fetching, and starting the window rendering.
+
+When windowing is disabled, the display clock always runs for the last
+159 cycles.  This is very interesting to me, because that means the
+video hardware is actively shifting pixels out to the display, but
+some of these pixels DO NOT HAVE A CORRESPONDING DCLK!  This is how
+fine X scroll is achieved- the first 0 to 7 pixels are just thrown away.
+They get shifted out, but since the display clock is not running, they
+do not get shifted in.  By delaying these cycles, the display data will
+shift left from 0 to 7 pixels.
+
+The windowing function works the same way- the pixel where the window
+is started will restart the rendering engine and thus allow single pixel
+precision on where the window starts on the LCD.
+
+During the first 6 cycles of the window fetch, the LCD clock is stalled.
+This lets the pipeline fill and then display clocking resumes after the
+6 cycle delay.
+
+That takes care of the timing of display data clocking.  
+
+Now for the interesting part about how data is read and shifted out the
+LCD data pins:
+
+When the nametable fetch starts, the LAST tile data read will be latched
+into two 8 bit shift registers, and then shift out the data pins one
+pixel per clock.  No matter what.
+
+So, referring to the access pattern again:
+
+B01   read the first tile
+B01s  latch the pixel data into the output shift registers
+B01s  latch the pixel data into the output shift registers
+B01s...
+
+Since each B01s access takes exactly 8 cycles, the output shift registers
+will be exactly refilled when they are empty, and continue the output
+data sending without interruption.
+
+Fine xscroll is effected by controlling the point in this process where
+the display clocking is started relative to the start of the rendering
+phase.  The data will always shift out the pixel data pins at the same
+point in the render cycle, but since the DCLK is started earlier or
+later, the point where the LCD starts latching data changes relative to
+the data.  This causes a 0-7 shift in the data on the LCD.
+
+The afore-mentioned output shift registers will blindly shift out their
+8 pixels of data without stopping, except when the LCD hardware is
+stalled by a sprite fetch (described later).  Thus, the timing of the
+VRAM reads determines the amount of fine xscroll on the background
+and on the window.
+
+---

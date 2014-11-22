@@ -373,7 +373,6 @@ void GB_TimersWriteTAC(int reference_clocks, int value)
     }
     //TODO: I can't test SGB or SGB2!
 
-GB_TimerIncreaseTIMA();
     if(value & BIT(2))
     {
         GameBoy.Emulator.timer_enabled = 1;

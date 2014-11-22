@@ -304,10 +304,10 @@ void GB_TimersWriteTAC(int reference_clocks, int value)
         }
     }
     else if(GameBoy.Emulator.HardwareType == HW_GBC)
-    {
+    {/*
         if(GameBoy.Emulator.timer_enabled == 0)
         {
-            if( (mem->IO_Ports[TAC_REG-0xFF00] & 7) == 2) // The same as: ( (x & 3) == 2 )
+            if( (mem->IO_Ports[TAC_REG-0xFF00] & 3) == 2)
             {
                 if( (value & 7) == 7)
                 {
@@ -329,11 +329,43 @@ void GB_TimersWriteTAC(int reference_clocks, int value)
         else
         {
 
-        }
+        }*/
     }
     else if(GameBoy.Emulator.HardwareType == HW_GBA)
     {
+        /*
+        if(GameBoy.Emulator.timer_enabled == 0)
+        {
+            if( (mem->IO_Ports[TAC_REG-0xFF00] & 3) == 1)
+            {
+                if( ((value & 7) == 4) || ((value & 7) == 6) )
+                {
+                    //Sys xxx1x00
+                    if( (GameBoy.Emulator.sys_clocks & 0xB) == 0x8)
+                        GB_TimerIncreaseTIMA();
+                }
+            }
+            else if( (mem->IO_Ports[TAC_REG-0xFF00] & 3) == 2)
+            {
+                if( ((value & 7) == 4) || ((value & 7) == 7) )
+                {
+                    //Sys xxx1x00
+                    if( (GameBoy.Emulator.sys_clocks & 0x23) == 0x20)
+                        GB_TimerIncreaseTIMA();
+                }
+                else if((value & 7) == 5)
+                {
+                    //Sys xxx1x00
+                    if( (GameBoy.Emulator.sys_clocks & 0x2B) == 0x20)
+                        GB_TimerIncreaseTIMA();
+                }
+            }
+        }
+        else
+        {
 
+        }
+        */
     }
     else if(GameBoy.Emulator.HardwareType == HW_GBA_SP)
     {
@@ -341,6 +373,7 @@ void GB_TimersWriteTAC(int reference_clocks, int value)
     }
     //TODO: I can't test SGB or SGB2!
 
+GB_TimerIncreaseTIMA();
     if(value & BIT(2))
     {
         GameBoy.Emulator.timer_enabled = 1;

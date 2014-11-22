@@ -51,7 +51,7 @@ During that strange cycle [A] you can prevent the IF flag from being set and pre
 
 - Writing to TAC doesn't reset the system counter.
 
-- TAC: TODO: TEST
+- TAC glitches: Changing TAC value may produce an increment in TIMA. TIMA and IF don't have any strange behavior when incrementing, it's just a normal increment. The glitch depends on the hardware. GB/GBP work the same way, GBC, GBA and GBA SP are all different. I don't have SGB/SGB2 to test them. I suppose that they work the same way as the GB.
 
 DIV interaction with APU
 ------------------------

@@ -361,14 +361,19 @@ typedef struct {
     u32 timer_reload_delay_active; // to reload TIMA from TMA
     u32 tima_just_reloaded;
 
-    u32 serial_clocks; //count
+    //Serial
     u32 serial_enabled;
-    u32 serial_total_clocks;
+    u32 serial_clocks_to_flip_clock_signal;
+    u32 serial_transfered_bits;
+    u32 serial_clocks; //internal counter
+    u32 serial_clock_signal;
+    //Serial device
     u32 serial_device;
     serial_send_fn_ptr SerialSend_Fn;
     serial_recv_fn_ptr SerialRecv_Fn;
 
-    u32 joypad_signal; // for joypad interrupt
+    //Joypad
+    u32 joypad_signal;
 
     u32 FrameDrawn;
 } _EMULATOR_INFO_;

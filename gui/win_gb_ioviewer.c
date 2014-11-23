@@ -251,18 +251,20 @@ void Win_GBIOViewerUpdate(void)
     GUI_ConsoleModePrintf(&gb_ioview_clocks_con,0,0,"LCD: %d",GameBoy.Emulator.LCD_clocks);
     if(GameBoy.Emulator.timer_enabled)
     {
-        GUI_ConsoleModePrintf(&gb_ioview_clocks_con,0,1,"Timer: %d",
+        GUI_ConsoleModePrintf(&gb_ioview_clocks_con,0,1,"TIMA: %d",
                               GameBoy.Emulator.sys_clocks&GameBoy.Emulator.timer_overflow_mask);
     }
     else
     {
-        GUI_ConsoleModePrintf(&gb_ioview_clocks_con,0,1,"Timer: (%d)",
+        GUI_ConsoleModePrintf(&gb_ioview_clocks_con,0,1,"TIMA: (%d)",
                               GameBoy.Emulator.sys_clocks&GameBoy.Emulator.timer_overflow_mask);
     }
     GUI_ConsoleModePrintf(&gb_ioview_clocks_con,0,2,"  out of %d",GameBoy.Emulator.timer_overflow_mask+1);
     GUI_ConsoleModePrintf(&gb_ioview_clocks_con,0,3,"DIV: %d",GameBoy.Emulator.sys_clocks&0xFF);
-    GUI_ConsoleModePrintf(&gb_ioview_clocks_con,0,4,"Serial: %d",GameBoy.Emulator.serial_clocks);
-    GUI_ConsoleModePrintf(&gb_ioview_clocks_con,0,5,"  out of %d",GameBoy.Emulator.serial_total_clocks);
+    GUI_ConsoleModePrintf(&gb_ioview_clocks_con,0,4,"SIO: %3d (%d)",
+                          GameBoy.Emulator.serial_clocks&(GameBoy.Emulator.serial_clocks_to_flip_clock_signal-1),
+                          GameBoy.Emulator.serial_clock_signal);
+    GUI_ConsoleModePrintf(&gb_ioview_clocks_con,0,5,"  out of %3d",GameBoy.Emulator.serial_clocks_to_flip_clock_signal);
 }
 
 //----------------------------------------------------------------

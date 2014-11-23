@@ -41,6 +41,29 @@ extern _GB_CONTEXT_ GameBoy;
 
 //--------------------------------------------------------------------------------
 
+static void GB_SerialSendBit(void)
+{
+    _GB_MEMORY_ * mem = &GameBoy.Memory;
+
+    GameBoy.Emulator.serial_transfered_bits ++;
+
+    if( (GameBoy.Emulator.serial_transfered_bits&7) == 0 )
+    {
+        GameBoy.Emulator.serial_enabled = 0;
+
+        GB_SetInterrupt(I_SERIAL);
+
+        GameBoy.Emulator.SerialSend_Fn(mem->IO_Ports[SB_REG-0xFF00]);
+
+        mem->IO_Ports[SC_REG-0xFF00] &= ~0x80;
+        mem->IO_Ports[SB_REG-0xFF00] = GameBoy.Emulator.SerialRecv_Fn();
+
+        GB_CPUBreakLoop();
+    }
+}
+
+//--------------------------------------------------------------------------------
+
 static int gb_serial_clock_counter = 0;
 
 void GB_SerialClockCounterReset(void)
@@ -68,26 +91,24 @@ void GB_SerialUpdateClocksClounterReference(int reference_clocks)
     {
         if(mem->IO_Ports[SC_REG-0xFF00] & 0x01) //Internal clock
         {
-            GameBoy.Emulator.serial_clocks += increment_clocks;
+            int flip_clocks = GameBoy.Emulator.serial_clocks_to_flip_clock_signal;
 
-            if(GameBoy.Emulator.serial_clocks >= GameBoy.Emulator.serial_total_clocks)
+            int serial_new_clocks = (GameBoy.Emulator.serial_clocks&(flip_clocks-1)) + increment_clocks;
+
+            while(serial_new_clocks >= flip_clocks)
             {
-                GameBoy.Emulator.serial_enabled = 0;
-                GameBoy.Emulator.serial_total_clocks = 0;
-                GameBoy.Emulator.serial_clocks = 0;
+                serial_new_clocks -= flip_clocks;
 
-                GB_SetInterrupt(I_SERIAL);
+                GameBoy.Emulator.serial_clock_signal ^= 1;
 
-                // (*) see memory.c
-                GameBoy.Emulator.SerialSend_Fn(mem->IO_Ports[SB_REG-0xFF00]);
-
-                mem->IO_Ports[SC_REG-0xFF00] &= ~0x80;
-                mem->IO_Ports[SB_REG-0xFF00] = GameBoy.Emulator.SerialRecv_Fn();
-
-                GB_CPUBreakLoop();
+                if(GameBoy.Emulator.serial_clock_signal == 0) // falling edge
+                    GB_SerialSendBit();
             }
         }
     }
+
+    GameBoy.Emulator.serial_clocks += increment_clocks;
+    GameBoy.Emulator.serial_clocks &= (512/2) - 1;
 
     GB_SerialClockCounterSet(reference_clocks);
 }
@@ -100,7 +121,9 @@ int GB_SerialGetClocksToNextEvent(void)
     {
         if(mem->IO_Ports[SC_REG-0xFF00] & 0x01) //Internal clock
         {
-            return GameBoy.Emulator.serial_total_clocks - GameBoy.Emulator.serial_clocks;
+            int clocks = GameBoy.Emulator.serial_clocks_to_flip_clock_signal;
+
+            return clocks - (GameBoy.Emulator.serial_clocks & (clocks-1));
         }
     }
 
@@ -122,26 +145,44 @@ void GB_SerialWriteSC(int reference_clocks, int value)
     if(value & 0x80)
     {
         GameBoy.Emulator.serial_enabled = 1;
+        GameBoy.Emulator.serial_transfered_bits = 0;
+        GameBoy.Emulator.serial_clock_signal = 0;
 
-        GameBoy.Emulator.serial_clocks = 0; //??
+        if(value & 0x01) // Internal clock
+        {
+            if(GameBoy.Emulator.CGBEnabled == 1)
+            {
+/*
+                int old_sc = GameBoy.Memory.IO_Ports[SC_REG-0xFF00];
+                int new_sc = value;
 
-        if(GameBoy.Emulator.CGBEnabled == 1)
-        {
-            if(value & 0x02) GameBoy.Emulator.serial_total_clocks = 16 * 8; // clocks per bit * number of bits;
-            else GameBoy.Emulator.serial_total_clocks = 512 * 8; // clocks per bit * number of bits;
+                if( (old_sc & 0x80) && ((old_sc^new_sc) & BIT(1)) ) // change speed when enabled! check if glitch
+                {
+                    int old_signal = GameBoy.Emulator.serial_clocks & ( old_sc & BIT(1) ? 16/2 : 512/2 );
+                    int new_signal = GameBoy.Emulator.serial_clocks & ( new_sc & BIT(1) ? 16/2 : 512/2 );
+
+                    if( (old_signal == 0) && (new_signal != 0) )
+                    {
+                        GameBoy.Emulator.serial_clock_signal ^= 1;
+
+                        if(GameBoy.Emulator.serial_clock_signal == 0) // falling edge
+                            GB_SerialSendBit();
+                    }
+                }
+*/
+                if(value & 0x02) GameBoy.Emulator.serial_clocks_to_flip_clock_signal = 16/2;
+                else GameBoy.Emulator.serial_clocks_to_flip_clock_signal = 512/2;
+            }
+            else
+            {
+                GameBoy.Emulator.serial_clocks_to_flip_clock_signal = 512/2;
+            }
         }
-        else
-        {
-            GameBoy.Emulator.serial_total_clocks = 512 * 8; // clocks per bit * number of bits;
-        }
-        // (*) see serial.c
-        //GameBoy.Emulator.SerialSend_Fn(GameBoy.Memory.IO_Ports[SB_REG-0xFF00]);
     }
     else
     {
         GameBoy.Emulator.serial_enabled = 0;
-        GameBoy.Emulator.serial_clocks = 0;
-        GameBoy.Emulator.serial_total_clocks = 0;
+        GameBoy.Emulator.serial_transfered_bits = 0;
     }
 
     GameBoy.Memory.IO_Ports[SC_REG-0xFF00]  = value;
@@ -447,8 +488,73 @@ void GB_SerialPlug(int device)
 
 void GB_SerialInit(void)
 {
-    GameBoy.Emulator.serial_clocks = 0;
     GameBoy.Emulator.serial_enabled = 0;
+    GameBoy.Emulator.serial_clocks_to_flip_clock_signal = 512/2;
+    GameBoy.Emulator.serial_transfered_bits = 0;
+    GameBoy.Emulator.serial_clocks = 0;
+    GameBoy.Emulator.serial_clock_signal = 0;
+
+    if(GameBoy.Emulator.enable_boot_rom) // unknown
+    {
+        switch(GameBoy.Emulator.HardwareType)
+        {
+            case HW_GB:
+            case HW_GBP:
+                GameBoy.Emulator.serial_clocks = 8; // TODO: Can't verify until PPU is emulated correctly
+                break;
+
+            case HW_SGB:
+            case HW_SGB2:
+                GameBoy.Emulator.serial_clocks = 0; // TODO: Unknown. Can't test.
+                break;
+
+            case HW_GBC: // Same value for GBC in GB mode. The boot ROM starts the same way!
+                GameBoy.Emulator.serial_clocks = 0; // TODO: Can't verify until PPU is emulated correctly
+                break;
+
+            case HW_GBA:
+            case HW_GBA_SP: // Same value for GBC in GB mode. The boot ROM starts the same way!
+                GameBoy.Emulator.serial_clocks = 0; // TODO: Can't verify until PPU is emulated correctly
+                break;
+
+            default:
+                GameBoy.Emulator.sys_clocks = 0;
+                Debug_ErrorMsg("GB_SerialInit():\nUnknown hardware\n(boot ROM enabled)");
+                break;
+        }
+    }
+    else
+    {
+        switch(GameBoy.Emulator.HardwareType)
+        {
+            case HW_GB:
+            case HW_GBP:
+                GameBoy.Emulator.serial_clocks = 0xCC; // Verified on hardware
+                break;
+
+            case HW_SGB:
+            case HW_SGB2:
+                GameBoy.Emulator.serial_clocks = 0; // TODO: Unknown. Can't test.
+                break;
+
+            case HW_GBC:
+                GameBoy.Emulator.serial_clocks = 0xA0; // Verified on hardware
+				//TODO: GBC in GB mode? Use value corresponding to a boot without any user interaction.
+                break;
+
+            case HW_GBA:
+            case HW_GBA_SP:
+                GameBoy.Emulator.serial_clocks = 0xA4; // TODO: Verify on hardware
+				//TODO: GBC in GB mode? Use value corresponding to a boot without any user interaction.
+                break;
+
+            default:
+                GameBoy.Emulator.sys_clocks = 0;
+                Debug_ErrorMsg("GB_SerialInit():\nUnknown hardware");
+                break;
+        }
+    }
+
 
     GameBoy.Emulator.serial_device = SERIAL_NONE;
     GB_SerialPlug(EmulatorConfig.serial_device);

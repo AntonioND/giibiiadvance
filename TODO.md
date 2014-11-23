@@ -12,6 +12,7 @@ General
 Game Boy
 --------
 
+- When loading a GB only ROM in GBC mode, prepare palettes.
 - Emulate joypad bounce. This doesn't happen in GBA SP.
 - Make that everything read FFh except HRAM when DMG DMA is enabled.
 - HDMA copies when HALT is enabled? HALT is ignored if called when HDMA is active? STOP disables it? Switching speeds disables it?

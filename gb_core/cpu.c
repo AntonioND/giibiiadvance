@@ -156,7 +156,7 @@ void GB_CPUInit(void)
     GameBoy.Emulator.CurrentScanLine = 0;
     GameBoy.Emulator.CPUHalt = 0;
     GameBoy.Emulator.DoubleSpeed = 0;
-    GameBoy.Emulator.halt_dmg_bug = 0;
+    GameBoy.Emulator.halt_bug = 0;
 
     if(GameBoy.Emulator.CGBEnabled == 1)
     {
@@ -306,9 +306,9 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
         u8 opcode = (u8)GB_MemRead8(cpu->R16.PC++);
         cpu->R16.PC &= 0xFFFF;
 
-        if(GameBoy.Emulator.halt_dmg_bug)
+        if(GameBoy.Emulator.halt_bug)
         {
-            GameBoy.Emulator.halt_dmg_bug = 0;
+            GameBoy.Emulator.halt_bug = 0;
             cpu->R16.PC--;
             cpu->R16.PC &= 0xFFFF;
         }
@@ -1022,18 +1022,10 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 }
                 else
                 {
-                    if( ! ( (GameBoy.Emulator.HardwareType == HW_GBC) || (GameBoy.Emulator.HardwareType == HW_GBA) ||
-                            (GameBoy.Emulator.HardwareType == HW_GBA_SP)) )
-                    //if(GameBoy.Emulator.CGBEnabled == 0)
+                    if(mem->IO_Ports[IF_REG-0xFF00] & mem->HighRAM[IE_REG-0xFF80] & 0x1F)
                     {
-                        if(mem->IO_Ports[IF_REG-0xFF00] & mem->HighRAM[IE_REG-0xFF80] & 0x1F)
-                        {
-                            GameBoy.Emulator.halt_dmg_bug = 1;
-                        }
-                        else
-                        {
-                            GameBoy.Emulator.CPUHalt = 1;
-                        }
+                        //The halt bug seems to happen even in GBC, not only DMG
+                        GameBoy.Emulator.halt_bug = 1;
                     }
                     else
                     {

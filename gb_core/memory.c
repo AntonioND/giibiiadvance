@@ -167,8 +167,7 @@ void GB_MemWrite8(u32 address, u32 value)
             if(address == IE_REG)
             {
                 mem->HighRAM[IE_REG-0xFF80] = value;
-            //    mem->IO_Ports[IF_REG-0xFF00] &= value;//???
-                GB_CheckStatSignal();//?
+                GB_CPUBreakLoop();
                 return;
             }
 

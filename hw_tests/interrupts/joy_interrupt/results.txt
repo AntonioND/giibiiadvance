@@ -1,0 +1,2 @@
+DMG/MGB/GBC -> Interrupt is triggered. There is bouncing.
+GBA SP -> Interrupt is triggered, no bouncing.

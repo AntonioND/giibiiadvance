@@ -339,7 +339,7 @@ typedef struct {
 
     //Other things
     u32 CPUHalt;
-    u32 halt_dmg_bug;
+    u32 halt_bug;
 
     u32 SGBEnabled;
     u32 wait_cycles;

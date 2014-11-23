@@ -152,7 +152,7 @@ static const int debug_command_param_size[256] = {
     0, 2, 0, 0, 0, 0, 1, 0, 2, 0, 0, 0, 0, 0, 1, 0,
     1, 2, 0, 0, 0, 0, 1, 0, 3, 0, 0, 0, 0, 0, 1, 0,
     3, 2, 0, 0, 0, 0, 1, 0, 3, 0, 0, 0, 0, 0, 1, 0,
-    3, 2, 0, 0, 0, 0, 1, 0, 3, 0, 0, 0, 0, 0, 1, 1,
+    3, 2, 0, 0, 0, 0, 1, 0, 3, 0, 0, 0, 0, 0, 1, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -516,7 +516,7 @@ char * GB_Dissasemble(u16 addr, int * step)
             char temp[32];
             char instr_text[64];
             s_strncpy(temp, debug_commands[cmd], sizeof(temp));
-            s_snprintf(instr_text,sizeof(instr_text),temp,param + addr);
+            s_snprintf(instr_text,sizeof(instr_text),temp,(param + addr) & 0xFFFF);
             info = debug_commands_info[cmd];
             s_snprintf(text,sizeof(text),"%02X%02X     %s",cmd,(u8)param,instr_text);
             param = param + addr;

@@ -491,7 +491,6 @@ void GB_TimersUpdateClocksClounterReference(int reference_clocks)
     // Sound
     // -----
 
-
     //TODO : SOUND UPDATE GOES HERE!!
 
 
@@ -572,7 +571,7 @@ int GB_TimersGetClocksToNextEvent(void)
 
 //----------------------------------------------------------------
 
-void GB_CheckJoypadInterrupt(void)
+void GB_CheckJoypadInterrupt(void) // called once per frame
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 

@@ -154,6 +154,8 @@ void GB_CPUInterruptsInit(void)
     GameBoy.Emulator.timer_reload_delay_active = 0;
     GameBoy.Emulator.tima_just_reloaded = 0;
 
+    GameBoy.Emulator.joypad_signal = 1;
+
     GameBoy.Memory.IO_Ports[DIV_REG-0xFF00] = GameBoy.Emulator.sys_clocks >> 8;
 
     if(GameBoy.Emulator.HasTimer)
@@ -364,7 +366,7 @@ void GB_TimersWriteTAC(int reference_clocks, int value)
                 //Approximate
                 //glitch = (sys_clocks & old_clocks_half) && ( (sys_clocks & new_clocks_half) == 0 );
 #endif // 0
-                //Exact?
+                //Exact emulation of one of my GBCs?
 #if 1
                 if(old_clocks_half == new_clocks_half)
                 {
@@ -574,20 +576,22 @@ void GB_CheckJoypadInterrupt(void)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
-    u32 i = mem->IO_Ports[P1_REG-0xFF00];
+    int old_signal = GameBoy.Emulator.joypad_signal;
+
+    u32 p1 = mem->IO_Ports[P1_REG-0xFF00];
     u32 result = 0;
 
     int Keys = GB_Input_Get(0);
-    if((i & (1<<5)) == 0) //A-B-SEL-STA
+    if((p1 & (1<<5)) == 0) //A-B-SEL-STA
         result |= Keys & (KEY_A|KEY_B|KEY_SELECT|KEY_START);
-    if((i & (1<<4)) == 0) //PAD
+    if((p1 & (1<<4)) == 0) //PAD
         result |= Keys & (KEY_UP|KEY_DOWN|KEY_LEFT|KEY_RIGHT);
 
-    if(result)
+    GameBoy.Emulator.joypad_signal = result ? 0 : 1;
+
+    if( (GameBoy.Emulator.joypad_signal == 0) && (old_signal) )
     {
-        if( ! ( (GameBoy.Emulator.HardwareType == HW_GBC) || (GameBoy.Emulator.HardwareType == HW_GBA) ||
-                (GameBoy.Emulator.HardwareType == HW_GBA_SP)) )
-            GB_SetInterrupt(I_JOYPAD); //No joypad interrupt in GBA/GBC? TODO: TEST
+        GB_SetInterrupt(I_JOYPAD);
 
         if(GameBoy.Emulator.CPUHalt == 2) // Exit stop mode in any hardware
             GameBoy.Emulator.CPUHalt = 0;

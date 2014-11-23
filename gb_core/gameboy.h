@@ -368,6 +368,8 @@ typedef struct {
     serial_send_fn_ptr SerialSend_Fn;
     serial_recv_fn_ptr SerialRecv_Fn;
 
+    u32 joypad_signal; // for joypad interrupt
+
     u32 FrameDrawn;
 } _EMULATOR_INFO_;
 

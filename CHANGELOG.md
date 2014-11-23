@@ -24,6 +24,7 @@ GB emulation
 - Timer emulated perfectly in DMG. In GBC/GBA/GBA SP there are some cases that can't be emulated.
 - HDMA/GDMA timings corrected.
 - Fixed KEY1 register when doing a hard reset.
+- Joypad interrupt fixed.
 
 Version 0.2.0
 -------------

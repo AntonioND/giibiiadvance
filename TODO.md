@@ -12,7 +12,7 @@ General
 Game Boy
 --------
 
-- Emulate joypad bounce.
+- Emulate joypad bounce. This doesn't happen in GBA SP.
 - Make that everything read FFh except HRAM when DMG DMA is enabled.
 - HDMA copies when HALT is enabled? HALT is ignored if called when HDMA is active? STOP disables it? Switching speeds disables it?
 - Check what happens if HDMA1-4 are modified during HDMA copy.
@@ -29,7 +29,6 @@ Game Boy
 - Initial memory values. Test with and without boot ROM.
 - PPU state after powering on the screen. Is Any register reseted?
 - When LCD is off, are LYC=0 or ScreenMode=0 IRQs triggered?
-- Has DI any delay? Test with timers.
 
 Game Boy Advance
 ----------------

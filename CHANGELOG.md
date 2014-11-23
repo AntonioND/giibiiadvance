@@ -8,6 +8,7 @@ Version 0.3.0
 
 General
 
+- Added a lot of documentation about GB hardware. [GB]
 - Controls can be configured.
 - Support for game controllers.
 - Rumble supported. In my joystick it doesn't work in Windows 7, but it works in Linux Mint 16...
@@ -20,8 +21,8 @@ GB emulation
 
 - GB core rewritten.
 - Removed stupid hack that delayed 24 clocks the VBL IRQ.
-- Emulated timer IRQ correctly. Writing to TIMA while overflowing will prevent the IRQ. IRQ is also delayed 1 clock from overflow.
-- HDMA/GDMA timings corrected. HDMA setup time added.
+- Timer emulated perfectly in DMG. In GBC/GBA/GBA SP there are some cases that can't be emulated.
+- HDMA/GDMA timings corrected.
 - Fixed KEY1 register when doing a hard reset.
 
 Version 0.2.0

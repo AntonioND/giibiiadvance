@@ -190,8 +190,30 @@ void GB_MemWriteReg8(u32 address, u32 value)
     switch(address)
     {
         case SB_REG:
-            GB_SerialUpdateClocksClounterReference(GB_CPUClockCounterGet());
-            mem->IO_Ports[address-0xFF00] = value;
+            GB_SerialWriteSB(GB_CPUClockCounterGet(),value);
+            return;
+
+        case SC_REG:
+            GB_SerialWriteSC(GB_CPUClockCounterGet(),value);
+            return;
+
+        case TIMA_REG:
+            GB_TimersWriteTIMA(GB_CPUClockCounterGet(),value);
+            return;
+
+        case TMA_REG:
+            GB_TimersWriteTMA(GB_CPUClockCounterGet(),value);
+            return;
+
+        case TAC_REG:
+            GB_TimersWriteTAC(GB_CPUClockCounterGet(),value);
+            return;
+
+        case DIV_REG:
+            GB_TimersWriteDIV(GB_CPUClockCounterGet(),value);
+            return;
+
+        case LY_REG: //Read only
             return;
 
         case SCY_REG:
@@ -272,25 +294,6 @@ void GB_MemWriteReg8(u32 address, u32 value)
             GB_CPUBreakLoop();
             return;
 
-        case LY_REG: //Read only
-            return;
-
-        case TIMA_REG:
-            GB_TimersWriteTIMA(GB_CPUClockCounterGet(),value);
-            return;
-
-        case TMA_REG:
-            GB_TimersWriteTMA(GB_CPUClockCounterGet(),value);
-            return;
-
-        case TAC_REG:
-            GB_TimersWriteTAC(GB_CPUClockCounterGet(),value);
-            return;
-
-        case DIV_REG:
-            GB_TimersWriteDIV(GB_CPUClockCounterGet(),value);
-            return;
-
         case LYC_REG:
             mem->IO_Ports[LYC_REG-0xFF00] = value;
             if(GameBoy.Emulator.lcd_on)
@@ -306,6 +309,7 @@ void GB_MemWriteReg8(u32 address, u32 value)
             if(GameBoy.Emulator.SGBEnabled == 1)
                 SGB_WriteP1(value);
             mem->IO_Ports[P1_REG-0xFF00] = value & 0xF0;
+            //TODO: Can this trigger joypad interrupt?
             return;
 
         case DMA_REG:
@@ -340,28 +344,6 @@ void GB_MemWriteReg8(u32 address, u32 value)
             GB_SoundUpdateClocksClounterReference(GB_CPUClockCounterGet());
             if((mem->IO_Ports[NR52_REG-0xFF00] & (1<<2)) == 0) //If not playing...
                 mem->IO_Ports[address-0xFF00] = value;
-            return;
-
-        case SC_REG:
-            GB_SerialUpdateClocksClounterReference(GB_CPUClockCounterGet());
-            mem->IO_Ports[SC_REG-0xFF00]  = value;
-            if(value & 0x80)
-            {
-                GameBoy.Emulator.serial_enabled = 1;
-
-                if(GameBoy.Emulator.CGBEnabled == 1)
-                {
-                    if(value & 0x02) GameBoy.Emulator.serial_total_clocks = 16 * 8; // clocks per bit * number of bits;
-                    else GameBoy.Emulator.serial_total_clocks = 512 * 8; // clocks per bit * number of bits;
-                }
-                else
-                {
-                    GameBoy.Emulator.serial_total_clocks = 512 * 8; // clocks per bit * number of bits;
-                }
-                // (*) see serial.c
-                //GameBoy.Emulator.SerialSend_Fn(mem->IO_Ports[SB_REG-0xFF00]);
-            }
-            GB_CPUBreakLoop();
             return;
 
         //                   GAMEBOY COLOR REGISTERS

@@ -27,6 +27,11 @@ int GB_SerialGetClocksToNextEvent(void);
 
 //--------------------------------------------------------------------------------
 
+void GB_SerialWriteSB(int reference_clocks, int value);
+void GB_SerialWriteSC(int reference_clocks, int value);
+
+//--------------------------------------------------------------------------------
+
 void GB_SerialInit(void);
 void GB_SerialEnd(void);
 

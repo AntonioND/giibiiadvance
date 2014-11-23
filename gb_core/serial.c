@@ -32,6 +32,7 @@
 #include "gameboy.h"
 #include "interrupts.h"
 #include "serial.h"
+#include "cpu.h"
 #include "debug.h"
 
 #include "../png/png_utils.h"
@@ -82,6 +83,8 @@ void GB_SerialUpdateClocksClounterReference(int reference_clocks)
 
                 mem->IO_Ports[SC_REG-0xFF00] &= ~0x80;
                 mem->IO_Ports[SB_REG-0xFF00] = GameBoy.Emulator.SerialRecv_Fn();
+
+                GB_CPUBreakLoop();
             }
         }
     }
@@ -102,6 +105,47 @@ int GB_SerialGetClocksToNextEvent(void)
     }
 
     return 0x7FFFFFFF;
+}
+
+//--------------------------------------------------------------------------------
+
+void GB_SerialWriteSB(int reference_clocks, int value)
+{
+    GB_SerialUpdateClocksClounterReference(reference_clocks);
+    GameBoy.Memory.IO_Ports[SB_REG-0xFF00] = value;
+}
+
+void GB_SerialWriteSC(int reference_clocks, int value)
+{
+    GB_SerialUpdateClocksClounterReference(reference_clocks);
+
+    if(value & 0x80)
+    {
+        GameBoy.Emulator.serial_enabled = 1;
+
+        GameBoy.Emulator.serial_clocks = 0; //??
+
+        if(GameBoy.Emulator.CGBEnabled == 1)
+        {
+            if(value & 0x02) GameBoy.Emulator.serial_total_clocks = 16 * 8; // clocks per bit * number of bits;
+            else GameBoy.Emulator.serial_total_clocks = 512 * 8; // clocks per bit * number of bits;
+        }
+        else
+        {
+            GameBoy.Emulator.serial_total_clocks = 512 * 8; // clocks per bit * number of bits;
+        }
+        // (*) see serial.c
+        //GameBoy.Emulator.SerialSend_Fn(GameBoy.Memory.IO_Ports[SB_REG-0xFF00]);
+    }
+    else
+    {
+        GameBoy.Emulator.serial_enabled = 0;
+        GameBoy.Emulator.serial_clocks = 0;
+        GameBoy.Emulator.serial_total_clocks = 0;
+    }
+
+    GameBoy.Memory.IO_Ports[SC_REG-0xFF00]  = value;
+    GB_CPUBreakLoop();
 }
 
 //--------------------------------------------------------------------------------

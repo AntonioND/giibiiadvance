@@ -432,7 +432,7 @@ void GB_MemWriteReg8(u32 address, u32 value)
             if(GameBoy.Emulator.CGBEnabled == 0) return;
 
             if(GameBoy.Emulator.GBC_DMA_enabled == GBC_DMA_NONE)
-                mem->IO_Ports[HDMA3_REG-0xFF00] = value&0x1F; //Dest is VRAM
+                mem->IO_Ports[HDMA3_REG-0xFF00] = value & 0x1F; //Dest is VRAM
             return;
         case HDMA1_REG:
             if(GameBoy.Emulator.CGBEnabled == 0) return;

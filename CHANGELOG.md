@@ -25,6 +25,7 @@ GB emulation
 - HDMA/GDMA timings corrected.
 - Fixed KEY1 register when doing a hard reset.
 - Joypad interrupt fixed.
+- HALT instruction emulated correctly.
 
 Version 0.2.0
 -------------

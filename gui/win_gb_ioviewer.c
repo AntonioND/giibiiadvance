@@ -174,7 +174,7 @@ void Win_GBIOViewerUpdate(void)
     GUI_ConsoleModePrintf(&gb_ioview_other_con,0,9,"4Fh VBK  - %02X",GB_MemReadReg8(0xFF4F));
     GUI_ConsoleModePrintf(&gb_ioview_other_con,0,10,"56h RP   - %02X",GB_MemReadReg8(0xFF56));
     GUI_ConsoleModePrintf(&gb_ioview_other_con,0,11,"70h SVBK - %02X",GB_MemReadReg8(0xFF70));
-    GUI_ConsoleModePrintf(&gb_ioview_other_con,0,12,"FFh IR   - %02X",GB_MemReadReg8(0xFFFF));
+    GUI_ConsoleModePrintf(&gb_ioview_other_con,0,12,"FFh IE   - %02X",GB_MemRead8(0xFFFF));
 
     //GBC DMA
     GUI_ConsoleModePrintf(&gb_ioview_gbcdma_con,0,0,"51h SRCH - %02X",GB_MemReadReg8(0xFF51));

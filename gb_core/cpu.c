@@ -218,6 +218,11 @@ void GB_CPUInit(void)
     }
 }
 
+void GB_CPUEnd(void)
+{
+    //nothing here
+}
+
 //----------------------------------------------------------------
 
 int gb_break_execution = 0;
@@ -443,6 +448,7 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                         GameBoy.Emulator.CPUHalt = 2;
                     }
                 }
+                GB_CPUBreakLoop();
                 break;
             case 0x11: //LD DE,nn - 3
                 GB_CPUClockCounterAdd(4);
@@ -1032,6 +1038,7 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                         GameBoy.Emulator.CPUHalt = 1;
                     }
                 }
+                GB_CPUBreakLoop();
                 break;
             case 0x77: //LD (HL),A - 2
                 GB_CPUClockCounterAdd(4);
@@ -3316,7 +3323,6 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                             opcode,GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
                         break;
                 } //end of inner switch
-
                 break;
             case 0xCC: //CALL Z,nn - 6/3
                 if(cpu->F.Z)

@@ -594,6 +594,8 @@ void GB_CheckJoypadInterrupt(void) // called once per frame
 
         if(GameBoy.Emulator.CPUHalt == 2) // Exit stop mode in any hardware
             GameBoy.Emulator.CPUHalt = 0;
+
+        //GB_CPUBreakLoop(); // GB_CheckJoypadInterrupt() shouldn't be called in execution loop, so not needed.
     }
 
     return;

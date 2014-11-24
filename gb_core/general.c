@@ -75,7 +75,7 @@ void GB_PowerOff(void)
     GB_PPUEnd();
     GB_SoundEnd();
     GB_CPUInterruptsEnd();
-    GB_CPUInterruptsEnd();
+    GB_CPUEnd();
 }
 
 void GB_HardReset(void)

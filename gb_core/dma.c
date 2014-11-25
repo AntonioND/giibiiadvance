@@ -202,6 +202,9 @@ int GB_DMAExecute(int clocks)
     //or as soon as entering mode 0 if there is a HDMA copy running. The only possible delay is
     //the one caused by finishing the CPU instruction or IRQ handling.
 
+    if(GameBoy.Emulator.CPUHalt != 0) // only copy if CPU is not halted
+        return 0;
+
     if(GameBoy.Emulator.GBC_DMA_enabled == GBC_DMA_GENERAL)
     {
         //It takes (220 + (n * 7.63)) microseconds in single speed and (110 + (n * 7.63)) microseconds

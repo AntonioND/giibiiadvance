@@ -1,0 +1,1 @@
+You should press a button when running this, and then run it without pressing any button.

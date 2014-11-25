@@ -11,6 +11,8 @@
 
 Main:
 	
+	call	screen_off
+	
 	ld	a,$80
 	ld	[rNR52],a
 	ld	a,$FF

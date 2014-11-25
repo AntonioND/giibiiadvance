@@ -15,7 +15,6 @@ Game Boy
 - When loading a GB only ROM in GBC mode, prepare palettes.
 - Emulate joypad bounce. This doesn't happen in GBA SP.
 - Make that everything read FFh except HRAM when DMG DMA is enabled.
-- HDMA copies when HALT is enabled? HALT is ignored if called when HDMA is active? STOP disables it? Switching speeds disables it?
 - Check what happens if HDMA1-4 are modified during HDMA copy.
 - Memory after OAM is an OAM mirror?
 - Can disabled cart RAM be read?
@@ -23,11 +22,12 @@ Game Boy
 - Check what memory areas do OAM DMA copy from depending on hardware (DMG/GBC).
 - Measure timings of every HALT behaviour.
 - What happens when TAC is changed while timer is working/not working in other models than the DMG/MGB.
-- Switch speed needs a lot of clocks to complete. During that time some IRQs can be triggered! DIV counter keeps counting so all things that use that counter are affected (DIV, timer, sound?). Serial?
 - Initial register values (including hidden ones). Test with and without boot ROM.
 - Initial memory values. Test with and without boot ROM.
 - PPU state after powering on the screen. Is Any register reseted?
 - When LCD is off, are LYC=0 or ScreenMode=0 IRQs triggered?
+- Emulate weird behaviours of speed switch and STOP mode (screen color).
+- Switch LCD off effect (check on hardware).
 
 Game Boy Advance
 ----------------

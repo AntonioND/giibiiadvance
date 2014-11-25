@@ -1,0 +1,2 @@
+DMG/MGB - Nintendo Logo screen -> LCD switched on.
+CGB/GBA - White screen -> LCD switched on.

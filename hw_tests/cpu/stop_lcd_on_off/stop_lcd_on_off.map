@@ -1,0 +1,135 @@
+ROM Bank #0 (HOME):
+  SECTION: $0000-$0000 ($0001 bytes)
+  SECTION: $0008-$0008 ($0001 bytes)
+  SECTION: $0010-$0010 ($0001 bytes)
+  SECTION: $0018-$0018 ($0001 bytes)
+  SECTION: $0020-$0020 ($0001 bytes)
+  SECTION: $0028-$0028 ($0001 bytes)
+  SECTION: $0030-$0030 ($0001 bytes)
+  SECTION: $0038-$003A ($0003 bytes)
+  SECTION: $0040-$0083 ($0044 bytes)
+           $0077 = irq_Common.goto_irq_handler
+           $0078 = wait_vbl
+  SECTION: $0100-$014F ($0050 bytes)
+  SECTION: $0150-$019C ($004D bytes)
+           $0156 = Reset
+           $0150 = StartPoint
+           $0174 = irq_set_JOY
+           $017B = CPU_fast
+           $0165 = irq_set_LCD
+           $0182 = CPU_slow
+           $0160 = irq_set_VBL
+           $016A = irq_set_TIM
+           $016F = irq_set_SIO
+  SECTION: $0084-$00E4 ($0061 bytes)
+           $0084 = Main
+  SECTION: $019D-$01BA ($001E bytes)
+           $01AF = memcopy_inc
+           $01A6 = memcopy
+           $019D = memset
+           $01A5 = memset_rand
+  SECTION: $01BB-$0200 ($0046 bytes)
+           $01CD = div_u8u8u8
+           $01BB = mul_u8u8u16
+           $01E0 = div_s8s8s8
+  SECTION: $0201-$0236 ($0036 bytes)
+           $0201 = scan_keys
+  SECTION: $0237-$0289 ($0053 bytes)
+           $0259 = rom_bank_set
+           $0269 = rom_bank_push_set
+           $0289 = ___long_call._jump_to_function
+           $0241 = rom_bank_pop
+           $0237 = rom_handler_init
+           $027D = ___long_call
+           $0254 = rom_bank_push
+  SECTION: $028A-$02E6 ($005D bytes)
+           $028A = wait_ly
+           $02AE = vram_copy
+           $0291 = wait_frames
+           $02CB = vram_copy_tiles
+           $02BD = vram_memset
+           $0298 = screen_off
+           $02A7 = wait_screen_blank
+  SECTION: $02E7-$0342 ($005C bytes)
+           $02E7 = sprite_get_base_pointer
+           $033B = __refresh_OAM_end
+           $0333 = __refresh_OAM
+           $02FE = sprite_set_params
+           $0340 = refresh_custom_OAM
+           $0306 = spr_set_palette
+           $02F7 = sprite_set_tile
+           $0326 = init_OAM
+           $02F0 = sprite_set_xy
+           $033B = refresh_OAM
+  SECTION: $0343-$037A ($0038 bytes)
+           $0363 = bg_set_tile_wrap
+           $0343 = bg_set_palette
+           $036D = bg_set_tile
+    SLACK: $3CD6 bytes
+
+WRAM Bank #0:
+  SECTION: $C0A0-$C0AC ($000D bytes)
+           $C0A2 = _is_vbl_flag
+           $C0A5 = LCD_handler
+           $C0A9 = SIO_handler
+           $C0AB = JOY_handler
+           $C0A3 = VBL_handler
+           $C0A1 = Init_Reg_B
+           $C0A0 = Init_Reg_A
+           $C0A7 = TIM_handler
+  SECTION: $CE00-$CFFF ($0200 bytes)
+  SECTION: $C0AD-$C0CD ($0021 bytes)
+           $C0CD = rom_position
+           $C0AD = rom_stack
+  SECTION: $C000-$C09F ($00A0 bytes)
+           $C000 = OAM_Copy
+    SLACK: $0D32 bytes
+
+WRAM Bank #1:
+  EMPTY
+
+WRAM Bank #2:
+  EMPTY
+
+WRAM Bank #3:
+  EMPTY
+
+WRAM Bank #4:
+  EMPTY
+
+WRAM Bank #5:
+  EMPTY
+
+WRAM Bank #6:
+  EMPTY
+
+WRAM Bank #7:
+  EMPTY
+
+VRAM Bank #0:
+  EMPTY
+
+VRAM Bank #1:
+  EMPTY
+
+HRAM:
+  SECTION: $FF88-$FF8A ($0003 bytes)
+           $FF89 = joy_held
+           $FF88 = _joy_old
+           $FF8A = joy_pressed
+  SECTION: $FF80-$FF87 ($0008 bytes)
+           $FF80 = refresh_OAM_HRAM
+    SLACK: $0074 bytes
+
+SRAM Bank #0:
+  EMPTY
+
+SRAM Bank #1:
+  EMPTY
+
+SRAM Bank #2:
+  EMPTY
+
+SRAM Bank #3:
+  EMPTY
+

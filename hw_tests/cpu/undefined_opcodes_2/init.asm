@@ -157,52 +157,14 @@ wait_vbl:
 StartPoint:
 
 	di
-	
+
 	ld	sp,$FFFE ; Use this as stack for a while
+	
+	call	scan_keys
+	
+	jp	Main
+	
 
-	push	af ; Save CPU type
-	push	bc
-	
-	xor	a,a
-	ld	[rNR52],a ; Switch off sound
-	
-	ld	hl,_RAM ; Clear RAM
-	ld	bc,$2000
-	ld	d,$00
-	call	memset
-	
-	pop	bc ; Get CPU type
-	pop	af
-	
-	ld	[Init_Reg_A],a  ; Save CPU type into RAM
-	ld	a,b
-	ld	[Init_Reg_B],a
-	
-	ld	sp,StackTop ; Real stack
-	
-	call	screen_off
-
-	ld	hl,_VRAM ; Clear VRAM
-	ld	bc,$2000
-	ld	d,$00
-	call	memset
-	
-	ld	hl,_HRAM ; Clear high RAM (and rIE)
-	ld	bc,$0080
-	ld	d,$00
-	call	memset
-	
-	call	init_OAM ; Copy OAM refresh function to high ram
-	call	refresh_OAM ; We filled RAM with $00, so this will clear OAM
-	
-	call	rom_handler_init
-	
-	; Real program starts here
-	
-	call	Main
-	
-	;Should never reach this point
-	
 	jp	Reset
 	
 ;--------------------------------------------------------------------------

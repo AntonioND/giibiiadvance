@@ -189,6 +189,8 @@ void GB_MemWriteReg8(u32 address, u32 value)
 
     switch(address)
     {
+        // Serial
+
         case SB_REG:
             GB_SerialWriteSB(GB_CPUClockCounterGet(),value);
             return;
@@ -196,6 +198,8 @@ void GB_MemWriteReg8(u32 address, u32 value)
         case SC_REG:
             GB_SerialWriteSC(GB_CPUClockCounterGet(),value);
             return;
+
+        // Timer
 
         case TIMA_REG:
             GB_TimersWriteTIMA(GB_CPUClockCounterGet(),value);
@@ -213,8 +217,57 @@ void GB_MemWriteReg8(u32 address, u32 value)
             GB_TimersWriteDIV(GB_CPUClockCounterGet(),value);
             return;
 
+        // Interrupts
+
+        case IF_REG:
+            //GB_UpdateCounterToClocks(GB_CPUClockCounterGet());
+            GB_PPUUpdateClocksClounterReference(GB_CPUClockCounterGet());
+            GB_TimersUpdateClocksClounterReference(GB_CPUClockCounterGet());
+            GB_SerialUpdateClocksClounterReference(GB_CPUClockCounterGet());
+            mem->IO_Ports[address-0xFF00] = value | (0xE0);
+            GB_CPUBreakLoop();
+            return;
+
+        // DMA
+
+        case DMA_REG:
+            GB_DMAWriteDMA(value);
+            return;
+
+        // Video
+
         case LY_REG: //Read only
             return;
+
+        // GBC Registers
+        // -------------
+
+        // GDMA/HDMA
+
+        case HDMA2_REG:
+            GB_DMAWriteHDMA2(value);
+            return;
+
+        case HDMA4_REG:
+            GB_DMAWriteHDMA4(value);
+            return;
+
+        case HDMA3_REG:
+            GB_DMAWriteHDMA3(value);
+            return;
+
+        case HDMA1_REG:
+            GB_DMAWriteHDMA1(value);
+            return;
+
+        case HDMA5_REG:
+            GB_DMAWriteHDMA5(value);
+            return;
+
+        //      TODO
+        // ---------------
+
+
 
         case SCY_REG:
         case SCX_REG:
@@ -227,14 +280,6 @@ void GB_MemWriteReg8(u32 address, u32 value)
             mem->IO_Ports[address-0xFF00] = value;
             return;
 
-        case IF_REG:
-            //GB_UpdateCounterToClocks(GB_CPUClockCounterGet());
-            GB_PPUUpdateClocksClounterReference(GB_CPUClockCounterGet());
-            GB_TimersUpdateClocksClounterReference(GB_CPUClockCounterGet());
-            GB_SerialUpdateClocksClounterReference(GB_CPUClockCounterGet());
-            mem->IO_Ports[address-0xFF00] = value | (0xE0);
-            GB_CPUBreakLoop();
-            return;
 
         case STAT_REG:
             GB_CPUBreakLoop();
@@ -306,20 +351,12 @@ void GB_MemWriteReg8(u32 address, u32 value)
 
         case P1_REG:
             //GB_SGBUpdate(GB_CPUClockCounterGet()); TODO
-            if(GameBoy.Emulator.SGBEnabled == 1)
-                SGB_WriteP1(value);
-            mem->IO_Ports[P1_REG-0xFF00] = value & 0xF0;
-            //TODO: Can this trigger joypad interrupt?
+            if(GameBoy.Emulator.SGBEnabled == 1) SGB_WriteP1(value);
+            mem->IO_Ports[P1_REG-0xFF00] = value & 0x30;
+            GB_CheckJoypadInterrupt(); // This can trigger the joypad interrupt!!
             return;
 
-        case DMA_REG:
-            //TODO
-            //It should disable non-highram memory (if source is VRAM, VRAM is disabled
-            //instead of other ram)... etc...
-            mem->IO_Ports[DMA_REG-0xFF00] = value;
-            GB_DMAInitOAMCopy(value);
-            GB_CPUBreakLoop();
-            return;
+
         //                   Sound...
         case NR10_REG: case NR11_REG: case NR12_REG: case NR13_REG: case NR14_REG:
         case NR21_REG: case NR22_REG: case NR23_REG: case NR24_REG:
@@ -350,10 +387,10 @@ void GB_MemWriteReg8(u32 address, u32 value)
 
         case KEY1_REG: //For double speed mode
             if(GameBoy.Emulator.CGBEnabled == 0) return;
-
             mem->IO_Ports[KEY1_REG-0xFF00] &= 0xFE;
             mem->IO_Ports[KEY1_REG-0xFF00] |= value&1;
             return;
+
         case SVBK_REG: //Work ram bank
             if(GameBoy.Emulator.CGBEnabled == 0) return;
 
@@ -418,53 +455,6 @@ void GB_MemWriteReg8(u32 address, u32 value)
                 u32 index = (mem->IO_Ports[OCPS_REG-0xFF00] + 1) & 0x3F;
                 index |= (mem->IO_Ports[OCPS_REG-0xFF00]&(1<<7)) | (1<<6);
                 mem->IO_Ports[OCPS_REG-0xFF00] = index;
-            }
-            return;
-
-        case HDMA2_REG:
-        case HDMA4_REG:
-            if(GameBoy.Emulator.CGBEnabled == 0) return;
-
-            if(GameBoy.Emulator.GBC_DMA_enabled == GBC_DMA_NONE)
-                mem->IO_Ports[address-0xFF00] = value & 0xF0; //4 lower bits ignored
-            return;
-        case HDMA3_REG:
-            if(GameBoy.Emulator.CGBEnabled == 0) return;
-
-            if(GameBoy.Emulator.GBC_DMA_enabled == GBC_DMA_NONE)
-                mem->IO_Ports[HDMA3_REG-0xFF00] = value & 0x1F; //Dest is VRAM
-            return;
-        case HDMA1_REG:
-            if(GameBoy.Emulator.CGBEnabled == 0) return;
-
-            if(GameBoy.Emulator.GBC_DMA_enabled == GBC_DMA_NONE)
-                mem->IO_Ports[HDMA1_REG-0xFF00] = value;
-            return;
-
-        case HDMA5_REG:
-            if(GameBoy.Emulator.CGBEnabled == 0) return;
-
-            //Start/Stop GBC DMA copy
-
-            GB_CPUBreakLoop();
-
-            mem->IO_Ports[HDMA5_REG-0xFF00] = value;
-
-            if(GameBoy.Emulator.GBC_DMA_enabled == GBC_DMA_NONE)
-            {
-                GB_DMAInitGBCCopy(value);
-            }
-            else //if(GameBoy.Emulator.GBC_DMA_enabled == GBC_DMA_HBLANK)
-            {
-                // If GBC_DMA_GENERAL the CPU is blocked, not needed to check if that is the current mode
-                if(value & BIT(7))
-                {
-                    GB_DMAInitGBCCopy(value); // update copy with new size - continue HDMA mode, not GDMA
-                }
-                else
-                {
-                    GB_DMAStopGBCCopy();
-                }
             }
             return;
 
@@ -541,7 +531,6 @@ void GB_MemWriteReg8(u32 address, u32 value)
             return;
 
         default:
-        //    mem->IO_Ports[address-0xFF00] = value;
             return;
     }
 
@@ -664,6 +653,7 @@ u32 GB_MemReadReg8(u32 address)
             GB_TimersUpdateClocksClounterReference(GB_CPUClockCounterGet());
             return mem->IO_Ports[address-0xFF00];
 
+        case DMA_REG: // This is R/W in all GB models I have (DMG, MGB, GBC, GBA)
         case TMA_REG:
         case LCDC_REG:
         case SCY_REG:
@@ -680,9 +670,6 @@ u32 GB_MemReadReg8(u32 address)
         case NR43_REG:
         case NR50_REG:
         case NR51_REG:
-            return mem->IO_Ports[address-0xFF00];
-
-        case DMA_REG: // This is R/W in all GB models I have (DMG, MGB, GBC, GBA)
             return mem->IO_Ports[address-0xFF00];
 
         case STAT_REG:
@@ -821,7 +808,7 @@ u32 GB_MemReadReg8(u32 address)
             return mem->IO_Ports[0xFF75-0xFF00] | (0x8F);
 
         default:
-            return 0xFF; //mem->IO_Ports[address-0xFF00];
+            return 0xFF;
     }
 
     return 0xFF;

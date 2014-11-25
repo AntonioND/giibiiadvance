@@ -565,7 +565,7 @@ int GB_TimersGetClocksToNextEvent(void)
 
 //----------------------------------------------------------------
 
-void GB_CheckJoypadInterrupt(void) // called once per frame
+void GB_CheckJoypadInterrupt(void) // Important: Must be called at least once per frame!
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
@@ -574,7 +574,7 @@ void GB_CheckJoypadInterrupt(void) // called once per frame
     u32 p1 = mem->IO_Ports[P1_REG-0xFF00];
     u32 result = 0;
 
-    int Keys = GB_Input_Get(0);
+    int Keys = GB_Input_Get(0); // TODO: This will fail in SGB multiplayer mode, but who cares?
     if((p1 & (1<<5)) == 0) //A-B-SEL-STA
         result |= Keys & (KEY_A|KEY_B|KEY_SELECT|KEY_START);
     if((p1 & (1<<4)) == 0) //PAD
@@ -589,7 +589,7 @@ void GB_CheckJoypadInterrupt(void) // called once per frame
         if(GameBoy.Emulator.CPUHalt == 2) // Exit stop mode in any hardware
             GameBoy.Emulator.CPUHalt = 0;
 
-        //GB_CPUBreakLoop(); // GB_CheckJoypadInterrupt() shouldn't be called in execution loop, so not needed.
+        GB_CPUBreakLoop();
     }
 
     return;

@@ -30,9 +30,13 @@ void GB_DMAEnd(void);
 
 //----------------------------------------------------------------
 
-void GB_DMAInitOAMCopy(int src_addr_high_byte);
-void GB_DMAInitGBCCopy(int register_value);
-void GB_DMAStopGBCCopy(void);
+inline void GB_DMAWriteDMA(int value); // reference_clocks not needed
+
+inline void GB_DMAWriteHDMA1(int value); // reference_clocks not needed
+inline void GB_DMAWriteHDMA2(int value);
+inline void GB_DMAWriteHDMA3(int value);
+inline void GB_DMAWriteHDMA4(int value);
+inline void GB_DMAWriteHDMA5(int value);
 
 //----------------------------------------------------------------
 

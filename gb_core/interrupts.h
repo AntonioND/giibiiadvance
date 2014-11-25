@@ -56,6 +56,7 @@ inline void GB_SetInterrupt(int flag);
 //----------------------------------------------------------------
 
 void GB_TimersWriteDIV(int reference_clocks, int value);
+
 void GB_TimersWriteTIMA(int reference_clocks, int value);
 void GB_TimersWriteTMA(int reference_clocks, int value);
 void GB_TimersWriteTAC(int reference_clocks, int value);
@@ -68,7 +69,7 @@ int GB_TimersGetClocksToNextEvent(void);
 
 //----------------------------------------------------------------
 
-void GB_CheckJoypadInterrupt(void);
+void GB_CheckJoypadInterrupt(void); // Important: Must be called at least once per frame!
 
 //----------------------------------------------------------------
 

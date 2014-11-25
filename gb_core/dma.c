@@ -55,7 +55,7 @@ void GB_DMAEnd(void)
 
 //----------------------------------------------------------------
 
-void GB_DMAInitOAMCopy(int src_addr_high_byte)
+static void GB_DMAInitOAMCopy(int src_addr_high_byte)
 {
     GameBoy.Emulator.OAM_DMA_bytes_left = 40*4;
     GameBoy.Emulator.OAM_DMA_clocks_elapsed = 0;
@@ -63,7 +63,7 @@ void GB_DMAInitOAMCopy(int src_addr_high_byte)
     GameBoy.Emulator.OAM_DMA_dst = 0xFE00;
 }
 
-void GB_DMAInitGBCCopy(int register_value)
+static void GB_DMAInitGBCCopy(int register_value)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
@@ -109,7 +109,7 @@ void GB_DMAInitGBCCopy(int register_value)
     }
 }
 
-void GB_DMAStopGBCCopy(void)
+static void GB_DMAStopGBCCopy(void)
 {
     GameBoy.Emulator.gdma_bytes_left = 0;
     GameBoy.Emulator.hdma_last_ly_copied = -1; // reset
@@ -188,6 +188,78 @@ int GB_DMAGetClocksToNextEvent(void)
     //}
 
     return clocks_to_next_event;
+}
+
+//----------------------------------------------------------------
+
+inline void GB_DMAWriteDMA(int value) // reference_clocks not needed
+{
+    //TODO
+    //It should disable non-highram memory (if source is VRAM, VRAM is disabled
+    //instead of other ram)... etc...
+    GameBoy.Memory.IO_Ports[DMA_REG-0xFF00] = value;
+    GB_DMAInitOAMCopy(value);
+    GB_CPUBreakLoop();
+}
+
+inline void GB_DMAWriteHDMA1(int value) // reference_clocks not needed
+{
+    if(GameBoy.Emulator.CGBEnabled == 0) return;
+    _GB_MEMORY_ * mem = &GameBoy.Memory;
+    mem->IO_Ports[HDMA1_REG-0xFF00] = value;
+    GameBoy.Emulator.gdma_src = (mem->IO_Ports[HDMA1_REG-0xFF00]<<8) | GameBoy.Memory.IO_Ports[HDMA2_REG-0xFF00];
+}
+
+inline void GB_DMAWriteHDMA2(int value)
+{
+    if(GameBoy.Emulator.CGBEnabled == 0) return;
+    _GB_MEMORY_ * mem = &GameBoy.Memory;
+    mem->IO_Ports[HDMA2_REG-0xFF00] = value & 0xF0; //4 lower bits ignored
+    GameBoy.Emulator.gdma_src = (mem->IO_Ports[HDMA1_REG-0xFF00]<<8) | GameBoy.Memory.IO_Ports[HDMA2_REG-0xFF00];
+}
+
+inline void GB_DMAWriteHDMA3(int value)
+{
+    if(GameBoy.Emulator.CGBEnabled == 0) return;
+    _GB_MEMORY_ * mem = &GameBoy.Memory;
+    mem->IO_Ports[HDMA3_REG-0xFF00] = value & 0x1F; //Dest is VRAM
+    GameBoy.Emulator.gdma_dst = ((mem->IO_Ports[HDMA3_REG-0xFF00]<<8) | mem->IO_Ports[HDMA4_REG-0xFF00]) + 0x8000;
+}
+
+inline void GB_DMAWriteHDMA4(int value)
+{
+    if(GameBoy.Emulator.CGBEnabled == 0) return;
+    _GB_MEMORY_ * mem = &GameBoy.Memory;
+    mem->IO_Ports[HDMA4_REG-0xFF00] = value & 0xF0; //4 lower bits ignored
+    GameBoy.Emulator.gdma_dst = ((mem->IO_Ports[HDMA3_REG-0xFF00]<<8) | mem->IO_Ports[HDMA4_REG-0xFF00]) + 0x8000;
+}
+
+inline void GB_DMAWriteHDMA5(int value)
+{
+    if(GameBoy.Emulator.CGBEnabled == 0) return;
+
+    //Start/Stop GBC DMA copy
+
+    GB_CPUBreakLoop();
+
+    GameBoy.Memory.IO_Ports[HDMA5_REG-0xFF00] = value;
+
+    if(GameBoy.Emulator.GBC_DMA_enabled == GBC_DMA_NONE)
+    {
+        GB_DMAInitGBCCopy(value);
+    }
+    else //if(GameBoy.Emulator.GBC_DMA_enabled == GBC_DMA_HBLANK)
+    {
+        // If GBC_DMA_GENERAL the CPU is blocked, not needed to check if that is the current mode
+        if(value & BIT(7))
+        {
+            GB_DMAInitGBCCopy(value); // update copy with new size - continue HDMA mode, not GDMA
+        }
+        else
+        {
+            GB_DMAStopGBCCopy();
+        }
+    }
 }
 
 //----------------------------------------------------------------

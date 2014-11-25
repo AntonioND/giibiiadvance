@@ -340,6 +340,7 @@ typedef struct {
     //Other things
     u32 CPUHalt;
     u32 halt_bug;
+    u32 cpu_change_speed_clocks; // clocks needed to change speed
 
     u32 SGBEnabled;
     u32 wait_cycles;

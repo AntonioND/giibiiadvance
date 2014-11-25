@@ -426,6 +426,7 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 if(GB_MemRead8(cpu->R16.PC++) != 0)
                     Debug_DebugMsgArg("Corrupted stop.\nPC: %04X\nROM: %d",
                             GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
+                GB_CPUClockCounterAdd(4);
 
                 if(GameBoy.Emulator.CGBEnabled == 0)
                 {
@@ -435,13 +436,10 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 {
                     if(mem->IO_Ports[KEY1_REG-0xFF00]&1)
                     {
-                        GameBoy.Emulator.DoubleSpeed ^= 1;
-                        mem->IO_Ports[KEY1_REG-0xFF00] = GameBoy.Emulator.DoubleSpeed<<7;
-
-                        //TODO: Stop needs a lot of clocks to complete. During that time some IRQs can be triggered!
-                        //DIV counter keeps counting so all things that use that counter are affected
-                        if(GameBoy.Emulator.timer_enabled)
-                            GB_SetInterrupt(I_TIMER);
+                        GameBoy.Emulator.CPUHalt = 3; // enter changing speed mode
+                        GameBoy.Emulator.cpu_change_speed_clocks = 128*1024 - 84;
+                        // same clocks when switching to double and single speed modes
+                        // The 84 clocks subtracted could be because of glitching during the speed switch.
                     }
                     else
                     {
@@ -3961,11 +3959,29 @@ int GB_RunFor(s32 run_for_clocks) // 1 frame = 70224 clocks
                 int irq_executed_clocks = GB_IRQExecute(); // GB_CPUClockCounterAdd() internal
                 if(irq_executed_clocks == 0)
                 {
-                    if(GameBoy.Emulator.CPUHalt == 0)
+                    if(GameBoy.Emulator.CPUHalt == 0) // no halt
                     {
                         executed_clocks = GB_CPUExecute(clocks_to_next_event); // GB_CPUClockCounterAdd() internal
                     }
-                    else
+                    else if(GameBoy.Emulator.CPUHalt == 3) // change speed mode
+                    {
+                        if(clocks_to_next_event >= GameBoy.Emulator.cpu_change_speed_clocks)
+                        {
+                            executed_clocks = GameBoy.Emulator.cpu_change_speed_clocks;
+                            GameBoy.Emulator.cpu_change_speed_clocks = 0;
+                            GameBoy.Emulator.CPUHalt = 0; // exit change speed mode
+
+                            GameBoy.Emulator.DoubleSpeed ^= 1;
+                            GameBoy.Memory.IO_Ports[KEY1_REG-0xFF00] = GameBoy.Emulator.DoubleSpeed<<7;
+                        }
+                        else
+                        {
+                            executed_clocks = clocks_to_next_event;
+                            GameBoy.Emulator.cpu_change_speed_clocks -= clocks_to_next_event;
+                        }
+                        GB_CPUClockCounterAdd(executed_clocks);
+                    }
+                    else // halt or stop
                     {
                         executed_clocks = clocks_to_next_event;
                         GB_CPUClockCounterAdd(clocks_to_next_event);

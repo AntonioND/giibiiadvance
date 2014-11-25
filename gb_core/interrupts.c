@@ -331,8 +331,11 @@ void GB_TimersWriteTAC(int reference_clocks, int value)
             }
         }
     }
-    else if(GameBoy.Emulator.HardwareType == HW_GBC)
+    else if( (GameBoy.Emulator.HardwareType == HW_GBC) || (GameBoy.Emulator.HardwareType == HW_GBA) ||
+        (GameBoy.Emulator.HardwareType == HW_GBA_SP) )
     {
+        // GBC/GBA/GBA SP are different, but it can't be emulated correctly.
+
         if(old_enable == 0)
         {
             // This part is different from DMG. A lot glitchier, too...
@@ -429,12 +432,6 @@ void GB_TimersWriteTAC(int reference_clocks, int value)
             }
         }
     }
-    else if(GameBoy.Emulator.HardwareType == HW_GBA)
-    {
-    }
-    else if(GameBoy.Emulator.HardwareType == HW_GBA_SP)
-    {
-    }
 
     if(glitch)
         GB_TimerIncreaseTIMA();
@@ -500,10 +497,7 @@ void GB_TimersUpdateClocksClounterReference(int reference_clocks)
 
     GameBoy.Emulator.tima_just_reloaded = 0;
 
-    //if(GameBoy.Emulator.timer_enabled)
-        GB_TimersUpdateDelays(increment_clocks);
-    //else
-    //    GameBoy.Emulator.timer_irq_delay_active = 0;
+    GB_TimersUpdateDelays(increment_clocks);
 
     if(GameBoy.Emulator.timer_enabled)
     {

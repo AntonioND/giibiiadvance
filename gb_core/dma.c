@@ -207,27 +207,7 @@ int GB_DMAExecute(int clocks)
 
     if(GameBoy.Emulator.GBC_DMA_enabled == GBC_DMA_GENERAL)
     {
-        //It takes (220 + (n * 7.63)) microseconds in single speed and (110 + (n * 7.63)) microseconds
-        //in double speed mode. (Where n = 0 is 16 bytes, n = 1 is 32 bytes, n=2 is 48 bytes, etc... )
-        //This translates to a transfer rate of 2097152 bytes/sec if you don't consider the initial
-        //startup delay of 220uS (110uS in double speed mode.) The value 110uS is accurate within +/-5uS.
-        //The value 220uS is accurate within +/- 10uS.
-
-        // Single speed
-        // 220 us = 922 (+/- 42) clocks
-        // 7.63 us = 32 clocks
-        // Preparation clocks = 922 - 32 = 890
-        // Clocks per byte = 32/16 = 2
-
-        //Double speed
-        // 110 us = 922 (+/- 42) clocks
-        // 7.63 us = 64 clocks
-        // Preparation clocks = 922 - 64 = 858 (?)
-        // Clocks per byte = 64/16 = 4
-
         //This copy has to be divided. Only execute the specified clocks.
-        //The CPU can force to end an instruction because the worst case is about 30 clocks off, but
-        //GDMA worst case is about 9050 clocks
 
         int start_clocks = GB_CPUClockCounterGet();
 

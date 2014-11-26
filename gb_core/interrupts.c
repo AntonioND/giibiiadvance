@@ -28,6 +28,8 @@
 #include "memory.h"
 #include "general.h"
 #include "video.h"
+#include "ppu.h"
+#include "serial.h"
 #include "interrupts.h"
 #include "gb_main.h"
 
@@ -181,6 +183,24 @@ inline void GB_SetInterrupt(int flag)
     GameBoy.Memory.IO_Ports[IF_REG-0xFF00] |= flag;
     //if(GameBoy.Memory.HighRAM[IE_REG-0xFF80] & flag)
        GameBoy.Emulator.CPUHalt = 0; // Clear halt regardless of IME
+    GB_CPUBreakLoop();
+}
+
+//----------------------------------------------------------------
+
+void GB_InterruptsWriteIE(int value) // reference_clocks not needed
+{
+    GameBoy.Memory.HighRAM[IE_REG-0xFF80] = value;
+    GB_CPUBreakLoop();
+}
+
+void GB_InterruptsWriteIF(int reference_clocks, int value)
+{
+    //GB_UpdateCounterToClocks(reference_clocks);
+    GB_PPUUpdateClocksClounterReference(reference_clocks);
+    GB_TimersUpdateClocksClounterReference(reference_clocks);
+    GB_SerialUpdateClocksClounterReference(reference_clocks);
+    GameBoy.Memory.IO_Ports[IF_REG-0xFF00] = value | (0xE0);
     GB_CPUBreakLoop();
 }
 
@@ -548,8 +568,10 @@ int GB_TimersGetClocksToNextEvent(void)
 
     if(GameBoy.Emulator.timer_enabled)
     {
-        int timer_counter = GameBoy.Emulator.sys_clocks&GameBoy.Emulator.timer_overflow_mask;
-        int clocks_left_for_timer = (GameBoy.Emulator.timer_overflow_mask+1) - timer_counter;
+        int mask = GameBoy.Emulator.timer_overflow_mask;
+        int timer_counter = GameBoy.Emulator.sys_clocks&mask;
+        int clocks_left_for_timer = (mask+1) - timer_counter; // clocks for next increment
+        clocks_left_for_timer += (255 - GameBoy.Memory.IO_Ports[TIMA_REG-0xFF00]) * (mask+1); // for overflow
         if(clocks_left_for_timer < clocks_to_next_event)
             clocks_to_next_event = clocks_left_for_timer;
 

@@ -55,6 +55,11 @@ inline void GB_SetInterrupt(int flag);
 
 //----------------------------------------------------------------
 
+void GB_InterruptsWriteIE(int value); // reference_clocks not needed
+void GB_InterruptsWriteIF(int reference_clocks, int value);
+
+//----------------------------------------------------------------
+
 void GB_TimersWriteDIV(int reference_clocks, int value);
 
 void GB_TimersWriteTIMA(int reference_clocks, int value);

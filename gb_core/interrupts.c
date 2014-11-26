@@ -89,7 +89,7 @@ void GB_CPUInterruptsInit(void)
 
     GB_MemWrite8(TAC_REG,0x00); // Verified on hardware
 
-    if(GameBoy.Emulator.enable_boot_rom) // unknown
+    if(GameBoy.Emulator.enable_boot_rom) // actually unknown, but one can guess...
     {
         switch(GameBoy.Emulator.HardwareType)
         {
@@ -124,23 +124,27 @@ void GB_CPUInterruptsInit(void)
         {
             case HW_GB:
             case HW_GBP:
-                GameBoy.Emulator.sys_clocks = 0xAF0C; // Verified on hardware
+                GameBoy.Emulator.sys_clocks = 0xABCC; // Verified on hardware
                 break;
 
             case HW_SGB:
             case HW_SGB2:
-                GameBoy.Emulator.sys_clocks = 0; // TODO: Unknown. Can't test.
+                GameBoy.Emulator.sys_clocks = 0; // TODO: Unknown. Can't test. Not the same as DMG (different boot ROM).
                 break;
 
             case HW_GBC:
-                GameBoy.Emulator.sys_clocks = 0x21E0; // Verified on hardware
-				//TODO: GBC in GB mode? Use value corresponding to a boot without any user interaction.
+                if(GameBoy.Emulator.game_supports_gbc)
+                    GameBoy.Emulator.sys_clocks = 0x1EA0; // Verified on hardware
+                else
+                    GameBoy.Emulator.sys_clocks = 0x267C; // Verified on hardware - No user interaction during boot.
                 break;
 
             case HW_GBA:
             case HW_GBA_SP:
-                GameBoy.Emulator.sys_clocks = 0x21E4; // Verified on hardware
-				//TODO: GBC in GB mode? Use value corresponding to a boot without any user interaction.
+                if(GameBoy.Emulator.game_supports_gbc)
+                    GameBoy.Emulator.sys_clocks = 0x1EA4; // Verified on hardware
+                else
+                    GameBoy.Emulator.sys_clocks = 0x2680; // Verified on hardware - No user interaction during boot.
                 break;
 
             default:

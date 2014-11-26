@@ -164,22 +164,27 @@ int GB_CartridgeLoad(const u8 * pointer, const u32 rom_size)
     int enable_sgb = 0;
     int enable_gbc = 0;
 
+    GameBoy.Emulator.game_supports_gbc = 0;
+
     //COLOR
     if(GB_Header->cgb_flag & (1<<7))
     {
         if(GB_Header->cgb_flag == 0xC0)//GBC only
         {
             enable_gbc = 1;
+            GameBoy.Emulator.game_supports_gbc = 1;
         }
         else if(GB_Header->cgb_flag == 0x80) //Can use a normal GB too
         {
             enable_gbc = 1;
             enable_gb = 1;
+            GameBoy.Emulator.game_supports_gbc = 1;
         }
         else //Unknown
         {
             enable_gb = 1;
             enable_gbc = 1;
+            GameBoy.Emulator.game_supports_gbc = 1;
 
             ConsolePrint("[!]Unknown GBC flag...\n");
             if(EmulatorConfig.debug_msg_enable) showconsole = 1;
@@ -381,17 +386,7 @@ int GB_CartridgeLoad(const u8 * pointer, const u32 rom_size)
             GameBoy.Emulator.MemoryController = MEM_MBC3;
             GameBoy.Emulator.HasBattery = 1;
             break;
-    /*    case 0x15: //MBC4
-            GameBoy.Emulator.MemoryController = MEM_MBC4;
-            break;
-        case 0x16: //MBC4+RAM          //I've never seen a game that uses MBC4...
-            GameBoy.Emulator.MemoryController = MEM_MBC4;
-            break;
-        case 0x17: //MBC4+RAM+BATTERY
-            GameBoy.Emulator.MemoryController = MEM_MBC4;
-            GameBoy.Emulator.HasBattery = 1;
-            break;
-    */    case 0x19: //MBC5
+        case 0x19: //MBC5
             GameBoy.Emulator.MemoryController = MEM_MBC5;
             break;
         case 0x1A: //MBC5+RAM
@@ -481,10 +476,6 @@ int GB_CartridgeLoad(const u8 * pointer, const u32 rom_size)
         case 0x06: GameBoy.Emulator.ROM_Banks = 128; break;
         case 0x07: GameBoy.Emulator.ROM_Banks = 256; break;
         case 0x08: GameBoy.Emulator.ROM_Banks = 512; break;
-    //    case 0x52: GameBoy.Emulator.ROM_Banks = 72; break; // After the general checksum, this
-    //    case 0x53: GameBoy.Emulator.ROM_Banks = 80; break; // is changed to 128 to avoid
-    //    case 0x54: GameBoy.Emulator.ROM_Banks = 96; break; // problems...
-    //    I've never seen a game with 0x52, 0x53 or 0x54 in its header.
         default:
              ConsolePrint("[!]ROM SIZE UNKNOWN: %02X\n",GB_Header->rom_size);
              showconsole = 1;
@@ -555,10 +546,6 @@ int GB_CartridgeLoad(const u8 * pointer, const u32 rom_size)
         ConsolePrint("\n[!]INCORRECT! - Maybe a bad dump?\n[!]Game wouldn't work in a real GB.\n");
         if(EmulatorConfig.debug_msg_enable) showconsole = 1;
     }
-
-    //Fix some rom sizes...
-//    if(GameBoy.Emulator.ROM_Banks == 72 || GameBoy.Emulator.ROM_Banks == 80 || GameBoy.Emulator.ROM_Banks == 96)
-//        GameBoy.Emulator.ROM_Banks = 128;
 
     //  SAVE LOCATION...
     GameBoy.Emulator.Rom_Pointer = (void*)GB_Header;

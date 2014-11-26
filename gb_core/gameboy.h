@@ -307,6 +307,7 @@ typedef struct {
     u32 rumble; //rumble enabled
     u32 * Rom_Pointer;
     char save_filename[MAX_PATHLEN];
+    u32 game_supports_gbc;
 
     u8 * boot_rom;
     u32 boot_rom_loaded;

@@ -38,7 +38,11 @@
 #include "serial.h"
 #include "dma.h"
 
+//----------------------------------------------------------------
+
 extern _GB_CONTEXT_ GameBoy;
+
+//----------------------------------------------------------------
 
 void GB_MemInit(void)
 {
@@ -87,6 +91,13 @@ void GB_MemInit(void)
 
     //All those writes will generate a GB_CPUBreakLoop(), but it doesn't matter.
 }
+
+void GB_MemEnd(void)
+{
+    //Nothing to do
+}
+
+//----------------------------------------------------------------
 
 inline void GB_MemWrite16(u32 address, u32 value)
 {
@@ -173,7 +184,7 @@ void GB_MemWrite8(u32 address, u32 value)
             mem->HighRAM[address-0xFF80] = value;
             return;
         default:
-            Debug_DebugMsgArg("Wrote address %04x\nPC: %04x\nROM: %d",
+            Debug_ErrorMsgArg("Wrote address %04x\nPC: %04x\nROM: %d",
                         address,GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
             GB_MemWrite8(address&0xFFFF,value);
             return;
@@ -526,6 +537,8 @@ void GB_MemWriteReg8(u32 address, u32 value)
     return;
 }
 
+//----------------------------------------------------------------
+
 inline u32 GB_MemRead16(u32 address)
 {
     return ( GB_MemRead8(address) | (GB_MemRead8((address+1)&0xFFFF) << 8) );
@@ -604,7 +617,7 @@ u32 GB_MemRead8(u32 address)
 
             return mem->HighRAM[address-0xFF80];
         default:
-            Debug_DebugMsgArg("Read address %04X\nPC: %04X\nROM: %d",
+            Debug_ErrorMsgArg("Read address %04X\nPC: %04X\nROM: %d",
                         address,GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
             return GB_MemReadReg8(address&0xFFFF);
     }
@@ -847,3 +860,116 @@ u32 GB_MemReadReg8(u32 address)
     return 0xFF;
 }
 
+//----------------------------------------------------------------
+
+void GB_MemWriteDMA8(u32 address, u32 value) // This assumes that address is 0xFE00-0xFEA0
+{
+#ifdef VRAM_MEM_CHECKING
+    if(GameBoy.Emulator.lcd_on && GameBoy.Emulator.ScreenMode == 2 or 3) return;
+#endif
+    GameBoy.Memory.ObjAttrMem[address-0xFE00] = value;
+}
+
+u32 GB_MemReadDMA8(u32 address) // NOT VERIFIED YET
+{
+    _GB_MEMORY_ * mem = &GameBoy.Memory;
+
+    switch(address >> 12)
+    {
+        case 0x0:
+        case 0x1:
+        case 0x2:
+        case 0x3: //16KB ROM Bank 00
+            return mem->ROM_Base[address];
+        case 0x4:
+        case 0x5:
+        case 0x6:
+        case 0x7: //16KB ROM Bank 01..NN
+            return mem->ROM_Curr[address-0x4000];
+        case 0x8:
+        case 0x9: //8KB Video RAM (VRAM)
+#ifdef VRAM_MEM_CHECKING
+            if(GameBoy.Emulator.lcd_on && GameBoy.Emulator.ScreenMode == 3) return 0xFF;
+#endif
+            return 0xFF; // ??
+        case 0xA:
+        case 0xB: //8KB External RAM
+            return GameBoy.Memory.MapperRead(address);
+        case 0xC: //4KB Work RAM Bank 0
+            return mem->WorkRAM[address-0xC000];
+        case 0xD: // 4KB Work RAM Bank 1
+            return mem->WorkRAM_Curr[address-0xD000];
+        case 0xE: // Same as C000-DDFF
+        case 0xF:
+            return GameBoy.Memory.MapperRead(address+0xA000-0xE000);
+        default:
+            Debug_ErrorMsgArg("GB_MemReadDMA8() Read address %04X\nPC: %04X\nROM: %d",
+                        address,GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
+            return GB_MemReadReg8(address&0xFFFF);
+    }
+
+    return 0x00;
+}
+
+//----------------------------------------------------------------
+
+void GB_MemWriteHDMA8(u32 address, u32 value)
+{
+    if( (address & 0xE000) == 0x8000 ) //8000h or 9000h - Video RAM (VRAM)
+    {
+#ifdef VRAM_MEM_CHECKING
+        if(GameBoy.Emulator.lcd_on && GameBoy.Emulator.ScreenMode == 3) return;
+#endif
+        GameBoy.Memory.VideoRAM_Curr[address-0x8000] = value;
+        return;
+    }
+    else
+    {
+        Debug_ErrorMsgArg("GB_MemWriteHDMA8(): Wrote address %04x\nPC: %04x\nROM: %d",
+                    address,GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
+        return;
+    }
+}
+
+u32 GB_MemReadHDMA8(u32 address)
+{
+    _GB_MEMORY_ * mem = &GameBoy.Memory;
+
+    switch(address >> 12)
+    {
+        case 0x0:
+        case 0x1:
+        case 0x2:
+        case 0x3: //16KB ROM Bank 00
+            return mem->ROM_Base[address];
+        case 0x4:
+        case 0x5:
+        case 0x6:
+        case 0x7: //16KB ROM Bank 01..NN
+            return mem->ROM_Curr[address-0x4000];
+        case 0x8:
+        case 0x9: //8KB Video RAM (VRAM)
+#ifdef VRAM_MEM_CHECKING
+            if(GameBoy.Emulator.lcd_on && GameBoy.Emulator.ScreenMode == 3) return 0xFF;
+#endif
+            return 0xFF; // TODO: This is not completely correct.
+        case 0xA:
+        case 0xB: //8KB External RAM
+            return GameBoy.Memory.MapperRead(address);
+        case 0xC: //4KB Work RAM Bank 0
+            return mem->WorkRAM[address-0xC000];
+        case 0xD: // 4KB Work RAM Bank 1
+            return mem->WorkRAM_Curr[address-0xD000];
+        case 0xE: // Same as C000-DDFF
+        case 0xF:
+            return GameBoy.Memory.MapperRead(address+0xA000-0xE000);
+        default:
+            Debug_ErrorMsgArg("GB_MemReadHDMA8() Read address %04X\nPC: %04X\nROM: %d",
+                        address,GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
+            return GB_MemReadReg8(address&0xFFFF);
+    }
+
+    return 0x00;
+}
+
+//----------------------------------------------------------------

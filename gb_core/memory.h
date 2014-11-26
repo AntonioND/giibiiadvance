@@ -19,15 +19,34 @@
 #ifndef __GB_MEMORY__
 #define __GB_MEMORY__
 
+//----------------------------------------------------------------
+
 void GB_MemInit(void);
+void GB_MemEnd(void);
+
+//----------------------------------------------------------------
 
 inline void GB_MemWrite16(u32 address, u32 value);
 void GB_MemWrite8(u32 address, u32 value);
 void GB_MemWriteReg8(u32 address, u32 value);
 
+//----------------------------------------------------------------
+
 inline u32 GB_MemRead16(u32 address);
 u32 GB_MemRead8(u32 address);
 u32 GB_MemReadReg8(u32 address);
+
+//----------------------------------------------------------------
+
+void GB_MemWriteDMA8(u32 address, u32 value); // This assumes that address is 0xFE00-0xFEA0
+u32 GB_MemReadDMA8(u32 address);
+
+//----------------------------------------------------------------
+
+void GB_MemWriteHDMA8(u32 address, u32 value);
+u32 GB_MemReadHDMA8(u32 address);
+
+//----------------------------------------------------------------
 
 #endif //__GB_MEMORY__
 

@@ -154,7 +154,7 @@ void GB_DMAUpdateClocksClounterReference(int reference_clocks)
             GameBoy.Emulator.OAM_DMA_clocks_elapsed ++;
             if((GameBoy.Emulator.OAM_DMA_clocks_elapsed & 3) == 0)
             {
-                GB_MemWrite8(GameBoy.Emulator.OAM_DMA_dst++,GB_MemRead8(GameBoy.Emulator.OAM_DMA_src++));
+                GB_MemWriteDMA8(GameBoy.Emulator.OAM_DMA_dst++,GB_MemReadDMA8(GameBoy.Emulator.OAM_DMA_src++));
                 GameBoy.Emulator.OAM_DMA_bytes_left --;
 
                 if(GameBoy.Emulator.OAM_DMA_bytes_left == 0)
@@ -316,7 +316,7 @@ int GB_DMAExecute(int clocks)
 
                     if( (GameBoy.Emulator.gdma_copy_clocks_left & clocks_per_byte_mask) == 0 )
                     {
-                        GB_MemWrite8(GameBoy.Emulator.gdma_dst++,GB_MemRead8(GameBoy.Emulator.gdma_src++));
+                        GB_MemWriteHDMA8(GameBoy.Emulator.gdma_dst++,GB_MemReadHDMA8(GameBoy.Emulator.gdma_src++));
                         bytes --;
                         if(bytes == 0)
                         {
@@ -375,7 +375,7 @@ int GB_DMAExecute(int clocks)
                         {
                             //The copy needs the same TIME in single and double speeds mode.
                             GB_CPUClockCounterAdd(2<<GameBoy.Emulator.DoubleSpeed);
-                            GB_MemWrite8(GameBoy.Emulator.gdma_dst++,GB_MemRead8(GameBoy.Emulator.gdma_src++));
+                            GB_MemWriteHDMA8(GameBoy.Emulator.gdma_dst++,GB_MemReadHDMA8(GameBoy.Emulator.gdma_src++));
                         }
 
                         mem->IO_Ports[HDMA1_REG-0xFF00] = GameBoy.Emulator.gdma_src >> 8;

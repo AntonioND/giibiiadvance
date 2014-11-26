@@ -1,0 +1,1 @@
+Keep any button pressed when initing the ROM. Don't press any other, don't release that pressed button. A new tone should play in a second and a half.

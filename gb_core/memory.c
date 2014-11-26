@@ -394,10 +394,10 @@ void GB_MemWriteReg8(u32 address, u32 value)
         case SVBK_REG: //Work ram bank
             if(GameBoy.Emulator.CGBEnabled == 0) return;
 
+            mem->IO_Ports[SVBK_REG-0xFF00] = value | (0xF8);
+
             value &= 7;
             if(value == 0) value = 1;
-
-            mem->IO_Ports[SVBK_REG-0xFF00] = value | (0xF8);
 
             mem->selected_wram = value-1;
             mem->WorkRAM_Curr = mem->WorkRAM_Switch[mem->selected_wram];
@@ -630,6 +630,18 @@ u32 GB_MemReadReg8(u32 address)
     switch(address)
     {
         case VBK_REG:
+            if( (GameBoy.Emulator.HardwareType == HW_GB) || (GameBoy.Emulator.HardwareType == HW_GBP) ||
+                (GameBoy.Emulator.HardwareType == HW_SGB) || (GameBoy.Emulator.HardwareType == HW_SGB2) )
+            {
+                return 0xFF;
+            }
+            else
+            {
+                if(GameBoy.Emulator.CGBEnabled == 0)
+                    return 0xFE;
+            }
+            return mem->IO_Ports[address-0xFF00];
+
         case HDMA5_REG: // Updated in execution loop. The others are write only
         case BCPS_REG:
         case OCPS_REG:
@@ -647,6 +659,10 @@ u32 GB_MemReadReg8(u32 address)
         case SB_REG:
             GB_SerialUpdateClocksClounterReference(GB_CPUClockCounterGet());
             return mem->IO_Ports[SB_REG-0xFF00];
+
+        case SC_REG:
+            GB_SerialUpdateClocksClounterReference(GB_CPUClockCounterGet());
+            return mem->IO_Ports[SC_REG-0xFF00] | ((GameBoy.Emulator.CGBEnabled == 1) ? 0x7C: 0x7E);
 
         case DIV_REG:
         case TIMA_REG:
@@ -762,8 +778,7 @@ u32 GB_MemReadReg8(u32 address)
         case TAC_REG:
             return mem->IO_Ports[TAC_REG-0xFF00] | (0xF8);
 
-        case SC_REG:
-            return mem->IO_Ports[SC_REG-0xFF00] | ((GameBoy.Emulator.CGBEnabled == 1) ? 0x7C: 0x7E);
+
 
         //                   GAMEBOY COLOR REGISTERS
 

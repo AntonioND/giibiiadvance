@@ -26,6 +26,7 @@ Game Boy
 - PPU state after powering on the screen. Is Any register reseted?
 - When LCD is off, are LYC=0 or ScreenMode=0 IRQs triggered?
 - Emulate weird behaviours of speed switch and STOP mode (screen color).
+- Emulate RP register.
 
 Game Boy Advance
 ----------------

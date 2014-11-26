@@ -1,2 +1,0 @@
-LY	7..0 (R)* Screen OFF = 00h
-LYC	7..0 (R/W)

@@ -1,0 +1,99 @@
+ROM Bank #0 (HOME):
+  SECTION: $0000-$0047 ($0048 bytes)
+           $0022 = wait_ly
+           $0029 = screen_off
+           $0000 = CPU_fast
+           $0037 = memset
+           $003F = memcopy
+           $0007 = CPU_slow
+  SECTION: $0100-$02AB ($01AC bytes)
+  SECTION: $02AC-$050D ($0262 bytes)
+           $02C1 = DMA0_END
+           $02AC = DMA0_START
+           $02D7 = DMA1_END
+           $02C1 = DMA1_START
+           $02EE = DMA2_END
+           $02D7 = DMA2_START
+           $0306 = DMA3_END
+           $02EE = DMA3_START
+           $031F = DMA4_END
+           $0306 = DMA4_START
+           $0339 = DMA5_END
+           $031F = DMA5_START
+           $0354 = DMA6_END
+           $0339 = DMA6_START
+           $0370 = DMA7_END
+           $0354 = DMA7_START
+           $038D = DMA8_END
+           $0370 = DMA8_START
+           $03AB = DMA9_END
+           $038D = DMA9_START
+           $03CA = DMA10_END
+           $03AB = DMA10_START
+           $03EA = DMA11_END
+           $03CA = DMA11_START
+           $040B = DMA12_END
+           $03EA = DMA12_START
+           $042D = DMA13_END
+           $040B = DMA13_START
+           $0450 = DMA14_END
+           $042D = DMA14_START
+           $0474 = DMA15_END
+           $0450 = DMA15_START
+           $0499 = DMA16_END
+           $0474 = DMA16_START
+           $04BF = DMA17_END
+           $0499 = DMA17_START
+           $04E6 = DMA18_END
+           $04BF = DMA18_START
+           $050E = DMA19_END
+           $04E6 = DMA19_START
+    SLACK: $3BAA bytes
+
+WRAM Bank #0:
+  SECTION: $C100-$C0FF ($0000 bytes)
+           $C100 = MAGIC_VALUE
+  EMPTY
+
+WRAM Bank #1:
+  EMPTY
+
+WRAM Bank #2:
+  EMPTY
+
+WRAM Bank #3:
+  EMPTY
+
+WRAM Bank #4:
+  EMPTY
+
+WRAM Bank #5:
+  EMPTY
+
+WRAM Bank #6:
+  EMPTY
+
+WRAM Bank #7:
+  EMPTY
+
+VRAM Bank #0:
+  EMPTY
+
+VRAM Bank #1:
+  EMPTY
+
+HRAM:
+  EMPTY
+
+SRAM Bank #0:
+  EMPTY
+
+SRAM Bank #1:
+  EMPTY
+
+SRAM Bank #2:
+  EMPTY
+
+SRAM Bank #3:
+  EMPTY
+

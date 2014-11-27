@@ -221,7 +221,7 @@ void GB_PPUUpdateClocksClounterReference(int reference_clocks)
                         GameBoy.Emulator.ScreenMode = 3;
                         mem->IO_Ports[STAT_REG-0xFF00] |= 0x03;
 
-                        GB_CheckStatSignal();
+                        GB_PPUCheckStatSignal();
                     }
                     else
                     {
@@ -238,7 +238,7 @@ void GB_PPUUpdateClocksClounterReference(int reference_clocks)
                         GameBoy.Emulator.ScreenMode = 0;
                         mem->IO_Ports[STAT_REG-0xFF00] &= 0xFC;
 
-                        GB_CheckStatSignal();
+                        GB_PPUCheckStatSignal();
                     }
                     else
                     {
@@ -254,7 +254,7 @@ void GB_PPUUpdateClocksClounterReference(int reference_clocks)
 
                         mem->IO_Ports[LY_REG-0xFF00] = GameBoy.Emulator.CurrentScanLine;
 
-                        GB_CheckLYC();
+                        GB_PPUCheckLYC();
 
                         if(GameBoy.Emulator.CurrentScanLine == 144)
                         {
@@ -272,7 +272,7 @@ void GB_PPUUpdateClocksClounterReference(int reference_clocks)
                             mem->IO_Ports[STAT_REG-0xFF00] |= 0x02;
                         }
 
-                        GB_CheckStatSignal();
+                        GB_PPUCheckStatSignal();
                     }
                     else
                     {
@@ -289,7 +289,7 @@ void GB_PPUUpdateClocksClounterReference(int reference_clocks)
                             GameBoy.Emulator.ScreenMode = 2;
                             mem->IO_Ports[STAT_REG-0xFF00] &= 0xFC;
                             mem->IO_Ports[STAT_REG-0xFF00] |= 0x02;
-                            GB_CheckStatSignal();
+                            GB_PPUCheckStatSignal();
                             break;
                         }
 
@@ -309,9 +309,9 @@ void GB_PPUUpdateClocksClounterReference(int reference_clocks)
 
                         mem->IO_Ports[LY_REG-0xFF00] = GameBoy.Emulator.CurrentScanLine;
 
-                        GB_CheckLYC();
+                        GB_PPUCheckLYC();
 
-                        GB_CheckStatSignal();
+                        GB_PPUCheckStatSignal();
                     }
                     else
                     {
@@ -359,7 +359,7 @@ int GB_PPUGetClocksToNextEvent(void)
 
 //----------------------------------------------------------------
 
-inline void GB_CheckStatSignal(void)
+inline void GB_PPUCheckStatSignal(void)
 {
     if(GameBoy.Emulator.lcd_on == 0)
     {
@@ -388,7 +388,7 @@ inline void GB_CheckStatSignal(void)
     }
 }
 
-inline void GB_CheckLYC(void)
+inline void GB_PPUCheckLYC(void)
 {
     if(GameBoy.Emulator.lcd_on)
     {

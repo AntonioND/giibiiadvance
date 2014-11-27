@@ -36,8 +36,8 @@ int GB_PPUGetClocksToNextEvent(void);
 
 //----------------------------------------------------------------
 
-inline void GB_CheckStatSignal(void);
-inline void GB_CheckLYC(void);
+inline void GB_PPUCheckStatSignal(void);
+inline void GB_PPUCheckLYC(void);
 
 //----------------------------------------------------------------
 

@@ -293,7 +293,7 @@ void GB_MemWriteReg8(u32 address, u32 value)
             mem->IO_Ports[STAT_REG-0xFF00] &= (0x07);
             mem->IO_Ports[STAT_REG-0xFF00] |= (value & 0xF8);
 
-            GB_CheckStatSignal();
+            GB_PPUCheckStatSignal();
 
             if( (GameBoy.Emulator.HardwareType == HW_GBC) || (GameBoy.Emulator.HardwareType == HW_GBA) ||
                 (GameBoy.Emulator.HardwareType == HW_GBA_SP))
@@ -334,7 +334,7 @@ void GB_MemWriteReg8(u32 address, u32 value)
                 }
                 else GameBoy.Emulator.LCD_clocks = 0;
 
-                GB_CheckStatSignal();
+                GB_PPUCheckStatSignal();
                 mem->IO_Ports[IF_REG-0xFF00] &= ~I_STAT;
             }
 
@@ -349,8 +349,8 @@ void GB_MemWriteReg8(u32 address, u32 value)
             mem->IO_Ports[LYC_REG-0xFF00] = value;
             if(GameBoy.Emulator.lcd_on)
             {
-                GB_CheckLYC();
-                GB_CheckStatSignal();
+                GB_PPUCheckLYC();
+                GB_PPUCheckStatSignal();
                 GB_CPUBreakLoop();
             }
             return;

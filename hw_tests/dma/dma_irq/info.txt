@@ -1,0 +1,2 @@
+DMG/MGB -> This should hang (ROM is disabled during DMA from WRAM).
+GBC/GBA -> A note should play (ROM is NOT disabled during DMA from WRAM).

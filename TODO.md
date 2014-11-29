@@ -8,6 +8,7 @@ General
 - Cross out things in debugger that can't be used (transparent palette colors, GBA sprites that are hiden?, ...)
 - Little screens in sprite viewers to indicate the position of a sprite?
 - Update debugger windows when focusing the disassembler.
+- Configure speedup key.
 
 Game Boy
 --------
@@ -27,6 +28,7 @@ Game Boy
 - When LCD is off, are LYC=0 or ScreenMode=0 IRQs triggered?
 - Emulate weird behaviours of speed switch and STOP mode (screen color).
 - Emulate RP register.
+- P1 register starting value in DMG or GBC mode?
 
 Game Boy Advance
 ----------------

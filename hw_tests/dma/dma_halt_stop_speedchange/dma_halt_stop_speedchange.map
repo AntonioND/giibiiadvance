@@ -1,0 +1,60 @@
+ROM Bank #0 (HOME):
+  SECTION: $0050-$0050 ($0001 bytes)
+  SECTION: $0060-$0060 ($0001 bytes)
+  SECTION: $0000-$0025 ($0026 bytes)
+           $0000 = wait_ly
+           $0007 = screen_off
+           $0015 = memcopy
+           $001E = memset
+  SECTION: $0100-$0239 ($013A bytes)
+           $022E = DMA_HALT_END
+           $0222 = DMA_HALT_START
+           $023A = DMA_STOP_END
+           $022E = DMA_STOP_START
+    SLACK: $3E9E bytes
+
+WRAM Bank #0:
+  EMPTY
+
+WRAM Bank #1:
+  EMPTY
+
+WRAM Bank #2:
+  EMPTY
+
+WRAM Bank #3:
+  EMPTY
+
+WRAM Bank #4:
+  EMPTY
+
+WRAM Bank #5:
+  EMPTY
+
+WRAM Bank #6:
+  EMPTY
+
+WRAM Bank #7:
+  EMPTY
+
+VRAM Bank #0:
+  EMPTY
+
+VRAM Bank #1:
+  EMPTY
+
+HRAM:
+  EMPTY
+
+SRAM Bank #0:
+  EMPTY
+
+SRAM Bank #1:
+  EMPTY
+
+SRAM Bank #2:
+  EMPTY
+
+SRAM Bank #3:
+  EMPTY
+

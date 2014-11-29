@@ -67,7 +67,7 @@ t_config EmulatorConfig = { //Default options...
 // "-1" - "4"
 
 #define CFG_OPENGL_FILTER "opengl_filter"
-char * oglfiltertype[] = { "nearest", "linear" };
+static const char * oglfiltertype[] = { "nearest", "linear" };
 
 #define CFG_AUTO_CLOSE_DEBUGGER "auto_close_debugger"
 // "true" - "false"
@@ -82,10 +82,10 @@ char * oglfiltertype[] = { "nearest", "linear" };
 // "true" - "false"
 
 #define CFG_HW_TYPE "hardware_type"
-char * hwtype[] = { "Auto", "DMG", "MGB", "SGB", "SG2", "CGB", "AGB", "AGS" };
+static const char * hwtype[] = { "Auto", "DMG", "MGB", "SGB", "SG2", "CGB", "AGB", "AGS" };
 
 #define CFG_SERIAL_DEVICE "serial_device"
-char * serialdevice[] = { "None", "GBPrinter" }; //, "Gameboy" };
+static const char * serialdevice[] = { "None", "GBPrinter" }; //, "Gameboy" };
 
 #define CFG_ENABLE_BLUR "enable_blur"
 // "true" - "false"

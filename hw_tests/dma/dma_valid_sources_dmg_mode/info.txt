@@ -1,0 +1,44 @@
+D = Data currently being read by DMA.
+ok = Real data in that address.
+
+DMG
+---
+
+                        DST
+SRC
+        ROM_0 ROM_4 VRAM_8 VRAM_9 SRAM_A SRAM_B WRAM_C WRAM_D   ECHO   OAM   REG
+ROM_0     D     D     ok?      ?     D      D      D      D      D      FF    ok
+ROM_4     D     D     ok?      ?     D      D      D      D      D      FF    ok
+VRAM_8    ok    ok     D?     D?     ok     ok     ok     ok    VRAM    FF    ok
+VRAM_9    ok    ok     D?     D?     ok     ok     ok     ok    VRAM    FF    ok
+SRAM_A    D     D     ok?      ?     D      D      D      D      D      FF    ok
+SRAM_B    D     D     ok?      ?     D      D      D      D      D      FF    ok
+WRAM_C    D     D     ok?     D?     D      D      D      D      D      FF    ok
+WRAM_D    D     D     ok?     D?     D      D      D      D      D      FF    ok
+ECHO_E    D     D     ok?     D?     D      D      D      D      D      FF    ok
+ECHO_F    D     D     ok?     D?     D      D      D      D      D      FF    ok
+OAM       D     D     ok?     D?     D      D      D      D      D      FF    ok
+REG       D     D     ok?     D?     D      D      D      D      D      FF    ok
+
+DMA: Copying from E000 or higher reads from VRAM at 8000.
+
+GBC
+---
+
+                        DST
+SRC
+        ROM_0 ROM_4 VRAM_8 VRAM_9 SRAM_A SRAM_B WRAM_C WRAM_D   ECHO   OAM   REG
+ROM_0     D     D     ok?      ?     D      D      ok  WRAM_C  WRAM_C   FF    ok
+ROM_4     D     D     ok?      ?     D      D      ok  WRAM_C  WRAM_C   FF    ok
+VRAM_8    ok    ok     D?     D?     ok     ok     ok    ok     WRAM    FF    ok
+VRAM_9    ok    ok     D?     D?     ok     ok     ok    ok     WRAM    FF    ok
+SRAM_A    D     D     ok?      ?     D      D      ok  WRAM_C  WRAM_C   FF    ok
+SRAM_B    D     D     ok?      ?     D      D   WRAM_D   ok    WRAM_D   FF    ok
+WRAM_C    ok    ok    ok?     D?     ok     ok     D     D       D      FF    ok
+WRAM_D    ok    ok    ok?     D?     ok     ok     D     D       D      FF    ok
+ECHO_E    D     D     ok?      ?     D      D      ok  WRAM_C  WRAM_C   FF    ok
+ECHO_F    D     D     ok?      ?     D      D   WRAM_D   ok    WRAM_D   FF    ok
+OAM       D     D     ok?      ?     D      D   WRAM_D   ok    WRAM_D   FF    ok
+REG       D     D     ok?      ?     D      D   WRAM_D   ok    WRAM_D   FF    ok
+
+DMA: Copying from E000 or higher reads from SRAM at A000.

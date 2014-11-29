@@ -138,12 +138,37 @@ void GB_MemWrite8(u32 address, u32 value)
         case 0xD: // 4KB Work RAM Bank 1
             mem->WorkRAM_Curr[address-0xD000] = value;
             return;
-        case 0xE: // Same as C000-DDFF
-            return GB_MemWrite8(address-0x2000,value);
-        case 0xF:
-            if(address < 0xFE00) // Same as C000-DDFF
+        case 0xE: // ECHO RAM
+        {
+            if( (GameBoy.Emulator.HardwareType == HW_GB) || (GameBoy.Emulator.HardwareType == HW_GBP) ||
+                (GameBoy.Emulator.HardwareType == HW_SGB) || (GameBoy.Emulator.HardwareType == HW_SGB2) )
             {
-                GB_MemWrite8(address-0x2000,value);
+                mem->WorkRAM[address-0xE000] = value;
+                GameBoy.Memory.MapperWrite(address-0xE000+0xA000, value);
+                return;
+            }
+            else if( (GameBoy.Emulator.HardwareType == HW_GBC) || (GameBoy.Emulator.HardwareType == HW_GBA) ||
+                (GameBoy.Emulator.HardwareType == HW_GBA_SP) )
+            {
+                mem->WorkRAM[address-0xE000] = value;
+            }
+            return;
+        }
+        case 0xF:
+            if(address < 0xFE00) // ECHO RAM
+            {
+                if( (GameBoy.Emulator.HardwareType == HW_GB) || (GameBoy.Emulator.HardwareType == HW_GBP) ||
+                    (GameBoy.Emulator.HardwareType == HW_SGB) || (GameBoy.Emulator.HardwareType == HW_SGB2) )
+                {
+                    mem->WorkRAM_Curr[address-0xF000] = value;
+                    GameBoy.Memory.MapperWrite(address-0xF000+0xB000, value);
+                    return;
+                }
+                else if( (GameBoy.Emulator.HardwareType == HW_GBC) || (GameBoy.Emulator.HardwareType == HW_GBA) ||
+                    (GameBoy.Emulator.HardwareType == HW_GBA_SP) )
+                {
+                    mem->WorkRAM_Curr[address-0xF000] = value;
+                }
                 return;
             }
             else if(address < 0xFEA0) // Sprite Attribute Table
@@ -587,7 +612,7 @@ u32 GB_MemRead8(u32 address)
             if( (GameBoy.Emulator.HardwareType == HW_GB) || (GameBoy.Emulator.HardwareType == HW_GBP) ||
                 (GameBoy.Emulator.HardwareType == HW_SGB) || (GameBoy.Emulator.HardwareType == HW_SGB2) )
             {
-                return 0xFF; // unknown
+                return mem->WorkRAM[address-0xE000] & GameBoy.Memory.MapperRead(address-0xE000+0xA000);
             }
             else if( (GameBoy.Emulator.HardwareType == HW_GBC) || (GameBoy.Emulator.HardwareType == HW_GBA) ||
                 (GameBoy.Emulator.HardwareType == HW_GBA_SP) )
@@ -605,7 +630,7 @@ u32 GB_MemRead8(u32 address)
                 if( (GameBoy.Emulator.HardwareType == HW_GB) || (GameBoy.Emulator.HardwareType == HW_GBP) ||
                     (GameBoy.Emulator.HardwareType == HW_SGB) || (GameBoy.Emulator.HardwareType == HW_SGB2) )
                 {
-                    return 0xFF; // unknown
+                return mem->WorkRAM_Curr[address-0xF000] & GameBoy.Memory.MapperRead(address-0xF000+0xB000);
                 }
                 else if( (GameBoy.Emulator.HardwareType == HW_GBC) || (GameBoy.Emulator.HardwareType == HW_GBA) ||
                     (GameBoy.Emulator.HardwareType == HW_GBA_SP) )

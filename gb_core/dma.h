@@ -30,7 +30,7 @@ void GB_DMAEnd(void);
 
 //----------------------------------------------------------------
 
-inline void GB_DMAWriteDMA(int value); // reference_clocks not needed
+inline void GB_DMAWriteDMA(int reference_clocks, int value);
 
 inline void GB_DMAWriteHDMA1(int value); // reference_clocks not needed
 inline void GB_DMAWriteHDMA2(int value);

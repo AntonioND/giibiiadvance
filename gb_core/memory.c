@@ -233,7 +233,7 @@ void GB_MemWriteReg8(u32 address, u32 value)
         // DMA
 
         case DMA_REG:
-            GB_DMAWriteDMA(value);
+            GB_DMAWriteDMA(GB_CPUClockCounterGet(),value);
             return;
 
         // Video
@@ -582,12 +582,40 @@ u32 GB_MemRead8(u32 address)
             return mem->WorkRAM[address-0xC000];
         case 0xD: // 4KB Work RAM Bank 1
             return mem->WorkRAM_Curr[address-0xD000];
-        case 0xE: // Same as C000-DDFF
-            return GB_MemRead8(address-0x2000);
-        case 0xF:
-            if(address < 0xFE00) // Same as C000-DDFF
+        case 0xE: // Echo RAM
+        {
+            if( (GameBoy.Emulator.HardwareType == HW_GB) || (GameBoy.Emulator.HardwareType == HW_GBP) ||
+                (GameBoy.Emulator.HardwareType == HW_SGB) || (GameBoy.Emulator.HardwareType == HW_SGB2) )
             {
-                return GameBoy.Memory.MapperRead(address-0x2000);
+                return 0xFF; // unknown
+            }
+            else if( (GameBoy.Emulator.HardwareType == HW_GBC) || (GameBoy.Emulator.HardwareType == HW_GBA) ||
+                (GameBoy.Emulator.HardwareType == HW_GBA_SP) )
+            {
+                return mem->WorkRAM[address-0xE000];
+            }
+            else
+            {
+                return 0xFF; // unknown hardware
+            }
+        }
+        case 0xF:
+            if(address < 0xFE00) // Echo RAM
+            {
+                if( (GameBoy.Emulator.HardwareType == HW_GB) || (GameBoy.Emulator.HardwareType == HW_GBP) ||
+                    (GameBoy.Emulator.HardwareType == HW_SGB) || (GameBoy.Emulator.HardwareType == HW_SGB2) )
+                {
+                    return 0xFF; // unknown
+                }
+                else if( (GameBoy.Emulator.HardwareType == HW_GBC) || (GameBoy.Emulator.HardwareType == HW_GBA) ||
+                    (GameBoy.Emulator.HardwareType == HW_GBA_SP) )
+                {
+                    return mem->WorkRAM_Curr[address-0xF000];
+                }
+                else
+                {
+                    return 0xFF; // unknown hardware
+                }
             }
             else if(address < 0xFEA0) // Sprite Attribute Table
             {

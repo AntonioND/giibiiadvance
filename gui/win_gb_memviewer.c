@@ -346,7 +346,7 @@ static void _win_gb_mem_view_textbox_callback(int x, int y)
         gb_memviewer_clicked_address = clicked_addr;
         gb_memviewer_inputwindow_is_goto = 0;
         char caption[100];
-        s_snprintf(caption,sizeof(caption),"Change [0x%08X] (%d bits)",clicked_addr,numbits);
+        s_snprintf(caption,sizeof(caption),"Change [0x%04X] (%d bits)",clicked_addr,numbits);
         GUI_InputWindowOpen(&gui_iw_gb_memviewer,caption,_win_gb_mem_viewer_inputwindow_callback);
     }
 }

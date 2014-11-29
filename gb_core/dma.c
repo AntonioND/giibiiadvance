@@ -141,10 +141,8 @@ void GB_DMAUpdateClocksClounterReference(int reference_clocks)
 {
     int increment_clocks = reference_clocks - GB_DMAClockCounterGet();
 
-    // pandocs says it needs aprox 160 us in normal speed mode
-    //  bytes * (clocks per byte (guesswork)) * (us per clock)
-    // (40*4) * 4 * 0.2384185791015625 = 152.587890625 us -> not sure if 8 us needed to setup or just
-    //                                                       incorrect measurement
+    // This needs 40*4 + 8 clocks to end
+
     if(GameBoy.Emulator.OAM_DMA_bytes_left > 0)
     {
         int stop_clocks = GameBoy.Emulator.OAM_DMA_clocks_elapsed + increment_clocks;
@@ -192,8 +190,9 @@ int GB_DMAGetClocksToNextEvent(void)
 
 //----------------------------------------------------------------
 
-inline void GB_DMAWriteDMA(int value) // reference_clocks not needed
+inline void GB_DMAWriteDMA(int reference_clocks, int value)
 {
+    GB_DMAUpdateClocksClounterReference(reference_clocks),
     //TODO
     //It should disable non-highram memory (if source is VRAM, VRAM is disabled
     //instead of other ram)... etc...

@@ -643,6 +643,13 @@ void GB_SRAM_Load(void)
 {
     if(GameBoy.Emulator.RAM_Banks == 0 || GameBoy.Emulator.HasBattery == 0) return;
 
+    //Reset cartridge RAM in case there is no SAV
+    int i;
+    for(i = 0; i < GameBoy.Emulator.RAM_Banks; i++)
+    {
+        memset_rand(GameBoy.Memory.ExternRAM[i], 8 * 1024);
+    }
+
     int size = strlen(GameBoy.Emulator.save_filename) + 5;
     char * name = malloc(size);
     s_snprintf(name,size,"%s.sav",GameBoy.Emulator.save_filename);

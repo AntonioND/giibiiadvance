@@ -123,10 +123,12 @@ void GB_MemInit(void)
 
     memset(mem->VideoRAM,0,0x4000);
 
-    for(i = 0; i < GameBoy.Emulator.RAM_Banks; i++)
-    {
-        memset_rand(mem->ExternRAM[i], 8 * 1024);
-    }
+    //Don't clear cartridge RAM here. Do it when loading the sav file if not found!
+    //for(i = 0; i < GameBoy.Emulator.RAM_Banks; i++)
+    //{
+    //    memset_rand(mem->ExternRAM[i], 8 * 1024);
+    //}
+
     memset_rand(mem->WorkRAM , 0x1000);
 
     if(GameBoy.Emulator.CGBEnabled == 1)

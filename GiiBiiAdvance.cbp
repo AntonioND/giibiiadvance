@@ -226,6 +226,14 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="gb_core/memory.h" />
+		<Unit filename="gb_core/memory_dmg.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gb_core/memory_dmg.h" />
+		<Unit filename="gb_core/memory_gbc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gb_core/memory_gbc.h" />
 		<Unit filename="gb_core/noise.c">
 			<Option compilerVar="CC" />
 		</Unit>

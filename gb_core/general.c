@@ -41,8 +41,8 @@ _GB_CONTEXT_ GameBoy;
 void GB_PowerOn(void)
 {
     GB_CPUInit(); // This goes first - It resets the clock counters of all subsystems
-    GB_CPUInterruptsInit();
-    GB_MemInit();
+    GB_MemInit(); // This prepares the write/read function pointers - It must be called second
+    GB_InterruptsInit();
     GB_SoundInit();
     GB_Screen_Init();
     GB_PPUInit();
@@ -74,8 +74,8 @@ void GB_PowerOff(void)
     GB_SerialEnd();
     GB_PPUEnd();
     GB_SoundEnd();
+    GB_InterruptsEnd();
     GB_MemEnd();
-    GB_CPUInterruptsEnd();
     GB_CPUEnd();
 }
 

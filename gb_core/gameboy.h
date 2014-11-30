@@ -168,8 +168,11 @@ typedef struct PACKED {
     _GB_OAM_ENTRY_ Sprite[40];
 } _GB_OAM_ ;
 
-typedef void (*mapper_write_fn)(u32,u32);
+typedef void (*mapper_write_fn)(u32,u32); // address, value
 typedef u32 (*mapper_read_fn)(u32);
+
+typedef void (*gb_mem_write_fn_ptr)(u32,u32); // address, value
+typedef u32 (*gb_mem_read_fn_ptr)(u32);
 
 typedef struct {
     u8 * ROM_Base;          //0000 | 16KB
@@ -184,6 +187,8 @@ typedef struct {
     u8 IO_Ports[0x80];       //FF00 | 128B                                 0x30 instead of 0x60)
     u8 HighRAM[0x80];        //FF80 | 128B
 
+    gb_mem_write_fn_ptr MemWrite, MemWriteReg; // 8 bit
+    gb_mem_read_fn_ptr MemRead, MemReadReg; // 8 bit
 
     u32 selected_rom, selected_ram;
     u32 selected_wram, selected_vram; //gbc only
@@ -312,7 +317,9 @@ typedef struct {
     u8 * boot_rom;
     u32 boot_rom_loaded;
     u32 enable_boot_rom;
+
     u32 gbc_in_gb_mode;
+    u32 CGBEnabled; // this can be 0 even if the hardware is GBC, GBA or GBA_SP (GBC in DMG mode)
 
     //CGB only
     u32 spr_pal[64];
@@ -342,12 +349,10 @@ typedef struct {
     u32 CPUHalt;
     u32 halt_bug;
     u32 cpu_change_speed_clocks; // clocks needed to change speed
+    u32 DoubleSpeed;
 
     u32 SGBEnabled;
     u32 wait_cycles;
-
-    u32 CGBEnabled;
-    u32 DoubleSpeed;
 
     //LCD
     s32 LCD_clocks; //for screen.
@@ -378,6 +383,7 @@ typedef struct {
     u32 joypad_signal;
 
     u32 FrameDrawn;
+
 } _EMULATOR_INFO_;
 
 //------------------------------------------------------------------------------

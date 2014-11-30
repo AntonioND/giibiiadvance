@@ -78,7 +78,7 @@ void GB_HandleRTC(void)
 
 //----------------------------------------------------------------
 
-void GB_CPUInterruptsInit(void)
+void GB_InterruptsInit(void)
 {
     GameBoy.Memory.InterruptMasterEnable = 0;
 
@@ -114,7 +114,7 @@ void GB_CPUInterruptsInit(void)
 
             default:
                 GameBoy.Emulator.sys_clocks = 0;
-                Debug_ErrorMsg("GB_CPUInterruptsInit():\nUnknown hardware\n(boot ROM enabled)");
+                Debug_ErrorMsg("GB_InterruptsInit():\nUnknown hardware\n(boot ROM enabled)");
                 break;
         }
     }
@@ -149,7 +149,7 @@ void GB_CPUInterruptsInit(void)
 
             default:
                 GameBoy.Emulator.sys_clocks = 0;
-                Debug_ErrorMsg("GB_CPUInterruptsInit():\nUnknown hardware");
+                Debug_ErrorMsg("GB_InterruptsInit():\nUnknown hardware");
                 break;
         }
     }
@@ -175,7 +175,7 @@ void GB_CPUInterruptsInit(void)
     }
 }
 
-void GB_CPUInterruptsEnd(void)
+void GB_InterruptsEnd(void)
 {
     // Nothing to do
 }

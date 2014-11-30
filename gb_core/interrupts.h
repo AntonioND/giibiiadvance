@@ -46,8 +46,8 @@ void GB_HandleRTC(void);
 
 //----------------------------------------------------------------
 
-void GB_CPUInterruptsInit(void);
-void GB_CPUInterruptsEnd(void);
+void GB_InterruptsInit(void);
+void GB_InterruptsEnd(void);
 
 //----------------------------------------------------------------
 

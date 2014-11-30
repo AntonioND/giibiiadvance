@@ -16,41 +16,28 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __GB_MEMORY__
-#define __GB_MEMORY__
+#ifndef __GB_MEMORY_GBC__
+#define __GB_MEMORY_GBC__
 
 //----------------------------------------------------------------
 
-void GB_MemInit(void);
-void GB_MemEnd(void);
+#include "gameboy.h"
 
 //----------------------------------------------------------------
 
-void GB_MemUpdateReadWriteFunctionPointers(void);
+// Functions in this file are the ones used for GBC in both GBC and DMG modes.
+
+u32 GB_MemRead8_GBC_BootEnabled(u32 address);
+u32 GB_MemRead8_GBC_BootDisabled(u32 address);
+
+void GB_MemWrite8_GBC(u32 address, u32 value);
 
 //----------------------------------------------------------------
 
-inline void GB_MemWrite16(u32 address, u32 value); // only used by debugger
-inline void GB_MemWrite8(u32 address, u32 value);
-inline void GB_MemWriteReg8(u32 address, u32 value);
+u32 GB_MemReadReg8_GBC(u32 address);
+
+void GB_MemWriteReg8_GBC(u32 address, u32 value);
 
 //----------------------------------------------------------------
 
-inline u32 GB_MemRead16(u32 address); // only used by debugger
-inline u32 GB_MemRead8(u32 address);
-inline u32 GB_MemReadReg8(u32 address);
-
-//----------------------------------------------------------------
-
-void GB_MemWriteDMA8(u32 address, u32 value); // This assumes that address is 0xFE00-0xFEA0
-u32 GB_MemReadDMA8(u32 address);
-
-//----------------------------------------------------------------
-
-void GB_MemWriteHDMA8(u32 address, u32 value);
-u32 GB_MemReadHDMA8(u32 address);
-
-//----------------------------------------------------------------
-
-#endif //__GB_MEMORY__
-
+#endif //__GB_MEMORY_GBC__

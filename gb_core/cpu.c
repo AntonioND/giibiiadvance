@@ -151,20 +151,10 @@ void GB_CPUInit(void)
     gb_break_cpu_loop = 0;
     gb_last_residual_clocks = 0;
 
-    GameBoy.Emulator.ScreenMode = 2;
-    GameBoy.Memory.IO_Ports[STAT_REG-0xFF00] = 0x02;
-    GameBoy.Emulator.CurrentScanLine = 0;
     GameBoy.Emulator.CPUHalt = 0;
     GameBoy.Emulator.DoubleSpeed = 0;
     GameBoy.Emulator.halt_bug = 0;
     GameBoy.Emulator.cpu_change_speed_clocks = 0;
-
-    if(GameBoy.Emulator.CGBEnabled == 1)
-    {
-        GameBoy.Emulator.ScreenMode = 1;
-        GameBoy.Memory.IO_Ports[STAT_REG-0xFF00] = 0x01;
-        GameBoy.Emulator.CurrentScanLine = 0x90;
-    }
 
     //Registers
     if(GameBoy.Emulator.boot_rom_loaded == 0)

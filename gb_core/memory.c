@@ -138,7 +138,7 @@ void GB_MemWrite8(u32 address, u32 value)
         case 0xD: // 4KB Work RAM Bank 1
             mem->WorkRAM_Curr[address-0xD000] = value;
             return;
-        case 0xE: // ECHO RAM
+        case 0xE: // Echo RAM
         {
             if( (GameBoy.Emulator.HardwareType == HW_GB) || (GameBoy.Emulator.HardwareType == HW_GBP) ||
                 (GameBoy.Emulator.HardwareType == HW_SGB) || (GameBoy.Emulator.HardwareType == HW_SGB2) )
@@ -155,7 +155,7 @@ void GB_MemWrite8(u32 address, u32 value)
             return;
         }
         case 0xF:
-            if(address < 0xFE00) // ECHO RAM
+            if(address < 0xFE00) // Echo RAM
             {
                 if( (GameBoy.Emulator.HardwareType == HW_GB) || (GameBoy.Emulator.HardwareType == HW_GBP) ||
                     (GameBoy.Emulator.HardwareType == HW_SGB) || (GameBoy.Emulator.HardwareType == HW_SGB2) )

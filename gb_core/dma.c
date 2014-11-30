@@ -141,7 +141,7 @@ void GB_DMAUpdateClocksClounterReference(int reference_clocks)
 {
     int increment_clocks = reference_clocks - GB_DMAClockCounterGet();
 
-    // This needs 40*4 + 8 clocks to end
+    // This needs 160*4 + 8 clocks to end
 
     if(GameBoy.Emulator.OAM_DMA_bytes_left > 0)
     {

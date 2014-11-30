@@ -52,5 +52,10 @@ u32 GB_MemReadHDMA8(u32 address);
 
 //----------------------------------------------------------------
 
+void GB_MemoryWriteSVBK(int value); // reference_clocks not needed
+void GB_MemoryWriteVBK(int value); // reference_clocks not needed
+
+//----------------------------------------------------------------
+
 #endif //__GB_MEMORY__
 

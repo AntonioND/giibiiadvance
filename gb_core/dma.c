@@ -46,6 +46,9 @@ void GB_DMAInit(void)
     GameBoy.Emulator.gdma_bytes_left = 0;
 
     GameBoy.Emulator.hdma_last_ly_copied = -1;
+
+    if(GameBoy.Emulator.CGBEnabled == 1)
+        GameBoy.Memory.IO_Ports[HDMA5_REG-0xFF00] = 0xFF;
 }
 
 void GB_DMAEnd(void)
@@ -203,7 +206,6 @@ inline void GB_DMAWriteDMA(int reference_clocks, int value)
 
 inline void GB_DMAWriteHDMA1(int value) // reference_clocks not needed
 {
-    if(GameBoy.Emulator.CGBEnabled == 0) return;
     _GB_MEMORY_ * mem = &GameBoy.Memory;
     mem->IO_Ports[HDMA1_REG-0xFF00] = value;
     GameBoy.Emulator.gdma_src = (mem->IO_Ports[HDMA1_REG-0xFF00]<<8) | GameBoy.Memory.IO_Ports[HDMA2_REG-0xFF00];
@@ -211,7 +213,6 @@ inline void GB_DMAWriteHDMA1(int value) // reference_clocks not needed
 
 inline void GB_DMAWriteHDMA2(int value)
 {
-    if(GameBoy.Emulator.CGBEnabled == 0) return;
     _GB_MEMORY_ * mem = &GameBoy.Memory;
     mem->IO_Ports[HDMA2_REG-0xFF00] = value & 0xF0; //4 lower bits ignored
     GameBoy.Emulator.gdma_src = (mem->IO_Ports[HDMA1_REG-0xFF00]<<8) | GameBoy.Memory.IO_Ports[HDMA2_REG-0xFF00];
@@ -219,7 +220,6 @@ inline void GB_DMAWriteHDMA2(int value)
 
 inline void GB_DMAWriteHDMA3(int value)
 {
-    if(GameBoy.Emulator.CGBEnabled == 0) return;
     _GB_MEMORY_ * mem = &GameBoy.Memory;
     mem->IO_Ports[HDMA3_REG-0xFF00] = value & 0x1F; //Dest is VRAM
     GameBoy.Emulator.gdma_dst = ((mem->IO_Ports[HDMA3_REG-0xFF00]<<8) | mem->IO_Ports[HDMA4_REG-0xFF00]) + 0x8000;
@@ -227,7 +227,6 @@ inline void GB_DMAWriteHDMA3(int value)
 
 inline void GB_DMAWriteHDMA4(int value)
 {
-    if(GameBoy.Emulator.CGBEnabled == 0) return;
     _GB_MEMORY_ * mem = &GameBoy.Memory;
     mem->IO_Ports[HDMA4_REG-0xFF00] = value & 0xF0; //4 lower bits ignored
     GameBoy.Emulator.gdma_dst = ((mem->IO_Ports[HDMA3_REG-0xFF00]<<8) | mem->IO_Ports[HDMA4_REG-0xFF00]) + 0x8000;
@@ -235,8 +234,6 @@ inline void GB_DMAWriteHDMA4(int value)
 
 inline void GB_DMAWriteHDMA5(int value)
 {
-    if(GameBoy.Emulator.CGBEnabled == 0) return;
-
     //Start/Stop GBC DMA copy
 
     GB_CPUBreakLoop();

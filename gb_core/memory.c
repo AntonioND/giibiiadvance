@@ -18,6 +18,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "../build_options.h"
 #include "../general_utils.h"
@@ -106,16 +107,66 @@ void GB_MemUpdateReadWriteFunctionPointers(void)
 
 void GB_MemInit(void)
 {
-    _GB_MEMORY_ * mem = &GameBoy.Memory;
-
     GB_MemUpdateReadWriteFunctionPointers();
 
-    //LOAD INITIAL VALUES TO RAM
+    // Setup memory areas
+    //-------------------
+
+    _GB_MEMORY_ * mem = &GameBoy.Memory;
+
+    mem->ROM_Base = (void*)GameBoy.Emulator.Rom_Pointer;
+
+    int i;
+    for(i = 0; i < 512; i++) mem->ROM_Switch[i] = NULL;
+    for(i = 0; i < GameBoy.Emulator.ROM_Banks; i++)
+        mem->ROM_Switch[i] = (u8*)GameBoy.Emulator.Rom_Pointer + (16 * 1024 * i);
+
+    memset(mem->VideoRAM,0,0x4000);
+
+    for(i = 0; i < GameBoy.Emulator.RAM_Banks; i++)
+    {
+        memset_rand(mem->ExternRAM[i], 8 * 1024);
+    }
+    memset_rand(mem->WorkRAM , 0x1000);
+
+    if(GameBoy.Emulator.CGBEnabled == 1)
+    {
+        for(i = 0; i < 7; i++)
+        {
+            memset_rand(mem->WorkRAM_Switch[i], 0x1000);
+        }
+        memset_rand(mem->StrangeRAM, 0x30);
+    }
+    else
+    {
+        memset_rand(mem->WorkRAM_Switch[0], 0x1000);
+    }
+
+    if( (GameBoy.Emulator.HardwareType == HW_GBC) || (GameBoy.Emulator.HardwareType == HW_GBA) ||
+        (GameBoy.Emulator.HardwareType == HW_GBA_SP) )
+        memset(mem->ObjAttrMem,0,0xA0);
+    else
+        memset_rand(mem->ObjAttrMem,0xA0);
+
+    memset(mem->IO_Ports,0,0x80);
+    memset(mem->HighRAM,0,0x80);
+
+    mem->selected_rom = 1;
+    mem->selected_ram = 0;
+    mem->selected_wram = 0;
+    mem->selected_vram = 0;
+    mem->mbc_mode = 0;
+
+    mem->VideoRAM_Curr = mem->VideoRAM;
+    mem->ROM_Curr = mem->ROM_Switch[mem->selected_rom];
+    mem->RAM_Curr = mem->ExternRAM[0];
+    mem->WorkRAM_Curr = mem->WorkRAM_Switch[0];
+
+    //Prepare registers
+    //-----------------
 
     //Interrupt/timer registers are inited in GB_InterruptsInit()
-
     //Sound registers are inited in GB_SoundInit()
-
     //PPU registers in GB_PPUInit()
 
     GameBoy.Memory.RAMEnabled = 0; // MBC
@@ -137,21 +188,13 @@ void GB_MemInit(void)
         GB_MemWriteReg8(SVBK_REG,0xF8);
         GB_MemWriteReg8(VBK_REG,0xFE);
 
-        //GB_MemWriteReg8(KEY1_REG,0x7E);
-        mem->IO_Ports[KEY1_REG-0xFF00] = 0x7E;
-
-        mem->IO_Ports[HDMA5_REG-0xFF00] = 0xFF;
-
         //PALETTE RAM
-        u32 i;
-        for(i= 0; i < 64; i++)
+        for(i = 0; i < 64; i++)
         {
             GameBoy.Emulator.bg_pal[i] = 0xFF;
             GameBoy.Emulator.spr_pal[i] = rand() & 0xFF;
         }
     }
-
-    //All those writes will generate a GB_CPUBreakLoop(), but it doesn't matter.
 }
 
 void GB_MemEnd(void)
@@ -204,7 +247,7 @@ void GB_MemWriteDMA8(u32 address, u32 value) // This assumes that address is 0xF
     GameBoy.Memory.ObjAttrMem[address-0xFE00] = value;
 }
 
-u32 GB_MemReadDMA8(u32 address) // NOT VERIFIED YET
+u32 GB_MemReadDMA8(u32 address) // NOT VERIFIED YET - different for GBC and DMG
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
@@ -304,6 +347,33 @@ u32 GB_MemReadHDMA8(u32 address)
     }
 
     return 0x00;
+}
+
+//----------------------------------------------------------------
+
+void GB_MemoryWriteSVBK(int value) // reference_clocks not needed
+{
+    _GB_MEMORY_ * mem = &GameBoy.Memory;
+
+    mem->IO_Ports[SVBK_REG-0xFF00] = value | (0xF8);
+
+    value &= 7;
+    if(value == 0) value = 1;
+
+    mem->selected_wram = value-1;
+    mem->WorkRAM_Curr = mem->WorkRAM_Switch[mem->selected_wram];
+}
+
+void GB_MemoryWriteVBK(int value) // reference_clocks not needed
+{
+    _GB_MEMORY_ * mem = &GameBoy.Memory;
+
+    mem->IO_Ports[VBK_REG-0xFF00] = value | (0xFE);
+
+    mem->selected_vram = value & 1;
+
+    if(mem->selected_vram) mem->VideoRAM_Curr = &mem->VideoRAM[0x2000];
+    else mem->VideoRAM_Curr = &mem->VideoRAM[0x0000];
 }
 
 //----------------------------------------------------------------

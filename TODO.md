@@ -18,7 +18,6 @@ Game Boy
 - When loading a GB only ROM in GBC mode, prepare palettes.
 - Make that everything read FFh except HRAM when DMG DMA is enabled.
 - Memory after OAM is an OAM mirror? Check in all GB models.
-- Can disabled cart RAM be read?
 - What STAT mode is the GBC when the LCD is switched on. 0?
 - Check what memory areas do OAM DMA copy from depending on hardware (DMG/GBC).
 - What happens when TAC is changed while timer is working/not working in other models than the DMG/MGB.

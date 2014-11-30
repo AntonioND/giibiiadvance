@@ -175,17 +175,17 @@ typedef void (*gb_mem_write_fn_ptr)(u32,u32); // address, value
 typedef u32 (*gb_mem_read_fn_ptr)(u32);
 
 typedef struct {
-    u8 * ROM_Base;          //0000 | 16KB
-    u8 * ROM_Switch[512];   //4000 | 16KB
-    u8 VideoRAM[0x4000];    //8000 | 8KB -- 2 banks in GBC - Only 0x2000 needed in GB mode, but
-    u8 * ExternRAM[16];     //A000 | 8KB                   | let's allocate that anyway...
-    u8 WorkRAM[0x1000];     //C000 | 4KB
-    u8 * WorkRAM_Switch[7]; //D000 | 4KB -- 8 banks in GBC -- 0 only accessible from C000-CFFF
-                             //E000 -- ram echo
-    u8 ObjAttrMem[0xA0];     //FE00 | (40 * 4) B
-    u8 StrangeRAM[0x30];     //FEA0 -- strange RAM - (only GBC, see memory.c for the reason of
-    u8 IO_Ports[0x80];       //FF00 | 128B                                 0x30 instead of 0x60)
-    u8 HighRAM[0x80];        //FF80 | 128B
+    u8 * ROM_Base;                //0000 | 16KB
+    u8 * ROM_Switch[512];         //4000 | 16KB
+    u8 VideoRAM[0x4000];          //8000 | 8KB -- 2 banks in GBC - Only 0x2000 needed in GB mode, but
+    u8 ExternRAM[16][0x2000];     //A000 | 8KB                   | let's allocate that anyway...
+    u8 WorkRAM[0x1000];           //C000 | 4KB
+    u8 WorkRAM_Switch[7][0x1000]; //D000 | 4KB -- 8 banks in GBC -- 0 only accessible from C000-CFFF
+                                  //E000 -- ram echo
+    u8 ObjAttrMem[0xA0];          //FE00 | (40 * 4) B
+    u8 StrangeRAM[0x30];          //FEA0 -- strange RAM - (GBC only, not GBA or GB)
+    u8 IO_Ports[0x80];            //FF00 | 128B
+    u8 HighRAM[0x80];             //FF80 | 128B
 
     gb_mem_write_fn_ptr MemWrite, MemWriteReg; // 8 bit
     gb_mem_read_fn_ptr MemRead, MemReadReg; // 8 bit

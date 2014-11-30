@@ -89,7 +89,7 @@ u32 GB_MemRead8_DMG_BootEnabled(u32 address)
             }
             else if(address < 0xFF00) // Not Usable
             {
-                return 0xFF;
+                return 0x00; // Not FFh
             }
             else if(address < 0xFF80) // I/O Ports
             {
@@ -152,7 +152,7 @@ u32 GB_MemRead8_DMG_BootDisabled(u32 address)
             }
             else if(address < 0xFF00) // Not Usable
             {
-                return 0xFF;
+                return 0x00; // Not FFh
             }
             else if(address < 0xFF80) // I/O Ports
             {
@@ -264,7 +264,6 @@ u32 GB_MemReadReg8_DMG(u32 address)
     switch(address)
     {
         // Serial
-
         case SB_REG:
             GB_SerialUpdateClocksClounterReference(GB_CPUClockCounterGet());
             return mem->IO_Ports[SB_REG-0xFF00];
@@ -273,7 +272,6 @@ u32 GB_MemReadReg8_DMG(u32 address)
             return mem->IO_Ports[SC_REG-0xFF00] | 0x7E;
 
         // Timer
-
         case TMA_REG:
             return mem->IO_Ports[address-0xFF00];
         case TIMA_REG:
@@ -282,12 +280,12 @@ u32 GB_MemReadReg8_DMG(u32 address)
         case TAC_REG:
             return mem->IO_Ports[TAC_REG-0xFF00] | (0xF8);
 
+        // Divider
         case DIV_REG:
             GB_TimersUpdateClocksClounterReference(GB_CPUClockCounterGet());
             return mem->IO_Ports[DIV_REG-0xFF00];
 
         // Interrupts
-
         case IF_REG:
             //GB_UpdateCounterToClocks(GB_CPUClockCounterGet());
             GB_PPUUpdateClocksClounterReference(GB_CPUClockCounterGet());
@@ -296,7 +294,6 @@ u32 GB_MemReadReg8_DMG(u32 address)
             return mem->IO_Ports[IF_REG-0xFF00];
 
         // DMA
-
         case DMA_REG: // This is R/W in all GB models
             return mem->IO_Ports[DMA_REG-0xFF00];
 
@@ -430,7 +427,6 @@ void GB_MemWriteReg8_DMG(u32 address, u32 value)
     switch(address)
     {
         // Serial
-
         case SB_REG:
             GB_SerialWriteSB(GB_CPUClockCounterGet(),value);
             return;
@@ -439,7 +435,6 @@ void GB_MemWriteReg8_DMG(u32 address, u32 value)
             return;
 
         // Timer
-
         case TIMA_REG:
             GB_TimersWriteTIMA(GB_CPUClockCounterGet(),value);
             return;
@@ -450,24 +445,22 @@ void GB_MemWriteReg8_DMG(u32 address, u32 value)
             GB_TimersWriteTAC(GB_CPUClockCounterGet(),value);
             return;
 
+        // Divider
         case DIV_REG:
             GB_TimersWriteDIV(GB_CPUClockCounterGet(),value);
             return;
 
         // Interrupts
-
         case IF_REG:
             GB_InterruptsWriteIF(GB_CPUClockCounterGet(),value);
             return;
 
         // DMA
-
         case DMA_REG:
             GB_DMAWriteDMA(GB_CPUClockCounterGet(),value);
             return;
 
         // Video
-
         case LY_REG: //Read only
             return;
 
@@ -593,13 +586,6 @@ void GB_MemWriteReg8_DMG(u32 address, u32 value)
         // MGB ROM: [FF50]=FF
 
         // SGB ROM: [FF50]=01
-
-        // CGB ROM: [FF50]=11
-        //  GB game:     [FF6C]=FE, [FF4C]=04, [FF6C]=01
-        //  GB+GBC game: [FF6C]=FE, [FF4C]=80
-        //  GBC game:    [FF6C]=FE, [FF4C]=C0
-
-        //Change is done when disabling boot ROM.
 
         case 0xFF50: //Disable boot rom
             if(GameBoy.Emulator.enable_boot_rom)

@@ -35,6 +35,7 @@
 #include "camera.h"
 #include "ppu.h"
 #include "dma.h"
+#include "mbc.h"
 
 _GB_CONTEXT_ GameBoy;
 
@@ -48,28 +49,16 @@ void GB_PowerOn(void)
     GB_PPUInit();
     GB_SerialInit();
     GB_DMAInit();
+    GB_MapperInit();
 
     if(GameBoy.Emulator.SGBEnabled) SGB_Init();
-
-    if(GameBoy.Emulator.MemoryController == MEM_CAMERA)
-    {
-        //if(GB_CameraInit(EmulatorConfig.debug_msg_enable) == 0)
-        //    Debug_DebugMsgArg("Camera functions won't be emulated... How about some screen noise instead? :)");
-        GB_CameraInit();
-    }
-
-    if(GameBoy.Emulator.MemoryController == MEM_MBC7)
-    {
-        GB_InputSetMBC7(0,0);
-    }
 }
 
 void GB_PowerOff(void)
 {
-    if(GameBoy.Emulator.MemoryController == MEM_CAMERA) GB_CameraEnd();
-
     if(GameBoy.Emulator.SGBEnabled) SGB_End();
 
+    GB_MapperEnd();
     GB_DMAEnd();
     GB_SerialEnd();
     GB_PPUEnd();

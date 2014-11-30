@@ -93,6 +93,13 @@ u32 GB_MemRead8_GBC_BootEnabled(u32 address)
 #ifdef VRAM_MEM_CHECKING
                 if(GameBoy.Emulator.lcd_on && GameBoy.Emulator.ScreenMode & 0x02) return 0xFF;
 #endif
+                if( (GameBoy.Emulator.HardwareType == HW_GBA) || (GameBoy.Emulator.HardwareType == HW_GBA_SP) )
+                {
+                    int val = address & 0xF0;
+                    return val | (val>>4);
+                }
+
+                // GBC
                 u32 addr = address - 0xFEA0;
                 if(addr >= 0x30) addr = 0x20 + (addr & 0x0F); //this is what my gbc says...
                 return mem->StrangeRAM[addr];
@@ -161,6 +168,13 @@ u32 GB_MemRead8_GBC_BootDisabled(u32 address)
 #ifdef VRAM_MEM_CHECKING
                 if(GameBoy.Emulator.lcd_on && GameBoy.Emulator.ScreenMode & 0x02) return 0xFF;
 #endif
+                if( (GameBoy.Emulator.HardwareType == HW_GBA) || (GameBoy.Emulator.HardwareType == HW_GBA_SP) )
+                {
+                    int val = address & 0xF0;
+                    return val | (val>>4);
+                }
+
+                // GBC
                 u32 addr = address - 0xFEA0;
                 if(addr >= 0x30) addr = 0x20 + (addr & 0x0F); //this is what my gbc says...
                 return mem->StrangeRAM[addr];
@@ -239,6 +253,12 @@ void GB_MemWrite8_GBC(u32 address, u32 value)
             }
             else if(address < 0xFF00) // Not Usable
             {
+                if( (GameBoy.Emulator.HardwareType == HW_GBA) || (GameBoy.Emulator.HardwareType == HW_GBA_SP) )
+                    return;
+                //GBC
+                u32 addr = address - 0xFEA0;
+                if(addr >= 0x30) addr = 0x20 + (addr & 0x0F); //this is what my gbc says...
+                mem->StrangeRAM[addr] = value;
                 return;
             }
             else if(address < 0xFF80) // I/O Ports
@@ -275,7 +295,6 @@ u32 GB_MemReadReg8_GBC(u32 address)
     switch(address)
     {
         // Serial
-
         case SB_REG:
             GB_SerialUpdateClocksClounterReference(GB_CPUClockCounterGet());
             return mem->IO_Ports[SB_REG-0xFF00];
@@ -284,7 +303,6 @@ u32 GB_MemReadReg8_GBC(u32 address)
             return mem->IO_Ports[SC_REG-0xFF00] | ((GameBoy.Emulator.CGBEnabled == 1) ? 0x7C: 0x7E);
 
         // Timer
-
         case TMA_REG:
             return mem->IO_Ports[address-0xFF00];
         case TIMA_REG:
@@ -293,12 +311,12 @@ u32 GB_MemReadReg8_GBC(u32 address)
         case TAC_REG:
             return mem->IO_Ports[TAC_REG-0xFF00] | (0xF8);
 
+        // Divider
         case DIV_REG:
             GB_TimersUpdateClocksClounterReference(GB_CPUClockCounterGet());
             return mem->IO_Ports[DIV_REG-0xFF00];
 
         // Interrupts
-
         case IF_REG:
             //GB_UpdateCounterToClocks(GB_CPUClockCounterGet());
             GB_PPUUpdateClocksClounterReference(GB_CPUClockCounterGet());
@@ -307,7 +325,6 @@ u32 GB_MemReadReg8_GBC(u32 address)
             return mem->IO_Ports[IF_REG-0xFF00];
 
         // DMA
-
         case DMA_REG: // This is R/W in all GB models
             return mem->IO_Ports[DMA_REG-0xFF00];
 
@@ -315,28 +332,29 @@ u32 GB_MemReadReg8_GBC(u32 address)
         // -------------
 
         // HDMA
-
         case HDMA5_REG: // Updated in execution loop. The other HDMAx registers are write only
             if(GameBoy.Emulator.CGBEnabled == 0) return 0xFF;
             return mem->IO_Ports[address-0xFF00];
 
         // Speed switch
-
         case KEY1_REG:
             if(GameBoy.Emulator.CGBEnabled == 0) return 0xFF;
             return mem->IO_Ports[KEY1_REG-0xFF00] | (0x7E);
 
-
-        // TODO
-
+        // Video ram bank
         case VBK_REG:
             if(GameBoy.Emulator.CGBEnabled == 0)
                 return 0xFE;
-            return mem->IO_Ports[address-0xFF00];
+            return mem->IO_Ports[VBK_REG-0xFF00];
 
+        // Work ram bank
+        case SVBK_REG:
+            if(GameBoy.Emulator.CGBEnabled == 0) return 0xFF;
+            return mem->IO_Ports[SVBK_REG-0xFF00];
+
+        // TODO
         case BCPS_REG:
         case OCPS_REG:
-        case SVBK_REG:
             if(GameBoy.Emulator.CGBEnabled == 0) return 0xFF;
             return mem->IO_Ports[address-0xFF00];
 
@@ -504,7 +522,6 @@ void GB_MemWriteReg8_GBC(u32 address, u32 value)
     switch(address)
     {
         // Serial
-
         case SB_REG:
             GB_SerialWriteSB(GB_CPUClockCounterGet(),value);
             return;
@@ -513,7 +530,6 @@ void GB_MemWriteReg8_GBC(u32 address, u32 value)
             return;
 
         // Timer
-
         case TIMA_REG:
             GB_TimersWriteTIMA(GB_CPUClockCounterGet(),value);
             return;
@@ -524,60 +540,73 @@ void GB_MemWriteReg8_GBC(u32 address, u32 value)
             GB_TimersWriteTAC(GB_CPUClockCounterGet(),value);
             return;
 
+        // Divider
         case DIV_REG:
             GB_TimersWriteDIV(GB_CPUClockCounterGet(),value);
             return;
 
         // Interrupts
-
         case IF_REG:
             GB_InterruptsWriteIF(GB_CPUClockCounterGet(),value);
             return;
 
         // DMA
-
         case DMA_REG:
             GB_DMAWriteDMA(GB_CPUClockCounterGet(),value);
             return;
 
         // Video
-
         case LY_REG: //Read only
-            return;
-
-        // GBC Registers
-        // -------------
-
-        // GDMA/HDMA
-
-        case HDMA1_REG:
-            GB_DMAWriteHDMA1(value);
-            return;
-        case HDMA2_REG:
-            GB_DMAWriteHDMA2(value);
-            return;
-        case HDMA3_REG:
-            GB_DMAWriteHDMA3(value);
-            return;
-        case HDMA4_REG:
-            GB_DMAWriteHDMA4(value);
-            return;
-        case HDMA5_REG:
-            GB_DMAWriteHDMA5(value);
-            return;
-
-        // Speed switch
-
-        case KEY1_REG:
-            if(GameBoy.Emulator.CGBEnabled == 0) return;
-            mem->IO_Ports[KEY1_REG-0xFF00] &= 0xFE;
-            mem->IO_Ports[KEY1_REG-0xFF00] |= value&1;
             return;
 
         // Joypad
         case P1_REG:
             mem->IO_Ports[P1_REG-0xFF00] = value & 0x30;
             GB_CheckJoypadInterrupt(); // This can trigger the joypad interrupt!!
+            return;
+
+        // GBC Registers
+        // -------------
+
+        // GDMA/HDMA
+        case HDMA1_REG:
+            if(GameBoy.Emulator.CGBEnabled == 0) return;
+            GB_DMAWriteHDMA1(value);
+            return;
+        case HDMA2_REG:
+            if(GameBoy.Emulator.CGBEnabled == 0) return;
+            GB_DMAWriteHDMA2(value);
+            return;
+        case HDMA3_REG:
+            if(GameBoy.Emulator.CGBEnabled == 0) return;
+            GB_DMAWriteHDMA3(value);
+            return;
+        case HDMA4_REG:
+            if(GameBoy.Emulator.CGBEnabled == 0) return;
+            GB_DMAWriteHDMA4(value);
+            return;
+        case HDMA5_REG:
+            if(GameBoy.Emulator.CGBEnabled == 0) return;
+            GB_DMAWriteHDMA5(value);
+            return;
+
+        // Speed switch
+        case KEY1_REG:
+            if(GameBoy.Emulator.CGBEnabled == 0) return;
+            mem->IO_Ports[KEY1_REG-0xFF00] &= 0xFE;
+            mem->IO_Ports[KEY1_REG-0xFF00] |= value&1;
+            return;
+
+        // Work ram bank
+        case SVBK_REG:
+            if(GameBoy.Emulator.CGBEnabled == 0) return;
+            GB_MemoryWriteSVBK(value);
+            return;
+
+        // Video ram bank
+        case VBK_REG:
+            if(GameBoy.Emulator.CGBEnabled == 0) return;
+            GB_MemoryWriteVBK(value);
             return;
 
         //      TODO
@@ -647,9 +676,6 @@ void GB_MemWriteReg8_GBC(u32 address, u32 value)
             }
             return;
 
-
-
-
         //                   Sound...
         case NR10_REG: case NR11_REG: case NR12_REG: case NR13_REG: case NR14_REG:
         case NR21_REG: case NR22_REG: case NR23_REG: case NR24_REG:
@@ -677,28 +703,6 @@ void GB_MemWriteReg8_GBC(u32 address, u32 value)
             return;
 
         //                   GAMEBOY COLOR REGISTERS
-
-        case SVBK_REG: //Work ram bank
-            if(GameBoy.Emulator.CGBEnabled == 0) return;
-
-            mem->IO_Ports[SVBK_REG-0xFF00] = value | (0xF8);
-
-            value &= 7;
-            if(value == 0) value = 1;
-
-            mem->selected_wram = value-1;
-            mem->WorkRAM_Curr = mem->WorkRAM_Switch[mem->selected_wram];
-            return;
-        case VBK_REG: //Video ram bank
-            if(GameBoy.Emulator.CGBEnabled == 0) return;
-
-            mem->IO_Ports[VBK_REG-0xFF00] = value | (0xFE);
-
-            mem->selected_vram = value & 1;
-
-            if(mem->selected_vram) mem->VideoRAM_Curr = &mem->VideoRAM[0x2000];
-            else mem->VideoRAM_Curr = &mem->VideoRAM[0x0000];
-            return;
 
         //                   PALETTES
         case BCPS_REG:
@@ -753,18 +757,12 @@ void GB_MemWriteReg8_GBC(u32 address, u32 value)
 
         //Undocumented registers...
 
-        // DMG ROM: [FF50]=01
-
-        // MGB ROM: [FF50]=FF
-
-        // SGB ROM: [FF50]=01
-
         // CGB ROM: [FF50]=11
         //  GB game:     [FF6C]=FE, [FF4C]=04, [FF6C]=01
         //  GB+GBC game: [FF6C]=FE, [FF4C]=80
         //  GBC game:    [FF6C]=FE, [FF4C]=C0
 
-        //Change is done when disabling boot ROM.
+        //Change to DMG mode is done when disabling boot ROM?
 
         case 0xFF4C: // change to gb mode ?
             if(GameBoy.Emulator.CGBEnabled == 0) return;

@@ -199,7 +199,6 @@ void GB_CPUInit(void)
     else
     {
         // No idea of the real initial values (except the PC one, it must be 0x0000).
-        // Maybe they are random?
         GameBoy.CPU.R16.AF = 0x0000;
         GameBoy.CPU.R16.BC = 0x0000;
         GameBoy.CPU.R16.DE = 0x0000;
@@ -207,6 +206,9 @@ void GB_CPUInit(void)
         GameBoy.CPU.R16.PC = 0x0000;
         GameBoy.CPU.R16.SP = 0x0000;
     }
+
+    if(GameBoy.Emulator.CGBEnabled == 1)
+        GameBoy.Memory.IO_Ports[KEY1_REG-0xFF00] = 0x7E;
 }
 
 void GB_CPUEnd(void)

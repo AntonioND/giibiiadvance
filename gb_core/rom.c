@@ -220,6 +220,12 @@ int GB_CartridgeLoad(const u8 * pointer, const u32 rom_size)
         case HW_GBP:
             ConsolePrint("Loading in GBP mode...\n");
             break;
+        case HW_SGB:
+            ConsolePrint("Loading in SGB mode...\n");
+            break;
+        case HW_SGB2:
+            ConsolePrint("Loading in SGB2 mode...\n");
+            break;
         case HW_GBC:
             ConsolePrint("Loading in GBC mode...\n");
             break;
@@ -229,14 +235,8 @@ int GB_CartridgeLoad(const u8 * pointer, const u32 rom_size)
         case HW_GBA_SP:
             ConsolePrint("Loading in GBA SP mode...\n");
             break;
-        case HW_SGB:
-            ConsolePrint("Loading in SGB mode...\n");
-            break;
-        case HW_SGB2:
-            ConsolePrint("Loading in SGB2 mode...\n");
-            break;
         default: //Should never happen
-            Debug_ErrorMsgArg("GB_CartridgeLoad(): Trying to load in an undefined mode, should never happen.");
+            Debug_ErrorMsgArg("GB_CartridgeLoad(): Trying to load in an undefined mode!");
             return 0;
             break;
     }
@@ -460,7 +460,7 @@ int GB_CartridgeLoad(const u8 * pointer, const u32 rom_size)
 
     if(GameBoy.Emulator.MemoryController == MEM_CAMERA)
         if(GameBoy.Emulator.RAM_Banks < 1) // in case any other software uses GB Camera...
-            GameBoy.Emulator.RAM_Banks = 1; // shouldn't be needed.
+            GameBoy.Emulator.RAM_Banks = 1; // It shouldn't be needed.
 
     ConsolePrint("RAM size %02X -- %d banks\n",GB_Header->ram_size,GameBoy.Emulator.RAM_Banks);
 
@@ -548,68 +548,9 @@ int GB_CartridgeLoad(const u8 * pointer, const u32 rom_size)
     }
 
     //  SAVE LOCATION...
-    GameBoy.Emulator.Rom_Pointer = (void*)GB_Header;
+    GameBoy.Emulator.Rom_Pointer = (void*)pointer;
 
-    // ------- ALLOCATE MEMORY -----------
-
-    ConsolePrint("Loading... ");
-
-    _GB_MEMORY_ * mem = &GameBoy.Memory;
-
-    mem->ROM_Base = (void*)GB_Header;
-
-    int i;
-    for(i=0;i<512;i++) mem->ROM_Switch[i] = NULL;
-    for(i=0;i<GameBoy.Emulator.ROM_Banks;i++) mem->ROM_Switch[i] = (u8*)GB_Header + (16 * 1024 * i);
-
-    memset(mem->VideoRAM,0, 0x4000);
-
-    for(i=0;i<16;i++) mem->ExternRAM[i] = NULL; //Reset pointers
-    for(i=0;i<GameBoy.Emulator.RAM_Banks;i++)
-    {
-        mem->ExternRAM[i] = malloc(8 * 1024);
-        memset_rand(mem->ExternRAM[i], 8 * 1024);
-    }
-
-    memset_rand(mem->WorkRAM , 0x1000);
-
-    if(GameBoy.Emulator.CGBEnabled == 1)
-    {
-        for(i=0;i<7;i++)
-        {
-            mem->WorkRAM_Switch[i] = malloc(4 * 1024);
-            memset_rand(mem->WorkRAM_Switch[i] , 4 * 1024);
-        }
-        memset_rand(mem->StrangeRAM, 0x30);
-    }
-    else
-    {
-        for(i=0;i<7;i++) mem->WorkRAM_Switch[i] = NULL;
-        mem->WorkRAM_Switch[0] = malloc(4 * 1024);
-        memset_rand(mem->WorkRAM_Switch[0], 4 * 1024);
-    }
-
-    if( (GameBoy.Emulator.HardwareType == HW_GBC) || (GameBoy.Emulator.HardwareType == HW_GBA) ||
-        (GameBoy.Emulator.HardwareType == HW_GBA_SP) )
-        memset(mem->ObjAttrMem,0,0xA0);
-    else
-        memset_rand(mem->ObjAttrMem,0xA0);
-
-    memset(mem->IO_Ports,0,0x80);
-    memset(mem->HighRAM,0,0x80);
-
-    mem->InterruptMasterEnable = 0;
-
-    mem->selected_rom = 1;
-    mem->selected_ram = mem->selected_wram = mem->selected_vram = 0;
-    mem->mbc_mode = 0;
-    GameBoy.Emulator.rumble = 0;
-    GameBoy.Emulator.MBC7.sensorX = GameBoy.Emulator.MBC7.sensorY = 2047;
-
-    mem->VideoRAM_Curr = mem->VideoRAM;
-    mem->ROM_Curr = mem->ROM_Switch[mem->selected_rom];
-    mem->RAM_Curr = mem->ExternRAM[0];
-    mem->WorkRAM_Curr = mem->WorkRAM_Switch[0];
+    // Prepare Game Boy palettes
 
     if(GameBoy.Emulator.HardwareType == HW_GB)
         GB_ConfigLoadPalette();
@@ -623,26 +564,12 @@ int GB_CartridgeLoad(const u8 * pointer, const u32 rom_size)
 
 void GB_Cartridge_Unload(void)
 {
-    _GB_MEMORY_ * mem = &GameBoy.Memory;
-
     if(GameBoy.Emulator.boot_rom_loaded)
     {
         free(GameBoy.Emulator.boot_rom);
         GameBoy.Emulator.boot_rom = NULL;
         GameBoy.Emulator.boot_rom_loaded = 0;
         GameBoy.Emulator.enable_boot_rom = 0;
-    }
-
-    int i;
-    for(i = 0; i < GameBoy.Emulator.RAM_Banks ; i++) free(mem->ExternRAM[i]);
-
-    if(GameBoy.Emulator.CGBEnabled == 1)
-    {
-        for(i = 0; i < 7; i++) free(mem->WorkRAM_Switch[i]);
-    }
-    else
-    {
-        free(mem->WorkRAM_Switch[0]);
     }
 
     free(GameBoy.Emulator.Rom_Pointer);

@@ -20,7 +20,7 @@ General
 GB emulation
 
 - GB core rewritten.
-- Timer emulated perfectly in DMG. In GBC/GBA/GBA SP there are some cases that can't be emulated.
+- Timer emulated perfectly in DMG. In GBC/GBA/GBA SP there are some cases that can't be emulated. (?)
 - HDMA/GDMA timings corrected.
 - Fixed KEY1 register when doing a hard reset.
 - Joypad interrupt fixed.

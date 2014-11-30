@@ -21,6 +21,9 @@
 
 void GB_MapperSet(int type);
 
+void GB_MapperInit(void);
+void GB_MapperEnd(void);
+
 #endif //__GB_MBC__
 
 

@@ -147,9 +147,9 @@ u32 GB_MemRead8_GBC_BootDisabled(u32 address)
             return GameBoy.Memory.MapperRead(address);
         case 0xC: //4KB Work RAM Bank 0
 
-            //GB_DMAUpdateClocksClounterReference(GB_CPUClockCounterGet());
-            //if(GameBoy.Emulator.OAM_DMA_last_read_byte_enabled)
-            //    return GameBoy.Emulator.OAM_DMA_last_read_byte;
+            GB_DMAUpdateClocksClounterReference(GB_CPUClockCounterGet());
+            if(GameBoy.Emulator.OAM_DMA_enabled)
+                return GameBoy.Emulator.OAM_DMA_last_read_byte;
 
             return mem->WorkRAM[address-0xC000];
         case 0xD: // 4KB Work RAM Bank 1
@@ -166,6 +166,10 @@ u32 GB_MemRead8_GBC_BootDisabled(u32 address)
 #ifdef VRAM_MEM_CHECKING
                 if(GameBoy.Emulator.lcd_on && GameBoy.Emulator.ScreenMode & 0x02) return 0xFF;
 #endif
+                GB_DMAUpdateClocksClounterReference(GB_CPUClockCounterGet());
+                if(GameBoy.Emulator.OAM_DMA_enabled)
+                    return 0xFF;
+
                 return mem->ObjAttrMem[address-0xFE00];
             }
             else if(address < 0xFF00) // Not Usable

@@ -334,7 +334,6 @@ typedef struct {
     u32 OAM_DMA_src; // pointers to current positions to read and copy
     u32 OAM_DMA_dst;
     u32 OAM_DMA_last_read_byte;
-    u32 OAM_DMA_last_read_byte_enabled;
 
     // GBC DMA
     u32 GBC_DMA_enabled; //GBC_DMA_<***> defines

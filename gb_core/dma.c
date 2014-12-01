@@ -38,7 +38,6 @@ void GB_DMAInit(void)
     GameBoy.Emulator.OAM_DMA_src = 0;
     GameBoy.Emulator.OAM_DMA_dst = 0;
     GameBoy.Emulator.OAM_DMA_last_read_byte = 0;
-    GameBoy.Emulator.OAM_DMA_last_read_byte_enabled = 0;
 
     // HDMA/GDMA
     GameBoy.Emulator.GBC_DMA_enabled = GBC_DMA_NONE;
@@ -69,7 +68,6 @@ static void GB_DMAInitOAMCopy(int src_addr_high_byte)
     GameBoy.Emulator.OAM_DMA_src = src_addr_high_byte<<8;
     GameBoy.Emulator.OAM_DMA_dst = 0xFE00;
     GameBoy.Emulator.OAM_DMA_last_read_byte = 0x00;
-    GameBoy.Emulator.OAM_DMA_last_read_byte_enabled = 0;
     //Change read and write functions
 }
 
@@ -167,13 +165,7 @@ void GB_DMAUpdateClocksClounterReference(int reference_clocks)
             GB_MemWriteDMA8(GameBoy.Emulator.OAM_DMA_dst++,GameBoy.Emulator.OAM_DMA_last_read_byte);
         }
 
-        GameBoy.Emulator.OAM_DMA_last_read_byte_enabled = 0;
-
-        if( (last_destination_to_copy >= 0xFE00) && (last_destination_to_copy < 0xFEA0) )
-        {
-            GameBoy.Emulator.OAM_DMA_last_read_byte_enabled = 1;
-        }
-        else if(last_destination_to_copy >= 0xFEA0)
+        if(last_destination_to_copy >= 0xFEA0)
         {
             GameBoy.Emulator.OAM_DMA_enabled = 0;
         }

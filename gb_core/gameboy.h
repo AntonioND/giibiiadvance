@@ -329,10 +329,12 @@ typedef struct {
     draw_scanline_fn_ptr DrawScanlineFn;
 
     // OAM DMA
-    u32 OAM_DMA_bytes_left;
+    u32 OAM_DMA_enabled;
     u32 OAM_DMA_clocks_elapsed;
     u32 OAM_DMA_src; // pointers to current positions to read and copy
     u32 OAM_DMA_dst;
+    u32 OAM_DMA_last_read_byte;
+    u32 OAM_DMA_last_read_byte_enabled;
 
     // GBC DMA
     u32 GBC_DMA_enabled; //GBC_DMA_<***> defines

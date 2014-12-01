@@ -150,7 +150,7 @@ void GB_MemInit(void)
     else
         memset_rand(mem->ObjAttrMem,0xA0);
 
-    memset(mem->IO_Ports,0,0x80);
+    memset(mem->IO_Ports,0x00,0x80);
     memset(mem->HighRAM,0,0x80);
 
     mem->selected_rom = 1;

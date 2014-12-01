@@ -146,6 +146,11 @@ u32 GB_MemRead8_GBC_BootDisabled(u32 address)
         case 0xB: //8KB External RAM
             return GameBoy.Memory.MapperRead(address);
         case 0xC: //4KB Work RAM Bank 0
+
+            //GB_DMAUpdateClocksClounterReference(GB_CPUClockCounterGet());
+            //if(GameBoy.Emulator.OAM_DMA_last_read_byte_enabled)
+            //    return GameBoy.Emulator.OAM_DMA_last_read_byte;
+
             return mem->WorkRAM[address-0xC000];
         case 0xD: // 4KB Work RAM Bank 1
             return mem->WorkRAM_Curr[address-0xD000];

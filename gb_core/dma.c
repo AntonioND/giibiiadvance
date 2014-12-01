@@ -32,11 +32,15 @@ extern _GB_CONTEXT_ GameBoy;
 
 void GB_DMAInit(void)
 {
-    GameBoy.Emulator.OAM_DMA_bytes_left = 0;
+    // DMA
+    GameBoy.Emulator.OAM_DMA_enabled = 0;
     GameBoy.Emulator.OAM_DMA_clocks_elapsed = 0;
     GameBoy.Emulator.OAM_DMA_src = 0;
     GameBoy.Emulator.OAM_DMA_dst = 0;
+    GameBoy.Emulator.OAM_DMA_last_read_byte = 0;
+    GameBoy.Emulator.OAM_DMA_last_read_byte_enabled = 0;
 
+    // HDMA/GDMA
     GameBoy.Emulator.GBC_DMA_enabled = GBC_DMA_NONE;
 
     GameBoy.Emulator.gdma_preparation_clocks_left = 0;
@@ -60,10 +64,13 @@ void GB_DMAEnd(void)
 
 static void GB_DMAInitOAMCopy(int src_addr_high_byte)
 {
-    GameBoy.Emulator.OAM_DMA_bytes_left = 40*4;
+    GameBoy.Emulator.OAM_DMA_enabled = 1;
     GameBoy.Emulator.OAM_DMA_clocks_elapsed = 0;
     GameBoy.Emulator.OAM_DMA_src = src_addr_high_byte<<8;
     GameBoy.Emulator.OAM_DMA_dst = 0xFE00;
+    GameBoy.Emulator.OAM_DMA_last_read_byte = 0x00;
+    GameBoy.Emulator.OAM_DMA_last_read_byte_enabled = 0;
+    //Change read and write functions
 }
 
 static void GB_DMAInitGBCCopy(int register_value)
@@ -142,30 +149,33 @@ static inline void GB_DMAClockCounterSet(int new_reference_clocks)
 
 void GB_DMAUpdateClocksClounterReference(int reference_clocks)
 {
-    int increment_clocks = reference_clocks - GB_DMAClockCounterGet();
-
-    // This needs 160*4 + 8 clocks to end
-
-    if(GameBoy.Emulator.OAM_DMA_bytes_left > 0)
+    if(GameBoy.Emulator.OAM_DMA_enabled)
     {
-        int stop_clocks = GameBoy.Emulator.OAM_DMA_clocks_elapsed + increment_clocks;
+        // This needs 160*4 + 4 clocks to end
 
-        while(stop_clocks > GameBoy.Emulator.OAM_DMA_clocks_elapsed)
+        int increment_clocks = reference_clocks - GB_DMAClockCounterGet();
+
+        GameBoy.Emulator.OAM_DMA_clocks_elapsed += increment_clocks;
+
+        int last_destination_to_copy = 0xFE00 + (GameBoy.Emulator.OAM_DMA_clocks_elapsed / 4) - 2;
+
+        while(GameBoy.Emulator.OAM_DMA_dst <= last_destination_to_copy)
         {
-            GameBoy.Emulator.OAM_DMA_clocks_elapsed ++;
-            if((GameBoy.Emulator.OAM_DMA_clocks_elapsed & 3) == 0)
-            {
-                GB_MemWriteDMA8(GameBoy.Emulator.OAM_DMA_dst++,GB_MemReadDMA8(GameBoy.Emulator.OAM_DMA_src++));
-                GameBoy.Emulator.OAM_DMA_bytes_left --;
+            if(GameBoy.Emulator.OAM_DMA_dst >= 0xFEA0) break;
 
-                if(GameBoy.Emulator.OAM_DMA_bytes_left == 0)
-                {
-                    GameBoy.Emulator.OAM_DMA_clocks_elapsed = 0;
-                    GameBoy.Emulator.OAM_DMA_src = 0;
-                    GameBoy.Emulator.OAM_DMA_dst = 0;
-                    break;
-                }
-            }
+            GameBoy.Emulator.OAM_DMA_last_read_byte = GB_MemReadDMA8(GameBoy.Emulator.OAM_DMA_src++);
+            GB_MemWriteDMA8(GameBoy.Emulator.OAM_DMA_dst++,GameBoy.Emulator.OAM_DMA_last_read_byte);
+        }
+
+        GameBoy.Emulator.OAM_DMA_last_read_byte_enabled = 0;
+
+        if( (last_destination_to_copy >= 0xFE00) && (last_destination_to_copy < 0xFEA0) )
+        {
+            GameBoy.Emulator.OAM_DMA_last_read_byte_enabled = 1;
+        }
+        else if(last_destination_to_copy >= 0xFEA0)
+        {
+            GameBoy.Emulator.OAM_DMA_enabled = 0;
         }
     }
 
@@ -187,6 +197,13 @@ int GB_DMAGetClocksToNextEvent(void)
     //{
     //    return clocks to video mode 0. That is done already in GB_PPUGetClocksToNextEvent()
     //}
+
+    if(GameBoy.Emulator.OAM_DMA_enabled)
+    {
+        int clocks = (160*4+4)+4 - GameBoy.Emulator.OAM_DMA_clocks_elapsed;
+        if(clocks < clocks_to_next_event)
+            clocks_to_next_event = clocks;
+    }
 
     return clocks_to_next_event;
 }

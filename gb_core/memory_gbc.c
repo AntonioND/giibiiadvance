@@ -801,6 +801,8 @@ void GB_MemWriteReg8_GBC(u32 address, u32 value)
                 }
 
                 GB_MemUpdateReadWriteFunctionPointers();
+
+                GB_CPUBreakLoop();
             }
             return;
 

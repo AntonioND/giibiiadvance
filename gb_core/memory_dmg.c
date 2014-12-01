@@ -596,6 +596,8 @@ void GB_MemWriteReg8_DMG(u32 address, u32 value)
                 GameBoy.Emulator.enable_boot_rom = 0;
 
                 GB_MemUpdateReadWriteFunctionPointers();
+
+                GB_CPUBreakLoop();
             }
             return;
 

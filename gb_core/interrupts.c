@@ -91,6 +91,8 @@ void GB_InterruptsInit(void)
 
     if(GameBoy.Emulator.enable_boot_rom) // actually unknown, but one can guess...
     {
+        GameBoy.Memory.IO_Ports[P1_REG-0xFF00] = 0xFF;
+
         switch(GameBoy.Emulator.HardwareType)
         {
             case HW_GB:
@@ -125,26 +127,40 @@ void GB_InterruptsInit(void)
             case HW_GB:
             case HW_GBP:
                 GameBoy.Emulator.sys_clocks = 0xABCC; // Verified on hardware
+                GameBoy.Memory.IO_Ports[P1_REG-0xFF00] = 0xCF;
                 break;
 
             case HW_SGB:
             case HW_SGB2:
                 GameBoy.Emulator.sys_clocks = 0; // TODO: Unknown. Can't test. Not the same as DMG (different boot ROM).
+                GameBoy.Memory.IO_Ports[P1_REG-0xFF00] = 0xFF;
                 break;
 
             case HW_GBC:
                 if(GameBoy.Emulator.game_supports_gbc)
+                {
                     GameBoy.Emulator.sys_clocks = 0x1EA0; // Verified on hardware
+                    GameBoy.Memory.IO_Ports[P1_REG-0xFF00] = 0xCF;
+                }
                 else
+                {
                     GameBoy.Emulator.sys_clocks = 0x267C; // Verified on hardware - No user interaction during boot.
+                    GameBoy.Memory.IO_Ports[P1_REG-0xFF00] = 0xFF;
+                }
                 break;
 
             case HW_GBA:
             case HW_GBA_SP:
                 if(GameBoy.Emulator.game_supports_gbc)
+                {
                     GameBoy.Emulator.sys_clocks = 0x1EA4; // Verified on hardware
+                    GameBoy.Memory.IO_Ports[P1_REG-0xFF00] = 0xCF;
+                }
                 else
+                {
                     GameBoy.Emulator.sys_clocks = 0x2680; // Verified on hardware - No user interaction during boot.
+                    GameBoy.Memory.IO_Ports[P1_REG-0xFF00] = 0xFF;
+                }
                 break;
 
             default:

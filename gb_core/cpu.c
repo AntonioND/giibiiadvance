@@ -159,46 +159,77 @@ void GB_CPUInit(void)
     //Registers
     if(GameBoy.Emulator.boot_rom_loaded == 0)
     {
-        GameBoy.CPU.R8.F = 0xB0;
-
-        if(GameBoy.Emulator.CGBEnabled)
-        {
-            GameBoy.CPU.R16.BC = 0x0000;
-            GameBoy.CPU.R16.DE = 0xFF56;
-            GameBoy.CPU.R16.HL = 0x000D;
-        }
-        else
-        {
-            GameBoy.CPU.R16.BC = 0x0013;
-            GameBoy.CPU.R16.DE = 0x00D8;
-            GameBoy.CPU.R16.HL = 0x014D;
-        }
-
-        GameBoy.CPU.R16.PC = 0x0100;
         GameBoy.CPU.R16.SP = 0xFFFE;
+        GameBoy.CPU.R16.PC = 0x0100;
 
         switch(GameBoy.Emulator.HardwareType)
         {
-            case HW_GB:
-            case HW_SGB:
-                GameBoy.CPU.R8.A = 0x01; // SGB or Normal Gameboy
+            case HW_GB: // Verified on hardware
+                GameBoy.CPU.R16.AF = 0x01B0;
+                GameBoy.CPU.R16.BC = 0x0013;
+                GameBoy.CPU.R16.DE = 0x00D8;
+                GameBoy.CPU.R16.HL = 0x014D;
                 break;
-            case HW_GBP:
-            case HW_SGB2:
-                GameBoy.CPU.R8.A = 0xFF; // SGB2 or Pocket Gameboy
+            case HW_GBP: // Verified on hardware
+                GameBoy.CPU.R16.AF = 0xFFB0;
+                GameBoy.CPU.R16.BC = 0x0013;
+                GameBoy.CPU.R16.DE = 0x00D8;
+                GameBoy.CPU.R16.HL = 0x014D;
+                break;
+            case HW_SGB: // Obtained from boot ROM dump.
+                GameBoy.CPU.R16.AF = 0x0100;
+                GameBoy.CPU.R16.BC = 0x0014;
+                GameBoy.CPU.R16.DE = 0x0000;
+                GameBoy.CPU.R16.HL = 0xC060;
+                break;
+            case HW_SGB2: // Unknown, can't test
+                GameBoy.CPU.R16.AF = 0xFF00; // The only known value is that A is FF
+                GameBoy.CPU.R16.BC = 0x0014;
+                GameBoy.CPU.R16.DE = 0x0000;
+                GameBoy.CPU.R16.HL = 0xC060;
+                break;
+            case HW_GBC: // Verified on hardware
+                if(GameBoy.Emulator.game_supports_gbc)
+                {
+                    GameBoy.CPU.R16.AF = 0x1180;
+                    GameBoy.CPU.R16.BC = 0x0000;
+                    GameBoy.CPU.R16.DE = 0xFF56;
+                    GameBoy.CPU.R16.HL = 0x000D;
+                }
+                else
+                {
+                    GameBoy.CPU.R16.AF = 0x1100;
+                    GameBoy.CPU.R16.BC = 0x0000;
+                    GameBoy.CPU.R16.DE = 0x0008;
+                    GameBoy.CPU.R16.HL = 0x007C;
+                }
                 break;
             case HW_GBA:
-            case HW_GBA_SP:
-                GameBoy.CPU.R8.B |= 0x01; // GBA
-                //NO BREAK
-            case HW_GBC:
-                GameBoy.CPU.R8.A = 0x11; // CGB or GBA
+            case HW_GBA_SP: // Verified on hardware
+                if(GameBoy.Emulator.game_supports_gbc)
+                {
+                    GameBoy.CPU.R16.AF = 0x1180;
+                    GameBoy.CPU.R16.BC = 0x0100;
+                    GameBoy.CPU.R16.DE = 0xFF56;
+                    GameBoy.CPU.R16.HL = 0x000D;
+                }
+                else
+                {
+                    GameBoy.CPU.R16.AF = 0x1100;
+                    GameBoy.CPU.R16.BC = 0x0100;
+                    GameBoy.CPU.R16.DE = 0x0008;
+                    GameBoy.CPU.R16.HL = 0x007C;
+                }
+                break;
+
+            default:
+                Debug_ErrorMsg("GB_CPUInit()\nUnknown hardware!");
                 break;
         }
     }
     else
     {
-        // No idea of the real initial values (except the PC one, it must be 0x0000).
+        // No idea of the real initial values (except for the PC one, it must be 0x0000).
         GameBoy.CPU.R16.AF = 0x0000;
         GameBoy.CPU.R16.BC = 0x0000;
         GameBoy.CPU.R16.DE = 0x0000;

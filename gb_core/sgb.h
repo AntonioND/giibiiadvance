@@ -90,7 +90,6 @@ typedef struct {
 extern _SGB_INFO_ SGBInfo;
 
 void SGB_Init(void);
-void SGB_Clock(int clocks);
 void SGB_End(void);
 
 inline int SGB_MultiplayerIsEnabled(void); // returns 0 if disabled, mode if enabled

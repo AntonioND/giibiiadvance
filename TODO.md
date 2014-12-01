@@ -28,6 +28,7 @@ Game Boy
 - Emulate weird behaviours of speed switch and STOP mode (screen color).
 - Emulate RP register.
 - P1 register starting value in DMG or GBC mode?
+- Initial values in SGB/SGB2 of registers, timer and serial. I can't test because I don't have the hardware.
 
 Game Boy Advance
 ----------------

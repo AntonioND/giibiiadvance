@@ -1,2 +1,1 @@
-DMG MGB     -> 00 6B 00 00 12 34 56 78
-CGB AGB AGS -> 00 6A 00 00 90 91 44 00
+This should show "E1 00 00 00 ..." in every hardware.

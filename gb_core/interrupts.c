@@ -201,8 +201,9 @@ void GB_InterruptsEnd(void)
 inline void GB_SetInterrupt(int flag)
 {
     GameBoy.Memory.IO_Ports[IF_REG-0xFF00] |= flag;
-    //if(GameBoy.Memory.HighRAM[IE_REG-0xFF80] & flag)
-       GameBoy.Emulator.CPUHalt = 0; // Clear halt regardless of IME
+    if(GameBoy.Memory.HighRAM[IE_REG-0xFF80] & flag)
+        if(GameBoy.Emulator.CPUHalt == 1) // Only exit from HALT mode, not STOP
+            GameBoy.Emulator.CPUHalt = 0; // Clear halt regardless of IME
     GB_CPUBreakLoop();
 }
 
@@ -251,7 +252,7 @@ static void GB_TimerIncreaseTIMA(void)
 
     if(mem->IO_Ports[TIMA_REG-0xFF00] == 0xFF) //overflow
     {
-        //GB_SetInterrupt(I_TIMER); // Don't, there's a 4 clock delay between overflow and IF flag being set
+        //GB_SetInterrupt(I_TIMER); // There's a 4 clock delay between overflow and IF flag being set
         GameBoy.Emulator.timer_irq_delay_active = 4;
 
         mem->IO_Ports[TIMA_REG-0xFF00] = 0; //mem->IO_Ports[TMA_REG-0xFF00];

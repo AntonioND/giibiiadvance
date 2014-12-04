@@ -743,7 +743,7 @@ static u32 GB_MBC2Read(u32 address)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
     if(GameBoy.Emulator.RAM_Banks == 0 || mem->RAMEnabled == 0) return 0xFF;
-    return ( (mem->RAM_Curr[address-0xA000]) & 0x0F );
+    return ( (mem->RAM_Curr[address-0xA000]) | 0xF0 );
 }
 
 static u32 GB_MBC3Read(u32 address)

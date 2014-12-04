@@ -83,9 +83,8 @@ u32 GB_MemRead8_GBC_BootEnabled(u32 address)
             }
             else if(address < 0xFEA0) // Sprite Attribute Table
             {
-#ifdef VRAM_MEM_CHECKING
+                GB_PPUUpdateClocksClounterReference(GB_CPUClockCounterGet());
                 if(GameBoy.Emulator.lcd_on && GameBoy.Emulator.ScreenMode & 0x02) return 0xFF;
-#endif
                 return mem->ObjAttrMem[address-0xFE00];
             }
             else if(address < 0xFF00) // Not Usable
@@ -163,12 +162,10 @@ u32 GB_MemRead8_GBC_BootDisabled(u32 address)
             }
             else if(address < 0xFEA0) // Sprite Attribute Table
             {
-#ifdef VRAM_MEM_CHECKING
+                GB_PPUUpdateClocksClounterReference(GB_CPUClockCounterGet());
                 if(GameBoy.Emulator.lcd_on && GameBoy.Emulator.ScreenMode & 0x02) return 0xFF;
-#endif
                 GB_DMAUpdateClocksClounterReference(GB_CPUClockCounterGet());
-                if(GameBoy.Emulator.OAM_DMA_enabled)
-                    return 0xFF;
+                if(GameBoy.Emulator.OAM_DMA_enabled) return 0xFF;
 
                 return mem->ObjAttrMem[address-0xFE00];
             }

@@ -31,20 +31,6 @@
 #include "interrupts.h"
 #include "gb_main.h"
 
-/*******************************************************
-** Mode 2 -  80 clks \                                **
-** Mode 3 - 172 clks |- 456 clks  -  144 times        **
-** Mode 0 - 204 clks /                                **
-**                                                    **
-** Mode 3: 10 SPR - 296 clks || 0 SPR - 172 clks      **
-** Mode 0: 10 SPR -  80 clks || 0 SPR - 204 clks      **
-**                                                    **
-** VBlank (Mode 1) lasts 4560 clks.                   **
-**                                                    **
-** A complete screen refresh occurs every 70224 clks. **
-** 230230230230...11111111...230230230....1111111...  **
-*******************************************************/
-
 //----------------------------------------------------------------
 
 extern _GB_CONTEXT_ GameBoy;
@@ -176,7 +162,7 @@ void GB_PPUInit(void)
 
 void GB_PPUEnd(void)
 {
-
+    //Nothing to do
 }
 
 //----------------------------------------------------------------
@@ -214,9 +200,9 @@ void GB_PPUUpdateClocksClounterReference(int reference_clocks)
             switch(GameBoy.Emulator.ScreenMode)
             {
                 case 2:
-                    if(GameBoy.Emulator.LCD_clocks >= (80<<GameBoy.Emulator.DoubleSpeed) )
+                    if(GameBoy.Emulator.LCD_clocks >= (GameBoy.Emulator.DoubleSpeed ? 156:76) )
                     {
-                        GameBoy.Emulator.LCD_clocks -= (80<<GameBoy.Emulator.DoubleSpeed);
+                        GameBoy.Emulator.LCD_clocks -= (GameBoy.Emulator.DoubleSpeed ? 156:76);
 
                         GameBoy.Emulator.ScreenMode = 3;
                         mem->IO_Ports[STAT_REG-0xFF00] |= 0x03;
@@ -229,9 +215,9 @@ void GB_PPUUpdateClocksClounterReference(int reference_clocks)
                     }
                     break;
                 case 3:
-                    if(GameBoy.Emulator.LCD_clocks >= (172<<GameBoy.Emulator.DoubleSpeed) )
+                    if(GameBoy.Emulator.LCD_clocks >= (GameBoy.Emulator.DoubleSpeed ? 348:176) )
                     {
-                        GameBoy.Emulator.LCD_clocks -= (172<<GameBoy.Emulator.DoubleSpeed);
+                        GameBoy.Emulator.LCD_clocks -= (GameBoy.Emulator.DoubleSpeed ? 348:176);
 
                         GameBoy.Emulator.DrawScanlineFn(GameBoy.Emulator.CurrentScanLine);
 
@@ -338,10 +324,10 @@ int GB_PPUGetClocksToNextEvent(void)
         switch(GameBoy.Emulator.ScreenMode)
         {
             case 2:
-                clocks_to_next_event = (80<<GameBoy.Emulator.DoubleSpeed) - GameBoy.Emulator.LCD_clocks;
+                clocks_to_next_event = (GameBoy.Emulator.DoubleSpeed ? 156:76) - GameBoy.Emulator.LCD_clocks;
                 break;
             case 3:
-                clocks_to_next_event = (172<<GameBoy.Emulator.DoubleSpeed) - GameBoy.Emulator.LCD_clocks;
+                clocks_to_next_event = (GameBoy.Emulator.DoubleSpeed ? 348:176) - GameBoy.Emulator.LCD_clocks;
                 break;
             case 0:
                 clocks_to_next_event = (204<<GameBoy.Emulator.DoubleSpeed) - GameBoy.Emulator.LCD_clocks;

@@ -248,7 +248,7 @@ void Win_GBIOViewerUpdate(void)
     GUI_ConsoleModePrintf(&gb_ioview_irq_con,0,6,"JOYPAD [%c][%c]",(__ie&16)?CHR_SQUAREBLACK_MID:' ',(__if&16)?CHR_SQUAREBLACK_MID:' ');
 
     //Clocks
-    GUI_ConsoleModePrintf(&gb_ioview_clocks_con,0,0,"LCD: %d",GameBoy.Emulator.LCD_clocks);
+    GUI_ConsoleModePrintf(&gb_ioview_clocks_con,0,0,"LY: %d",GameBoy.Emulator.ly_clocks);
     if(GameBoy.Emulator.timer_enabled)
     {
         GUI_ConsoleModePrintf(&gb_ioview_clocks_con,0,1,"TIMA: %d",

@@ -653,13 +653,13 @@ void GB_MemWriteReg8_GBC(u32 address, u32 value)
 
                 if(value & (1<<7))
                 {
-                    GameBoy.Emulator.LCD_clocks = 456;
+                    GameBoy.Emulator.ly_clocks = 456;
                     GameBoy.Emulator.CurrentScanLine = 0;
                     GameBoy.Emulator.ScreenMode = 1;
                     mem->IO_Ports[STAT_REG-0xFF00] &= 0xFC;
                     mem->IO_Ports[STAT_REG-0xFF00] |= 1;
                 }
-                else GameBoy.Emulator.LCD_clocks = 0;
+                else GameBoy.Emulator.ly_clocks = 0;
 
                 GB_PPUCheckStatSignal();
                 mem->IO_Ports[IF_REG-0xFF00] &= ~I_STAT;

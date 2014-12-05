@@ -356,7 +356,8 @@ typedef struct {
     u32 wait_cycles;
 
     //LCD
-    s32 LCD_clocks; //for screen.
+    s32 ly_clocks; //clocks left for ly change
+    s32 ly_drawn; //1 if this line has been drawn
     u32 ScreenMode; //for vblank, hblank...
     u32 CurrentScanLine;
     u32 stat_signal; //when this goes from 0 to 1, STAT interrupt is triggered.

@@ -201,9 +201,10 @@ void GB_InterruptsEnd(void)
 inline void GB_SetInterrupt(int flag)
 {
     GameBoy.Memory.IO_Ports[IF_REG-0xFF00] |= flag;
-    if(GameBoy.Memory.HighRAM[IE_REG-0xFF80] & flag)
-        if(GameBoy.Emulator.CPUHalt == 1) // Only exit from HALT mode, not STOP
-            GameBoy.Emulator.CPUHalt = 0; // Clear halt regardless of IME
+//This is checked in GB_IRQExecute(), not here!
+//    if(GameBoy.Memory.HighRAM[IE_REG-0xFF80] & flag)
+//        if(GameBoy.Emulator.CPUHalt == 1) // Only exit from HALT mode, not STOP
+//            GameBoy.Emulator.CPUHalt = 0; // Clear halt regardless of IME
     GB_CPUBreakLoop();
 }
 
@@ -629,7 +630,7 @@ void GB_CheckJoypadInterrupt(void) // Important: Must be called at least once pe
     {
         GB_SetInterrupt(I_JOYPAD);
 
-        if(GameBoy.Emulator.CPUHalt == 2) // Exit stop mode in any hardware
+        if(GameBoy.Emulator.CPUHalt == 2) // Exit stop mode (in any hardware)
             GameBoy.Emulator.CPUHalt = 0;
 
         GB_CPUBreakLoop();

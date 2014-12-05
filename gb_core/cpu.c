@@ -268,11 +268,15 @@ static int GB_IRQExecute(void)
     int interrupts = mem->IO_Ports[IF_REG-0xFF00] & mem->HighRAM[IE_REG-0xFF80] & 0x1F;
     if(interrupts != 0)
     {
-        if(mem->InterruptMasterEnable) // Execute interrupt
+        if(mem->InterruptMasterEnable) // Execute interrupt and clear IME
         {
             int start_clocks = GB_CPUClockCounterGet();
 
-            GameBoy.Emulator.CPUHalt = 0;
+            if(GameBoy.Emulator.CPUHalt == 1)
+            {
+                GB_CPUClockCounterAdd(4); // Extra cycle needed to exit halt mode
+                GameBoy.Emulator.CPUHalt = 0;
+            }
 
             GameBoy.Memory.InterruptMasterEnable = 0;
             GB_CPUClockCounterAdd(8);
@@ -300,6 +304,12 @@ static int GB_IRQExecute(void)
             int end_clocks = GB_CPUClockCounterGet();
 
             executed_clocks = end_clocks - start_clocks;
+        }
+        else
+        {
+            //Exit HALT mode regardless of IME
+            if(GameBoy.Emulator.CPUHalt == 1) // If HALT
+                GameBoy.Emulator.CPUHalt = 0;
         }
     }
 

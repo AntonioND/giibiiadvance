@@ -309,7 +309,11 @@ static int GB_IRQExecute(void)
         {
             //Exit HALT mode regardless of IME
             if(GameBoy.Emulator.CPUHalt == 1) // If HALT
+            {
                 GameBoy.Emulator.CPUHalt = 0;
+                GB_CPUClockCounterAdd(4); // 4 clocks are needed to exit HALT mode
+                executed_clocks = 4;
+            }
         }
     }
 

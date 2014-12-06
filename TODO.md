@@ -13,6 +13,7 @@ General
 Game Boy
 --------
 
+- Use 2 GBC using serial INT to check delays in IR communications.
 - Switch LCD off effect (check on hardware).
 - Emulate joypad bounce. This doesn't happen in GBA SP.
 - When loading a GB only ROM in GBC mode, prepare palettes.

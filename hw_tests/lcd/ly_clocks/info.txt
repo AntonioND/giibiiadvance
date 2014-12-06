@@ -1,4 +1,5 @@
 DMG MGB     - 4E 00 00 00 12 34 56 78
 CGB AGB AGS - 4E 00 00 00 2C 94 00 00
 
-The important thing is that the numbers at 2C and 94 (and 4E and 00) add the same value.
+Correct LY timing: Numbers at 2C and 94 (and 4E and 00) add the same value.
+Correct INT timing: All numbers are correct.

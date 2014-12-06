@@ -200,7 +200,7 @@ void GB_PPUUpdateClocksClounterReference(int reference_clocks)
             switch(GameBoy.Emulator.ScreenMode)
             {
                 case 2:
-                    if(GameBoy.Emulator.ly_clocks >= (84<<GameBoy.Emulator.DoubleSpeed) )
+                    if(GameBoy.Emulator.ly_clocks >= (82<<GameBoy.Emulator.DoubleSpeed) )
                     {
                         GameBoy.Emulator.ScreenMode = 3;
                         mem->IO_Ports[STAT_REG-0xFF00] |= 0x03;

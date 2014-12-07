@@ -8,6 +8,23 @@
 
 ;------------------------------------
 
+ClearSprites:
+	push	hl
+	
+	ld	b,144
+	call	wait_ly
+	
+	xor	a,a
+	ld	b,$A0
+	ld	hl,$FE00
+.loop:
+	ld	[hl+],a
+	dec	b
+	jr	nz,.loop
+	
+	pop	hl
+	ret
+	
 PrepareSprites: ; d = number of sprites in test line
 	
 	ld	b,144
@@ -79,6 +96,8 @@ PERFORM_TEST : MACRO
 
 	halt
 ENDM
+	
+	call	ClearSprites
 	
 	ld	d,0
 .next_spr_number:
@@ -212,7 +231,9 @@ ENDM
 	ld	[$0000],a ; enable ram
 	
 	; ---------------------------------
-
+	
+	call	ClearSprites
+	
 	ld	d,0
 .next_spr_number2:
 	push	de

@@ -2,10 +2,6 @@
 	INCLUDE	"hardware.inc"
 	INCLUDE "header.inc"
 
-	
-	SECTION	"var",BSS
-	
-repeat_loop:	DS 1
 
 	SECTION	"Main",HOME
 	
@@ -32,17 +28,7 @@ Main:
 	
 	ld	a,LCDCF_ON|LCDCF_OBJON
 	ld	[rLCDC],a
-	
-	ld	a,[Init_Reg_A]
-	cp	a,$11
-	jr	nz,.skip1
-	ld	a,0
-	ld	[repeat_loop],a
-	call	CPU_slow
-.skip1:
 
-.repeat_all:
-	
 	; -------------------------------------------------------
 
 PERFORM_TEST : MACRO
@@ -154,22 +140,6 @@ ENDM
 	inc hl
 	ld	[hl],$78
 	pop	hl
-	
-	; -------------------------------------------------------
-	
-	ld	a,[Init_Reg_A]
-	cp	a,$11
-	jr	nz,.dontchange
-	ld	a,[repeat_loop]
-	and	a,a
-	jr	nz,.dontchange
-	; -------------------------------------------------------
-
-	call	CPU_fast
-	ld	a,1
-	ld	[repeat_loop],a
-	jp	.repeat_all
-.dontchange:
 	
 	; -------------------------------------------------------
 

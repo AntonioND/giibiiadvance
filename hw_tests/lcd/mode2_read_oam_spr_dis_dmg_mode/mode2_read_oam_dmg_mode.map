@@ -20,8 +20,7 @@ ROM Bank #0 (HOME):
            $01A2 = irq_set_VBL
            $01AC = irq_set_TIM
            $01B1 = irq_set_SIO
-  SECTION: $01DF-$0BD1 ($09F3 bytes)
-           $0205 = Main.repeat_all
+  SECTION: $01DF-$0B86 ($09A8 bytes)
            $01DF = Main
   SECTION: $0081-$009E ($001E bytes)
            $0093 = memcopy_inc
@@ -32,40 +31,40 @@ ROM Bank #0 (HOME):
            $00B1 = div_u8u8u8
            $009F = mul_u8u8u16
            $00C4 = div_s8s8s8
-  SECTION: $0BD2-$0C07 ($0036 bytes)
-           $0BD2 = scan_keys
-  SECTION: $0C08-$0C5A ($0053 bytes)
-           $0C2A = rom_bank_set
-           $0C3A = rom_bank_push_set
-           $0C5A = ___long_call._jump_to_function
-           $0C12 = rom_bank_pop
-           $0C08 = rom_handler_init
-           $0C4E = ___long_call
-           $0C25 = rom_bank_push
-  SECTION: $0C5B-$0CB7 ($005D bytes)
-           $0C5B = wait_ly
-           $0C7F = vram_copy
-           $0C62 = wait_frames
-           $0C9C = vram_copy_tiles
-           $0C8E = vram_memset
-           $0C69 = screen_off
-           $0C78 = wait_screen_blank
-  SECTION: $0CB8-$0D13 ($005C bytes)
-           $0CB8 = sprite_get_base_pointer
-           $0D0C = __refresh_OAM_end
-           $0D04 = __refresh_OAM
-           $0CCF = sprite_set_params
-           $0D11 = refresh_custom_OAM
-           $0CD7 = spr_set_palette
-           $0CC8 = sprite_set_tile
-           $0CF7 = init_OAM
-           $0CC1 = sprite_set_xy
-           $0D0C = refresh_OAM
-  SECTION: $0D14-$0D4B ($0038 bytes)
-           $0D34 = bg_set_tile_wrap
-           $0D14 = bg_set_palette
-           $0D3E = bg_set_tile
-    SLACK: $3307 bytes
+  SECTION: $0B87-$0BBC ($0036 bytes)
+           $0B87 = scan_keys
+  SECTION: $0BBD-$0C0F ($0053 bytes)
+           $0BDF = rom_bank_set
+           $0BEF = rom_bank_push_set
+           $0C0F = ___long_call._jump_to_function
+           $0BC7 = rom_bank_pop
+           $0BBD = rom_handler_init
+           $0C03 = ___long_call
+           $0BDA = rom_bank_push
+  SECTION: $0C10-$0C6C ($005D bytes)
+           $0C10 = wait_ly
+           $0C34 = vram_copy
+           $0C17 = wait_frames
+           $0C51 = vram_copy_tiles
+           $0C43 = vram_memset
+           $0C1E = screen_off
+           $0C2D = wait_screen_blank
+  SECTION: $0C6D-$0CC8 ($005C bytes)
+           $0C6D = sprite_get_base_pointer
+           $0CC1 = __refresh_OAM_end
+           $0CB9 = __refresh_OAM
+           $0C84 = sprite_set_params
+           $0CC6 = refresh_custom_OAM
+           $0C8C = spr_set_palette
+           $0C7D = sprite_set_tile
+           $0CAC = init_OAM
+           $0C76 = sprite_set_xy
+           $0CC1 = refresh_OAM
+  SECTION: $0CC9-$0D00 ($0038 bytes)
+           $0CE9 = bg_set_tile_wrap
+           $0CC9 = bg_set_palette
+           $0CF3 = bg_set_tile
+    SLACK: $3352 bytes
 
 ROM Bank #1:
   SECTION: $4000-$491F ($0920 bytes)
@@ -147,14 +146,12 @@ WRAM Bank #0:
            $C0A5 = LCD_handler
   SECTION: $CE00-$CFFF ($0200 bytes)
            $D000 = StackTop
-  SECTION: $C0AD-$C0AD ($0001 bytes)
-           $C0AD = repeat_loop
-  SECTION: $C0AE-$C0CE ($0021 bytes)
-           $C0CE = rom_position
-           $C0AE = rom_stack
+  SECTION: $C0AD-$C0CD ($0021 bytes)
+           $C0CD = rom_position
+           $C0AD = rom_stack
   SECTION: $C000-$C09F ($00A0 bytes)
            $C000 = OAM_Copy
-    SLACK: $0D31 bytes
+    SLACK: $0D32 bytes
 
 WRAM Bank #1:
   EMPTY

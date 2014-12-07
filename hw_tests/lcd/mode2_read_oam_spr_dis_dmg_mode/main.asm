@@ -2,11 +2,6 @@
 	INCLUDE	"hardware.inc"
 	INCLUDE "header.inc"
 
-	
-	SECTION	"var",BSS
-	
-repeat_loop:	DS 1
-
 	SECTION	"Main",HOME
 	
 ;--------------------------------------------------------------------------
@@ -32,16 +27,7 @@ Main:
 	
 	ld	a,LCDCF_ON
 	ld	[rLCDC],a
-	
-	ld	a,[Init_Reg_A]
-	cp	a,$11
-	jr	nz,.skip1
-	ld	a,0
-	ld	[repeat_loop],a
-	call	CPU_slow
-.skip1:
 
-.repeat_all:
 	
 	; -------------------------------------------------------
 
@@ -155,46 +141,6 @@ ENDM
 	ld	[hl],$78
 	pop	hl
 	
-	; -------------------------------------------------------
-	
-	ld	a,[Init_Reg_A]
-	cp	a,$11
-	jr	nz,.dontchange
-	ld	a,[repeat_loop]
-	and	a,a
-	jr	nz,.dontchange
-	; -------------------------------------------------------
-
-	call	CPU_fast
-	ld	a,1
-	ld	[repeat_loop],a
-	jp	.repeat_all
-.dontchange:
-	
-	; -------------------------------------------------------
-
-	ld	a,$00
-	ld	[$0000],a ; disable ram
-	
-	call	screen_off
-	
-	ld	a,$80
-	ld	[rNR52],a
-	ld	a,$FF
-	ld	[rNR51],a
-	ld	a,$77
-	ld	[rNR50],a
-	
-	ld	a,$C0
-	ld	[rNR11],a
-	ld	a,$E0
-	ld	[rNR12],a
-	ld	a,$00
-	ld	[rNR13],a
-	ld	a,$87
-	ld	[rNR14],a
-	
-
 .endloop:
 	halt
 	jr	.endloop

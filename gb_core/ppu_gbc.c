@@ -176,7 +176,7 @@ int GB_PPUGetClocksToNextEvent_GBC(void)
         switch(GameBoy.Emulator.ScreenMode)
         {
             case 2:
-                clocks_to_next_event = 4;
+                clocks_to_next_event = (82<<GameBoy.Emulator.DoubleSpeed) - GameBoy.Emulator.ly_clocks;
                 break;
             case 3:
                 clocks_to_next_event = 4;

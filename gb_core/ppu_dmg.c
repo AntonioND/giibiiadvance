@@ -46,7 +46,7 @@ void GB_PPUUpdateClocks_DMG(int increment_clocks)
         switch(GameBoy.Emulator.ScreenMode)
         {
             case 2:
-                if(GameBoy.Emulator.ly_clocks >= (82<<GameBoy.Emulator.DoubleSpeed) )
+                if(GameBoy.Emulator.ly_clocks >= 82)
                 {
                     GameBoy.Emulator.ScreenMode = 3;
                     mem->IO_Ports[STAT_REG-0xFF00] |= 0x03;
@@ -59,7 +59,7 @@ void GB_PPUUpdateClocks_DMG(int increment_clocks)
                 }
                 break;
             case 3:
-                if(GameBoy.Emulator.ly_clocks >= (252<<GameBoy.Emulator.DoubleSpeed) )
+                if(GameBoy.Emulator.ly_clocks >= 252)
                 {
                     GameBoy.Emulator.DrawScanlineFn(GameBoy.Emulator.CurrentScanLine);
 
@@ -106,9 +106,9 @@ void GB_PPUUpdateClocks_DMG(int increment_clocks)
                 }
                 else
                 {
-                    if(GameBoy.Emulator.ly_clocks >= (456<<GameBoy.Emulator.DoubleSpeed) )
+                    if(GameBoy.Emulator.ly_clocks >= 456 )
                     {
-                        GameBoy.Emulator.ly_clocks -= (456<<GameBoy.Emulator.DoubleSpeed);
+                        GameBoy.Emulator.ly_clocks -= 456;
 
                         GameBoy.Emulator.CurrentScanLine ++;
                         GameBoy.Emulator.ly_drawn = 0;
@@ -122,9 +122,9 @@ void GB_PPUUpdateClocks_DMG(int increment_clocks)
                 }
                 break;
             case 1:
-                if(GameBoy.Emulator.ly_clocks >= (456<<GameBoy.Emulator.DoubleSpeed) )
+                if(GameBoy.Emulator.ly_clocks >= 456)
                 {
-                    GameBoy.Emulator.ly_clocks -= (456<<GameBoy.Emulator.DoubleSpeed);
+                    GameBoy.Emulator.ly_clocks -= 456;
 
                     if(GameBoy.Emulator.CurrentScanLine == 0)
                     {
@@ -137,16 +137,18 @@ void GB_PPUUpdateClocks_DMG(int increment_clocks)
 
                     GameBoy.Emulator.CurrentScanLine ++;
 
+                    GB_PPUCheckLYC();
+
                     if(GameBoy.Emulator.CurrentScanLine == 153)
                     {
-                        GameBoy.Emulator.ly_clocks += ((456-8)<<GameBoy.Emulator.DoubleSpeed); // 8 clocks this scanline
+                        GameBoy.Emulator.ly_clocks += (456-8); // 8 clocks this scanline
                     }
                     else if(GameBoy.Emulator.CurrentScanLine == 154)
                     {
                         GameBoy.Emulator.CurrentScanLine = 0;
                         GameBoy.Emulator.FrameDrawn = 1;
 
-                        GameBoy.Emulator.ly_clocks += (8<<GameBoy.Emulator.DoubleSpeed); // 456 - 8 cycles left of vblank...
+                        GameBoy.Emulator.ly_clocks += 8; // 456 - 8 cycles left of vblank...
                     }
 
                     mem->IO_Ports[LY_REG-0xFF00] = GameBoy.Emulator.CurrentScanLine;
@@ -183,10 +185,10 @@ int GB_PPUGetClocksToNextEvent_DMG(void)
                 break;
             case 0:
                 clocks_to_next_event = 4;
-                //clocks_to_next_event = (456<<GameBoy.Emulator.DoubleSpeed) - GameBoy.Emulator.ly_clocks;
+                //clocks_to_next_event = 456 - GameBoy.Emulator.ly_clocks;
                 break;
             case 1:
-                clocks_to_next_event = (456<<GameBoy.Emulator.DoubleSpeed) - GameBoy.Emulator.ly_clocks;
+                clocks_to_next_event = 456 - GameBoy.Emulator.ly_clocks;
                 break;
             default:
                 break;

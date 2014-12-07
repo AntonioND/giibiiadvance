@@ -254,6 +254,9 @@ typedef struct {
 #define SERIAL_GBPRINTER (1)
 #define SERIAL_GAMEBOY   (2)
 
+typedef void (*gb_ppu_update_fn_ptr)(int); // increment clocks
+typedef int (*gb_ppu_clocks_to_event_fn_ptr)(void);
+
 typedef void (*draw_scanline_fn_ptr)(s32);
 
 typedef void (*serial_send_fn_ptr)(u32);
@@ -361,6 +364,8 @@ typedef struct {
     u32 ScreenMode; //for vblank, hblank...
     u32 CurrentScanLine;
     u32 stat_signal; //when this goes from 0 to 1, STAT interrupt is triggered.
+    gb_ppu_update_fn_ptr PPUUpdate; // argument = increment clocks
+    gb_ppu_clocks_to_event_fn_ptr PPUClocksToNextEvent;
 
     //DIV, Timer, Sound
     u32 sys_clocks; // 16 bit register. The 8 most significant bits are DIV_REG

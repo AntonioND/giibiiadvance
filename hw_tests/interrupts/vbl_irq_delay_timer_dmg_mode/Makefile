@@ -1,7 +1,7 @@
 #####################################################################
 ##                           ROM NAME                              ##
 
-NAME = vbl_int_delay
+NAME = vbl_irq_delay_timer_dmg_mode
 EXT	 = gbc
 
 ##                                                                 ##

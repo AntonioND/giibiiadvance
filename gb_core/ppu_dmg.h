@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __GB_PPU__
-#define __GB_PPU__
+#ifndef __GB_PPU_DMG__
+#define __GB_PPU_DMG__
 
 //----------------------------------------------------------------
 
@@ -25,19 +25,9 @@
 
 //----------------------------------------------------------------
 
-void GB_PPUInit(void);
-void GB_PPUEnd(void);
+void GB_PPUUpdateClocks_DMG(int increment_clocks);
 
-//----------------------------------------------------------------
-
-inline void GB_PPUClockCounterReset(void);
-void GB_PPUUpdateClocksClounterReference(int reference_clocks);
-inline int GB_PPUGetClocksToNextEvent(void);
-
-//----------------------------------------------------------------
-
-inline void GB_PPUCheckStatSignal(void);
-inline void GB_PPUCheckLYC(void);
+int GB_PPUGetClocksToNextEvent_DMG(void);
 
 //----------------------------------------------------------------
 

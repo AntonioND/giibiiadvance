@@ -1,0 +1,267 @@
+ROM Bank #0 (HOME):
+  SECTION: $0000-$0000 ($0001 bytes)
+  SECTION: $0008-$0008 ($0001 bytes)
+  SECTION: $0010-$0010 ($0001 bytes)
+  SECTION: $0018-$0018 ($0001 bytes)
+  SECTION: $0020-$0020 ($0001 bytes)
+  SECTION: $0028-$0028 ($0001 bytes)
+  SECTION: $0030-$0030 ($0001 bytes)
+  SECTION: $0038-$0038 ($0001 bytes)
+  SECTION: $0040-$0080 ($0041 bytes)
+           $0075 = wait_vbl
+  SECTION: $0100-$014F ($0050 bytes)
+  SECTION: $0150-$01DE ($008F bytes)
+           $0150 = StartPoint
+           $0198 = Reset
+           $01B6 = irq_set_JOY
+           $01BD = CPU_fast
+           $01A7 = irq_set_LCD
+           $01C4 = CPU_slow
+           $01A2 = irq_set_VBL
+           $01AC = irq_set_TIM
+           $01B1 = irq_set_SIO
+  SECTION: $01DF-$2838 ($265A bytes)
+           $01DF = Main
+  SECTION: $0081-$009E ($001E bytes)
+           $0093 = memcopy_inc
+           $008A = memcopy
+           $0081 = memset
+           $0089 = memset_rand
+  SECTION: $009F-$00E4 ($0046 bytes)
+           $00B1 = div_u8u8u8
+           $009F = mul_u8u8u16
+           $00C4 = div_s8s8s8
+  SECTION: $2839-$286E ($0036 bytes)
+           $2839 = scan_keys
+  SECTION: $286F-$28C1 ($0053 bytes)
+           $2891 = rom_bank_set
+           $28A1 = rom_bank_push_set
+           $28C1 = ___long_call._jump_to_function
+           $2879 = rom_bank_pop
+           $286F = rom_handler_init
+           $28B5 = ___long_call
+           $288C = rom_bank_push
+  SECTION: $28C2-$291E ($005D bytes)
+           $28C2 = wait_ly
+           $28E6 = vram_copy
+           $28C9 = wait_frames
+           $2903 = vram_copy_tiles
+           $28F5 = vram_memset
+           $28D0 = screen_off
+           $28DF = wait_screen_blank
+  SECTION: $291F-$297A ($005C bytes)
+           $291F = sprite_get_base_pointer
+           $2973 = __refresh_OAM_end
+           $296B = __refresh_OAM
+           $2936 = sprite_set_params
+           $2978 = refresh_custom_OAM
+           $293E = spr_set_palette
+           $292F = sprite_set_tile
+           $295E = init_OAM
+           $2928 = sprite_set_xy
+           $2973 = refresh_OAM
+  SECTION: $297B-$29B2 ($0038 bytes)
+           $299B = bg_set_tile_wrap
+           $297B = bg_set_palette
+           $29A5 = bg_set_tile
+    SLACK: $16A0 bytes
+
+ROM Bank #1:
+  SECTION: $4000-$4C3F ($0C40 bytes)
+           $4000 = LCD_INT_HANDLER_STAT_0
+           $4009 = LCD_INT_HANDLER_STAT_1
+           $4013 = LCD_INT_HANDLER_STAT_2
+           $401E = LCD_INT_HANDLER_STAT_3
+           $402A = LCD_INT_HANDLER_STAT_4
+           $4037 = LCD_INT_HANDLER_STAT_5
+           $4045 = LCD_INT_HANDLER_STAT_6
+           $4054 = LCD_INT_HANDLER_STAT_7
+           $4064 = LCD_INT_HANDLER_STAT_8
+           $4075 = LCD_INT_HANDLER_STAT_9
+           $4087 = LCD_INT_HANDLER_STAT_10
+           $409A = LCD_INT_HANDLER_STAT_11
+           $40AE = LCD_INT_HANDLER_STAT_12
+           $40C3 = LCD_INT_HANDLER_STAT_13
+           $40D9 = LCD_INT_HANDLER_STAT_14
+           $40F0 = LCD_INT_HANDLER_STAT_15
+           $4108 = LCD_INT_HANDLER_STAT_16
+           $4121 = LCD_INT_HANDLER_STAT_17
+           $413B = LCD_INT_HANDLER_STAT_18
+           $4156 = LCD_INT_HANDLER_STAT_19
+           $4172 = LCD_INT_HANDLER_STAT_20
+           $418F = LCD_INT_HANDLER_STAT_21
+           $41AD = LCD_INT_HANDLER_STAT_22
+           $41CC = LCD_INT_HANDLER_STAT_23
+           $41EC = LCD_INT_HANDLER_STAT_24
+           $420D = LCD_INT_HANDLER_STAT_25
+           $422F = LCD_INT_HANDLER_STAT_26
+           $4252 = LCD_INT_HANDLER_STAT_27
+           $4276 = LCD_INT_HANDLER_STAT_28
+           $429B = LCD_INT_HANDLER_STAT_29
+           $42C1 = LCD_INT_HANDLER_STAT_30
+           $42E8 = LCD_INT_HANDLER_STAT_31
+           $4310 = LCD_INT_HANDLER_TIMA_0
+           $4319 = LCD_INT_HANDLER_TIMA_1
+           $4323 = LCD_INT_HANDLER_TIMA_2
+           $432E = LCD_INT_HANDLER_TIMA_3
+           $433A = LCD_INT_HANDLER_TIMA_4
+           $4347 = LCD_INT_HANDLER_TIMA_5
+           $4355 = LCD_INT_HANDLER_TIMA_6
+           $4364 = LCD_INT_HANDLER_TIMA_7
+           $4374 = LCD_INT_HANDLER_TIMA_8
+           $4385 = LCD_INT_HANDLER_TIMA_9
+           $4397 = LCD_INT_HANDLER_TIMA_10
+           $43AA = LCD_INT_HANDLER_TIMA_11
+           $43BE = LCD_INT_HANDLER_TIMA_12
+           $43D3 = LCD_INT_HANDLER_TIMA_13
+           $43E9 = LCD_INT_HANDLER_TIMA_14
+           $4400 = LCD_INT_HANDLER_TIMA_15
+           $4418 = LCD_INT_HANDLER_TIMA_16
+           $4431 = LCD_INT_HANDLER_TIMA_17
+           $444B = LCD_INT_HANDLER_TIMA_18
+           $4466 = LCD_INT_HANDLER_TIMA_19
+           $4482 = LCD_INT_HANDLER_TIMA_20
+           $449F = LCD_INT_HANDLER_TIMA_21
+           $44BD = LCD_INT_HANDLER_TIMA_22
+           $44DC = LCD_INT_HANDLER_TIMA_23
+           $44FC = LCD_INT_HANDLER_TIMA_24
+           $451D = LCD_INT_HANDLER_TIMA_25
+           $453F = LCD_INT_HANDLER_TIMA_26
+           $4562 = LCD_INT_HANDLER_TIMA_27
+           $4586 = LCD_INT_HANDLER_TIMA_28
+           $45AB = LCD_INT_HANDLER_TIMA_29
+           $45D1 = LCD_INT_HANDLER_TIMA_30
+           $45F8 = LCD_INT_HANDLER_TIMA_31
+           $4620 = LCD_INT_HANDLER_IF_0
+           $4629 = LCD_INT_HANDLER_IF_1
+           $4633 = LCD_INT_HANDLER_IF_2
+           $463E = LCD_INT_HANDLER_IF_3
+           $464A = LCD_INT_HANDLER_IF_4
+           $4657 = LCD_INT_HANDLER_IF_5
+           $4665 = LCD_INT_HANDLER_IF_6
+           $4674 = LCD_INT_HANDLER_IF_7
+           $4684 = LCD_INT_HANDLER_IF_8
+           $4695 = LCD_INT_HANDLER_IF_9
+           $46A7 = LCD_INT_HANDLER_IF_10
+           $46BA = LCD_INT_HANDLER_IF_11
+           $46CE = LCD_INT_HANDLER_IF_12
+           $46E3 = LCD_INT_HANDLER_IF_13
+           $46F9 = LCD_INT_HANDLER_IF_14
+           $4710 = LCD_INT_HANDLER_IF_15
+           $4728 = LCD_INT_HANDLER_IF_16
+           $4741 = LCD_INT_HANDLER_IF_17
+           $475B = LCD_INT_HANDLER_IF_18
+           $4776 = LCD_INT_HANDLER_IF_19
+           $4792 = LCD_INT_HANDLER_IF_20
+           $47AF = LCD_INT_HANDLER_IF_21
+           $47CD = LCD_INT_HANDLER_IF_22
+           $47EC = LCD_INT_HANDLER_IF_23
+           $480C = LCD_INT_HANDLER_IF_24
+           $482D = LCD_INT_HANDLER_IF_25
+           $484F = LCD_INT_HANDLER_IF_26
+           $4872 = LCD_INT_HANDLER_IF_27
+           $4896 = LCD_INT_HANDLER_IF_28
+           $48BB = LCD_INT_HANDLER_IF_29
+           $48E1 = LCD_INT_HANDLER_IF_30
+           $4908 = LCD_INT_HANDLER_IF_31
+           $4930 = LCD_INT_HANDLER_LY_0
+           $4939 = LCD_INT_HANDLER_LY_1
+           $4943 = LCD_INT_HANDLER_LY_2
+           $494E = LCD_INT_HANDLER_LY_3
+           $495A = LCD_INT_HANDLER_LY_4
+           $4967 = LCD_INT_HANDLER_LY_5
+           $4975 = LCD_INT_HANDLER_LY_6
+           $4984 = LCD_INT_HANDLER_LY_7
+           $4994 = LCD_INT_HANDLER_LY_8
+           $49A5 = LCD_INT_HANDLER_LY_9
+           $49B7 = LCD_INT_HANDLER_LY_10
+           $49CA = LCD_INT_HANDLER_LY_11
+           $49DE = LCD_INT_HANDLER_LY_12
+           $49F3 = LCD_INT_HANDLER_LY_13
+           $4A09 = LCD_INT_HANDLER_LY_14
+           $4A20 = LCD_INT_HANDLER_LY_15
+           $4A38 = LCD_INT_HANDLER_LY_16
+           $4A51 = LCD_INT_HANDLER_LY_17
+           $4A6B = LCD_INT_HANDLER_LY_18
+           $4A86 = LCD_INT_HANDLER_LY_19
+           $4AA2 = LCD_INT_HANDLER_LY_20
+           $4ABF = LCD_INT_HANDLER_LY_21
+           $4ADD = LCD_INT_HANDLER_LY_22
+           $4AFC = LCD_INT_HANDLER_LY_23
+           $4B1C = LCD_INT_HANDLER_LY_24
+           $4B3D = LCD_INT_HANDLER_LY_25
+           $4B5F = LCD_INT_HANDLER_LY_26
+           $4B82 = LCD_INT_HANDLER_LY_27
+           $4BA6 = LCD_INT_HANDLER_LY_28
+           $4BCB = LCD_INT_HANDLER_LY_29
+           $4BF1 = LCD_INT_HANDLER_LY_30
+           $4C18 = LCD_INT_HANDLER_LY_31
+    SLACK: $33C0 bytes
+
+WRAM Bank #0:
+  SECTION: $C0A0-$C0AC ($000D bytes)
+           $C0A2 = _is_vbl_flag
+           $C0A7 = TIM_handler
+           $C0A9 = SIO_handler
+           $C0AB = JOY_handler
+           $C0A3 = VBL_handler
+           $C0A0 = Init_Reg_A
+           $C0A1 = Init_Reg_B
+           $C0A5 = LCD_handler
+  SECTION: $CE00-$CFFF ($0200 bytes)
+           $D000 = StackTop
+  SECTION: $C0AD-$C0CD ($0021 bytes)
+           $C0CD = rom_position
+           $C0AD = rom_stack
+  SECTION: $C000-$C09F ($00A0 bytes)
+           $C000 = OAM_Copy
+    SLACK: $0D32 bytes
+
+WRAM Bank #1:
+  EMPTY
+
+WRAM Bank #2:
+  EMPTY
+
+WRAM Bank #3:
+  EMPTY
+
+WRAM Bank #4:
+  EMPTY
+
+WRAM Bank #5:
+  EMPTY
+
+WRAM Bank #6:
+  EMPTY
+
+WRAM Bank #7:
+  EMPTY
+
+VRAM Bank #0:
+  EMPTY
+
+VRAM Bank #1:
+  EMPTY
+
+HRAM:
+  SECTION: $FF88-$FF8A ($0003 bytes)
+           $FF89 = joy_held
+           $FF88 = _joy_old
+           $FF8A = joy_pressed
+  SECTION: $FF80-$FF87 ($0008 bytes)
+           $FF80 = refresh_OAM_HRAM
+    SLACK: $0074 bytes
+
+SRAM Bank #0:
+  EMPTY
+
+SRAM Bank #1:
+  EMPTY
+
+SRAM Bank #2:
+  EMPTY
+
+SRAM Bank #3:
+  EMPTY
+

@@ -8,10 +8,10 @@
 ;--------------------------------------------------------------------------
 
 	SECTION	"RST_00",HOME[$0000]
-	ret
+	ret ; Reserved for interrupt handler. If any interrupt vector is $0000 it jumps here and returns.
 	
 	SECTION	"RST_08",HOME[$0008]
-	ret
+	jp	hl ; Reserved for interrupt handler. (Or any other function that uses "call hl")
 
 	SECTION	"RST_10",HOME[$0010]
 	ret
@@ -29,7 +29,7 @@
 	ret
 
 	SECTION	"RST_38",HOME[$0038]
-	jp	Reset
+	ret
 	
 ;--------------------------------------------------------------------------
 ;-                            INTERRUPT VECTORS                           -
@@ -38,19 +38,13 @@
 	SECTION	"Interrupt Vectors",HOME[$0040]
 	
 ;	SECTION	"VBL Interrupt Vector",HOME[$0040]
-	ld	[hl+],a
-	ret ; don't enable again!
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
+	push	hl
+	ld	hl,_is_vbl_flag
+	ld	[hl],1
+	jr	irq_VBlank
 	
 ;	SECTION	"LCD Interrupt Vector",HOME[$0048]
-	xor	a,a
-	reti
-	nop
+	jp	$FF80
 	nop
 	nop
 	nop
@@ -58,16 +52,13 @@
 	nop
 	
 ;	SECTION	"TIM Interrupt Vector",HOME[$0050]
-	reti
+	push	hl
+	ld	hl,TIM_handler
+	jr	irq_Common
 	nop
 	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-
-;	SECTION	"SIO Interrupt Vector",HOME[$0058]	
+	
+;	SECTION	"SIO Interrupt Vector",HOME[$0058]
 	push	hl
 	ld	hl,SIO_handler
 	jr	irq_Common
@@ -85,7 +76,7 @@
 ;-                               IRQS HANDLER                             -
 ;--------------------------------------------------------------------------
 
-irq_VBlank:	
+irq_VBlank:
 	ld	hl,VBL_handler
 	
 irq_Common:
@@ -95,23 +86,17 @@ irq_Common:
 	ld	h,[hl]
 	ld	l,a
 	
-;	or	a,h
-;	jr	z,.no_irq
+	; If vector is $0000, it will jump there and return. Not needed to check here.
 	
 	push	bc
 	push	de
-	call .goto_irq_handler	
+	rst $08 ; call irq handler
 	pop	de
 	pop	bc
-	
-;.no_irq:
 	pop	af
-	pop	hl	
+	pop	hl
 	
 	reti
-	
-.goto_irq_handler:	
-	jp	hl
 
 ;--------------------------------------------------------------------------
 ;- wait_vbl()                                                             -

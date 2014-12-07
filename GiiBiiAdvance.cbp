@@ -241,6 +241,14 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="gb_core/ppu.h" />
+		<Unit filename="gb_core/ppu_dmg.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gb_core/ppu_dmg.h" />
+		<Unit filename="gb_core/ppu_gbc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gb_core/ppu_gbc.h" />
 		<Unit filename="gb_core/rom.c">
 			<Option compilerVar="CC" />
 		</Unit>

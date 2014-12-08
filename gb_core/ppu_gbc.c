@@ -78,7 +78,7 @@ void GB_PPUUpdateClocks_GBC(int increment_clocks)
             case 0:
                 if(GameBoy.Emulator.ly_drawn == 0)
                 {
-                    if(GameBoy.Emulator.ly_clocks >= 4)
+                    if(GameBoy.Emulator.ly_clocks >= 2)
                     {
                         GB_PPUCheckLYC();
 
@@ -179,10 +179,10 @@ int GB_PPUGetClocksToNextEvent_GBC(void)
                 clocks_to_next_event = (82<<GameBoy.Emulator.DoubleSpeed) - GameBoy.Emulator.ly_clocks;
                 break;
             case 3:
-                clocks_to_next_event = 4;
+                clocks_to_next_event = 2;
                 break;
             case 0:
-                clocks_to_next_event = 4;
+                clocks_to_next_event = 2;
                 //clocks_to_next_event = (456<<GameBoy.Emulator.DoubleSpeed) - GameBoy.Emulator.ly_clocks;
                 break;
             case 1:

@@ -112,6 +112,7 @@ static void GB_DMAInitGBCCopy(int register_value)
         GameBoy.Emulator.gdma_dst = ((mem->IO_Ports[HDMA3_REG-0xFF00]<<8) | mem->IO_Ports[HDMA4_REG-0xFF00]) + 0x8000;
         GameBoy.Emulator.gdma_bytes_left = blocks * 16;
 
+        //_gb_break_to_debugger();
         //Debug_DebugMsgArg("GDMA\nSRC = %04X\nDST = %04X\nBYTES = %d",
         //    GameBoy.Emulator.gdma_src,GameBoy.Emulator.gdma_dst,GameBoy.Emulator.gdma_bytes_left);
     }

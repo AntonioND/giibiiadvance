@@ -294,6 +294,9 @@ u32 GB_MemReadDMA8(u32 address) // NOT VERIFIED YET - different for GBC and DMG
 
 void GB_MemWriteHDMA8(u32 address, u32 value)
 {
+    if(GameBoy.Emulator.lcd_on && GameBoy.Emulator.ScreenMode == 3) return;
+    GameBoy.Memory.VideoRAM_Curr[address&0x1FFF] = value;
+    /*
     if( (address & 0xE000) == 0x8000 ) //8000h or 9000h - Video RAM (VRAM)
     {
 #ifdef VRAM_MEM_CHECKING
@@ -308,6 +311,7 @@ void GB_MemWriteHDMA8(u32 address, u32 value)
                     address,GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
         return;
     }
+    */
 }
 
 u32 GB_MemReadHDMA8(u32 address)

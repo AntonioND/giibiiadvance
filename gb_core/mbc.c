@@ -193,14 +193,14 @@ static void GB_MBC3Write(u32 address, u32 value)
         case 0x4:
         case 0x5: //RAM Bank Number - or - RTC Register Select
             value &= 0x0F;
-            if(value < 4) //RAM MODE
+            if(value <= 7) //RAM MODE
             {
                 mem->selected_ram = value & (GameBoy.Emulator.RAM_Banks-1);
 
                 mem->RAM_Curr = mem->ExternRAM[mem->selected_ram];
                 mem->mbc_mode = 1;
             }
-            else if(value > 7 && value < 0xD) //RTC MODE
+            else if(value >= 0x8 && value <= 0xC) //RTC MODE
             {
                 mem->selected_ram = value;
                 mem->mbc_mode = 0;

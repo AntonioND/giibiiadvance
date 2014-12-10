@@ -446,6 +446,7 @@ int GB_CartridgeLoad(const u8 * pointer, const u32 rom_size)
         case 0x02: GameBoy.Emulator.RAM_Banks = 1; break; //8KB
         case 0x03: GameBoy.Emulator.RAM_Banks = 4; break; //4 * 8KB
         case 0x04: GameBoy.Emulator.RAM_Banks = 16; break; //16 * 8KB
+        case 0x05: GameBoy.Emulator.RAM_Banks = 8; break; //8 * 8KB -> "Pocket Monsters - Crystal Version (Japan)"
         default:
              ConsolePrint("[!]RAM SIZE UNKNOWN: %02X\n",GB_Header->ram_size);
              showconsole = 1;

@@ -78,7 +78,7 @@ void GB_PPUUpdateClocks_GBC(int increment_clocks)
             case 0:
                 if(GameBoy.Emulator.ly_drawn == 0)
                 {
-                    if(GameBoy.Emulator.ly_clocks >= 2)
+                    if(GameBoy.Emulator.ly_clocks >= 0)
                     {
                         GB_PPUCheckLYC();
 

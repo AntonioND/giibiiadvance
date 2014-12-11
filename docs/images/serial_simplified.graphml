@@ -455,7 +455,7 @@ bit<y:LabelModel>
     <node id="n26">
       <data key="d6">
         <y:ShapeNode>
-          <y:Geometry height="30.0" width="30.0" x="555.0" y="405.0"/>
+          <y:Geometry height="30.0" width="30.0" x="525.0" y="465.0"/>
           <y:Fill color="#00FFFF" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.701171875" modelName="custom" textColor="#000000" visible="true" width="30.00390625" x="-0.001953125" y="5.6494140625">XOR<y:LabelModel>
@@ -589,7 +589,6 @@ detector<y:LabelModel>
       </data>
     </edge>
     <edge id="e8" source="n3" target="n24">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="60.0" ty="-15.0"/>
@@ -600,7 +599,6 @@ detector<y:LabelModel>
       </data>
     </edge>
     <edge id="e9" source="n8" target="n24">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="-90.0" ty="-15.0"/>
@@ -611,12 +609,13 @@ detector<y:LabelModel>
       </data>
     </edge>
     <edge id="e10" source="n25" target="n26">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
             <y:Point x="630.0" y="480.0"/>
             <y:Point x="630.0" y="420.0"/>
+            <y:Point x="480.0" y="420.0"/>
+            <y:Point x="480.0" y="450.0"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
@@ -624,12 +623,11 @@ detector<y:LabelModel>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e11" source="n22" target="n25">
-      <data key="d9"/>
+    <edge id="e11" source="n22" target="n26">
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
-            <y:Point x="540.0" y="510.0"/>
+            <y:Point x="480.0" y="510.0"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
@@ -638,13 +636,9 @@ detector<y:LabelModel>
       </data>
     </edge>
     <edge id="e12" source="n26" target="n25">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
-          <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
-            <y:Point x="540.0" y="420.5"/>
-            <y:Point x="540.0" y="450.0"/>
-          </y:Path>
+          <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
           <y:BendStyle smoothed="false"/>
@@ -652,7 +646,6 @@ detector<y:LabelModel>
       </data>
     </edge>
     <edge id="e13" source="n25" target="n27">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -663,7 +656,6 @@ detector<y:LabelModel>
       </data>
     </edge>
     <edge id="e14" source="n27" target="n20">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>

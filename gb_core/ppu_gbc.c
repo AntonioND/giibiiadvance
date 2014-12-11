@@ -34,6 +34,70 @@ extern _GB_CONTEXT_ GameBoy;
 
 //----------------------------------------------------------------
 
+void GB_PPUWriteLYC_GBC(int reference_clocks, int value)
+{
+    GB_PPUUpdateClocksClounterReference(reference_clocks);
+    GameBoy.Memory.IO_Ports[LYC_REG-0xFF00] = value;
+    if(GameBoy.Emulator.lcd_on)
+    {
+        GB_PPUCheckLYC();
+        GB_PPUCheckStatSignal();
+        GB_CPUBreakLoop();
+    }
+}
+
+void GB_PPUWriteLCDC_GBC(int reference_clocks, int value)
+{
+    _GB_MEMORY_ * mem = &GameBoy.Memory;
+
+    GB_PPUUpdateClocksClounterReference(reference_clocks);
+
+    if( (mem->IO_Ports[LCDC_REG-0xFF00] ^ value) & (1<<7) )
+    {
+        mem->IO_Ports[LY_REG-0xFF00] = 0x00;
+        GameBoy.Emulator.CurrentScanLine = 0;
+        mem->IO_Ports[STAT_REG-0xFF00] &= 0xFC;
+        GameBoy.Emulator.ScreenMode = 0;
+
+        if(value & (1<<7))
+        {
+            GameBoy.Emulator.ly_clocks = 456;
+            GameBoy.Emulator.CurrentScanLine = 0;
+            GameBoy.Emulator.ScreenMode = 1;
+            mem->IO_Ports[STAT_REG-0xFF00] &= 0xFC;
+            mem->IO_Ports[STAT_REG-0xFF00] |= 1;
+        }
+        else GameBoy.Emulator.ly_clocks = 0;
+
+        GB_PPUCheckStatSignal();
+        mem->IO_Ports[IF_REG-0xFF00] &= ~I_STAT;
+    }
+
+    GameBoy.Emulator.lcd_on = value >> 7;
+
+    mem->IO_Ports[LCDC_REG-0xFF00] = value;
+
+    GB_CPUBreakLoop();
+}
+
+void GB_PPUWriteSTAT_GBC(int reference_clocks, int value)
+{
+    _GB_MEMORY_ * mem = &GameBoy.Memory;
+
+    GB_PPUUpdateClocksClounterReference(GB_CPUClockCounterGet());
+
+    GB_CPUBreakLoop();
+
+    mem->IO_Ports[STAT_REG-0xFF00] &= (0x07);
+    mem->IO_Ports[STAT_REG-0xFF00] |= (value & 0xF8);
+
+    GB_PPUCheckStatSignal();
+
+    //No bug in GBC/GBA/GBA_SP
+}
+
+//----------------------------------------------------------------
+
 void GB_PPUUpdateClocks_GBC(int increment_clocks)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
@@ -78,7 +142,7 @@ void GB_PPUUpdateClocks_GBC(int increment_clocks)
             case 0:
                 if(GameBoy.Emulator.ly_drawn == 0)
                 {
-                    if(GameBoy.Emulator.ly_clocks >= 0)
+                    if(GameBoy.Emulator.ly_clocks >= 4)
                     {
                         GB_PPUCheckLYC();
 

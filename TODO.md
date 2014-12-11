@@ -31,6 +31,7 @@ Game Boy
 - P1 register starting value in DMG or GBC mode?
 - Initial values in SGB/SGB2 of registers, timer and serial. I can't test because I don't have the hardware.
 - STOP doesn't STOP in emulator?
+- Verify ECHO RAM in real cartridge.
 
 Game Boy Advance
 ----------------

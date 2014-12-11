@@ -25,6 +25,12 @@
 
 //----------------------------------------------------------------
 
+void GB_PPUWriteLYC_GBC(int reference_clocks, int value);
+void GB_PPUWriteLCDC_GBC(int reference_clocks, int value);
+void GB_PPUWriteSTAT_GBC(int reference_clocks, int value);
+
+//----------------------------------------------------------------
+
 void GB_PPUUpdateClocks_GBC(int increment_clocks);
 
 int GB_PPUGetClocksToNextEvent_GBC(void);

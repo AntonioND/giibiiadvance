@@ -356,7 +356,7 @@ int GB_DMAExecute(int clocks)
     {
         //This doesn't need to be divided. Worst case is 64 clocks.
 
-        if(GameBoy.Emulator.CPUHalt == 0) // TODO: TEST ?
+        if(GameBoy.Emulator.CPUHalt == 0)
         {
             int current_ly = -1;
 
@@ -367,7 +367,7 @@ int GB_DMAExecute(int clocks)
 
             if(GameBoy.Emulator.hdma_last_ly_copied != current_ly)
             {
-                if(GameBoy.Emulator.ScreenMode == 0)
+                if( (!GameBoy.Emulator.lcd_on) || ((GameBoy.Emulator.ScreenMode == 0)&&GameBoy.Emulator.ly_drawn) )
                 {
                     GameBoy.Emulator.hdma_last_ly_copied = current_ly;
                     if(current_ly < 144)

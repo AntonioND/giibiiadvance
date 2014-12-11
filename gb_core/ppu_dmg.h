@@ -25,6 +25,12 @@
 
 //----------------------------------------------------------------
 
+void GB_PPUWriteLYC_DMG(int reference_clocks, int value);
+void GB_PPUWriteLCDC_DMG(int reference_clocks, int value);
+void GB_PPUWriteSTAT_DMG(int reference_clocks, int value);
+
+//----------------------------------------------------------------
+
 void GB_PPUUpdateClocks_DMG(int increment_clocks);
 
 int GB_PPUGetClocksToNextEvent_DMG(void);

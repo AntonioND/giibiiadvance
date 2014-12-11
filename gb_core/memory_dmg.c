@@ -31,6 +31,7 @@
 #include "general.h"
 #include "sound.h"
 #include "ppu.h"
+#include "ppu_dmg.h"
 #include "sgb.h"
 #include "video.h"
 #include "gb_main.h"
@@ -295,8 +296,7 @@ u32 GB_MemReadReg8_DMG(u32 address)
         case DMA_REG: // This is R/W in all GB models
             return mem->IO_Ports[DMA_REG-0xFF00];
 
-        // TODO
-
+        //Video
         case LCDC_REG:
         case SCY_REG:
         case SCX_REG:
@@ -306,6 +306,23 @@ u32 GB_MemReadReg8_DMG(u32 address)
         case OBP1_REG:
         case WY_REG:
         case WX_REG:
+            return mem->IO_Ports[address-0xFF00];
+
+        // TODO
+
+        case STAT_REG:
+            GB_PPUUpdateClocksClounterReference(GB_CPUClockCounterGet());
+            if(GameBoy.Emulator.lcd_on) return mem->IO_Ports[STAT_REG-0xFF00] | (0x80);
+            return (mem->IO_Ports[STAT_REG-0xFF00] | 0x80) & 0xFC;
+
+        case LY_REG:
+            if(GameBoy.Emulator.lcd_on)
+            {
+                GB_PPUUpdateClocksClounterReference(GB_CPUClockCounterGet());
+                return mem->IO_Ports[LY_REG-0xFF00];
+            }
+            else return 0; // verified on hardware
+
         case NR12_REG:
         case NR22_REG:
         case NR42_REG:
@@ -313,11 +330,6 @@ u32 GB_MemReadReg8_DMG(u32 address)
         case NR50_REG:
         case NR51_REG:
             return mem->IO_Ports[address-0xFF00];
-
-        case STAT_REG:
-            GB_PPUUpdateClocksClounterReference(GB_CPUClockCounterGet());
-            if(GameBoy.Emulator.lcd_on) return mem->IO_Ports[STAT_REG-0xFF00] | (0x80);
-            return (mem->IO_Ports[STAT_REG-0xFF00] | 0x80) & 0xFC;
 
         case P1_REG:
             //GB_SGBUpdate(GB_CPUClockCounterGet()); TODO
@@ -393,14 +405,6 @@ u32 GB_MemReadReg8_DMG(u32 address)
                 return 0xFF;
             else return mem->IO_Ports[address-0xFF00];
 
-        case LY_REG:
-            if(GameBoy.Emulator.lcd_on)
-            {
-                GB_PPUUpdateClocksClounterReference(GB_CPUClockCounterGet());
-                return mem->IO_Ports[LY_REG-0xFF00];
-            }
-            else return 0; // verified on hardware (GBC and GBA SP)
-
         //Undocumented registers...
         case 0xFF76:
         case 0xFF77:
@@ -461,6 +465,15 @@ void GB_MemWriteReg8_DMG(u32 address, u32 value)
         // Video
         case LY_REG: //Read only
             return;
+        case LYC_REG:
+            GB_PPUWriteLYC_DMG(GB_CPUClockCounterGet(),value);
+            return;
+        case LCDC_REG:
+            GB_PPUWriteLCDC_DMG(GB_CPUClockCounterGet(),value);
+            return;
+        case STAT_REG:
+            GB_PPUWriteSTAT_DMG(GB_CPUClockCounterGet(),value);
+            return;
 
         //      TODO
         // ---------------
@@ -474,73 +487,6 @@ void GB_MemWriteReg8_DMG(u32 address, u32 value)
         case WX_REG:
             GB_PPUUpdateClocksClounterReference(GB_CPUClockCounterGet());
             mem->IO_Ports[address-0xFF00] = value;
-            return;
-
-
-        case STAT_REG:
-            GB_CPUBreakLoop();
-
-            mem->IO_Ports[STAT_REG-0xFF00] &= (0x07);
-            mem->IO_Ports[STAT_REG-0xFF00] |= (value & 0xF8);
-
-            GB_PPUCheckStatSignal();
-
-            // BUG
-
-            if(GameBoy.Emulator.lcd_on && ((GameBoy.Emulator.ScreenMode == 0) || (GameBoy.Emulator.ScreenMode == 1)))
-            {
-                GB_SetInterrupt(I_STAT);
-            }
-
-            //Old code
-            //if( (GameBoy.Emulator.CGBEnabled == 0) && GameBoy.Emulator.lcd_on &&
-            //        (GameBoy.Emulator.ScreenMode == 2) )
-            //{
-            //    GB_SetInterrupt(I_STAT);
-            //}
-
-            //if(value & IENABLE_OAM) Debug_DebugMsgArg("Wrote STAT - ENABLE OAM INT");
-            return;
-
-        case LCDC_REG:
-            GB_PPUUpdateClocksClounterReference(GB_CPUClockCounterGet());
-
-            if( (mem->IO_Ports[LCDC_REG-0xFF00] ^ value) & (1<<7) )
-            {
-                mem->IO_Ports[LY_REG-0xFF00] = 0x00;
-                GameBoy.Emulator.CurrentScanLine = 0;
-                mem->IO_Ports[STAT_REG-0xFF00] &= 0xFC;
-                GameBoy.Emulator.ScreenMode = 0;
-
-                if(value & (1<<7))
-                {
-                    GameBoy.Emulator.ly_clocks = 456;
-                    GameBoy.Emulator.CurrentScanLine = 0;
-                    GameBoy.Emulator.ScreenMode = 1;
-                    mem->IO_Ports[STAT_REG-0xFF00] &= 0xFC;
-                    mem->IO_Ports[STAT_REG-0xFF00] |= 1;
-                }
-                else GameBoy.Emulator.ly_clocks = 0;
-
-                GB_PPUCheckStatSignal();
-                mem->IO_Ports[IF_REG-0xFF00] &= ~I_STAT;
-            }
-
-            GameBoy.Emulator.lcd_on = value >> 7;
-
-            mem->IO_Ports[LCDC_REG-0xFF00] = value;
-
-            GB_CPUBreakLoop();
-            return;
-
-        case LYC_REG:
-            mem->IO_Ports[LYC_REG-0xFF00] = value;
-            if(GameBoy.Emulator.lcd_on)
-            {
-                GB_PPUCheckLYC();
-                GB_PPUCheckStatSignal();
-                GB_CPUBreakLoop();
-            }
             return;
 
         case P1_REG:
@@ -590,11 +536,8 @@ void GB_MemWriteReg8_DMG(u32 address, u32 value)
             {
                 //if(value == 1) // DMG or SGB
                 //if(value == 0xFF) // MGB
-
                 GameBoy.Emulator.enable_boot_rom = 0;
-
                 GB_MemUpdateReadWriteFunctionPointers();
-
                 GB_CPUBreakLoop();
             }
             return;

@@ -118,7 +118,8 @@ static inline int GB_ClocksForNextEvent(void)
     clocks_to_next_event = min(clocks_to_next_event,GB_SoundGetClocksToNextEvent());
     //SGB?, CAMERA?
 
-    return (clocks_to_next_event | 4) & ~3; // align to 4 clocks for CPU
+    //clocks_to_next_event should never be 0, this is enough:
+    return (clocks_to_next_event | 4) & ~3; // align to 4 clocks for CPU HALT
 }
 
 static inline void GB_ClockCountersReset(void)

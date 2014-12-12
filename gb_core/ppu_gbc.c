@@ -243,10 +243,10 @@ int GB_PPUGetClocksToNextEvent_GBC(void)
                 clocks_to_next_event = (82<<GameBoy.Emulator.DoubleSpeed) - GameBoy.Emulator.ly_clocks;
                 break;
             case 3:
-                clocks_to_next_event = 2;
+                clocks_to_next_event = 4;
                 break;
             case 0:
-                clocks_to_next_event = 2;
+                clocks_to_next_event = 4;
                 //clocks_to_next_event = (456<<GameBoy.Emulator.DoubleSpeed) - GameBoy.Emulator.ly_clocks;
                 break;
             case 1:

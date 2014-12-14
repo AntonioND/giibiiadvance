@@ -249,7 +249,7 @@ inline void GB_PPUCheckStatSignal(void)
     {
         if(GameBoy.Emulator.stat_signal == 0) // rising edge
         {
-            GB_SetInterrupt(I_STAT);
+            GB_InterruptsSetFlag(I_STAT);
         }
 
         GameBoy.Emulator.stat_signal = 1;

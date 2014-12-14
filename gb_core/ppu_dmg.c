@@ -97,14 +97,14 @@ void GB_PPUWriteSTAT_DMG(int reference_clocks, int value)
 
     if(GameBoy.Emulator.lcd_on && ((GameBoy.Emulator.ScreenMode == 0) || (GameBoy.Emulator.ScreenMode == 1)))
     {
-        GB_SetInterrupt(I_STAT);
+        GB_InterruptsSetFlag(I_STAT);
     }
 
     //Old code
     //if( (GameBoy.Emulator.CGBEnabled == 0) && GameBoy.Emulator.lcd_on &&
     //        (GameBoy.Emulator.ScreenMode == 2) )
     //{
-    //    GB_SetInterrupt(I_STAT);
+    //    GB_InterruptsSetFlag(I_STAT);
     //}
 
     //if(value & IENABLE_OAM) Debug_DebugMsgArg("Wrote STAT - ENABLE OAM INT");
@@ -164,7 +164,7 @@ void GB_PPUUpdateClocks_DMG(int increment_clocks)
                             mem->IO_Ports[STAT_REG-0xFF00] &= 0xFC;
                             mem->IO_Ports[STAT_REG-0xFF00] |= 0x01;
 
-                            GB_SetInterrupt(I_VBLANK);
+                            GB_InterruptsSetFlag(I_VBLANK);
                         }
                         else
                         {

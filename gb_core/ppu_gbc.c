@@ -152,7 +152,7 @@ void GB_PPUUpdateClocks_GBC(int increment_clocks)
                             mem->IO_Ports[STAT_REG-0xFF00] &= 0xFC;
                             mem->IO_Ports[STAT_REG-0xFF00] |= 0x01;
 
-                            GB_SetInterrupt(I_VBLANK);
+                            GB_InterruptsSetFlag(I_VBLANK);
                         }
                         else
                         {

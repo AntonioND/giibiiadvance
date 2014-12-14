@@ -167,60 +167,44 @@ void GB_CPUInit(void)
         switch(GameBoy.Emulator.HardwareType)
         {
             case HW_GB: // Verified on hardware
-                GameBoy.CPU.R16.AF = 0x01B0;
-                GameBoy.CPU.R16.BC = 0x0013;
-                GameBoy.CPU.R16.DE = 0x00D8;
-                GameBoy.CPU.R16.HL = 0x014D;
+                GameBoy.CPU.R16.AF = 0x01B0; GameBoy.CPU.R16.BC = 0x0013;
+                GameBoy.CPU.R16.DE = 0x00D8; GameBoy.CPU.R16.HL = 0x014D;
                 break;
             case HW_GBP: // Verified on hardware
-                GameBoy.CPU.R16.AF = 0xFFB0;
-                GameBoy.CPU.R16.BC = 0x0013;
-                GameBoy.CPU.R16.DE = 0x00D8;
-                GameBoy.CPU.R16.HL = 0x014D;
+                GameBoy.CPU.R16.AF = 0xFFB0; GameBoy.CPU.R16.BC = 0x0013;
+                GameBoy.CPU.R16.DE = 0x00D8; GameBoy.CPU.R16.HL = 0x014D;
                 break;
             case HW_SGB: // Obtained from boot ROM dump.
-                GameBoy.CPU.R16.AF = 0x0100;
-                GameBoy.CPU.R16.BC = 0x0014;
-                GameBoy.CPU.R16.DE = 0x0000;
-                GameBoy.CPU.R16.HL = 0xC060;
+                GameBoy.CPU.R16.AF = 0x0100; GameBoy.CPU.R16.BC = 0x0014;
+                GameBoy.CPU.R16.DE = 0x0000; GameBoy.CPU.R16.HL = 0xC060;
                 break;
-            case HW_SGB2: // Unknown, can't test
-                GameBoy.CPU.R16.AF = 0xFF00; // The only known value is that A is FF
-                GameBoy.CPU.R16.BC = 0x0014;
-                GameBoy.CPU.R16.DE = 0x0000;
-                GameBoy.CPU.R16.HL = 0xC060;
+            case HW_SGB2: // Unknown, can't test. The only known value is that A is FF
+                GameBoy.CPU.R16.AF = 0xFF00; GameBoy.CPU.R16.BC = 0x0014;
+                GameBoy.CPU.R16.DE = 0x0000; GameBoy.CPU.R16.HL = 0xC060;
                 break;
             case HW_GBC: // Verified on hardware
                 if(GameBoy.Emulator.game_supports_gbc)
                 {
-                    GameBoy.CPU.R16.AF = 0x1180;
-                    GameBoy.CPU.R16.BC = 0x0000;
-                    GameBoy.CPU.R16.DE = 0xFF56;
-                    GameBoy.CPU.R16.HL = 0x000D;
+                    GameBoy.CPU.R16.AF = 0x1180; GameBoy.CPU.R16.BC = 0x0000;
+                    GameBoy.CPU.R16.DE = 0xFF56; GameBoy.CPU.R16.HL = 0x000D;
                 }
                 else
                 {
-                    GameBoy.CPU.R16.AF = 0x1100;
-                    GameBoy.CPU.R16.BC = 0x0000;
-                    GameBoy.CPU.R16.DE = 0x0008;
-                    GameBoy.CPU.R16.HL = 0x007C;
+                    GameBoy.CPU.R16.AF = 0x1100; GameBoy.CPU.R16.BC = 0x0000;
+                    GameBoy.CPU.R16.DE = 0x0008; GameBoy.CPU.R16.HL = 0x007C;
                 }
                 break;
             case HW_GBA:
             case HW_GBA_SP: // Verified on hardware
                 if(GameBoy.Emulator.game_supports_gbc)
                 {
-                    GameBoy.CPU.R16.AF = 0x1180;
-                    GameBoy.CPU.R16.BC = 0x0100;
-                    GameBoy.CPU.R16.DE = 0xFF56;
-                    GameBoy.CPU.R16.HL = 0x000D;
+                    GameBoy.CPU.R16.AF = 0x1180; GameBoy.CPU.R16.BC = 0x0100;
+                    GameBoy.CPU.R16.DE = 0xFF56; GameBoy.CPU.R16.HL = 0x000D;
                 }
                 else
                 {
-                    GameBoy.CPU.R16.AF = 0x1100;
-                    GameBoy.CPU.R16.BC = 0x0100;
-                    GameBoy.CPU.R16.DE = 0x0008;
-                    GameBoy.CPU.R16.HL = 0x007C;
+                    GameBoy.CPU.R16.AF = 0x1100; GameBoy.CPU.R16.BC = 0x0100;
+                    GameBoy.CPU.R16.DE = 0x0008; GameBoy.CPU.R16.HL = 0x007C;
                 }
                 break;
 
@@ -232,12 +216,9 @@ void GB_CPUInit(void)
     else
     {
         // No idea of the real initial values (except for the PC one, it must be 0x0000).
-        GameBoy.CPU.R16.AF = 0x0000;
-        GameBoy.CPU.R16.BC = 0x0000;
-        GameBoy.CPU.R16.DE = 0x0000;
-        GameBoy.CPU.R16.HL = 0x0000;
-        GameBoy.CPU.R16.PC = 0x0000;
-        GameBoy.CPU.R16.SP = 0x0000;
+        GameBoy.CPU.R16.AF = 0x0000; GameBoy.CPU.R16.BC = 0x0000;
+        GameBoy.CPU.R16.DE = 0x0000; GameBoy.CPU.R16.HL = 0x0000;
+        GameBoy.CPU.R16.PC = 0x0000; GameBoy.CPU.R16.SP = 0x0000;
     }
 
     if(GameBoy.Emulator.CGBEnabled == 1)
@@ -256,70 +237,6 @@ int gb_break_execution = 0;
 inline void _gb_break_to_debugger(void)
 {
     gb_break_execution = 1;
-}
-
-//----------------------------------------------------------------
-
-static int GB_IRQExecute(void)
-{
-    _GB_CPU_ * cpu = &GameBoy.CPU;
-    _GB_MEMORY_ * mem = &GameBoy.Memory;
-
-    int executed_clocks = 0;
-
-    int interrupts = mem->IO_Ports[IF_REG-0xFF00] & mem->HighRAM[IE_REG-0xFF80] & 0x1F;
-    if(interrupts != 0)
-    {
-        if(mem->InterruptMasterEnable) // Execute interrupt and clear IME
-        {
-            int start_clocks = GB_CPUClockCounterGet();
-
-            if(GameBoy.Emulator.CPUHalt == 1)
-            {
-                GB_CPUClockCounterAdd(4); // Extra cycle needed to exit halt mode
-                GameBoy.Emulator.CPUHalt = 0;
-            }
-
-            GameBoy.Memory.InterruptMasterEnable = 0;
-            GB_CPUClockCounterAdd(8);
-            cpu->R16.SP --;
-            cpu->R16.SP &= 0xFFFF;
-            GB_MemWrite8(cpu->R16.SP,cpu->R8.PCH);
-            GB_CPUClockCounterAdd(4);
-            cpu->R16.SP --;
-            cpu->R16.SP &= 0xFFFF;
-            GB_MemWrite8(cpu->R16.SP,cpu->R8.PCL);
-            {
-                if(interrupts & I_VBLANK)
-                { cpu->R16.PC = 0x0040; mem->IO_Ports[IF_REG-0xFF00] &= ~I_VBLANK; }
-                else if(interrupts & I_STAT)
-                { cpu->R16.PC = 0x0048; mem->IO_Ports[IF_REG-0xFF00] &= ~I_STAT; }
-                else if(interrupts & I_TIMER)
-                { cpu->R16.PC = 0x0050; mem->IO_Ports[IF_REG-0xFF00] &= ~I_TIMER; }
-                else if(interrupts & I_SERIAL)
-                { cpu->R16.PC = 0x0058; mem->IO_Ports[IF_REG-0xFF00] &= ~I_SERIAL; }
-                else //if(interrupts & I_JOYPAD)
-                { cpu->R16.PC = 0x0060; mem->IO_Ports[IF_REG-0xFF00] &= ~I_JOYPAD; }
-            }
-            GB_CPUClockCounterAdd(8);
-
-            int end_clocks = GB_CPUClockCounterGet();
-
-            executed_clocks = end_clocks - start_clocks;
-        }
-        else
-        {
-            //Exit HALT mode regardless of IME
-            if(GameBoy.Emulator.CPUHalt == 1) // If HALT
-            {
-                GameBoy.Emulator.CPUHalt = 0;
-                GB_CPUClockCounterAdd(4); // 4 clocks are needed to exit HALT mode
-                executed_clocks = 4;
-            }
-        }
-    }
-
-    return executed_clocks;
 }
 
 //----------------------------------------------------------------
@@ -1975,7 +1892,7 @@ int GB_RunFor(s32 run_for_clocks) // 1 frame = 70224 clocks
                 int dma_executed_clocks = GB_DMAExecute(clocks_to_next_event); // GB_CPUClockCounterAdd() internal
                 if(dma_executed_clocks == 0)
                 {
-                    int irq_executed_clocks = GB_IRQExecute(); // GB_CPUClockCounterAdd() internal
+                    int irq_executed_clocks = GB_InterruptsExecute(); // GB_CPUClockCounterAdd() internal
                     if(irq_executed_clocks == 0)
                     {
                         if(GameBoy.Emulator.CPUHalt == 0) // no halt

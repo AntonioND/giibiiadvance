@@ -51,7 +51,7 @@ static void GB_SerialSendBit(void)
     {
         GameBoy.Emulator.serial_enabled = 0;
 
-        GB_SetInterrupt(I_SERIAL);
+        GB_InterruptsSetFlag(I_SERIAL);
 
         GameBoy.Emulator.SerialSend_Fn(mem->IO_Ports[SB_REG-0xFF00]);
 

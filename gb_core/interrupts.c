@@ -198,7 +198,126 @@ void GB_InterruptsEnd(void)
 
 //----------------------------------------------------------------
 
-inline void GB_SetInterrupt(int flag)
+int GB_InterruptsExecute(void)
+{
+    _GB_CPU_ * cpu = &GameBoy.CPU;
+    _GB_MEMORY_ * mem = &GameBoy.Memory;
+
+    int executed_clocks = 0;
+
+    int interrupts = mem->IO_Ports[IF_REG-0xFF00] & mem->HighRAM[IE_REG-0xFF80] & 0x1F;
+    if(interrupts != 0)
+    {
+        if(mem->InterruptMasterEnable) // Execute interrupt and clear IME
+        {
+            int start_clocks = GB_CPUClockCounterGet();
+
+            mem->InterruptMasterEnable = 0; // Clear IME
+
+            if(GameBoy.Emulator.CPUHalt == 1)
+            {
+                GB_CPUClockCounterAdd(4); // Extra cycle needed to exit halt mode
+                GameBoy.Emulator.CPUHalt = 0;
+            }
+
+            if(interrupts & I_VBLANK)
+            {
+                GB_CPUClockCounterAdd(8);
+                cpu->R16.SP = (cpu->R16.SP-1) & 0xFFFF;
+                GB_MemWrite8(cpu->R16.SP,cpu->R8.PCH);
+                GB_CPUClockCounterAdd(4);
+                cpu->R16.SP = (cpu->R16.SP-1) & 0xFFFF;
+                GB_MemWrite8(cpu->R16.SP,cpu->R8.PCL);
+                cpu->R16.PC = 0x0040;
+                mem->IO_Ports[IF_REG-0xFF00] &= ~I_VBLANK;
+                GB_CPUClockCounterAdd(8);
+            }
+            else if(interrupts & I_STAT)
+            {
+                if( ( (GameBoy.Emulator.HardwareType == HW_GB) || (GameBoy.Emulator.HardwareType == HW_GBP) ||
+                    (GameBoy.Emulator.HardwareType == HW_SGB) || (GameBoy.Emulator.HardwareType == HW_SGB2))
+                    && (GameBoy.Emulator.CPUHalt == 0) )
+                        GB_CPUClockCounterAdd(4);
+
+                GB_CPUClockCounterAdd(8);
+                cpu->R16.SP = (cpu->R16.SP-1) & 0xFFFF;
+                GB_MemWrite8(cpu->R16.SP,cpu->R8.PCH);
+                GB_CPUClockCounterAdd(4);
+                cpu->R16.SP = (cpu->R16.SP-1) & 0xFFFF;
+                GB_MemWrite8(cpu->R16.SP,cpu->R8.PCL);
+                cpu->R16.PC = 0x0048;
+                mem->IO_Ports[IF_REG-0xFF00] &= ~I_STAT;
+                GB_CPUClockCounterAdd(8);
+            }
+            else
+            {
+                GB_CPUClockCounterAdd(8);
+                cpu->R16.SP = (cpu->R16.SP-1) & 0xFFFF;
+                GB_MemWrite8(cpu->R16.SP,cpu->R8.PCH);
+                GB_CPUClockCounterAdd(4);
+                cpu->R16.SP = (cpu->R16.SP-1) & 0xFFFF;
+                GB_MemWrite8(cpu->R16.SP,cpu->R8.PCL);
+                {
+                    if(interrupts & I_TIMER)
+                    { cpu->R16.PC = 0x0050; mem->IO_Ports[IF_REG-0xFF00] &= ~I_TIMER; }
+                    else if(interrupts & I_SERIAL)
+                    { cpu->R16.PC = 0x0058; mem->IO_Ports[IF_REG-0xFF00] &= ~I_SERIAL; }
+                    else //if(interrupts & I_JOYPAD)
+                    { cpu->R16.PC = 0x0060; mem->IO_Ports[IF_REG-0xFF00] &= ~I_JOYPAD; }
+                }
+                GB_CPUClockCounterAdd(8);
+            }
+
+/*
+            mem->InterruptMasterEnable = 0; // Clear IME
+
+            if(GameBoy.Emulator.CPUHalt == 1)
+            {
+                GB_CPUClockCounterAdd(4); // Extra cycle needed to exit halt mode
+                GameBoy.Emulator.CPUHalt = 0;
+            }
+
+            GB_CPUClockCounterAdd(8);
+            cpu->R16.SP = (cpu->R16.SP-1) & 0xFFFF;
+            GB_MemWrite8(cpu->R16.SP,cpu->R8.PCH);
+            GB_CPUClockCounterAdd(4);
+            cpu->R16.SP = (cpu->R16.SP-1) & 0xFFFF;
+            GB_MemWrite8(cpu->R16.SP,cpu->R8.PCL);
+            {
+                if(interrupts & I_VBLANK)
+                { cpu->R16.PC = 0x0040; mem->IO_Ports[IF_REG-0xFF00] &= ~I_VBLANK; }
+                else if(interrupts & I_STAT)
+                { cpu->R16.PC = 0x0048; mem->IO_Ports[IF_REG-0xFF00] &= ~I_STAT; }
+                else if(interrupts & I_TIMER)
+                { cpu->R16.PC = 0x0050; mem->IO_Ports[IF_REG-0xFF00] &= ~I_TIMER; }
+                else if(interrupts & I_SERIAL)
+                { cpu->R16.PC = 0x0058; mem->IO_Ports[IF_REG-0xFF00] &= ~I_SERIAL; }
+                else //if(interrupts & I_JOYPAD)
+                { cpu->R16.PC = 0x0060; mem->IO_Ports[IF_REG-0xFF00] &= ~I_JOYPAD; }
+            }
+            GB_CPUClockCounterAdd(8);
+*/
+            int end_clocks = GB_CPUClockCounterGet();
+            executed_clocks = end_clocks - start_clocks;
+        }
+        else
+        {
+            //Exit HALT mode regardless of IME
+            if(GameBoy.Emulator.CPUHalt == 1) // If HALT
+            {
+                GameBoy.Emulator.CPUHalt = 0;
+                GB_CPUClockCounterAdd(4); // 4 clocks are needed to exit HALT mode
+                executed_clocks = 4;
+            }
+        }
+    }
+
+    return executed_clocks;
+}
+
+//----------------------------------------------------------------
+
+inline void GB_InterruptsSetFlag(int flag)
 {
     GameBoy.Memory.IO_Ports[IF_REG-0xFF00] |= flag;
 //This is checked in GB_IRQExecute(), not here!
@@ -253,7 +372,7 @@ static void GB_TimerIncreaseTIMA(void)
 
     if(mem->IO_Ports[TIMA_REG-0xFF00] == 0xFF) //overflow
     {
-        //GB_SetInterrupt(I_TIMER); // There's a 4 clock delay between overflow and IF flag being set
+        //GB_InterruptsSetFlag(I_TIMER); // There's a 4 clock delay between overflow and IF flag being set
         GameBoy.Emulator.timer_irq_delay_active = 4;
 
         mem->IO_Ports[TIMA_REG-0xFF00] = 0; //mem->IO_Ports[TMA_REG-0xFF00];
@@ -380,13 +499,16 @@ void GB_TimersWriteTAC(int reference_clocks, int value)
 
         if(old_enable == 0)
         {
-            // This part is different from DMG. A lot glitchier, too...
+            // This part is different from DMG. A lot glitchier, too... And inconsistent between GBCs.
             if(new_enable == 0)
             {
                 glitch = 0;
             }
             else
             {
+                //Approximate
+                glitch = (sys_clocks & old_clocks_half) && ( (sys_clocks & new_clocks_half) == 0 );
+
 #if 0
                 //Hardware simulation?
                 int sysb3 = (sys_clocks & BIT(3)) != 0;
@@ -407,12 +529,9 @@ void GB_TimersWriteTAC(int reference_clocks, int value)
                                 ( (new_tac&1) ? (sysb3) : (sysb9) );   // 01 00
 
                 glitch = (step0 && !step1) ^ (step1 && !step2);
-
-                //Approximate
-                //glitch = (sys_clocks & old_clocks_half) && ( (sys_clocks & new_clocks_half) == 0 );
 #endif // 0
-                //Exact emulation of one of my GBCs?
-#if 1
+                //Exact emulation of one of my GBCs
+#if 0
                 if(old_clocks_half == new_clocks_half)
                 {
                     glitch = 0;
@@ -497,7 +616,7 @@ static void GB_TimersUpdateDelays(int increment_clocks)
         else
         {
             GameBoy.Emulator.timer_irq_delay_active = 0;
-            GB_SetInterrupt(I_TIMER);
+            GB_InterruptsSetFlag(I_TIMER);
         }
     }
 
@@ -628,7 +747,7 @@ void GB_CheckJoypadInterrupt(void) // Important: Must be called at least once pe
 
     if( (GameBoy.Emulator.joypad_signal == 0) && (old_signal) )
     {
-        GB_SetInterrupt(I_JOYPAD);
+        GB_InterruptsSetFlag(I_JOYPAD);
 
         if(GameBoy.Emulator.CPUHalt == 2) // Exit stop mode (in any hardware)
             GameBoy.Emulator.CPUHalt = 0;

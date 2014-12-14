@@ -51,7 +51,11 @@ void GB_InterruptsEnd(void);
 
 //----------------------------------------------------------------
 
-inline void GB_SetInterrupt(int flag);
+int GB_InterruptsExecute(void);
+
+//----------------------------------------------------------------
+
+inline void GB_InterruptsSetFlag(int flag);
 
 //----------------------------------------------------------------
 

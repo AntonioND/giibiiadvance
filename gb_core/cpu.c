@@ -324,6 +324,384 @@ static int GB_IRQExecute(void)
 
 //----------------------------------------------------------------
 
+//LD r16,nn - 3
+#define gb_ld_r16_nn(reg_hi,reg_low) { \
+    GB_CPUClockCounterAdd(4); \
+    reg_low = GB_MemRead8(cpu->R16.PC++); \
+    GB_CPUClockCounterAdd(4); \
+    reg_hi = GB_MemRead8(cpu->R16.PC++); \
+    GB_CPUClockCounterAdd(4); \
+}
+
+//LD r8,n - 2
+#define gb_ld_r8_n(reg8) { \
+    GB_CPUClockCounterAdd(4); \
+    reg8 = GB_MemRead8(cpu->R16.PC++); \
+    GB_CPUClockCounterAdd(4); \
+}
+
+//LD (r16),A - 2
+#define gb_ld_ptr_r16_a(reg16) { \
+    GB_CPUClockCounterAdd(4); \
+    GB_MemWrite8(reg16,cpu->R8.A); \
+    GB_CPUClockCounterAdd(4); \
+}
+
+//INC r16 - 2
+#define gb_inc_r16(reg16) { \
+    reg16 = (reg16+1) & 0xFFFF; \
+    GB_CPUClockCounterAdd(8); \
+}
+
+//INC r8 - 1
+#define gb_inc_r8(reg8) { \
+    cpu->R16.AF &= ~F_SUBTRACT; \
+    cpu->F.H = ( (reg8 & 0xF) == 0xF); \
+    reg8 ++; \
+    cpu->F.Z = (reg8 == 0); \
+    GB_CPUClockCounterAdd(4); \
+}
+
+//DEC r8 - 1
+#define gb_dec_r8(reg8) { \
+    cpu->R16.AF |= F_SUBTRACT; \
+    cpu->F.H = ( (reg8 & 0xF) == 0x0); \
+    reg8 --; \
+    cpu->F.Z = (reg8 == 0); \
+    GB_CPUClockCounterAdd(4); \
+}
+
+//ADD HL,r16 - 2
+#define gb_add_hl_r16(reg16) { \
+    cpu->R16.AF &= ~F_SUBTRACT; \
+    u32 temp = cpu->R16.HL + reg16; \
+    cpu->F.C = (temp > 0xFFFF); \
+    cpu->F.H = ( ( (cpu->R16.HL & 0x0FFF) + (reg16 & 0x0FFF) ) > 0x0FFF ); \
+    cpu->R16.HL = temp & 0xFFFF; \
+    GB_CPUClockCounterAdd(8); \
+}
+
+//ADD A,r8 - 1
+#define gb_add_a_r8(reg8) { \
+    cpu->R16.AF &= ~F_SUBTRACT; \
+    u32 temp = cpu->R8.A; \
+    cpu->F.H = ( (temp & 0xF) + ((u32)reg8 & 0xF) ) > 0xF; \
+    cpu->R8.A += reg8; \
+    cpu->F.Z = (cpu->R8.A == 0); \
+    cpu->F.C = (temp > cpu->R8.A); \
+    GB_CPUClockCounterAdd(4); \
+}
+
+//ADC A,r8 - 1
+#define gb_adc_a_r8(reg8) { \
+    cpu->R16.AF &= ~F_SUBTRACT; \
+    u32 temp = cpu->R8.A + reg8 + cpu->F.C; \
+    cpu->F.H = ( ((cpu->R8.A & 0xF) + (reg8 & 0xF) ) + cpu->F.C) > 0xF; \
+    cpu->F.C = (temp > 0xFF); \
+    temp &= 0xFF; \
+    cpu->R8.A = temp; \
+    cpu->F.Z = (temp == 0); \
+    GB_CPUClockCounterAdd(4); \
+}
+
+//SUB A,r8 - 1
+#define gb_sub_a_r8(reg8) { \
+    cpu->R8.F = F_SUBTRACT; \
+    cpu->F.H = (cpu->R8.A & 0xF) < (reg8 & 0xF); \
+    cpu->F.C = (u32)cpu->R8.A < (u32)reg8; \
+    cpu->R8.A -= reg8; \
+    cpu->F.Z = (cpu->R8.A == 0); \
+    GB_CPUClockCounterAdd(4); \
+}
+
+//SBC A,r8 - 1
+#define gb_sbc_a_r8(reg8) { \
+    u32 temp = cpu->R8.A - reg8 - ((cpu->R8.F&F_CARRY)?1:0); \
+    cpu->R8.F = ((temp & ~0xFF)?F_CARRY:0)|((temp&0xFF)?0:F_ZERO)|F_SUBTRACT; \
+    cpu->F.H = ( (cpu->R8.A^reg8^temp) & 0x10 ) != 0 ; \
+    cpu->R8.A = temp; \
+    GB_CPUClockCounterAdd(4); \
+}
+
+//AND A,r8 - 1
+#define gb_and_a_r8(reg8) { \
+    cpu->R16.AF |= F_HALFCARRY; \
+    cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY); \
+    cpu->R8.A &= reg8; \
+    cpu->F.Z = (cpu->R8.A == 0); \
+    GB_CPUClockCounterAdd(4); \
+}
+
+//XOR A,r8 - 1
+#define gb_xor_a_r8(reg8) { \
+    cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY|F_HALFCARRY); \
+    cpu->R8.A ^= reg8; \
+    cpu->F.Z = (cpu->R8.A == 0); \
+    GB_CPUClockCounterAdd(4); \
+}
+
+//OR A,r8 - 1
+#define gb_or_a_r8(reg8) { \
+    cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY|F_HALFCARRY); \
+    cpu->R8.A |= reg8; \
+    cpu->F.Z = (cpu->R8.A == 0); \
+    GB_CPUClockCounterAdd(4); \
+}
+
+//CP A,r8 - 1
+#define gb_cp_a_r8(reg8) { \
+    cpu->R16.AF |= F_SUBTRACT; \
+    cpu->F.H = (cpu->R8.A & 0xF) < (reg8 & 0xF); \
+    cpu->F.C = (u32)cpu->R8.A < (u32)reg8; \
+    cpu->F.Z = (cpu->R8.A == reg8); \
+    GB_CPUClockCounterAdd(4); \
+}
+
+//RST nnnn - 4
+#define gb_rst_nnnn(addr) { \
+    GB_CPUClockCounterAdd(4); \
+    cpu->R16.SP --; \
+    cpu->R16.SP &= 0xFFFF; \
+    GB_MemWrite8(cpu->R16.SP,cpu->R8.PCH); \
+    GB_CPUClockCounterAdd(4); \
+    cpu->R16.SP --; \
+    cpu->R16.SP &= 0xFFFF; \
+    GB_MemWrite8(cpu->R16.SP,cpu->R8.PCL); \
+    GB_CPUClockCounterAdd(4); \
+    cpu->R16.PC = addr; \
+    GB_CPUClockCounterAdd(4); \
+}
+
+//PUSH r16 - 4
+#define gb_push_r16(reg_hi,reg_low) { \
+    GB_CPUClockCounterAdd(4); \
+    cpu->R16.SP--; \
+    cpu->R16.SP &= 0xFFFF; \
+    GB_MemWrite8(cpu->R16.SP,reg_hi); \
+    GB_CPUClockCounterAdd(4); \
+    cpu->R16.SP--; \
+    cpu->R16.SP &= 0xFFFF; \
+    GB_MemWrite8(cpu->R16.SP,reg_low); \
+    GB_CPUClockCounterAdd(8); \
+}
+
+//POP r16 - 4
+#define gb_pop_r16(reg_hi,reg_low) { \
+    GB_CPUClockCounterAdd(4); \
+    reg_low = GB_MemRead8(cpu->R16.SP++); \
+    cpu->R16.SP &= 0xFFFF; \
+    GB_CPUClockCounterAdd(4); \
+    reg_hi = GB_MemRead8(cpu->R16.SP++); \
+    cpu->R16.SP &= 0xFFFF; \
+    GB_CPUClockCounterAdd(4); \
+}
+
+//CALL cond,nn - 6/3
+#define gb_call_cond_nn(cond) { \
+    if(cond) \
+    { \
+        GB_CPUClockCounterAdd(4); \
+        u32 temp = GB_MemRead8(cpu->R16.PC++); \
+        GB_CPUClockCounterAdd(4); \
+        temp |= ( (u32)GB_MemRead8(cpu->R16.PC++) ) << 8; \
+        GB_CPUClockCounterAdd(4); \
+        cpu->R16.SP --; \
+        cpu->R16.SP &= 0xFFFF; \
+        GB_MemWrite8(cpu->R16.SP,cpu->R8.PCH); \
+        GB_CPUClockCounterAdd(4); \
+        cpu->R16.SP --; \
+        cpu->R16.SP &= 0xFFFF; \
+        GB_MemWrite8(cpu->R16.SP,cpu->R8.PCL); \
+        GB_CPUClockCounterAdd(4); \
+        cpu->R16.PC = temp; \
+        GB_CPUClockCounterAdd(4); \
+    } \
+    else \
+    { \
+        cpu->R16.PC += 2; \
+        cpu->R16.PC &= 0xFFFF; \
+        GB_CPUClockCounterAdd(12); \
+    } \
+}
+
+//RET cond - 5/2
+#define gb_ret_cond_nn(cond) { \
+    if(cond) \
+    { \
+        GB_CPUClockCounterAdd(4); \
+        u32 temp = GB_MemRead8(cpu->R16.SP++); \
+        cpu->R16.SP &= 0xFFFF; \
+        GB_CPUClockCounterAdd(4); \
+        temp |= ( (u32)GB_MemRead8(cpu->R16.SP++) ) << 8; \
+        cpu->R16.SP &= 0xFFFF; \
+        GB_CPUClockCounterAdd(4); \
+        cpu->R16.PC = temp; \
+        GB_CPUClockCounterAdd(8); \
+    } \
+    else \
+    { \
+        GB_CPUClockCounterAdd(8); \
+    } \
+}
+
+//JP cond,nn - 4/3
+#define gb_jp_cond_nn(cond) { \
+    if(cond) \
+    { \
+        GB_CPUClockCounterAdd(4); \
+        u32 temp = GB_MemRead8(cpu->R16.PC++); \
+        GB_CPUClockCounterAdd(4); \
+        temp |= ( (u32)GB_MemRead8(cpu->R16.PC++) ) << 8; \
+        GB_CPUClockCounterAdd(4); \
+        cpu->R16.PC = temp; \
+        GB_CPUClockCounterAdd(4); \
+    } \
+    else \
+    { \
+        cpu->R16.PC += 2; \
+        cpu->R16.PC &= 0xFFFF; \
+        GB_CPUClockCounterAdd(12); \
+    } \
+}
+
+//JR cond,n - 3/2
+#define gb_jr_cond_nn(cond) { \
+    if(cond) \
+    { \
+        GB_CPUClockCounterAdd(4); \
+        u32 temp = GB_MemRead8(cpu->R16.PC++); \
+        cpu->R16.PC = (cpu->R16.PC + (s8)temp) & 0xFFFF; \
+        GB_CPUClockCounterAdd(8); \
+    } \
+    else \
+    { \
+        cpu->R16.PC ++; \
+        GB_CPUClockCounterAdd(8); \
+    } \
+}
+
+//RLC r8 - 2
+#define gb_rlc_r8(reg8) { \
+    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY); \
+    cpu->F.C = (reg8 & 0x80) != 0; \
+    reg8 = (reg8 << 1) | cpu->F.C; \
+    cpu->F.Z = (reg8 == 0); \
+    GB_CPUClockCounterAdd(4); \
+}
+
+//RRC r8 - 2
+#define gb_rrc_r8(reg8) { \
+    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY); \
+    cpu->F.C = (reg8 & 0x01) != 0; \
+    reg8 = (reg8 >> 1) | (cpu->F.C << 7); \
+    cpu->F.Z = (reg8 == 0); \
+    GB_CPUClockCounterAdd(4); \
+}
+
+//RL r8 - 2
+#define gb_rl_r8(reg8) { \
+    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY); \
+    u32 temp = cpu->F.C; \
+    cpu->F.C = (reg8 & 0x80) != 0; \
+    reg8 = (reg8 << 1) | temp; \
+    cpu->F.Z = (reg8 == 0); \
+    GB_CPUClockCounterAdd(4); \
+}
+
+//RR r8 - 2
+#define gb_rr_r8(reg8) { \
+    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY); \
+    u32 temp = cpu->F.C; \
+    cpu->F.C = (reg8 & 0x01) != 0; \
+    reg8 = (reg8 >> 1) | (temp << 7); \
+    cpu->F.Z = (reg8 == 0); \
+    GB_CPUClockCounterAdd(4); \
+}
+
+//SLA r8 - 2
+#define gb_sla_r8(reg8) { \
+    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY); \
+    cpu->F.C = (reg8 & 0x80) != 0; \
+    reg8 = reg8 << 1; \
+    cpu->F.Z = (reg8 == 0); \
+    GB_CPUClockCounterAdd(4); \
+}
+
+//SRA r8 - 2
+#define gb_sra_r8(reg8) { \
+    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY); \
+    cpu->F.C = (reg8 & 0x01) != 0; \
+    reg8 = (reg8 & 0x80) | (reg8 >> 1); \
+    cpu->F.Z = (reg8 == 0); \
+    GB_CPUClockCounterAdd(4); \
+}
+
+//SWAP r8 - 2
+#define gb_swap_r8(reg8) { \
+    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY|F_CARRY); \
+    reg8 = ((reg8 >> 4) | (reg8 << 4)); \
+    cpu->F.Z = (reg8 == 0); \
+    GB_CPUClockCounterAdd(4); \
+}
+
+//SRL r8 - 2
+#define gb_srl_r8(reg8) { \
+    cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY); \
+    cpu->F.C = (reg8 & 0x01) != 0; \
+    reg8 = reg8 >> 1; \
+    cpu->F.Z = (reg8 == 0); \
+    GB_CPUClockCounterAdd(4); \
+}
+
+//BIT n,r8 - 2
+#define gb_bit_n_r8(bitn,reg8) { \
+    cpu->R16.AF &= ~F_SUBTRACT; \
+    cpu->R16.AF |= F_HALFCARRY; \
+    cpu->F.Z = (reg8 & (1<<bitn)) == 0; \
+    GB_CPUClockCounterAdd(4); \
+}
+
+//BIT n,(HL) - 3
+#define gb_bit_n_ptr_hl(bitn) { \
+    GB_CPUClockCounterAdd(4); \
+    cpu->R16.AF &= ~F_SUBTRACT; \
+    cpu->R16.AF |= F_HALFCARRY; \
+    cpu->F.Z = (GB_MemRead8(cpu->R16.HL) & (1<<bitn)) == 0; \
+    GB_CPUClockCounterAdd(4); \
+}
+
+//RES n,r8 - 2
+#define gb_res_n_r8(bitn,reg8) { \
+    reg8 &= ~(1 << bitn); \
+    GB_CPUClockCounterAdd(4); \
+}
+
+//RES n,(HL) - 4
+#define gb_res_n_ptr_hl(bitn) { \
+    GB_CPUClockCounterAdd(4); \
+    u32 temp = GB_MemRead8(cpu->R16.HL); \
+    GB_CPUClockCounterAdd(4); \
+    GB_MemWrite8(cpu->R16.HL, temp & (~(1 << bitn))); \
+    GB_CPUClockCounterAdd(4); \
+}
+
+//SET n,r8 - 2
+#define gb_set_n_r8(bitn,reg8) { \
+    reg8 |= (1 << bitn); \
+    GB_CPUClockCounterAdd(4); \
+}
+
+//SET n,(HL) - 4
+#define gb_set_n_ptr_hl(bitn) { \
+    GB_CPUClockCounterAdd(4); \
+    u32 temp = GB_MemRead8(cpu->R16.HL); \
+    GB_CPUClockCounterAdd(4); \
+    GB_MemWrite8(cpu->R16.HL, temp | (1 << bitn)); \
+    GB_CPUClockCounterAdd(4); \
+}
+
+//----------------------------------------------------------------
+
 static int GB_CPUExecute(int clocks) // returns executed clocks
 {
     _GB_CPU_ * cpu = &GameBoy.CPU;
@@ -364,39 +742,22 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 GB_CPUClockCounterAdd(4);
                 break;
             case 0x01: //LD BC,nn - 3
-                GB_CPUClockCounterAdd(4);
-                cpu->R8.C = GB_MemRead8(cpu->R16.PC++);
-                GB_CPUClockCounterAdd(4);
-                cpu->R8.B = GB_MemRead8(cpu->R16.PC++);
-                GB_CPUClockCounterAdd(4);
+                gb_ld_r16_nn(cpu->R8.B,cpu->R8.C);
                 break;
             case 0x02: //LD (BC),A - 2
-                GB_CPUClockCounterAdd(4);
-                GB_MemWrite8(cpu->R16.BC,cpu->R8.A);
-                GB_CPUClockCounterAdd(4);
+                gb_ld_ptr_r16_a(cpu->R16.BC);
                 break;
             case 0x03: //INC BC - 2
-                cpu->R16.BC = (cpu->R16.BC+1) & 0xFFFF;
-                GB_CPUClockCounterAdd(8);
+                gb_inc_r16(cpu->R16.BC);
                 break;
             case 0x04: //INC B - 1
-                cpu->R16.AF &= ~F_SUBTRACT;
-                cpu->F.H = ( (cpu->R8.B & 0xF) == 0xF);
-                cpu->R8.B ++;
-                cpu->F.Z = (cpu->R8.B == 0);
-                GB_CPUClockCounterAdd(4);
+                gb_inc_r8(cpu->R8.B);
                 break;
             case 0x05: //DEC B - 1
-                cpu->R16.AF |= F_SUBTRACT;
-                cpu->F.H = ( (cpu->R8.B & 0xF) == 0x0);
-                cpu->R8.B --;
-                cpu->F.Z = (cpu->R8.B == 0);
-                GB_CPUClockCounterAdd(4);
+                gb_dec_r8(cpu->R8.B);
                 break;
             case 0x06: //LD B,n - 2
-                GB_CPUClockCounterAdd(4);
-                cpu->R8.B = GB_MemRead8(cpu->R16.PC++);
-                GB_CPUClockCounterAdd(4);
+                gb_ld_r8_n(cpu->R8.B);
                 break;
             case 0x07: //RLCA - 1
                 cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY|F_ZERO);
@@ -418,15 +779,8 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 break;
             }
             case 0x09: //ADD HL,BC - 2
-            {
-                cpu->R16.AF &= ~F_SUBTRACT;
-                u32 temp = cpu->R16.HL + cpu->R16.BC;
-                cpu->F.C = (temp > 0xFFFF);
-                cpu->F.H = ( ( (cpu->R16.HL & 0x0FFF) + (cpu->R16.BC & 0x0FFF) ) > 0x0FFF );
-                cpu->R16.HL = temp & 0xFFFF;
-                GB_CPUClockCounterAdd(8);
+                gb_add_hl_r16(cpu->R16.BC);
                 break;
-            }
             case 0x0A: //LD A,(BC) - 2
                 GB_CPUClockCounterAdd(4);
                 cpu->R8.A = GB_MemRead8(cpu->R16.BC);
@@ -437,23 +791,13 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 GB_CPUClockCounterAdd(8);
                 break;
             case 0x0C: //INC C - 1
-                cpu->R16.AF &= ~F_SUBTRACT;
-                cpu->F.H = ( (cpu->R8.C & 0xF) == 0xF);
-                cpu->R8.C ++;
-                cpu->F.Z = (cpu->R8.C == 0);
-                GB_CPUClockCounterAdd(4);
+                gb_inc_r8(cpu->R8.C);
                 break;
             case 0x0D: //DEC C - 1
-                cpu->R16.AF |= F_SUBTRACT;
-                cpu->F.H = ( (cpu->R8.C & 0xF) == 0x0);
-                cpu->R8.C --;
-                cpu->F.Z = (cpu->R8.C == 0);
-                GB_CPUClockCounterAdd(4);
+                gb_dec_r8(cpu->R8.C);
                 break;
             case 0x0E: //LD C,n - 2
-                GB_CPUClockCounterAdd(4);
-                cpu->R8.C = GB_MemRead8(cpu->R16.PC++);
-                GB_CPUClockCounterAdd(4);
+                gb_ld_r8_n(cpu->R8.C);
                 break;
             case 0x0F: //RRCA - 1
                 cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY|F_ZERO);
@@ -490,39 +834,22 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 GB_CPUBreakLoop();
                 break;
             case 0x11: //LD DE,nn - 3
-                GB_CPUClockCounterAdd(4);
-                cpu->R8.E = GB_MemRead8(cpu->R16.PC++);
-                GB_CPUClockCounterAdd(4);
-                cpu->R8.D = GB_MemRead8(cpu->R16.PC++);
-                GB_CPUClockCounterAdd(4);
+                gb_ld_r16_nn(cpu->R8.D,cpu->R8.E);
                 break;
             case 0x12: //LD (DE),A - 2
-                GB_CPUClockCounterAdd(4);
-                GB_MemWrite8(cpu->R16.DE,cpu->R8.A);
-                GB_CPUClockCounterAdd(4);
+                gb_ld_ptr_r16_a(cpu->R16.DE);
                 break;
             case 0x13: //INC DE - 2
-                cpu->R16.DE = (cpu->R16.DE+1) & 0xFFFF;
-                GB_CPUClockCounterAdd(8);
+                gb_inc_r16(cpu->R16.DE);
                 break;
             case 0x14: //INC D - 1
-                cpu->R16.AF &= ~(F_SUBTRACT);
-                cpu->F.H = ( (cpu->R8.D & 0xF) == 0xF);
-                cpu->R8.D ++;
-                cpu->F.Z = (cpu->R8.D == 0);
-                GB_CPUClockCounterAdd(4);
+                gb_inc_r8(cpu->R8.D);
                 break;
             case 0x15: //DEC D - 1
-                cpu->R16.AF |= F_SUBTRACT;
-                cpu->F.H = ( (cpu->R8.D & 0xF) == 0x0);
-                cpu->R8.D --;
-                cpu->F.Z = (cpu->R8.D == 0);
-                GB_CPUClockCounterAdd(4);
+                gb_dec_r8(cpu->R8.D);
                 break;
             case 0x16: //LD D,n - 2
-                GB_CPUClockCounterAdd(4);
-                cpu->R8.D = GB_MemRead8(cpu->R16.PC++);
-                GB_CPUClockCounterAdd(4);
+                gb_ld_r8_n(cpu->R8.D);
                 break;
             case 0x17: //RLA - 1
             {
@@ -543,15 +870,8 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 break;
             }
             case 0x19: //ADD HL,DE - 2
-            {
-                cpu->R16.AF &= ~F_SUBTRACT;
-                u32 temp = cpu->R16.HL + cpu->R16.DE;
-                cpu->F.C = ( temp > 0xFFFF );
-                cpu->F.H = ( ( (cpu->R16.HL & 0xFFF) + (cpu->R16.DE & 0xFFF) ) > 0xFFF );
-                cpu->R16.HL = temp & 0xFFFF;
-                GB_CPUClockCounterAdd(8);
+                gb_add_hl_r16(cpu->R16.DE);
                 break;
-            }
             case 0x1A: //LD A,(DE) - 2
                 GB_CPUClockCounterAdd(4);
                 cpu->R8.A = GB_MemRead8(cpu->R16.DE);
@@ -562,23 +882,13 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 GB_CPUClockCounterAdd(8);
                 break;
             case 0x1C: //INC E - 1
-                cpu->R16.AF &= ~F_SUBTRACT;
-                cpu->F.H = ( (cpu->R8.E & 0xF) == 0xF);
-                cpu->R8.E ++;
-                cpu->F.Z = (cpu->R8.E == 0);
-                GB_CPUClockCounterAdd(4);
+                gb_inc_r8(cpu->R8.E);
                 break;
             case 0x1D: //DEC E - 1
-                cpu->R16.AF |= F_SUBTRACT;
-                cpu->F.H = ( (cpu->R8.E & 0xF) == 0x0);
-                cpu->R8.E --;
-                cpu->F.Z = (cpu->R8.E == 0);
-                GB_CPUClockCounterAdd(4);
+                gb_dec_r8(cpu->R8.E);
                 break;
             case 0x1E: //LD E,n - 2
-                GB_CPUClockCounterAdd(4);
-                cpu->R8.E = GB_MemRead8(cpu->R16.PC++);
-                GB_CPUClockCounterAdd(4);
+                gb_ld_r8_n(cpu->R8.E);
                 break;
             case 0x1F: //RRA - 1
             {
@@ -590,25 +900,10 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 break;
             }
             case 0x20: //JR NZ,n - 3/2
-                if(cpu->F.Z == 0)
-                {
-                    GB_CPUClockCounterAdd(4);
-                    u32 temp = GB_MemRead8(cpu->R16.PC++);
-                    cpu->R16.PC = (cpu->R16.PC + (s8)temp) & 0xFFFF;
-                    GB_CPUClockCounterAdd(8);
-                }
-                else
-                {
-                    cpu->R16.PC ++;
-                    GB_CPUClockCounterAdd(8);
-                }
+                gb_jr_cond_nn(cpu->F.Z == 0);
                 break;
             case 0x21: //LD HL,nn - 3
-                GB_CPUClockCounterAdd(4);
-                cpu->R8.L = GB_MemRead8(cpu->R16.PC++);
-                GB_CPUClockCounterAdd(4);
-                cpu->R8.H = GB_MemRead8(cpu->R16.PC++);
-                GB_CPUClockCounterAdd(4);
+                gb_ld_r16_nn(cpu->R8.H,cpu->R8.L);
                 break;
             case 0x22: //LD (HL+),A - 2
                 GB_CPUClockCounterAdd(4);
@@ -617,27 +912,16 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 GB_CPUClockCounterAdd(4);
                 break;
             case 0x23: //INC HL - 2
-                cpu->R16.HL = (cpu->R16.HL+1) & 0xFFFF;
-                GB_CPUClockCounterAdd(8);
+                gb_inc_r16(cpu->R16.HL);
                 break;
             case 0x24: //INC H - 1
-                cpu->R16.AF &= ~F_SUBTRACT;
-                cpu->F.H = ( (cpu->R8.H & 0xF) == 0xF);
-                cpu->R8.H ++;
-                cpu->F.Z = (cpu->R8.H == 0);
-                GB_CPUClockCounterAdd(4);
+                gb_inc_r8(cpu->R8.H);
                 break;
             case 0x25: //DEC H - 1
-                cpu->R16.AF |= F_SUBTRACT;
-                cpu->F.H = ( (cpu->R8.H & 0xF) == 0x0);
-                cpu->R8.H --;
-                cpu->F.Z = (cpu->R8.H == 0);
-                GB_CPUClockCounterAdd(4);
+                gb_dec_r8(cpu->R8.H);
                 break;
             case 0x26: //LD H,n - 2
-                GB_CPUClockCounterAdd(4);
-                cpu->R8.H = GB_MemRead8(cpu->R16.PC++);
-                GB_CPUClockCounterAdd(4);
+                gb_ld_r8_n(cpu->R8.H);
                 break;
             case 0x27: //DAA - 1
             {
@@ -648,18 +932,7 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 break;
             }
             case 0x28: //JR Z,n - 3/2
-                if(cpu->F.Z)
-                {
-                    GB_CPUClockCounterAdd(4);
-                    u32 temp = GB_MemRead8(cpu->R16.PC++);
-                    cpu->R16.PC = (cpu->R16.PC + (s8)temp) & 0xFFFF;
-                    GB_CPUClockCounterAdd(8);
-                }
-                else
-                {
-                    cpu->R16.PC ++;
-                    GB_CPUClockCounterAdd(8);
-                }
+                gb_jr_cond_nn(cpu->F.Z);
                 break;
             case 0x29: //ADD HL,HL - 2
                 cpu->R16.AF &= ~F_SUBTRACT;
@@ -679,23 +952,13 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 GB_CPUClockCounterAdd(8);
                 break;
             case 0x2C: //INC L - 1
-                cpu->R16.AF &= ~F_SUBTRACT;
-                cpu->F.H = ( (cpu->R8.L & 0xF) == 0xF);
-                cpu->R8.L ++;
-                cpu->F.Z = (cpu->R8.L == 0);
-                GB_CPUClockCounterAdd(4);
+                gb_inc_r8(cpu->R8.L);
                 break;
             case 0x2D: //DEC L - 1
-                cpu->R16.AF |= F_SUBTRACT;
-                cpu->F.H = ( (cpu->R8.L & 0xF) == 0x0);
-                cpu->R8.L --;
-                cpu->F.Z = (cpu->R8.L == 0);
-                GB_CPUClockCounterAdd(4);
+                gb_dec_r8(cpu->R8.L);
                 break;
             case 0x2E: //LD L,n - 2
-                GB_CPUClockCounterAdd(4);
-                cpu->R8.L = GB_MemRead8(cpu->R16.PC++);
-                GB_CPUClockCounterAdd(4);
+                gb_ld_r8_n(cpu->R8.L);
                 break;
             case 0x2F: //CPL - 1
                 cpu->R16.AF |= (F_SUBTRACT|F_HALFCARRY);
@@ -703,25 +966,10 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 GB_CPUClockCounterAdd(4);
                 break;
             case 0x30: //JR NC,n - 3/2
-                if(cpu->F.C == 0)
-                {
-                    GB_CPUClockCounterAdd(4);
-                    u32 temp = GB_MemRead8(cpu->R16.PC++);
-                    cpu->R16.PC = (cpu->R16.PC + (s8)temp) & 0xFFFF;
-                    GB_CPUClockCounterAdd(8);
-                }
-                else
-                {
-                    cpu->R16.PC ++;
-                    GB_CPUClockCounterAdd(8);
-                }
+                gb_jr_cond_nn(cpu->F.C == 0);
                 break;
             case 0x31: //LD SP,nn - 3
-                GB_CPUClockCounterAdd(4);
-                cpu->R8.SPL = GB_MemRead8(cpu->R16.PC++);
-                GB_CPUClockCounterAdd(4);
-                cpu->R8.SPH = GB_MemRead8(cpu->R16.PC++);
-                GB_CPUClockCounterAdd(4);
+                gb_ld_r16_nn(cpu->R8.SPH,cpu->R8.SPL);
                 break;
             case 0x32: //LD (HL-),A - 2
                 GB_CPUClockCounterAdd(4);
@@ -730,8 +978,7 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 GB_CPUClockCounterAdd(4);
                 break;
             case 0x33: //INC SP - 2
-                cpu->R16.SP = (cpu->R16.SP+1) & 0xFFFF;
-                GB_CPUClockCounterAdd(8);
+                gb_inc_r16(cpu->R16.SP);
                 break;
             case 0x34: //INC (HL) - 3
             {
@@ -774,29 +1021,11 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 GB_CPUClockCounterAdd(4);
                 break;
             case 0x38: //JR C,n - 3/2
-                if(cpu->F.C == 1)
-                {
-                    GB_CPUClockCounterAdd(4);
-                    u32 temp = GB_MemRead8(cpu->R16.PC++);
-                    cpu->R16.PC = (cpu->R16.PC + (s8)temp) & 0xFFFF;
-                    GB_CPUClockCounterAdd(8);
-                }
-                else
-                {
-                    cpu->R16.PC ++;
-                    GB_CPUClockCounterAdd(8);
-                }
+                gb_jr_cond_nn(cpu->F.C);
                 break;
             case 0x39: //ADD HL,SP - 2
-            {
-                cpu->R16.AF &= ~F_SUBTRACT;
-                u32 temp = cpu->R16.HL + cpu->R16.SP;
-                cpu->F.C = (temp > 0xFFFF);
-                cpu->F.H = ( ( (cpu->R16.HL & 0x0FFF) + (cpu->R16.SP & 0x0FFF) ) > 0x0FFF );
-                cpu->R16.HL = temp & 0xFFFF;
-                GB_CPUClockCounterAdd(8);
+                gb_add_hl_r16(cpu->R16.SP);
                 break;
-            }
             case 0x3A: //LD A,(HL-) - 2
                 GB_CPUClockCounterAdd(4);
                 cpu->R8.A = GB_MemRead8(cpu->R16.HL);
@@ -808,23 +1037,13 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 GB_CPUClockCounterAdd(8);
                 break;
             case 0x3C: //INC A - 1
-                cpu->R16.AF &= ~F_SUBTRACT;
-                cpu->F.H = ( (cpu->R8.A & 0xF) == 0xF);
-                cpu->R8.A ++;
-                cpu->F.Z = (cpu->R8.A == 0);
-                GB_CPUClockCounterAdd(4);
+                gb_inc_r8(cpu->R8.A);
                 break;
             case 0x3D: //DEC A - 1
-                cpu->R16.AF |= F_SUBTRACT;
-                cpu->F.H = ( (cpu->R8.A & 0xF) == 0x0);
-                cpu->R8.A --;
-                cpu->F.Z = (cpu->R8.A == 0);
-                GB_CPUClockCounterAdd(4);
+                gb_dec_r8(cpu->R8.A);
                 break;
             case 0x3E: //LD A,n - 2
-                GB_CPUClockCounterAdd(4);
-                cpu->R8.A = GB_MemRead8(cpu->R16.PC++);
-                GB_CPUClockCounterAdd(4);
+                gb_ld_r8_n(cpu->R8.A);
                 break;
             case 0x3F: //CCF - 1
                 cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
@@ -1080,9 +1299,7 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 GB_CPUBreakLoop();
                 break;
             case 0x77: //LD (HL),A - 2
-                GB_CPUClockCounterAdd(4);
-                GB_MemWrite8(cpu->R16.HL,cpu->R8.A);
-                GB_CPUClockCounterAdd(4);
+                gb_ld_ptr_r16_a(cpu->R16.HL);
                 break;
             case 0x78: //LD A,B - 1
                 cpu->R8.A = cpu->R8.B;
@@ -1118,71 +1335,23 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 GB_CPUClockCounterAdd(4);
                 break;
             case 0x80: //ADD A,B - 1
-            {
-                cpu->R16.AF &= ~F_SUBTRACT;
-                u32 temp = cpu->R8.A;
-                cpu->F.H = ( (temp & 0xF) + ((u32)cpu->R8.B & 0xF) ) > 0xF;
-                cpu->R8.A += cpu->R8.B;
-                cpu->F.Z = (cpu->R8.A == 0);
-                cpu->F.C = (temp > cpu->R8.A);
-                GB_CPUClockCounterAdd(4);
+                gb_add_a_r8(cpu->R8.B);
                 break;
-            }
             case 0x81: //ADD A,C - 1
-            {
-                cpu->R16.AF &= ~F_SUBTRACT;
-                u32 temp = cpu->R8.A;
-                cpu->F.H = ( (temp & 0xF) + ((u32)cpu->R8.C & 0xF) ) > 0xF;
-                cpu->R8.A += cpu->R8.C;
-                cpu->F.Z = (cpu->R8.A == 0);
-                cpu->F.C = (temp > cpu->R8.A);
-                GB_CPUClockCounterAdd(4);
+                gb_add_a_r8(cpu->R8.C);
                 break;
-            }
             case 0x82: //ADD A,D - 1
-            {
-                cpu->R16.AF &= ~F_SUBTRACT;
-                u32 temp = cpu->R8.A;
-                cpu->F.H = ( (temp & 0xF) + ((u32)cpu->R8.D & 0xF) ) > 0xF;
-                cpu->R8.A += cpu->R8.D;
-                cpu->F.Z = (cpu->R8.A == 0);
-                cpu->F.C = (temp > cpu->R8.A);
-                GB_CPUClockCounterAdd(4);
+                gb_add_a_r8(cpu->R8.D);
                 break;
-            }
             case 0x83: //ADD A,E - 1
-            {
-                cpu->R16.AF &= ~F_SUBTRACT;
-                u32 temp = cpu->R8.A;
-                cpu->F.H = ( (temp & 0xF) + ((u32)cpu->R8.E & 0xF) ) > 0xF;
-                cpu->R8.A += cpu->R8.E;
-                cpu->F.Z = (cpu->R8.A == 0);
-                cpu->F.C = (temp > cpu->R8.A);
-                GB_CPUClockCounterAdd(4);
+                gb_add_a_r8(cpu->R8.E);
                 break;
-            }
             case 0x84: //ADD A,H - 1
-            {
-                cpu->R16.AF &= ~F_SUBTRACT;
-                u32 temp = cpu->R8.A;
-                cpu->F.H = ( (temp & 0xF) + ((u32)cpu->R8.H & 0xF) ) > 0xF;
-                cpu->R8.A += cpu->R8.H;
-                cpu->F.Z = (cpu->R8.A == 0);
-                cpu->F.C = (temp > cpu->R8.A);
-                GB_CPUClockCounterAdd(4);
+                gb_add_a_r8(cpu->R8.H);
                 break;
-            }
             case 0x85: //ADD A,L - 1
-            {
-                cpu->R16.AF &= ~F_SUBTRACT;
-                u32 temp = cpu->R8.A;
-                cpu->F.H = ( (temp & 0xF) + ((u32)cpu->R8.L & 0xF) ) > 0xF;
-                cpu->R8.A += cpu->R8.L;
-                cpu->F.Z = (cpu->R8.A == 0);
-                cpu->F.C = (temp > cpu->R8.A);
-                GB_CPUClockCounterAdd(4);
+                gb_add_a_r8(cpu->R8.L);
                 break;
-            }
             case 0x86: //ADD A,(HL) - 2
             {
                 GB_CPUClockCounterAdd(4);
@@ -1205,77 +1374,23 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 GB_CPUClockCounterAdd(4);
                 break;
             case 0x88: //ADC A,B - 1
-            {
-                cpu->R16.AF &= ~F_SUBTRACT;
-                u32 temp = cpu->R8.A + cpu->R8.B + cpu->F.C;
-                cpu->F.H = ( ((cpu->R8.A & 0xF) + (cpu->R8.B & 0xF) ) + cpu->F.C) > 0xF;
-                cpu->F.C = (temp > 0xFF);
-                temp &= 0xFF;
-                cpu->R8.A = temp;
-                cpu->F.Z = (temp == 0);
-                GB_CPUClockCounterAdd(4);
+                gb_adc_a_r8(cpu->R8.B);
                 break;
-            }
             case 0x89: //ADC A,C - 1
-            {
-                cpu->R16.AF &= ~F_SUBTRACT;
-                u32 temp = cpu->R8.A + cpu->R8.C + cpu->F.C;
-                cpu->F.H = ( ((cpu->R8.A & 0xF) + (cpu->R8.C & 0xF) ) + cpu->F.C) > 0xF;
-                cpu->F.C = (temp > 0xFF);
-                temp &= 0xFF;
-                cpu->R8.A = temp;
-                cpu->F.Z = (temp == 0);
-                GB_CPUClockCounterAdd(4);
+                gb_adc_a_r8(cpu->R8.C);
                 break;
-            }
             case 0x8A: //ADC A,D - 1
-            {
-                cpu->R16.AF &= ~F_SUBTRACT;
-                u32 temp = cpu->R8.A + cpu->R8.D + cpu->F.C;
-                cpu->F.H = ( ((cpu->R8.A & 0xF) + (cpu->R8.D & 0xF) ) + cpu->F.C) > 0xF;
-                cpu->F.C = (temp > 0xFF);
-                temp &= 0xFF;
-                cpu->R8.A = temp;
-                cpu->F.Z = (temp == 0);
-                GB_CPUClockCounterAdd(4);
+                gb_adc_a_r8(cpu->R8.D);
                 break;
-            }
             case 0x8B: //ADC A,E - 1
-            {
-                cpu->R16.AF &= ~F_SUBTRACT;
-                u32 temp = cpu->R8.A + cpu->R8.E + cpu->F.C;
-                cpu->F.H = ( ((cpu->R8.A & 0xF) + (cpu->R8.E & 0xF) ) + cpu->F.C) > 0xF;
-                cpu->F.C = (temp > 0xFF);
-                temp &= 0xFF;
-                cpu->R8.A = temp;
-                cpu->F.Z = (temp == 0);
-                GB_CPUClockCounterAdd(4);
+                gb_adc_a_r8(cpu->R8.E);
                 break;
-            }
             case 0x8C: //ADC A,H - 1
-            {
-                cpu->R16.AF &= ~F_SUBTRACT;
-                u32 temp = cpu->R8.A + cpu->R8.H + cpu->F.C;
-                cpu->F.H = ( ((cpu->R8.A & 0xF) + (cpu->R8.H & 0xF) ) + cpu->F.C) > 0xF;
-                cpu->F.C = (temp > 0xFF);
-                temp &= 0xFF;
-                cpu->R8.A = temp;
-                cpu->F.Z = (temp == 0);
-                GB_CPUClockCounterAdd(4);
+                gb_adc_a_r8(cpu->R8.H);
                 break;
-            }
             case 0x8D: //ADC A,L - 1
-            {
-                cpu->R16.AF &= ~F_SUBTRACT;
-                u32 temp = cpu->R8.A + cpu->R8.L + cpu->F.C;
-                cpu->F.H = ( ((cpu->R8.A & 0xF) + (cpu->R8.L & 0xF) ) + cpu->F.C) > 0xF;
-                cpu->F.C = (temp > 0xFF);
-                temp &= 0xFF;
-                cpu->R8.A = temp;
-                cpu->F.Z = (temp == 0);
-                GB_CPUClockCounterAdd(4);
+                gb_adc_a_r8(cpu->R8.L);
                 break;
-            }
             case 0x8E: //ADC A,(HL) - 2
             {
                 GB_CPUClockCounterAdd(4);
@@ -1303,55 +1418,25 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 GB_CPUClockCounterAdd(4);
                 break;
             }
-            case 0x90: //SUB B - 1
-                cpu->R8.F = F_SUBTRACT;
-                cpu->F.H = (cpu->R8.A & 0xF) < (cpu->R8.B & 0xF);
-                cpu->F.C = (u32)cpu->R8.A < (u32)cpu->R8.B;
-                cpu->R8.A -= cpu->R8.B;
-                cpu->F.Z = (cpu->R8.A == 0);
-                GB_CPUClockCounterAdd(4);
+            case 0x90: //SUB A,B - 1
+                gb_sub_a_r8(cpu->R8.B);
                 break;
-            case 0x91: //SUB C - 1
-                cpu->R8.F = F_SUBTRACT;
-                cpu->F.H = (cpu->R8.A & 0xF) < (cpu->R8.C & 0xF);
-                cpu->F.C = (u32)cpu->R8.A < (u32)cpu->R8.C;
-                cpu->R8.A -= cpu->R8.C;
-                cpu->F.Z = (cpu->R8.A == 0);
-                GB_CPUClockCounterAdd(4);
+            case 0x91: //SUB A,C - 1
+                gb_sub_a_r8(cpu->R8.C);
                 break;
-            case 0x92: //SUB D - 1
-                cpu->R8.F = F_SUBTRACT;
-                cpu->F.H = (cpu->R8.A & 0xF) < (cpu->R8.D & 0xF);
-                cpu->F.C = (u32)cpu->R8.A < (u32)cpu->R8.D;
-                cpu->R8.A -= cpu->R8.D;
-                cpu->F.Z = (cpu->R8.A == 0);
-                GB_CPUClockCounterAdd(4);
+            case 0x92: //SUB A,D - 1
+                gb_sub_a_r8(cpu->R8.D);
                 break;
-            case 0x93: //SUB E - 1
-                cpu->R8.F = F_SUBTRACT;
-                cpu->F.H = (cpu->R8.A & 0xF) < (cpu->R8.E & 0xF);
-                cpu->F.C = (u32)cpu->R8.A < (u32)cpu->R8.E;
-                cpu->R8.A -= cpu->R8.E;
-                cpu->F.Z = (cpu->R8.A == 0);
-                GB_CPUClockCounterAdd(4);
+            case 0x93: //SUB A,E - 1
+                gb_sub_a_r8(cpu->R8.E);
                 break;
-            case 0x94: //SUB H - 1
-                cpu->R8.F = F_SUBTRACT;
-                cpu->F.H = (cpu->R8.A & 0xF) < (cpu->R8.H & 0xF);
-                cpu->F.C = (u32)cpu->R8.A < (u32)cpu->R8.H;
-                cpu->R8.A -= cpu->R8.H;
-                cpu->F.Z = (cpu->R8.A == 0);
-                GB_CPUClockCounterAdd(4);
+            case 0x94: //SUB A,H - 1
+                gb_sub_a_r8(cpu->R8.H);
                 break;
-            case 0x95: //SUB L - 1
-                cpu->R8.F = F_SUBTRACT;
-                cpu->F.H = (cpu->R8.A & 0xF) < (cpu->R8.L & 0xF);
-                cpu->F.C = (u32)cpu->R8.A < (u32)cpu->R8.L;
-                cpu->R8.A -= cpu->R8.L;
-                cpu->F.Z = (cpu->R8.A == 0);
-                GB_CPUClockCounterAdd(4);
+            case 0x95: //SUB A,L - 1
+                gb_sub_a_r8(cpu->R8.L);
                 break;
-            case 0x96: //SUB (HL) - 2
+            case 0x96: //SUB A,(HL) - 2
             {
                 GB_CPUClockCounterAdd(4);
                 u32 temp = GB_MemRead8(cpu->R16.HL);
@@ -1363,65 +1448,29 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 GB_CPUClockCounterAdd(4);
                 break;
             }
-            case 0x97: //SUB A - 1
+            case 0x97: //SUB A,A - 1
                 cpu->R8.F = F_SUBTRACT|F_ZERO;
                 cpu->R8.A = 0;
                 GB_CPUClockCounterAdd(4);
                 break;
             case 0x98: //SBC A,B - 1
-            {
-                u32 temp = cpu->R8.A - cpu->R8.B - ((cpu->R8.F&F_CARRY)?1:0);
-                cpu->R8.F = ((temp & ~0xFF)?F_CARRY:0)|((temp&0xFF)?0:F_ZERO)|F_SUBTRACT;
-                cpu->F.H = ( (cpu->R8.A^cpu->R8.B^temp) & 0x10 ) != 0 ;
-                cpu->R8.A = temp;
-                GB_CPUClockCounterAdd(4);
+                gb_sbc_a_r8(cpu->R8.B);
                 break;
-            }
             case 0x99: //SBC A,C - 1
-            {
-                u32 temp = cpu->R8.A - cpu->R8.C - ((cpu->R8.F&F_CARRY)?1:0);
-                cpu->R8.F = ((temp & ~0xFF)?F_CARRY:0)|((temp&0xFF)?0:F_ZERO)|F_SUBTRACT;
-                cpu->F.H = ( (cpu->R8.A^cpu->R8.C^temp) & 0x10 ) != 0 ;
-                cpu->R8.A = temp;
-                GB_CPUClockCounterAdd(4);
+                gb_sbc_a_r8(cpu->R8.C);
                 break;
-            }
             case 0x9A: //SBC A,D - 1
-            {
-                u32 temp = cpu->R8.A - cpu->R8.D - ((cpu->R8.F&F_CARRY)?1:0);
-                cpu->R8.F = ((temp & ~0xFF)?F_CARRY:0)|((temp&0xFF)?0:F_ZERO)|F_SUBTRACT;
-                cpu->F.H = ( (cpu->R8.A^cpu->R8.D^temp) & 0x10 ) != 0 ;
-                cpu->R8.A = temp;
-                GB_CPUClockCounterAdd(4);
+                gb_sbc_a_r8(cpu->R8.D);
                 break;
-            }
             case 0x9B: //SBC A,E - 1
-            {
-                u32 temp = cpu->R8.A - cpu->R8.E - ((cpu->R8.F&F_CARRY)?1:0);
-                cpu->R8.F = ((temp & ~0xFF)?F_CARRY:0)|((temp&0xFF)?0:F_ZERO)|F_SUBTRACT;
-                cpu->F.H = ( (cpu->R8.A^cpu->R8.E^temp) & 0x10 ) != 0 ;
-                cpu->R8.A = temp;
-                GB_CPUClockCounterAdd(4);
+                gb_sbc_a_r8(cpu->R8.E);
                 break;
-            }
             case 0x9C: //SBC A,H - 1
-            {
-                u32 temp = cpu->R8.A - cpu->R8.H - ((cpu->R8.F&F_CARRY)?1:0);
-                cpu->R8.F = ((temp & ~0xFF)?F_CARRY:0)|((temp&0xFF)?0:F_ZERO)|F_SUBTRACT;
-                cpu->F.H = ( (cpu->R8.A^cpu->R8.H^temp) & 0x10 ) != 0 ;
-                cpu->R8.A = temp;
-                GB_CPUClockCounterAdd(4);
+                gb_sbc_a_r8(cpu->R8.H);
                 break;
-            }
             case 0x9D: //SBC A,L - 1
-            {
-                u32 temp = cpu->R8.A - cpu->R8.L - ((cpu->R8.F&F_CARRY)?1:0);
-                cpu->R8.F = ((temp & ~0xFF)?F_CARRY:0)|((temp&0xFF)?0:F_ZERO)|F_SUBTRACT;
-                cpu->F.H = ( (cpu->R8.A^cpu->R8.L^temp) & 0x10 ) != 0 ;
-                cpu->R8.A = temp;
-                GB_CPUClockCounterAdd(4);
+                gb_sbc_a_r8(cpu->R8.L);
                 break;
-            }
             case 0x9E: //SBC A,(HL) - 2
             {
                 GB_CPUClockCounterAdd(4);
@@ -1438,49 +1487,25 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                         ( (0xFF<<8)|F_CARRY|F_HALFCARRY|F_SUBTRACT ) : (F_ZERO|F_SUBTRACT) ;
                 GB_CPUClockCounterAdd(4);
                 break;
-            case 0xA0: //AND B - 1
-                cpu->R16.AF |= F_HALFCARRY;
-                cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY);
-                cpu->R8.A &= cpu->R8.B;
-                cpu->F.Z = (cpu->R8.A == 0);
-                GB_CPUClockCounterAdd(4);
+            case 0xA0: //AND A,B - 1
+                gb_and_a_r8(cpu->R8.B);
                 break;
-            case 0xA1: //AND C - 1
-                cpu->R16.AF |= F_HALFCARRY;
-                cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY);
-                cpu->R8.A &= cpu->R8.C;
-                cpu->F.Z = (cpu->R8.A == 0);
-                GB_CPUClockCounterAdd(4);
+            case 0xA1: //AND A,C - 1
+                gb_and_a_r8(cpu->R8.C);
                 break;
-            case 0xA2: //AND D - 1
-                cpu->R16.AF |= F_HALFCARRY;
-                cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY);
-                cpu->R8.A &= cpu->R8.D;
-                cpu->F.Z = (cpu->R8.A == 0);
-                GB_CPUClockCounterAdd(4);
+            case 0xA2: //AND A,D - 1
+                gb_and_a_r8(cpu->R8.D);
                 break;
-            case 0xA3: //AND E - 1
-                cpu->R16.AF |= F_HALFCARRY;
-                cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY);
-                cpu->R8.A &= cpu->R8.E;
-                cpu->F.Z = (cpu->R8.A == 0);
-                GB_CPUClockCounterAdd(4);
+            case 0xA3: //AND A,E - 1
+                gb_and_a_r8(cpu->R8.E);
                 break;
-            case 0xA4: //AND H - 1
-                cpu->R16.AF |= F_HALFCARRY;
-                cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY);
-                cpu->R8.A &= cpu->R8.H;
-                cpu->F.Z = (cpu->R8.A == 0);
-                GB_CPUClockCounterAdd(4);
+            case 0xA4: //AND A,H - 1
+                gb_and_a_r8(cpu->R8.H);
                 break;
-            case 0xA5: //AND L - 1
-                cpu->R16.AF |= F_HALFCARRY;
-                cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY);
-                cpu->R8.A &= cpu->R8.L;
-                cpu->F.Z = (cpu->R8.A == 0);
-                GB_CPUClockCounterAdd(4);
+            case 0xA5: //AND A,L - 1
+                gb_and_a_r8(cpu->R8.L);
                 break;
-            case 0xA6: //AND (HL) - 2
+            case 0xA6: //AND A,(HL) - 2
                 GB_CPUClockCounterAdd(4);
                 cpu->R16.AF |= F_HALFCARRY;
                 cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY);
@@ -1488,152 +1513,92 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 cpu->F.Z = (cpu->R8.A == 0);
                 GB_CPUClockCounterAdd(4);
                 break;
-            case 0xA7: //AND A - 1
+            case 0xA7: //AND A,A - 1
                 cpu->R16.AF |= F_HALFCARRY;
                 cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY);
                 //cpu->R8.A &= cpu->R8.A;
                 cpu->F.Z = (cpu->R8.A == 0);
                 GB_CPUClockCounterAdd(4);
                 break;
-            case 0xA8: //XOR B - 1
-                cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY|F_HALFCARRY);
-                cpu->R8.A ^= cpu->R8.B;
-                cpu->F.Z = (cpu->R8.A == 0);
-                GB_CPUClockCounterAdd(4);
+            case 0xA8: //XOR A,B - 1
+                gb_xor_a_r8(cpu->R8.B);
                 break;
-            case 0xA9: //XOR C - 1
-                cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY|F_HALFCARRY);
-                cpu->R8.A ^= cpu->R8.C;
-                cpu->F.Z = (cpu->R8.A == 0);
-                GB_CPUClockCounterAdd(4);
+            case 0xA9: //XOR A,C - 1
+                gb_xor_a_r8(cpu->R8.C);
                 break;
-            case 0xAA: //XOR D - 1
-                cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY|F_HALFCARRY);
-                cpu->R8.A ^= cpu->R8.D;
-                cpu->F.Z = (cpu->R8.A == 0);
-                GB_CPUClockCounterAdd(4);
+            case 0xAA: //XOR A,D - 1
+                gb_xor_a_r8(cpu->R8.D);
                 break;
-            case 0xAB: //XOR E - 1
-                cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY|F_HALFCARRY);
-                cpu->R8.A ^= cpu->R8.E;
-                cpu->F.Z = (cpu->R8.A == 0);
-                GB_CPUClockCounterAdd(4);
+            case 0xAB: //XOR A,E - 1
+                gb_xor_a_r8(cpu->R8.E);
                 break;
-            case 0xAC: //XOR H - 1
-                cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY|F_HALFCARRY);
-                cpu->R8.A ^= cpu->R8.H;
-                cpu->F.Z = (cpu->R8.A == 0);
-                GB_CPUClockCounterAdd(4);
+            case 0xAC: //XOR A,H - 1
+                gb_xor_a_r8(cpu->R8.H);
                 break;
-            case 0xAD: //XOR L - 1
-                cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY|F_HALFCARRY);
-                cpu->R8.A ^= cpu->R8.L;
-                cpu->F.Z = (cpu->R8.A == 0);
-                GB_CPUClockCounterAdd(4);
+            case 0xAD: //XOR A,L - 1
+                gb_xor_a_r8(cpu->R8.L);
                 break;
-            case 0xAE: //XOR (HL) - 2
+            case 0xAE: //XOR A,(HL) - 2
                 GB_CPUClockCounterAdd(4);
                 cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY|F_HALFCARRY);
                 cpu->R8.A ^= GB_MemRead8(cpu->R16.HL);
                 cpu->F.Z = (cpu->R8.A == 0);
                 GB_CPUClockCounterAdd(4);
                 break;
-            case 0xAF: //XOR A - 1
+            case 0xAF: //XOR A,A - 1
                 cpu->R16.AF = F_ZERO;
                 GB_CPUClockCounterAdd(4);
                 break;
-            case 0xB0: //OR B - 1
-                cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY|F_HALFCARRY);
-                cpu->R8.A |= cpu->R8.B;
-                cpu->F.Z = (cpu->R8.A == 0);
-                GB_CPUClockCounterAdd(4);
+            case 0xB0: //OR A,B - 1
+                gb_or_a_r8(cpu->R8.B);
                 break;
-            case 0xB1: //OR C - 1
-                cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY|F_HALFCARRY);
-                cpu->R8.A |= cpu->R8.C;
-                cpu->F.Z = (cpu->R8.A == 0);
-                GB_CPUClockCounterAdd(4);
+            case 0xB1: //OR A,C - 1
+                gb_or_a_r8(cpu->R8.C);
                 break;
-            case 0xB2: //OR D - 1
-                cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY|F_HALFCARRY);
-                cpu->R8.A |= cpu->R8.D;
-                cpu->F.Z = (cpu->R8.A == 0);
-                GB_CPUClockCounterAdd(4);
+            case 0xB2: //OR A,D - 1
+                gb_or_a_r8(cpu->R8.D);
                 break;
-            case 0xB3: //OR E - 1
-                cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY|F_HALFCARRY);
-                cpu->R8.A |= cpu->R8.E;
-                cpu->F.Z = (cpu->R8.A == 0);
-                GB_CPUClockCounterAdd(4);
+            case 0xB3: //OR A,E - 1
+                gb_or_a_r8(cpu->R8.E);
                 break;
-            case 0xB4: //OR H - 1
-                cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY|F_HALFCARRY);
-                cpu->R8.A |= cpu->R8.H;
-                cpu->F.Z = (cpu->R8.A == 0);
-                GB_CPUClockCounterAdd(4);
+            case 0xB4: //OR A,H - 1
+                gb_or_a_r8(cpu->R8.H);
                 break;
-            case 0xB5: //OR L - 1
-                cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY|F_HALFCARRY);
-                cpu->R8.A |= cpu->R8.L;
-                cpu->F.Z = (cpu->R8.A == 0);
-                GB_CPUClockCounterAdd(4);
+            case 0xB5: //OR A,L - 1
+                gb_or_a_r8(cpu->R8.L);
                 break;
-            case 0xB6: //OR (HL) - 2
+            case 0xB6: //OR A,(HL) - 2
                 GB_CPUClockCounterAdd(4);
                 cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY|F_HALFCARRY);
                 cpu->R8.A |= GB_MemRead8(cpu->R16.HL);
                 cpu->F.Z = (cpu->R8.A == 0);
                 GB_CPUClockCounterAdd(4);
                 break;
-            case 0xB7: //OR A - 1
+            case 0xB7: //OR A,A - 1
                 cpu->R16.AF &= ~(F_SUBTRACT|F_CARRY|F_HALFCARRY);
                 //cpu->R8.A |= cpu->R8.A;
                 cpu->F.Z = (cpu->R8.A == 0);
                 GB_CPUClockCounterAdd(4);
                 break;
-            case 0xB8: //CP B - 1
-                cpu->R16.AF |= F_SUBTRACT;
-                cpu->F.H = (cpu->R8.A & 0xF) < (cpu->R8.B & 0xF);
-                cpu->F.C = (u32)cpu->R8.A < (u32)cpu->R8.B;
-                cpu->F.Z = (cpu->R8.A == cpu->R8.B);
-                GB_CPUClockCounterAdd(4);
+            case 0xB8: //CP A,B - 1
+                gb_cp_a_r8(cpu->R8.B);
                 break;
-            case 0xB9: //CP C - 1
-                cpu->R16.AF |= F_SUBTRACT;
-                cpu->F.H = (cpu->R8.A & 0xF) < (cpu->R8.C & 0xF);
-                cpu->F.C = (u32)cpu->R8.A < (u32)cpu->R8.C;
-                cpu->F.Z = (cpu->R8.A == cpu->R8.C);
-                GB_CPUClockCounterAdd(4);
+            case 0xB9: //CP A,C - 1
+                gb_cp_a_r8(cpu->R8.C);
                 break;
-            case 0xBA: //CP D - 1
-                cpu->R16.AF |= F_SUBTRACT;
-                cpu->F.H = (cpu->R8.A & 0xF) < (cpu->R8.D & 0xF);
-                cpu->F.C = (u32)cpu->R8.A < (u32)cpu->R8.D;
-                cpu->F.Z = (cpu->R8.A == cpu->R8.D);
-                GB_CPUClockCounterAdd(4);
+            case 0xBA: //CP A,D - 1
+                gb_cp_a_r8(cpu->R8.D);
                 break;
-            case 0xBB: //CP E - 1
-                cpu->R16.AF |= F_SUBTRACT;
-                cpu->F.H = (cpu->R8.A & 0xF) < (cpu->R8.E & 0xF);
-                cpu->F.C = (u32)cpu->R8.A < (u32)cpu->R8.E;
-                cpu->F.Z = (cpu->R8.A == cpu->R8.E);
-                GB_CPUClockCounterAdd(4);
+            case 0xBB: //CP A,E - 1
+                gb_cp_a_r8(cpu->R8.E);
                 break;
-            case 0xBC: //CP H - 1
-                cpu->R16.AF |= F_SUBTRACT;
-                cpu->F.H = (cpu->R8.A & 0xF) < (cpu->R8.H & 0xF);
-                cpu->F.C = (u32)cpu->R8.A < (u32)cpu->R8.H;
-                cpu->F.Z = (cpu->R8.A == cpu->R8.H);
-                GB_CPUClockCounterAdd(4);
+            case 0xBC: //CP A,H - 1
+                gb_cp_a_r8(cpu->R8.H);
                 break;
-            case 0xBD: //CP L - 1
-                cpu->R16.AF |= F_SUBTRACT;
-                cpu->F.H = (cpu->R8.A & 0xF) < (cpu->R8.L & 0xF);
-                cpu->F.C = (u32)cpu->R8.A < (u32)cpu->R8.L;
-                cpu->F.Z = (cpu->R8.A == cpu->R8.L);
-                GB_CPUClockCounterAdd(4);
+            case 0xBD: //CP A,L - 1
+                gb_cp_a_r8(cpu->R8.L);
                 break;
-            case 0xBE: //CP (HL) - 2
+            case 0xBE: //CP A,(HL) - 2
             {
                 GB_CPUClockCounterAdd(4);
                 cpu->R16.AF |= F_SUBTRACT;
@@ -1644,55 +1609,19 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 GB_CPUClockCounterAdd(4);
                 break;
             }
-            case 0xBF: //CP A - 1
+            case 0xBF: //CP A,A - 1
                 cpu->R16.AF |= (F_SUBTRACT|F_ZERO);
                 cpu->R16.AF &= ~(F_HALFCARRY|F_CARRY);
                 GB_CPUClockCounterAdd(4);
                 break;
             case 0xC0: //RET NZ - 5/2
-                if(cpu->F.Z == 0)
-                {
-                    GB_CPUClockCounterAdd(4);
-                    u32 temp = GB_MemRead8(cpu->R16.SP++);
-                    cpu->R16.SP &= 0xFFFF;
-                    GB_CPUClockCounterAdd(4);
-                    temp |= ( (u32)GB_MemRead8(cpu->R16.SP++) ) << 8;
-                    cpu->R16.SP &= 0xFFFF;
-                    GB_CPUClockCounterAdd(4);
-                    cpu->R16.PC = temp;
-                    GB_CPUClockCounterAdd(8);
-                }
-                else
-                {
-                    GB_CPUClockCounterAdd(8);
-                }
+                gb_ret_cond_nn(cpu->F.Z == 0);
                 break;
             case 0xC1: //POP BC - 3
-                GB_CPUClockCounterAdd(4);
-                cpu->R8.C = GB_MemRead8(cpu->R16.SP++);
-                cpu->R16.SP &= 0xFFFF;
-                GB_CPUClockCounterAdd(4);
-                cpu->R8.B = GB_MemRead8(cpu->R16.SP++);
-                cpu->R16.SP &= 0xFFFF;
-                GB_CPUClockCounterAdd(4);
+                gb_pop_r16(cpu->R8.B,cpu->R8.C);
                 break;
             case 0xC2: //JP NZ,nn - 4/3
-                if(cpu->F.Z == 0)
-                {
-                    GB_CPUClockCounterAdd(4);
-                    u32 temp = GB_MemRead8(cpu->R16.PC++);
-                    GB_CPUClockCounterAdd(4);
-                    temp |= ( (u32)GB_MemRead8(cpu->R16.PC++) ) << 8;
-                    GB_CPUClockCounterAdd(4);
-                    cpu->R16.PC = temp;
-                    GB_CPUClockCounterAdd(4);
-                }
-                else
-                {
-                    cpu->R16.PC += 2;
-                    cpu->R16.PC &= 0xFFFF;
-                    GB_CPUClockCounterAdd(12);
-                }
+                gb_jp_cond_nn(cpu->F.Z == 0);
                 break;
             case 0xC3: //JP nn - 4
             {
@@ -1708,41 +1637,10 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 break;
             }
             case 0xC4: //CALL NZ,nn - 6/3
-                if(cpu->F.Z == 0)
-                {
-                    GB_CPUClockCounterAdd(4);
-                    u32 temp = GB_MemRead8(cpu->R16.PC++);
-                    GB_CPUClockCounterAdd(4);
-                    temp |= ( (u32)GB_MemRead8(cpu->R16.PC++) ) << 8;
-                    GB_CPUClockCounterAdd(4);
-                    cpu->R16.SP --;
-                    cpu->R16.SP &= 0xFFFF;
-                    GB_MemWrite8(cpu->R16.SP,cpu->R8.PCH);
-                    GB_CPUClockCounterAdd(4);
-                    cpu->R16.SP --;
-                    cpu->R16.SP &= 0xFFFF;
-                    GB_MemWrite8(cpu->R16.SP,cpu->R8.PCL);
-                    GB_CPUClockCounterAdd(4);
-                    cpu->R16.PC = temp;
-                    GB_CPUClockCounterAdd(4);
-                }
-                else
-                {
-                    cpu->R16.PC += 2;
-                    cpu->R16.PC &= 0xFFFF;
-                    GB_CPUClockCounterAdd(12);
-                }
+                gb_call_cond_nn(cpu->F.Z == 0);
                 break;
             case 0xC5: //PUSH BC - 4
-                GB_CPUClockCounterAdd(4);
-                cpu->R16.SP--;
-                cpu->R16.SP &= 0xFFFF;
-                GB_MemWrite8(cpu->R16.SP,cpu->R8.B);
-                GB_CPUClockCounterAdd(4);
-                cpu->R16.SP--;
-                cpu->R16.SP &= 0xFFFF;
-                GB_MemWrite8(cpu->R16.SP,cpu->R8.C);
-                GB_CPUClockCounterAdd(8);
+                gb_push_r16(cpu->R8.B,cpu->R8.C);
                 break;
             case 0xC6: //ADD A,n - 2
             {
@@ -1758,35 +1656,10 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 break;
             }
             case 0xC7: //RST 0x00 - 4
-                GB_CPUClockCounterAdd(4);
-                cpu->R16.SP --;
-                cpu->R16.SP &= 0xFFFF;
-                GB_MemWrite8(cpu->R16.SP,cpu->R8.PCH);
-                GB_CPUClockCounterAdd(4);
-                cpu->R16.SP --;
-                cpu->R16.SP &= 0xFFFF;
-                GB_MemWrite8(cpu->R16.SP,cpu->R8.PCL);
-                GB_CPUClockCounterAdd(4);
-                cpu->R16.PC = 0x0000;
-                GB_CPUClockCounterAdd(4);
+                gb_rst_nnnn(0x0000);
                 break;
             case 0xC8: //RET Z - 5/2
-                if(cpu->F.Z)
-                {
-                    GB_CPUClockCounterAdd(4);
-                    u32 temp = GB_MemRead8(cpu->R16.SP++);
-                    cpu->R16.SP &= 0xFFFF;
-                    GB_CPUClockCounterAdd(4);
-                    temp |= ( (u32)GB_MemRead8(cpu->R16.SP++) ) << 8;
-                    cpu->R16.SP &= 0xFFFF;
-                    GB_CPUClockCounterAdd(4);
-                    cpu->R16.PC = temp;
-                    GB_CPUClockCounterAdd(8);
-                }
-                else
-                {
-                    GB_CPUClockCounterAdd(8);
-                }
+                gb_ret_cond_nn(cpu->F.Z);
                 break;
             case 0xC9: //RET - 4
             {
@@ -1802,22 +1675,7 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 break;
             }
             case 0xCA: //JP Z,nn - 4/3
-                if(cpu->F.Z)
-                {
-                    GB_CPUClockCounterAdd(4);
-                    u32 temp = GB_MemRead8(cpu->R16.PC++);
-                    GB_CPUClockCounterAdd(4);
-                    temp |= ( (u32)GB_MemRead8(cpu->R16.PC++) ) << 8;
-                    GB_CPUClockCounterAdd(4);
-                    cpu->R16.PC = temp;
-                    GB_CPUClockCounterAdd(4);
-                }
-                else
-                {
-                    cpu->R16.PC += 2;
-                    cpu->R16.PC &= 0xFFFF;
-                    GB_CPUClockCounterAdd(12);
-                }
+                gb_jp_cond_nn(cpu->F.Z);
                 break;
             case 0xCB:
                 GB_CPUClockCounterAdd(4);
@@ -1826,48 +1684,12 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
 
                 switch(opcode)
                 {
-                    case 0x00: //RLC B - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.B & 0x80) != 0;
-                        cpu->R8.B = (cpu->R8.B << 1) | cpu->F.C;
-                        cpu->F.Z = (cpu->R8.B == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x01: //RLC C - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.C & 0x80) != 0;
-                        cpu->R8.C = (cpu->R8.C << 1) | cpu->F.C;
-                        cpu->F.Z = (cpu->R8.C == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x02: //RLC D - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.D & 0x80) != 0;
-                        cpu->R8.D = (cpu->R8.D << 1) | cpu->F.C;
-                        cpu->F.Z = (cpu->R8.D == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x03: //RLC E - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.E & 0x80) != 0;
-                        cpu->R8.E = (cpu->R8.E << 1) | cpu->F.C;
-                        cpu->F.Z = (cpu->R8.E == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x04: //RLC H - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.H & 0x80) != 0;
-                        cpu->R8.H = (cpu->R8.H << 1) | cpu->F.C;
-                        cpu->F.Z = (cpu->R8.H == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x05: //RLC L - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.L & 0x80) != 0;
-                        cpu->R8.L = (cpu->R8.L << 1) | cpu->F.C;
-                        cpu->F.Z = (cpu->R8.L == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
+                    case 0x00: gb_rlc_r8(cpu->R8.B); break; //RLC B - 2
+                    case 0x01: gb_rlc_r8(cpu->R8.C); break; //RLC C - 2
+                    case 0x02: gb_rlc_r8(cpu->R8.D); break; //RLC D - 2
+                    case 0x03: gb_rlc_r8(cpu->R8.E); break; //RLC E - 2
+                    case 0x04: gb_rlc_r8(cpu->R8.H); break; //RLC H - 2
+                    case 0x05: gb_rlc_r8(cpu->R8.L); break; //RLC L - 2
                     case 0x06: //RLC (HL) - 4
                     {
                         GB_CPUClockCounterAdd(4);
@@ -1881,56 +1703,14 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                         GB_CPUClockCounterAdd(4);
                         break;
                     }
-                    case 0x07: //RLC A - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.A & 0x80) != 0;
-                        cpu->R8.A = (cpu->R8.A << 1) | cpu->F.C;
-                        cpu->F.Z = (cpu->R8.A == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
+                    case 0x07: gb_rlc_r8(cpu->R8.A); break; //RLC A - 2
 
-                    case 0x08: //RRC B - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.B & 0x01) != 0;
-                        cpu->R8.B = (cpu->R8.B >> 1) | (cpu->F.C << 7);
-                        cpu->F.Z = (cpu->R8.B == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x09: //RRC C - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.C & 0x01) != 0;
-                        cpu->R8.C = (cpu->R8.C >> 1) | (cpu->F.C << 7);
-                        cpu->F.Z = (cpu->R8.C == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x0A: //RRC D - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.D & 0x01) != 0;
-                        cpu->R8.D = (cpu->R8.D >> 1) | (cpu->F.C << 7);
-                        cpu->F.Z = (cpu->R8.D == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x0B: //RRC E - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.E & 0x01) != 0;
-                        cpu->R8.E = (cpu->R8.E >> 1) | (cpu->F.C << 7);
-                        cpu->F.Z = (cpu->R8.E == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x0C: //RRC H - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.H & 0x01) != 0;
-                        cpu->R8.H = (cpu->R8.H >> 1) | (cpu->F.C << 7);
-                        cpu->F.Z = (cpu->R8.H == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x0D: //RRC L - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.L & 0x01) != 0;
-                        cpu->R8.L = (cpu->R8.L >> 1) | (cpu->F.C << 7);
-                        cpu->F.Z = (cpu->R8.L == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
+                    case 0x08: gb_rrc_r8(cpu->R8.B); break; //RRC B - 2
+                    case 0x09: gb_rrc_r8(cpu->R8.C); break; //RRC C - 2
+                    case 0x0A: gb_rrc_r8(cpu->R8.D); break; //RRC D - 2
+                    case 0x0B: gb_rrc_r8(cpu->R8.E); break; //RRC E - 2
+                    case 0x0C: gb_rrc_r8(cpu->R8.H); break; //RRC H - 2
+                    case 0x0D: gb_rrc_r8(cpu->R8.L); break; //RRC L - 2
                     case 0x0E: //RRC (HL) - 4
                     {
                         GB_CPUClockCounterAdd(4);
@@ -1944,74 +1724,14 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                         GB_CPUClockCounterAdd(4);
                         break;
                     }
-                    case 0x0F: //RRC A - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.A & 0x01) != 0;
-                        cpu->R8.A = (cpu->R8.A >> 1) | (cpu->F.C << 7);
-                        cpu->F.Z = (cpu->R8.A == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
+                    case 0x0F: gb_rrc_r8(cpu->R8.A); break; //RRC A - 2
 
-                    case 0x10: //RL B - 2
-                    {
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        u32 temp = cpu->F.C; //old carry flag
-                        cpu->F.C = (cpu->R8.B & 0x80) != 0;
-                        cpu->R8.B = (cpu->R8.B << 1) | temp;
-                        cpu->F.Z = (cpu->R8.B == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    }
-                    case 0x11: //RL C - 2
-                    {
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        u32 temp = cpu->F.C; //old carry flag
-                        cpu->F.C = (cpu->R8.C & 0x80) != 0;
-                        cpu->R8.C = (cpu->R8.C << 1) | temp;
-                        cpu->F.Z = (cpu->R8.C == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    }
-                    case 0x12: //RL D - 2
-                    {
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        u32 temp = cpu->F.C; //old carry flag
-                        cpu->F.C = (cpu->R8.D & 0x80) != 0;
-                        cpu->R8.D = (cpu->R8.D << 1) | temp;
-                        cpu->F.Z = (cpu->R8.D == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    }
-                    case 0x13: //RL E - 2
-                    {
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        u32 temp = cpu->F.C; //old carry flag
-                        cpu->F.C = (cpu->R8.E & 0x80) != 0;
-                        cpu->R8.E = (cpu->R8.E << 1) | temp;
-                        cpu->F.Z = (cpu->R8.E == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    }
-                    case 0x14: //RL H - 2
-                    {
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        u32 temp = cpu->F.C; //old carry flag
-                        cpu->F.C = (cpu->R8.H & 0x80) != 0;
-                        cpu->R8.H = (cpu->R8.H << 1) | temp;
-                        cpu->F.Z = (cpu->R8.H == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    }
-                    case 0x15: //RL L - 2
-                    {
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        u32 temp = cpu->F.C; //old carry flag
-                        cpu->F.C = (cpu->R8.L & 0x80) != 0;
-                        cpu->R8.L = (cpu->R8.L << 1) | temp;
-                        cpu->F.Z = (cpu->R8.L == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    }
+                    case 0x10: gb_rl_r8(cpu->R8.B); break; //RL B - 2
+                    case 0x11: gb_rl_r8(cpu->R8.C); break; //RL C - 2
+                    case 0x12: gb_rl_r8(cpu->R8.D); break; //RL D - 2
+                    case 0x13: gb_rl_r8(cpu->R8.E); break; //RL E - 2
+                    case 0x14: gb_rl_r8(cpu->R8.H); break; //RL H - 2
+                    case 0x15: gb_rl_r8(cpu->R8.L); break; //RL L - 2
                     case 0x16: //RL (HL) - 4
                     {
                         GB_CPUClockCounterAdd(4);
@@ -2026,77 +1746,14 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                         GB_CPUClockCounterAdd(4);
                         break;
                     }
-                    case 0x17: //RL A - 2
-                    {
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        u32 temp = cpu->F.C; //old carry flag
-                        cpu->F.C = (cpu->R8.A & 0x80) != 0;
-                        cpu->R8.A = (cpu->R8.A << 1) | temp;
-                        cpu->F.Z = (cpu->R8.A == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    }
+                    case 0x17: gb_rl_r8(cpu->R8.A); break; //RL A - 2
 
-                    case 0x18: //RR B - 2
-                    {
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        u32 temp = cpu->F.C; //old carry flag
-                        cpu->F.C = (cpu->R8.B & 0x01) != 0;
-                        cpu->R8.B = (cpu->R8.B >> 1) | (temp << 7);
-                        cpu->F.Z = (cpu->R8.B == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    }
-                    case 0x19: //RR C - 2
-                    {
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        u32 temp = cpu->F.C; //old carry flag
-                        cpu->F.C = (cpu->R8.C & 0x01) != 0;
-                        cpu->R8.C = (cpu->R8.C >> 1) | (temp << 7);
-                        cpu->F.Z = (cpu->R8.C == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    }
-                    case 0x1A: //RR D - 2
-                    {
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        u32 temp = cpu->F.C; //old carry flag
-                        cpu->F.C = (cpu->R8.D & 0x01) != 0;
-                        cpu->R8.D = (cpu->R8.D >> 1) | (temp << 7);
-                        cpu->F.Z = (cpu->R8.D == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    }
-                    case 0x1B: //RR E - 2
-                    {
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        u32 temp = cpu->F.C; //old carry flag
-                        cpu->F.C = (cpu->R8.E & 0x01) != 0;
-                        cpu->R8.E = (cpu->R8.E >> 1) | (temp << 7);
-                        cpu->F.Z = (cpu->R8.E == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    }
-                    case 0x1C: //RR H - 2
-                    {
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        u32 temp = cpu->F.C; //old carry flag
-                        cpu->F.C = (cpu->R8.H & 0x01) != 0;
-                        cpu->R8.H = (cpu->R8.H >> 1) | (temp << 7);
-                        cpu->F.Z = (cpu->R8.H == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    }
-                    case 0x1D: //RR L - 2
-                    {
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        u32 temp = cpu->F.C; //old carry flag
-                        cpu->F.C = (cpu->R8.L & 0x01) != 0;
-                        cpu->R8.L = (cpu->R8.L >> 1) | (temp << 7);
-                        cpu->F.Z = (cpu->R8.L == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    }
+                    case 0x18: gb_rr_r8(cpu->R8.B); break; //RR B - 2
+                    case 0x19: gb_rr_r8(cpu->R8.C); break; //RR C - 2
+                    case 0x1A: gb_rr_r8(cpu->R8.D); break; //RR D - 2
+                    case 0x1B: gb_rr_r8(cpu->R8.E); break; //RR E - 2
+                    case 0x1C: gb_rr_r8(cpu->R8.H); break; //RR H - 2
+                    case 0x1D: gb_rr_r8(cpu->R8.L); break; //RR L - 2
                     case 0x1E: //RR (HL) - 4
                     {
                         GB_CPUClockCounterAdd(4);
@@ -2111,59 +1768,14 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                         GB_CPUClockCounterAdd(4);
                         break;
                     }
-                    case 0x1F: //RR A - 2
-                    {
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        u32 temp = cpu->F.C; //old carry flag
-                        cpu->F.C = (cpu->R8.A & 0x01) != 0;
-                        cpu->R8.A = (cpu->R8.A >> 1) | (temp << 7);
-                        cpu->F.Z = (cpu->R8.A == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    }
+                    case 0x1F: gb_rr_r8(cpu->R8.A); break; //RR A - 2
 
-                    case 0x20: //SLA B - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.B & 0x80) != 0;
-                        cpu->R8.B = cpu->R8.B << 1;
-                        cpu->F.Z = (cpu->R8.B == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x21: //SLA C - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.C & 0x80) != 0;
-                        cpu->R8.C = cpu->R8.C << 1;
-                        cpu->F.Z = (cpu->R8.C == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x22: //SLA D - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.D & 0x80) != 0;
-                        cpu->R8.D = cpu->R8.D << 1;
-                        cpu->F.Z = (cpu->R8.D == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x23: //SLA E - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.E & 0x80) != 0;
-                        cpu->R8.E = cpu->R8.E << 1;
-                        cpu->F.Z = (cpu->R8.E == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x24: //SLA H - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.H & 0x80) != 0;
-                        cpu->R8.H = cpu->R8.H << 1;
-                        cpu->F.Z = (cpu->R8.H == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x25: //SLA L - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.L & 0x80) != 0;
-                        cpu->R8.L = cpu->R8.L << 1;
-                        cpu->F.Z = (cpu->R8.L == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
+                    case 0x20: gb_sla_r8(cpu->R8.B); break; //SLA B - 2
+                    case 0x21: gb_sla_r8(cpu->R8.C); break; //SLA C - 2
+                    case 0x22: gb_sla_r8(cpu->R8.D); break; //SLA D - 2
+                    case 0x23: gb_sla_r8(cpu->R8.E); break; //SLA E - 2
+                    case 0x24: gb_sla_r8(cpu->R8.H); break; //SLA H - 2
+                    case 0x25: gb_sla_r8(cpu->R8.L); break; //SLA L - 2
                     case 0x26: //SLA (HL) - 4
                     {
                         GB_CPUClockCounterAdd(4);
@@ -2177,56 +1789,14 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                         GB_CPUClockCounterAdd(4);
                         break;
                     }
-                    case 0x27: //SLA A - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.A & 0x80) != 0;
-                        cpu->R8.A = cpu->R8.A << 1;
-                        cpu->F.Z = (cpu->R8.A == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
+                    case 0x27: gb_sla_r8(cpu->R8.A); break; //SLA A - 2
 
-                    case 0x28: //SRA B - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.B & 0x01) != 0;
-                        cpu->R8.B = (cpu->R8.B & 0x80) | (cpu->R8.B >> 1);
-                        cpu->F.Z = (cpu->R8.B == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x29: //SRA C - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.C & 0x01) != 0;
-                        cpu->R8.C = (cpu->R8.C & 0x80) | (cpu->R8.C >> 1);
-                        cpu->F.Z = (cpu->R8.C == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x2A: //SRA D - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.D & 0x01) != 0;
-                        cpu->R8.D = (cpu->R8.D & 0x80) | (cpu->R8.D >> 1);
-                        cpu->F.Z = (cpu->R8.D == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x2B: //SRA E - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.E & 0x01) != 0;
-                        cpu->R8.E = (cpu->R8.E & 0x80) | (cpu->R8.E >> 1);
-                        cpu->F.Z = (cpu->R8.E == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x2C: //SRA H - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.H & 0x01) != 0;
-                        cpu->R8.H = (cpu->R8.H & 0x80) | (cpu->R8.H >> 1);
-                        cpu->F.Z = (cpu->R8.H == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x2D: //SRA L - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.L & 0x01) != 0;
-                        cpu->R8.L = (cpu->R8.L & 0x80) | (cpu->R8.L >> 1);
-                        cpu->F.Z = (cpu->R8.L == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
+                    case 0x28: gb_sra_r8(cpu->R8.B); break; //SRA B - 2
+                    case 0x29: gb_sra_r8(cpu->R8.C); break; //SRA C - 2
+                    case 0x2A: gb_sra_r8(cpu->R8.D); break; //SRA D - 2
+                    case 0x2B: gb_sra_r8(cpu->R8.E); break; //SRA E - 2
+                    case 0x2C: gb_sra_r8(cpu->R8.H); break; //SRA H - 2
+                    case 0x2D: gb_sra_r8(cpu->R8.L); break; //SRA L - 2
                     case 0x2E: //SRA (HL) - 4
                     {
                         GB_CPUClockCounterAdd(4);
@@ -2240,50 +1810,14 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                         GB_CPUClockCounterAdd(4);
                         break;
                     }
-                    case 0x2F: //SRA A - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.A & 0x01) != 0;
-                        cpu->R8.A = (cpu->R8.A & 0x80) | (cpu->R8.A >> 1);
-                        cpu->F.Z = (cpu->R8.A == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
+                    case 0x2F: gb_sra_r8(cpu->R8.A); break; //SRA A - 2
 
-                    case 0x30: //SWAP B - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY|F_CARRY);
-                        cpu->R8.B = ((cpu->R8.B >> 4) | (cpu->R8.B << 4));
-                        cpu->F.Z = (cpu->R8.B == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x31: //SWAP C - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY|F_CARRY);
-                        cpu->R8.C = ((cpu->R8.C >> 4) | (cpu->R8.C << 4));
-                        cpu->F.Z = (cpu->R8.C == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x32: //SWAP D - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY|F_CARRY);
-                        cpu->R8.D = ((cpu->R8.D >> 4) | (cpu->R8.D << 4));
-                        cpu->F.Z = (cpu->R8.D == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x33: //SWAP E - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY|F_CARRY);
-                        cpu->R8.E = ((cpu->R8.E >> 4) | (cpu->R8.E << 4));
-                        cpu->F.Z = (cpu->R8.E == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x34: //SWAP H - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY|F_CARRY);
-                        cpu->R8.H = ((cpu->R8.H >> 4) | (cpu->R8.H << 4));
-                        cpu->F.Z = (cpu->R8.H == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x35: //SWAP L - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY|F_CARRY);
-                        cpu->R8.L = ((cpu->R8.L >> 4) | (cpu->R8.L << 4));
-                        cpu->F.Z = (cpu->R8.L == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
+                    case 0x30: gb_swap_r8(cpu->R8.B); break; //SWAP B - 2
+                    case 0x31: gb_swap_r8(cpu->R8.C); break; //SWAP C - 2
+                    case 0x32: gb_swap_r8(cpu->R8.D); break; //SWAP D - 2
+                    case 0x33: gb_swap_r8(cpu->R8.E); break; //SWAP E - 2
+                    case 0x34: gb_swap_r8(cpu->R8.H); break; //SWAP H - 2
+                    case 0x35: gb_swap_r8(cpu->R8.L); break; //SWAP L - 2
                     case 0x36: //SWAP (HL) - 4
                     {
                         GB_CPUClockCounterAdd(4);
@@ -2296,55 +1830,14 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                         GB_CPUClockCounterAdd(4);
                         break;
                     }
-                    case 0x37: //SWAP A - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY|F_CARRY);
-                        cpu->R8.A = ((cpu->R8.A & 0xF0) >> 4) | ((cpu->R8.A & 0x0F) << 4);
-                        cpu->F.Z = (cpu->R8.A == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
+                    case 0x37: gb_swap_r8(cpu->R8.A); break; //SWAP A - 2
 
-                    case 0x38: //SRL B - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.B & 0x01) != 0;
-                        cpu->R8.B = cpu->R8.B >> 1;
-                        cpu->F.Z = (cpu->R8.B == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x39: //SRL C - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.C & 0x01) != 0;
-                        cpu->R8.C = cpu->R8.C >> 1;
-                        cpu->F.Z = (cpu->R8.C == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x3A: //SRL D - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.D & 0x01) != 0;
-                        cpu->R8.D = cpu->R8.D >> 1;
-                        cpu->F.Z = (cpu->R8.D == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x3B: //SRL E - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.E & 0x01) != 0;
-                        cpu->R8.E = cpu->R8.E >> 1;
-                        cpu->F.Z = (cpu->R8.E == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x3C: //SRL H - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.H & 0x01) != 0;
-                        cpu->R8.H = cpu->R8.H >> 1;
-                        cpu->F.Z = (cpu->R8.H == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x3D: //SRL L - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.L & 0x01) != 0;
-                        cpu->R8.L = cpu->R8.L >> 1;
-                        cpu->F.Z = (cpu->R8.L == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
+                    case 0x38: gb_srl_r8(cpu->R8.B); break; //SRL B - 2
+                    case 0x39: gb_srl_r8(cpu->R8.C); break; //SRL C - 2
+                    case 0x3A: gb_srl_r8(cpu->R8.D); break; //SRL D - 2
+                    case 0x3B: gb_srl_r8(cpu->R8.E); break; //SRL E - 2
+                    case 0x3C: gb_srl_r8(cpu->R8.H); break; //SRL H - 2
+                    case 0x3D: gb_srl_r8(cpu->R8.L); break; //SRL L - 2
                     case 0x3E: //SRL (HL) - 4
                     {
                         GB_CPUClockCounterAdd(4);
@@ -2358,1036 +1851,235 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                         GB_CPUClockCounterAdd(4);
                         break;
                     }
-                    case 0x3F: //SRL A - 2
-                        cpu->R16.AF &= ~(F_SUBTRACT|F_HALFCARRY);
-                        cpu->F.C = (cpu->R8.A & 0x01) != 0;
-                        cpu->R8.A = cpu->R8.A >> 1;
-                        cpu->F.Z = (cpu->R8.A == 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
+                    case 0x3F: gb_srl_r8(cpu->R8.A); break; //SRL A - 2
 
-                    case 0x40: //BIT 0,B - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.B & (1<<0)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x41: //BIT 0,C - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.C & (1<<0)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x42: //BIT 0,D - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.D & (1<<0)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x43: //BIT 0,E - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.E & (1<<0)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x44: //BIT 0,H - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.H & (1<<0)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x45: //BIT 0,L - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.L & (1<<0)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x46: //BIT 0,(HL) - 3
-                        GB_CPUClockCounterAdd(4);
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (GB_MemRead8(cpu->R16.HL) & (1<<0)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x47: //BIT 0,A - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.A & (1<<0)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
+                    case 0x40: gb_bit_n_r8(0,cpu->R8.B); break; //BIT 0,B - 2
+                    case 0x41: gb_bit_n_r8(0,cpu->R8.C); break; //BIT 0,C - 2
+                    case 0x42: gb_bit_n_r8(0,cpu->R8.D); break; //BIT 0,D - 2
+                    case 0x43: gb_bit_n_r8(0,cpu->R8.E); break; //BIT 0,E - 2
+                    case 0x44: gb_bit_n_r8(0,cpu->R8.H); break; //BIT 0,H - 2
+                    case 0x45: gb_bit_n_r8(0,cpu->R8.L); break; //BIT 0,L - 2
+                    case 0x46: gb_bit_n_ptr_hl(0); break; //BIT 0,(HL) - 3
+                    case 0x47: gb_bit_n_r8(0,cpu->R8.A); break; //BIT 0,A - 2
 
-                    case 0x48: //BIT 1,B - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.B & (1<<1)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x49: //BIT 1,C - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.C & (1<<1)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x4A: //BIT 1,D - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.D & (1<<1)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x4B: //BIT 1,E - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.E & (1<<1)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x4C: //BIT 1,H - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.H & (1<<1)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x4D: //BIT 1,L - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.L & (1<<1)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x4E: //BIT 1,(HL) - 3
-                        GB_CPUClockCounterAdd(4);
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (GB_MemRead8(cpu->R16.HL) & (1<<1)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x4F: //BIT 1,A - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.A & (1<<1)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x50: //BIT 2,B - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.B & (1<<2)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x51: //BIT 2,C - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.C & (1<<2)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x52: //BIT 2,D - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.D & (1<<2)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x53: //BIT 2,E - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.E & (1<<2)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x54: //BIT 2,H - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.H & (1<<2)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x55: //BIT 2,L - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.L & (1<<2)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x56: //BIT 2,(HL) - 3
-                        GB_CPUClockCounterAdd(4);
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (GB_MemRead8(cpu->R16.HL) & (1<<2)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x57: //BIT 2,A - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.A & (1<<2)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x58: //BIT 3,B - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.B & (1<<3)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x59: //BIT 3,C - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.C & (1<<3)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x5A: //BIT 3,D - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.D & (1<<3)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x5B: //BIT 3,E - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.E & (1<<3)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x5C: //BIT 3,H - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.H & (1<<3)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x5D: //BIT 3,L - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.L & (1<<3)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x5E: //BIT 3,(HL) - 3
-                        GB_CPUClockCounterAdd(4);
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (GB_MemRead8(cpu->R16.HL) & (1<<3)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x5F: //BIT 3,A - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.A & (1<<3)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x60: //BIT 4,B - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.B & (1<<4)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x61: //BIT 4,C - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.C & (1<<4)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x62: //BIT 4,D - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.D & (1<<4)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x63: //BIT 4,E - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.E & (1<<4)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x64: //BIT 4,H - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.H & (1<<4)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x65: //BIT 4,L - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.L & (1<<4)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x66: //BIT 4,(HL) - 3
-                        GB_CPUClockCounterAdd(4);
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (GB_MemRead8(cpu->R16.HL) & (1<<4)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x67: //BIT 4,A - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.A & (1<<4)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x68: //BIT 5,B - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.B & (1<<5)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x69: //BIT 5,C - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.C & (1<<5)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x6A: //BIT 5,D - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.D & (1<<5)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x6B: //BIT 5,E - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.E & (1<<5)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x6C: //BIT 5,H - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.H & (1<<5)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x6D: //BIT 5,L - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.L & (1<<5)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x6E: //BIT 5,(HL) - 3
-                        GB_CPUClockCounterAdd(4);
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (GB_MemRead8(cpu->R16.HL) & (1<<5)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x6F: //BIT 5,A - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.A & (1<<5)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x70: //BIT 6,B - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.B & (1<<6)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x71: //BIT 6,C - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.C & (1<<6)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x72: //BIT 6,D - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.D & (1<<6)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x73: //BIT 6,E - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.E & (1<<6)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x74: //BIT 6,H - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.H & (1<<6)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x75: //BIT 6,L - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.L & (1<<6)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x76: //BIT 6,(HL) - 3
-                        GB_CPUClockCounterAdd(4);
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (GB_MemRead8(cpu->R16.HL) & (1<<6)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x77: //BIT 6,A - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.A & (1<<6)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x78: //BIT 7,B - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.B & (1<<7)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x79: //BIT 7,C - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.C & (1<<7)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x7A: //BIT 7,D - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.D & (1<<7)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x7B: //BIT 7,E - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.E & (1<<7)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x7C: //BIT 7,H - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.H & (1<<7)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x7D: //BIT 7,L - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.L & (1<<7)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x7E: //BIT 7,(HL) - 3
-                        GB_CPUClockCounterAdd(4);
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (GB_MemRead8(cpu->R16.HL) & (1<<7)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x7F: //BIT 7,A - 2
-                        cpu->R16.AF &= ~F_SUBTRACT;
-                        cpu->R16.AF |= F_HALFCARRY;
-                        cpu->F.Z = (cpu->R8.A & (1<<7)) == 0;
-                        GB_CPUClockCounterAdd(4);
-                        break;
+                    case 0x48: gb_bit_n_r8(1,cpu->R8.B); break; //BIT 1,B - 2
+                    case 0x49: gb_bit_n_r8(1,cpu->R8.C); break; //BIT 1,C - 2
+                    case 0x4A: gb_bit_n_r8(1,cpu->R8.D); break; //BIT 1,D - 2
+                    case 0x4B: gb_bit_n_r8(1,cpu->R8.E); break; //BIT 1,E - 2
+                    case 0x4C: gb_bit_n_r8(1,cpu->R8.H); break; //BIT 1,H - 2
+                    case 0x4D: gb_bit_n_r8(1,cpu->R8.L); break; //BIT 1,L - 2
+                    case 0x4E: gb_bit_n_ptr_hl(1); break; //BIT 1,(HL) - 3
+                    case 0x4F: gb_bit_n_r8(1,cpu->R8.A); break; //BIT 1,A - 2
 
-                    case 0x80: //RES 0,B - 2
-                        cpu->R8.B &= ~(1 << 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x81: //RES 0,C - 2
-                        cpu->R8.C &= ~(1 << 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x82: //RES 0,D - 2
-                        cpu->R8.D &= ~(1 << 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x83: //RES 0,E - 2
-                        cpu->R8.E &= ~(1 << 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x84: //RES 0,H - 2
-                        cpu->R8.H &= ~(1 << 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x85: //RES 0,L - 2
-                        cpu->R8.L &= ~(1 << 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x86: //RES 0,(HL) - 4
-                    {
-                        GB_CPUClockCounterAdd(4);
-                        u32 temp = GB_MemRead8(cpu->R16.HL);
-                        GB_CPUClockCounterAdd(4);
-                        GB_MemWrite8(cpu->R16.HL, temp & (~(1 << 0)));
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    }
-                    case 0x87: //RES 0,A - 2
-                        cpu->R8.A &= ~(1 << 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x88: //RES 1,B - 2
-                        cpu->R8.B &= ~(1 << 1);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x89: //RES 1,C - 2
-                        cpu->R8.C &= ~(1 << 1);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x8A: //RES 1,D - 2
-                        cpu->R8.D &= ~(1 << 1);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x8B: //RES 1,E - 2
-                        cpu->R8.E &= ~(1 << 1);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x8C: //RES 1,H - 2
-                        cpu->R8.H &= ~(1 << 1);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x8D: //RES 1,L - 2
-                        cpu->R8.L &= ~(1 << 1);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x8E: //RES 1,(HL) - 4
-                    {
-                        GB_CPUClockCounterAdd(4);
-                        u32 temp = GB_MemRead8(cpu->R16.HL);
-                        GB_CPUClockCounterAdd(4);
-                        GB_MemWrite8(cpu->R16.HL, temp & (~(1 << 1)));
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    }
-                    case 0x8F: //RES 1,A - 2
-                        cpu->R8.A &= ~(1 << 1);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x90: //RES 2,B - 2
-                        cpu->R8.B &= ~(1 << 2);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x91: //RES 2,C - 2
-                        cpu->R8.C &= ~(1 << 2);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x92: //RES 2,D - 2
-                        cpu->R8.D &= ~(1 << 2);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x93: //RES 2,E - 2
-                        cpu->R8.E &= ~(1 << 2);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x94: //RES 2,H - 2
-                        cpu->R8.H &= ~(1 << 2);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x95: //RES 2,L - 2
-                        cpu->R8.L &= ~(1 << 2);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x96: //RES 2,(HL) - 4
-                    {
-                        GB_CPUClockCounterAdd(4);
-                        u32 temp = GB_MemRead8(cpu->R16.HL);
-                        GB_CPUClockCounterAdd(4);
-                        GB_MemWrite8(cpu->R16.HL, temp & (~(1 << 2)));
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    }
-                    case 0x97: //RES 2,A - 2
-                        cpu->R8.A &= ~(1 << 2);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x98: //RES 3,B - 2
-                        cpu->R8.B &= ~(1 << 3);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x99: //RES 3,C - 2
-                        cpu->R8.C &= ~(1 << 3);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x9A: //RES 3,D - 2
-                        cpu->R8.D &= ~(1 << 3);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x9B: //RES 3,E - 2
-                        cpu->R8.E &= ~(1 << 3);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x9C: //RES 3,H - 2
-                        cpu->R8.H &= ~(1 << 3);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x9D: //RES 3,L - 2
-                        cpu->R8.L &= ~(1 << 3);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0x9E: //RES 3,(HL) - 4
-                    {
-                        GB_CPUClockCounterAdd(4);
-                        u32 temp = GB_MemRead8(cpu->R16.HL);
-                        GB_CPUClockCounterAdd(4);
-                        GB_MemWrite8(cpu->R16.HL, temp & (~(1 << 3)));
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    }
-                    case 0x9F: //RES 3,A - 2
-                        cpu->R8.A &= ~(1 << 3);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xA0: //RES 4,B - 2
-                        cpu->R8.B &= ~(1 << 4);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xA1: //RES 4,C - 2
-                        cpu->R8.C &= ~(1 << 4);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xA2: //RES 4,D - 2
-                        cpu->R8.D &= ~(1 << 4);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xA3: //RES 4,E - 2
-                        cpu->R8.E &= ~(1 << 4);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xA4: //RES 4,H - 2
-                        cpu->R8.H &= ~(1 << 4);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xA5: //RES 4,L - 2
-                        cpu->R8.L &= ~(1 << 4);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xA6: //RES 4,(HL) - 4
-                    {
-                        GB_CPUClockCounterAdd(4);
-                        u32 temp = GB_MemRead8(cpu->R16.HL);
-                        GB_CPUClockCounterAdd(4);
-                        GB_MemWrite8(cpu->R16.HL, temp & (~(1 << 4)));
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    }
-                    case 0xA7: //RES 4,A - 2
-                        cpu->R8.A &= ~(1 << 4);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xA8: //RES 5,B - 2
-                        cpu->R8.B &= ~(1 << 5);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xA9: //RES 5,C - 2
-                        cpu->R8.C &= ~(1 << 5);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xAA: //RES 5,D - 2
-                        cpu->R8.D &= ~(1 << 5);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xAB: //RES 5,E - 2
-                        cpu->R8.E &= ~(1 << 5);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xAC: //RES 5,H - 2
-                        cpu->R8.H &= ~(1 << 5);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xAD: //RES 5,L - 2
-                        cpu->R8.L &= ~(1 << 5);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xAE: //RES 5,(HL) - 4
-                    {
-                        GB_CPUClockCounterAdd(4);
-                        u32 temp = GB_MemRead8(cpu->R16.HL);
-                        GB_CPUClockCounterAdd(4);
-                        GB_MemWrite8(cpu->R16.HL, temp & (~(1 << 5)));
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    }
-                    case 0xAF: //RES 5,A - 2
-                        cpu->R8.A &= ~(1 << 5);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xB0: //RES 6,B - 2
-                        cpu->R8.B &= ~(1 << 6);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xB1: //RES 6,C - 2
-                        cpu->R8.C &= ~(1 << 6);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xB2: //RES 6,D - 2
-                        cpu->R8.D &= ~(1 << 6);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xB3: //RES 6,E - 2
-                        cpu->R8.E &= ~(1 << 6);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xB4: //RES 6,H - 2
-                        cpu->R8.H &= ~(1 << 6);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xB5: //RES 6,L - 2
-                        cpu->R8.L &= ~(1 << 6);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xB6: //RES 6,(HL) - 4
-                    {
-                        GB_CPUClockCounterAdd(4);
-                        u32 temp = GB_MemRead8(cpu->R16.HL);
-                        GB_CPUClockCounterAdd(4);
-                        GB_MemWrite8(cpu->R16.HL, temp & (~(1 << 6)));
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    }
-                    case 0xB7: //RES 6,A - 2
-                        cpu->R8.A &= ~(1 << 6);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xB8: //RES 7,B - 2
-                        cpu->R8.B &= ~(1 << 7);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xB9: //RES 7,C - 2
-                        cpu->R8.C &= ~(1 << 7);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xBA: //RES 7,D - 2
-                        cpu->R8.D &= ~(1 << 7);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xBB: //RES 7,E - 2
-                        cpu->R8.E &= ~(1 << 7);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xBC: //RES 7,H - 2
-                        cpu->R8.H &= ~(1 << 7);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xBD: //RES 7,L - 2
-                        cpu->R8.L &= ~(1 << 7);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xBE: //RES 7,(HL) - 4
-                    {
-                        GB_CPUClockCounterAdd(4);
-                        u32 temp = GB_MemRead8(cpu->R16.HL);
-                        GB_CPUClockCounterAdd(4);
-                        GB_MemWrite8(cpu->R16.HL, temp & (~(1 << 7)));
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    }
-                    case 0xBF: //RES 7,A - 2
-                        cpu->R8.A &= ~(1 << 7);
-                        GB_CPUClockCounterAdd(4);
-                        break;
+                    case 0x50: gb_bit_n_r8(2,cpu->R8.B); break; //BIT 2,B - 2
+                    case 0x51: gb_bit_n_r8(2,cpu->R8.C); break; //BIT 2,C - 2
+                    case 0x52: gb_bit_n_r8(2,cpu->R8.D); break; //BIT 2,D - 2
+                    case 0x53: gb_bit_n_r8(2,cpu->R8.E); break; //BIT 2,E - 2
+                    case 0x54: gb_bit_n_r8(2,cpu->R8.H); break; //BIT 2,H - 2
+                    case 0x55: gb_bit_n_r8(2,cpu->R8.L); break; //BIT 2,L - 2
+                    case 0x56: gb_bit_n_ptr_hl(2); break; //BIT 2,(HL) - 3
+                    case 0x57: gb_bit_n_r8(2,cpu->R8.A); break; //BIT 2,A - 2
 
-                    case 0xC0: //SET 0,B - 2
-                        cpu->R8.B |= (1 << 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xC1: //SET 0,C - 2
-                        cpu->R8.C |= (1 << 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xC2: //SET 0,D - 2
-                        cpu->R8.D |= (1 << 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xC3: //SET 0,E - 2
-                        cpu->R8.E |= (1 << 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xC4: //SET 0,H - 2
-                        cpu->R8.H |= (1 << 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xC5: //SET 0,L - 2
-                        cpu->R8.L |= (1 << 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xC6: //SET 0,(HL) - 4
-                    {
-                        GB_CPUClockCounterAdd(4);
-                        u32 temp = GB_MemRead8(cpu->R16.HL);
-                        GB_CPUClockCounterAdd(4);
-                        GB_MemWrite8(cpu->R16.HL, temp | (1 << 0));
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    }
-                    case 0xC7: //SET 0,A - 2
-                        cpu->R8.A |= (1 << 0);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xC8: //SET 1,B - 2
-                        cpu->R8.B |= (1 << 1);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xC9: //SET 1,C - 2
-                        cpu->R8.C |= (1 << 1);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xCA: //SET 1,D - 2
-                        cpu->R8.D |= (1 << 1);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xCB: //SET 1,E - 2
-                        cpu->R8.E |= (1 << 1);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xCC: //SET 1,H - 2
-                        cpu->R8.H |= (1 << 1);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xCD: //SET 1,L - 2
-                        cpu->R8.L |= (1 << 1);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xCE: //SET 1,(HL) - 4
-                    {
-                        GB_CPUClockCounterAdd(4);
-                        u32 temp = GB_MemRead8(cpu->R16.HL);
-                        GB_CPUClockCounterAdd(4);
-                        GB_MemWrite8(cpu->R16.HL, temp | (1 << 1));
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    }
-                    case 0xCF: //SET 1,A - 2
-                        cpu->R8.A |= (1 << 1);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xD0: //SET 2,B - 2
-                        cpu->R8.B |= (1 << 2);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xD1: //SET 2,C - 2
-                        cpu->R8.C |= (1 << 2);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xD2: //SET 2,D - 2
-                        cpu->R8.D |= (1 << 2);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xD3: //SET 2,E - 2
-                        cpu->R8.E |= (1 << 2);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xD4: //SET 2,H - 2
-                        cpu->R8.H |= (1 << 2);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xD5: //SET 2,L - 2
-                        cpu->R8.L |= (1 << 2);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xD6: //SET 2,(HL) - 4
-                    {
-                        GB_CPUClockCounterAdd(4);
-                        u32 temp = GB_MemRead8(cpu->R16.HL);
-                        GB_CPUClockCounterAdd(4);
-                        GB_MemWrite8(cpu->R16.HL, temp | (1 << 2));
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    }
-                    case 0xD7: //SET 2,A - 2
-                        cpu->R8.A |= (1 << 2);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xD8: //SET 3,B - 2
-                        cpu->R8.B |= (1 << 3);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xD9: //SET 3,C - 2
-                        cpu->R8.C |= (1 << 3);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xDA: //SET 3,D - 2
-                        cpu->R8.D |= (1 << 3);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xDB: //SET 3,E - 2
-                        cpu->R8.E |= (1 << 3);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xDC: //SET 3,H - 2
-                        cpu->R8.H |= (1 << 3);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xDD: //SET 3,L - 2
-                        cpu->R8.L |= (1 << 3);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xDE: //SET 3,(HL) - 4
-                    {
-                        GB_CPUClockCounterAdd(4);
-                        u32 temp = GB_MemRead8(cpu->R16.HL);
-                        GB_CPUClockCounterAdd(4);
-                        GB_MemWrite8(cpu->R16.HL, temp | (1 << 3));
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    }
-                    case 0xDF: //SET 3,A - 2
-                        cpu->R8.A |= (1 << 3);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xE0: //SET 4,B - 2
-                        cpu->R8.B |= (1 << 4);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xE1: //SET 4,C - 2
-                        cpu->R8.C |= (1 << 4);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xE2: //SET 4,D - 2
-                        cpu->R8.D |= (1 << 4);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xE3: //SET 4,E - 2
-                        cpu->R8.E |= (1 << 4);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xE4: //SET 4,H - 2
-                        cpu->R8.H |= (1 << 4);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xE5: //SET 4,L - 2
-                        cpu->R8.L |= (1 << 4);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xE6: //SET 4,(HL) - 4
-                    {
-                        GB_CPUClockCounterAdd(4);
-                        u32 temp = GB_MemRead8(cpu->R16.HL);
-                        GB_CPUClockCounterAdd(4);
-                        GB_MemWrite8(cpu->R16.HL, temp | (1 << 4));
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    }
-                    case 0xE7: //SET 4,A - 2
-                        cpu->R8.A |= (1 << 4);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xE8: //SET 5,B - 2
-                        cpu->R8.B |= (1 << 5);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xE9: //SET 5,C - 2
-                        cpu->R8.C |= (1 << 5);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xEA: //SET 5,D - 2
-                        cpu->R8.D |= (1 << 5);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xEB: //SET 5,E - 2
-                        cpu->R8.E |= (1 << 5);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xEC: //SET 5,H - 2
-                        cpu->R8.H |= (1 << 5);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xED: //SET 5,L - 2
-                        cpu->R8.L |= (1 << 5);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xEE: //SET 5,(HL) - 4
-                    {
-                        GB_CPUClockCounterAdd(4);
-                        u32 temp = GB_MemRead8(cpu->R16.HL);
-                        GB_CPUClockCounterAdd(4);
-                        GB_MemWrite8(cpu->R16.HL, temp | (1 << 5));
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    }
-                    case 0xEF: //SET 5,A - 2
-                        cpu->R8.A |= (1 << 5);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xF0: //SET 6,B - 2
-                        cpu->R8.B |= (1 << 6);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xF1: //SET 6,C - 2
-                        cpu->R8.C |= (1 << 6);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xF2: //SET 6,D - 2
-                        cpu->R8.D |= (1 << 6);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xF3: //SET 6,E - 2
-                        cpu->R8.E |= (1 << 6);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xF4: //SET 6,H - 2
-                        cpu->R8.H |= (1 << 6);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xF5: //SET 6,L - 2
-                        cpu->R8.L |= (1 << 6);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xF6: //SET 6,(HL) - 4
-                    {
-                        GB_CPUClockCounterAdd(4);
-                        u32 temp = GB_MemRead8(cpu->R16.HL);
-                        GB_CPUClockCounterAdd(4);
-                        GB_MemWrite8(cpu->R16.HL, temp | (1 << 6));
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    }
-                    case 0xF7: //SET 6,A - 2
-                        cpu->R8.A |= (1 << 6);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xF8: //SET 7,B - 2
-                        cpu->R8.B |= (1 << 7);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xF9: //SET 7,C - 2
-                        cpu->R8.C |= (1 << 7);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xFA: //SET 7,D - 2
-                        cpu->R8.D |= (1 << 7);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xFB: //SET 7,E - 2
-                        cpu->R8.E |= (1 << 7);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xFC: //SET 7,H - 2
-                        cpu->R8.H |= (1 << 7);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xFD: //SET 7,L - 2
-                        cpu->R8.L |= (1 << 7);
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    case 0xFE: //SET 7,(HL) - 4
-                    {
-                        GB_CPUClockCounterAdd(4);
-                        u32 temp = GB_MemRead8(cpu->R16.HL);
-                        GB_CPUClockCounterAdd(4);
-                        GB_MemWrite8(cpu->R16.HL, temp | (1 << 7));
-                        GB_CPUClockCounterAdd(4);
-                        break;
-                    }
-                    case 0xFF: //SET 7,A - 2
-                        cpu->R8.A |= (1 << 7);
-                        GB_CPUClockCounterAdd(4);
-                        break;
+                    case 0x58: gb_bit_n_r8(3,cpu->R8.B); break; //BIT 3,B - 2
+                    case 0x59: gb_bit_n_r8(3,cpu->R8.C); break; //BIT 3,C - 2
+                    case 0x5A: gb_bit_n_r8(3,cpu->R8.D); break; //BIT 3,D - 2
+                    case 0x5B: gb_bit_n_r8(3,cpu->R8.E); break; //BIT 3,E - 2
+                    case 0x5C: gb_bit_n_r8(3,cpu->R8.H); break; //BIT 3,H - 2
+                    case 0x5D: gb_bit_n_r8(3,cpu->R8.L); break; //BIT 3,L - 2
+                    case 0x5E: gb_bit_n_ptr_hl(3); break; //BIT 3,(HL) - 3
+                    case 0x5F: gb_bit_n_r8(3,cpu->R8.A); break; //BIT 3,A - 2
+
+                    case 0x60: gb_bit_n_r8(4,cpu->R8.B); break; //BIT 4,B - 2
+                    case 0x61: gb_bit_n_r8(4,cpu->R8.C); break; //BIT 4,C - 2
+                    case 0x62: gb_bit_n_r8(4,cpu->R8.D); break; //BIT 4,D - 2
+                    case 0x63: gb_bit_n_r8(4,cpu->R8.E); break; //BIT 4,E - 2
+                    case 0x64: gb_bit_n_r8(4,cpu->R8.H); break; //BIT 4,H - 2
+                    case 0x65: gb_bit_n_r8(4,cpu->R8.L); break; //BIT 4,L - 2
+                    case 0x66: gb_bit_n_ptr_hl(4); break; //BIT 4,(HL) - 3
+                    case 0x67: gb_bit_n_r8(4,cpu->R8.A); break; //BIT 4,A - 2
+
+                    case 0x68: gb_bit_n_r8(5,cpu->R8.B); break; //BIT 5,B - 2
+                    case 0x69: gb_bit_n_r8(5,cpu->R8.C); break; //BIT 5,C - 2
+                    case 0x6A: gb_bit_n_r8(5,cpu->R8.D); break; //BIT 5,D - 2
+                    case 0x6B: gb_bit_n_r8(5,cpu->R8.E); break; //BIT 5,E - 2
+                    case 0x6C: gb_bit_n_r8(5,cpu->R8.H); break; //BIT 5,H - 2
+                    case 0x6D: gb_bit_n_r8(5,cpu->R8.L); break; //BIT 5,L - 2
+                    case 0x6E: gb_bit_n_ptr_hl(5); break; //BIT 5,(HL) - 3
+                    case 0x6F: gb_bit_n_r8(5,cpu->R8.A); break; //BIT 5,A - 2
+
+                    case 0x70: gb_bit_n_r8(6,cpu->R8.B); break; //BIT 6,B - 2
+                    case 0x71: gb_bit_n_r8(6,cpu->R8.C); break; //BIT 6,C - 2
+                    case 0x72: gb_bit_n_r8(6,cpu->R8.D); break; //BIT 6,D - 2
+                    case 0x73: gb_bit_n_r8(6,cpu->R8.E); break; //BIT 6,E - 2
+                    case 0x74: gb_bit_n_r8(6,cpu->R8.H); break; //BIT 6,H - 2
+                    case 0x75: gb_bit_n_r8(6,cpu->R8.L); break; //BIT 6,L - 2
+                    case 0x76: gb_bit_n_ptr_hl(6); break; //BIT 6,(HL) - 3
+                    case 0x77: gb_bit_n_r8(6,cpu->R8.A); break; //BIT 6,A - 2
+
+                    case 0x78: gb_bit_n_r8(7,cpu->R8.B); break; //BIT 7,B - 2
+                    case 0x79: gb_bit_n_r8(7,cpu->R8.C); break; //BIT 7,C - 2
+                    case 0x7A: gb_bit_n_r8(7,cpu->R8.D); break; //BIT 7,D - 2
+                    case 0x7B: gb_bit_n_r8(7,cpu->R8.E); break; //BIT 7,E - 2
+                    case 0x7C: gb_bit_n_r8(7,cpu->R8.H); break; //BIT 7,H - 2
+                    case 0x7D: gb_bit_n_r8(7,cpu->R8.L); break; //BIT 7,L - 2
+                    case 0x7E: gb_bit_n_ptr_hl(7); break; //BIT 7,(HL) - 3
+                    case 0x7F: gb_bit_n_r8(7,cpu->R8.A); break; //BIT 7,A - 2
+
+                    case 0x80: gb_res_n_r8(0,cpu->R8.B); break; //RES 0,B - 2
+                    case 0x81: gb_res_n_r8(0,cpu->R8.C); break; //RES 0,C - 2
+                    case 0x82: gb_res_n_r8(0,cpu->R8.D); break; //RES 0,D - 2
+                    case 0x83: gb_res_n_r8(0,cpu->R8.E); break; //RES 0,E - 2
+                    case 0x84: gb_res_n_r8(0,cpu->R8.H); break; //RES 0,H - 2
+                    case 0x85: gb_res_n_r8(0,cpu->R8.L); break; //RES 0,L - 2
+                    case 0x86: gb_res_n_ptr_hl(0); break; //RES 0,(HL) - 4
+                    case 0x87: gb_res_n_r8(0,cpu->R8.A); break; //RES 0,A - 2
+
+                    case 0x88: gb_res_n_r8(1,cpu->R8.B); break; //RES 1,B - 2
+                    case 0x89: gb_res_n_r8(1,cpu->R8.C); break; //RES 1,C - 2
+                    case 0x8A: gb_res_n_r8(1,cpu->R8.D); break; //RES 1,D - 2
+                    case 0x8B: gb_res_n_r8(1,cpu->R8.E); break; //RES 1,E - 2
+                    case 0x8C: gb_res_n_r8(1,cpu->R8.H); break; //RES 1,H - 2
+                    case 0x8D: gb_res_n_r8(1,cpu->R8.L); break; //RES 1,L - 2
+                    case 0x8E: gb_res_n_ptr_hl(1); break; //RES 1,(HL) - 4
+                    case 0x8F: gb_res_n_r8(1,cpu->R8.A); break; //RES 1,A - 2
+
+                    case 0x90: gb_res_n_r8(2,cpu->R8.B); break; //RES 2,B - 2
+                    case 0x91: gb_res_n_r8(2,cpu->R8.C); break; //RES 2,C - 2
+                    case 0x92: gb_res_n_r8(2,cpu->R8.D); break; //RES 2,D - 2
+                    case 0x93: gb_res_n_r8(2,cpu->R8.E); break; //RES 2,E - 2
+                    case 0x94: gb_res_n_r8(2,cpu->R8.H); break; //RES 2,H - 2
+                    case 0x95: gb_res_n_r8(2,cpu->R8.L); break; //RES 2,L - 2
+                    case 0x96: gb_res_n_ptr_hl(2); break; //RES 2,(HL) - 4
+                    case 0x97: gb_res_n_r8(2,cpu->R8.A); break; //RES 2,A - 2
+
+                    case 0x98: gb_res_n_r8(3,cpu->R8.B); break; //RES 3,B - 2
+                    case 0x99: gb_res_n_r8(3,cpu->R8.C); break; //RES 3,C - 2
+                    case 0x9A: gb_res_n_r8(3,cpu->R8.D); break; //RES 3,D - 2
+                    case 0x9B: gb_res_n_r8(3,cpu->R8.E); break; //RES 3,E - 2
+                    case 0x9C: gb_res_n_r8(3,cpu->R8.H); break; //RES 3,H - 2
+                    case 0x9D: gb_res_n_r8(3,cpu->R8.L); break; //RES 3,L - 2
+                    case 0x9E: gb_res_n_ptr_hl(3); break; //RES 3,(HL) - 4
+                    case 0x9F: gb_res_n_r8(3,cpu->R8.A); break; //RES 3,A - 2
+
+                    case 0xA0: gb_res_n_r8(4,cpu->R8.B); break; //RES 4,B - 2
+                    case 0xA1: gb_res_n_r8(4,cpu->R8.C); break; //RES 4,C - 2
+                    case 0xA2: gb_res_n_r8(4,cpu->R8.D); break; //RES 4,D - 2
+                    case 0xA3: gb_res_n_r8(4,cpu->R8.E); break; //RES 4,E - 2
+                    case 0xA4: gb_res_n_r8(4,cpu->R8.H); break; //RES 4,H - 2
+                    case 0xA5: gb_res_n_r8(4,cpu->R8.L); break; //RES 4,L - 2
+                    case 0xA6: gb_res_n_ptr_hl(4); break; //RES 4,(HL) - 4
+                    case 0xA7: gb_res_n_r8(4,cpu->R8.A); break; //RES 4,A - 2
+
+                    case 0xA8: gb_res_n_r8(5,cpu->R8.B); break; //RES 5,B - 2
+                    case 0xA9: gb_res_n_r8(5,cpu->R8.C); break; //RES 5,C - 2
+                    case 0xAA: gb_res_n_r8(5,cpu->R8.D); break; //RES 5,D - 2
+                    case 0xAB: gb_res_n_r8(5,cpu->R8.E); break; //RES 5,E - 2
+                    case 0xAC: gb_res_n_r8(5,cpu->R8.H); break; //RES 5,H - 2
+                    case 0xAD: gb_res_n_r8(5,cpu->R8.L); break; //RES 5,L - 2
+                    case 0xAE: gb_res_n_ptr_hl(5); break; //RES 5,(HL) - 4
+                    case 0xAF: gb_res_n_r8(5,cpu->R8.A); break; //RES 5,A - 2
+
+                    case 0xB0: gb_res_n_r8(6,cpu->R8.B); break; //RES 6,B - 2
+                    case 0xB1: gb_res_n_r8(6,cpu->R8.C); break; //RES 6,C - 2
+                    case 0xB2: gb_res_n_r8(6,cpu->R8.D); break; //RES 6,D - 2
+                    case 0xB3: gb_res_n_r8(6,cpu->R8.E); break; //RES 6,E - 2
+                    case 0xB4: gb_res_n_r8(6,cpu->R8.H); break; //RES 6,H - 2
+                    case 0xB5: gb_res_n_r8(6,cpu->R8.L); break; //RES 6,L - 2
+                    case 0xB6: gb_res_n_ptr_hl(6); break; //RES 6,(HL) - 4
+                    case 0xB7: gb_res_n_r8(6,cpu->R8.A); break; //RES 6,A - 2
+
+                    case 0xB8: gb_res_n_r8(7,cpu->R8.B); break; //RES 7,B - 2
+                    case 0xB9: gb_res_n_r8(7,cpu->R8.C); break; //RES 7,C - 2
+                    case 0xBA: gb_res_n_r8(7,cpu->R8.D); break; //RES 7,D - 2
+                    case 0xBB: gb_res_n_r8(7,cpu->R8.E); break; //RES 7,E - 2
+                    case 0xBC: gb_res_n_r8(7,cpu->R8.H); break; //RES 7,H - 2
+                    case 0xBD: gb_res_n_r8(7,cpu->R8.L); break; //RES 7,L - 2
+                    case 0xBE: gb_res_n_ptr_hl(7); break; //RES 7,(HL) - 4
+                    case 0xBF: gb_res_n_r8(7,cpu->R8.A); break; //RES 7,A - 2
+
+                    case 0xC0: gb_set_n_r8(0,cpu->R8.B); break; //SET 0,B - 2
+                    case 0xC1: gb_set_n_r8(0,cpu->R8.C); break; //SET 0,C - 2
+                    case 0xC2: gb_set_n_r8(0,cpu->R8.D); break; //SET 0,D - 2
+                    case 0xC3: gb_set_n_r8(0,cpu->R8.E); break; //SET 0,E - 2
+                    case 0xC4: gb_set_n_r8(0,cpu->R8.H); break; //SET 0,H - 2
+                    case 0xC5: gb_set_n_r8(0,cpu->R8.L); break; //SET 0,L - 2
+                    case 0xC6: gb_set_n_ptr_hl(0); break; //SET 0,(HL) - 4
+                    case 0xC7: gb_set_n_r8(0,cpu->R8.A); break; //SET 0,A - 2
+
+                    case 0xC8: gb_set_n_r8(1,cpu->R8.B); break; //SET 1,B - 2
+                    case 0xC9: gb_set_n_r8(1,cpu->R8.C); break; //SET 1,C - 2
+                    case 0xCA: gb_set_n_r8(1,cpu->R8.D); break; //SET 1,D - 2
+                    case 0xCB: gb_set_n_r8(1,cpu->R8.E); break; //SET 1,E - 2
+                    case 0xCC: gb_set_n_r8(1,cpu->R8.H); break; //SET 1,H - 2
+                    case 0xCD: gb_set_n_r8(1,cpu->R8.L); break; //SET 1,L - 2
+                    case 0xCE: gb_set_n_ptr_hl(1); break; //SET 1,(HL) - 4
+                    case 0xCF: gb_set_n_r8(1,cpu->R8.A); break; //SET 1,A - 2
+
+                    case 0xD0: gb_set_n_r8(2,cpu->R8.B); break; //SET 2,B - 2
+                    case 0xD1: gb_set_n_r8(2,cpu->R8.C); break; //SET 2,C - 2
+                    case 0xD2: gb_set_n_r8(2,cpu->R8.D); break; //SET 2,D - 2
+                    case 0xD3: gb_set_n_r8(2,cpu->R8.E); break; //SET 2,E - 2
+                    case 0xD4: gb_set_n_r8(2,cpu->R8.H); break; //SET 2,H - 2
+                    case 0xD5: gb_set_n_r8(2,cpu->R8.L); break; //SET 2,L - 2
+                    case 0xD6: gb_set_n_ptr_hl(2); break; //SET 2,(HL) - 4
+                    case 0xD7: gb_set_n_r8(2,cpu->R8.A); break; //SET 2,A - 2
+
+                    case 0xD8: gb_set_n_r8(3,cpu->R8.B); break; //SET 3,B - 2
+                    case 0xD9: gb_set_n_r8(3,cpu->R8.C); break; //SET 3,C - 2
+                    case 0xDA: gb_set_n_r8(3,cpu->R8.D); break; //SET 3,D - 2
+                    case 0xDB: gb_set_n_r8(3,cpu->R8.E); break; //SET 3,E - 2
+                    case 0xDC: gb_set_n_r8(3,cpu->R8.H); break; //SET 3,H - 2
+                    case 0xDD: gb_set_n_r8(3,cpu->R8.L); break; //SET 3,L - 2
+                    case 0xDE: gb_set_n_ptr_hl(3); break; //SET 3,(HL) - 4
+                    case 0xDF: gb_set_n_r8(3,cpu->R8.A); break; //SET 3,A - 2
+
+                    case 0xE0: gb_set_n_r8(4,cpu->R8.B); break; //SET 4,B - 2
+                    case 0xE1: gb_set_n_r8(4,cpu->R8.C); break; //SET 4,C - 2
+                    case 0xE2: gb_set_n_r8(4,cpu->R8.D); break; //SET 4,D - 2
+                    case 0xE3: gb_set_n_r8(4,cpu->R8.E); break; //SET 4,E - 2
+                    case 0xE4: gb_set_n_r8(4,cpu->R8.H); break; //SET 4,H - 2
+                    case 0xE5: gb_set_n_r8(4,cpu->R8.L); break; //SET 4,L - 2
+                    case 0xE6: gb_set_n_ptr_hl(4); break; //SET 4,(HL) - 4
+                    case 0xE7: gb_set_n_r8(4,cpu->R8.A); break; //SET 4,A - 2
+
+                    case 0xE8: gb_set_n_r8(5,cpu->R8.B); break; //SET 5,B - 2
+                    case 0xE9: gb_set_n_r8(5,cpu->R8.C); break; //SET 5,C - 2
+                    case 0xEA: gb_set_n_r8(5,cpu->R8.D); break; //SET 5,D - 2
+                    case 0xEB: gb_set_n_r8(5,cpu->R8.E); break; //SET 5,E - 2
+                    case 0xEC: gb_set_n_r8(5,cpu->R8.H); break; //SET 5,H - 2
+                    case 0xED: gb_set_n_r8(5,cpu->R8.L); break; //SET 5,L - 2
+                    case 0xEE: gb_set_n_ptr_hl(5); break; //SET 5,(HL) - 4
+                    case 0xEF: gb_set_n_r8(5,cpu->R8.A); break; //SET 5,A - 2
+
+                    case 0xF0: gb_set_n_r8(6,cpu->R8.B); break; //SET 6,B - 2
+                    case 0xF1: gb_set_n_r8(6,cpu->R8.C); break; //SET 6,C - 2
+                    case 0xF2: gb_set_n_r8(6,cpu->R8.D); break; //SET 6,D - 2
+                    case 0xF3: gb_set_n_r8(6,cpu->R8.E); break; //SET 6,E - 2
+                    case 0xF4: gb_set_n_r8(6,cpu->R8.H); break; //SET 6,H - 2
+                    case 0xF5: gb_set_n_r8(6,cpu->R8.L); break; //SET 6,L - 2
+                    case 0xF6: gb_set_n_ptr_hl(6); break; //SET 6,(HL) - 4
+                    case 0xF7: gb_set_n_r8(6,cpu->R8.A); break; //SET 6,A - 2
+
+                    case 0xF8: gb_set_n_r8(7,cpu->R8.B); break; //SET 7,B - 2
+                    case 0xF9: gb_set_n_r8(7,cpu->R8.C); break; //SET 7,C - 2
+                    case 0xFA: gb_set_n_r8(7,cpu->R8.D); break; //SET 7,D - 2
+                    case 0xFB: gb_set_n_r8(7,cpu->R8.E); break; //SET 7,E - 2
+                    case 0xFC: gb_set_n_r8(7,cpu->R8.H); break; //SET 7,H - 2
+                    case 0xFD: gb_set_n_r8(7,cpu->R8.L); break; //SET 7,L - 2
+                    case 0xFE: gb_set_n_ptr_hl(7); break; //SET 7,(HL) - 4
+                    case 0xFF: gb_set_n_r8(7,cpu->R8.A); break; //SET 7,A - 2
 
                     default:
                         // ...wtf??
                         GB_CPUClockCounterAdd(4);
                         _gb_break_to_debugger();
-                        Debug_ErrorMsgArg("Unidentified opcode. CB %X\nPC: %04X\nROM: %d",
+                        Debug_ErrorMsgArg("Unidentified opcode. 0xCB 0x%X\nPC: %04X\nROM: %d",
                             opcode,GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
                         break;
                 } //end of inner switch
                 break;
             case 0xCC: //CALL Z,nn - 6/3
-                if(cpu->F.Z)
-                {
-                    GB_CPUClockCounterAdd(4);
-                    u32 temp = GB_MemRead8(cpu->R16.PC++);
-                    GB_CPUClockCounterAdd(4);
-                    temp |= ( (u32)GB_MemRead8(cpu->R16.PC++) ) << 8;
-                    GB_CPUClockCounterAdd(4);
-                    cpu->R16.SP --;
-                    cpu->R16.SP &= 0xFFFF;
-                    GB_MemWrite8(cpu->R16.SP,cpu->R8.PCH);
-                    GB_CPUClockCounterAdd(4);
-                    cpu->R16.SP --;
-                    cpu->R16.SP &= 0xFFFF;
-                    GB_MemWrite8(cpu->R16.SP,cpu->R8.PCL);
-                    GB_CPUClockCounterAdd(4);
-                    cpu->R16.PC = temp;
-                    GB_CPUClockCounterAdd(4);
-                }
-                else
-                {
-                    cpu->R16.PC += 2;
-                    cpu->R16.PC &= 0xFFFF;
-                    GB_CPUClockCounterAdd(12);
-                }
+                gb_call_cond_nn(cpu->F.Z);
                 break;
             case 0xCD: //CALL nn - 6
             {
@@ -3424,106 +2116,29 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 break;
             }
             case 0xCF: //RST 0x08 - 4
-                GB_CPUClockCounterAdd(4);
-                cpu->R16.SP --;
-                cpu->R16.SP &= 0xFFFF;
-                GB_MemWrite8(cpu->R16.SP,cpu->R8.PCH);
-                GB_CPUClockCounterAdd(4);
-                cpu->R16.SP --;
-                cpu->R16.SP &= 0xFFFF;
-                GB_MemWrite8(cpu->R16.SP,cpu->R8.PCL);
-                GB_CPUClockCounterAdd(4);
-                cpu->R16.PC = 0x0008;
-                GB_CPUClockCounterAdd(4);
+                gb_rst_nnnn(0x0008);
                 break;
             case 0xD0: //RET NC - 5/2
-                if(cpu->F.C == 0)
-                {
-                    GB_CPUClockCounterAdd(4);
-                    u32 temp = GB_MemRead8(cpu->R16.SP++);
-                    cpu->R16.SP &= 0xFFFF;
-                    GB_CPUClockCounterAdd(4);
-                    temp |= ( (u32)GB_MemRead8(cpu->R16.SP++) ) << 8;
-                    cpu->R16.SP &= 0xFFFF;
-                    GB_CPUClockCounterAdd(4);
-                    cpu->R16.PC = temp;
-                    GB_CPUClockCounterAdd(8);
-                }
-                else
-                {
-                    GB_CPUClockCounterAdd(8);
-                }
+                gb_ret_cond_nn(cpu->F.C == 0);
                 break;
             case 0xD1: //POP DE - 3
-                GB_CPUClockCounterAdd(4);
-                cpu->R8.E = GB_MemRead8(cpu->R16.SP++);
-                cpu->R16.SP &= 0xFFFF;
-                GB_CPUClockCounterAdd(4);
-                cpu->R8.D = GB_MemRead8(cpu->R16.SP++);
-                cpu->R16.SP &= 0xFFFF;
-                GB_CPUClockCounterAdd(4);
+                gb_pop_r16(cpu->R8.D,cpu->R8.E);
                 break;
             case 0xD2: //JP NC,nn - 4/3
-                if(cpu->F.C == 0)
-                {
-                    GB_CPUClockCounterAdd(4);
-                    u32 temp = GB_MemRead8(cpu->R16.PC++);
-                    GB_CPUClockCounterAdd(4);
-                    temp |= ( (u32)GB_MemRead8(cpu->R16.PC++) ) << 8;
-                    GB_CPUClockCounterAdd(4);
-                    cpu->R16.PC = temp;
-                    GB_CPUClockCounterAdd(4);
-                }
-                else
-                {
-                    cpu->R16.PC += 2;
-                    cpu->R16.PC &= 0xFFFF;
-                    GB_CPUClockCounterAdd(12);
-                }
+                gb_jp_cond_nn(cpu->F.C == 0);
                 break;
             case 0xD3: // Undefined - *
                 GB_CPUClockCounterAdd(4);
                 cpu->R16.PC--;
                 _gb_break_to_debugger();
-                Debug_ErrorMsgArg("Undefined opcode. D3\nPC: %04X\nROM: %d",
+                Debug_ErrorMsgArg("Undefined opcode. 0xD3\nPC: %04X\nROM: %d",
                             GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
                 break;
             case 0xD4: //CALL NC,nn - 6/3
-                if(cpu->F.C == 0)
-                {
-                    GB_CPUClockCounterAdd(4);
-                    u32 temp = GB_MemRead8(cpu->R16.PC++);
-                    GB_CPUClockCounterAdd(4);
-                    temp |= ( (u32)GB_MemRead8(cpu->R16.PC++) ) << 8;
-                    GB_CPUClockCounterAdd(4);
-                    cpu->R16.SP --;
-                    cpu->R16.SP &= 0xFFFF;
-                    GB_MemWrite8(cpu->R16.SP,cpu->R8.PCH);
-                    GB_CPUClockCounterAdd(4);
-                    cpu->R16.SP --;
-                    cpu->R16.SP &= 0xFFFF;
-                    GB_MemWrite8(cpu->R16.SP,cpu->R8.PCL);
-                    GB_CPUClockCounterAdd(4);
-                    cpu->R16.PC = temp;
-                    GB_CPUClockCounterAdd(4);
-                }
-                else
-                {
-                    cpu->R16.PC += 2;
-                    cpu->R16.PC &= 0xFFFF;
-                    GB_CPUClockCounterAdd(12);
-                }
+                gb_call_cond_nn(cpu->F.C == 0);
                 break;
             case 0xD5: //PUSH DE - 4
-                GB_CPUClockCounterAdd(4);
-                cpu->R16.SP--;
-                cpu->R16.SP &= 0xFFFF;
-                GB_MemWrite8(cpu->R16.SP,cpu->R8.D);
-                GB_CPUClockCounterAdd(4);
-                cpu->R16.SP--;
-                cpu->R16.SP &= 0xFFFF;
-                GB_MemWrite8(cpu->R16.SP,cpu->R8.E);
-                GB_CPUClockCounterAdd(8);
+                gb_push_r16(cpu->R8.D,cpu->R8.E);
                 break;
             case 0xD6:  //SUB n - 2
             {
@@ -3538,35 +2153,10 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 break;
             }
             case 0xD7: //RST 0x10 - 4
-                GB_CPUClockCounterAdd(4);
-                cpu->R16.SP --;
-                cpu->R16.SP &= 0xFFFF;
-                GB_MemWrite8(cpu->R16.SP,cpu->R8.PCH);
-                GB_CPUClockCounterAdd(4);
-                cpu->R16.SP --;
-                cpu->R16.SP &= 0xFFFF;
-                GB_MemWrite8(cpu->R16.SP,cpu->R8.PCL);
-                GB_CPUClockCounterAdd(4);
-                cpu->R16.PC = 0x0010;
-                GB_CPUClockCounterAdd(4);
+                gb_rst_nnnn(0x0010);
                 break;
             case 0xD8: //RET C - 5/2
-                if(cpu->F.C)
-                {
-                    GB_CPUClockCounterAdd(4);
-                    u32 temp = GB_MemRead8(cpu->R16.SP++);
-                    cpu->R16.SP &= 0xFFFF;
-                    GB_CPUClockCounterAdd(4);
-                    temp |= ( (u32)GB_MemRead8(cpu->R16.SP++) ) << 8;
-                    cpu->R16.SP &= 0xFFFF;
-                    GB_CPUClockCounterAdd(4);
-                    cpu->R16.PC = temp;
-                    GB_CPUClockCounterAdd(8);
-                }
-                else
-                {
-                    GB_CPUClockCounterAdd(8);
-                }
+                gb_ret_cond_nn(cpu->F.C);
                 break;
             case 0xD9: //RETI - 4
             {
@@ -3584,61 +2174,23 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 break;
             }
             case 0xDA: //JP C,nn - 4/3
-                if(cpu->F.C)
-                {
-                    GB_CPUClockCounterAdd(4);
-                    u32 temp = GB_MemRead8(cpu->R16.PC++);
-                    GB_CPUClockCounterAdd(4);
-                    temp |= ( (u32)GB_MemRead8(cpu->R16.PC++) ) << 8;
-                    GB_CPUClockCounterAdd(4);
-                    cpu->R16.PC = temp;
-                    GB_CPUClockCounterAdd(4);
-                }
-                else
-                {
-                    cpu->R16.PC += 2;
-                    cpu->R16.PC &= 0xFFFF;
-                    GB_CPUClockCounterAdd(12);
-                }
+                gb_jp_cond_nn(cpu->F.C);
                 break;
             case 0xDB: // Undefined - *
                 GB_CPUClockCounterAdd(4);
                 cpu->R16.PC--;
                 _gb_break_to_debugger();
-                Debug_ErrorMsgArg("Undefined opcode. DB\nPC: %04X\nROM: %d",
+                Debug_ErrorMsgArg("Undefined opcode. 0xDB\nPC: %04X\nROM: %d",
                             GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
                 break;
             case 0xDC: //CALL C,nn - 6/3
-                if(cpu->F.C)
-                {
-                    GB_CPUClockCounterAdd(4);
-                    u32 temp = GB_MemRead8(cpu->R16.PC++);
-                    GB_CPUClockCounterAdd(4);
-                    temp |= ( (u32)GB_MemRead8(cpu->R16.PC++) ) << 8;
-                    GB_CPUClockCounterAdd(4);
-                    cpu->R16.SP --;
-                    cpu->R16.SP &= 0xFFFF;
-                    GB_MemWrite8(cpu->R16.SP,cpu->R8.PCH);
-                    GB_CPUClockCounterAdd(4);
-                    cpu->R16.SP --;
-                    cpu->R16.SP &= 0xFFFF;
-                    GB_MemWrite8(cpu->R16.SP,cpu->R8.PCL);
-                    GB_CPUClockCounterAdd(4);
-                    cpu->R16.PC = temp;
-                    GB_CPUClockCounterAdd(4);
-                }
-                else
-                {
-                    cpu->R16.PC += 2;
-                    cpu->R16.PC &= 0xFFFF;
-                    GB_CPUClockCounterAdd(12);
-                }
+                gb_call_cond_nn(cpu->F.C);
                 break;
             case 0xDD: // Undefined - *
                 GB_CPUClockCounterAdd(4);
                 cpu->R16.PC--;
                 _gb_break_to_debugger();
-                Debug_ErrorMsgArg("Undefined opcode. DD\nPC: %04X\nROM: %d",
+                Debug_ErrorMsgArg("Undefined opcode. 0xDD\nPC: %04X\nROM: %d",
                             GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
                 break;
             case 0xDE: //SBC A,n - 2
@@ -3653,17 +2205,7 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 break;
             }
             case 0xDF: //RST 0x18 - 4
-                GB_CPUClockCounterAdd(4);
-                cpu->R16.SP --;
-                cpu->R16.SP &= 0xFFFF;
-                GB_MemWrite8(cpu->R16.SP,cpu->R8.PCH);
-                GB_CPUClockCounterAdd(4);
-                cpu->R16.SP --;
-                cpu->R16.SP &= 0xFFFF;
-                GB_MemWrite8(cpu->R16.SP,cpu->R8.PCL);
-                GB_CPUClockCounterAdd(4);
-                cpu->R16.PC = 0x0018;
-                GB_CPUClockCounterAdd(4);
+                gb_rst_nnnn(0x0018);
                 break;
             case 0xE0: //LDH (n),A - 3
             {
@@ -3675,13 +2217,7 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 break;
             }
             case 0xE1: //POP HL - 3
-                GB_CPUClockCounterAdd(4);
-                cpu->R8.L = GB_MemRead8(cpu->R16.SP++);
-                cpu->R16.SP &= 0xFFFF;
-                GB_CPUClockCounterAdd(4);
-                cpu->R8.H = GB_MemRead8(cpu->R16.SP++);
-                cpu->R16.SP &= 0xFFFF;
-                GB_CPUClockCounterAdd(4);
+                gb_pop_r16(cpu->R8.H,cpu->R8.L);
                 break;
             case 0xE2: //LD (C),A - 2
                 GB_CPUClockCounterAdd(4);
@@ -3692,26 +2228,18 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 GB_CPUClockCounterAdd(4);
                 cpu->R16.PC--;
                 _gb_break_to_debugger();
-                Debug_ErrorMsgArg("Undefined opcode. E3\nPC: %04X\nROM: %d",
+                Debug_ErrorMsgArg("Undefined opcode. 0xE3\nPC: %04X\nROM: %d",
                             GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
                 break;
             case 0xE4: // Undefined - *
                 GB_CPUClockCounterAdd(4);
                 cpu->R16.PC--;
                 _gb_break_to_debugger();
-                Debug_ErrorMsgArg("Undefined opcode. E4\nPC: %04X\nROM: %d",
+                Debug_ErrorMsgArg("Undefined opcode. 0xE4\nPC: %04X\nROM: %d",
                             GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
                 break;
             case 0xE5: //PUSH HL - 4
-                GB_CPUClockCounterAdd(4);
-                cpu->R16.SP--;
-                cpu->R16.SP &= 0xFFFF;
-                GB_MemWrite8(cpu->R16.SP,cpu->R8.H);
-                GB_CPUClockCounterAdd(4);
-                cpu->R16.SP--;
-                cpu->R16.SP &= 0xFFFF;
-                GB_MemWrite8(cpu->R16.SP,cpu->R8.L);
-                GB_CPUClockCounterAdd(8);
+                gb_push_r16(cpu->R8.H,cpu->R8.L);
                 break;
             case 0xE6: //AND n - 2
             {
@@ -3724,17 +2252,7 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 break;
             }
             case 0xE7: //RST 0x20 - 4
-                GB_CPUClockCounterAdd(4);
-                cpu->R16.SP --;
-                cpu->R16.SP &= 0xFFFF;
-                GB_MemWrite8(cpu->R16.SP,cpu->R8.PCH);
-                GB_CPUClockCounterAdd(4);
-                cpu->R16.SP --;
-                cpu->R16.SP &= 0xFFFF;
-                GB_MemWrite8(cpu->R16.SP,cpu->R8.PCL);
-                GB_CPUClockCounterAdd(4);
-                cpu->R16.PC = 0x0020;
-                GB_CPUClockCounterAdd(4);
+                gb_rst_nnnn(0x0020);
                 break;
             case 0xE8: //ADD SP,n - 4
             {
@@ -3769,21 +2287,21 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 GB_CPUClockCounterAdd(4);
                 cpu->R16.PC--;
                 _gb_break_to_debugger();
-                Debug_ErrorMsgArg("Undefined opcode. EB\nPC: %04X\nROM: %d",
+                Debug_ErrorMsgArg("Undefined opcode. 0xEB\nPC: %04X\nROM: %d",
                             GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
                 break;
             case 0xEC: // Undefined - *
                 GB_CPUClockCounterAdd(4);
                 cpu->R16.PC--;
                 _gb_break_to_debugger();
-                Debug_ErrorMsgArg("Undefined opcode. EC\nPC: %04X\nROM: %d",
+                Debug_ErrorMsgArg("Undefined opcode. 0xEC\nPC: %04X\nROM: %d",
                             GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
                 break;
             case 0xED: // Undefined - *
                 GB_CPUClockCounterAdd(4);
                 cpu->R16.PC--;
                 _gb_break_to_debugger();
-                Debug_ErrorMsgArg("Undefined opcode. ED\nPC: %04X\nROM: %d",
+                Debug_ErrorMsgArg("Undefined opcode. 0xED\nPC: %04X\nROM: %d",
                             GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
                 break;
             case 0xEE: //XOR n - 2
@@ -3794,17 +2312,7 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 GB_CPUClockCounterAdd(4);
                 break;
             case 0xEF: //RST 0x28 - 4
-                GB_CPUClockCounterAdd(4);
-                cpu->R16.SP --;
-                cpu->R16.SP &= 0xFFFF;
-                GB_MemWrite8(cpu->R16.SP,cpu->R8.PCH);
-                GB_CPUClockCounterAdd(4);
-                cpu->R16.SP --;
-                cpu->R16.SP &= 0xFFFF;
-                GB_MemWrite8(cpu->R16.SP,cpu->R8.PCL);
-                GB_CPUClockCounterAdd(4);
-                cpu->R16.PC = 0x0028;
-                GB_CPUClockCounterAdd(4);
+                gb_rst_nnnn(0x0028);
                 break;
             case 0xF0: //LDH A,(n) - 3
             {
@@ -3816,13 +2324,8 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 break;
             }
             case 0xF1: //POP AF - 3
-                GB_CPUClockCounterAdd(4);
-                cpu->R8.F = GB_MemRead8(cpu->R16.SP++) & 0xF0;
-                cpu->R16.SP &= 0xFFFF;
-                GB_CPUClockCounterAdd(4);
-                cpu->R8.A = GB_MemRead8(cpu->R16.SP++);
-                cpu->R16.SP &= 0xFFFF;
-                GB_CPUClockCounterAdd(4);
+                gb_pop_r16(cpu->R8.A,cpu->R8.F);
+                cpu->R8.F &= 0xF0;
                 break;
             case 0xF2: //LD A,(C) - 2
                 GB_CPUClockCounterAdd(4);
@@ -3838,19 +2341,11 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 GB_CPUClockCounterAdd(4);
                 cpu->R16.PC--;
                 _gb_break_to_debugger();
-                Debug_ErrorMsgArg("Undefined opcode. F4\nPC: %04X\nROM: %d",
+                Debug_ErrorMsgArg("Undefined opcode. 0xF4\nPC: %04X\nROM: %d",
                             GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
                 break;
             case 0xF5: //PUSH AF - 4
-                GB_CPUClockCounterAdd(4);
-                cpu->R16.SP--;
-                cpu->R16.SP &= 0xFFFF;
-                GB_MemWrite8(cpu->R16.SP,cpu->R8.A);
-                GB_CPUClockCounterAdd(4);
-                cpu->R16.SP--;
-                cpu->R16.SP &= 0xFFFF;
-                GB_MemWrite8(cpu->R16.SP,cpu->R8.F);
-                GB_CPUClockCounterAdd(8);
+                gb_push_r16(cpu->R8.A,cpu->R8.F);
                 break;
             case 0xF6: //OR n - 2
                 GB_CPUClockCounterAdd(4);
@@ -3860,17 +2355,7 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 GB_CPUClockCounterAdd(4);
                 break;
             case 0xF7: //RST 0x30 - 4
-                GB_CPUClockCounterAdd(4);
-                cpu->R16.SP --;
-                cpu->R16.SP &= 0xFFFF;
-                GB_MemWrite8(cpu->R16.SP,cpu->R8.PCH);
-                GB_CPUClockCounterAdd(4);
-                cpu->R16.SP --;
-                cpu->R16.SP &= 0xFFFF;
-                GB_MemWrite8(cpu->R16.SP,cpu->R8.PCL);
-                GB_CPUClockCounterAdd(4);
-                cpu->R16.PC = 0x0030;
-                GB_CPUClockCounterAdd(4);
+                gb_rst_nnnn(0x0030);
                 break;
             case 0xF8: //LD HL,SP+n - 3
             {
@@ -3913,14 +2398,14 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 GB_CPUClockCounterAdd(4);
                 cpu->R16.PC--;
                 _gb_break_to_debugger();
-                Debug_ErrorMsgArg("Undefined opcode. FC\nPC: %04X\nROM: %d",
+                Debug_ErrorMsgArg("Undefined opcode. 0xFC\nPC: %04X\nROM: %d",
                             GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
                 break;
             case 0xFD: // Undefined - *
                 GB_CPUClockCounterAdd(4);
                 cpu->R16.PC--;
                 _gb_break_to_debugger();
-                Debug_ErrorMsgArg("Undefined opcode. FD\nPC: %04X\nROM: %d",
+                Debug_ErrorMsgArg("Undefined opcode. 0xFD\nPC: %04X\nROM: %d",
                             GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
                 break;
             case 0xFE: //CP n - 2
@@ -3936,23 +2421,13 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 break;
             }
             case 0xFF: //RST 0x38 - 4
-                GB_CPUClockCounterAdd(4);
-                cpu->R16.SP --;
-                cpu->R16.SP &= 0xFFFF;
-                GB_MemWrite8(cpu->R16.SP,cpu->R8.PCH);
-                GB_CPUClockCounterAdd(4);
-                cpu->R16.SP --;
-                cpu->R16.SP &= 0xFFFF;
-                GB_MemWrite8(cpu->R16.SP,cpu->R8.PCL);
-                GB_CPUClockCounterAdd(4);
-                cpu->R16.PC = 0x0038;
-                GB_CPUClockCounterAdd(4);
+                gb_rst_nnnn(0x0038);
                 break;
 
             default: //wtf...?
                 GB_CPUClockCounterAdd(4);
                 _gb_break_to_debugger();
-                Debug_ErrorMsgArg("Unidentified opcode. %X\nPC: %04X\nROM: %d",
+                Debug_ErrorMsgArg("Unidentified opcode. 0x%X\nPC: %04X\nROM: %d",
                             opcode,GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom);
                 break;
         } //end switch

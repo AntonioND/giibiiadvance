@@ -211,7 +211,7 @@ int GB_InterruptsExecute(void)
         if(mem->InterruptMasterEnable) // Execute interrupt and clear IME
         {
             int start_clocks = GB_CPUClockCounterGet();
-
+/*
             mem->InterruptMasterEnable = 0; // Clear IME
 
             if(GameBoy.Emulator.CPUHalt == 1)
@@ -267,8 +267,7 @@ int GB_InterruptsExecute(void)
                 }
                 GB_CPUClockCounterAdd(8);
             }
-
-/*
+*/
             mem->InterruptMasterEnable = 0; // Clear IME
 
             if(GameBoy.Emulator.CPUHalt == 1)
@@ -296,7 +295,7 @@ int GB_InterruptsExecute(void)
                 { cpu->R16.PC = 0x0060; mem->IO_Ports[IF_REG-0xFF00] &= ~I_JOYPAD; }
             }
             GB_CPUClockCounterAdd(8);
-*/
+
             int end_clocks = GB_CPUClockCounterGet();
             executed_clocks = end_clocks - start_clocks;
         }

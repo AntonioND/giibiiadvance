@@ -6,6 +6,7 @@ _todo/
 bios/
 _roms/
 screenshots/
+gbc-hw-tests/
 ./*.gb
 ./*.gbc
 ./tools/*.gba

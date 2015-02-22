@@ -407,7 +407,6 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="gui/win_utils_events.h" />
-		<Unit filename="icon.ico" />
 		<Unit filename="input_utils.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -527,19 +526,22 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="png/zlib-1.2.8/zutil.h" />
-		<Unit filename="resource.rc">
-			<Option compilerVar="WINDRES" />
-			<Option target="Debug_Windows" />
-			<Option target="Release_Windows" />
-			<Option target="Debug_Windows_NoCamera" />
-			<Option target="Release_Windows_NoCamera" />
-		</Unit>
 		<Unit filename="sound_utils.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="sound_utils.h" />
 		<Unit filename="text_data.c">
 			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="win_resources/icon.ico">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="win_resources/resource.rc">
+			<Option compilerVar="WINDRES" />
+			<Option target="Debug_Windows" />
+			<Option target="Debug_Windows_NoCamera" />
+			<Option target="Release_Windows" />
+			<Option target="Release_Windows_NoCamera" />
 		</Unit>
 		<Unit filename="window_handler.c">
 			<Option compilerVar="CC" />

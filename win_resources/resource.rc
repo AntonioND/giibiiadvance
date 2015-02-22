@@ -1,6 +1,6 @@
 /*
     GiiBiiAdvance - GBA/GB  emulator
-    Copyright (C) 2011-2014 Antonio Niño Díaz (AntonioND)
+    Copyright (C) 2011-2015 Antonio Niño Díaz (AntonioND)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,19 +16,15 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-//#if defined(_WIN32) || defined(WIN32)
-
 #include <windows.h>
 
-#include "build_options.h"
-
-#define MY_ICON  101
+#include "../build_options.h"
 
 //Setup the .exe icon
-MY_ICON ICON "icon.ico"
+MAINICON ICON "icon.ico"
 
 //include version information in .exe
-1 VERSIONINFO
+VS_VERSION_INFO VERSIONINFO
 FILEVERSION GIIBIIADVANCE_VERSION_MAJOR,GIIBIIADVANCE_VERSION_MINOR,GIIBIIADVANCE_VERSION_PATCH,0
 PRODUCTVERSION GIIBIIADVANCE_VERSION_MAJOR,GIIBIIADVANCE_VERSION_MINOR,GIIBIIADVANCE_VERSION_PATCH,0
 FILETYPE VFT_APP
@@ -55,6 +51,7 @@ FILETYPE VFT_APP
         VALUE "Translation", 0x0809, 1252 //language codes
         //0x0809 = MAKELANGID(LANG_ENGLISH,SUBLANG_ENGLISH_UK) -- in <winnt.h>
         //0x0409 = MAKELANGID(LANG_ENGLISH,SUBLANG_ENGLISH_US)
+        //1252 = Windows ANSI codepage
     }
 }
 

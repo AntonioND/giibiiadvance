@@ -533,20 +533,14 @@
 		<Unit filename="text_data.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="win_resources/icon.ico">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
-		<Unit filename="win_resources/resource.rc">
-			<Option compilerVar="WINDRES" />
-			<Option target="Debug_Windows" />
-			<Option target="Debug_Windows_NoCamera" />
-			<Option target="Release_Windows" />
-			<Option target="Release_Windows_NoCamera" />
-		</Unit>
 		<Unit filename="window_handler.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="window_handler.h" />
+		<Unit filename="windows_resources/icon.ico" />
+		<Unit filename="windows_resources/resource.rc">
+			<Option compilerVar="WINDRES" />
+		</Unit>
 		<Extensions>
 			<code_completion />
 			<envvars />

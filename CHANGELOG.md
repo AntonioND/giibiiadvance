@@ -25,6 +25,7 @@ GB emulation
 - Fixed KEY1 register when doing a hard reset.
 - Joypad interrupt fixed.
 - HALT instruction emulated correctly.
+- GB Camera emulation greatly improved.
 
 Version 0.2.0
 -------------

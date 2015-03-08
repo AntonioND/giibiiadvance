@@ -17,7 +17,7 @@ For 0.2.0 I've ported the Win32 GUI to SDL2. The objective is to make it portabl
 
 This has been compiled in Linux Mint 16 and Windows 7 succesfuly. Compiling with OpenCV in Linux is a bit tricky, and the emulator can't close nicely, but camera works. SDL windows handler is a bit buggy (?), so expect some glitches when using the debugger.
 
-This is the only GB emulator that emulates completely the GB Camera if you have a webcam! :)
+This is the only GB emulator that emulates completely the GB Camera if you have a webcam! :) More information here: https://github.com/AntonioND/gbcam-rev-engineer
 
 For 0.3.0
 ---------

@@ -29,6 +29,14 @@ extern _GB_CONTEXT_ GameBoy;
 
 //------------------------------------------------------------------------------
 
+#define GBCAM_SENSOR_W (128)
+#define GBCAM_SENSOR_H (112+4) // The actual sensor is 128x126 or so, but only 4 extra rows are needed
+
+#define GBCAM_W (128)
+#define GBCAM_H (112)
+
+//------------------------------------------------------------------------------
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -38,30 +46,31 @@ extern _GB_CONTEXT_ GameBoy;
 #include <opencv/highgui.h>
 
 static CvCapture * capture;
-static int gbcamenabled = 0;
-static int gbcamerafactor = 1;
+static int gbcamera_enabled = 0;
+static int gbcamera_zoomfactor = 1;
+
 #endif
 
 //----------------------------------------------------------------------------
 
-static int gb_camera_webcam_output[16*8][14*8];  // webcam image
-static int gb_cam_retina_output_buf[16*8][14*8]; // image processed by retina chip
+static int gb_camera_webcam_output[GBCAM_SENSOR_W][GBCAM_SENSOR_H];  // webcam image
+static int gb_cam_retina_output_buf[GBCAM_SENSOR_W][GBCAM_SENSOR_H]; // image processed by retina chip
 
 void GB_CameraEnd(void)
 {
 #ifndef NO_CAMERA_EMULATION
-    if(gbcamenabled == 0) return;
+    if(gbcamera_enabled == 0) return;
 
     cvReleaseCapture(&capture);
 
-    gbcamenabled = 0;
+    gbcamera_enabled = 0;
 #endif
 }
 
 int GB_CameraInit(void)
 {
 #ifndef NO_CAMERA_EMULATION
-    if(gbcamenabled) return 1;
+    if(gbcamera_enabled) return 1;
 
     capture = cvCaptureFromCAM(CV_CAP_ANY); // TODO : Select camera from configuration file?
     if(!capture)
@@ -70,12 +79,12 @@ int GB_CameraInit(void)
         return 0;
     }
 
-    gbcamenabled = 1;
+    gbcamera_enabled = 1;
 
     // TODO : Select resolution from configuration file?
-    int w = 160; //This is the minimum standard resolution that works with GB Camera (128x112)
+    int w = 160; //This is the minimum standard resolution that works with GB Camera (128 x 112+4)
     int h = 120;
-    while(1) // Get the smaller valid resolution
+    while(1) // Get the smallest valid resolution
     {
         cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, w);
         cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, h);
@@ -83,7 +92,7 @@ int GB_CameraInit(void)
         w = cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH);
         h = cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT);
 
-        if( (w >= 128) && (h >= 112) )
+        if( (w >= GBCAM_SENSOR_W) && (h >= GBCAM_SENSOR_H) )
         {
             break;
         }
@@ -107,17 +116,17 @@ int GB_CameraInit(void)
     else
     {
         Debug_LogMsgArg("Camera resolution is: %dx%d",frame->width,frame->height);
-        if( (frame->width < 16*8) || (frame->height < 14*8) )
+        if( (frame->width < GBCAM_SENSOR_W) || (frame->height < GBCAM_SENSOR_H) )
         {
             Debug_ErrorMsgArg("Camera resolution is too small..");
             GB_CameraEnd();
             return 0;
         }
 
-        int xfactor = frame->width / (16*8);
-        int yfactor = frame->height / (14*8);
+        int xfactor = frame->width / GBCAM_SENSOR_W;
+        int yfactor = frame->height / GBCAM_SENSOR_H;
 
-        gbcamerafactor = (xfactor > yfactor) ? yfactor : xfactor; //min
+        gbcamera_zoomfactor = (xfactor > yfactor) ? yfactor : xfactor; //min
     }
 
     return 1;
@@ -133,13 +142,13 @@ void GB_CameraWebcamCapture(void)
 
 #ifdef NO_CAMERA_EMULATION
     //Random output...
-    for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++) gb_camera_webcam_output[i][j] = rand();
+    for(i = 0; i < GBCAM_SENSOR_W; i++) for(j = 0; j < GBCAM_SENSOR_H; j++) gb_camera_webcam_output[i][j] = rand();
 #else
     //Get image
-    if(gbcamenabled == 0)
+    if(gbcamera_enabled == 0)
     {
         //Random output...
-        for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++) gb_camera_webcam_output[i][j] = rand();
+        for(i = 0; i < GBCAM_SENSOR_W; i++) for(j = 0; j < GBCAM_SENSOR_H; j++) gb_camera_webcam_output[i][j] = rand();
     }
     else
     {
@@ -154,10 +163,10 @@ void GB_CameraWebcamCapture(void)
         {
             if(frame->depth == 8 && frame->nChannels == 3)
             {
-                for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
+                for(i = 0; i < GBCAM_SENSOR_W; i++) for(j = 0; j < GBCAM_SENSOR_H; j++)
                 {
                     u8 * data = &( ((u8*)frame->imageData)
-                            [((j*gbcamerafactor)*frame->widthStep)+((i*gbcamerafactor)*3)] );
+                            [((j*gbcamera_zoomfactor)*frame->widthStep)+((i*gbcamera_zoomfactor)*3)] );
 
                     u32 r = data[0];
                     u32 g = data[1];
@@ -275,27 +284,32 @@ static void GB_CameraTakePicture(void)
     //------------------------------------------------
 
     // Get webcam image
+    // ----------------
+
     GB_CameraWebcamCapture();
 
     //------------------------------------------------
 
+    // Get configuration
+    // -----------------
+
     // Register 0
     u32 P_bits = 0;
     u32 M_bits = 0;
-    //u32 X_bits = 0x01; //Whatever...
+    //u32 X_bits = 0x01; // Whatever...
 
     switch( (cam->reg[0]>>1)&3 )
     {
         case 0: P_bits = 0x00; M_bits = 0x01; break;
         case 1: P_bits = 0x01; M_bits = 0x00; break;
-        case 2: case 3: P_bits = 0x01; M_bits = 0x02; break; // They are the same
+        case 2: case 3: P_bits = 0x01; M_bits = 0x02; break;
         default: break;
     }
 
     // Register 1
     u32 N_bit = (cam->reg[1] & BIT(7)) >> 7;
     u32 VH_bits = (cam->reg[1] & (BIT(6)|BIT(5))) >> 5;
-
+/*
     const float gain_lut[32] = { // Absolute, not dB
        5.01,  5.96,  7.08,   8.41,  10.00,  11.89,  14.13,  16.79,
       19.95, 28.18, 39.81,  56.23,  79.43, 112.20, 188.36, 375.84,
@@ -304,84 +318,170 @@ static void GB_CameraTakePicture(void)
     };
 
     float GAIN = gain_lut[cam->reg[1] & 0x1F];
-
+*/
     // Registers 2 and 3
     u32 EXPOSURE_bits = cam->reg[3] | (cam->reg[2]<<8);
 
     // Register 4
-    const int edge_ratio_lut[8] = { 50, 75, 100, 125, 200, 300, 400, 500 }; // Percent
+    const int edge_ratio_lut[8] = { 0.50, 0.75, 1.00, 1.25, 2.00, 3.00, 4.00, 5.00 };
 
-    int EDGE_RATIO = edge_ratio_lut[(cam->reg[4] & 0x70)>>4];
+    int EDGE_alpha = edge_ratio_lut[(cam->reg[4] & 0x70)>>4];
 
     u32 E3_bit = (cam->reg[4] & BIT(7)) >> 7;
     u32 I_bit = (cam->reg[4] & BIT(3)) >> 3;
 
-    float VREF = 0.5f * (float)(cam->reg[4]&7);
+//    int VREF = (0.5f * (float)(cam->reg[4]&7)) * 255.0 / 5.0;
 
     // Register 5
-    u32 Z_bits = (cam->reg[5] & (BIT(7)|BIT(6))) >> 6;
+//    u32 Z_bits = (cam->reg[5] & (BIT(7)|BIT(6))) >> 6;
 
-    float offset_step = ( (cam->reg[5] & 0x20) ? 0.032 : -0.032 );
-    float OFFSET = offset_step * (cam->reg[5] & 0x1F);
-
-    // Check what kind of image processing has to be done
-
-    u32 _3x3_matrix_enabled = 0;
-    u32 _1D_filtering_enabled = 0;
-
-    u32 switch_value = (N_bit<<3) | (VH_bits<<1) | E3_bit;
-    switch(switch_value)
-    {
-        case 0x0: _1D_filtering_enabled = 1; break;
-        case 0xE: _3x3_matrix_enabled = 1; break;
-        default:
-            Debug_LogMsgArg("Unsupported GB Cam mode: 0x%X",switch_value);
-            break;
-    }
+//    float offset_step = ( (cam->reg[5] & 0x20) ? 0.032 : -0.032 );
+//    int OFFSET = ( ( offset_step * (cam->reg[5] & 0x1F) ) * 255.0 / 5.0 );
 
     //------------------------------------------------
 
     // Calculate timings
+    // -----------------
+
     cam->clocks_left = 4 * ( 32446 + ( N_bit ? 0 : 512 ) + 16 * EXPOSURE_bits );
 
     //------------------------------------------------
 
-    // Apply exposure time
-    for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
+    // Sensor handling
+    // ---------------
+
+    //Copy webcam buffer to sensor buffer applying color correction
+    for(i = 0; i < GBCAM_SENSOR_W; i++) for(j = 0; j < GBCAM_SENSOR_H; j++)
     {
-        int result = gb_camera_webcam_output[i][j];
-        result = ( (result * EXPOSURE_bits ) / 0x0800 );
+        int value = gb_camera_webcam_output[i][j];
+        value = 128 + 0.75f*(float)(value-128);
+        gb_cam_retina_output_buf[i][j] = gb_clamp_int(0,value,255);
+    }
+
+    // Apply exposure time
+    for(i = 0; i < GBCAM_SENSOR_W; i++) for(j = 0; j < GBCAM_SENSOR_H; j++)
+    {
+        int result = gb_cam_retina_output_buf[i][j];
+        result = ( (result * EXPOSURE_bits ) / 0x0100 );
         gb_cam_retina_output_buf[i][j] = gb_clamp_int(0,result,255);
     }
 
-/*
-    // Apply 3x3 programmable 1-D filtering
-    for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
+    if(I_bit) // Invert image
     {
+        for(i = 0; i < GBCAM_SENSOR_W; i++) for(j = 0; j < GBCAM_SENSOR_H; j++)
+        {
+            gb_cam_retina_output_buf[i][j] ^= 255;
+        }
+    }
 
-        // 2D edge
-        int ms = gb_camera_webcam_output[i][gb_min_int(j+1,14*8-1)];
-        int mn = gb_camera_webcam_output[i][gb_max_int(0,j-1)];
-        int mw = gb_camera_webcam_output[gb_max_int(0,i-1)][j];
-        int me = gb_camera_webcam_output[gb_min_int(i+1,16*8-1)][j];
-        gb_cam_retina_output_buf[i][j] =
-            gb_clamp_int( 0, (3*gb_camera_webcam_output[i][j]) - (ms+mn+mw+me)/2 , 255);
+    int temp_buf[GBCAM_SENSOR_W][GBCAM_SENSOR_H];
 
-        gb_cam_retina_output_buf[i][j] = gb_camera_webcam_output[i][j];
+    u32 filtering_mode = (N_bit<<3) | (VH_bits<<1) | E3_bit;
+    switch(filtering_mode)
+    {
+        case 0x0: // 1-D filtering
+        {
+            for(i = 0; i < GBCAM_SENSOR_W; i++) for(j = 0; j < GBCAM_SENSOR_H; j++)
+            {
+                int ms = gb_cam_retina_output_buf[i][gb_min_int(j+1,GBCAM_SENSOR_H-1)];
+                int px = gb_cam_retina_output_buf[i][j];
+
+                int value = 0;
+                if(P_bits&BIT(0)) value += px;
+                if(P_bits&BIT(1)) value += ms;
+                if(M_bits&BIT(0)) value -= px;
+                if(M_bits&BIT(1)) value -= ms;
+                temp_buf[i][j] = gb_clamp_int(0,value,255);
+            }
+            for(i = 0; i < GBCAM_SENSOR_W; i++) for(j = 0; j < GBCAM_SENSOR_H; j++)
+            {
+                gb_cam_retina_output_buf[i][j] = temp_buf[i][j];
+            }
+            break;
+        }
+        case 0x2: //1-D filtering + Horiz. enhancement : P + {2P-(MW+ME)} * alpha
+        {
+            for(i = 0; i < GBCAM_SENSOR_W; i++) for(j = 0; j < GBCAM_SENSOR_H; j++)
+            {
+                int ms = gb_cam_retina_output_buf[i][gb_min_int(j+1,GBCAM_SENSOR_H-1)];
+                int px = gb_cam_retina_output_buf[i][j];
+
+                int value = 0;
+                if(P_bits&BIT(0)) value += px;
+                if(P_bits&BIT(1)) value += ms;
+                if(M_bits&BIT(0)) value -= px;
+                if(M_bits&BIT(1)) value -= ms;
+                temp_buf[i][j] = gb_clamp_int(0,value,255);
+            }
+
+            for(i = 0; i < GBCAM_SENSOR_W; i++) for(j = 0; j < GBCAM_SENSOR_H; j++)
+            {
+                int mw = temp_buf[gb_max_int(0,i-1)][j];
+                int me = temp_buf[gb_min_int(i+1,GBCAM_SENSOR_W-1)][j];
+                int px = temp_buf[i][j];
+
+                gb_cam_retina_output_buf[i][j] = gb_clamp_int(0,px+((2*px-mw-me)*EDGE_alpha),255);
+            }
+            break;
+        }
+        case 0xE: //2D enhancement : P + {4P-(MN+MS+ME+MW)} * alpha
+        {
+            for(i = 0; i < GBCAM_SENSOR_W; i++) for(j = 0; j < GBCAM_SENSOR_H; j++)
+            {
+                temp_buf[i][j] = gb_cam_retina_output_buf[i][j];
+            }
+            for(i = 0; i < GBCAM_SENSOR_W; i++) for(j = 0; j < GBCAM_SENSOR_H; j++)
+            {
+                int ms = temp_buf[i][gb_min_int(j+1,GBCAM_SENSOR_H-1)];
+                int mn = temp_buf[i][gb_max_int(0,j-1)];
+                int mw = temp_buf[gb_max_int(0,i-1)][j];
+                int me = temp_buf[gb_min_int(i+1,GBCAM_SENSOR_W-1)][j];
+                int px  = temp_buf[i][j];
+
+                gb_cam_retina_output_buf[i][j] = gb_clamp_int(0,px+((4*px-mw-me-mn-ms)*EDGE_alpha),255);
+            }
+            break;
+        }
+        default:
+        {
+            Debug_DebugMsgArg("Unsupported GB Cam mode: 0x%X",filtering_mode);
+            break;
+        }
+    }
+/*
+    for(i = 0; i < GBCAM_SENSOR_W; i++) for(j = 0; j < GBCAM_SENSOR_H; j++)
+    {
+        int value = gb_cam_retina_output_buf[i][j] + OFFSET;
+        gb_cam_retina_output_buf[i][j] = gb_clamp_int(0,value,255);
+    }
+
+    for(i = 0; i < GBCAM_SENSOR_W; i++) for(j = 0; j < GBCAM_SENSOR_H; j++)
+    {
+        int value = gb_cam_retina_output_buf[i][j] * GAIN/20.0f;
+        gb_cam_retina_output_buf[i][j] = gb_clamp_int(0,value,255);
+    }
+
+    for(i = 0; i < GBCAM_SENSOR_W; i++) for(j = 0; j < GBCAM_SENSOR_H; j++)
+    {
+        int value = gb_cam_retina_output_buf[i][j] + VREF;
+        gb_cam_retina_output_buf[i][j] = gb_clamp_int(0,value,255);
     }
 */
     //------------------------------------------------
 
-    int fourcolorsbuffer[16*8][14*8]; // buffer after controller matrix
+    // Controller handling
+    // -------------------
+
+    int fourcolorsbuffer[GBCAM_W][GBCAM_H]; // buffer after controller matrix
 
     // Convert to Game Boy colors using the controller matrix
-    for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
-        fourcolorsbuffer[i][j] = gb_cam_matrix_process(gb_cam_retina_output_buf[i][j],i,j);
+    for(i = 0; i < GBCAM_W; i++) for(j = 0; j < GBCAM_H; j++)
+        fourcolorsbuffer[i][j] = gb_cam_matrix_process(gb_cam_retina_output_buf[i][j+1],i,j);
 
     // Convert to tiles
     u8 finalbuffer[14][16][16]; // final buffer
     memset(finalbuffer,0,sizeof(finalbuffer));
-    for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
+    for(i = 0; i < GBCAM_W; i++) for(j = 0; j < GBCAM_H; j++)
     {
         u8 outcolor = 3 - (fourcolorsbuffer[i][j] >> 6);
 
@@ -417,15 +517,12 @@ void GB_CameraWriteRegister(int address, int value)
     {
         //Debug_LogMsgArg("Cam [0x%02X]=0x%02X",(u32)(u16)(address&0xFF),(u32)(u8)value);
 
+        cam->reg[reg] = value;
+
         if(reg == 0) // Take picture...
         {
-            cam->reg[reg] = value & 7;
-
+            cam->reg[0] &= 7;
             if(value & BIT(0)) GB_CameraTakePicture();
-        }
-        else
-        {
-            cam->reg[reg] = value;
         }
     }
     else
@@ -443,12 +540,12 @@ int GB_MapperIsGBCamera(void)
 
 inline int GB_CameraWebcamImageGetPixel(int x, int y)
 {
-    return gb_camera_webcam_output[x][y];
+    return gb_camera_webcam_output[x][y+2]; // 4 extra rows, 2 on each border
 }
 
 inline int GB_CameraRetinaProcessedImageGetPixel(int x, int y)
 {
-    return gb_cam_retina_output_buf[x][y];
+    return gb_cam_retina_output_buf[x][y+2]; // 4 extra rows, 2 on each border
 }
 
 //----------------------------------------------------------------------------

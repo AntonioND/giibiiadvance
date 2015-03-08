@@ -81,7 +81,7 @@ static inline void GB_SerialClockCounterSet(int new_reference_clocks)
     gb_serial_clock_counter = new_reference_clocks;
 }
 
-void GB_SerialUpdateClocksClounterReference(int reference_clocks)
+void GB_SerialUpdateClocksCounterReference(int reference_clocks)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
@@ -134,13 +134,13 @@ int GB_SerialGetClocksToNextEvent(void)
 
 void GB_SerialWriteSB(int reference_clocks, int value)
 {
-    GB_SerialUpdateClocksClounterReference(reference_clocks);
+    GB_SerialUpdateClocksCounterReference(reference_clocks);
     GameBoy.Memory.IO_Ports[SB_REG-0xFF00] = value;
 }
 
 void GB_SerialWriteSC(int reference_clocks, int value)
 {
-    GB_SerialUpdateClocksClounterReference(reference_clocks);
+    GB_SerialUpdateClocksCounterReference(reference_clocks);
 
     if(value & 0x80)
     {

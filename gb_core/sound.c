@@ -843,7 +843,7 @@ static inline void GB_SoundClockCounterSet(int new_reference_clocks)
     gb_sound_clock_counter = new_reference_clocks;
 }
 
-void GB_SoundUpdateClocksClounterReference(int reference_clocks)
+void GB_SoundUpdateClocksCounterReference(int reference_clocks)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 

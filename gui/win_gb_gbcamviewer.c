@@ -129,7 +129,7 @@ void Win_GB_GBCameraViewerUpdate(void)
 
     //_GB_MEMORY_ * mem = &GameBoy.Memory;
 
-    if(GameBoy.Emulator.RAM_Banks == 4) // if this is official GB Camera software
+    if(GameBoy.Emulator.RAM_Banks == 16) // if this is official GB Camera software
     {
         GB_Debug_GBCameraMiniPhotoPrintAll(gb_allphotos_buffer);
 

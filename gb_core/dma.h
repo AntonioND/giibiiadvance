@@ -41,7 +41,7 @@ inline void GB_DMAWriteHDMA5(int value);
 //----------------------------------------------------------------
 
 inline void GB_DMAClockCounterReset(void);
-void GB_DMAUpdateClocksClounterReference(int reference_clocks);
+void GB_DMAUpdateClocksCounterReference(int reference_clocks);
 int GB_DMAGetClocksToNextEvent(void);
 
 //----------------------------------------------------------------

@@ -337,9 +337,9 @@ void GB_InterruptsWriteIE(int value) // reference_clocks not needed
 void GB_InterruptsWriteIF(int reference_clocks, int value)
 {
     //GB_UpdateCounterToClocks(reference_clocks);
-    GB_PPUUpdateClocksClounterReference(reference_clocks);
-    GB_TimersUpdateClocksClounterReference(reference_clocks);
-    GB_SerialUpdateClocksClounterReference(reference_clocks);
+    GB_PPUUpdateClocksCounterReference(reference_clocks);
+    GB_TimersUpdateClocksCounterReference(reference_clocks);
+    GB_SerialUpdateClocksCounterReference(reference_clocks);
     GameBoy.Memory.IO_Ports[IF_REG-0xFF00] = value | (0xE0);
     GB_CPUBreakLoop();
 }
@@ -388,7 +388,7 @@ void GB_TimersWriteDIV(int reference_clocks, int value)
 
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
-    GB_TimersUpdateClocksClounterReference(reference_clocks);
+    GB_TimersUpdateClocksCounterReference(reference_clocks);
 
     if(GameBoy.Emulator.timer_enabled)
     {
@@ -409,7 +409,7 @@ void GB_TimersWriteTIMA(int reference_clocks, int value)
 
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
-    GB_TimersUpdateClocksClounterReference(reference_clocks);
+    GB_TimersUpdateClocksCounterReference(reference_clocks);
 
     if(GameBoy.Emulator.timer_enabled)
     {
@@ -433,7 +433,7 @@ void GB_TimersWriteTMA(int reference_clocks, int value)
 
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
-    GB_TimersUpdateClocksClounterReference(reference_clocks); // First, update as normal
+    GB_TimersUpdateClocksCounterReference(reference_clocks); // First, update as normal
 
     if(GameBoy.Emulator.timer_enabled)
     {
@@ -454,7 +454,7 @@ void GB_TimersWriteTAC(int reference_clocks, int value)
 
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
-    GB_TimersUpdateClocksClounterReference(reference_clocks);
+    GB_TimersUpdateClocksCounterReference(reference_clocks);
 
     //Okay, so this register works differently in each hardware... Try to emulate each one.
 
@@ -636,7 +636,7 @@ static void GB_TimersUpdateDelays(int increment_clocks)
     }
 }
 
-void GB_TimersUpdateClocksClounterReference(int reference_clocks)
+void GB_TimersUpdateClocksCounterReference(int reference_clocks)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 

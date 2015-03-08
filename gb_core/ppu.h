@@ -31,7 +31,7 @@ void GB_PPUEnd(void);
 //----------------------------------------------------------------
 
 inline void GB_PPUClockCounterReset(void);
-void GB_PPUUpdateClocksClounterReference(int reference_clocks);
+void GB_PPUUpdateClocksCounterReference(int reference_clocks);
 inline int GB_PPUGetClocksToNextEvent(void);
 
 //----------------------------------------------------------------

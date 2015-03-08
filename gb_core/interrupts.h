@@ -73,7 +73,7 @@ void GB_TimersWriteTAC(int reference_clocks, int value);
 //----------------------------------------------------------------
 
 inline void GB_TimersClockCounterReset(void);
-void GB_TimersUpdateClocksClounterReference(int reference_clocks);
+void GB_TimersUpdateClocksCounterReference(int reference_clocks);
 int GB_TimersGetClocksToNextEvent(void);
 
 //----------------------------------------------------------------

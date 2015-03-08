@@ -22,7 +22,7 @@
 //--------------------------------------------------------------------------------
 
 void GB_SerialClockCounterReset(void);
-void GB_SerialUpdateClocksClounterReference(int reference_clocks);
+void GB_SerialUpdateClocksCounterReference(int reference_clocks);
 int GB_SerialGetClocksToNextEvent(void);
 
 //--------------------------------------------------------------------------------

@@ -145,7 +145,7 @@ static inline void GB_DMAClockCounterSet(int new_reference_clocks)
     gb_dma_clock_counter = new_reference_clocks;
 }
 
-void GB_DMAUpdateClocksClounterReference(int reference_clocks)
+void GB_DMAUpdateClocksCounterReference(int reference_clocks)
 {
     if(GameBoy.Emulator.OAM_DMA_enabled)
     {
@@ -204,7 +204,7 @@ int GB_DMAGetClocksToNextEvent(void)
 
 inline void GB_DMAWriteDMA(int reference_clocks, int value)
 {
-    GB_DMAUpdateClocksClounterReference(reference_clocks),
+    GB_DMAUpdateClocksCounterReference(reference_clocks),
     //TODO
     //It should disable non-highram memory (if source is VRAM, VRAM is disabled
     //instead of other ram)... etc...

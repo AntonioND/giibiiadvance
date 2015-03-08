@@ -41,7 +41,7 @@ void GB_SoundCallback(void * buffer, long len);
 
 inline void GB_SoundClockCounterReset(void);
 
-void GB_SoundUpdateClocksClounterReference(int reference_clocks);
+void GB_SoundUpdateClocksCounterReference(int reference_clocks);
 
 int GB_SoundGetClocksToNextEvent(void);
 

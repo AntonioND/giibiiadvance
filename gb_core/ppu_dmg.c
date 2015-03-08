@@ -36,7 +36,7 @@ extern _GB_CONTEXT_ GameBoy;
 
 void GB_PPUWriteLYC_DMG(int reference_clocks, int value)
 {
-    GB_PPUUpdateClocksClounterReference(reference_clocks);
+    GB_PPUUpdateClocksCounterReference(reference_clocks);
     GameBoy.Memory.IO_Ports[LYC_REG-0xFF00] = value;
     if(GameBoy.Emulator.lcd_on)
     {
@@ -50,7 +50,7 @@ void GB_PPUWriteLCDC_DMG(int reference_clocks, int value)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
-    GB_PPUUpdateClocksClounterReference(reference_clocks);
+    GB_PPUUpdateClocksCounterReference(reference_clocks);
 
     if( (mem->IO_Ports[LCDC_REG-0xFF00] ^ value) & (1<<7) )
     {
@@ -84,7 +84,7 @@ void GB_PPUWriteSTAT_DMG(int reference_clocks, int value)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
 
-    GB_PPUUpdateClocksClounterReference(GB_CPUClockCounterGet());
+    GB_PPUUpdateClocksCounterReference(GB_CPUClockCounterGet());
 
     GB_CPUBreakLoop();
 

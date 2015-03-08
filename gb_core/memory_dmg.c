@@ -79,11 +79,12 @@ u32 GB_MemRead8_DMG_BootEnabled(u32 address)
         case 0xF:
             if(address < 0xFE00) // Echo RAM
             {
-                return mem->WorkRAM_Curr[address-0xF000] & GameBoy.Memory.MapperRead(address-0xF000+0xB000);
+                return mem->WorkRAM_Curr[address-0xF000];
+                //return mem->WorkRAM_Curr[address-0xF000] & GameBoy.Memory.MapperRead(address-0xF000+0xB000);
             }
             else if(address < 0xFEA0) // Sprite Attribute Table
             {
-                GB_PPUUpdateClocksClounterReference(GB_CPUClockCounterGet());
+                GB_PPUUpdateClocksCounterReference(GB_CPUClockCounterGet());
                 if(GameBoy.Emulator.lcd_on && GameBoy.Emulator.ScreenMode & 0x02) return 0xFF;
                 return mem->ObjAttrMem[address-0xFE00];
             }
@@ -141,11 +142,12 @@ u32 GB_MemRead8_DMG_BootDisabled(u32 address)
         case 0xF:
             if(address < 0xFE00) // Echo RAM
             {
-                return mem->WorkRAM_Curr[address-0xF000] & GameBoy.Memory.MapperRead(address-0xF000+0xB000);
+                return mem->WorkRAM_Curr[address-0xF000];
+                //return mem->WorkRAM_Curr[address-0xF000] & GameBoy.Memory.MapperRead(address-0xF000+0xB000);
             }
             else if(address < 0xFEA0) // Sprite Attribute Table
             {
-                GB_PPUUpdateClocksClounterReference(GB_CPUClockCounterGet());
+                GB_PPUUpdateClocksCounterReference(GB_CPUClockCounterGet());
                 if(GameBoy.Emulator.lcd_on && GameBoy.Emulator.ScreenMode & 0x02) return 0xFF;
                 return mem->ObjAttrMem[address-0xFE00];
             }
@@ -214,7 +216,7 @@ void GB_MemWrite8_DMG(u32 address, u32 value)
             if(address < 0xFE00) // Echo RAM
             {
                 mem->WorkRAM_Curr[address-0xF000] = value;
-                GameBoy.Memory.MapperWrite(address-0xF000+0xB000, value);
+                //GameBoy.Memory.MapperWrite(address-0xF000+0xB000, value);
                 return;
             }
             else if(address < 0xFEA0) // Sprite Attribute Table
@@ -264,32 +266,32 @@ u32 GB_MemReadReg8_DMG(u32 address)
     {
         // Serial
         case SB_REG:
-            GB_SerialUpdateClocksClounterReference(GB_CPUClockCounterGet());
+            GB_SerialUpdateClocksCounterReference(GB_CPUClockCounterGet());
             return mem->IO_Ports[SB_REG-0xFF00];
         case SC_REG:
-            GB_SerialUpdateClocksClounterReference(GB_CPUClockCounterGet());
+            GB_SerialUpdateClocksCounterReference(GB_CPUClockCounterGet());
             return mem->IO_Ports[SC_REG-0xFF00] | 0x7E;
 
         // Timer
         case TMA_REG:
             return mem->IO_Ports[address-0xFF00];
         case TIMA_REG:
-            GB_TimersUpdateClocksClounterReference(GB_CPUClockCounterGet());
+            GB_TimersUpdateClocksCounterReference(GB_CPUClockCounterGet());
             return mem->IO_Ports[TIMA_REG-0xFF00];
         case TAC_REG:
             return mem->IO_Ports[TAC_REG-0xFF00] | (0xF8);
 
         // Divider
         case DIV_REG:
-            GB_TimersUpdateClocksClounterReference(GB_CPUClockCounterGet());
+            GB_TimersUpdateClocksCounterReference(GB_CPUClockCounterGet());
             return mem->IO_Ports[DIV_REG-0xFF00];
 
         // Interrupts
         case IF_REG:
             //GB_UpdateCounterToClocks(GB_CPUClockCounterGet());
-            GB_PPUUpdateClocksClounterReference(GB_CPUClockCounterGet());
-            GB_TimersUpdateClocksClounterReference(GB_CPUClockCounterGet());
-            GB_SerialUpdateClocksClounterReference(GB_CPUClockCounterGet());
+            GB_PPUUpdateClocksCounterReference(GB_CPUClockCounterGet());
+            GB_TimersUpdateClocksCounterReference(GB_CPUClockCounterGet());
+            GB_SerialUpdateClocksCounterReference(GB_CPUClockCounterGet());
             return mem->IO_Ports[IF_REG-0xFF00];
 
         // DMA
@@ -311,14 +313,14 @@ u32 GB_MemReadReg8_DMG(u32 address)
         // TODO
 
         case STAT_REG:
-            GB_PPUUpdateClocksClounterReference(GB_CPUClockCounterGet());
+            GB_PPUUpdateClocksCounterReference(GB_CPUClockCounterGet());
             if(GameBoy.Emulator.lcd_on) return mem->IO_Ports[STAT_REG-0xFF00] | (0x80);
             return (mem->IO_Ports[STAT_REG-0xFF00] | 0x80) & 0xFC;
 
         case LY_REG:
             if(GameBoy.Emulator.lcd_on)
             {
-                GB_PPUUpdateClocksClounterReference(GB_CPUClockCounterGet());
+                GB_PPUUpdateClocksCounterReference(GB_CPUClockCounterGet());
                 return mem->IO_Ports[LY_REG-0xFF00];
             }
             else return 0; // verified on hardware
@@ -385,7 +387,7 @@ u32 GB_MemReadReg8_DMG(u32 address)
         case NR41_REG:
             return 0xFF;
         case NR52_REG:
-            GB_SoundUpdateClocksClounterReference(GB_CPUClockCounterGet());
+            GB_SoundUpdateClocksCounterReference(GB_CPUClockCounterGet());
             return mem->IO_Ports[NR52_REG-0xFF00] | 0x70;
 
         //Wave pattern for channel 3
@@ -393,7 +395,7 @@ u32 GB_MemReadReg8_DMG(u32 address)
         case 0xFF34: case 0xFF35: case 0xFF36: case 0xFF37:
         case 0xFF38: case 0xFF39: case 0xFF3A: case 0xFF3B:
         case 0xFF3C: case 0xFF3D: case 0xFF3E: case 0xFF3F:
-            GB_SoundUpdateClocksClounterReference(GB_CPUClockCounterGet());
+            GB_SoundUpdateClocksCounterReference(GB_CPUClockCounterGet());
 
             //if(GameBoy.Emulator.CGBEnabled == 1) //gbc enabled or gbc hardware?
             //    return mem->IO_Ports[address-0xFF00];
@@ -485,7 +487,7 @@ void GB_MemWriteReg8_DMG(u32 address, u32 value)
         case OBP1_REG:
         case WY_REG:
         case WX_REG:
-            GB_PPUUpdateClocksClounterReference(GB_CPUClockCounterGet());
+            GB_PPUUpdateClocksCounterReference(GB_CPUClockCounterGet());
             mem->IO_Ports[address-0xFF00] = value;
             return;
 
@@ -503,12 +505,12 @@ void GB_MemWriteReg8_DMG(u32 address, u32 value)
         case NR30_REG: case NR31_REG: case NR32_REG: case NR33_REG: case NR34_REG:
         case NR41_REG: case NR42_REG: case NR43_REG: case NR44_REG:
         case NR50_REG: case NR51_REG:
-            GB_SoundUpdateClocksClounterReference(GB_CPUClockCounterGet());
+            GB_SoundUpdateClocksCounterReference(GB_CPUClockCounterGet());
             mem->IO_Ports[address-0xFF00] = value;
             GB_SoundRegWrite(address, value);
             return;
         case NR52_REG:
-            GB_SoundUpdateClocksClounterReference(GB_CPUClockCounterGet());
+            GB_SoundUpdateClocksCounterReference(GB_CPUClockCounterGet());
             mem->IO_Ports[NR52_REG-0xFF00] &= 0x0F; //Status flags
             mem->IO_Ports[NR52_REG-0xFF00] |= (value & 0xF0);
             GB_SoundRegWrite(address, value);
@@ -518,7 +520,7 @@ void GB_MemWriteReg8_DMG(u32 address, u32 value)
         case 0xFF34: case 0xFF35: case 0xFF36: case 0xFF37:
         case 0xFF38: case 0xFF39: case 0xFF3A: case 0xFF3B:
         case 0xFF3C: case 0xFF3D: case 0xFF3E: case 0xFF3F:
-            GB_SoundUpdateClocksClounterReference(GB_CPUClockCounterGet());
+            GB_SoundUpdateClocksCounterReference(GB_CPUClockCounterGet());
             if((mem->IO_Ports[NR52_REG-0xFF00] & (1<<2)) == 0) //If not playing...
                 mem->IO_Ports[address-0xFF00] = value;
             return;

@@ -21,15 +21,8 @@
 #include "../debug_utils.h"
 
 #include "gameboy.h"
+#include "cpu.h"
 
-//------------------------------------------------------------------------------
-//
-//          WARNING: THIS FILE IS ALMOST EVERYTHING GUESSWORK!
-//
-//           Some information taken from M64282FP datasheet.
-//
-//           GB Camera documentation in ../docs/
-//
 //------------------------------------------------------------------------------
 
 extern _GB_CONTEXT_ GameBoy;
@@ -45,7 +38,6 @@ extern _GB_CONTEXT_ GameBoy;
 #include <opencv/highgui.h>
 
 static CvCapture * capture;
-//static int gbcamwindow = 0;
 static int gbcamenabled = 0;
 static int gbcamerafactor = 1;
 #endif
@@ -60,16 +52,13 @@ void GB_CameraEnd(void)
 #ifndef NO_CAMERA_EMULATION
     if(gbcamenabled == 0) return;
 
-    //if(gbcamwindow) cvDestroyWindow("GiiBii - Webcam Output");
-
     cvReleaseCapture(&capture);
 
-    //gbcamwindow = 0;
     gbcamenabled = 0;
 #endif
 }
 
-int GB_CameraInit(void) // (int createwindow)
+int GB_CameraInit(void)
 {
 #ifndef NO_CAMERA_EMULATION
     if(gbcamenabled) return 1;
@@ -82,10 +71,6 @@ int GB_CameraInit(void) // (int createwindow)
     }
 
     gbcamenabled = 1;
-
-    //gbcamwindow = createwindow;
-
-    //if(gbcamwindow) cvNamedWindow("GiiBii - Webcam Output",CV_WINDOW_AUTOSIZE);
 
     // TODO : Select resolution from configuration file?
     int w = 160; //This is the minimum standard resolution that works with GB Camera (128x112)
@@ -173,9 +158,13 @@ void GB_CameraShoot(void)
                 {
                     u8 * data = &( ((u8*)frame->imageData)
                             [((j*gbcamerafactor)*frame->widthStep)+((i*gbcamerafactor)*3)] );
-                    s16 value = ((u32)data[0]+(u32)data[1]+(u32)data[2])/3;
+
+                    u32 r = data[0];
+                    u32 g = data[1];
+                    u32 b = data[2];
+
+                    s16 value = ( 2*r + 5*g + 1*b) >> 3;
                     gb_camera_webcam_output[i][j] = value;
-                    //if(gbcamwindow) { data[0] = ~data[0]; data[1] = ~data[1]; data[2] = ~data[2]; }
                 }
             }
             else
@@ -183,10 +172,62 @@ void GB_CameraShoot(void)
                 Debug_ErrorMsgArg("Invalid camera output. Depth = %d bits | Channels = %d",
                                   frame->depth,frame->nChannels);
             }
-            //if(gbcamwindow) cvShowImage("GiiBii - Webcam Output", frame );
         }
     }
 #endif
+}
+
+//----------------------------------------------------------------
+
+static int gb_camera_clock_counter = 0;
+
+inline void GB_CameraClockCounterReset(void)
+{
+    gb_camera_clock_counter = 0;
+}
+
+static inline int GB_CameraClockCounterGet(void)
+{
+    return gb_camera_clock_counter;
+}
+
+static inline void GB_CameraClockCounterSet(int new_reference_clocks)
+{
+    gb_camera_clock_counter = new_reference_clocks;
+}
+
+void GB_CameraUpdateClocksCounterReference(int reference_clocks)
+{
+    if(GameBoy.Emulator.MemoryController != MEM_CAMERA) return;
+
+    int increment_clocks = reference_clocks - GB_CameraClockCounterGet();
+
+    {
+        _GB_CAMERA_CART_ * cam = &GameBoy.Emulator.CAM;
+
+        if(cam->clocks_left > 0)
+        {
+            cam->clocks_left -= increment_clocks;
+
+            if(cam->clocks_left <= 0)
+            {
+                cam->reg[0] = 0; // ready
+                cam->clocks_left = 0;
+            }
+        }
+    }
+
+    GB_CameraClockCounterSet(reference_clocks);
+}
+
+inline int GB_CameraGetClocksToNextEvent(void)
+{
+    if(GameBoy.Emulator.MemoryController != MEM_CAMERA) return 0x7FFFFFFF;
+
+    _GB_CAMERA_CART_ * cam = &GameBoy.Emulator.CAM;
+
+    if(cam->clocks_left == 0) return 0x7FFFFFFF;
+    return cam->clocks_left;
 }
 
 //----------------------------------------------------------------------------
@@ -314,32 +355,6 @@ static void GB_CameraTakePicture(u32 exposure_time, int offset, int dithering_en
 
     if(dithering_enabled)
     {
-/*
-        // Floyd–Steinberg dithering - Wikipedia
-        for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
-        {
-            int oldpixel = gb_cam_retina_output_buf[i][j]; // oldpixel  := pixel[x][y]
-            int newpixel = oldpixel & 0xC0;   // newpixel  := find_closest_palette_color(oldpixel)
-            inbuffer[i][j] = (u8)newpixel;    // pixel[x][y]  := newpixel
-            int error = oldpixel - newpixel;  // quant_error  := oldpixel - newpixel
-            //pixel[x+1][y  ] := pixel[x+1][y  ] + 7/16 * quant_error
-            //pixel[x-1][y+1] := pixel[x-1][y+1] + 3/16 * quant_error
-            //pixel[x  ][y+1] := pixel[x  ][y+1] + 5/16 * quant_error
-            //pixel[x+1][y+1] := pixel[x+1][y+1] + 1/16 * quant_error
-            if(i < (16*8-1))
-            {
-                gb_cam_retina_output_buf[i+1][j] = gb_clamp_int(0,gb_cam_retina_output_buf[i+1][j] + (7*error)/16,255);
-                if(j < (14*8-1))
-                    gb_cam_retina_output_buf[i+1][j+1] = gb_clamp_int(0,gb_cam_retina_output_buf[i+1][j+1] + (1*error)/16,255);
-            }
-            if(j < (14*8-1))
-            {
-                gb_cam_retina_output_buf[i][j+1] = gb_clamp_int(0,gb_cam_retina_output_buf[i][j+1] + (5*error)/16,255);
-                if(i > 0)
-                    gb_cam_retina_output_buf[i-1][j+1] = gb_clamp_int(0,gb_cam_retina_output_buf[i-1][j+1] + (3*error)/16,255);
-            }
-        }
-*/
         // Standard ordered dithering. Bayer threshold matrix - http://bisqwit.iki.fi/story/howto/dither/jy/
         const int matrix[16] =  { // divided by 256
              15, 135,  45, 165,
@@ -390,8 +405,10 @@ int GB_CameraReadRegister(int address)
 {
     _GB_CAMERA_CART_ * cam = &GameBoy.Emulator.CAM;
 
+    GB_CameraUpdateClocksCounterReference(GB_CPUClockCounterGet());
+
     if(address == 0xA000) return cam->reg[0]; //'ready' register
-    return 0xFF; //others are write-only? they are never read so the value doesn't matter...
+    return 0x00; //others are write-only and they return 0.
 }
 
 void GB_CameraWriteRegister(int address, int value)
@@ -452,28 +469,7 @@ void GB_CameraWriteRegister(int address, int value)
     }
 }
 
-int GB_CameraClock(int clocks)
-{
-    if(GameBoy.Emulator.MemoryController != MEM_CAMERA)
-        return 0x7FFFFFFF;
-
-    _GB_CAMERA_CART_ * cam = &GameBoy.Emulator.CAM;
-
-    if(cam->clocks_left == 0)
-        return 0x7FFFFFFF;
-
-    cam->clocks_left -= clocks;
-
-    if(cam->clocks_left <= 0)
-    {
-        cam->reg[0] = 0; // ready
-        cam->clocks_left = 0;
-    }
-
-    return cam->clocks_left;
-}
-
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------
 
 int GB_MapperIsGBCamera(void)
 {

@@ -30,5 +30,13 @@ int GB_MapperIsGBCamera(void); // returns 1 if mapper is the GB Camera
 int GB_CameraWebcamImageGetPixel(int x, int y); // webcam image
 int GB_CameraRetinaProcessedImageGetPixel(int x, int y); // image processed by retina chip
 
+//----------------------------------------------------------------
+
+inline void GB_CameraClockCounterReset(void);
+void GB_CameraUpdateClocksCounterReference(int reference_clocks);
+inline int GB_CameraGetClocksToNextEvent(void);
+
+//----------------------------------------------------------------
+
 #endif // __GB_CAMERA__
 

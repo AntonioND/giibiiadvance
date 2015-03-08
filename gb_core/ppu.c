@@ -208,7 +208,7 @@ static inline void GB_PPUClockCounterSet(int new_reference_clocks)
     gb_ppu_clock_counter = new_reference_clocks;
 }
 
-void GB_PPUUpdateClocksClounterReference(int reference_clocks)
+void GB_PPUUpdateClocksCounterReference(int reference_clocks)
 {
     int increment_clocks = reference_clocks - GB_PPUClockCounterGet();
 

@@ -130,18 +130,19 @@ static inline void GB_ClockCountersReset(void)
     GB_SerialClockCounterReset();
     GB_SoundClockCounterReset();
     GB_DMAClockCounterReset();
-    //SGB?, CAMERA?
+    //SGB?
+    GB_CameraClockCounterReset();
 }
 
 inline void GB_UpdateCounterToClocks(int reference_clocks)
 {
-    GB_TimersUpdateClocksClounterReference(reference_clocks);
-    GB_PPUUpdateClocksClounterReference(reference_clocks);
-    GB_SerialUpdateClocksClounterReference(reference_clocks);
-    GB_SoundUpdateClocksClounterReference(reference_clocks);
-    GB_DMAUpdateClocksClounterReference(reference_clocks);
+    GB_TimersUpdateClocksCounterReference(reference_clocks);
+    GB_PPUUpdateClocksCounterReference(reference_clocks);
+    GB_SerialUpdateClocksCounterReference(reference_clocks);
+    GB_SoundUpdateClocksCounterReference(reference_clocks);
+    GB_DMAUpdateClocksCounterReference(reference_clocks);
     //SGB_Update(reference_clocks);
-    //GB_CameraUpdate(reference_clocks);
+    GB_CameraUpdateClocksCounterReference(reference_clocks);
 }
 
 //----------------------------------------------------------------

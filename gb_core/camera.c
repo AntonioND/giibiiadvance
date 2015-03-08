@@ -44,8 +44,8 @@ static int gbcamerafactor = 1;
 
 //----------------------------------------------------------------------------
 
-static int gb_camera_webcam_output[16*8][14*8]; // image processed by retina chip
-static int gb_cam_retina_output_buf[16*8][14*8]; // webcam image
+static int gb_camera_webcam_output[16*8][14*8];  // webcam image
+static int gb_cam_retina_output_buf[16*8][14*8]; // image processed by retina chip
 
 void GB_CameraEnd(void)
 {
@@ -127,18 +127,19 @@ int GB_CameraInit(void)
 #endif
 }
 
-void GB_CameraShoot(void)
+void GB_CameraWebcamCapture(void)
 {
     int i, j;
 
-#ifndef NO_CAMERA_EMULATION
+#ifdef NO_CAMERA_EMULATION
+    //Random output...
+    for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++) gb_camera_webcam_output[i][j] = rand();
+#else
     //Get image
     if(gbcamenabled == 0)
     {
-#endif
-        //just some random output...
+        //Random output...
         for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++) gb_camera_webcam_output[i][j] = rand();
-#ifndef NO_CAMERA_EMULATION
     }
     else
     {
@@ -174,7 +175,7 @@ void GB_CameraShoot(void)
             }
         }
     }
-#endif
+#endif // NO_CAMERA_EMULATION
 }
 
 //----------------------------------------------------------------
@@ -256,39 +257,31 @@ static int gb_cam_matrix_process(int value, int x, int y)
     x = x % 4;
     y = y % 4;
 
-    int r0 = cam->reg[y*3+x+0];
-    int r1 = cam->reg[y*3+x+1];
-    int r2 = cam->reg[y*3+x+2];
+    int base = 6 + y*3 + x;
+
+    int r0 = cam->reg[base+0];
+    int r1 = cam->reg[base+1];
+    int r2 = cam->reg[base+2];
 
     value = (255 - value);
 
-    if(value < r0) return 0xC0;
-    if(value < r1) return 0x80;
+    if(value < r0) return 0x00;
+    if(value < r1) return 0x40;
     if(value < r2) return 0x40;
-    return 0x00;
+    return 0xC0;
 }
 */
 static void GB_CameraTakePicture(u32 exposure_time, int offset, int dithering_enabled, int contrast) // contrast: 0..100
 {
-    GB_CameraShoot();
+    GB_CameraWebcamCapture();
 
-    int inbuffer[16*8][14*8]; // buffer after aplying effects
+    int inbuffer[16*8][14*8]; // buffer after applying effects
     u8 readybuffer[14][16][16];
     int i, j;
 
     //Apply 3x3 programmable 1-D filtering
     for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
     {
-/*
-        // Horizontal edge
-        if( (i > 0) && (i < 16*8-1))
-            gb_cam_retina_output_buf[i][j] =
-                gb_clamp_int( 0, (2 * gb_camera_webcam_output[i][j]) -
-                ( (gb_camera_webcam_output[i-1][j] + gb_camera_webcam_output[i+1][j]) / 2 ),
-                             255);
-        else
-            gb_cam_retina_output_buf[i][j] = gb_camera_webcam_output[i][j];
-*/
         // 2D edge
         int ms = gb_camera_webcam_output[i][gb_min_int(j+1,14*8-1)];
         int mn = gb_camera_webcam_output[i][gb_max_int(0,j-1)];
@@ -305,16 +298,6 @@ static void GB_CameraTakePicture(u32 exposure_time, int offset, int dithering_en
         result = ( ( (result + (exposure_time>>8)) * exposure_time ) / 0x800 );
         gb_cam_retina_output_buf[i][j] = gb_clamp_int(0,result,255);
     }
-
-/*
-    //Apply offset
-    for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
-    {
-        gb_cam_retina_output_buf[i][j] = gb_clamp_int(0,
-                            gb_cam_retina_output_buf[i][j] + offset,
-                            255);
-    }
-*/
 
     //Apply contrast
     double c;
@@ -415,20 +398,20 @@ void GB_CameraWriteRegister(int address, int value)
 {
     _GB_CAMERA_CART_ * cam = &GameBoy.Emulator.CAM;
 
-    int reg = address-0xA000;
+    int reg = (address&0x7F);
 
     //printf("[%04X]=%02X\n",(u32)(u16)address,(u32)(u8)value);
     if(reg < 0x36)
     {
         //Debug_LogMsgArg("Cam [0x%02X]=0x%02X",(u32)(u16)(address&0xFF),(u32)(u8)value);
 
-        cam->reg[reg] = value;
+        cam->reg[reg] = value & 7;
 
         if(reg == 0) // Take picture...
         {
             if(value == 0x3) //execute command? take picture?
             {
-                u32 exposure_time = cam->reg[3] | (cam->reg[2]<<8);
+                u32 exposure_steps = cam->reg[3] | (cam->reg[2]<<8);
 
                 int dithering = 0;
 
@@ -444,21 +427,13 @@ void GB_CameraWriteRegister(int address, int value)
 
                 int contrast = gb_clamp_int(0, ((cam->reg[6] - 0x80) * 100) / 0x12, 100);
 
-                GB_CameraTakePicture(exposure_time,
+                GB_CameraTakePicture(exposure_steps,
                                      (cam->reg[1]&0x20) ? -(cam->reg[1]&0x1F) : (cam->reg[1]&0x1F),
                                      dithering,
                                      contrast);
 
-                // 4194304 Hz -> 0.2384185791015625 (us/clock)
-                // each exposure time step is 16 (us)
-                // 16 (us) / 0.2384185791015625 (us/clock) = 67.108864 clocks
-                cam->clocks_left = 67 * exposure_time;
-                //exposure_time = 0xFFFF -> 1,048576 second delay
-
-                // Needed clocks for transfer (chip transfers 128*128 pixels, the last rows are garbage)
-                // Since the output value is analog, only one clock per pixel.
-                cam->clocks_left += 128*128;
-                // I assume the value is stored in cartridge RAM while it is being transfered.
+                int N_bit = (cam->reg[1] & BIT(7)) ? 0 : 512;
+                cam->clocks_left = 4 * ( 32446 + N_bit + 16 * exposure_steps );
             }
             //else Debug_DebugMsgArg("CAMERA WROTE - %02x to %04x",value,address);
         }

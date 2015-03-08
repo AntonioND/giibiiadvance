@@ -679,17 +679,16 @@ static void GB_CameraWrite(u32 address, u32 value)
             mem->RAMEnabled = ((value & 0x0F) == 0x0A);
             if(GameBoy.Emulator.RAM_Banks == 0) mem->RAMEnabled = 0;
             break;
-        case 0x2: //ROM change.
+        case 0x2: //ROM change. Bank 0 is allowed
             mem->selected_rom &= 0xFF00;
             mem->selected_rom |= (value&0xFF);
             mem->selected_rom &= GameBoy.Emulator.ROM_Banks-1;
-            if(mem->selected_rom == 0) mem->selected_rom = 1;
             mem->ROM_Curr = mem->ROM_Switch[mem->selected_rom];
             break;
         case 0x3:
             break;
         case 0x4:
-            if(value == 0x10)
+            if(value & 0x10) // any value with bit 4 set to '1' will set register mode
             {
                 mem->mbc_mode = 1;
             }

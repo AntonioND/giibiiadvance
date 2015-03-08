@@ -38,8 +38,8 @@ inline int GB_CameraGetClocksToNextEvent(void);
 //----------------------------------------------------------------
 
 // For debug window
-int GB_CameraWebcamImageGetPixel(int x, int y); // webcam image
-int GB_CameraRetinaProcessedImageGetPixel(int x, int y); // image processed by retina chip
+inline int GB_CameraWebcamImageGetPixel(int x, int y); // webcam image
+inline int GB_CameraRetinaProcessedImageGetPixel(int x, int y); // image processed by retina chip
 
 //----------------------------------------------------------------
 

@@ -154,7 +154,6 @@ void GB_CameraWebcamCapture(void)
         {
             if(frame->depth == 8 && frame->nChannels == 3)
             {
-
                 for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
                 {
                     u8 * data = &( ((u8*)frame->imageData)
@@ -164,8 +163,7 @@ void GB_CameraWebcamCapture(void)
                     u32 g = data[1];
                     u32 b = data[2];
 
-                    s16 value = ( 2*r + 5*g + 1*b) >> 3;
-                    gb_camera_webcam_output[i][j] = value;
+                    gb_camera_webcam_output[i][j] = ( 2*r + 5*g + 1*b) >> 3;
                 }
             }
             else
@@ -212,7 +210,7 @@ void GB_CameraUpdateClocksCounterReference(int reference_clocks)
 
             if(cam->clocks_left <= 0)
             {
-                cam->reg[0] = 0; // ready
+                cam->reg[0] &= ~BIT(0); // ready
                 cam->clocks_left = 0;
             }
         }
@@ -249,39 +247,118 @@ static inline int gb_max_int(int a, int b)
 {
     return (a > b) ? a : b;
 }
-/*
-static int gb_cam_matrix_process(int value, int x, int y)
+
+static inline u32 gb_cam_matrix_process(u32 value, int x, int y)
 {
     _GB_CAMERA_CART_ * cam = &GameBoy.Emulator.CAM;
 
-    x = x % 4;
-    y = y % 4;
+    x = x & 3;
+    y = y & 3;
 
-    int base = 6 + y*3 + x;
+    int base = 6 + (y*4 + x) * 3;
 
-    int r0 = cam->reg[base+0];
-    int r1 = cam->reg[base+1];
-    int r2 = cam->reg[base+2];
-
-    value = (255 - value);
+    u32 r0 = cam->reg[base+0];
+    u32 r1 = cam->reg[base+1];
+    u32 r2 = cam->reg[base+2];
 
     if(value < r0) return 0x00;
-    if(value < r1) return 0x40;
-    if(value < r2) return 0x40;
+    else if(value < r1) return 0x40;
+    else if(value < r2) return 0x80;
     return 0xC0;
 }
-*/
-static void GB_CameraTakePicture(u32 exposure_time, int offset, int dithering_enabled, int contrast) // contrast: 0..100
+
+static void GB_CameraTakePicture(void)
 {
+    int i, j;
+    _GB_CAMERA_CART_ * cam = &GameBoy.Emulator.CAM;
+
+    //------------------------------------------------
+
+    // Get webcam image
     GB_CameraWebcamCapture();
 
-    int inbuffer[16*8][14*8]; // buffer after applying effects
-    u8 readybuffer[14][16][16];
-    int i, j;
+    //------------------------------------------------
 
-    //Apply 3x3 programmable 1-D filtering
+    // Register 0
+    u32 P_bits = 0;
+    u32 M_bits = 0;
+    //u32 X_bits = 0x01; //Whatever...
+
+    switch( (cam->reg[0]>>1)&3 )
+    {
+        case 0: P_bits = 0x00; M_bits = 0x01; break;
+        case 1: P_bits = 0x01; M_bits = 0x00; break;
+        case 2: case 3: P_bits = 0x01; M_bits = 0x02; break; // They are the same
+        default: break;
+    }
+
+    // Register 1
+    u32 N_bit = (cam->reg[1] & BIT(7)) >> 7;
+    u32 VH_bits = (cam->reg[1] & (BIT(6)|BIT(5))) >> 5;
+
+    const float gain_lut[32] = { // Absolute, not dB
+       5.01,  5.96,  7.08,   8.41,  10.00,  11.89,  14.13,  16.79,
+      19.95, 28.18, 39.81,  56.23,  79.43, 112.20, 188.36, 375.84,
+      10.00, 11.89, 14.13,  16.79,  19.95,  23.71,  28.18,  33.50,
+      39.81, 56.23, 79.43, 112.20, 158.49, 223.87, 375.84, 749.89,
+    };
+
+    float GAIN = gain_lut[cam->reg[1] & 0x1F];
+
+    // Registers 2 and 3
+    u32 EXPOSURE_bits = cam->reg[3] | (cam->reg[2]<<8);
+
+    // Register 4
+    const int edge_ratio_lut[8] = { 50, 75, 100, 125, 200, 300, 400, 500 }; // Percent
+
+    int EDGE_RATIO = edge_ratio_lut[(cam->reg[4] & 0x70)>>4];
+
+    u32 E3_bit = (cam->reg[4] & BIT(7)) >> 7;
+    u32 I_bit = (cam->reg[4] & BIT(3)) >> 3;
+
+    float VREF = 0.5f * (float)(cam->reg[4]&7);
+
+    // Register 5
+    u32 Z_bits = (cam->reg[5] & (BIT(7)|BIT(6))) >> 6;
+
+    float offset_step = ( (cam->reg[5] & 0x20) ? 0.032 : -0.032 );
+    float OFFSET = offset_step * (cam->reg[5] & 0x1F);
+
+    // Check what kind of image processing has to be done
+
+    u32 _3x3_matrix_enabled = 0;
+    u32 _1D_filtering_enabled = 0;
+
+    u32 switch_value = (N_bit<<3) | (VH_bits<<1) | E3_bit;
+    switch(switch_value)
+    {
+        case 0x0: _1D_filtering_enabled = 1; break;
+        case 0xE: _3x3_matrix_enabled = 1; break;
+        default:
+            Debug_LogMsgArg("Unsupported GB Cam mode: 0x%X",switch_value);
+            break;
+    }
+
+    //------------------------------------------------
+
+    // Calculate timings
+    cam->clocks_left = 4 * ( 32446 + ( N_bit ? 0 : 512 ) + 16 * EXPOSURE_bits );
+
+    //------------------------------------------------
+
+    // Apply exposure time
     for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
     {
+        int result = gb_camera_webcam_output[i][j];
+        result = ( (result * EXPOSURE_bits ) / 0x0800 );
+        gb_cam_retina_output_buf[i][j] = gb_clamp_int(0,result,255);
+    }
+
+/*
+    // Apply 3x3 programmable 1-D filtering
+    for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
+    {
+
         // 2D edge
         int ms = gb_camera_webcam_output[i][gb_min_int(j+1,14*8-1)];
         int mn = gb_camera_webcam_output[i][gb_max_int(0,j-1)];
@@ -289,108 +366,44 @@ static void GB_CameraTakePicture(u32 exposure_time, int offset, int dithering_en
         int me = gb_camera_webcam_output[gb_min_int(i+1,16*8-1)][j];
         gb_cam_retina_output_buf[i][j] =
             gb_clamp_int( 0, (3*gb_camera_webcam_output[i][j]) - (ms+mn+mw+me)/2 , 255);
-    }
 
-    //Apply exposure time
+        gb_cam_retina_output_buf[i][j] = gb_camera_webcam_output[i][j];
+    }
+*/
+    //------------------------------------------------
+
+    int fourcolorsbuffer[16*8][14*8]; // buffer after controller matrix
+
+    // Convert to Game Boy colors using the controller matrix
+    for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
+        fourcolorsbuffer[i][j] = gb_cam_matrix_process(gb_cam_retina_output_buf[i][j],i,j);
+
+    // Convert to tiles
+    u8 finalbuffer[14][16][16]; // final buffer
+    memset(finalbuffer,0,sizeof(finalbuffer));
     for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
     {
-        int result = gb_cam_retina_output_buf[i][j];
-        result = ( ( (result + (exposure_time>>8)) * exposure_time ) / 0x800 );
-        gb_cam_retina_output_buf[i][j] = gb_clamp_int(0,result,255);
-    }
+        u8 outcolor = 3 - (fourcolorsbuffer[i][j] >> 6);
 
-    //Apply contrast
-    double c;
-    if(contrast <= 50)
-    {
-        c = (double)(50-contrast);
-        c /= 60.0;
-        c *= c;
-        c = (double)1.0 - c;
-    }
-    else
-    {
-        c = (double)(contrast-50);
-        c /= 60.0;
-        c *= c;
-        c *= c;
-        c *= 100;
-        c = (double)1.0 + c;
-    }
-
-    int contrast_lookup[256];
-    double newValue = 0;
-    for(i = 0; i < 256; i++)
-    {
-        newValue = (double)i;
-        newValue /= 255.0;
-        newValue -= 0.5;
-        newValue *= c;
-        newValue += 0.5;
-        newValue *= 255;
-
-        newValue = gb_clamp_int(0,newValue,255);
-        contrast_lookup[i] = (int)newValue;
-    }
-
-    for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
-        gb_cam_retina_output_buf[i][j] = contrast_lookup[gb_cam_retina_output_buf[i][j]];
-
-    if(dithering_enabled)
-    {
-        // Standard ordered dithering. Bayer threshold matrix - http://bisqwit.iki.fi/story/howto/dither/jy/
-        const int matrix[16] =  { // divided by 256
-             15, 135,  45, 165,
-            195,  75, 225, 105,
-             60, 180,  30, 150,
-            240, 120, 210,  90
-        };
-        const int matrix_div = 256;
-
-        int treshold = 256/4;
-        for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
-        {
-            int oldpixel = gb_cam_retina_output_buf[i][j];
-            //int matrix_value = matrix[(i & 7) + ((j & 7) << 3)];
-            int matrix_value = matrix[(i & 3) + ((j & 3) << 2)];
-            int newpixel = gb_clamp_int(0, oldpixel + ( (matrix_value * treshold) / matrix_div), 255 ) & 0xC0;
-            inbuffer[i][j] = (u8)newpixel;
-        }
-    }
-    else
-    {
-        // No dithering
-        for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
-        {
-            inbuffer[i][j] = (u8)(gb_cam_retina_output_buf[i][j] & 0xC0);
-        }
-    }
-
-    //Convert to tiles
-    memset(readybuffer,0,sizeof(readybuffer));
-    for(i = 0; i < 16*8; i++) for(j = 0; j < 14*8; j++)
-    {
-        u8 outcolor = 3 - (inbuffer[i][j] >> 6);
-
-        u8 * tile_base = readybuffer[j>>3][i>>3];
-
+        u8 * tile_base = finalbuffer[j>>3][i>>3];
         tile_base = &tile_base[(j&7)*2];
 
         if(outcolor & 1) tile_base[0] |= 1<<(7-(7&i));
         if(outcolor & 2) tile_base[1] |= 1<<(7-(7&i));
     }
 
-    //Copy to cart ram...
-    memcpy(&(GameBoy.Memory.ExternRAM[0][0xA100-0xA000]),readybuffer,sizeof(readybuffer));
+    // Copy to cart ram...
+    memcpy(&(GameBoy.Memory.ExternRAM[0][0xA100-0xA000]),finalbuffer,sizeof(finalbuffer));
 }
 
 int GB_CameraReadRegister(int address)
 {
-    _GB_CAMERA_CART_ * cam = &GameBoy.Emulator.CAM;
-
     GB_CameraUpdateClocksCounterReference(GB_CPUClockCounterGet());
 
-    if(address == 0xA000) return cam->reg[0]; //'ready' register
+    _GB_CAMERA_CART_ * cam = &GameBoy.Emulator.CAM;
+
+    int reg = (address&0x7F); // Mirror
+    if(reg == 0) return cam->reg[0]; //'ready' register
     return 0x00; //others are write-only and they return 0.
 }
 
@@ -398,44 +411,21 @@ void GB_CameraWriteRegister(int address, int value)
 {
     _GB_CAMERA_CART_ * cam = &GameBoy.Emulator.CAM;
 
-    int reg = (address&0x7F);
+    int reg = (address&0x7F); // Mirror
 
-    //printf("[%04X]=%02X\n",(u32)(u16)address,(u32)(u8)value);
     if(reg < 0x36)
     {
         //Debug_LogMsgArg("Cam [0x%02X]=0x%02X",(u32)(u16)(address&0xFF),(u32)(u8)value);
 
-        cam->reg[reg] = value & 7;
-
         if(reg == 0) // Take picture...
         {
-            if(value == 0x3) //execute command? take picture?
-            {
-                u32 exposure_steps = cam->reg[3] | (cam->reg[2]<<8);
+            cam->reg[reg] = value & 7;
 
-                int dithering = 0;
-
-                int i;
-                for(i = 6; i < 0x36; i += 3) // if first 3 registers mirror, not dithering
-                {
-                    if(cam->reg[6+(i%3)] != cam->reg[i])
-                    {
-                        dithering = 1;
-                        break;
-                    }
-                }
-
-                int contrast = gb_clamp_int(0, ((cam->reg[6] - 0x80) * 100) / 0x12, 100);
-
-                GB_CameraTakePicture(exposure_steps,
-                                     (cam->reg[1]&0x20) ? -(cam->reg[1]&0x1F) : (cam->reg[1]&0x1F),
-                                     dithering,
-                                     contrast);
-
-                int N_bit = (cam->reg[1] & BIT(7)) ? 0 : 512;
-                cam->clocks_left = 4 * ( 32446 + N_bit + 16 * exposure_steps );
-            }
-            //else Debug_DebugMsgArg("CAMERA WROTE - %02x to %04x",value,address);
+            if(value & BIT(0)) GB_CameraTakePicture();
+        }
+        else
+        {
+            cam->reg[reg] = value;
         }
     }
     else
@@ -451,12 +441,12 @@ int GB_MapperIsGBCamera(void)
     return (GameBoy.Emulator.MemoryController == MEM_CAMERA);
 }
 
-int GB_CameraWebcamImageGetPixel(int x, int y)
+inline int GB_CameraWebcamImageGetPixel(int x, int y)
 {
     return gb_camera_webcam_output[x][y];
 }
 
-int GB_CameraRetinaProcessedImageGetPixel(int x, int y)
+inline int GB_CameraRetinaProcessedImageGetPixel(int x, int y)
 {
     return gb_cam_retina_output_buf[x][y];
 }

@@ -29,8 +29,9 @@ extern _GB_CONTEXT_ GameBoy;
 
 //------------------------------------------------------------------------------
 
+#define GBCAM_SENSOR_EXTRA_LINES (8)
 #define GBCAM_SENSOR_W (128)
-#define GBCAM_SENSOR_H (112+4) // The actual sensor is 128x126 or so, but only 4 extra rows are needed
+#define GBCAM_SENSOR_H (112+GBCAM_SENSOR_EXTRA_LINES) // The actual sensor is 128x126 or so
 
 #define GBCAM_W (128)
 #define GBCAM_H (112)
@@ -383,19 +384,19 @@ static void GB_CameraTakePicture(void)
         {
             for(i = 0; i < GBCAM_SENSOR_W; i++) for(j = 0; j < GBCAM_SENSOR_H; j++)
             {
-                int ms = gb_cam_retina_output_buf[i][gb_min_int(j+1,GBCAM_SENSOR_H-1)];
-                int px = gb_cam_retina_output_buf[i][j];
+                temp_buf[i][j] = gb_cam_retina_output_buf[i][j];
+            }
+            for(i = 0; i < GBCAM_SENSOR_W; i++) for(j = 0; j < GBCAM_SENSOR_H; j++)
+            {
+                int ms = temp_buf[i][gb_min_int(j+1,GBCAM_SENSOR_H-1)];
+                int px = temp_buf[i][j];
 
                 int value = 0;
                 if(P_bits&BIT(0)) value += px;
                 if(P_bits&BIT(1)) value += ms;
                 if(M_bits&BIT(0)) value -= px;
                 if(M_bits&BIT(1)) value -= ms;
-                temp_buf[i][j] = gb_clamp_int(0,value,255);
-            }
-            for(i = 0; i < GBCAM_SENSOR_W; i++) for(j = 0; j < GBCAM_SENSOR_H; j++)
-            {
-                gb_cam_retina_output_buf[i][j] = temp_buf[i][j];
+                gb_cam_retina_output_buf[i][j] = gb_clamp_int(0,value,255);
             }
             break;
         }
@@ -403,24 +404,23 @@ static void GB_CameraTakePicture(void)
         {
             for(i = 0; i < GBCAM_SENSOR_W; i++) for(j = 0; j < GBCAM_SENSOR_H; j++)
             {
-                int ms = gb_cam_retina_output_buf[i][gb_min_int(j+1,GBCAM_SENSOR_H-1)];
+                int mw = gb_cam_retina_output_buf[gb_max_int(0,i-1)][j];
+                int me = gb_cam_retina_output_buf[gb_min_int(i+1,GBCAM_SENSOR_W-1)][j];
                 int px = gb_cam_retina_output_buf[i][j];
+
+                temp_buf[i][j] = gb_clamp_int(0,px+((2*px-mw-me)*EDGE_alpha),255);
+            }
+            for(i = 0; i < GBCAM_SENSOR_W; i++) for(j = 0; j < GBCAM_SENSOR_H; j++)
+            {
+                int ms = temp_buf[i][gb_min_int(j+1,GBCAM_SENSOR_H-1)];
+                int px = temp_buf[i][j];
 
                 int value = 0;
                 if(P_bits&BIT(0)) value += px;
                 if(P_bits&BIT(1)) value += ms;
                 if(M_bits&BIT(0)) value -= px;
                 if(M_bits&BIT(1)) value -= ms;
-                temp_buf[i][j] = gb_clamp_int(0,value,255);
-            }
-
-            for(i = 0; i < GBCAM_SENSOR_W; i++) for(j = 0; j < GBCAM_SENSOR_H; j++)
-            {
-                int mw = temp_buf[gb_max_int(0,i-1)][j];
-                int me = temp_buf[gb_min_int(i+1,GBCAM_SENSOR_W-1)][j];
-                int px = temp_buf[i][j];
-
-                gb_cam_retina_output_buf[i][j] = gb_clamp_int(0,px+((2*px-mw-me)*EDGE_alpha),255);
+                gb_cam_retina_output_buf[i][j] = gb_clamp_int(0,value,255);
             }
             break;
         }
@@ -428,23 +428,35 @@ static void GB_CameraTakePicture(void)
         {
             for(i = 0; i < GBCAM_SENSOR_W; i++) for(j = 0; j < GBCAM_SENSOR_H; j++)
             {
-                temp_buf[i][j] = gb_cam_retina_output_buf[i][j];
+                int ms = gb_cam_retina_output_buf[i][gb_min_int(j+1,GBCAM_SENSOR_H-1)];
+                int mn = gb_cam_retina_output_buf[i][gb_max_int(0,j-1)];
+                int mw = gb_cam_retina_output_buf[gb_max_int(0,i-1)][j];
+                int me = gb_cam_retina_output_buf[gb_min_int(i+1,GBCAM_SENSOR_W-1)][j];
+                int px  = gb_cam_retina_output_buf[i][j];
+
+                temp_buf[i][j] = gb_clamp_int(0,px+((4*px-mw-me-mn-ms)*EDGE_alpha),255);
             }
             for(i = 0; i < GBCAM_SENSOR_W; i++) for(j = 0; j < GBCAM_SENSOR_H; j++)
             {
-                int ms = temp_buf[i][gb_min_int(j+1,GBCAM_SENSOR_H-1)];
-                int mn = temp_buf[i][gb_max_int(0,j-1)];
-                int mw = temp_buf[gb_max_int(0,i-1)][j];
-                int me = temp_buf[gb_min_int(i+1,GBCAM_SENSOR_W-1)][j];
-                int px  = temp_buf[i][j];
-
-                gb_cam_retina_output_buf[i][j] = gb_clamp_int(0,px+((4*px-mw-me-mn-ms)*EDGE_alpha),255);
+                gb_cam_retina_output_buf[i][j] = temp_buf[i][j];
+            }
+            break;
+        }
+        case 0x1:
+        {
+            // In my GB Camera cartridge this is always the same color. The datasheet of the sensor
+            // doesn't have this configuration documented. Maybe this is a bug?
+            for(i = 0; i < GBCAM_SENSOR_W; i++) for(j = 0; j < GBCAM_SENSOR_H; j++)
+            {
+                gb_cam_retina_output_buf[i][j] = 0x80;
             }
             break;
         }
         default:
         {
-            Debug_DebugMsgArg("Unsupported GB Cam mode: 0x%X",filtering_mode);
+            // Ignore filtering
+            Debug_DebugMsgArg("Unsupported GB Cam mode: 0x%X\n%02X %02X %02X %02X %02X %02X",filtering_mode,
+                              cam->reg[0],cam->reg[1],cam->reg[2],cam->reg[3],cam->reg[4],cam->reg[5]);
             break;
         }
     }
@@ -476,7 +488,8 @@ static void GB_CameraTakePicture(void)
 
     // Convert to Game Boy colors using the controller matrix
     for(i = 0; i < GBCAM_W; i++) for(j = 0; j < GBCAM_H; j++)
-        fourcolorsbuffer[i][j] = gb_cam_matrix_process(gb_cam_retina_output_buf[i][j+1],i,j);
+        fourcolorsbuffer[i][j] =
+            gb_cam_matrix_process(gb_cam_retina_output_buf[i][j+(GBCAM_SENSOR_EXTRA_LINES/2)],i,j);
 
     // Convert to tiles
     u8 finalbuffer[14][16][16]; // final buffer
@@ -540,12 +553,12 @@ int GB_MapperIsGBCamera(void)
 
 inline int GB_CameraWebcamImageGetPixel(int x, int y)
 {
-    return gb_camera_webcam_output[x][y+2]; // 4 extra rows, 2 on each border
+    return gb_camera_webcam_output[x][y+(GBCAM_SENSOR_EXTRA_LINES/2)];
 }
 
 inline int GB_CameraRetinaProcessedImageGetPixel(int x, int y)
 {
-    return gb_cam_retina_output_buf[x][y+2]; // 4 extra rows, 2 on each border
+    return gb_cam_retina_output_buf[x][y+(GBCAM_SENSOR_EXTRA_LINES/2)]; // 4 extra rows, 2 on each border
 }
 
 //----------------------------------------------------------------------------

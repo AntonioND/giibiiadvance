@@ -297,7 +297,6 @@ static void GB_CameraTakePicture(void)
     // Register 0
     u32 P_bits = 0;
     u32 M_bits = 0;
-    //u32 X_bits = 0x01; // Whatever...
 
     switch( (cam->reg[0]>>1)&3 )
     {
@@ -310,34 +309,17 @@ static void GB_CameraTakePicture(void)
     // Register 1
     u32 N_bit = (cam->reg[1] & BIT(7)) >> 7;
     u32 VH_bits = (cam->reg[1] & (BIT(6)|BIT(5))) >> 5;
-/*
-    const float gain_lut[32] = { // Absolute, not dB
-       5.01,  5.96,  7.08,   8.41,  10.00,  11.89,  14.13,  16.79,
-      19.95, 28.18, 39.81,  56.23,  79.43, 112.20, 188.36, 375.84,
-      10.00, 11.89, 14.13,  16.79,  19.95,  23.71,  28.18,  33.50,
-      39.81, 56.23, 79.43, 112.20, 158.49, 223.87, 375.84, 749.89,
-    };
 
-    float GAIN = gain_lut[cam->reg[1] & 0x1F];
-*/
     // Registers 2 and 3
     u32 EXPOSURE_bits = cam->reg[3] | (cam->reg[2]<<8);
 
     // Register 4
-    const int edge_ratio_lut[8] = { 0.50, 0.75, 1.00, 1.25, 2.00, 3.00, 4.00, 5.00 };
+    const float edge_ratio_lut[8] = { 0.50, 0.75, 1.00, 1.25, 2.00, 3.00, 4.00, 5.00 };
 
-    int EDGE_alpha = edge_ratio_lut[(cam->reg[4] & 0x70)>>4];
+    float EDGE_alpha = edge_ratio_lut[(cam->reg[4] & 0x70)>>4];
 
     u32 E3_bit = (cam->reg[4] & BIT(7)) >> 7;
     u32 I_bit = (cam->reg[4] & BIT(3)) >> 3;
-
-//    int VREF = (0.5f * (float)(cam->reg[4]&7)) * 255.0 / 5.0;
-
-    // Register 5
-//    u32 Z_bits = (cam->reg[5] & (BIT(7)|BIT(6))) >> 6;
-
-//    float offset_step = ( (cam->reg[5] & 0x20) ? 0.032 : -0.032 );
-//    int OFFSET = ( ( offset_step * (cam->reg[5] & 0x1F) ) * 255.0 / 5.0 );
 
     //------------------------------------------------
 
@@ -460,25 +442,7 @@ static void GB_CameraTakePicture(void)
             break;
         }
     }
-/*
-    for(i = 0; i < GBCAM_SENSOR_W; i++) for(j = 0; j < GBCAM_SENSOR_H; j++)
-    {
-        int value = gb_cam_retina_output_buf[i][j] + OFFSET;
-        gb_cam_retina_output_buf[i][j] = gb_clamp_int(0,value,255);
-    }
 
-    for(i = 0; i < GBCAM_SENSOR_W; i++) for(j = 0; j < GBCAM_SENSOR_H; j++)
-    {
-        int value = gb_cam_retina_output_buf[i][j] * GAIN/20.0f;
-        gb_cam_retina_output_buf[i][j] = gb_clamp_int(0,value,255);
-    }
-
-    for(i = 0; i < GBCAM_SENSOR_W; i++) for(j = 0; j < GBCAM_SENSOR_H; j++)
-    {
-        int value = gb_cam_retina_output_buf[i][j] + VREF;
-        gb_cam_retina_output_buf[i][j] = gb_clamp_int(0,value,255);
-    }
-*/
     //------------------------------------------------
 
     // Controller handling

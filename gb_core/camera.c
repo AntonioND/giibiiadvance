@@ -19,6 +19,7 @@
 #include "../build_options.h"
 #include "../general_utils.h"
 #include "../debug_utils.h"
+#include "../config.h"
 
 #include "gameboy.h"
 #include "cpu.h"
@@ -73,11 +74,24 @@ int GB_CameraInit(void)
 #ifndef NO_CAMERA_EMULATION
     if(gbcamera_enabled) return 1;
 
-    capture = cvCaptureFromCAM(CV_CAP_ANY); // TODO : Select camera from configuration file?
-    if(!capture)
+    if(EmulatorConfig.webcam_select == 0)
     {
-        Debug_DebugMsgArg("OpenCV ERROR:\ncvCaptureFromCAM(CV_CAP_ANY) is NULL.\nNo camera detected?");
-        return 0;
+        capture = cvCaptureFromCAM(CV_CAP_ANY);
+        if(!capture)
+        {
+            Debug_DebugMsgArg("OpenCV error:\ncvCaptureFromCAM(CV_CAP_ANY) is NULL.\nNo camera detected?");
+            return 0;
+        }
+    }
+    else
+    {
+        capture = cvCaptureFromCAM(EmulatorConfig.webcam_select);
+        if(!capture)
+        {
+            Debug_DebugMsgArg("OpenCV error:\ncvCaptureFromCAM(%d) is NULL.\nNo camera detected?",
+                              EmulatorConfig.webcam_select);
+            return 0;
+        }
     }
 
     gbcamera_enabled = 1;
@@ -110,7 +124,7 @@ int GB_CameraInit(void)
     IplImage * frame = cvQueryFrame(capture);
     if(!frame)
     {
-        Debug_DebugMsgArg("OpenCV ERROR: frame is NULL");
+        Debug_DebugMsgArg("OpenCV error: frame is NULL");
         GB_CameraEnd();
         return 0;
     }
@@ -158,27 +172,27 @@ void GB_CameraWebcamCapture(void)
         if(!frame)
         {
             GB_CameraEnd();
-            Debug_ErrorMsgArg("OpenCV ERROR: frame is null...\n");
+            Debug_ErrorMsgArg("OpenCV error: frame is null...\n");
         }
         else
         {
-            if(frame->depth == 8 && frame->nChannels == 3)
+            if( (frame->depth == 8) && (frame->nChannels == 3) )
             {
                 for(i = 0; i < GBCAM_SENSOR_W; i++) for(j = 0; j < GBCAM_SENSOR_H; j++)
                 {
                     u8 * data = &( ((u8*)frame->imageData)
                             [((j*gbcamera_zoomfactor)*frame->widthStep)+((i*gbcamera_zoomfactor)*3)] );
 
-                    u32 r = data[0];
-                    u32 g = data[1];
-                    u32 b = data[2];
+                    u32 r = *data++;
+                    u32 g = *data++;
+                    u32 b = *data;
 
                     gb_camera_webcam_output[i][j] = ( 2*r + 5*g + 1*b) >> 3;
                 }
             }
             else
             {
-                Debug_ErrorMsgArg("Invalid camera output. Depth = %d bits | Channels = %d",
+                Debug_ErrorMsgArg("Invalid camera output.\nDepth = %d bits\nChannels = %d",
                                   frame->depth,frame->nChannels);
             }
         }
@@ -333,20 +347,13 @@ static void GB_CameraTakePicture(void)
     // Sensor handling
     // ---------------
 
-    //Copy webcam buffer to sensor buffer applying color correction
+    //Copy webcam buffer to sensor buffer applying color correction and exposure time
     for(i = 0; i < GBCAM_SENSOR_W; i++) for(j = 0; j < GBCAM_SENSOR_H; j++)
     {
         int value = gb_camera_webcam_output[i][j];
-        value = 128 + (((value-128) * 5)/8); // "adapt" to 3.1/5.0 V
+        value = ( (value * EXPOSURE_bits ) / 0x0300 ); // 0x0300 could be other values
+        value = 128 + (((value-128) * 1)/8); // "adapt" to "3.1"/5.0 V
         gb_cam_retina_output_buf[i][j] = gb_clamp_int(0,value,255);
-    }
-
-    // Apply exposure time
-    for(i = 0; i < GBCAM_SENSOR_W; i++) for(j = 0; j < GBCAM_SENSOR_H; j++)
-    {
-        int result = gb_cam_retina_output_buf[i][j];
-        result = ( (result * EXPOSURE_bits ) / 0x0100 );
-        gb_cam_retina_output_buf[i][j] = gb_clamp_int(0,result,255);
     }
 
     if(I_bit) // Invert image

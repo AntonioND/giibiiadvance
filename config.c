@@ -40,6 +40,7 @@ t_config EmulatorConfig = { //Default options...
     -1, //frameskip
     0, //oglfilter
     0, //auto_close_debugger
+    0, //webcam_select
     //---------
     64, //volume
     0x3F, //chn_flags
@@ -71,6 +72,9 @@ static const char * oglfiltertype[] = { "nearest", "linear" };
 
 #define CFG_AUTO_CLOSE_DEBUGGER "auto_close_debugger"
 // "true" - "false"
+
+#define CFG_WEBCAM_SELECT "webcam_select"
+// "0" - "9"
 
 #define CFG_SND_CHN_ENABLE "channels_enabled"
 // "#3F" 3F = flags
@@ -113,6 +117,7 @@ void Config_Save(void)
     fprintf(ini_file,CFG_FRAMESKIP "=%d\n",EmulatorConfig.frameskip);
     fprintf(ini_file,CFG_OPENGL_FILTER "=%s\n",oglfiltertype[EmulatorConfig.oglfilter]);
     fprintf(ini_file,CFG_AUTO_CLOSE_DEBUGGER "=%s\n",EmulatorConfig.auto_close_debugger?"true":"false");
+    fprintf(ini_file,CFG_WEBCAM_SELECT "=%d\n",EmulatorConfig.webcam_select);
     fprintf(ini_file,"\n");
 
     fprintf(ini_file,"[Sound]\n");
@@ -273,6 +278,14 @@ void Config_Load(void)
             EmulatorConfig.auto_close_debugger = 1;
         else
             EmulatorConfig.auto_close_debugger = 0;
+    }
+
+    tmp = strstr(ini,CFG_WEBCAM_SELECT);
+    if(tmp)
+    {
+        tmp += strlen(CFG_WEBCAM_SELECT) + 1;
+        EmulatorConfig.webcam_select = *tmp - '0';
+        if(EmulatorConfig.webcam_select > 9) EmulatorConfig.webcam_select = 9;
     }
 
     //SOUND

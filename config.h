@@ -26,6 +26,7 @@ typedef struct {
     int frameskip; // -1 = auto, 0-9 = fixed frameskip
     int oglfilter;
     int auto_close_debugger;
+    unsigned int webcam_select; // 0 = CV_CAP_ANY
 
     //Sound
     //-----

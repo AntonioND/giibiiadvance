@@ -188,12 +188,12 @@ void GB_ScreenDrawScanline(s32 y)
         //DRAW BG + WIN
         for(x = 0; x < 160; x ++)
         {
-            u32 color = GB_GameBoyGetGray(0);
+            u32 color = bg_pal[0];
             bool window_draw = 0;
             bool bg_color0 = false;
 
             if(window_current_line >= 0)
-                if(lcd_reg & (1<<5)) //WIN
+                if( (lcd_reg & (1<<5)) && (lcd_reg & (1<<0)) ) //WIN
                 {
                     if(wy_reg <= y)
                     if(  (wx_reg < 8)  || ( (wx_reg > 7) && ((wx_reg-7) <= x))  )
@@ -752,7 +752,7 @@ void GBC_GB_ScreenDrawScanline(s32 y)
             }
             else
             {
-                gb_framebuffer[gb_cur_fb][base_index + x] = GB_RGB(31,31,31);
+                gb_framebuffer[gb_cur_fb][base_index + x] = bg_pal[0];
                 gb_framebuffer_bgcolor0[x] = 1;
             }
         }
@@ -1083,12 +1083,12 @@ void SGB_ScreenDrawScanline(s32 y)
         //DRAW BG + WIN
         for(x = 0; x < 160; x ++)
         {
-            u32 color = SGB_GetPixelColor(x,y,0);
+            u32 color = SGB_GetPixelColor(x,y,bg_pal[0]);
             bool window_draw = 0;
             bool bg_color0 = false;
 
             if(window_current_line >= 0)
-                if(lcd_reg & (1<<5)) //WIN
+                if( (lcd_reg & (1<<5)) && (lcd_reg & (1<<0)) ) //WIN
                 {
                     if(wy_reg <= y)
                     if(  (wx_reg < 8)  || ( (wx_reg > 7) && ((wx_reg-7) <= x))  )

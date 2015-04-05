@@ -351,7 +351,7 @@ static void GB_CameraTakePicture(void)
     for(i = 0; i < GBCAM_SENSOR_W; i++) for(j = 0; j < GBCAM_SENSOR_H; j++)
     {
         int value = gb_camera_webcam_output[i][j];
-        value = ( (value * EXPOSURE_bits ) / 0x0300 ); // 0x0300 could be other values
+        value = ( (value * EXPOSURE_bits ) / EmulatorConfig.gbcam_exposure_reference );
         value = 128 + (((value-128) * 1)/8); // "adapt" to "3.1"/5.0 V
         gb_cam_retina_output_buf[i][j] = gb_clamp_int(0,value,255);
     }

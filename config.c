@@ -33,11 +33,11 @@
 
 #include "gba_core/sound.h"
 
-t_config EmulatorConfig = { //Default options...
+t_config EmulatorConfig = { //Default values...
     0, //debug_msg_enable
     2, //screen_size
     0, //load_from_boot_rom
-    -1, //frameskip
+    0, //frameskip
     0, //oglfilter
     0, //auto_close_debugger
     0, //webcam_select
@@ -50,6 +50,7 @@ t_config EmulatorConfig = { //Default options...
     SERIAL_GBPRINTER, //serial_device
     0, //enableblur
     0, //realcolors
+    0x0200, //gbcam_exposure_reference
 
     //gb palette is not stored here, it is stored in gb_main.c
     //key config not here, either... it's in input_utils.c
@@ -97,6 +98,9 @@ static const char * serialdevice[] = { "None", "GBPrinter" }; //, "Gameboy" };
 #define CFG_REAL_GB_COLORS "real_colors"
 // "true" - "false"
 
+#define CFG_GBCAM_EXPOSURE_REFERENCE "gbcam_exposure_reference"
+// "#NNNN"
+
 #define CFG_GB_PALETTE "gb_palette"
 // "#RRGGBB"
 
@@ -133,6 +137,8 @@ void Config_Save(void)
     fprintf(ini_file,CFG_SERIAL_DEVICE "=%s\n",serialdevice[EmulatorConfig.serial_device]);
     fprintf(ini_file,CFG_ENABLE_BLUR "=%s\n",EmulatorConfig.enableblur?"true":"false");
     fprintf(ini_file,CFG_REAL_GB_COLORS "=%s\n",EmulatorConfig.realcolors?"true":"false");
+    fprintf(ini_file,CFG_GBCAM_EXPOSURE_REFERENCE "=#%04X\n",EmulatorConfig.gbcam_exposure_reference);
+
     u8 r,g,b; GB_ConfigGetPalette(&r,&g,&b);
     fprintf(ini_file,CFG_GB_PALETTE "=#%02X%02X%02X\n",r,g,b);
     fprintf(ini_file,"\n");
@@ -380,6 +386,25 @@ void Config_Load(void)
             EmulatorConfig.realcolors = 0;
 
         GB_EnableRealColors(EmulatorConfig.realcolors);
+    }
+
+    tmp = strstr(ini,CFG_GBCAM_EXPOSURE_REFERENCE);
+    if(tmp)
+    {
+        tmp += strlen(CFG_GBCAM_EXPOSURE_REFERENCE) + 1;
+        if(*tmp == '#')
+        {
+            tmp ++;
+            char aux[5]; aux[4] = '\0';
+            aux[0] = *tmp++;
+            aux[1] = *tmp++;
+            aux[2] = *tmp++;
+            aux[3] = *tmp++;
+            unsigned int value = asciihex_to_int(aux);
+
+            if(value <= 0xFFFF)
+                EmulatorConfig.gbcam_exposure_reference = value;
+        }
     }
 
     tmp = strstr(ini,CFG_GB_PALETTE);

@@ -40,6 +40,7 @@ typedef struct {
     int serial_device;
     int enableblur;
     int realcolors;
+    unsigned int gbcam_exposure_reference;
 
     //gb palette is not stored here, it is stored in gb_main.c
 

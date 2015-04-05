@@ -43,7 +43,7 @@ For 0.3.0
 Dependencies
 ------------
 
-This program needs SDL2 and OpenCV for GB Camera support. I'm using version 2.0.0 of OpenCV.
+This program needs SDL2, and optionally OpenCV for GB Camera support. I'm using version 2.0.0 of OpenCV.
 
 It also uses libpng and zlib, but at the moment they are statically linked so there are no conflicts between runtime and compiled versions.
 

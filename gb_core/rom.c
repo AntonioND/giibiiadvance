@@ -49,6 +49,7 @@ Others are bad dumps (in fact, some of those are bad dumps or strange roms...).
 
 //If a cart type is in parenthesis, I haven't seen any game that uses it, but it should use that
 //controller. Cartridges with "???" have been seen, but there is not much documentation about it...
+//Probably just bad dumps.
 static const char * gb_memorycontrollers[256] = {
     "ROM ONLY", "MBC1", "MBC1+RAM", "MBC1+RAM+BATTERY", "Unknown", "(MBC2)", "MBC2+BATTERY", "Unknown",
     "(ROM+RAM) ", "(ROM+RAM+BATTERY)", "Unknown", "MMM01", "(MMM01+RAM)", "MMM01+RAM+BATTERY", "Unknown", "(MBC3+TIMER+BATTERY)",
@@ -601,6 +602,155 @@ void GB_Cardridge_Set_Filename(char * filename)
 
 //--------------------------------------------------------------------------
 
+void GB_RTC_Save(FILE * savefile)
+{
+    if(GameBoy.Emulator.HasTimer == 0) return;
+
+    time_t current_time = time(NULL);
+
+    int error = 0;
+
+    // Time
+
+    if( fwrite(&GameBoy.Emulator.Timer.sec,1,4,savefile) != 4 ) error = 1;
+    if( fwrite(&GameBoy.Emulator.Timer.min,1,4,savefile) != 4 ) error = 1;
+    if( fwrite(&GameBoy.Emulator.Timer.hour,1,4,savefile) != 4 ) error = 1;
+
+    u32 days_low = GameBoy.Emulator.Timer.days & 0xFF;
+    u32 days_hi = (GameBoy.Emulator.Timer.days >> 8) |
+                  (GameBoy.Emulator.Timer.halt << 6) |
+                  (GameBoy.Emulator.Timer.carry << 7);
+
+    if( fwrite(&days_low,1,4,savefile) != 4 ) error = 1;
+    if( fwrite(&days_hi,1,4,savefile) != 4 ) error = 1;
+
+    // Latched time
+
+    if( fwrite(&GameBoy.Emulator.LatchedTime.sec,1,4,savefile) != 4 ) error = 1;
+    if( fwrite(&GameBoy.Emulator.LatchedTime.min,1,4,savefile) != 4 ) error = 1;
+    if( fwrite(&GameBoy.Emulator.LatchedTime.hour,1,4,savefile) != 4 ) error = 1;
+
+    days_low = GameBoy.Emulator.LatchedTime.days & 0xFF;
+    days_hi = (GameBoy.Emulator.LatchedTime.days >> 8) |
+              (GameBoy.Emulator.LatchedTime.halt << 6) |
+              (GameBoy.Emulator.LatchedTime.carry << 7);
+
+    if( fwrite(&days_low,1,4,savefile) != 4 ) error = 1;
+    if( fwrite(&days_hi,1,4,savefile) != 4 ) error = 1;
+
+    // Timestamp
+
+    u32 timestamp_low, timestamp_hi;
+
+    if(sizeof(time_t) == 4)
+    {
+        timestamp_low = current_time;
+        timestamp_hi = 0;
+    }
+    else if(sizeof(time_t) == 8)
+    {
+        timestamp_low = current_time;
+        timestamp_hi = (current_time>>32); // TODO: Remove warning?
+    }
+    else // ????
+    {
+        //Debug_ErrorMsg("Invalid size of time_t.");
+        timestamp_low = current_time;
+        timestamp_hi = (current_time>>32); // TODO: Remove warning?
+    }
+
+    if( fwrite(&timestamp_low,1,4,savefile) != 4 ) error = 1;
+    if( fwrite(&timestamp_hi,1,4,savefile) != 4 ) error = 1;
+
+    if(error) Debug_ErrorMsgArg("Error while saving RTC data!");
+}
+
+void GB_RTC_Load(FILE * savefile)
+{
+    if(GameBoy.Emulator.HasTimer == 0) return;
+
+    u64 current_time = (u64)time(NULL);
+    u64 old_time;
+
+    ConsolePrint("Loading RTC data... ");
+
+    int error = 0;
+    u32 days_low, days_hi;
+
+    // Time
+
+    if( fread(&GameBoy.Emulator.Timer.sec,1,4,savefile) != 4 ) error = 1;
+    if( fread(&GameBoy.Emulator.Timer.min,1,4,savefile) != 4 ) error = 1;
+    if( fread(&GameBoy.Emulator.Timer.hour,1,4,savefile) != 4 ) error = 1;
+
+    if( fread(&days_low,1,4,savefile) != 4 ) error = 1;
+    if( fread(&days_hi,1,4,savefile) != 4 ) error = 1;
+
+    GameBoy.Emulator.Timer.days = (days_low & 0xFF) | ((days_hi&0x01)<<8);
+    GameBoy.Emulator.Timer.halt = (days_hi&(1<<6)) >> 6;
+    GameBoy.Emulator.Timer.carry = (days_hi&(1<<7)) >> 7;
+
+    // Latched time
+
+    if( fread(&GameBoy.Emulator.LatchedTime.sec,1,4,savefile) != 4 ) error = 1;
+    if( fread(&GameBoy.Emulator.LatchedTime.min,1,4,savefile) != 4 ) error = 1;
+    if( fread(&GameBoy.Emulator.LatchedTime.hour,1,4,savefile) != 4 ) error = 1;
+
+    if( fread(&days_low,1,4,savefile) != 4 ) error = 1;
+    if( fread(&days_hi,1,4,savefile) != 4 ) error = 1;
+
+    GameBoy.Emulator.LatchedTime.days = (days_low & 0xFF) | ((days_hi&0x01)<<8);
+    GameBoy.Emulator.LatchedTime.halt = (days_hi&(1<<6)) >> 6;
+    GameBoy.Emulator.LatchedTime.carry = (days_hi&(1<<7)) >> 7;
+
+    // Timestamp
+
+    u32 timestamp_low, timestamp_hi;
+
+    if( fread(&timestamp_low,1,4,savefile) != 4 ) error = 1;
+    if( fread(&timestamp_hi,1,4,savefile) != 4 ) timestamp_hi = 0;
+
+    old_time = ((u64)timestamp_low) | ( ((u64)timestamp_hi) << 32 );
+
+    if(error) Debug_ErrorMsgArg("Error while loading RTC data!");
+
+    if(GameBoy.Emulator.Timer.halt == 1) return; //Nothing else to do...
+
+    u64 time_increased = current_time - old_time;
+
+    GameBoy.Emulator.Timer.sec += time_increased % 60;
+    if(GameBoy.Emulator.Timer.sec > 59)
+    {
+        GameBoy.Emulator.Timer.sec -= 60;
+        time_increased += 60;
+    }
+
+    GameBoy.Emulator.Timer.min += (time_increased / 60) % 60;
+    if(GameBoy.Emulator.Timer.min > 59)
+    {
+        GameBoy.Emulator.Timer.min -= 60;
+        time_increased += 3600;
+    }
+
+    GameBoy.Emulator.Timer.hour += (time_increased / 3600) % 24;
+    if(GameBoy.Emulator.Timer.hour > 23)
+    {
+        GameBoy.Emulator.Timer.hour -= 24;
+        time_increased += 3600 * 24;
+    }
+
+    GameBoy.Emulator.Timer.days += (time_increased / (3600 * 24));
+    while(GameBoy.Emulator.Timer.days > 511)
+    {
+        GameBoy.Emulator.Timer.days &= 511;
+        GameBoy.Emulator.Timer.carry = 1;
+    }
+
+    ConsolePrint("Done!\n");
+}
+
+//--------------------------------------------------------------------------
+
 void GB_SRAM_Save(void)
 {
     if(GameBoy.Emulator.RAM_Banks == 0 || GameBoy.Emulator.HasBattery == 0) return;
@@ -637,7 +787,10 @@ void GB_SRAM_Save(void)
         }
     }
 
+    GB_RTC_Save(savefile);
+
     fclose(savefile);
+    free(name);
 }
 
 void GB_SRAM_Load(void)
@@ -685,6 +838,8 @@ void GB_SRAM_Load(void)
         }
     }
 
+    GB_RTC_Load(savefile);
+
     fclose(savefile);
     free(name);
 
@@ -692,103 +847,4 @@ void GB_SRAM_Load(void)
 }
 
 //--------------------------------------------------------------------------
-
-void GB_RTC_Save(void)
-{
-    if(GameBoy.Emulator.HasTimer == 0) return;
-
-    int size = strlen(GameBoy.Emulator.save_filename) + 5;
-    char * name = malloc(size);
-    s_snprintf(name,size,"%s.rtc",GameBoy.Emulator.save_filename);
-
-    time_t current_time = time(NULL);
-
-    FILE * savefile = fopen (name,"wb+");
-
-    if(!savefile)
-    {
-        Debug_ErrorMsgArg("Couldn't save rtc data.");
-        free(name);
-        return;
-    }
-
-    int n = fwrite(&GameBoy.Emulator.Timer, 1, sizeof(_GB_MB3_TIMER_), savefile);
-    if(n != sizeof(_GB_MB3_TIMER_))
-        Debug_ErrorMsgArg("Error while saving MBC3 data: %d bytes written",n);
-
-    n = fwrite(&current_time, 1, sizeof(time_t), savefile);
-    if(n != sizeof(time_t))
-        Debug_ErrorMsgArg("Error while saving RTC data: %d bytes written",n);
-
-
-    fclose(savefile);
-    free(name);
-}
-
-void GB_RTC_Load(void)
-{
-    if(GameBoy.Emulator.HasTimer == 0) return;
-
-    int size = strlen(GameBoy.Emulator.save_filename) + 5;
-    char * name = malloc(size);
-    s_snprintf(name,size,"%s.rtc",GameBoy.Emulator.save_filename);
-
-    time_t current_time = time(NULL);
-    time_t old_time;
-
-    FILE * savefile = fopen (name,"rb");
-
-    if(!savefile)
-    {
-        free(name);
-        return; // No save file...
-    }
-
-    ConsolePrint("Loading RTC data... ");
-
-    int n = fread(&GameBoy.Emulator.Timer, 1, sizeof(_GB_MB3_TIMER_), savefile);
-    if(n != sizeof(_GB_MB3_TIMER_))
-        ConsolePrint("Error while loading MBC3 data: %d bytes read",n);
-
-    n = fread(&old_time, 1, sizeof(time_t), savefile);
-    if(n != sizeof(time_t))
-        ConsolePrint("Error while loading RTC data: %d bytes read",n);
-
-    fclose(savefile);
-
-    if(GameBoy.Emulator.Timer.halt == 1) return; //Nothing else to do...
-
-    time_t time_increased = current_time - old_time;
-
-    GameBoy.Emulator.Timer.sec += time_increased % 60;
-    if(GameBoy.Emulator.Timer.sec > 59)
-    {
-        GameBoy.Emulator.Timer.sec -= 60;
-        time_increased += 60;
-    }
-
-    GameBoy.Emulator.Timer.min += (time_increased / 60) % 60;
-    if(GameBoy.Emulator.Timer.min > 59)
-    {
-        GameBoy.Emulator.Timer.min -= 60;
-        time_increased += 3600;
-    }
-
-    GameBoy.Emulator.Timer.hour += (time_increased / 3600) % 24;
-    if(GameBoy.Emulator.Timer.hour > 23)
-    {
-        GameBoy.Emulator.Timer.hour -= 24;
-        time_increased += 3600 * 24;
-    }
-
-    GameBoy.Emulator.Timer.days += (time_increased / (3600 * 24));
-    while(GameBoy.Emulator.Timer.days > 511)
-    {
-        GameBoy.Emulator.Timer.days &= 511;
-        GameBoy.Emulator.Timer.carry = 1;
-    }
-
-    ConsolePrint("Done!\n");
-}
-
 

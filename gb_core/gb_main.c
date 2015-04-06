@@ -57,7 +57,6 @@ int GB_ROMLoad(const char * rom_path)
             GB_Cardridge_Set_Filename((char*)rom_path);
 
             GB_SRAM_Load();
-            GB_RTC_Load();
 
             GB_PowerOn();
             GB_SkipFrame(0);
@@ -79,10 +78,7 @@ int GB_ROMLoad(const char * rom_path)
 void GB_End(int save)
 {
     if(save)
-    {
         GB_SRAM_Save();
-        GB_RTC_Save();
-    }
 
     GB_PowerOff();
     GB_Cartridge_Unload();

@@ -79,8 +79,5 @@ void GB_Cardridge_Set_Filename(char * filename);
 void GB_SRAM_Save(void);
 void GB_SRAM_Load(void);
 
-void GB_RTC_Save(void);
-void GB_RTC_Load(void);
-
 #endif //__GB_ROM__
 

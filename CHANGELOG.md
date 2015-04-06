@@ -13,9 +13,10 @@ General
 - Support for game controllers.
 - Rumble supported. In my joystick it doesn't work in Windows 7, but it works in Linux Mint 16...
 - Added GB Camera viewer. [GB]
--- Fixed sprites showing as hidden in the GB sprite viewer when they are in the bottom 8 rows of the screen (in 8x8 mode). [GB]
+- Fixed sprites showing as hidden in the GB sprite viewer when they are in the bottom 8 rows of the screen (in 8x8 mode). [GB]
 - Code reorganized.
 - Update memory and I/O viewers pressing F7 in dissasembler. [GB/GBA]
+- MBC3 timer data is now appended to the .sav file like other emulators do to make them compatible.
 
 GB emulation
 
@@ -25,7 +26,7 @@ GB emulation
 - Fixed KEY1 register when doing a hard reset.
 - Joypad interrupt fixed.
 - HALT instruction emulated correctly.
-- GB Camera emulation greatly improved. Also, webcam can be selected with the ini configuration file.
+- GB Camera emulation greatly improved. Also, webcam can be selected with the ini configuration file (base exposure time can also be changed).
 
 Version 0.2.0
 -------------

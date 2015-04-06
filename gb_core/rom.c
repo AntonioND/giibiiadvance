@@ -712,34 +712,38 @@ void GB_RTC_Load(FILE * savefile)
 
     old_time = ((u64)timestamp_low) | ( ((u64)timestamp_hi) << 32 );
 
-    if(error) Debug_ErrorMsgArg("Error while loading RTC data!");
+    if(error)
+    {
+        Debug_ErrorMsgArg("Error while loading RTC data!");
+        old_time = current_time;
+    }
 
     if(GameBoy.Emulator.Timer.halt == 1) return; //Nothing else to do...
 
-    u64 time_increased = current_time - old_time;
+    u64 delta_time = current_time - old_time;
 
-    GameBoy.Emulator.Timer.sec += time_increased % 60;
+    GameBoy.Emulator.Timer.sec += delta_time % 60;
     if(GameBoy.Emulator.Timer.sec > 59)
     {
         GameBoy.Emulator.Timer.sec -= 60;
-        time_increased += 60;
+        delta_time += 60;
     }
 
-    GameBoy.Emulator.Timer.min += (time_increased / 60) % 60;
+    GameBoy.Emulator.Timer.min += (delta_time / 60) % 60;
     if(GameBoy.Emulator.Timer.min > 59)
     {
         GameBoy.Emulator.Timer.min -= 60;
-        time_increased += 3600;
+        delta_time += 3600;
     }
 
-    GameBoy.Emulator.Timer.hour += (time_increased / 3600) % 24;
+    GameBoy.Emulator.Timer.hour += (delta_time / 3600) % 24;
     if(GameBoy.Emulator.Timer.hour > 23)
     {
         GameBoy.Emulator.Timer.hour -= 24;
-        time_increased += 3600 * 24;
+        delta_time += 3600 * 24;
     }
 
-    GameBoy.Emulator.Timer.days += (time_increased / (3600 * 24));
+    GameBoy.Emulator.Timer.days += (delta_time / (3600 * 24));
     while(GameBoy.Emulator.Timer.days > 511)
     {
         GameBoy.Emulator.Timer.days &= 511;

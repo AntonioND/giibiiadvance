@@ -64,7 +64,7 @@ static int Init(void)
     return 0;
 }
 
-#define FLOAT_MS_PER_FRAME ((float)1000.0/(float)60.0)
+#define FLOAT_MS_PER_FRAME ((double)1000.0/(double)60.0)
 
 int main( int argc, char * argv[] )
 {
@@ -100,7 +100,7 @@ int main( int argc, char * argv[] )
 
     //if(argc > 1) LOAD_GAME(argv[1]);
 
-    float waitforticks = 0;
+    double waitforticks = 0;
 
     while(!WH_AreAllWindowsClosed())
     {

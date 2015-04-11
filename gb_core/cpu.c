@@ -390,7 +390,7 @@ inline void _gb_break_to_debugger(void)
 
 //RST nnnn - 4
 #define gb_rst_nnnn(addr) { \
-    GB_CPUClockCounterAdd(4); \
+    GB_CPUClockCounterAdd(8); \
     cpu->R16.SP --; \
     cpu->R16.SP &= 0xFFFF; \
     GB_MemWrite8(cpu->R16.SP,cpu->R8.PCH); \
@@ -398,14 +398,13 @@ inline void _gb_break_to_debugger(void)
     cpu->R16.SP --; \
     cpu->R16.SP &= 0xFFFF; \
     GB_MemWrite8(cpu->R16.SP,cpu->R8.PCL); \
-    GB_CPUClockCounterAdd(4); \
     cpu->R16.PC = addr; \
     GB_CPUClockCounterAdd(4); \
 }
 
 //PUSH r16 - 4
 #define gb_push_r16(reg_hi,reg_low) { \
-    GB_CPUClockCounterAdd(4); \
+    GB_CPUClockCounterAdd(8); \
     cpu->R16.SP--; \
     cpu->R16.SP &= 0xFFFF; \
     GB_MemWrite8(cpu->R16.SP,reg_hi); \
@@ -413,7 +412,7 @@ inline void _gb_break_to_debugger(void)
     cpu->R16.SP--; \
     cpu->R16.SP &= 0xFFFF; \
     GB_MemWrite8(cpu->R16.SP,reg_low); \
-    GB_CPUClockCounterAdd(8); \
+    GB_CPUClockCounterAdd(4); \
 }
 
 //POP r16 - 4
@@ -435,7 +434,7 @@ inline void _gb_break_to_debugger(void)
         u32 temp = GB_MemRead8(cpu->R16.PC++); \
         GB_CPUClockCounterAdd(4); \
         temp |= ( (u32)GB_MemRead8(cpu->R16.PC++) ) << 8; \
-        GB_CPUClockCounterAdd(4); \
+        GB_CPUClockCounterAdd(8); \
         cpu->R16.SP --; \
         cpu->R16.SP &= 0xFFFF; \
         GB_MemWrite8(cpu->R16.SP,cpu->R8.PCH); \
@@ -443,7 +442,6 @@ inline void _gb_break_to_debugger(void)
         cpu->R16.SP --; \
         cpu->R16.SP &= 0xFFFF; \
         GB_MemWrite8(cpu->R16.SP,cpu->R8.PCL); \
-        GB_CPUClockCounterAdd(4); \
         cpu->R16.PC = temp; \
         GB_CPUClockCounterAdd(4); \
     } \
@@ -636,7 +634,7 @@ inline void _gb_break_to_debugger(void)
     GB_CPUClockCounterAdd(4); \
     cpu->R16.PC--; \
     _gb_break_to_debugger(); \
-    Debug_ErrorMsgArg("Undefined opcode. 0x02X\nPC: %04X\nROM: %d", \
+    Debug_DebugMsgArg("Undefined opcode. 0x%02X\nPC: %04X\nROM: %d", \
                 op,GameBoy.CPU.R16.PC,GameBoy.Memory.selected_rom); \
 }
 
@@ -1595,7 +1593,7 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 GB_CPUClockCounterAdd(4);
                 temp |= ( (u32)GB_MemRead8(cpu->R16.PC++) ) << 8;
                 cpu->R16.PC &= 0xFFFF;
-                GB_CPUClockCounterAdd(4);
+                GB_CPUClockCounterAdd(8);
                 cpu->R16.SP --;
                 cpu->R16.SP &= 0xFFFF;
                 GB_MemWrite8(cpu->R16.SP,cpu->R8.PCH);
@@ -1603,7 +1601,6 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 cpu->R16.SP --;
                 cpu->R16.SP &= 0xFFFF;
                 GB_MemWrite8(cpu->R16.SP,cpu->R8.PCL);
-                GB_CPUClockCounterAdd(4);
                 cpu->R16.PC = temp;
                 GB_CPUClockCounterAdd(4);
                 break;
@@ -1706,12 +1703,11 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
             {
                 GB_CPUClockCounterAdd(4);
                 u32 temp = (u16)(s16)(s8)GB_MemRead8(cpu->R16.PC++); //expand sign
-                GB_CPUClockCounterAdd(8);
                 cpu->R8.F = 0;
                 cpu->F.C = ( ( (cpu->R16.SP & 0x00FF) + (temp & 0x00FF) ) > 0x00FF );
                 cpu->F.H = ( ( (cpu->R16.SP & 0x000F) + (temp & 0x000F) ) > 0x000F );
                 cpu->R16.SP = (cpu->R16.SP + temp) & 0xFFFF;
-                GB_CPUClockCounterAdd(4);
+                GB_CPUClockCounterAdd(12);
                 break;
             }
             case 0xE9: //JP HL - 1
@@ -1781,13 +1777,12 @@ static int GB_CPUExecute(int clocks) // returns executed clocks
                 GB_CPUClockCounterAdd(4);
                 s32 temp = (s32)(s8)GB_MemRead8(cpu->R16.PC++);
                 cpu->R16.PC &= 0xFFFF;
-                GB_CPUClockCounterAdd(4);
                 s32 res = (s32)cpu->R16.SP + temp;
                 cpu->R16.HL = res & 0xFFFF;
                 cpu->R8.F = 0;
                 cpu->F.C = ( ( (cpu->R16.SP & 0x00FF) + (temp & 0x00FF) ) > 0x00FF );
                 cpu->F.H = ( ( (cpu->R16.SP & 0x000F) + (temp & 0x000F) ) > 0x000F );
-                GB_CPUClockCounterAdd(4);
+                GB_CPUClockCounterAdd(8);
                 break;
             }
             case 0xF9: //LD SP,HL - 2

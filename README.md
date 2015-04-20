@@ -1,7 +1,7 @@
 GiiBiiAdvance
 =============
 
-Another GB, GBC and GBA emulator writen in C. By Antonio Niño Díaz (AntonioND).
+Another GB, GBC and GBA emulator writen in C. By Antonio Niño Díaz (AntonioND). It's licensed under the GPL v2 license.
 
 [http://antoniond_blog.drunkencoders.com/](http://antoniond_blog.drunkencoders.com/)
 

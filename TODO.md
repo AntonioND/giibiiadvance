@@ -35,6 +35,7 @@ Game Boy
 - STOP doesn't STOP in emulator?
 - Verify ECHO RAM in real cartridge.
 - Writing times of interrupt handler.
+- Can OAM DMA be used anytime (and copy the data correctly)?
 
 Game Boy Advance
 ----------------

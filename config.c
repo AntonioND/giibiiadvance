@@ -18,7 +18,6 @@
 
 #include <string.h>
 #include <stdio.h>
-#include <malloc.h>
 #include <stdlib.h>
 
 #include "build_options.h"

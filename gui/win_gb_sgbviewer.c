@@ -19,7 +19,6 @@
 #include <SDL2/SDL.h>
 
 #include <string.h>
-#include <malloc.h>
 
 #include "../debug_utils.h"
 #include "../window_handler.h"

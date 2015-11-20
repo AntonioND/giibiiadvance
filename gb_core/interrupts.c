@@ -16,7 +16,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <malloc.h>
 #include <time.h>
 
 #include "../build_options.h"

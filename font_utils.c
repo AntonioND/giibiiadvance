@@ -19,7 +19,6 @@
 #include <stdarg.h>
 #include <string.h>
 #include <stdio.h>
-#include <malloc.h>
 
 #include "debug_utils.h"
 #include "png/png_utils.h"

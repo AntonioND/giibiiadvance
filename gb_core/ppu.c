@@ -16,8 +16,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <malloc.h>
-
 #include "../build_options.h"
 #include "../debug_utils.h"
 

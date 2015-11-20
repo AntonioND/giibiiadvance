@@ -19,7 +19,6 @@
 #include <SDL2/SDL.h>
 #include <string.h>
 #include <ctype.h>
-#include <malloc.h>
 
 #include "win_main.h"
 #include "win_utils.h"

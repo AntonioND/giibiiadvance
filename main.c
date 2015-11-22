@@ -35,12 +35,25 @@ static int Init(void)
     WH_Init();
 
     //Initialize SDL
-    if( SDL_Init(SDL_INIT_EVERYTHING) != 0 )
+    if( SDL_Init(SDL_INIT_TIMER|SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_EVENTS) != 0 )
     {
         Debug_LogMsgArg( "SDL could not initialize! SDL Error: %s\n", SDL_GetError() );
         return 1;
     }
     atexit(SDL_Quit);
+
+    //Try to init joystick and haptic, but don't abort if it fails.
+    if( SDL_InitSubSystem(SDL_INIT_JOYSTICK) != 0 )
+    {
+        Debug_LogMsgArg( "SDL could not initialize joystick! SDL Error: %s\n", SDL_GetError() );
+    }
+    else // If joystick inited, try haptic
+    {
+        if( SDL_InitSubSystem(SDL_INIT_HAPTIC) != 0 )
+        {
+            Debug_LogMsgArg( "SDL could not initialize haptic! SDL Error: %s\n", SDL_GetError() );
+        }
+    }
 
     Input_InitSystem(); // init this before loading the configuration
 

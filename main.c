@@ -38,7 +38,6 @@ static int Init(void)
     if( SDL_Init(SDL_INIT_EVERYTHING) != 0 )
     {
         Debug_LogMsgArg( "SDL could not initialize! SDL Error: %s\n", SDL_GetError() );
-        return 1;
     }
     atexit(SDL_Quit);
 

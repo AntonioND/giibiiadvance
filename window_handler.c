@@ -18,9 +18,9 @@
 
 //#define OPENGL_BLIT
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #ifdef OPENGL_BLIT
-#include <SDL2/SDL_opengl.h>
+#include <SDL_opengl.h>
 #endif
 #include <stdio.h>
 #include <string.h>

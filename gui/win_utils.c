@@ -21,7 +21,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include "win_utils.h"
 #include "win_utils_draw.h"

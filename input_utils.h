@@ -19,7 +19,7 @@
 #ifndef __INPUT_UTILS__
 #define __INPUT_UTILS__
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 //----------------------------------------------------------------------------------
 

@@ -70,13 +70,9 @@ Game Boy Advance
 Random things
 -------------
 
-- Add a Makefile.
 - [GB] Reverse engineer GB Camera. 
 - [GB] Put wave RAM in the I/O viewer?
 - [GBA] Final Fantasy Tactics Advance. Mateus Totema LY effect is wrong.
 - [GBA] Reading a 32 bit value in ROM from EWRAM: 10 cycles (wait, wait, read instruction, compute address, wait, wait, wait, read low bits, wait, read high bits)
 - [GBA] Reading a 32 bit value in EWRAM from EWRAM: 10 cycles (wait, wait, read instruction, compute address, wait, wait, read low bits, wait, wait, read high bits)
 - [GBA] Loading a 16 bit value using mov/lsl/mov/orr: 12 cycles ( (wait, wait, read instruction) * 3 )
-
-
-

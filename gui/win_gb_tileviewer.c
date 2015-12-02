@@ -150,7 +150,7 @@ void Win_GBTileViewerUpdate(void)
     }
 
     char text[8];
-    s_snprintf(text,sizeof(text),"Pal: %d",gb_tile_zoomed_tile_sel_pal);
+    snprintf(text,sizeof(text),"Pal: %d",gb_tile_zoomed_tile_sel_pal);
     GUI_SetLabelCaption(&gb_tileview_zoomed_tile_pal_label,text);
 
     GUI_Draw_SetDrawingColor(255,0,0);

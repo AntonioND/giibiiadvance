@@ -205,7 +205,7 @@ int FileExplorer_LoadFolder(void)
             break;
 
         char checkingfile[MAX_PATHLEN];
-        s_snprintf(checkingfile,sizeof(checkingfile),"%s%s",exploring_path,pent->d_name);
+        snprintf(checkingfile,sizeof(checkingfile),"%s%s",exploring_path,pent->d_name);
 
         stat(checkingfile,&statbuf);
         FileExplorer_ListAdd(pent->d_name,(S_ISDIR(statbuf.st_mode))!=0);
@@ -252,7 +252,7 @@ int FileExplorer_SelectEntry(char * file)
     }
 
     char file_path[MAX_PATHLEN];
-    s_snprintf(file_path,sizeof(file_path),"%s%s",exploring_path,file);
+    snprintf(file_path,sizeof(file_path),"%s%s",exploring_path,file);
     struct stat statbuf;
     stat(file_path,&statbuf);
     //Debug_DebugMsgArg("stat(%s)",file_path);

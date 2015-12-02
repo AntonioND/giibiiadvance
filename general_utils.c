@@ -26,16 +26,6 @@
 
 //----------------------------------------------------------------------------------
 
-int s_snprintf(char * dest, int _size, const char * msg, ...)
-{
-    va_list args;
-    va_start(args,msg);
-    int ret = vsnprintf(dest, _size, msg, args);
-    va_end(args);
-    dest[_size-1] = '\0';
-    return ret;
-}
-
 void s_strncpy(char * dest, const char * src, int _size)
 {
     strncpy(dest,src,_size);

@@ -451,7 +451,7 @@ char * GB_Dissasemble(u16 addr, int * step)
         if(paramsize == 0)
         {
             *step = 1;
-            s_snprintf(text,sizeof(text),"%02X       %s",cmd,debug_commands[cmd]);
+            snprintf(text,sizeof(text),"%02X       %s",cmd,debug_commands[cmd]);
             info = debug_commands_info[cmd];
             param = 0;
         }
@@ -480,7 +480,7 @@ char * GB_Dissasemble(u16 addr, int * step)
                     char temp[32];
                     s_strncpy(temp, debug_commands[cmd], sizeof(temp));
                     info = debug_commands_info[cmd];
-                    s_snprintf(instr_text,sizeof(instr_text),temp,param);
+                    snprintf(instr_text,sizeof(instr_text),temp,param);
                 }
             }
             else
@@ -488,10 +488,10 @@ char * GB_Dissasemble(u16 addr, int * step)
                 char temp[32];
                 s_strncpy(temp, debug_commands[cmd], sizeof(temp));
                 info = debug_commands_info[cmd];
-                s_snprintf(instr_text,sizeof(instr_text),temp,param);
+                snprintf(instr_text,sizeof(instr_text),temp,param);
             }
 
-            s_snprintf(text,sizeof(text),"%02X%02X     %s",cmd,param,instr_text);
+            snprintf(text,sizeof(text),"%02X%02X     %s",cmd,param,instr_text);
             *step = 2;
         }
         else if(paramsize == 2)
@@ -505,9 +505,9 @@ char * GB_Dissasemble(u16 addr, int * step)
             param = param1 | (param2 << 8);
             char temp[32];
             s_strncpy(temp, debug_commands[cmd], sizeof(temp));
-            s_snprintf(instr_text,sizeof(instr_text),temp,param);
+            snprintf(instr_text,sizeof(instr_text),temp,param);
             info = debug_commands_info[cmd];
-            s_snprintf(text,sizeof(text),"%02X%02X%02X   %s",cmd,param1,param2,instr_text);
+            snprintf(text,sizeof(text),"%02X%02X%02X   %s",cmd,param1,param2,instr_text);
             *step = 3;
         }
         else if(paramsize == 3) //jump relative
@@ -516,9 +516,9 @@ char * GB_Dissasemble(u16 addr, int * step)
             char temp[32];
             char instr_text[64];
             s_strncpy(temp, debug_commands[cmd], sizeof(temp));
-            s_snprintf(instr_text,sizeof(instr_text),temp,(param + addr) & 0xFFFF);
+            snprintf(instr_text,sizeof(instr_text),temp,(param + addr) & 0xFFFF);
             info = debug_commands_info[cmd];
-            s_snprintf(text,sizeof(text),"%02X%02X     %s",cmd,(u8)param,instr_text);
+            snprintf(text,sizeof(text),"%02X%02X     %s",cmd,(u8)param,instr_text);
             param = param + addr;
             *step = 2;
         }
@@ -599,7 +599,7 @@ char * GB_Dissasemble(u16 addr, int * step)
     else //not code...
     {
         u8 data = GB_MemRead8(addr);
-        s_snprintf(text,sizeof(text),"%02X       db 0x%02X",data,data);
+        snprintf(text,sizeof(text),"%02X       db 0x%02X",data,data);
         *step = 1;
     }
 

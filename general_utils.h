@@ -34,10 +34,7 @@ typedef signed char s8;
 
 //----------------------------------------------------------------------------------
 
-//safe versions of snprintf, strncpy and strncat that set a terminating character if needed.
-//strncpy doesn't set it, and I'd say I've seen implementations of strncat and snprinf that
-//doesn't, either.
-int s_snprintf(char * dest, int _size, const char * msg, ...);
+//safe versions of strncpy and strncat that set a terminating character if needed.
 void s_strncpy(char * dest, const char * src, int _size);
 void s_strncat(char * dest, const char * src, int _size);
 

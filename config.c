@@ -108,7 +108,7 @@ static const char * serialdevice[] = { "None", "GBPrinter" }; //, "Gameboy" };
 void Config_Save(void)
 {
     char path[MAX_PATHLEN];
-    if(DirGetRunningPath()) s_snprintf(path,sizeof(path),"%sGiiBiiAdvance.ini",DirGetRunningPath());
+    if(DirGetRunningPath()) snprintf(path,sizeof(path),"%sGiiBiiAdvance.ini",DirGetRunningPath());
     else s_strncpy(path,"GiiBiiAdvance.ini",sizeof(path));
     FILE * ini_file = fopen(path,"wb");
     if(ini_file == NULL) return;
@@ -203,7 +203,7 @@ void Config_Load(void)
     GB_ConfigSetPalette(0xB0,0xFF,0xB0);
 
     char path[MAX_PATHLEN];
-    if(DirGetRunningPath()) s_snprintf(path,sizeof(path),"%sGiiBiiAdvance.ini",DirGetRunningPath());
+    if(DirGetRunningPath()) snprintf(path,sizeof(path),"%sGiiBiiAdvance.ini",DirGetRunningPath());
     else s_strncpy(path,"GiiBiiAdvance.ini",sizeof(path));
 
     char * ini;
@@ -434,7 +434,7 @@ void Config_Load(void)
         char temp_str[64];
         if(player > 0)
         {
-            s_snprintf(temp_str,sizeof(temp_str),"P%d_Enabled=",player+1);
+            snprintf(temp_str,sizeof(temp_str),"P%d_Enabled=",player+1);
             tmp = strstr(ini,temp_str);
             if(tmp)
             {
@@ -452,7 +452,7 @@ void Config_Load(void)
 
         if(player_enabled) // read the rest of the configuration
         {
-            s_snprintf(temp_str,sizeof(temp_str),"P%d_Controller=[",player+1);
+            snprintf(temp_str,sizeof(temp_str),"P%d_Controller=[",player+1);
             tmp = strstr(ini,temp_str);
             if(tmp)
             {
@@ -476,7 +476,7 @@ void Config_Load(void)
                     //now, read keys
                     for(key = 0; key < P_NUM_KEYS; key ++)
                     {
-                        s_snprintf(temp_str,sizeof(temp_str),"P%d_%s=",player+1,GBKeyNames[key]);
+                        snprintf(temp_str,sizeof(temp_str),"P%d_%s=",player+1,GBKeyNames[key]);
                         tmp = strstr(ini,temp_str);
                         if(tmp)
                         {

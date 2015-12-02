@@ -272,7 +272,7 @@ static void _win_main_config_update_gbpal_info(void)
     GB_ConfigGetPalette(&r,&g,&b);
 
     char text[40];
-    s_snprintf(text,sizeof(text),"GB Palette: (%2d,%2d,%2d)",r/8,g/8,b/8);
+    snprintf(text,sizeof(text),"GB Palette: (%2d,%2d,%2d)",r/8,g/8,b/8);
     GUI_SetLabelCaption(&mainwindow_configwin_gameboy_palette_label,text);
 
     int i;
@@ -429,7 +429,7 @@ void Win_MainCreateConfigWindow(void)
     u8 r,g,b;
     GB_ConfigGetPalette(&r,&g,&b);
     char text[40];
-    s_snprintf(text,sizeof(text),"GB Palette: (%2d,%2d,%2d)",r/8,g/8,b/8);
+    snprintf(text,sizeof(text),"GB Palette: (%2d,%2d,%2d)",r/8,g/8,b/8);
     GUI_SetLabel(&mainwindow_configwin_gameboy_palette_label,12,320,-1,FONT_HEIGHT,text);
     GUI_SetScrollBar(&mainwindow_configwin_gameboy_pal_r_scrollbar,12,338,172,10,
                      0,31,r/8,_win_main_config_gbpal_r_scrollbar_callback);

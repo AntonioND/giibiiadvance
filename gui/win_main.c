@@ -114,10 +114,10 @@ static Uint32 _fps_callback_function(Uint32 interval, void *param)
     WinMain_frames_drawn = 0;
     char caption[60];
     if(_win_main_frameskip > 0)
-        s_snprintf(caption,sizeof(caption),"GiiBiiAdvance: %d fps - %.2f%% - (%d)",WinMain_FPS,
+        snprintf(caption,sizeof(caption),"GiiBiiAdvance: %d fps - %.2f%% - (%d)",WinMain_FPS,
                    (float)WinMain_FPS*10.0f/6.0f,_win_main_frameskip);
     else
-        s_snprintf(caption,sizeof(caption),"GiiBiiAdvance: %d fps - %.2f%%",WinMain_FPS,(float)WinMain_FPS*10.0f/6.0f);
+        snprintf(caption,sizeof(caption),"GiiBiiAdvance: %d fps - %.2f%%",WinMain_FPS,(float)WinMain_FPS*10.0f/6.0f);
     WH_SetCaption(WinIDMain,caption);
 
     return interval;
@@ -392,7 +392,7 @@ static int _win_main_load_rom_autodetect(char * path)
 
         char bios_path[MAX_PATHLEN];
         unsigned int bios_size;
-        s_snprintf(bios_path,sizeof(bios_path),"%s"GBA_BIOS_FILENAME,DirGetBiosFolderPath());
+        snprintf(bios_path,sizeof(bios_path),"%s"GBA_BIOS_FILENAME,DirGetBiosFolderPath());
 
         FileLoad_NoError(bios_path,&bios_buffer,&bios_size); // don't show error messages...
 

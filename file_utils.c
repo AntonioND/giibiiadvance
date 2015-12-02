@@ -65,8 +65,8 @@ void DirSetRunningPath(char * path)
         running_path[2] = '\0';
     }
 
-    s_snprintf(bios_path,sizeof(bios_path),"%s%s%c",running_path,BIOS_FOLDER,slash_char);
-    s_snprintf(screenshot_path,sizeof(screenshot_path),"%s%s%c",running_path,SCREENSHOT_FOLDER,slash_char);
+    snprintf(bios_path,sizeof(bios_path),"%s%s%c",running_path,BIOS_FOLDER,slash_char);
+    snprintf(screenshot_path,sizeof(screenshot_path),"%s%s%c",running_path,SCREENSHOT_FOLDER,slash_char);
 }
 
 char * DirGetRunningPath(void)
@@ -237,12 +237,12 @@ char * FU_GetNewTimestampFilename(const char * basename)
     struct tm * ptm = gmtime(&rawtime);
 
     char timestamp[50];
-    s_snprintf(timestamp,sizeof(timestamp),"%04d%02d%02d_%02d%02d%02d",1900+ptm->tm_year,1+ptm->tm_mon,ptm->tm_mday,
+    snprintf(timestamp,sizeof(timestamp),"%04d%02d%02d_%02d%02d%02d",1900+ptm->tm_year,1+ptm->tm_mon,ptm->tm_mday,
                1+ptm->tm_hour,ptm->tm_min,ptm->tm_sec);
 
     while(1)
     {
-        s_snprintf(_fu_filename,sizeof(_fu_filename),"%s%s_%s_%d.png",DirGetScreenshotFolderPath(),basename,
+        snprintf(_fu_filename,sizeof(_fu_filename),"%s%s_%s_%d.png",DirGetScreenshotFolderPath(),basename,
                    timestamp,number);
 
         FILE * file=fopen(_fu_filename, "rb");

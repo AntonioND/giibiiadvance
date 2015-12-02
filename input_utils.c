@@ -217,7 +217,7 @@ void Input_GetJoystickElementName(char * name, int namelen, int btncode)
         int is_btn_positive = (btncode&KEYCODE_POSITIVE_AXIS);
         btncode &= ~KEYCODE_POSITIVE_AXIS; //remove positive flag
 
-        s_snprintf(name,namelen,"Axis %d%c",btncode,is_btn_positive?'+':'-');
+        snprintf(name,namelen,"Axis %d%c",btncode,is_btn_positive?'+':'-');
     }
     else if(btncode & KEYCODE_IS_HAT) // axis
     {
@@ -233,11 +233,11 @@ void Input_GetJoystickElementName(char * name, int namelen, int btncode)
         else if(position & SDL_HAT_DOWN) dir = "Down";
         else if(position & SDL_HAT_LEFT) dir = "Left";
 
-        s_snprintf(name,namelen,"Hat %d %s",hat_index,dir);
+        snprintf(name,namelen,"Hat %d %s",hat_index,dir);
     }
     else // button
     {
-        s_snprintf(name,namelen,"Button %d",btncode);
+        snprintf(name,namelen,"Button %d",btncode);
     }
 }
 

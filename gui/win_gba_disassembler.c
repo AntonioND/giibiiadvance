@@ -144,11 +144,11 @@ void Win_GBADisassemblerUpdate(void)
     GUI_ConsoleModePrintf(&gba_regs_con,0,18,"              ");
 
     char text[80];
-    s_snprintf(text,sizeof(text),"N:%d Z:%d C:%d V:%d", (cpu->CPSR&F_N) != 0, (cpu->CPSR&F_Z) != 0,
+    snprintf(text,sizeof(text),"N:%d Z:%d C:%d V:%d", (cpu->CPSR&F_N) != 0, (cpu->CPSR&F_Z) != 0,
             (cpu->CPSR&F_C) != 0, (cpu->CPSR&F_V) != 0);
     GUI_ConsoleModePrintf(&gba_regs_con,0,19,text);
 
-    s_snprintf(text,sizeof(text),"I:%d F:%d     T:%d", (cpu->CPSR&F_I) != 0, (cpu->CPSR&F_F) != 0,
+    snprintf(text,sizeof(text),"I:%d F:%d     T:%d", (cpu->CPSR&F_I) != 0, (cpu->CPSR&F_F) != 0,
             (cpu->CPSR&F_T) != 0);
     GUI_ConsoleModePrintf(&gba_regs_con,0,20,text);
 
@@ -157,7 +157,7 @@ void Win_GBADisassemblerUpdate(void)
         "user","fiq","irq","svc","abort","undef.", "system"
     };
 
-    s_snprintf(text,sizeof(text),"Mode:%02X (%s)", cpu->CPSR&0x1F, cpu_modes[cpu->MODE]);
+    snprintf(text,sizeof(text),"Mode:%02X (%s)", cpu->CPSR&0x1F, cpu_modes[cpu->MODE]);
     GUI_ConsoleModePrintf(&gba_regs_con,0,21,text);
 
     //DISASSEMBLER
@@ -175,7 +175,7 @@ void Win_GBADisassemblerUpdate(void)
             u32 opcode = GBA_MemoryReadFast32(address);
 
             GBA_DisassembleARM(opcode,address,opcode_text,sizeof(opcode_text));
-            s_snprintf(final_text,sizeof(final_text),"%08X:%08X %s",address,opcode,opcode_text);
+            snprintf(final_text,sizeof(final_text),"%08X:%08X %s",address,opcode,opcode_text);
 
             GUI_ConsoleModePrintf(&gba_disassembly_con,0,i,final_text);
 
@@ -201,7 +201,7 @@ void Win_GBADisassemblerUpdate(void)
             u16 opcode = GBA_MemoryReadFast16(address);
 
             GBA_DisassembleTHUMB(opcode,address,opcode_text,sizeof(opcode_text));
-            s_snprintf(final_text,sizeof(final_text),"%08X:%04X %s",address,opcode,opcode_text);
+            snprintf(final_text,sizeof(final_text),"%08X:%04X %s",address,opcode,opcode_text);
 
             GUI_ConsoleModePrintf(&gba_disassembly_con,0,i,final_text);
 
@@ -407,11 +407,11 @@ static void _win_gba_registers_textbox_callback(int x, int y)
 
     char text[30];
     if(reg < 16)
-        s_snprintf(text,sizeof(text),"New value for r%d",reg);
+        snprintf(text,sizeof(text),"New value for r%d",reg);
     else if(reg == 16)
-        s_snprintf(text,sizeof(text),"New value for cpsr");
+        snprintf(text,sizeof(text),"New value for cpsr");
     else if(reg == 17)
-        s_snprintf(text,sizeof(text),"New value for spsr");
+        snprintf(text,sizeof(text),"New value for spsr");
     else
         return;
 

@@ -194,10 +194,10 @@ void Win_GBASprViewerUpdate(void)
     GUI_ConsoleModePrintf(&gba_sprview_matrixinfo_con,0,2,"     [%04X,%04X]",(u16)pa,(u16)pb);
     GUI_ConsoleModePrintf(&gba_sprview_matrixinfo_con,0,3,"     [%04X,%04X]",(u16)pc,(u16)pd);
 
-    char text_a[7]; s_snprintf(text_a,sizeof(text_a),"%.8f",((float)pa)/(1<<8));
-    char text_b[7]; s_snprintf(text_b,sizeof(text_b),"%.8f",((float)pb)/(1<<8));
-    char text_c[7]; s_snprintf(text_c,sizeof(text_c),"%.8f",((float)pc)/(1<<8));
-    char text_d[7]; s_snprintf(text_d,sizeof(text_d),"%.8f",((float)pd)/(1<<8));
+    char text_a[7]; snprintf(text_a,sizeof(text_a),"%.8f",((float)pa)/(1<<8));
+    char text_b[7]; snprintf(text_b,sizeof(text_b),"%.8f",((float)pb)/(1<<8));
+    char text_c[7]; snprintf(text_c,sizeof(text_c),"%.8f",((float)pc)/(1<<8));
+    char text_d[7]; snprintf(text_d,sizeof(text_d),"%.8f",((float)pd)/(1<<8));
     GUI_ConsoleModePrintf(&gba_sprview_matrixinfo_con,0,5, "   (%s,%s)",text_a,text_b);
     GUI_ConsoleModePrintf(&gba_sprview_matrixinfo_con,0,6, "   (%s,%s)",text_c,text_d);
 }

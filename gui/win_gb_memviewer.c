@@ -103,14 +103,14 @@ void Win_GBMemViewerUpdate(void)
         int i;
         for(i = 0; i < GB_MEMVIEWER_MAX_LINES; i++)
         {
-            s_snprintf(textbuf,sizeof(textbuf),"%04X : ",address);
+            snprintf(textbuf,sizeof(textbuf),"%04X : ",address);
 
             u16 tmpaddr = address;
             int j;
             for(j = 0; j < 8; j ++)
             {
                 char tmp[30];
-                s_snprintf(tmp,sizeof(tmp),"%04X ",GB_MemRead16(tmpaddr));
+                snprintf(tmp,sizeof(tmp),"%04X ",GB_MemRead16(tmpaddr));
                 s_strncat(textbuf,tmp,sizeof(textbuf));
                 tmpaddr += 2;
             }
@@ -120,7 +120,7 @@ void Win_GBMemViewerUpdate(void)
             for(j = 0; j < 16; j ++)
             {
                 char tmp[30];
-                s_snprintf(tmp,sizeof(tmp),"%c",win_gb_memviewer_character_fix(GB_MemRead8(tmpaddr)));
+                snprintf(tmp,sizeof(tmp),"%c",win_gb_memviewer_character_fix(GB_MemRead8(tmpaddr)));
                 if((j&3) == 3) s_strncat(tmp," ",sizeof(tmp));
                 s_strncat(textbuf,tmp,sizeof(textbuf));
                 tmpaddr ++;
@@ -136,14 +136,14 @@ void Win_GBMemViewerUpdate(void)
         int i;
         for(i = 0; i < GB_MEMVIEWER_MAX_LINES; i++)
         {
-            s_snprintf(textbuf,sizeof(textbuf),"%04X : ",address);
+            snprintf(textbuf,sizeof(textbuf),"%04X : ",address);
 
             u16 tmpaddr = address;
             int j;
             for(j = 0; j < 16; j ++)
             {
                 char tmp[30];
-                s_snprintf(tmp,sizeof(tmp),"%02X ",GB_MemRead8(tmpaddr));
+                snprintf(tmp,sizeof(tmp),"%02X ",GB_MemRead8(tmpaddr));
                 s_strncat(textbuf,tmp,sizeof(textbuf));
                 tmpaddr ++;
             }
@@ -153,7 +153,7 @@ void Win_GBMemViewerUpdate(void)
             for(j = 0; j < 16; j ++)
             {
                 char tmp[30];
-                s_snprintf(tmp,sizeof(tmp),"%c",win_gb_memviewer_character_fix(GB_MemRead8(tmpaddr)));
+                snprintf(tmp,sizeof(tmp),"%c",win_gb_memviewer_character_fix(GB_MemRead8(tmpaddr)));
                 if((j&3) == 3) s_strncat(tmp," ",sizeof(tmp));
                 s_strncat(textbuf,tmp,sizeof(textbuf));
                 tmpaddr ++;
@@ -346,7 +346,7 @@ static void _win_gb_mem_view_textbox_callback(int x, int y)
         gb_memviewer_clicked_address = clicked_addr;
         gb_memviewer_inputwindow_is_goto = 0;
         char caption[100];
-        s_snprintf(caption,sizeof(caption),"Change [0x%04X] (%d bits)",clicked_addr,numbits);
+        snprintf(caption,sizeof(caption),"Change [0x%04X] (%d bits)",clicked_addr,numbits);
         GUI_InputWindowOpen(&gui_iw_gb_memviewer,caption,_win_gb_mem_viewer_inputwindow_callback);
     }
 }

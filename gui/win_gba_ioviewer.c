@@ -459,8 +459,8 @@ void Win_GBAIOViewerUpdate(void)
 
                 int bg2x = REG_BG2X; if(bg2x&BIT(27)) bg2x |= 0xF0000000;
                 int bg2y = REG_BG2Y; if(bg2y&BIT(27)) bg2y |= 0xF0000000;
-                char text_x[9]; s_snprintf(text_x,sizeof(text_x),"%.8f",((float)bg2x)/(1<<8));
-                char text_y[9]; s_snprintf(text_y,sizeof(text_y),"%.8f",((float)bg2y)/(1<<8));
+                char text_x[9]; snprintf(text_x,sizeof(text_x),"%.8f",((float)bg2x)/(1<<8));
+                char text_y[9]; snprintf(text_y,sizeof(text_y),"%.8f",((float)bg2y)/(1<<8));
                 GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,2,3, "(%s,%s)",text_x,text_y);
 
                 GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,2,7, "    [%04X,%04X]",REG_BG2PA,REG_BG2PB);
@@ -468,10 +468,10 @@ void Win_GBAIOViewerUpdate(void)
 
                 int pa = (s32)(s16)REG_BG2PA; int pb = (s32)(s16)REG_BG2PB;
                 int pc = (s32)(s16)REG_BG2PC; int pd = (s32)(s16)REG_BG2PD;
-                char text_a[7]; s_snprintf(text_a,sizeof(text_a),"%.8f",((float)pa)/(1<<8));
-                char text_b[7]; s_snprintf(text_b,sizeof(text_b),"%.8f",((float)pb)/(1<<8));
-                char text_c[7]; s_snprintf(text_c,sizeof(text_c),"%.8f",((float)pc)/(1<<8));
-                char text_d[7]; s_snprintf(text_d,sizeof(text_d),"%.8f",((float)pd)/(1<<8));
+                char text_a[7]; snprintf(text_a,sizeof(text_a),"%.8f",((float)pa)/(1<<8));
+                char text_b[7]; snprintf(text_b,sizeof(text_b),"%.8f",((float)pb)/(1<<8));
+                char text_c[7]; snprintf(text_c,sizeof(text_c),"%.8f",((float)pc)/(1<<8));
+                char text_d[7]; snprintf(text_d,sizeof(text_d),"%.8f",((float)pd)/(1<<8));
                 GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,2,9,  "  (%s,%s)",text_a,text_b);
                 GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,2,10, "  (%s,%s)",text_c,text_d);
             }
@@ -491,8 +491,8 @@ void Win_GBAIOViewerUpdate(void)
 
                 int bg3x = REG_BG3X; if(bg3x&BIT(27)) bg3x |= 0xF0000000;
                 int bg3y = REG_BG3Y; if(bg3y&BIT(27)) bg3y |= 0xF0000000;
-                char text_x[9]; s_snprintf(text_x,sizeof(text_x),"%.8f",((float)bg3x)/(1<<8));
-                char text_y[9]; s_snprintf(text_y,sizeof(text_y),"%.8f",((float)bg3y)/(1<<8));
+                char text_x[9]; snprintf(text_x,sizeof(text_x),"%.8f",((float)bg3x)/(1<<8));
+                char text_y[9]; snprintf(text_y,sizeof(text_y),"%.8f",((float)bg3y)/(1<<8));
                 GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,26,3, "(%s,%s)",text_x,text_y);
 
                 GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,26,7, "    [%04X,%04X]",REG_BG3PA,REG_BG3PB);
@@ -500,10 +500,10 @@ void Win_GBAIOViewerUpdate(void)
 
                 int pa = (s32)(s16)REG_BG3PA; int pb = (s32)(s16)REG_BG3PB;
                 int pc = (s32)(s16)REG_BG3PC; int pd = (s32)(s16)REG_BG3PD;
-                char text_a[7]; s_snprintf(text_a,sizeof(text_a),"%.8f",((float)pa)/(1<<8));
-                char text_b[7]; s_snprintf(text_b,sizeof(text_b),"%.8f",((float)pb)/(1<<8));
-                char text_c[7]; s_snprintf(text_c,sizeof(text_c),"%.8f",((float)pc)/(1<<8));
-                char text_d[7]; s_snprintf(text_d,sizeof(text_d),"%.8f",((float)pd)/(1<<8));
+                char text_a[7]; snprintf(text_a,sizeof(text_a),"%.8f",((float)pa)/(1<<8));
+                char text_b[7]; snprintf(text_b,sizeof(text_b),"%.8f",((float)pb)/(1<<8));
+                char text_c[7]; snprintf(text_c,sizeof(text_c),"%.8f",((float)pc)/(1<<8));
+                char text_d[7]; snprintf(text_d,sizeof(text_d),"%.8f",((float)pd)/(1<<8));
                 GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,26,9,  "  (%s,%s)",text_a,text_b);
                 GUI_ConsoleModePrintf(&gba_ioview_bgs_affine_con,26,10, "  (%s,%s)",text_c,text_d);
             }
@@ -742,7 +742,7 @@ void Win_GBAIOViewerUpdate(void)
             GUI_ConsoleModePrintf(&gba_ioview_sound_chn1_con,0,4, "[%2d] Volume",gba_debug_get_psg_vol(1));
 
             char text_freq[10];
-            s_snprintf(text_freq,sizeof(text_freq),"%9.2f", 131072.0/(float)(2048-(REG_SOUND1CNT_X&0x7FF)));
+            snprintf(text_freq,sizeof(text_freq),"%9.2f", 131072.0/(float)(2048-(REG_SOUND1CNT_X&0x7FF)));
             GUI_ConsoleModePrintf(&gba_ioview_sound_chn1_con,0,5, "[%s] Frequency",text_freq);
 
             // Channel 2
@@ -754,7 +754,7 @@ void Win_GBAIOViewerUpdate(void)
 
             GUI_ConsoleModePrintf(&gba_ioview_sound_chn2_con,0,4, "[%2d] Volume",gba_debug_get_psg_vol(2));
 
-            s_snprintf(text_freq,sizeof(text_freq),"%9.2f", 131072.0/(float)(2048-(REG_SOUND2CNT_H&0x7FF)));
+            snprintf(text_freq,sizeof(text_freq),"%9.2f", 131072.0/(float)(2048-(REG_SOUND2CNT_H&0x7FF)));
             GUI_ConsoleModePrintf(&gba_ioview_sound_chn2_con,0,5, "[%s] Frequency",text_freq);
 
             // Channel 3
@@ -767,7 +767,7 @@ void Win_GBAIOViewerUpdate(void)
 
             GUI_ConsoleModePrintf(&gba_ioview_sound_chn3_con,0,4, "[%2d] Volume",gba_debug_get_psg_vol(3));
 
-            s_snprintf(text_freq,sizeof(text_freq),"%9.2f", 2097152.0/(float)(2048-(REG_SOUND3CNT_X&0x7FF)));
+            snprintf(text_freq,sizeof(text_freq),"%9.2f", 2097152.0/(float)(2048-(REG_SOUND3CNT_X&0x7FF)));
             GUI_ConsoleModePrintf(&gba_ioview_sound_chn3_con,0,5, "[%s] Frequency",text_freq);
 
             // Channel 4

@@ -296,7 +296,7 @@ int GB_CartridgeLoad(const u8 * pointer, const u32 rom_size)
             {
                 int size = strlen(DirGetBiosFolderPath()) + strlen(boot_rom_filename) + 2;
                 char * completepath = malloc(size);
-                s_snprintf(completepath,size,"%s%s",DirGetBiosFolderPath(),boot_rom_filename);
+                snprintf(completepath,size,"%s%s",DirGetBiosFolderPath(),boot_rom_filename);
                 FILE * test = fopen(completepath,"rb");
                 if(test)
                 {
@@ -760,7 +760,7 @@ void GB_SRAM_Save(void)
 
     int size = strlen(GameBoy.Emulator.save_filename) + 5;
     char * name = malloc(size);
-    s_snprintf(name,size,"%s.sav",GameBoy.Emulator.save_filename);
+    snprintf(name,size,"%s.sav",GameBoy.Emulator.save_filename);
 
     FILE * savefile = fopen (name,"wb+");
 
@@ -809,7 +809,7 @@ void GB_SRAM_Load(void)
 
     int size = strlen(GameBoy.Emulator.save_filename) + 5;
     char * name = malloc(size);
-    s_snprintf(name,size,"%s.sav",GameBoy.Emulator.save_filename);
+    snprintf(name,size,"%s.sav",GameBoy.Emulator.save_filename);
 
     FILE * savefile = fopen (name,"rb");
 

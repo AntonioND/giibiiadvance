@@ -136,8 +136,7 @@ const char * readme_text = {
 "-------\n"
 "\n"
 "You can contact me by email: antonio_nd (at) outlook (dot) com\n"
-"http://antoniond.drunkencoders.com/\n"
-"http://antoniond_blog.drunkencoders.com/\n"
+"www.skylyrac.net\n"
 "\n"
 };
 
@@ -156,8 +155,7 @@ const char * about_text = {
 "\n"
 "You can contact me by email: antonio_nd (at) outlook (dot) com\n"
 "\n"
-"http://antoniond.drunkencoders.com/\n"
-"http://antoniond_blog.drunkencoders.com/\n"
+"www.skylyrac.net\n"
 "\n"
 "Source code:\n"
 "\n"

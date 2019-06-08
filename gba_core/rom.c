@@ -165,7 +165,7 @@ int GBA_ShowConsoleRequested(void)
     return ret;
 }
 
-void  GBA_HeaderCheck(void * rom)
+void GBA_HeaderCheck(void * rom)
 {
     showconsole = 0; //if at the end this is 1, show console window
 

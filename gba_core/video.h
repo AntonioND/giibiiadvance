@@ -21,8 +21,8 @@
 
 #include "gba.h"
 
-inline void GBA_SkipFrame(int skip);
-inline int GBA_HasToSkipFrame(void);
+void GBA_SkipFrame(int skip);
+int GBA_HasToSkipFrame(void);
 
 //---------------------------------------------------------
 
@@ -32,10 +32,10 @@ void GBA_FillFadeTables(void);
 
 void GBA_UpdateDrawScanlineFn(void); // ! the correct way of emulating is drawing a pixel every 4 clocks
 
-inline void GBA_VideoUpdateRegister(u32 address);
+void GBA_VideoUpdateRegister(u32 address);
 
-inline void GBA_DrawScanline(s32 y);
-inline void GBA_DrawScanlineWhite(s32 y);
+void GBA_DrawScanline(s32 y);
+void GBA_DrawScanlineWhite(s32 y);
 
 void GBA_ConvertScreenBufferTo24RGB(void * dst); // 24 RGB
 void GBA_ConvertScreenBufferTo32RGB(void * dst); // 32 RGB (alpha = 255)

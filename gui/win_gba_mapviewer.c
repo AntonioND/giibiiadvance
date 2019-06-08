@@ -193,7 +193,7 @@ static void _win_gba_mapviewer_update_mapbuffer_from_temp_buffer(void)
     }
 }
 
-static inline u32 rgb16to32(u16 color)
+static u32 rgb16to32(u16 color)
 {
     int r = (color & 31)<<3;
     int g = ((color >> 5) & 31)<<3;
@@ -201,13 +201,13 @@ static inline u32 rgb16to32(u16 color)
     return (b<<16)|(g<<8)|r;
 }
 
-static inline u32 se_index(u32 tx, u32 ty, u32 pitch) //from tonc
+static u32 se_index(u32 tx, u32 ty, u32 pitch) //from tonc
 {
     u32 sbb = (ty/32)*(pitch/32) + (tx/32);
     return sbb*1024 + (ty%32)*32 + tx%32;
 }
 
-static inline u32 se_index_affine(u32 tx, u32 ty, u32 tpitch)
+static u32 se_index_affine(u32 tx, u32 ty, u32 tpitch)
 {
     return (ty * tpitch) + tx;
 }

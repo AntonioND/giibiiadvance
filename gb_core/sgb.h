@@ -92,7 +92,7 @@ extern _SGB_INFO_ SGBInfo;
 void SGB_Init(void);
 void SGB_End(void);
 
-inline int SGB_MultiplayerIsEnabled(void); // returns 0 if disabled, mode if enabled
+int SGB_MultiplayerIsEnabled(void); // returns 0 if disabled, mode if enabled
 
 void SGB_WriteP1(u32 value);
 u32  SGB_ReadP1(void);

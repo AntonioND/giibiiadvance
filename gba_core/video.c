@@ -38,7 +38,7 @@ static void GBA_DrawScanlineMode2(s32 y);
 static void GBA_DrawScanlineMode3(s32 y);
 static void GBA_DrawScanlineMode4(s32 y);
 static void GBA_DrawScanlineMode5(s32 y);
-inline void GBA_DrawScanlineWhite(s32 y);
+void GBA_DrawScanlineWhite(s32 y);
 
 static s32 BG2lastx,BG2lasty; //for affine transformation
 static s32 BG3lastx,BG3lasty;
@@ -49,9 +49,9 @@ static u32 Win1X1, Win1X2, Win1Y1, Win1Y2;
 
 //-----------------------------------------------------------
 
-static inline s32 max(s32 a, s32 b) { return ((a<b)?b:a); }
+static s32 max(s32 a, s32 b) { return ((a<b)?b:a); }
 
-static inline void mem_clear_32(u32 * ptr, u32 size)
+static void mem_clear_32(u32 * ptr, u32 size)
 {
     size >>= 2;
     while(size--) *ptr++ = 0;
@@ -61,12 +61,12 @@ static inline void mem_clear_32(u32 * ptr, u32 size)
 
 static int gba_frameskip = 0;
 
-inline void GBA_SkipFrame(int skip)
+void GBA_SkipFrame(int skip)
 {
     gba_frameskip = skip;
 }
 
-inline int GBA_HasToSkipFrame(void)
+int GBA_HasToSkipFrame(void)
 {
     return gba_frameskip;
 }
@@ -90,7 +90,7 @@ void GBA_UpdateDrawScanlineFn(void)
     }
 }
 
-inline void GBA_DrawScanline(s32 y)
+void GBA_DrawScanline(s32 y)
 {
     if(GBA_HasToSkipFrame()) return;
 
@@ -115,7 +115,7 @@ inline void GBA_DrawScanline(s32 y)
     BG3lasty += (s32)(s16)REG_BG3PD;
 }
 
-inline void GBA_DrawScanlineWhite(s32 y)
+void GBA_DrawScanlineWhite(s32 y)
 {
     if(GBA_HasToSkipFrame()) return;
 
@@ -141,7 +141,7 @@ static const int spr_size[4][4][2] = { //shape, size, (x,y)
     {{0,0},{0,0},{0,0},{0,0}} //Prohibited
 };
 
-static inline void gba_sprites_draw_mode012(s32 ly)
+static void gba_sprites_draw_mode012(s32 ly)
 {
     _oam_spr_entry_t * spr = (_oam_spr_entry_t*)Mem.oam;
 
@@ -488,7 +488,7 @@ static inline void gba_sprites_draw_mode012(s32 ly)
     }
 }
 
-static inline void gba_sprites_draw_mode345(s32 ly)
+static void gba_sprites_draw_mode345(s32 ly)
 {
     _oam_spr_entry_t * spr = (_oam_spr_entry_t*)Mem.oam;
 
@@ -855,7 +855,7 @@ u16 bgfb[4][240]; int bgvisible[4][240]; u16 backdrop[240]; int backdropvisible[
 
 static const u32 text_bg_size[4][2] = { {256,256}, {512,256}, {256,512}, {512,512} };
 
-static inline u32 se_index(u32 tx, u32 ty, u32 pitch) //from tonc
+static u32 se_index(u32 tx, u32 ty, u32 pitch) //from tonc
 {
     u32 sbb = (ty/32)*(pitch/32) + (tx/32);
     return sbb*1024 + (ty%32)*32 + tx%32;
@@ -1208,7 +1208,7 @@ static void gba_bg3drawtext(s32 y)
 
 //-----------------------------------------------------------------------------------
 
-static inline u32 se_index_affine(u32 tx, u32 ty, u32 tpitch)
+static u32 se_index_affine(u32 tx, u32 ty, u32 tpitch)
 {
     return (ty * tpitch) + tx;
 }
@@ -1487,7 +1487,7 @@ static void gba_bg2drawbitmapmode5(s32 y)
 
 //-----------------------------------------------------------------------------------
 
-static inline void gba_video_all_buffers_clear(void)
+static void gba_video_all_buffers_clear(void)
 {
     mem_clear_32((u32*)bgfb,sizeof(bgfb)); mem_clear_32((u32*)bgvisible,sizeof(bgvisible));
     mem_clear_32((u32*)sprfb,sizeof(sprfb)); mem_clear_32((u32*)sprvisible,sizeof(sprvisible));
@@ -1504,7 +1504,7 @@ static u16 * layer_fb[9];
 static _layer_type_ layer_id[9];
 static int layer_active_num;
 
-static inline void gba_sort_layers(int video_mode)
+static void gba_sort_layers(int video_mode)
 {
     static const int bg0act[6] = {1,1,0,0,0,0}; static const int bg1act[6] = {1,1,0,0,0,0};
     static const int bg2act[6] = {1,1,1,1,1,1}; static const int bg3act[6] = {1,0,1,0,0,0};
@@ -1566,7 +1566,7 @@ static inline void gba_sort_layers(int video_mode)
     layer_active_num = cur_layer;
 }
 
-static inline void gba_blit_layers(int y)
+static void gba_blit_layers(int y)
 {
     u16 * destptr = (u16*)&screen_buffer[240*y];
 
@@ -1591,7 +1591,7 @@ static inline void gba_blit_layers(int y)
 
 int win_coloreffect_enable[240]; // color effect is enabled / disabled by windows
 
-static inline void gba_window_apply(int y, int win0, int win1, int winobj) // bits 13-15 of DISPCNT
+static void gba_window_apply(int y, int win0, int win1, int winobj) // bits 13-15 of DISPCNT
 {
     if(!(winobj||win1||win0))
     {
@@ -1818,17 +1818,17 @@ void GBA_FillFadeTables(void)
     }
 }
 
-static inline u16 fade_white(u16 col, u16 evy)
+static u16 fade_white(u16 col, u16 evy)
 {
     return (white_table[(col>>10)&0x1F][evy]<<10)|(white_table[(col>>5)&0x1F][evy]<<5)|white_table[col&0x1F][evy];
 }
-static inline u16 fade_black(u16 col, u16 evy)
+static u16 fade_black(u16 col, u16 evy)
 {
     return (black_table[(col>>10)&0x1F][evy]<<10)|(black_table[(col>>5)&0x1F][evy]<<5)|black_table[col&0x1F][evy];
 }
 
-static inline u16 min(u16 a, u16 b) { return (a<b) ? a : b ; }
-static inline u16 blend(u16 col_1, u16 col_2, u16 eva, u16 evb)
+static u16 min(u16 a, u16 b) { return (a<b) ? a : b ; }
+static u16 blend(u16 col_1, u16 col_2, u16 eva, u16 evb)
 {
     u16 r = min(31, (((col_1&0x1F)*eva)>>4) + (((col_2&0x1F)*evb)>>4) );
     u16 g = min(31, ((((col_1>>5)&0x1F)*eva)>>4) + ((((col_2>>5)&0x1F)*evb)>>4) );
@@ -1836,7 +1836,7 @@ static inline u16 blend(u16 col_1, u16 col_2, u16 eva, u16 evb)
     return (b<<10)|(g<<5)|r;
 }
 
-static inline void gba_effects_apply(void)
+static void gba_effects_apply(void)
 {
     int i;
 
@@ -2045,7 +2045,7 @@ static inline void gba_effects_apply(void)
 
 //--------------------------------------------------------------------------------------
 
-static inline void gba_greenswap_apply(int y)
+static void gba_greenswap_apply(int y)
 {
     if(REG_GREENSWAP & 1)
     {
@@ -2191,7 +2191,7 @@ static void GBA_DrawScanlineMode5(s32 y)
 
 //-----------------------------------------------------------------------------------
 
-inline void GBA_VideoUpdateRegister(u32 address)
+void GBA_VideoUpdateRegister(u32 address)
 {
     switch(address)
     {

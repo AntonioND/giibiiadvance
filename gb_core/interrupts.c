@@ -315,7 +315,7 @@ int GB_InterruptsExecute(void)
 
 //----------------------------------------------------------------
 
-inline void GB_InterruptsSetFlag(int flag)
+void GB_InterruptsSetFlag(int flag)
 {
     GameBoy.Memory.IO_Ports[IF_REG-0xFF00] |= flag;
 //This is checked in GB_IRQExecute(), not here!
@@ -347,17 +347,17 @@ void GB_InterruptsWriteIF(int reference_clocks, int value)
 
 static int gb_timer_clock_counter = 0;
 
-inline void GB_TimersClockCounterReset(void)
+void GB_TimersClockCounterReset(void)
 {
     gb_timer_clock_counter = 0;
 }
 
-static inline int GB_TimersClockCounterGet(void)
+static int GB_TimersClockCounterGet(void)
 {
     return gb_timer_clock_counter;
 }
 
-static inline void GB_TimersClockCounterSet(int new_reference_clocks)
+static void GB_TimersClockCounterSet(int new_reference_clocks)
 {
     gb_timer_clock_counter = new_reference_clocks;
 }

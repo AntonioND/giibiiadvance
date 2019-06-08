@@ -153,7 +153,7 @@ void SGB_Init(void)
     memset(SGBInfo.data,0,sizeof(SGBInfo.data));
 }
 
-//inline void SGB_Clock(int clocks)  // for delay between frames (not used for now)
+//void SGB_Clock(int clocks)  // for delay between frames (not used for now)
 //{
 //    if(GameBoy.Emulator.SGBEnabled == 1)
 //        if(SGBInfo.delay > 0)
@@ -707,7 +707,7 @@ static void SGB_ExecuteCommand(void)
     }
 }
 
-inline int SGB_MultiplayerIsEnabled(void)
+int SGB_MultiplayerIsEnabled(void)
 {
     return SGBInfo.multiplayer;
 }

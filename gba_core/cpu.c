@@ -215,7 +215,7 @@ void GBA_CPUChangeMode(u32 value)
 
 static s32 gba_halt;
 
-inline void GBA_CPUSetHalted(s32 value)
+void GBA_CPUSetHalted(s32 value)
 {
     if(REG_IE) gba_halt = 1+(value>>7); //don't halt if IE = 0 or it will never exit from halt
     //else
@@ -227,17 +227,17 @@ inline void GBA_CPUSetHalted(s32 value)
     //gba_halt = 2 => stop
 }
 
-inline s32 GBA_CPUGetHalted(void)
+s32 GBA_CPUGetHalted(void)
 {
     return gba_halt;
 }
 
-inline void GBA_CPUClearHalted(void)
+void GBA_CPUClearHalted(void)
 {
     gba_halt = 0;
 }
 
-inline s32 GBA_Execute(s32 clocks) // returns total clocks not executed
+s32 GBA_Execute(s32 clocks) // returns total clocks not executed
 {
     if(GBA_CPUGetHalted()) return 0; // execute all clocks
 
@@ -245,7 +245,7 @@ inline s32 GBA_Execute(s32 clocks) // returns total clocks not executed
     else return GBA_ExecuteTHUMB(clocks);
 }
 
-inline void GBA_ExecutionBreak(void)
+void GBA_ExecutionBreak(void)
 {
     cpu_loop_break = 1;
 }

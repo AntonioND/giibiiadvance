@@ -187,7 +187,7 @@ static _GB_SOUND_HARDWARE_ Sound;
 
 static int output_enabled;
 
-inline int GB_SoundHardwareIsOn(void)
+int GB_SoundHardwareIsOn(void)
 {
     return Sound.master_enable;
 }
@@ -828,17 +828,17 @@ void GB_SoundEnd(void)
 
 static int gb_sound_clock_counter = 0;
 
-inline void GB_SoundClockCounterReset(void)
+void GB_SoundClockCounterReset(void)
 {
     gb_sound_clock_counter = 0;
 }
 
-static inline int GB_SoundClockCounterGet(void)
+static int GB_SoundClockCounterGet(void)
 {
     return gb_sound_clock_counter;
 }
 
-static inline void GB_SoundClockCounterSet(int new_reference_clocks)
+static void GB_SoundClockCounterSet(int new_reference_clocks)
 {
     gb_sound_clock_counter = new_reference_clocks;
 }

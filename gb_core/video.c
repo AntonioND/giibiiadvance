@@ -48,24 +48,24 @@ static u16 gb_framebuffer[2][256 * 224];
 
 static int gb_frameskip = 0;
 
-inline void GB_SkipFrame(int skip)
+void GB_SkipFrame(int skip)
 {
     gb_frameskip = skip;
 }
 
-inline int GB_HasToSkipFrame(void)
+int GB_HasToSkipFrame(void)
 {
     return gb_frameskip;
 }
 
 //-----------------------------------------------------------
 
-inline void GB_EnableBlur(int enable)
+void GB_EnableBlur(int enable)
 {
     gb_blur = enable;
 }
 
-inline void GB_EnableRealColors(int enable)
+void GB_EnableRealColors(int enable)
 {
     gb_realcolors = enable;
 }
@@ -112,7 +112,7 @@ void GB_SetPalette(u32 red, u32 green, u32 blue)
      gbpalettes[3] = GB_RGB(0,0,0);
 }
 
-inline u32 GB_GameBoyGetGray(u32 number)
+u32 GB_GameBoyGetGray(u32 number)
 {
     return gbpalettes[number & 3];
 }
@@ -853,7 +853,7 @@ void GBC_GB_ScreenDrawScanline(s32 y)
 
 //*********************************************************************************************
 
-inline u32 SGB_GetPixelColor(u32 x, u32 y, u32 palindex)
+u32 SGB_GetPixelColor(u32 x, u32 y, u32 palindex)
 {
     return SGBInfo.palette[SGBInfo.ATF_list[SGBInfo.curr_ATF][ (20*(y>>3)) + (x>>3)]][palindex];
 }
@@ -1260,13 +1260,13 @@ int GB_Screen_Init(void)
     return 0;
 }
 
-static inline void GB_Screen_WritePixel(char * buffer, int x, int y, int r, int g, int b)
+static void GB_Screen_WritePixel(char * buffer, int x, int y, int r, int g, int b)
 {
     u8 * p = (u8*)buffer + (y*160 + x) * 3;
     *p++ = r; *p++ = g; *p = b;
 }
 
-static inline void GB_Screen_WritePixelSGB(char * buffer, int x, int y, int r, int g, int b)
+static void GB_Screen_WritePixelSGB(char * buffer, int x, int y, int r, int g, int b)
 {
     u8 * p = (u8*)buffer + (y*(160+96) + x) * 3;
     *p++ = r; *p++ = g; *p = b;

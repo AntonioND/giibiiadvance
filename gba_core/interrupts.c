@@ -38,12 +38,12 @@ s32 scrclocks = HDRAW_CLOCKS;
 
 u32 ly = 0;
 
-inline void GBA_CallInterrupt(u32 flag)
+void GBA_CallInterrupt(u32 flag)
 {
     REG_IF |= flag;
 }
 
-inline int GBA_InterruptCheck(void)
+int GBA_InterruptCheck(void)
 {
     if(GBA_CPUGetHalted() == 2) return 0;
 
@@ -69,7 +69,7 @@ inline int GBA_InterruptCheck(void)
     return 0;
 }
 
-inline void GBA_CheckKeypadInterrupt(void)
+void GBA_CheckKeypadInterrupt(void)
 {
     u16 keys = REG_KEYCNT & 0x03FF;
     u16 keyspressed = (~REG_KEYINPUT) & 0x03FF;
@@ -92,13 +92,13 @@ inline void GBA_CheckKeypadInterrupt(void)
     }
 }
 
-inline void GBA_InterruptLCD(u32 flag)
+void GBA_InterruptLCD(u32 flag)
 {
     if(REG_DISPSTAT&flag) GBA_CallInterrupt(flag>>3);
 }
 
 int justchangedscreenmode = 0;
-inline int GBA_ScreenJustChangedMode(void)
+int GBA_ScreenJustChangedMode(void)
 {
     return justchangedscreenmode;
 }

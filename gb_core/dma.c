@@ -130,17 +130,17 @@ static void GB_DMAStopGBCCopy(void)
 
 static int gb_dma_clock_counter = 0;
 
-inline void GB_DMAClockCounterReset(void)
+void GB_DMAClockCounterReset(void)
 {
     gb_dma_clock_counter = 0;
 }
 
-static inline int GB_DMAClockCounterGet(void)
+static int GB_DMAClockCounterGet(void)
 {
     return gb_dma_clock_counter;
 }
 
-static inline void GB_DMAClockCounterSet(int new_reference_clocks)
+static void GB_DMAClockCounterSet(int new_reference_clocks)
 {
     gb_dma_clock_counter = new_reference_clocks;
 }
@@ -202,7 +202,7 @@ int GB_DMAGetClocksToNextEvent(void)
 
 //----------------------------------------------------------------
 
-inline void GB_DMAWriteDMA(int reference_clocks, int value)
+void GB_DMAWriteDMA(int reference_clocks, int value)
 {
     GB_DMAUpdateClocksCounterReference(reference_clocks),
     //TODO
@@ -213,35 +213,35 @@ inline void GB_DMAWriteDMA(int reference_clocks, int value)
     GB_CPUBreakLoop();
 }
 
-inline void GB_DMAWriteHDMA1(int value) // reference_clocks not needed
+void GB_DMAWriteHDMA1(int value) // reference_clocks not needed
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
     mem->IO_Ports[HDMA1_REG-0xFF00] = value;
     GameBoy.Emulator.gdma_src = (mem->IO_Ports[HDMA1_REG-0xFF00]<<8) | GameBoy.Memory.IO_Ports[HDMA2_REG-0xFF00];
 }
 
-inline void GB_DMAWriteHDMA2(int value)
+void GB_DMAWriteHDMA2(int value)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
     mem->IO_Ports[HDMA2_REG-0xFF00] = value & 0xF0; //4 lower bits ignored
     GameBoy.Emulator.gdma_src = (mem->IO_Ports[HDMA1_REG-0xFF00]<<8) | GameBoy.Memory.IO_Ports[HDMA2_REG-0xFF00];
 }
 
-inline void GB_DMAWriteHDMA3(int value)
+void GB_DMAWriteHDMA3(int value)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
     mem->IO_Ports[HDMA3_REG-0xFF00] = value & 0x1F; //Dest is VRAM
     GameBoy.Emulator.gdma_dst = ((mem->IO_Ports[HDMA3_REG-0xFF00]<<8) | mem->IO_Ports[HDMA4_REG-0xFF00]) + 0x8000;
 }
 
-inline void GB_DMAWriteHDMA4(int value)
+void GB_DMAWriteHDMA4(int value)
 {
     _GB_MEMORY_ * mem = &GameBoy.Memory;
     mem->IO_Ports[HDMA4_REG-0xFF00] = value & 0xF0; //4 lower bits ignored
     GameBoy.Emulator.gdma_dst = ((mem->IO_Ports[HDMA3_REG-0xFF00]<<8) | mem->IO_Ports[HDMA4_REG-0xFF00]) + 0x8000;
 }
 
-inline void GB_DMAWriteHDMA5(int value)
+void GB_DMAWriteHDMA5(int value)
 {
     //Start/Stop GBC DMA copy
 

@@ -50,7 +50,7 @@ typedef enum {
     SAV_AUTODETECT
 } _sav_types_;
 
-static inline int str_cmp_len(const char * str1, const char * str2, int len) //1 if equal
+static int str_cmp_len(const char * str1, const char * str2, int len) //1 if equal
 {
     int i;
     for(i = 0; i < len; i++) if(str1[i] != str2[i]) return 0;
@@ -59,7 +59,7 @@ static inline int str_cmp_len(const char * str1, const char * str2, int len) //1
 
 int SAVE_TYPE = SAV_NONE;
 
-inline int GBA_SaveIsEEPROM(void)
+int GBA_SaveIsEEPROM(void)
 {
     return (SAVE_TYPE == SAV_EEPROM) || (SAVE_TYPE == SAV_AUTODETECT);
 }
@@ -118,7 +118,7 @@ static const char * savetype[SAV_TYPES+3] = {
     "EEPROM", "SRAM (32KB)", "FLASH 64KB", "FLASH 64KB", "FLASH 128KB", "-", "None", "Unknown/None. Autodetecting...\n"
 };
 
-inline const char * GBA_GetSaveTypeString(void)
+const char * GBA_GetSaveTypeString(void)
 {
     return savetype[SAVE_TYPE];
 }

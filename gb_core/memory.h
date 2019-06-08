@@ -30,15 +30,15 @@ void GB_MemUpdateReadWriteFunctionPointers(void);
 
 //----------------------------------------------------------------
 
-inline void GB_MemWrite16(u32 address, u32 value); // only used by debugger
-inline void GB_MemWrite8(u32 address, u32 value);
-inline void GB_MemWriteReg8(u32 address, u32 value);
+void GB_MemWrite16(u32 address, u32 value); // only used by debugger
+void GB_MemWrite8(u32 address, u32 value);
+void GB_MemWriteReg8(u32 address, u32 value);
 
 //----------------------------------------------------------------
 
-inline u32 GB_MemRead16(u32 address); // only used by debugger
-inline u32 GB_MemRead8(u32 address);
-inline u32 GB_MemReadReg8(u32 address);
+u32 GB_MemRead16(u32 address); // only used by debugger
+u32 GB_MemRead8(u32 address);
+u32 GB_MemReadReg8(u32 address);
 
 //----------------------------------------------------------------
 

@@ -26,17 +26,17 @@ void GB_CPUEnd(void);
 
 //----------------------------------------------------------------
 
-inline void GB_CPUClockCounterReset(void);
-inline int GB_CPUClockCounterGet(void);
-inline void GB_CPUClockCounterAdd(int value);
+void GB_CPUClockCounterReset(void);
+int GB_CPUClockCounterGet(void);
+void GB_CPUClockCounterAdd(int value);
 
-inline void GB_UpdateCounterToClocks(int reference_clocks);
+void GB_UpdateCounterToClocks(int reference_clocks);
 
 //----------------------------------------------------------------
 
 //This will make the execution to exit the CPU loop and update the other systems of the GB
 //Call when writing to a register that can generate an event!!!
-inline void GB_CPUBreakLoop(void);
+void GB_CPUBreakLoop(void);
 
 //----------------------------------------------------------------
 

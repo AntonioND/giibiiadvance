@@ -71,12 +71,12 @@ void GB_SerialClockCounterReset(void)
     gb_serial_clock_counter = 0;
 }
 
-static inline int GB_SerialClockCounterGet(void)
+static int GB_SerialClockCounterGet(void)
 {
     return gb_serial_clock_counter;
 }
 
-static inline void GB_SerialClockCounterSet(int new_reference_clocks)
+static void GB_SerialClockCounterSet(int new_reference_clocks)
 {
     gb_serial_clock_counter = new_reference_clocks;
 }

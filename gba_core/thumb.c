@@ -30,7 +30,7 @@
 
 //-----------------------------------------------------------------------------------------------
 
-static inline int thumb_mul_extra_cycles(u32 Rd)
+static int thumb_mul_extra_cycles(u32 Rd)
 {
     register u32 temp = CPU.R[Rd];
     if(temp&BIT(31)) temp = ~temp; //all 0 or all 1
@@ -51,7 +51,7 @@ static inline int thumb_mul_extra_cycles(u32 Rd)
 
 //------------------------------------------------------------------------------------------------------
 
-static inline u32 thumb_bit_count(u16 value)
+static u32 thumb_bit_count(u16 value)
 {
     /*
     static const u32 bitcounttable[256] = {
@@ -90,12 +90,12 @@ static inline u32 thumb_bit_count(u16 value)
     return count;
 }
 
-static inline void thumb_ldm(u32 address, u32 reg)
+static void thumb_ldm(u32 address, u32 reg)
 {
     CPU.R[reg] = GBA_MemoryRead32(address&~3);
 }
 
-static inline void thumb_stm(u32 address, u32 reg)
+static void thumb_stm(u32 address, u32 reg)
 {
     GBA_MemoryWrite32(address&~3,CPU.R[reg]);
 }
@@ -128,21 +128,21 @@ static inline void thumb_stm(u32 address, u32 reg)
 //#define SUB_OVERFLOW(a,b,res) ( (POS(a)&NEG(b)&NEG(res)) || (NEG(a)&POS(b)&POS(res)) )
 //#define SUB_OVERFLOW(a,b,res) ( ( ((~(a))&(b)&(res)) | ((a)&(~((b)&(res)))) ) >> 31 )
 
-static inline void thumb_and(u16 Rd, u16 Rs)
+static void thumb_and(u16 Rd, u16 Rs)
 {
     CPU.R[Rd] &= CPU.R[Rs];
     CPU.CPSR &= ~(F_Z|F_N);
     CPU.CPSR |= (CPU.R[Rd]?0:F_Z)|(CPU.R[Rd]&F_N);
 }
 
-static inline void thumb_eor(u16 Rd, u16 Rs)
+static void thumb_eor(u16 Rd, u16 Rs)
 {
     CPU.R[Rd] ^= CPU.R[Rs];
     CPU.CPSR &= ~(F_Z|F_N);
     CPU.CPSR |= (CPU.R[Rd]?0:F_Z)|(CPU.R[Rd]&F_N);
 }
 
-static inline void thumb_lsl(u16 Rd, u16 Rs)
+static void thumb_lsl(u16 Rd, u16 Rs)
 {
     u8 carry;
     CPU.R[Rd] = lsl_shift_by_reg(CPU.R[Rd],CPU.R[Rs]&0xFF,&carry);
@@ -150,7 +150,7 @@ static inline void thumb_lsl(u16 Rd, u16 Rs)
     CPU.CPSR |= (CPU.R[Rd]?0:F_Z)|(CPU.R[Rd]&F_N)|(carry?F_C:0);
 }
 
-static inline void thumb_lsr(u16 Rd, u16 Rs)
+static void thumb_lsr(u16 Rd, u16 Rs)
 {
     u8 carry;
     CPU.R[Rd] = lsr_shift_by_reg(CPU.R[Rd],CPU.R[Rs]&0xFF,&carry);
@@ -158,7 +158,7 @@ static inline void thumb_lsr(u16 Rd, u16 Rs)
     CPU.CPSR |= (CPU.R[Rd]?0:F_Z)|(CPU.R[Rd]&F_N)|(carry?F_C:0);
 }
 
-static inline void thumb_asr(u16 Rd, u16 Rs)
+static void thumb_asr(u16 Rd, u16 Rs)
 {
     u8 carry;
     CPU.R[Rd] = asr_shift_by_reg(CPU.R[Rd],CPU.R[Rs]&0xFF,&carry);
@@ -166,7 +166,7 @@ static inline void thumb_asr(u16 Rd, u16 Rs)
     CPU.CPSR |= (CPU.R[Rd]?0:F_Z)|(CPU.R[Rd]&F_N)|(carry?F_C:0);
 }
 
-static inline void thumb_adc(u16 Rd, u16 Rs)
+static void thumb_adc(u16 Rd, u16 Rs)
 {
     u32 t1 = CPU.R[Rd];
     u32 t2 = CPU.R[Rs];
@@ -177,7 +177,7 @@ static inline void thumb_adc(u16 Rd, u16 Rs)
     CPU.R[Rd] = (u32)temp;
 }
 
-static inline void thumb_sbc(u16 Rd, u16 Rs)
+static void thumb_sbc(u16 Rd, u16 Rs)
 {
     u32 t1 = CPU.R[Rd];
     u32 t2 = ~CPU.R[Rs];
@@ -188,7 +188,7 @@ static inline void thumb_sbc(u16 Rd, u16 Rs)
     CPU.R[Rd] = (u32)temp;
 }
 
-static inline void thumb_ror(u16 Rd, u16 Rs)
+static void thumb_ror(u16 Rd, u16 Rs)
 {
     u8 carry;
     CPU.R[Rd] = ror_shift_by_reg(CPU.R[Rd],CPU.R[Rs]&0xFF,&carry);
@@ -196,14 +196,14 @@ static inline void thumb_ror(u16 Rd, u16 Rs)
     CPU.CPSR |= (CPU.R[Rd]?0:F_Z)|(CPU.R[Rd]&F_N)|(carry?F_C:0);
 }
 
-static inline void thumb_tst(u16 Rd, u16 Rs)
+static void thumb_tst(u16 Rd, u16 Rs)
 {
     u32 temp = CPU.R[Rd] & CPU.R[Rs];
     CPU.CPSR &= ~(F_Z|F_N);
     CPU.CPSR |= (temp?0:F_Z)|(temp&F_N);
 }
 
-static inline void thumb_neg(u16 Rd, u16 Rs)
+static void thumb_neg(u16 Rd, u16 Rs)
 {
     u32 tmp = CPU.R[Rs];
     CPU.R[Rd] = -(s32)tmp;
@@ -211,7 +211,7 @@ static inline void thumb_neg(u16 Rd, u16 Rs)
     CPU.CPSR |= (CPU.R[Rd]?0:F_Z) | (CPU.R[Rd]&F_N) | (tmp?0:F_C) | (ADD_OVERFLOW(0,~tmp,CPU.R[Rd])?F_V:0);
 }
 
-static inline void thumb_cmp(u16 Rd, u16 Rs)
+static void thumb_cmp(u16 Rd, u16 Rs)
 {
     u32 t1 = CPU.R[Rd];
     u32 t2 = ~CPU.R[Rs];
@@ -221,7 +221,7 @@ static inline void thumb_cmp(u16 Rd, u16 Rs)
         (ADD_OVERFLOW(t1,t2,(u32)temp)?F_V:0);
 }
 
-static inline void thumb_cmn(u16 Rd, u16 Rs)
+static void thumb_cmn(u16 Rd, u16 Rs)
 {
 #ifdef ENABLE_ASM_X86
     u8 carry, overflow;
@@ -240,14 +240,14 @@ static inline void thumb_cmn(u16 Rd, u16 Rs)
 #endif
 }
 
-static inline void thumb_orr(u16 Rd, u16 Rs)
+static void thumb_orr(u16 Rd, u16 Rs)
 {
     CPU.R[Rd] |= CPU.R[Rs];
     CPU.CPSR &= ~(F_Z|F_N);
     CPU.CPSR |= (CPU.R[Rd]?0:F_Z)|(CPU.R[Rd]&F_N);
 }
 
-static inline void thumb_mul(u16 Rd, u16 Rs)
+static void thumb_mul(u16 Rd, u16 Rs)
 {
     CPU.R[Rd] *= CPU.R[Rs];
     CPU.CPSR &= ~(F_Z|F_N);
@@ -255,14 +255,14 @@ static inline void thumb_mul(u16 Rd, u16 Rs)
     //carry flag destroyed
 }
 
-static inline void thumb_bic(u16 Rd, u16 Rs)
+static void thumb_bic(u16 Rd, u16 Rs)
 {
     CPU.R[Rd] &= ~CPU.R[Rs];
     CPU.CPSR &= ~(F_Z|F_N);
     CPU.CPSR |= (CPU.R[Rd]?0:F_Z)|(CPU.R[Rd]&F_N);
 }
 
-static inline void thumb_mvn(u16 Rd, u16 Rs)
+static void thumb_mvn(u16 Rd, u16 Rs)
 {
     CPU.R[Rd] = ~CPU.R[Rs];
     CPU.CPSR &= ~(F_Z|F_N);
@@ -272,7 +272,7 @@ static inline void thumb_mvn(u16 Rd, u16 Rs)
 //-------------------------------------------------------------------------------------------------------------
 
 extern u32 cpu_loop_break;
-inline s32 GBA_ExecuteTHUMB(s32 clocks) //returns residual clocks
+s32 GBA_ExecuteTHUMB(s32 clocks) //returns residual clocks
 {
     while(clocks > 0)
     {

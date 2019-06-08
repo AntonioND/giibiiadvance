@@ -21,13 +21,13 @@
 
 #include "gba.h"
 
-inline int GBA_SaveIsEEPROM(void);
+int GBA_SaveIsEEPROM(void);
 
 void GBA_DetectSaveType(u8 * romptr, int size);
 void GBA_ResetSaveBuffer(void);
 void GBA_SaveSetFilename(char * rom_path);
 
-inline const char * GBA_GetSaveTypeString(void);
+const char * GBA_GetSaveTypeString(void);
 
 u8 GBA_SaveRead8(u32 address);
 u16 GBA_SaveRead16(u32 address);

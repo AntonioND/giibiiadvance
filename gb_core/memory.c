@@ -206,35 +206,35 @@ void GB_MemEnd(void)
 
 //----------------------------------------------------------------
 
-inline void GB_MemWrite16(u32 address, u32 value)
+void GB_MemWrite16(u32 address, u32 value)
 {
     GB_MemWrite8(address++,value&0xFF);
     GB_MemWrite8(address&0xFFFF,value>>8);
 }
 
-inline void GB_MemWrite8(u32 address, u32 value)
+void GB_MemWrite8(u32 address, u32 value)
 {
     GameBoy.Memory.MemWrite(address,value);
 }
 
-inline void GB_MemWriteReg8(u32 address, u32 value)
+void GB_MemWriteReg8(u32 address, u32 value)
 {
     GameBoy.Memory.MemWriteReg(address,value);
 }
 
 //----------------------------------------------------------------
 
-inline u32 GB_MemRead16(u32 address)
+u32 GB_MemRead16(u32 address)
 {
     return ( GB_MemRead8(address) | (GB_MemRead8((address+1)&0xFFFF) << 8) );
 }
 
-inline u32 GB_MemRead8(u32 address)
+u32 GB_MemRead8(u32 address)
 {
     return GameBoy.Memory.MemRead(address);
 }
 
-inline u32 GB_MemReadReg8(u32 address)
+u32 GB_MemReadReg8(u32 address)
 {
     return GameBoy.Memory.MemReadReg(address);
 }

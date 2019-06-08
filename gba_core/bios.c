@@ -36,7 +36,8 @@ void GBA_BiosLoaded(int loaded)
 {
     gba_bios_loaded_from_file = loaded;
 }
-inline int GBA_BiosIsLoaded(void)
+
+int GBA_BiosIsLoaded(void)
 {
     return gba_bios_loaded_from_file;
 }

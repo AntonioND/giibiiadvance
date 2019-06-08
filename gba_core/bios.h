@@ -20,7 +20,7 @@
 #define __GBA_BIOS__
 
 void GBA_BiosLoaded(int loaded);
-inline int GBA_BiosIsLoaded(void);
+int GBA_BiosIsLoaded(void);
 
 void GBA_BiosEmulatedLoad(void);
 

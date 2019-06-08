@@ -42,7 +42,7 @@ static s32 lastresidualclocks = 0;
 static int inited = 0;
 
 int GBA_ROM_SIZE;
-inline int GBA_GetRomSize(void)
+int GBA_GetRomSize(void)
 {
     return GBA_ROM_SIZE;
 }
@@ -141,7 +141,7 @@ void GBA_Screenshot(void)
     free(buffer);
 }
 
-static inline s32 min(s32 a, s32 b)
+static s32 min(s32 a, s32 b)
 {
     return ((a < b) ? a : b);
 }

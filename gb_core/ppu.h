@@ -30,14 +30,14 @@ void GB_PPUEnd(void);
 
 //----------------------------------------------------------------
 
-inline void GB_PPUClockCounterReset(void);
+void GB_PPUClockCounterReset(void);
 void GB_PPUUpdateClocksCounterReference(int reference_clocks);
-inline int GB_PPUGetClocksToNextEvent(void);
+int GB_PPUGetClocksToNextEvent(void);
 
 //----------------------------------------------------------------
 
-inline void GB_PPUCheckStatSignal(void);
-inline void GB_PPUCheckLYC(void);
+void GB_PPUCheckStatSignal(void);
+void GB_PPUCheckLYC(void);
 
 //----------------------------------------------------------------
 

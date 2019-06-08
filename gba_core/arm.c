@@ -31,7 +31,7 @@
 
 //-----------------------------------------------------------------------------------------------
 
-inline u32 arm_check_condition(u32 cond)
+u32 arm_check_condition(u32 cond)
 {
     if(cond == 14) return 1; //This is the most used
 
@@ -65,7 +65,7 @@ inline u32 arm_check_condition(u32 cond)
 
 //---------------------------------------------------------------------------------------------
 
-static inline u32 arm_bit_count(u16 value)
+static u32 arm_bit_count(u16 value)
 {
     //u32 count = 0;
     //int i = 16;
@@ -82,12 +82,12 @@ static inline u32 arm_bit_count(u16 value)
     return count;
 }
 
-static inline void arm_ldm(u32 address, u32 reg)
+static void arm_ldm(u32 address, u32 reg)
 {
     CPU.R[reg] = GBA_MemoryRead32(address&~3);
 }
 
-static inline void arm_stm(u32 address, u32 reg)
+static void arm_stm(u32 address, u32 reg)
 {
     GBA_MemoryWrite32(address&~3,CPU.R[reg]+((reg==15)?12:0));
 }
@@ -117,7 +117,7 @@ static inline void arm_stm(u32 address, u32 reg)
 //---------------------------------------------------------------------------------------------
 
 extern u32 cpu_loop_break;
-inline s32 GBA_ExecuteARM(s32 clocks) //returns residual clocks
+s32 GBA_ExecuteARM(s32 clocks) //returns residual clocks
 {
     //static const u32 reg_add_4[16] = {0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,4};
     //static const u32 reg_add_8[16] = {0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,8};

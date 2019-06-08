@@ -29,15 +29,15 @@ void GBA_CPUInit(void);
 
 void GBA_CPUChangeMode(u32 value);
 
-inline s32 GBA_ExecuteARM(s32 clocks); // in arm.c
-inline s32 GBA_ExecuteTHUMB(s32 clocks); // in thumb.c
+s32 GBA_ExecuteARM(s32 clocks); // in arm.c
+s32 GBA_ExecuteTHUMB(s32 clocks); // in thumb.c
 
-inline s32 GBA_Execute(s32 clocks); // returns total clocks not executed
-inline void GBA_ExecutionBreak(void);
+s32 GBA_Execute(s32 clocks); // returns total clocks not executed
+void GBA_ExecutionBreak(void);
 
-inline void GBA_CPUSetHalted(s32 value);
-inline s32 GBA_CPUGetHalted(void); // 0 = no, 1 = halt, 2 = stop
-inline void GBA_CPUClearHalted(void);
+void GBA_CPUSetHalted(s32 value);
+s32 GBA_CPUGetHalted(void); // 0 = no, 1 = halt, 2 = stop
+void GBA_CPUClearHalted(void);
 
 //-----------------------------------------------------------------------------------
 

@@ -57,7 +57,7 @@ static _dma_channel_ DMA[4];
 
 //--------------------------------------------------------------------------
 
-static inline s32 min(s32 a, s32 b) { return ((a < b) ? a : b); }
+static s32 min(s32 a, s32 b) { return ((a < b) ? a : b); }
 
 //--------------------------------------------------------------------------
 
@@ -292,7 +292,7 @@ void GBA_DMA3Setup(void)
 
 //--------------------------------------------------------------------------
 
-static inline s32 GBA_DMA0Update(s32 clocks) //return clocks to finish transfer
+static s32 GBA_DMA0Update(s32 clocks) //return clocks to finish transfer
 {
     if(DMA[0].enabled == 0) return 0x7FFFFFFF;
 
@@ -392,7 +392,7 @@ static inline s32 GBA_DMA0Update(s32 clocks) //return clocks to finish transfer
     return DMA[0].clocksremaining;
 }
 
-static inline s32 GBA_DMA1Update(s32 clocks) //return clocks to finish transfer
+static s32 GBA_DMA1Update(s32 clocks) //return clocks to finish transfer
 {
     if(DMA[1].enabled == 0) return 0x7FFFFFFF;
 
@@ -503,7 +503,7 @@ static inline s32 GBA_DMA1Update(s32 clocks) //return clocks to finish transfer
     */
 }
 
-static inline s32 GBA_DMA2Update(s32 clocks) //return clocks to finish transfer
+static s32 GBA_DMA2Update(s32 clocks) //return clocks to finish transfer
 {
     if(DMA[2].enabled == 0) return 0x7FFFFFFF;
 
@@ -613,7 +613,7 @@ static inline s32 GBA_DMA2Update(s32 clocks) //return clocks to finish transfer
     */
 }
 
-static inline s32 GBA_DMA3Update(s32 clocks) //return clocks to finish transfer
+static s32 GBA_DMA3Update(s32 clocks) //return clocks to finish transfer
 {
     if(DMA[3].enabled == 0) return 0x7FFFFFFF;
 
@@ -761,22 +761,22 @@ s32 GBA_DMAUpdate(s32 clocks)
     return 0x7FFFFFFF;
 }
 
-inline int GBA_DMAisWorking(void)
+int GBA_DMAisWorking(void)
 {
     return gba_dmaworking;
 }
 
-inline int gba_dma3numchunks(void)
+int gba_dma3numchunks(void)
 {
     return DMA[3].num_chunks;
 }
 
-inline int gba_dma3enabled(void)
+int gba_dma3enabled(void)
 {
     return DMA[3].enabled;
 }
 
-inline s32 GBA_DMAGetExtraClocksElapsed(void)
+s32 GBA_DMAGetExtraClocksElapsed(void)
 {
     return gba_dma_extra_clocks_elapsed;
 }

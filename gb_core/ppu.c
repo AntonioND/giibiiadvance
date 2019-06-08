@@ -191,17 +191,17 @@ void GB_PPUEnd(void)
 
 static int gb_ppu_clock_counter = 0;
 
-inline void GB_PPUClockCounterReset(void)
+void GB_PPUClockCounterReset(void)
 {
     gb_ppu_clock_counter = 0;
 }
 
-static inline int GB_PPUClockCounterGet(void)
+static int GB_PPUClockCounterGet(void)
 {
     return gb_ppu_clock_counter;
 }
 
-static inline void GB_PPUClockCounterSet(int new_reference_clocks)
+static void GB_PPUClockCounterSet(int new_reference_clocks)
 {
     gb_ppu_clock_counter = new_reference_clocks;
 }
@@ -218,14 +218,14 @@ void GB_PPUUpdateClocksCounterReference(int reference_clocks)
     GB_PPUClockCounterSet(reference_clocks);
 }
 
-inline int GB_PPUGetClocksToNextEvent(void)
+int GB_PPUGetClocksToNextEvent(void)
 {
     return GameBoy.Emulator.PPUClocksToNextEvent();
 }
 
 //----------------------------------------------------------------
 
-inline void GB_PPUCheckStatSignal(void)
+void GB_PPUCheckStatSignal(void)
 {
     if(GameBoy.Emulator.lcd_on == 0)
     {
@@ -258,7 +258,7 @@ inline void GB_PPUCheckStatSignal(void)
     }
 }
 
-inline void GB_PPUCheckLYC(void)
+void GB_PPUCheckLYC(void)
 {
     if(GameBoy.Emulator.lcd_on)
     {

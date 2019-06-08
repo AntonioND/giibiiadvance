@@ -204,17 +204,17 @@ void GB_CameraWebcamCapture(void)
 
 static int gb_camera_clock_counter = 0;
 
-inline void GB_CameraClockCounterReset(void)
+void GB_CameraClockCounterReset(void)
 {
     gb_camera_clock_counter = 0;
 }
 
-static inline int GB_CameraClockCounterGet(void)
+static int GB_CameraClockCounterGet(void)
 {
     return gb_camera_clock_counter;
 }
 
-static inline void GB_CameraClockCounterSet(int new_reference_clocks)
+static void GB_CameraClockCounterSet(int new_reference_clocks)
 {
     gb_camera_clock_counter = new_reference_clocks;
 }
@@ -243,7 +243,7 @@ void GB_CameraUpdateClocksCounterReference(int reference_clocks)
     GB_CameraClockCounterSet(reference_clocks);
 }
 
-inline int GB_CameraGetClocksToNextEvent(void)
+int GB_CameraGetClocksToNextEvent(void)
 {
     if(GameBoy.Emulator.MemoryController != MEM_CAMERA) return 0x7FFFFFFF;
 
@@ -255,24 +255,24 @@ inline int GB_CameraGetClocksToNextEvent(void)
 
 //----------------------------------------------------------------------------
 
-static inline int gb_clamp_int(int min, int value, int max)
+static int gb_clamp_int(int min, int value, int max)
 {
     if(value < min) return min;
     if(value > max) return max;
     return value;
 }
 
-static inline int gb_min_int(int a, int b)
+static int gb_min_int(int a, int b)
 {
     return (a < b) ? a : b;
 }
 
-static inline int gb_max_int(int a, int b)
+static int gb_max_int(int a, int b)
 {
     return (a > b) ? a : b;
 }
 
-static inline u32 gb_cam_matrix_process(u32 value, int x, int y)
+static u32 gb_cam_matrix_process(u32 value, int x, int y)
 {
     _GB_CAMERA_CART_ * cam = &GameBoy.Emulator.CAM;
 
@@ -534,12 +534,12 @@ int GB_MapperIsGBCamera(void)
     return (GameBoy.Emulator.MemoryController == MEM_CAMERA);
 }
 
-inline int GB_CameraWebcamImageGetPixel(int x, int y)
+int GB_CameraWebcamImageGetPixel(int x, int y)
 {
     return gb_camera_webcam_output[x][y+(GBCAM_SENSOR_EXTRA_LINES/2)];
 }
 
-inline int GB_CameraRetinaProcessedImageGetPixel(int x, int y)
+int GB_CameraRetinaProcessedImageGetPixel(int x, int y)
 {
     return gb_cam_retina_output_buf[x][y+(GBCAM_SENSOR_EXTRA_LINES/2)]; // 4 extra rows, 2 on each border
 }

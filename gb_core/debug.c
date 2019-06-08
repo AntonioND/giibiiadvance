@@ -331,7 +331,7 @@ static const int debug_commands_cb_info[256] = {
 
 //------------------------------------------------------------------------------------------------
 
-inline int gb_debug_get_address_increment(u32 address)
+int gb_debug_get_address_increment(u32 address)
 {
     int temp;
 
@@ -370,7 +370,7 @@ inline int gb_debug_get_address_increment(u32 address)
     return 1;
 }
 
-inline int gb_debug_get_address_is_code(u32 address)
+int gb_debug_get_address_is_code(u32 address)
 {
     const int iscode[16] = { -1,1,1,1,
                               1,1,1,1,

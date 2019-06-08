@@ -46,7 +46,7 @@ static u32 memsizemask[16] = {
     0x00FFFFFF, 0x00FFFFFF, 0, 0
 };
 
-inline u32 GBA_MemoryReadFast32(u32 address)
+u32 GBA_MemoryReadFast32(u32 address)
 {
     if(address & 0xF0000000) return 0;
     u32 index = (address>>24)&0xF;
@@ -55,7 +55,7 @@ inline u32 GBA_MemoryReadFast32(u32 address)
     else return ptr[(address&memsizemask[index])>>2];
 }
 
-inline void GBA_MemoryWriteFast32(u32 address,u32 data)
+void GBA_MemoryWriteFast32(u32 address,u32 data)
 {
     if(address & 0xF0000000) return;
     u32 index = (address>>24)&0xF;
@@ -64,7 +64,7 @@ inline void GBA_MemoryWriteFast32(u32 address,u32 data)
     else ptr[(address&memsizemask[index])>>2] = data;
 }
 
-inline u16 GBA_MemoryReadFast16(u32 address)
+u16 GBA_MemoryReadFast16(u32 address)
 {
     if(address & 0xF0000000) return 0;
     u32 index = (address>>24)&0xF;
@@ -73,7 +73,7 @@ inline u16 GBA_MemoryReadFast16(u32 address)
     else return ptr[(address&memsizemask[index])>>1];
 }
 
-inline void GBA_MemoryWriteFast16(u32 address,u16 data)
+void GBA_MemoryWriteFast16(u32 address,u16 data)
 {
     if(address & 0xF0000000) return;
     u32 index = (address>>24)&0xF;
@@ -82,7 +82,7 @@ inline void GBA_MemoryWriteFast16(u32 address,u16 data)
     else ptr[(address&memsizemask[index])>>1] = data;
 }
 
-inline u8 GBA_MemoryReadFast8(u32 address)
+u8 GBA_MemoryReadFast8(u32 address)
 {
     if(address & 0xF0000000) return 0;
     u32 index = (address>>24)&0xF;
@@ -91,7 +91,7 @@ inline u8 GBA_MemoryReadFast8(u32 address)
     else return ptr[address&memsizemask[index]];
 }
 
-inline void GBA_MemoryWriteFast8(u32 address,u8 data)
+void GBA_MemoryWriteFast8(u32 address,u8 data)
 {
     if(address & 0xF0000000) return;
     u32 index = (address>>24)&0xF;
@@ -418,7 +418,7 @@ u8 GBA_MemoryRead8(u32 address)
     //return 0;
 }
 
-static inline u16 expand8to16(u8 data)
+static u16 expand8to16(u8 data)
 {
     return ((u16)data)|(((u16)data)<<8);
 }
@@ -452,13 +452,13 @@ void GBA_MemoryWrite8(u32 address,u8 data)
 
 //--------------------------------------------------------------------------------------------
 
-inline void GBA_RegisterWrite32(u32 address, u32 data)
+void GBA_RegisterWrite32(u32 address, u32 data)
 {
     GBA_RegisterWrite16(address,(u16)data);
     GBA_RegisterWrite16(address+2,(u16)(data>>16));
 }
 
-inline u32 GBA_RegisterRead32(u32 address)
+u32 GBA_RegisterRead32(u32 address)
 {
     return ((u32)GBA_RegisterRead16(address)) | (((u32)GBA_RegisterRead16(address+2))<<16);
 }
@@ -616,7 +616,7 @@ u16 GBA_RegisterRead16(u32 address)
     else return 0;
 }
 
-inline void GBA_RegisterWrite8(u32 address, u8 data) // ??????
+void GBA_RegisterWrite8(u32 address, u8 data) // ??????
 {
     if(address == REG_POSTFLG) { Debug_DebugMsgArg("reg_write_8 REG_POSTFLG (bug)"); GBA_ExecutionBreak(); }
     //BUG: THIS WILL ENTER HALT MODE WHEN WRITING TO REG_POSTFLG
@@ -625,7 +625,7 @@ inline void GBA_RegisterWrite8(u32 address, u8 data) // ??????
     else GBA_RegisterWrite16(address&~1,(temp&0xFF00) | (u16)data);
 }
 
-inline u8 GBA_RegisterRead8(u32 address)
+u8 GBA_RegisterRead8(u32 address)
 {
     if(address&1) return (GBA_RegisterRead16(address&~1)>>8);
     else return (GBA_RegisterRead16(address&~1)&0xFF);

@@ -30,12 +30,12 @@ void GBA_MemoryEnd(void);
 
 //----------------------------------------------------------------------
 
-inline u32 GBA_MemoryReadFast32(u32 address); //doesn't do any checking
-inline u16 GBA_MemoryReadFast16(u32 address);
-inline u8 GBA_MemoryReadFast8(u32 address);
-//inline void GBA_MemoryWriteFast32(u32 address,u32 data); //they don't work right
-//inline void GBA_MemoryWriteFast16(u32 address,u16 data);
-//inline void GBA_MemoryWriteFast8(u32 address,u8 data);
+u32 GBA_MemoryReadFast32(u32 address); //doesn't do any checking
+u16 GBA_MemoryReadFast16(u32 address);
+u8 GBA_MemoryReadFast8(u32 address);
+//void GBA_MemoryWriteFast32(u32 address,u32 data); //they don't work right
+//void GBA_MemoryWriteFast16(u32 address,u16 data);
+//void GBA_MemoryWriteFast8(u32 address,u8 data);
 
 u32 GBA_MemoryRead32(u32 address);
 void GBA_MemoryWrite32(u32 address,u32 data);
@@ -48,12 +48,12 @@ void GBA_MemoryWrite8(u32 address,u8 data);
 
 //----------------------------------------------------------------------
 
-inline void GBA_RegisterWrite32(u32 address, u32 data);
-inline u32 GBA_RegisterRead32(u32 address);
+void GBA_RegisterWrite32(u32 address, u32 data);
+u32 GBA_RegisterRead32(u32 address);
 void GBA_RegisterWrite16(u32 address, u16 data);
 u16 GBA_RegisterRead16(u32 address);
-inline void GBA_RegisterWrite8(u32 address, u8 data);
-inline u8 GBA_RegisterRead8(u32 address);
+void GBA_RegisterWrite8(u32 address, u8 data);
+u8 GBA_RegisterRead8(u32 address);
 
 //----------------------------------------------------------------------
 
@@ -63,7 +63,7 @@ extern u32 wait_table_seq[];
 extern u32 wait_table_nonseq[];
 extern const s32 mem_bus_is_16[];
 
-static inline u32 GBA_MemoryGetAccessCycles(u32 seq, u32 _32bit, u32 address)
+static u32 GBA_MemoryGetAccessCycles(u32 seq, u32 _32bit, u32 address)
 {
     //if((address & 0x1FFFF) == 0) seq = 0;
     u32 index = (address>>24)&0xF;
@@ -79,40 +79,40 @@ static inline u32 GBA_MemoryGetAccessCycles(u32 seq, u32 _32bit, u32 address)
     }
 }
 
-static inline u32 GBA_MemoryGetAccessCyclesNoSeq(u32 _32bit, u32 address)
+static u32 GBA_MemoryGetAccessCyclesNoSeq(u32 _32bit, u32 address)
 {
     u32 index = (address>>24)&0xF;
     if(_32bit && mem_bus_is_16[index]) return (wait_table_seq[index] + wait_table_nonseq[index] + 2);
     else return (wait_table_nonseq[index] + 1);
 }
 
-static inline u32 GBA_MemoryGetAccessCyclesSeq(u32 _32bit, u32 address)
+static u32 GBA_MemoryGetAccessCyclesSeq(u32 _32bit, u32 address)
 {
     //if((address & 0x1FFFF) == 0) return GBA_MemoryGetAccessCyclesNoSeq(_32bit,address);
     u32 index = (address>>24)&0xF;
     return (wait_table_seq[index] + 1) << (_32bit && mem_bus_is_16[index]);
 }
 
-static inline u32 GBA_MemoryGetAccessCyclesNoSeq32(u32 address)
+static u32 GBA_MemoryGetAccessCyclesNoSeq32(u32 address)
 {
     u32 index = (address>>24)&0xF;
     if(mem_bus_is_16[index]) return (wait_table_seq[index] + wait_table_nonseq[index] + 2);
     else return (wait_table_nonseq[index] + 1);
 }
 
-static inline u32 GBA_MemoryGetAccessCyclesNoSeq16(u32 address)
+static u32 GBA_MemoryGetAccessCyclesNoSeq16(u32 address)
 {
     return (wait_table_nonseq[(address>>24)&0xF] + 1);
 }
 
-static inline u32 GBA_MemoryGetAccessCyclesSeq32(u32 address)
+static u32 GBA_MemoryGetAccessCyclesSeq32(u32 address)
 {
     //if((address & 0x1FFFF) == 0) return GBA_MemoryGetAccessCyclesNoSeq32(address);
     u32 index = (address>>24)&0xF;
     return (wait_table_seq[index] + 1) << (mem_bus_is_16[index]);
 }
 
-static inline u32 GBA_MemoryGetAccessCyclesSeq16(u32 address)
+static u32 GBA_MemoryGetAccessCyclesSeq16(u32 address)
 {
     //if((address & 0x1FFFF) == 0) return GBA_MemoryGetAccessCyclesNoSeq16(address);
     return (wait_table_seq[(address>>24)&0xF] + 1);

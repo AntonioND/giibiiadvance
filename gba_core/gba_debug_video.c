@@ -23,7 +23,7 @@
 
 //----------------------------------------------------------------
 
-static inline u32 rgb16to32(u16 color)
+static u32 rgb16to32(u16 color)
 {
     int r = (color & 31)<<3;
     int g = ((color >> 5) & 31)<<3;
@@ -31,7 +31,7 @@ static inline u32 rgb16to32(u16 color)
     return (b<<16)|(g<<8)|r;
 }
 
-static inline int min(int a, int b)
+static int min(int a, int b)
 {
     return (a < b) ? a : b;
 }
@@ -452,13 +452,13 @@ void GBA_Debug_TilePrint64x64(char * buffer, int bufw, int bufh, int cbb, int ti
 
 //----------------------------------------------------------------
 
-static inline u32 se_index(u32 tx, u32 ty, u32 pitch) //from tonc
+static u32 se_index(u32 tx, u32 ty, u32 pitch) //from tonc
 {
     u32 sbb = (ty/32)*(pitch/32) + (tx/32);
     return sbb*1024 + (ty%32)*32 + tx%32;
 }
 
-static inline u32 se_index_affine(u32 tx, u32 ty, u32 tpitch)
+static u32 se_index_affine(u32 tx, u32 ty, u32 tpitch)
 {
     return (ty * tpitch) + tx;
 }

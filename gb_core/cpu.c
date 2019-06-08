@@ -75,7 +75,7 @@ extern const u8 gb_daa_table[256*8*2]; // In file daa_table.c
 
 static int gb_break_cpu_loop = 0;
 
-inline void GB_CPUBreakLoop(void) // call when writing to a register that can generate an event!!!
+void GB_CPUBreakLoop(void) // call when writing to a register that can generate an event!!!
 {
     gb_break_cpu_loop = 1;
 }
@@ -86,29 +86,29 @@ inline void GB_CPUBreakLoop(void) // call when writing to a register that can ge
 
 static int gb_cpu_clock_counter = 0;
 
-inline void GB_CPUClockCounterReset(void)
+void GB_CPUClockCounterReset(void)
 {
     gb_cpu_clock_counter = 0;
 }
 
-inline int GB_CPUClockCounterGet(void)
+int GB_CPUClockCounterGet(void)
 {
     return gb_cpu_clock_counter;
 }
 
-inline void GB_CPUClockCounterAdd(int value)
+void GB_CPUClockCounterAdd(int value)
 {
     gb_cpu_clock_counter += value;
 }
 
 //----------------------------------------------------------------
 
-static inline int min(int a, int b)
+static int min(int a, int b)
 {
     return (a < b) ? a : b;
 }
 
-static inline int GB_ClocksForNextEvent(void)
+static int GB_ClocksForNextEvent(void)
 {
     int clocks_to_next_event = GB_TimersGetClocksToNextEvent();
     clocks_to_next_event = min(clocks_to_next_event,GB_PPUGetClocksToNextEvent());
@@ -122,7 +122,7 @@ static inline int GB_ClocksForNextEvent(void)
     return (clocks_to_next_event | 4) & ~3; // align to 4 clocks for CPU HALT
 }
 
-static inline void GB_ClockCountersReset(void)
+static void GB_ClockCountersReset(void)
 {
     GB_CPUClockCounterReset();
     GB_TimersClockCounterReset();
@@ -134,7 +134,7 @@ static inline void GB_ClockCountersReset(void)
     GB_CameraClockCounterReset();
 }
 
-inline void GB_UpdateCounterToClocks(int reference_clocks)
+void GB_UpdateCounterToClocks(int reference_clocks)
 {
     GB_TimersUpdateClocksCounterReference(reference_clocks);
     GB_PPUUpdateClocksCounterReference(reference_clocks);
@@ -235,7 +235,7 @@ void GB_CPUEnd(void)
 
 int gb_break_execution = 0;
 
-inline void _gb_break_to_debugger(void)
+void _gb_break_to_debugger(void)
 {
     gb_break_execution = 1;
 }

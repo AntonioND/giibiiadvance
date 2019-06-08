@@ -30,17 +30,17 @@ void GB_DMAEnd(void);
 
 //----------------------------------------------------------------
 
-inline void GB_DMAWriteDMA(int reference_clocks, int value);
+void GB_DMAWriteDMA(int reference_clocks, int value);
 
-inline void GB_DMAWriteHDMA1(int value); // reference_clocks not needed
-inline void GB_DMAWriteHDMA2(int value);
-inline void GB_DMAWriteHDMA3(int value);
-inline void GB_DMAWriteHDMA4(int value);
-inline void GB_DMAWriteHDMA5(int value);
+void GB_DMAWriteHDMA1(int value); // reference_clocks not needed
+void GB_DMAWriteHDMA2(int value);
+void GB_DMAWriteHDMA3(int value);
+void GB_DMAWriteHDMA4(int value);
+void GB_DMAWriteHDMA5(int value);
 
 //----------------------------------------------------------------
 
-inline void GB_DMAClockCounterReset(void);
+void GB_DMAClockCounterReset(void);
 void GB_DMAUpdateClocksCounterReference(int reference_clocks);
 int GB_DMAGetClocksToNextEvent(void);
 

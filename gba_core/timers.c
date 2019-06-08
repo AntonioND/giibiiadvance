@@ -41,28 +41,28 @@ _timer_t Timer[4];
 
 //----------------------------------------------------------------
 
-static inline s32 min(s32 a, s32 b) { return ((a < b) ? a : b); }
+static s32 min(s32 a, s32 b) { return ((a < b) ? a : b); }
 
 //----------------------------------------------------------------
 
-inline void GBA_TimerInitAll(void)
+void GBA_TimerInitAll(void)
 {
     memset((void*)Timer,0,sizeof(Timer));
 }
 
 //----------------------------------------------------------------
 
-inline void GBA_TimerSetStart0(u16 val) { Timer[0].start = val; }
-inline void GBA_TimerSetStart1(u16 val) { Timer[1].start = val; }
-inline void GBA_TimerSetStart2(u16 val) { Timer[2].start = val; }
-inline void GBA_TimerSetStart3(u16 val) { Timer[3].start = val; }
+void GBA_TimerSetStart0(u16 val) { Timer[0].start = val; }
+void GBA_TimerSetStart1(u16 val) { Timer[1].start = val; }
+void GBA_TimerSetStart2(u16 val) { Timer[2].start = val; }
+void GBA_TimerSetStart3(u16 val) { Timer[3].start = val; }
 
 //----------------------------------------------------------------
 
-inline u16 gba_timergetstart0(void) { return Timer[0].start; }
-inline u16 gba_timergetstart1(void) { return Timer[1].start; }
-inline u16 gba_timergetstart2(void) { return Timer[2].start; }
-inline u16 gba_timergetstart3(void) { return Timer[3].start; }
+u16 gba_timergetstart0(void) { return Timer[0].start; }
+u16 gba_timergetstart1(void) { return Timer[1].start; }
+u16 gba_timergetstart2(void) { return Timer[2].start; }
+u16 gba_timergetstart3(void) { return Timer[3].start; }
 
 //----------------------------------------------------------------
 

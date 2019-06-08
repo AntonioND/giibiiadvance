@@ -28,12 +28,12 @@ void GBA_DMA3Setup(void);
 
 s32 GBA_DMAUpdate(s32 clocks);
 
-inline int GBA_DMAisWorking(void);
+int GBA_DMAisWorking(void);
 
-inline s32 GBA_DMAGetExtraClocksElapsed(void);
+s32 GBA_DMAGetExtraClocksElapsed(void);
 
-inline int gba_dma3numchunks(void); //for EEPROM
-inline int gba_dma3enabled(void);
+int gba_dma3numchunks(void); //for EEPROM
+int gba_dma3enabled(void);
 
 void GBA_DMASoundRequestData(int A, int B);
 

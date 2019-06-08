@@ -31,16 +31,16 @@ extern u32 screenmode;
 //#define HLINE_CLOCKS (1232)
 //#define VBL_CLOCKS   (83776) //68*HLINE_CLOCKS
 
-inline void GBA_CallInterrupt(u32 flag);
+void GBA_CallInterrupt(u32 flag);
 
-inline void GBA_InterruptLCD(u32 flag);
+void GBA_InterruptLCD(u32 flag);
 
-inline int GBA_ScreenJustChangedMode(void);
+int GBA_ScreenJustChangedMode(void);
 
 s32 GBA_UpdateScreenTimings(s32 clocks);
 
-inline int GBA_InterruptCheck(void);
-inline void GBA_CheckKeypadInterrupt(void);
+int GBA_InterruptCheck(void);
+void GBA_CheckKeypadInterrupt(void);
 
 void GBA_InterruptInit(void);
 

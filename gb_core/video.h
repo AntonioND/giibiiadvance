@@ -23,11 +23,11 @@
 
 //----------------------------------------------------
 
-inline void GB_SkipFrame(int skip);
-inline int GB_HasToSkipFrame(void);
+void GB_SkipFrame(int skip);
+int GB_HasToSkipFrame(void);
 
-inline void GB_EnableBlur(int enable);
-inline void GB_EnableRealColors(int enable);
+void GB_EnableBlur(int enable);
+void GB_EnableRealColors(int enable);
 
 void GB_ConfigGetPalette(u8 * red, u8 * green, u8 * blue);
 void GB_ConfigSetPalette(u8 red, u8 green, u8 blue);
@@ -37,7 +37,7 @@ void GB_ConfigLoadPalette(void);
 
 #define GB_RGB(r,g,b) ((r)|((g)<<5)|((b)<<10))
 void GB_SetPalette(u32 red, u32 green, u32 blue);
-inline u32 GB_GameBoyGetGray(u32 number);
+u32 GB_GameBoyGetGray(u32 number);
 
 u32 gbc_getbgpalcolor(int pal, int color);
 u32 gbc_getsprpalcolor(int pal, int color);

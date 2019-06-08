@@ -23,7 +23,7 @@
 
 void GBA_SoundInit(void);
 
-inline int GBA_SoundHardwareIsOn(void);
+int GBA_SoundHardwareIsOn(void);
 
 void GB_ToggleSound(void);
 

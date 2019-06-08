@@ -137,10 +137,10 @@ void GBA_DebugClearBreakpointAll(void)
 
 //----------------------------------------------------------------------------------
 
-inline u32 arm_check_condition(u32 cond); // in arm.c
+u32 arm_check_condition(u32 cond); // in arm.c
 
 //returns 1 if there is a ';' in the line (previous to this or written by this)
-static inline int gba_dissasemble_add_condition_met(int cond, u32 address, char * dest, int add_comment, int dest_size)
+static int gba_dissasemble_add_condition_met(int cond, u32 address, char * dest, int add_comment, int dest_size)
 {
     if(CPU.R[R_PC] == address)
     {

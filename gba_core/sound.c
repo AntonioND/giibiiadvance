@@ -230,7 +230,7 @@ static _GBA_SOUND_HARDWARE_ Sound;
 
 static int output_enabled;
 
-inline int GBA_SoundHardwareIsOn(void)
+int GBA_SoundHardwareIsOn(void)
 {
     return Sound.master_enable;
 }

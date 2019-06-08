@@ -156,7 +156,7 @@ typedef struct {
 
 //------------------------------------------------------------------------------------
 
-inline int GBA_GetRomSize(void);
+int GBA_GetRomSize(void);
 
 int GBA_InitRom(void * bios_ptr, void * rom_ptr, u32 romsize);
 int GBA_EndRom(int save);

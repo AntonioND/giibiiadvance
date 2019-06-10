@@ -1,20 +1,8 @@
-/*
-    GiiBiiAdvance - GBA/GB  emulator
-    Copyright (C) 2011-2015 Antonio Niño Díaz (AntonioND)
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+// SPDX-License-Identifier: GPL-2.0-or-later
+//
+// Copyright (c) 2011-2015, 2019, Antonio NiÃ±o DÃ­az
+//
+// GiiBiiAdvance - GBA/GB emulator
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -574,7 +562,7 @@ When not using sound output, power consumption can be reduced by setting both
     //fifo channels -> -65536 .. +65536
 
     //add everything, total -> -81920 .. +81920 -- clamp to -65536 .. +65536
-    //¿¿ clamp to bias/200h * 65536 ??
+    //Â¿Â¿ clamp to bias/200h * 65536 ??
 
     if(outvalue_left > 65535) outvalue_left = 65535;
     else if(outvalue_left < (-65536)) outvalue_left = -65536;

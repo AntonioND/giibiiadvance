@@ -1,6 +1,6 @@
 /*
     gbafix_debug.c
-    Modified version from gbafix.c by AntonioND (Antonio Niño Díaz)
+    Modified version from gbafix.c by AntonioND (Antonio NiÃ±o DÃ­az)
     It enables debug BIOS vectors.
 */
 /*

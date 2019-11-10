@@ -10,6 +10,7 @@
 #include "../build_options.h"
 #include "../debug_utils.h"
 #include "../file_utils.h"
+#include "../png_utils.h"
 
 #include "gba.h"
 #include "cpu.h"
@@ -22,7 +23,6 @@
 #include "save.h"
 #include "rom.h"
 #include "sound.h"
-#include "../png/png_utils.h"
 
 static s32 clocks_to_next_event;
 static s32 lastresidualclocks = 0;

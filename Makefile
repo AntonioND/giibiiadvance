@@ -13,7 +13,7 @@ COMMON_SOURCES = \
 	general_utils.c \
 	input_utils.c \
 	main.c \
-	png/png_utils.c \
+	png_utils.c \
 	sound_utils.c \
 	text_data.c \
 	window_handler.c \

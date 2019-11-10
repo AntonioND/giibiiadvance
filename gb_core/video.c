@@ -4,13 +4,14 @@
 //
 // GiiBiiAdvance - GBA/GB emulator
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdarg.h>
 
 #include "../build_options.h"
 #include "../file_utils.h"
+#include "../png_utils.h"
 
 #include "gameboy.h"
 #include "general.h"
@@ -20,8 +21,6 @@
 #include "sgb.h"
 #include "sound.h"
 #include "video.h"
-
-#include "../png/png_utils.h"
 
 extern _GB_CONTEXT_ GameBoy;
 extern _SGB_INFO_ SGBInfo;

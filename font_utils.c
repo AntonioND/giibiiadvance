@@ -8,12 +8,12 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "debug_utils.h"
-#include "png/png_utils.h"
-#include "font_utils.h"
-#include "file_utils.h"
 #include "build_options.h"
+#include "debug_utils.h"
+#include "file_utils.h"
+#include "font_utils.h"
 #include "general_utils.h"
+#include "png_utils.h"
 
 //------------------------------------------------------------------------------------------
 

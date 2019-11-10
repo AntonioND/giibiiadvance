@@ -9,10 +9,11 @@
 #include <string.h>
 
 #include "../debug_utils.h"
-#include "../window_handler.h"
+#include "../file_utils.h"
 #include "../font_utils.h"
 #include "../general_utils.h"
-#include "../file_utils.h"
+#include "../png_utils.h"
+#include "../window_handler.h"
 
 #include "win_gb_debugger.h"
 #include "win_main.h"
@@ -22,8 +23,6 @@
 #include "../gb_core/general.h"
 #include "../gb_core/debug_video.h"
 #include "../gb_core/sgb.h"
-
-#include "../png/png_utils.h"
 
 //------------------------------------------------------------------------------------------------
 

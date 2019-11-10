@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../../png/png_utils.h"
+#include "../png/png_utils.h"
 
 void Debug_LogMsgArg(const char *msg, ...)
 {

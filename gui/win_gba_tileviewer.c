@@ -9,18 +9,17 @@
 #include <string.h>
 
 #include "../debug_utils.h"
-#include "../window_handler.h"
+#include "../file_utils.h"
 #include "../font_utils.h"
 #include "../general_utils.h"
-#include "../file_utils.h"
+#include "../png_utils.h"
+#include "../window_handler.h"
 
 #include "win_gba_debugger.h"
 #include "win_main.h"
 #include "win_utils.h"
 
 #include "../gba_core/gba_debug_video.h"
-
-#include "../png/png_utils.h"
 
 //------------------------------------------------------------------------------------------------
 

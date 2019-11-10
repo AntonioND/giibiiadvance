@@ -11,10 +11,11 @@
 #include <string.h>
 
 #include "../build_options.h"
-#include "../general_utils.h"
-#include "../file_utils.h"
-#include "../debug_utils.h"
 #include "../config.h"
+#include "../debug_utils.h"
+#include "../file_utils.h"
+#include "../general_utils.h"
+#include "../png_utils.h"
 
 #include "general.h"
 #include "gameboy.h"
@@ -22,8 +23,6 @@
 #include "serial.h"
 #include "cpu.h"
 #include "debug.h"
-
-#include "../png/png_utils.h"
 
 extern _GB_CONTEXT_ GameBoy;
 

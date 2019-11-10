@@ -4,6 +4,7 @@
 //
 // GiiBiiAdvance - GBA/GB emulator
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -101,11 +102,11 @@ static void GBA_MemoryReadFastFillArray(void)
     memarray[6] = (u32*)Mem.vram;
     memarray[7] = (u32*)Mem.oam;
     memarray[8] = (u32*)Mem.rom_wait0;
-    memarray[9] = (u32*)((u32)Mem.rom_wait0 + 0x01000000);
+    memarray[9] = (u32*)((uintptr_t)Mem.rom_wait0 + 0x01000000);
     memarray[10] = (u32*)Mem.rom_wait1;
-    memarray[11] = (u32*)((u32)Mem.rom_wait1 + 0x01000000);
+    memarray[11] = (u32*)((uintptr_t)Mem.rom_wait1 + 0x01000000);
     memarray[12] = (u32*)Mem.rom_wait2;
-    memarray[13] = (u32*)((u32)Mem.rom_wait2 + 0x01000000);
+    memarray[13] = (u32*)((uintptr_t)Mem.rom_wait2 + 0x01000000);
     memarray[14] = NULL;
     memarray[15] = NULL;
 }

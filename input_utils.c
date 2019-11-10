@@ -410,7 +410,7 @@ void Input_RumbleEnable(void)
 
 int Input_JoystickHasRumble(int index)
 {
-    return (int)Joystick[index].haptic;
+    return (int)(uintptr_t)(Joystick[index].haptic);
 }
 
 //----------------------------------------------------------------------------------------

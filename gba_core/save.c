@@ -4,9 +4,10 @@
 //
 // GiiBiiAdvance - GBA/GB emulator
 
-#include <string.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "../build_options.h"
 #include "../debug_utils.h"
@@ -362,7 +363,7 @@ void GBA_SaveWrite8(u32 address, u8 data)
                     //erase sector
                     if(FLASH_CMD == 0x80)
                     {
-                        memset((void*)((u32)FLASH_BUFFER512+(address&0x0000F000)),0xFF,0xFFF);
+                        memset((void*)((uintptr_t)FLASH_BUFFER512+(address&0x0000F000)),0xFF,0xFFF);
                         FLASH_CMD = 0x30;
                         FLASH_STATE = 1;
                     }
@@ -452,7 +453,7 @@ void GBA_SaveWrite8(u32 address, u8 data)
                     //erase sector
                     if(FLASH_CMD == 0x80)
                     {
-                        memset((void*)((u32)FLASH_1M_PTR+(address&0x0000F000)),0xFF,0xFFF);
+                        memset((void*)((uintptr_t)FLASH_1M_PTR+(address&0x0000F000)),0xFF,0xFFF);
                         FLASH_CMD = 0x30;
                         FLASH_STATE = 1;
                     }

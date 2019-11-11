@@ -1,9 +1,29 @@
-PKG_CONFIG	= pkg-config
-INCS		= `$(PKG_CONFIG) --cflags sdl2 libpng opencv`
-LIBS		= `$(PKG_CONFIG) --libs sdl2 libpng opencv`
+PKG_CONFIG	:= pkg-config
+DEFINES		:=
+
+# `make ENABLE_OPENCL=1` builds the emulator with OpenCL support
+ifeq ($(ENABLE_OPENCL),1)
+PKG_CONFIG_LIBS	:= sdl2 libpng opencl
+else
+PKG_CONFIG_LIBS	:= sdl2 libpng
+DEFINES		+= -DNO_CAMERA_EMULATION
+endif
+
+# `make DISABLE_ASM_X86=1` builds the emulator without inline assembly
+ifneq ($(DISABLE_ASM_X86),1)
+DEFINES		+= -DENABLE_ASM_X86
+endif
+
+# `make DISABLE_OPENGL=1` builds the emulator without OpenGL support
+ifneq ($(DISABLE_OPENGL),1)
+DEFINES		+= -DENABLE_OPENGL
+endif
+
+INCS		:= `$(PKG_CONFIG) --cflags $(PKG_CONFIG_LIBS)`
+LIBS		:= `$(PKG_CONFIG) --libs $(PKG_CONFIG_LIBS)`
 LIBS		+= -lGL -lm
 
-COMMON_SOURCES = \
+COMMON_SOURCES := \
 	source/config.c \
 	source/debug_utils.c \
 	source/file_explorer.c \
@@ -18,7 +38,7 @@ COMMON_SOURCES = \
 	source/text_data.c \
 	source/window_handler.c \
 
-GB_SOURCES = \
+GB_SOURCES := \
 	source/gb_core/camera.c \
 	source/gb_core/cpu.c \
 	source/gb_core/daa_table.c \
@@ -43,7 +63,7 @@ GB_SOURCES = \
 	source/gb_core/sound.c \
 	source/gb_core/video.c \
 
-GBA_SOURCES = \
+GBA_SOURCES := \
 	source/gba_core/arm.c \
 	source/gba_core/bios.c \
 	source/gba_core/cpu.c \
@@ -60,7 +80,7 @@ GBA_SOURCES = \
 	source/gba_core/timers.c \
 	source/gba_core/video.c \
 
-GUI_SOURCES = \
+GUI_SOURCES := \
 	source/gui/win_gba_disassembler.c \
 	source/gui/win_gba_ioviewer.c \
 	source/gui/win_gba_mapviewer.c \
@@ -84,9 +104,9 @@ GUI_SOURCES = \
 	source/gui/win_utils_draw.c \
 	source/gui/win_utils_events.c \
 
-SOURCES = $(COMMON_SOURCES) $(GB_SOURCES) $(GBA_SOURCES) $(GUI_SOURCES)
+SOURCES := $(COMMON_SOURCES) $(GB_SOURCES) $(GBA_SOURCES) $(GUI_SOURCES)
 
-OBJS = $(SOURCES:.c=.o)
+OBJS := $(SOURCES:.c=.o)
 
 all: giibiiadvance
 
@@ -94,7 +114,7 @@ giibiiadvance: $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LIBS)
 
 .c.o:
-	$(CC) $(CFLAGS) $(INCS) -c -o $*.o $<
+	$(CC) $(CFLAGS) $(DEFINES) $(INCS) -c -o $*.o $<
 
 clean:
 	rm -f $(OBJS) giibiiadvance

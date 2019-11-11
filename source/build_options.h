@@ -35,9 +35,6 @@
 //----------------------- EMULATOR DEFINES ----------------------
 //---------------------------------------------------------------
 
-#define ENABLE_ASM_X86
-#define ENABLE_OPENGL // Enables OpenGL info in "System Information" window.
-
 #define BIOS_FOLDER "bios"
 #define SCREENSHOT_FOLDER "screenshots"
 
@@ -46,7 +43,6 @@
 //-----------------------------------------
 
 //#define VRAM_MEM_CHECKING // Don't even try to enable this...
-//#define NO_CAMERA_EMULATION // For GB Camera. If using Code::Blocks project file, you don't need to touch this.
 
 #define DMG_ROM_FILENAME "dmg_rom.bin"
 #define MGB_ROM_FILENAME "mgb_rom.bin"

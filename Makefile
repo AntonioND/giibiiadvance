@@ -1,9 +1,9 @@
 PKG_CONFIG	:= pkg-config
 DEFINES		:=
 
-# `make ENABLE_OPENCL=1` builds the emulator with OpenCL support
-ifeq ($(ENABLE_OPENCL),1)
-PKG_CONFIG_LIBS	:= sdl2 libpng opencl
+# `make ENABLE_OPENCV=1` builds the emulator with OpenCV support
+ifeq ($(ENABLE_OPENCV),1)
+PKG_CONFIG_LIBS	:= sdl2 libpng opencv
 else
 PKG_CONFIG_LIBS	:= sdl2 libpng
 DEFINES		+= -DNO_CAMERA_EMULATION

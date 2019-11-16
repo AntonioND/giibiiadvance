@@ -4,9 +4,9 @@
 //
 // GiiBiiAdvance - GBA/GB emulator
 
-#include <SDL.h>
-
 #include <string.h>
+
+#include <SDL.h>
 
 #include "../debug_utils.h"
 #include "../window_handler.h"
@@ -22,7 +22,7 @@
 #include "../gba_core/disassembler.h"
 #include "../gba_core/memory.h"
 
-//-----------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 static int WinIDGBADis;
 
@@ -31,7 +31,7 @@ static int WinIDGBADis;
 
 static int GBADisassemblerCreated = 0;
 
-//-----------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 #define CPU_DISASSEMBLER_MAX_INSTRUCTIONS (39)
 
@@ -44,7 +44,7 @@ static int disassemble_mode = GBA_DISASM_CPU_AUTO;
 static u32 gba_disassembler_set_default_address = 0;
 static u32 gba_disassembler_start_address;
 
-//-----------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 static _gui_console gba_disassembly_con, gba_regs_con;
 static _gui_element gba_disassembly_textbox, gba_regs_textbox;
@@ -53,7 +53,8 @@ static _gui_element gba_disassembler_step_btn, gba_disassembler_goto_btn;
 
 static _gui_element gba_disassembler_disassembly_mode_label;
 
-static _gui_element gba_disassembler_auto_radbtn, gba_disassembler_arm_radbtn, gba_disassembler_thumb_radbtn;
+static _gui_element gba_disassembler_auto_radbtn, gba_disassembler_arm_radbtn,
+                    gba_disassembler_thumb_radbtn;
 
 static _gui_element * gba_disassembler_window_gui_elements[] = {
     &gba_disassembly_textbox,
@@ -75,12 +76,12 @@ static _gui gba_disassembler_window_gui = {
     NULL
 };
 
-//-----------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 static void _win_gba_disassembler_step(void);
 static void _win_gba_disassembler_goto(void);
 
-//-----------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 void Win_GBADisassemblerStartAddressSetDefault(void)
 {
@@ -89,119 +90,146 @@ void Win_GBADisassemblerStartAddressSetDefault(void)
 
 void Win_GBADisassemblerUpdate(void)
 {
-    if(GBADisassemblerCreated == 0) return;
+    if (GBADisassemblerCreated == 0)
+        return;
 
-    if(Win_MainRunningGBA() == 0) return;
+    if (Win_MainRunningGBA() == 0)
+        return;
 
-    _cpu_t * cpu = GBA_CPUGet();
+    _cpu_t *cpu = GBA_CPUGet();
 
     GUI_ConsoleClear(&gba_regs_con);
     GUI_ConsoleClear(&gba_disassembly_con);
 
-    if(gba_disassembler_set_default_address)
+    if (gba_disassembler_set_default_address)
     {
         gba_disassembler_set_default_address = 0;
 
         u32 address = cpu->R[R_PC];
 
-        if(  ((disassemble_mode == GBA_DISASM_CPU_AUTO) && (cpu->EXECUTION_MODE == EXEC_ARM))  ||
-            (disassemble_mode == GBA_DISASM_CPU_ARM)  ) //ARM
+        if (((disassemble_mode == GBA_DISASM_CPU_AUTO) &&
+             (cpu->EXECUTION_MODE == EXEC_ARM)) ||
+            (disassemble_mode == GBA_DISASM_CPU_ARM)) // ARM
         {
-            if(address > ((CPU_DISASSEMBLER_MAX_INSTRUCTIONS/2)-2)*4)
-                address -= ((CPU_DISASSEMBLER_MAX_INSTRUCTIONS/2)-2)*4;
-            else address = 0;
+            if(address > ((CPU_DISASSEMBLER_MAX_INSTRUCTIONS / 2) - 2) * 4)
+                address -= ((CPU_DISASSEMBLER_MAX_INSTRUCTIONS / 2) - 2) * 4;
+            else
+                address = 0;
         }
-        else //THUMB
+        else // THUMB
         {
-            if(address > ((CPU_DISASSEMBLER_MAX_INSTRUCTIONS/2)-2)*2)
-                address -= ((CPU_DISASSEMBLER_MAX_INSTRUCTIONS/2)-2)*2;
-            else address = 0;
+            if(address > ((CPU_DISASSEMBLER_MAX_INSTRUCTIONS / 2) - 2) * 2)
+                address -= ((CPU_DISASSEMBLER_MAX_INSTRUCTIONS / 2) - 2) * 2;
+            else
+                address = 0;
         }
         gba_disassembler_start_address = address;
     }
 
-    int i;
-    //REGISTERS
-    for(i = 0; i < 10; i++)
-        GUI_ConsoleModePrintf(&gba_regs_con,0,i,"r%d:   %08X",i,cpu->R[i]);
-    for( ; i < 16; i++)
-        GUI_ConsoleModePrintf(&gba_regs_con,0,i,"r%d:  %08X",i,cpu->R[i]);
+    // REGISTERS
+    for (int i = 0; i < 10; i++)
+        GUI_ConsoleModePrintf(&gba_regs_con, 0, i, "r%d:   %08X", i, cpu->R[i]);
+    for (int i = 10; i < 16; i++)
+        GUI_ConsoleModePrintf(&gba_regs_con, 0, i, "r%d:  %08X", i, cpu->R[i]);
 
-    GUI_ConsoleModePrintf(&gba_regs_con,0,16,"cpsr: %08X",cpu->CPSR);
-    GUI_ConsoleModePrintf(&gba_regs_con,0,17,"spsr: %08X",cpu->SPSR);
-    GUI_ConsoleModePrintf(&gba_regs_con,0,18,"              ");
+    GUI_ConsoleModePrintf(&gba_regs_con, 0, 16, "cpsr: %08X", cpu->CPSR);
+    GUI_ConsoleModePrintf(&gba_regs_con, 0, 17, "spsr: %08X", cpu->SPSR);
+    GUI_ConsoleModePrintf(&gba_regs_con, 0, 18, "              ");
 
     char text[80];
-    snprintf(text,sizeof(text),"N:%d Z:%d C:%d V:%d", (cpu->CPSR&F_N) != 0, (cpu->CPSR&F_Z) != 0,
-            (cpu->CPSR&F_C) != 0, (cpu->CPSR&F_V) != 0);
-    GUI_ConsoleModePrintf(&gba_regs_con,0,19,text);
+    snprintf(text, sizeof(text), "N:%d Z:%d C:%d V:%d",
+             (cpu->CPSR & F_N) != 0, (cpu->CPSR & F_Z) != 0,
+             (cpu->CPSR & F_C) != 0, (cpu->CPSR & F_V) != 0);
+    GUI_ConsoleModePrintf(&gba_regs_con, 0, 19, text);
 
-    snprintf(text,sizeof(text),"I:%d F:%d     T:%d", (cpu->CPSR&F_I) != 0, (cpu->CPSR&F_F) != 0,
-            (cpu->CPSR&F_T) != 0);
-    GUI_ConsoleModePrintf(&gba_regs_con,0,20,text);
+    snprintf(text, sizeof(text), "I:%d F:%d     T:%d",
+             (cpu->CPSR & F_I) != 0, (cpu->CPSR & F_F) != 0,
+             (cpu->CPSR & F_T) != 0);
+    GUI_ConsoleModePrintf(&gba_regs_con, 0, 20, text);
 
-
-    static const char * cpu_modes[] = {
-        "user","fiq","irq","svc","abort","undef.", "system"
+    static const char *cpu_modes[] = {
+        "user", "fiq", "irq", "svc", "abort", "undef.", "system"
     };
 
-    snprintf(text,sizeof(text),"Mode:%02X (%s)", cpu->CPSR&0x1F, cpu_modes[cpu->MODE]);
-    GUI_ConsoleModePrintf(&gba_regs_con,0,21,text);
+    snprintf(text, sizeof(text), "Mode:%02X (%s)", cpu->CPSR & 0x1F,
+             cpu_modes[cpu->MODE]);
+    GUI_ConsoleModePrintf(&gba_regs_con, 0, 21, text);
 
-    //DISASSEMBLER
+    // DISASSEMBLER
 
     char opcode_text[128];
     char final_text[156];
 
-    if(  ((disassemble_mode == GBA_DISASM_CPU_AUTO) && (cpu->EXECUTION_MODE == EXEC_ARM))  ||
-        (disassemble_mode == GBA_DISASM_CPU_ARM)  ) //ARM
+    if (((disassemble_mode == GBA_DISASM_CPU_AUTO) &&
+         (cpu->EXECUTION_MODE == EXEC_ARM)) ||
+        (disassemble_mode == GBA_DISASM_CPU_ARM)) // ARM
     {
-        u32 address = gba_disassembler_start_address; //start address
+        u32 address = gba_disassembler_start_address; // Start address
 
-        for(i = 0; i < CPU_DISASSEMBLER_MAX_INSTRUCTIONS; i++)
+        for (int i = 0; i < CPU_DISASSEMBLER_MAX_INSTRUCTIONS; i++)
         {
             u32 opcode = GBA_MemoryReadFast32(address);
 
-            GBA_DisassembleARM(opcode,address,opcode_text,sizeof(opcode_text));
-            snprintf(final_text,sizeof(final_text),"%08X:%08X %s",address,opcode,opcode_text);
+            GBA_DisassembleARM(opcode, address, opcode_text,
+                               sizeof(opcode_text));
+            snprintf(final_text, sizeof(final_text), "%08X:%08X %s", address,
+                     opcode, opcode_text);
 
-            GUI_ConsoleModePrintf(&gba_disassembly_con,0,i,final_text);
+            GUI_ConsoleModePrintf(&gba_disassembly_con, 0, i, final_text);
 
-            if(GBA_DebugIsBreakpoint(address))
+            if (GBA_DebugIsBreakpoint(address))
             {
                 if(address == cpu->R[R_PC])
-                    GUI_ConsoleColorizeLine(&gba_disassembly_con, i, 0xFFFF8000);
+                {
+                    GUI_ConsoleColorizeLine(&gba_disassembly_con, i,
+                                            0xFFFF8000);
+                }
                 else
-                    GUI_ConsoleColorizeLine(&gba_disassembly_con, i, 0xFF0000FF);
+                {
+                    GUI_ConsoleColorizeLine(&gba_disassembly_con, i,
+                                            0xFF0000FF);
+                }
             }
             else if(address == cpu->R[R_PC])
+            {
                 GUI_ConsoleColorizeLine(&gba_disassembly_con, i, 0xFFFFFF00);
+            }
 
             address += 4;
         }
     }
-    else //THUMB
+    else // THUMB
     {
-        u32 address = gba_disassembler_start_address; //start address
+        u32 address = gba_disassembler_start_address; // Start address
 
-        for(i = 0; i < CPU_DISASSEMBLER_MAX_INSTRUCTIONS; i++)
+        for (int i = 0; i < CPU_DISASSEMBLER_MAX_INSTRUCTIONS; i++)
         {
             u16 opcode = GBA_MemoryReadFast16(address);
 
-            GBA_DisassembleTHUMB(opcode,address,opcode_text,sizeof(opcode_text));
-            snprintf(final_text,sizeof(final_text),"%08X:%04X %s",address,opcode,opcode_text);
+            GBA_DisassembleTHUMB(opcode, address, opcode_text,
+                                 sizeof(opcode_text));
+            snprintf(final_text, sizeof(final_text), "%08X:%04X %s", address,
+                     opcode, opcode_text);
 
-            GUI_ConsoleModePrintf(&gba_disassembly_con,0,i,final_text);
+            GUI_ConsoleModePrintf(&gba_disassembly_con, 0, i, final_text);
 
-            if(GBA_DebugIsBreakpoint(address))
+            if (GBA_DebugIsBreakpoint(address))
             {
-                if(address == cpu->R[R_PC])
-                    GUI_ConsoleColorizeLine(&gba_disassembly_con, i, 0xFFFF8000);
+                if (address == cpu->R[R_PC])
+                {
+                    GUI_ConsoleColorizeLine(&gba_disassembly_con, i,
+                                            0xFFFF8000);
+                }
                 else
-                    GUI_ConsoleColorizeLine(&gba_disassembly_con, i, 0xFF0000FF);
+                {
+                    GUI_ConsoleColorizeLine(&gba_disassembly_con, i,
+                                            0xFF0000FF);
+                }
             }
             else if(address == cpu->R[R_PC])
+            {
                 GUI_ConsoleColorizeLine(&gba_disassembly_con, i, 0xFFFFFF00);
+            }
 
             address += 2;
         }
@@ -210,41 +238,46 @@ void Win_GBADisassemblerUpdate(void)
 
 static void _win_gba_disassembler_render(void)
 {
-    if(GBADisassemblerCreated == 0) return;
+    if (GBADisassemblerCreated == 0)
+        return;
 
-    char buffer[WIN_GBA_DISASSEMBLER_WIDTH*WIN_GBA_DISASSEMBLER_HEIGHT*3];
-    GUI_Draw(&gba_disassembler_window_gui,buffer,WIN_GBA_DISASSEMBLER_WIDTH,WIN_GBA_DISASSEMBLER_HEIGHT,1);
+    char buffer[WIN_GBA_DISASSEMBLER_WIDTH * WIN_GBA_DISASSEMBLER_HEIGHT * 3];
+
+    GUI_Draw(&gba_disassembler_window_gui, buffer,
+             WIN_GBA_DISASSEMBLER_WIDTH, WIN_GBA_DISASSEMBLER_HEIGHT, 1);
 
     WH_Render(WinIDGBADis, buffer);
 }
 
-static int _win_gba_disassembler_callback(SDL_Event * e)
+static int _win_gba_disassembler_callback(SDL_Event *e)
 {
-    if(GBADisassemblerCreated == 0) return 1;
+    if (GBADisassemblerCreated == 0)
+        return 1;
 
-    int redraw = GUI_SendEvent(&gba_disassembler_window_gui,e);
+    int redraw = GUI_SendEvent(&gba_disassembler_window_gui, e);
 
-    _cpu_t * cpu = GBA_CPUGet();
+    _cpu_t *cpu = GBA_CPUGet();
     int close_this = 0;
 
-    if(GUI_InputWindowIsEnabled(&gui_iw_gba_disassembler) == 0)
+    if (GUI_InputWindowIsEnabled(&gui_iw_gba_disassembler) == 0)
     {
-        if(e->type == SDL_MOUSEWHEEL)
+        if (e->type == SDL_MOUSEWHEEL)
         {
-            if(  ((disassemble_mode == GBA_DISASM_CPU_AUTO) && (cpu->EXECUTION_MODE == EXEC_ARM))  ||
-                        (disassemble_mode == GBA_DISASM_CPU_ARM)  ) //ARM
+            if (((disassemble_mode == GBA_DISASM_CPU_AUTO) &&
+                 (cpu->EXECUTION_MODE == EXEC_ARM)) ||
+                (disassemble_mode == GBA_DISASM_CPU_ARM)) // ARM
             {
-                gba_disassembler_start_address -= e->wheel.y*3 * 4;
+                gba_disassembler_start_address -= e->wheel.y * 3 * 4;
             }
-            else //THUMB
+            else // THUMB
             {
-                gba_disassembler_start_address -= e->wheel.y*3 * 2;
+                gba_disassembler_start_address -= e->wheel.y * 3 * 2;
             }
             redraw = 1;
         }
-        else if( e->type == SDL_KEYDOWN)
+        else if (e->type == SDL_KEYDOWN)
         {
-            switch( e->key.keysym.sym )
+            switch (e->key.keysym.sym)
             {
                 case SDLK_F7:
                     _win_gba_disassembler_step();
@@ -256,12 +289,13 @@ static int _win_gba_disassembler_callback(SDL_Event * e)
                     break;
 
                 case SDLK_DOWN:
-                    if(  ((disassemble_mode == GBA_DISASM_CPU_AUTO) && (cpu->EXECUTION_MODE == EXEC_ARM))  ||
-                        (disassemble_mode == GBA_DISASM_CPU_ARM)  ) //ARM
+                    if (((disassemble_mode == GBA_DISASM_CPU_AUTO) &&
+                         (cpu->EXECUTION_MODE == EXEC_ARM)) ||
+                        (disassemble_mode == GBA_DISASM_CPU_ARM)) // ARM
                     {
                         gba_disassembler_start_address += 4;
                     }
-                    else //THUMB
+                    else // THUMB
                     {
                         gba_disassembler_start_address += 2;
                     }
@@ -269,12 +303,13 @@ static int _win_gba_disassembler_callback(SDL_Event * e)
                     break;
 
                 case SDLK_UP:
-                    if(  ((disassemble_mode == GBA_DISASM_CPU_AUTO) && (cpu->EXECUTION_MODE == EXEC_ARM))  ||
-                        (disassemble_mode == GBA_DISASM_CPU_ARM)  ) //ARM
+                    if (((disassemble_mode == GBA_DISASM_CPU_AUTO) &&
+                         (cpu->EXECUTION_MODE == EXEC_ARM)) ||
+                        (disassemble_mode == GBA_DISASM_CPU_ARM)) // ARM
                     {
                         gba_disassembler_start_address -= 4;
                     }
-                    else //THUMB
+                    else // THUMB
                     {
                         gba_disassembler_start_address -= 2;
                     }
@@ -284,42 +319,45 @@ static int _win_gba_disassembler_callback(SDL_Event * e)
         }
     }
 
-    if(e->type == SDL_WINDOWEVENT)
+    if (e->type == SDL_WINDOWEVENT)
     {
-        if(e->window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
+        if (e->window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
         {
             redraw = 1;
         }
-        else if(e->window.event == SDL_WINDOWEVENT_EXPOSED)
+        else if (e->window.event == SDL_WINDOWEVENT_EXPOSED)
         {
             redraw = 1;
         }
-        else if(e->window.event == SDL_WINDOWEVENT_CLOSE)
+        else if (e->window.event == SDL_WINDOWEVENT_CLOSE)
         {
             close_this = 1;
         }
     }
-    else if( e->type == SDL_KEYDOWN)
+    else if (e->type == SDL_KEYDOWN)
     {
-        if( e->key.keysym.sym == SDLK_ESCAPE )
+        if (e->key.keysym.sym == SDLK_ESCAPE)
         {
-            if(GUI_InputWindowIsEnabled(&gui_iw_gba_disassembler))
+            if (GUI_InputWindowIsEnabled(&gui_iw_gba_disassembler))
                 GUI_InputWindowClose(&gui_iw_gba_disassembler);
             else
                 close_this = 1;
         }
     }
 
-    if(close_this)
+    if (close_this)
     {
         GBADisassemblerCreated = 0;
-        if(GUI_InputWindowIsEnabled(&gui_iw_gba_disassembler))
+
+        if (GUI_InputWindowIsEnabled(&gui_iw_gba_disassembler))
             GUI_InputWindowClose(&gui_iw_gba_disassembler);
+
         WH_Close(WinIDGBADis);
+
         return 1;
     }
 
-    if(redraw)
+    if (redraw)
     {
         Win_GBADisassemblerUpdate();
         _win_gba_disassembler_render();
@@ -331,21 +369,23 @@ static int _win_gba_disassembler_callback(SDL_Event * e)
 
 static void _win_gba_disassembly_textbox_callback(int x, int y)
 {
-    _cpu_t * cpu = GBA_CPUGet();
+    _cpu_t *cpu = GBA_CPUGet();
 
     int instr_size;
 
-    if(  ((disassemble_mode == GBA_DISASM_CPU_AUTO) && (cpu->EXECUTION_MODE == EXEC_ARM))  ||
-            (disassemble_mode == GBA_DISASM_CPU_ARM)  ) //ARM
+    if (((disassemble_mode == GBA_DISASM_CPU_AUTO) &&
+         (cpu->EXECUTION_MODE == EXEC_ARM)) ||
+        (disassemble_mode == GBA_DISASM_CPU_ARM)) // ARM
     {
         instr_size = 4;
     }
-    else //THUMB
+    else // THUMB
     {
         instr_size = 2;
     }
 
-    u32 addr = gba_disassembler_start_address + ( (y/FONT_HEIGHT) * instr_size );
+    u32 addr = gba_disassembler_start_address
+             + ((y / FONT_HEIGHT) * instr_size);
 
     if(GBA_DebugIsBreakpoint(addr) == 0)
         GBA_DebugAddBreakpoint(addr);
@@ -355,57 +395,73 @@ static void _win_gba_disassembly_textbox_callback(int x, int y)
 
 static int gba_debugger_register_to_change; // 0-17 -> registers. 100 -> goto
 
-static void _win_gba_disassembly_inputwindow_callback(char * text, int is_valid)
+static void _win_gba_disassembly_inputwindow_callback(char *text, int is_valid)
 {
-    if(is_valid)
+    if (is_valid)
     {
         text[8] = '\0';
         u32 newvalue = asciihex_to_int(text);
 
-        _cpu_t * cpu = GBA_CPUGet();
-        if(gba_debugger_register_to_change < 16)
+        _cpu_t *cpu = GBA_CPUGet();
+
+        if (gba_debugger_register_to_change < 16)
+        {
             cpu->R[gba_debugger_register_to_change] = newvalue;
-        else if(gba_debugger_register_to_change == 16)
+        }
+        else if (gba_debugger_register_to_change == 16)
         {
             cpu->CPSR = newvalue;
-            if(cpu->CPSR&F_T)
+
+            if (cpu->CPSR & F_T)
                 cpu->EXECUTION_MODE = EXEC_THUMB;
             else
                 cpu->EXECUTION_MODE = EXEC_ARM;
-            GBA_CPUChangeMode(newvalue&0x1F);
+
+            GBA_CPUChangeMode(newvalue & 0x1F);
         }
-        else if(gba_debugger_register_to_change == 17)
+        else if (gba_debugger_register_to_change == 17)
+        {
             cpu->SPSR = newvalue;
-        else if(gba_debugger_register_to_change == 100)
+        }
+        else if (gba_debugger_register_to_change == 100)
         {
             int increment;
-            if(  ((disassemble_mode == GBA_DISASM_CPU_AUTO) && (cpu->EXECUTION_MODE == EXEC_ARM))  ||
-                (disassemble_mode == GBA_DISASM_CPU_ARM)  ) //ARM
+            if (((disassemble_mode == GBA_DISASM_CPU_AUTO) &&
+                 (cpu->EXECUTION_MODE == EXEC_ARM)) ||
+                (disassemble_mode == GBA_DISASM_CPU_ARM)) // ARM
+            {
                 increment = 4;
-            else //THUMB
+            }
+            else // THUMB
+            {
                 increment = 2;
-            gba_disassembler_start_address = newvalue-((CPU_DISASSEMBLER_MAX_INSTRUCTIONS/2)*increment);
+            }
+
+            gba_disassembler_start_address = newvalue
+                        - ((CPU_DISASSEMBLER_MAX_INSTRUCTIONS / 2) * increment);
         }
     }
 }
 
 static void _win_gba_registers_textbox_callback(int x, int y)
 {
-    int reg = y/FONT_HEIGHT;
+    int reg = y / FONT_HEIGHT;
 
     char text[30];
-    if(reg < 16)
-        snprintf(text,sizeof(text),"New value for r%d",reg);
-    else if(reg == 16)
-        snprintf(text,sizeof(text),"New value for cpsr");
-    else if(reg == 17)
-        snprintf(text,sizeof(text),"New value for spsr");
+
+    if (reg < 16)
+        snprintf(text, sizeof(text), "New value for r%d", reg);
+    else if (reg == 16)
+        snprintf(text, sizeof(text), "New value for cpsr");
+    else if (reg == 17)
+        snprintf(text, sizeof(text), "New value for spsr");
     else
         return;
 
     gba_debugger_register_to_change = reg;
 
-    GUI_InputWindowOpen(&gui_iw_gba_disassembler,text,_win_gba_disassembly_inputwindow_callback);
+    GUI_InputWindowOpen(&gui_iw_gba_disassembler, text,
+                        _win_gba_disassembly_inputwindow_callback);
 }
 
 static void _win_gba_cpu_mode_radbtn_callback(int btn_id)
@@ -417,9 +473,11 @@ static void _win_gba_cpu_mode_radbtn_callback(int btn_id)
 
 static void _win_gba_disassembler_step(void)
 {
-    if(GBADisassemblerCreated == 0) return;
+    if (GBADisassemblerCreated == 0)
+        return;
 
-    if(Win_MainRunningGBA() == 0) return;
+    if (Win_MainRunningGBA() == 0)
+        return;
 
     Win_GBADisassemblerStartAddressSetDefault();
 
@@ -434,49 +492,63 @@ static void _win_gba_disassembler_step(void)
 
 static void _win_gba_disassembler_goto(void)
 {
-    if(GBADisassemblerCreated == 0) return;
+    if (GBADisassemblerCreated == 0)
+        return;
 
-    if(Win_MainRunningGBA() == 0) return;
+    if (Win_MainRunningGBA() == 0)
+        return;
 
     gba_debugger_register_to_change = 100;
 
-    GUI_InputWindowOpen(&gui_iw_gba_disassembler,"Go to address",_win_gba_disassembly_inputwindow_callback);
+    GUI_InputWindowOpen(&gui_iw_gba_disassembler, "Go to address",
+                        _win_gba_disassembly_inputwindow_callback);
 }
 
 //----------------------------------------------------------------
 
 int Win_GBADisassemblerCreate(void)
 {
-    if(Win_MainRunningGBA() == 0) return 0;
+    if (Win_MainRunningGBA() == 0)
+        return 0;
 
-    if(GBADisassemblerCreated == 1)
+    if (GBADisassemblerCreated == 1)
     {
         WH_Focus(WinIDGBADis);
         return 0;
     }
 
-    GUI_SetTextBox(&gba_disassembly_textbox,&gba_disassembly_con,
-                   6,6, 66*FONT_WIDTH,CPU_DISASSEMBLER_MAX_INSTRUCTIONS*FONT_HEIGHT,
-                   _win_gba_disassembly_textbox_callback);
-    GUI_SetTextBox(&gba_regs_textbox,&gba_regs_con,
-                   6+66*FONT_WIDTH+12,6, 16*FONT_WIDTH,22*FONT_HEIGHT,
-                   _win_gba_registers_textbox_callback);
+    GUI_SetTextBox(&gba_disassembly_textbox, &gba_disassembly_con, 6, 6,
+            66 * FONT_WIDTH,CPU_DISASSEMBLER_MAX_INSTRUCTIONS * FONT_HEIGHT,
+            _win_gba_disassembly_textbox_callback);
+    GUI_SetTextBox(&gba_regs_textbox, &gba_regs_con,
+            6 + 66 * FONT_WIDTH + 12, 6, 16 * FONT_WIDTH, 22 * FONT_HEIGHT,
+            _win_gba_registers_textbox_callback);
 
-    GUI_SetButton(&gba_disassembler_step_btn,6+66*FONT_WIDTH+12,280,16*FONT_WIDTH,24,
-                  "Step (F7)",_win_gba_disassembler_step);
+    GUI_SetButton(&gba_disassembler_step_btn, 6 + 66 * FONT_WIDTH + 12, 280,
+                  16 * FONT_WIDTH, 24, "Step (F7)", _win_gba_disassembler_step);
 
-    GUI_SetButton(&gba_disassembler_goto_btn,6+66*FONT_WIDTH+12,316,16*FONT_WIDTH,24,
-                  "Goto (F8)",_win_gba_disassembler_goto);
+    GUI_SetButton(&gba_disassembler_goto_btn, 6 + 66 * FONT_WIDTH + 12, 316,
+                  16 * FONT_WIDTH, 24, "Goto (F8)", _win_gba_disassembler_goto);
 
-    GUI_SetLabel(&gba_disassembler_disassembly_mode_label,6+66*FONT_WIDTH+12,366,16*FONT_WIDTH,24,
+    GUI_SetLabel(&gba_disassembler_disassembly_mode_label,
+                 6 + 66 * FONT_WIDTH + 12, 366, 16 * FONT_WIDTH, 24,
                  "Disassembly mode");
 
-    GUI_SetRadioButton(&gba_disassembler_auto_radbtn,6+66*FONT_WIDTH+12,388,16*FONT_WIDTH,24,
-                  "Auto",  0,GBA_DISASM_CPU_AUTO,  1,_win_gba_cpu_mode_radbtn_callback);
-    GUI_SetRadioButton(&gba_disassembler_arm_radbtn,6+66*FONT_WIDTH+12,418,16*FONT_WIDTH,24,
-                  "ARM",   0,GBA_DISASM_CPU_ARM,   0,_win_gba_cpu_mode_radbtn_callback);
-    GUI_SetRadioButton(&gba_disassembler_thumb_radbtn,6+66*FONT_WIDTH+12,448,16*FONT_WIDTH,24,
-                  "THUMB", 0,GBA_DISASM_CPU_THUMB, 0,_win_gba_cpu_mode_radbtn_callback);
+    GUI_SetRadioButton(&gba_disassembler_auto_radbtn,
+                       6 + 66 * FONT_WIDTH + 12, 388,
+                       16 * FONT_WIDTH, 24,
+                       "Auto", 0, GBA_DISASM_CPU_AUTO, 1,
+                       _win_gba_cpu_mode_radbtn_callback);
+    GUI_SetRadioButton(&gba_disassembler_arm_radbtn,
+                       6 + 66 * FONT_WIDTH + 12, 418,
+                       16 * FONT_WIDTH, 24,
+                       "ARM", 0, GBA_DISASM_CPU_ARM, 0,
+                       _win_gba_cpu_mode_radbtn_callback);
+    GUI_SetRadioButton(&gba_disassembler_thumb_radbtn,
+                       6 + 66 * FONT_WIDTH + 12, 448,
+                       16 * FONT_WIDTH, 24,
+                       "THUMB", 0, GBA_DISASM_CPU_THUMB, 0,
+                       _win_gba_cpu_mode_radbtn_callback);
 
     GUI_InputWindowClose(&gui_iw_gba_disassembler);
 
@@ -486,10 +558,11 @@ int Win_GBADisassemblerCreate(void)
 
     Win_GBADisassemblerStartAddressSetDefault();
 
-    WinIDGBADis = WH_Create(WIN_GBA_DISASSEMBLER_WIDTH,WIN_GBA_DISASSEMBLER_HEIGHT, 0,0, 0);
-    WH_SetCaption(WinIDGBADis,"GBA CPU Disassembly");
+    WinIDGBADis = WH_Create(WIN_GBA_DISASSEMBLER_WIDTH,
+                            WIN_GBA_DISASSEMBLER_HEIGHT, 0, 0, 0);
+    WH_SetCaption(WinIDGBADis, "GBA CPU Disassembly");
 
-    WH_SetEventCallback(WinIDGBADis,_win_gba_disassembler_callback);
+    WH_SetEventCallback(WinIDGBADis, _win_gba_disassembler_callback);
 
     Win_GBADisassemblerUpdate();
     _win_gba_disassembler_render();
@@ -499,7 +572,7 @@ int Win_GBADisassemblerCreate(void)
 
 void Win_GBADisassemblerSetFocus(void)
 {
-    if(GBADisassemblerCreated == 1)
+    if (GBADisassemblerCreated == 1)
     {
         WH_Focus(WinIDGBADis);
         return;
@@ -510,12 +583,9 @@ void Win_GBADisassemblerSetFocus(void)
 
 void Win_GBADisassemblerClose(void)
 {
-    if(GBADisassemblerCreated == 0)
+    if (GBADisassemblerCreated == 0)
         return;
 
     GBADisassemblerCreated = 0;
     WH_Close(WinIDGBADis);
 }
-
-//----------------------------------------------------------------
-

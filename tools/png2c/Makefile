@@ -10,7 +10,7 @@ LIBS		= `$(PKG_CONFIG) --libs libpng`
 
 SOURCES	:= \
 	main.c \
-	../png/png_utils.c \
+	../../source/png_utils.c \
 
 OBJS	:= $(SOURCES:.c=.o)
 

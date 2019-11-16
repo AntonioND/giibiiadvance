@@ -4,13 +4,14 @@
 //
 // GiiBiiAdvance - GBA/GB emulator
 
-#ifndef __CONFIG__
-#define __CONFIG__
+#ifndef CONFIG__
+#define CONFIG__
 
 typedef struct {
     int debug_msg_enable;
     int screen_size;
-    int load_from_boot_rom; //gba always tries to load the bios, but this skips initial logo
+    // GBA always tries to load the BIOS, this only skips the initial logo
+    int load_from_boot_rom;
     int frameskip; // -1 = auto, 0-9 = fixed frameskip
     int oglfilter;
     int auto_close_debugger;
@@ -30,9 +31,9 @@ typedef struct {
     int realcolors;
     unsigned int gbcam_exposure_reference;
 
-    //gb palette is not stored here, it is stored in gb_main.c
+    // The GB palette is not stored here, it is stored in gb_main.c
 
-    //key configuration in input_utils.c
+    // The input configuration is in input_utils.c
 
 } t_config;
 
@@ -41,4 +42,4 @@ extern t_config EmulatorConfig;
 void Config_Save(void);
 void Config_Load(void);
 
-#endif //__CONFIG__
+#endif // CONFIG__

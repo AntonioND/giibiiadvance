@@ -4,10 +4,10 @@
 //
 // GiiBiiAdvance - GBA/GB emulator
 
-#ifndef __FONT_UTILS__
-#define __FONT_UTILS__
+#ifndef FONT_UTILS__
+#define FONT_UTILS__
 
-//---------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 #define CHR_MUSIC           14
 #define STR_MUSIC           "\x0E"
@@ -98,16 +98,16 @@
 #define CHR_SQUAREBLACK_MID 254
 #define STR_SQUAREBLACK_MID "\xFE"
 
-//---------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-#define FONT_WIDTH (7)
-#define FONT_HEIGHT (12)
+#define FONT_WIDTH          (7)
+#define FONT_HEIGHT         (12)
 
-int FU_Print(char * buffer, int bufw, int bufh, int tx, int ty, const char * txt, ...);
-int FU_PrintChar(char * buffer, int bufw, int bufh, int tx, int ty, unsigned char c, int color);
-int FU_PrintColor(char * buffer, int bufw, int bufh, int tx, int ty, int color, const char * txt, ...);
+int FU_Print(char *buffer, int bufw, int bufh, int tx, int ty,
+             const char *txt, ...);
+int FU_PrintChar(char *buffer, int bufw, int bufh, int tx, int ty,
+                 unsigned char c, int color);
+int FU_PrintColor(char *buffer, int bufw, int bufh, int tx, int ty, int color,
+                  const char * txt, ...);
 
-//---------------------------------------------------------------------------------
-
-#endif // __FONT_UTILS__
-
+#endif // FONT_UTILS__

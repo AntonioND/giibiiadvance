@@ -37,6 +37,7 @@ COMMON_SOURCES := \
 	source/sound_utils.c \
 	source/text_data.c \
 	source/window_handler.c \
+	source/window_icon_data.c \
 
 GB_SOURCES := \
 	source/gb_core/camera.c \

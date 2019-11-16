@@ -4,17 +4,17 @@
 //
 // GiiBiiAdvance - GBA/GB emulator
 
-#include <SDL.h>
-#include <stdio.h>
 #include <stdlib.h>
 
-#include "window_handler.h"
-#include "debug_utils.h"
-#include "font_utils.h"
-#include "file_utils.h"
-#include "sound_utils.h"
+#include <SDL.h>
+
 #include "config.h"
+#include "debug_utils.h"
+#include "file_utils.h"
+#include "font_utils.h"
 #include "input_utils.h"
+#include "sound_utils.h"
+#include "window_handler.h"
 
 #include "gui/win_main.h"
 
@@ -22,109 +22,122 @@ static int Init(void)
 {
     WH_Init();
 
-    //Initialize SDL
-    if( SDL_Init(SDL_INIT_TIMER|SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_EVENTS) != 0 )
+    // Initialize SDL
+    if (SDL_Init(SDL_INIT_TIMER | SDL_INIT_AUDIO | SDL_INIT_VIDEO |
+                 SDL_INIT_EVENTS) != 0)
     {
-        Debug_LogMsgArg( "SDL could not initialize! SDL Error: %s\n", SDL_GetError() );
+        Debug_LogMsgArg("SDL could not initialize! SDL Error: %s\n",
+                        SDL_GetError());
         return 1;
     }
     atexit(SDL_Quit);
 
-    //Try to init joystick and haptic, but don't abort if it fails.
-    if( SDL_InitSubSystem(SDL_INIT_JOYSTICK) != 0 )
+    // Try to init joystick and haptic, but don't abort if it fails
+    if (SDL_InitSubSystem(SDL_INIT_JOYSTICK) != 0)
     {
-        Debug_LogMsgArg( "SDL could not initialize joystick! SDL Error: %s\n", SDL_GetError() );
+        Debug_LogMsgArg("SDL could not initialize joystick! SDL Error: %s\n",
+                        SDL_GetError());
     }
-    else // If joystick inited, try haptic
+    else
     {
-        if( SDL_InitSubSystem(SDL_INIT_HAPTIC) != 0 )
+        // If joystick inited, try haptic
+        if (SDL_InitSubSystem(SDL_INIT_HAPTIC) != 0)
         {
-            Debug_LogMsgArg( "SDL could not initialize haptic! SDL Error: %s\n", SDL_GetError() );
+            Debug_LogMsgArg("SDL could not initialize haptic! SDL Error: %s\n",
+                            SDL_GetError());
         }
     }
 
-    Input_InitSystem(); // init this before loading the configuration
+    // Init this before loading the configuration
+    Input_InitSystem();
 
     Config_Load();
     atexit(Config_Save);
 
     //Enable VSync
-    //if(!SDL_SetHint( SDL_HINT_RENDER_VSYNC, "1"))
+    //if (!SDL_SetHint( SDL_HINT_RENDER_VSYNC, "1"))
     //{
     //    Debug_LogMsgArg("Warning: VSync not enabled!");
     //}
 
     Sound_Init();
 
-    if(DirCheckExistence(DirGetScreenshotFolderPath()) == 0)
+    if (DirCheckExistence(DirGetScreenshotFolderPath()) == 0)
         DirCreate(DirGetScreenshotFolderPath());
 
-    if(DirCheckExistence(DirGetBiosFolderPath()) == 0)
+    if (DirCheckExistence(DirGetBiosFolderPath()) == 0)
         DirCreate(DirGetBiosFolderPath());
 
     return 0;
 }
 
-#define FLOAT_MS_PER_FRAME ((double)1000.0/(double)60.0)
+#define FLOAT_MS_PER_FRAME ((double)1000.0 / (double)60.0)
 
-int main( int argc, char * argv[] )
+int main(int argc, char *argv[])
 {
+    // Try to get the path where the binary is running from. Try with SDL's
+    // helper, but fallback to argv[0] if it doesn't work or it's not available.
 #if SDL_VERSION_ATLEAST(2,0,1)
-    char * base_path = SDL_GetBasePath();
-    if(base_path)
+    char *base_path = SDL_GetBasePath();
+    if (base_path)
     {
         DirSetRunningPath(base_path);
         SDL_free(base_path);
     }
     else
     {
-        DirSetRunningPath(argv[0]); // whatever...
+        DirSetRunningPath(argv[0]);
     }
 #else
-    if(argc > 0)
-        DirSetRunningPath(argv[0]); // whatever...
+    if (argc > 0)
+        DirSetRunningPath(argv[0]);
 #endif // SDL_VERSION_ATLEAST
 
     Debug_Init();
     atexit(Debug_End);
 
-    if(Init() != 0)
+    if (Init() != 0)
         return 1;
 
-    Win_MainCreate( (argc > 1) ? argv[1] : NULL );
+    Win_MainCreate((argc > 1) ? argv[1] : NULL);
 
-    //if(argc > 0) Debug_LogMsgArg("argv[0] = %s",argv[0]);
-    //if(argc > 1) Debug_LogMsgArg("argv[1] = %s",argv[1]);
+    //if (argc > 0)
+    //    Debug_LogMsgArg("argv[0] = %s", argv[0]);
+    //if (argc > 1)
+    //    Debug_LogMsgArg("argv[1] = %s", argv[1]);
     //Debug_LogMsgArg(DirGetRunningPath());
     //Debug_LogMsgArg(DirGetBiosFolderPath());
     //Debug_LogMsgArg(DirGetScreenshotFolderPath());
 
-    //if(argc > 1) LOAD_GAME(argv[1]);
+    //if (argc > 1)
+    //    LOAD_GAME(argv[1]);
 
     double waitforticks = 0;
 
-    while(!WH_AreAllWindowsClosed())
-    {
-        //Handle events for all windows
+    while (!WH_AreAllWindowsClosed()) {
+
+        // Handle events for all windows
         WH_HandleEvents();
 
         Win_MainLoopHandle();
 
-        //Render main window every frame
+        // Render main window every frame
         Win_MainRender();
 
-        //-------------------
-
-        if(Input_Speedup_Enabled())
+        // Synchronise video
+        if (Input_Speedup_Enabled())
         {
             SDL_Delay(0);
         }
         else
         {
-            while(waitforticks >= SDL_GetTicks()) SDL_Delay(1);
+            while (waitforticks >= SDL_GetTicks())
+                SDL_Delay(1);
 
             int ticksnow = SDL_GetTicks();
-            if(waitforticks < (ticksnow - FLOAT_MS_PER_FRAME)) // if lost a frame or more
+
+            // If the emulator missed a frame or more, adjust next frame
+            if (waitforticks < (ticksnow - FLOAT_MS_PER_FRAME))
                 waitforticks = ticksnow + FLOAT_MS_PER_FRAME;
             else
                 waitforticks += FLOAT_MS_PER_FRAME;
@@ -133,4 +146,3 @@ int main( int argc, char * argv[] )
 
     return 0;
 }
-

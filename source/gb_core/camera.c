@@ -32,8 +32,10 @@ extern _GB_CONTEXT_ GameBoy;
 
 #ifndef NO_CAMERA_EMULATION
 
-#include <opencv/cv.h>
-#include <opencv/highgui.h>
+//#include <opencv/cv.h>
+//#include <opencv/highgui.h>
+#include <opencv4/opencv2/core/core_c.h>
+//#include <opencv/highgui.h>
 
 static CvCapture * capture;
 static int gbcamera_enabled = 0;

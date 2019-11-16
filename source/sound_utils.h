@@ -4,14 +4,14 @@
 //
 // GiiBiiAdvance - GBA/GB emulator
 
-#ifndef __SOUND_UTILS__
-#define __SOUND_UTILS__
+#ifndef SOUND_UTILS__
+#define SOUND_UTILS__
 
-typedef void (Sound_CallbackPointer)(void*,long);
+typedef void (Sound_CallbackPointer)(void *, long);
 
 void Sound_Init(void);
 
-void Sound_SetCallback(Sound_CallbackPointer * fn);
+void Sound_SetCallback(Sound_CallbackPointer *fn);
 
 void Sound_Enable(void);
 void Sound_Disable(void);
@@ -23,5 +23,4 @@ int Sound_GetEnabled(void);
 
 void Sound_SetEnabledChannels(int flags);
 
-#endif // __SOUND_UTILS__
-
+#endif // SOUND_UTILS__

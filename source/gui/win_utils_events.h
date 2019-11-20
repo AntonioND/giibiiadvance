@@ -4,12 +4,11 @@
 //
 // GiiBiiAdvance - GBA/GB emulator
 
-#ifndef __WIN_UTILS_EVENTS__
-#define __WIN_UTILS_EVENTS__
+#ifndef WIN_UTILS_EVENTS__
+#define WIN_UTILS_EVENTS__
 
 #include "win_utils.h"
 
-int GUI_SendEvent(_gui * gui, SDL_Event * e); // returns 1 if needed to redraw
+int GUI_SendEvent(_gui *gui, SDL_Event *e); // Returns 1 if needed to redraw
 
-#endif // __WIN_UTILS_EVENTS__
-
+#endif // WIN_UTILS_EVENTS__

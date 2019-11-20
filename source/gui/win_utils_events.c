@@ -4,70 +4,73 @@
 //
 // GiiBiiAdvance - GBA/GB emulator
 
-#include <string.h>
 #include <ctype.h>
+#include <string.h>
 
 #include "../font_utils.h"
 
-#include "win_utils_events.h"
 #include "win_utils.h"
+#include "win_utils_events.h"
 
-//-------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 static int _gui_pos_is_inside_rect(int xm, int ym, int x, int w, int y, int h)
 {
-    return (xm >= x) && (xm < (x+w)) && (ym >= y) && (ym < (y+h));
+    return (xm >= x) && (xm < (x+w)) && (ym >= y) && (ym < (y + h));
 }
 
-//-------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-static int _gui_inputwindow_send_event(_gui_inputwindow * win, SDL_Event * e)
+static int _gui_inputwindow_send_event(_gui_inputwindow *win, SDL_Event *e)
 {
-    if(win == NULL) return 0;
+    if (win == NULL)
+        return 0;
 
-    if(e->type == SDL_KEYDOWN)
+    if (e->type == SDL_KEYDOWN)
     {
         int key = e->key.keysym.sym;
-        if( ((key >= SDLK_a) && (key <= SDLK_f)) || ((key >= SDLK_0) && (key <= SDLK_9)) )
+        if (((key >= SDLK_a) && (key <= SDLK_f))
+                || ((key >= SDLK_0) && (key <= SDLK_9)))
         {
             int l = strlen(win->input_text);
-            if( l < (sizeof(win->input_text)-1) )
+            if (l < (sizeof(win->input_text) - 1))
             {
                 win->input_text[l++] = toupper(key);
                 win->input_text[l] = '\0';
             }
         }
-        else if(key == SDLK_BACKSPACE)
+        else if (key == SDLK_BACKSPACE)
         {
             int l = strlen(win->input_text);
-            if(l == 0)
+            if (l == 0)
             {
                 GUI_InputWindowClose(win);
                 return 1;
             }
-            win->input_text[l-1] = '\0';
+            win->input_text[l - 1] = '\0';
         }
-        else if(key == SDLK_RETURN)
+        else if (key == SDLK_RETURN)
         {
             int l = strlen(win->input_text);
-            if(win->callback)
-                win->callback(win->input_text, (l>0)?1:0);
+            if (win->callback)
+                win->callback(win->input_text, (l > 0) ? 1 : 0);
             win->enabled = 0;
         }
     }
     return 1;
 }
 
-//-------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-static int _gui_menu_send_event(_gui_menu * menu, SDL_Event * e)
+static int _gui_menu_send_event(_gui_menu *menu, SDL_Event *e)
 {
-    if(menu == NULL) return 0;
-
-    if(e->type != SDL_MOUSEBUTTONDOWN)
+    if (menu == NULL)
         return 0;
 
-    if(e->button.button != SDL_BUTTON_LEFT)
+    if (e->type != SDL_MOUSEBUTTONDOWN)
+        return 0;
+
+    if (e->button.button != SDL_BUTTON_LEFT)
         return 0;
 
     int x = 0;
@@ -75,74 +78,79 @@ static int _gui_menu_send_event(_gui_menu * menu, SDL_Event * e)
     int selected_element_x = 0;
 
     int i = 0;
-    while(1)
+    while (1)
     {
-        _gui_menu_list * list = menu->list_entry[i];
+        _gui_menu_list *list = menu->list_entry[i];
 
-        if(list == NULL) break;
+        if (list == NULL)
+            break;
 
         int l = strlen(list->title);
 
         x += FONT_WIDTH;
-        if(menu->element_opened == i) selected_element_x = x;
+        if (menu->element_opened == i)
+            selected_element_x = x;
 
-        if(_gui_pos_is_inside_rect(e->button.x,e->button.y,
-            x-FONT_WIDTH,(l+1)*FONT_WIDTH,   0,FONT_HEIGHT+FONT_HEIGHT/2))
+        if (_gui_pos_is_inside_rect(e->button.x, e->button.y,
+                                    x - FONT_WIDTH, (l + 1) * FONT_WIDTH,
+                                    0, FONT_HEIGHT + FONT_HEIGHT / 2))
         {
             menu->element_opened = i;
             return 1;
         }
 
-        x += l*FONT_WIDTH;
+        x += l * FONT_WIDTH;
         x += FONT_WIDTH;
 
         i++;
     }
 
-    // check only the bar
-    if(menu->element_opened < 0)
+    // Check only the bar
+    if (menu->element_opened < 0)
         return 0;
 
-    if(menu->element_opened >= i)
+    if (menu->element_opened >= i)
         return 0;
 
-    _gui_menu_list * selected_list = menu->list_entry[menu->element_opened];
+    _gui_menu_list *selected_list = menu->list_entry[menu->element_opened];
 
-    if(selected_list == NULL) return 0;
+    if (selected_list == NULL)
+        return 0;
 
-    _gui_menu_entry ** entries = selected_list->entry;
+    _gui_menu_entry **entries = selected_list->entry;
 
-    //get longer string for this list
+    // Get longest string for this list
     i = 0;
     int longest_string = 0;
-    while(1)
+    while (1)
     {
-        if(entries[i] == NULL)
+        if (entries[i] == NULL)
             break;
 
         int l = strlen(entries[i]->text);
-        if(longest_string < l)
+        if (longest_string < l)
             longest_string = l;
 
         i++;
     }
 
-    //print list
-    int y = 2*FONT_HEIGHT;
+    // Print list
+    int y = 2 * FONT_HEIGHT;
     i = 0;
-    while(1)
+    while (1)
     {
-        if(entries[i] == NULL)
+        if (entries[i] == NULL)
             break;
 
-        if(_gui_pos_is_inside_rect(e->button.x,e->button.y,
-            selected_element_x - FONT_WIDTH - 1, FONT_WIDTH*(longest_string+1+1) + 1,
-            y, FONT_HEIGHT)) // clicked in an element
+        if (_gui_pos_is_inside_rect(e->button.x, e->button.y,
+                                    selected_element_x - FONT_WIDTH - 1,
+                                    FONT_WIDTH * (longest_string + 1 + 1) + 1,
+                                    y, FONT_HEIGHT)) // Clicked in an element
         {
-            if( (entries[i]->enabled) && (entries[i]->callback) )
+            if ((entries[i]->enabled) && (entries[i]->callback))
             {
                 entries[i]->callback();
-                menu->element_opened = -1; // close the menu
+                menu->element_opened = -1; // Close the menu
             }
             return 1;
         }
@@ -151,147 +159,165 @@ static int _gui_menu_send_event(_gui_menu * menu, SDL_Event * e)
         i++;
     }
 
-    if(_gui_pos_is_inside_rect(e->button.x,e->button.y,
-            selected_element_x - FONT_WIDTH - 1, FONT_WIDTH*(longest_string+2) + 2,
-            FONT_HEIGHT + FONT_HEIGHT/2 - 1, (i+1)*FONT_HEIGHT + 2))
+    if (_gui_pos_is_inside_rect(e->button.x, e->button.y,
+                                selected_element_x - FONT_WIDTH - 1,
+                                FONT_WIDTH * (longest_string + 2) + 2,
+                                FONT_HEIGHT + FONT_HEIGHT / 2 - 1,
+                                (i + 1) * FONT_HEIGHT + 2))
     {
-        return 1; // clicked inside the menu box, but not in a element
+        return 1; // Clicked inside the menu box, but not in a element
     }
 
-    //if execution got here, clicked outside the menu
-    menu->element_opened = -1; // close the menu
+    // If execution got here, clicked outside the menu
+    menu->element_opened = -1; // Close the menu
     return 1;
 }
 
-//-------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-static int _gui_get_first_window_enabled(_gui * gui)
+static int _gui_get_first_window_enabled(_gui *gui)
 {
-    if(gui == NULL)
+    if (gui == NULL)
         return -1;
 
-    _gui_element ** gui_elements = gui->elements;
+    _gui_element **gui_elements = gui->elements;
 
-    if(gui_elements == NULL) return -1;
-
-    int i = 0;
-    while(*gui_elements != NULL)
-    {
-        if( (*gui_elements)->element_type == GUI_TYPE_WINDOW)
-            if( (*gui_elements)->info.window.enabled ) return i;
-        if( (*gui_elements)->element_type == GUI_TYPE_SCROLLABLETEXTWINDOW)
-            if( (*gui_elements)->info.scrollabletextwindow.enabled ) return i;
-        i++;
-        gui_elements++;
-    }
-
-    return -1;
-}
-
-static int _gui_get_first_messagebox_enabled(_gui * gui)
-{
-    if(gui == NULL)
+    if (gui_elements == NULL)
         return -1;
 
-    _gui_element ** gui_elements = gui->elements;
-
-    if(gui_elements == NULL) return -1;
-
     int i = 0;
-    while(*gui_elements != NULL)
+    while (*gui_elements != NULL)
     {
-        if( (*gui_elements)->element_type == GUI_TYPE_MESSAGEBOX)
-            if( (*gui_elements)->info.messagebox.enabled ) return i;
-        i++;
-        gui_elements++;
-    }
-
-    return -1;
-}
-
-//-------------------------------------------------------------------------------------------
-
-
-//-------------------------------------------------------------------------------------------
-
-void _gui_clear_radiobuttons(_gui_element ** element_list, int group_id);  // in win_utils.c
-
-//-------------------------------------------------------------------------------------------
-
-int __gui_send_event_element(_gui_element ** complete_gui, _gui_element * gui, SDL_Event * e)
-{
-    if(gui->element_type == GUI_TYPE_TEXTBOX)
-    {
-        if(e->type == SDL_MOUSEBUTTONDOWN)
+        if ((*gui_elements)->element_type == GUI_TYPE_WINDOW)
         {
-            if(e->button.button == SDL_BUTTON_LEFT)
+            if ((*gui_elements)->info.window.enabled )
+                return i;
+        }
+        if ((*gui_elements)->element_type == GUI_TYPE_SCROLLABLETEXTWINDOW)
+        {
+            if ((*gui_elements)->info.scrollabletextwindow.enabled)
+                return i;
+        }
+        i++;
+        gui_elements++;
+    }
+
+    return -1;
+}
+
+static int _gui_get_first_messagebox_enabled(_gui *gui)
+{
+    if (gui == NULL)
+        return -1;
+
+    _gui_element **gui_elements = gui->elements;
+
+    if (gui_elements == NULL) return -1;
+
+    int i = 0;
+    while (*gui_elements != NULL)
+    {
+        if ((*gui_elements)->element_type == GUI_TYPE_MESSAGEBOX)
+        {
+            if ((*gui_elements)->info.messagebox.enabled)
+                return i;
+        }
+        i++;
+        gui_elements++;
+    }
+
+    return -1;
+}
+
+//------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------
+
+// in win_utils.c
+void _gui_clear_radiobuttons(_gui_element **element_list, int group_id);
+
+//------------------------------------------------------------------------------
+
+int __gui_send_event_element(_gui_element **complete_gui, _gui_element *gui,
+                             SDL_Event *e)
+{
+    if (gui->element_type == GUI_TYPE_TEXTBOX)
+    {
+        if (e->type == SDL_MOUSEBUTTONDOWN)
+        {
+            if (e->button.button == SDL_BUTTON_LEFT)
             {
-                if(_gui_pos_is_inside_rect(e->button.x,e->button.y,
-                                              gui->x,gui->w,
-                                              gui->y,gui->h))
+                if (_gui_pos_is_inside_rect(e->button.x, e->button.y,
+                                            gui->x, gui->w, gui->y, gui->h))
                 {
-                    if(gui->info.textbox.mouse_press_callback)
-                            gui->info.textbox.mouse_press_callback(e->button.x - gui->x,
-                                                                   e->button.y - gui->y);
+                    if (gui->info.textbox.mouse_press_callback)
+                    {
+                            gui->info.textbox.mouse_press_callback(
+                                    e->button.x - gui->x, e->button.y - gui->y);
+                    }
                     return 1;
                 }
             }
         }
     }
-    else if(gui->element_type == GUI_TYPE_BUTTON)
+    else if (gui->element_type == GUI_TYPE_BUTTON)
     {
-        if(e->type == SDL_MOUSEBUTTONDOWN)
+        if (e->type == SDL_MOUSEBUTTONDOWN)
         {
-            if(e->button.button == SDL_BUTTON_LEFT)
+            if (e->button.button == SDL_BUTTON_LEFT)
             {
-                if(_gui_pos_is_inside_rect(e->button.x,e->button.y,gui->x,gui->w,
-                                              gui->y,gui->h))
+                if (_gui_pos_is_inside_rect(e->button.x, e->button.y,
+                                            gui->x, gui->w, gui->y, gui->h))
                 {
                     gui->info.button.is_pressed = 1;
 
-                    if(gui->info.button.callback)
+                    if (gui->info.button.callback)
                             gui->info.button.callback();
 
                     return 1;
                 }
             }
         }
-        else if(e->type == SDL_MOUSEBUTTONUP)
+        else if (e->type == SDL_MOUSEBUTTONUP)
         {
-            if(e->button.button == SDL_BUTTON_LEFT)
+            if (e->button.button == SDL_BUTTON_LEFT)
             {
                 gui->info.button.is_pressed = 0;
                 return 1;
             }
         }
-        else if(e->type == SDL_MOUSEMOTION)
+        else if (e->type == SDL_MOUSEMOTION)
         {
-            if(_gui_pos_is_inside_rect(e->motion.x,e->motion.y,gui->x,gui->w,
-                                              gui->y,gui->h))
+            if (_gui_pos_is_inside_rect(e->motion.x, e->motion.y,
+                                        gui->x, gui->w, gui->y, gui->h))
             {
                 gui->info.button.is_pressed = 0;
                 return 1;
             }
         }
     }
-    else if(gui->element_type == GUI_TYPE_RADIOBUTTON)
+    else if (gui->element_type == GUI_TYPE_RADIOBUTTON)
     {
-        if(gui->info.radiobutton.is_enabled)
+        if (gui->info.radiobutton.is_enabled)
         {
-            if(e->type == SDL_MOUSEBUTTONDOWN)
+            if (e->type == SDL_MOUSEBUTTONDOWN)
             {
-                if(e->button.button == SDL_BUTTON_LEFT)
+                if (e->button.button == SDL_BUTTON_LEFT)
                 {
-                    if(_gui_pos_is_inside_rect(e->button.x,e->button.y,
-                                                  gui->x,gui->w,
-                                                  gui->y,gui->h))
+                    if (_gui_pos_is_inside_rect(e->button.x, e->button.y,
+                                                gui->x, gui->w, gui->y, gui->h))
                     {
-                        _gui_clear_radiobuttons(complete_gui,gui->info.radiobutton.group_id);
+                        _gui_clear_radiobuttons(complete_gui,
+                                                gui->info.radiobutton.group_id);
 
                         gui->info.radiobutton.is_pressed = 1;
 
-                        if(gui->info.radiobutton.callback)
-                                gui->info.radiobutton.callback(gui->info.radiobutton.btn_id);
+                        if (gui->info.radiobutton.callback)
+                        {
+                                gui->info.radiobutton.callback(
+                                        gui->info.radiobutton.btn_id);
+                        }
 
                         return 1;
                     }
@@ -303,49 +329,52 @@ int __gui_send_event_element(_gui_element ** complete_gui, _gui_element * gui, S
             gui->info.radiobutton.is_pressed = 0;
         }
     }
-    else if(gui->element_type == GUI_TYPE_LABEL)
+    else if (gui->element_type == GUI_TYPE_LABEL)
     {
-        //nothing
+        // Nothing
         return 0;
     }
-    else if(gui->element_type == GUI_TYPE_BITMAP)
+    else if (gui->element_type == GUI_TYPE_BITMAP)
     {
-        if(e->type == SDL_MOUSEBUTTONDOWN)
+        if (e->type == SDL_MOUSEBUTTONDOWN)
         {
-            if(e->button.button == SDL_BUTTON_LEFT)
+            if (e->button.button == SDL_BUTTON_LEFT)
             {
-                if(_gui_pos_is_inside_rect(e->button.x,e->button.y,gui->x,gui->w,
-                                              gui->y,gui->h))
+                if (_gui_pos_is_inside_rect(e->button.x, e->button.y,
+                                            gui->x, gui->w, gui->y, gui->h))
                 {
-                    if(gui->info.bitmap.callback)
-                            return gui->info.bitmap.callback(e->button.x-gui->x,e->button.y-gui->y);
+                    if (gui->info.bitmap.callback)
+                    {
+                            return gui->info.bitmap.callback(
+                                    e->button.x - gui->x, e->button.y - gui->y);
+                    }
 
                     return 0;
                 }
             }
         }
     }
-    else if(gui->element_type == GUI_TYPE_WINDOW)
+    else if (gui->element_type == GUI_TYPE_WINDOW)
     {
-        if(gui->info.window.enabled == 0)
+        if (gui->info.window.enabled == 0)
             return 0;
 
-        if(e->type == SDL_MOUSEBUTTONDOWN)
-            if(!_gui_pos_is_inside_rect(e->button.x,e->button.y, gui->x,gui->w, gui->y,gui->h))
+        if (e->type == SDL_MOUSEBUTTONDOWN)
+            if (!_gui_pos_is_inside_rect(e->button.x, e->button.y,
+                                         gui->x, gui->w, gui->y, gui->h))
                 return 0;
 
-        _gui * relative_gui = gui->info.window.gui;
-        return GUI_SendEvent(relative_gui,e);
+        _gui *relative_gui = gui->info.window.gui;
+        return GUI_SendEvent(relative_gui, e);
     }
-    else if(gui->element_type == GUI_TYPE_MESSAGEBOX)
+    else if (gui->element_type == GUI_TYPE_MESSAGEBOX)
     {
-        if(e->type == SDL_MOUSEBUTTONDOWN)
+        if (e->type == SDL_MOUSEBUTTONDOWN)
         {
-            if(e->button.button == SDL_BUTTON_LEFT)
+            if (e->button.button == SDL_BUTTON_LEFT)
             {
-                if(_gui_pos_is_inside_rect(e->button.x,e->button.y,
-                                              gui->x,gui->w,
-                                              gui->y,gui->h))
+                if (_gui_pos_is_inside_rect(e->button.x, e->button.y,
+                                            gui->x, gui->w, gui->y, gui->h))
                 {
                     gui->info.messagebox.enabled = 0;
                     return 1;
@@ -353,288 +382,354 @@ int __gui_send_event_element(_gui_element ** complete_gui, _gui_element * gui, S
             }
         }
     }
-    else if(gui->element_type == GUI_TYPE_SCROLLABLETEXTWINDOW)
+    else if (gui->element_type == GUI_TYPE_SCROLLABLETEXTWINDOW)
     {
-        if(gui->info.scrollabletextwindow.enabled == 0)
+        if (gui->info.scrollabletextwindow.enabled == 0)
             return 0;
 
-        if(e->type == SDL_MOUSEBUTTONDOWN)
+        if (e->type == SDL_MOUSEBUTTONDOWN)
         {
-            if(e->button.button == SDL_BUTTON_LEFT)
+            if (e->button.button == SDL_BUTTON_LEFT)
             {
-                if(_gui_pos_is_inside_rect(e->button.x,e->button.y,gui->x,gui->w,
-                                              gui->y,gui->h) == 0)
+                if (_gui_pos_is_inside_rect(e->button.x, e->button.y, gui->x,
+                                            gui->w, gui->y, gui->h) == 0)
                 {
                     gui->info.scrollabletextwindow.enabled = 0;
                     return 1;
                 }
 
                 int basexcoord = gui->x;
-                int baseycoord = gui->y+FONT_HEIGHT+2;
+                int baseycoord = gui->y + FONT_HEIGHT + 2;
                 int textwidth = (gui->w / FONT_WIDTH) - 1;
 
-                if(_gui_pos_is_inside_rect(e->button.x,e->button.y,
-                                              basexcoord+textwidth*FONT_WIDTH,FONT_WIDTH,
-                                              baseycoord,FONT_HEIGHT))
+                if (_gui_pos_is_inside_rect(e->button.x, e->button.y,
+                                            basexcoord + textwidth * FONT_WIDTH,
+                                            FONT_WIDTH, baseycoord,
+                                            FONT_HEIGHT))
                 {
-                    gui->info.scrollabletextwindow.currentline --;
-                    if(gui->info.scrollabletextwindow.currentline < 0)
+                    gui->info.scrollabletextwindow.currentline--;
+                    if (gui->info.scrollabletextwindow.currentline < 0)
                             gui->info.scrollabletextwindow.currentline = 0;
                     return 1;
                 }
 
-                if(_gui_pos_is_inside_rect(e->button.x,e->button.y,
-                                basexcoord+textwidth*FONT_WIDTH,FONT_WIDTH,
-                                baseycoord+(gui->info.scrollabletextwindow.max_drawn_lines-1)*FONT_HEIGHT,FONT_HEIGHT))
+                if (_gui_pos_is_inside_rect(e->button.x, e->button.y,
+                        basexcoord + textwidth * FONT_WIDTH, FONT_WIDTH,
+                        baseycoord
+                        + (gui->info.scrollabletextwindow.max_drawn_lines - 1)
+                        * FONT_HEIGHT, FONT_HEIGHT))
                 {
-                    gui->info.scrollabletextwindow.currentline ++;
-                    if(gui->info.scrollabletextwindow.currentline >=
-                            gui->info.scrollabletextwindow.numlines - gui->info.scrollabletextwindow.max_drawn_lines)
+                    gui->info.scrollabletextwindow.currentline++;
+                    if (gui->info.scrollabletextwindow.currentline >=
+                            gui->info.scrollabletextwindow.numlines
+                            - gui->info.scrollabletextwindow.max_drawn_lines)
+                    {
                         gui->info.scrollabletextwindow.currentline =
-                                gui->info.scrollabletextwindow.numlines - gui->info.scrollabletextwindow.max_drawn_lines;
-                    if(gui->info.scrollabletextwindow.currentline < 0)
+                            gui->info.scrollabletextwindow.numlines
+                            - gui->info.scrollabletextwindow.max_drawn_lines;
+                    }
+                    if (gui->info.scrollabletextwindow.currentline < 0)
                         gui->info.scrollabletextwindow.currentline = 0;
                     return 1;
                 }
 
-                if(_gui_pos_is_inside_rect(e->button.x,e->button.y,
-                                basexcoord+textwidth*FONT_WIDTH,FONT_WIDTH,
-                                baseycoord+FONT_HEIGHT,(gui->info.scrollabletextwindow.max_drawn_lines-1)*FONT_HEIGHT))
+                if (_gui_pos_is_inside_rect(e->button.x, e->button.y,
+                        basexcoord + textwidth * FONT_WIDTH, FONT_WIDTH,
+                        baseycoord + FONT_HEIGHT,
+                        (gui->info.scrollabletextwindow.max_drawn_lines - 1)
+                            * FONT_HEIGHT))
                 {
-                    int percent = ( ( e->button.y-(baseycoord+FONT_HEIGHT) ) * 100 ) /
-                                            ( (gui->info.scrollabletextwindow.max_drawn_lines-4) * FONT_HEIGHT );
+                    int percent = ((e->button.y - (baseycoord + FONT_HEIGHT))
+                        * 100 ) /
+                        ((gui->info.scrollabletextwindow.max_drawn_lines - 4)
+                        * FONT_HEIGHT);
 
-                    int line =
-                        ( (gui->info.scrollabletextwindow.numlines - gui->info.scrollabletextwindow.max_drawn_lines)
-                         * percent ) / 100;
+                    int line = ((gui->info.scrollabletextwindow.numlines
+                        - gui->info.scrollabletextwindow.max_drawn_lines)
+                        * percent) / 100;
 
                     gui->info.scrollabletextwindow.currentline = line;
 
-                    if(gui->info.scrollabletextwindow.currentline >=
-                            gui->info.scrollabletextwindow.numlines - gui->info.scrollabletextwindow.max_drawn_lines)
+                    if (gui->info.scrollabletextwindow.currentline >=
+                            gui->info.scrollabletextwindow.numlines
+                            - gui->info.scrollabletextwindow.max_drawn_lines)
+                    {
                         gui->info.scrollabletextwindow.currentline =
-                                gui->info.scrollabletextwindow.numlines - gui->info.scrollabletextwindow.max_drawn_lines;
-                    if(gui->info.scrollabletextwindow.currentline < 0)
+                            gui->info.scrollabletextwindow.numlines
+                            - gui->info.scrollabletextwindow.max_drawn_lines;
+                    }
+                    if (gui->info.scrollabletextwindow.currentline < 0)
                         gui->info.scrollabletextwindow.currentline = 0;
                 }
             }
         }
-        else if(e->type == SDL_MOUSEMOTION)
+        else if (e->type == SDL_MOUSEMOTION)
         {
-            if(e->motion.state & SDL_BUTTON_LMASK)
+            if (e->motion.state & SDL_BUTTON_LMASK)
             {
                 int basexcoord = gui->x;
-                int baseycoord = gui->y+FONT_HEIGHT+2;
+                int baseycoord = gui->y + FONT_HEIGHT + 2;
                 int textwidth = (gui->w / FONT_WIDTH) - 1;
 
-                if(_gui_pos_is_inside_rect(e->button.x,e->button.y,
-                                basexcoord+textwidth*FONT_WIDTH,FONT_WIDTH,
-                                baseycoord+FONT_HEIGHT,(gui->info.scrollabletextwindow.max_drawn_lines-1)*FONT_HEIGHT))
+                if (_gui_pos_is_inside_rect(e->button.x, e->button.y,
+                        basexcoord + textwidth * FONT_WIDTH, FONT_WIDTH,
+                        baseycoord + FONT_HEIGHT,
+                        (gui->info.scrollabletextwindow.max_drawn_lines - 1)
+                        * FONT_HEIGHT))
                 {
-                    int percent = ( ( e->button.y-(baseycoord+FONT_HEIGHT) ) * 100 ) /
-                                            ( (gui->info.scrollabletextwindow.max_drawn_lines-4) * FONT_HEIGHT );
+                    int percent = ((e->button.y - (baseycoord + FONT_HEIGHT))
+                        * 100 ) /
+                        ((gui->info.scrollabletextwindow.max_drawn_lines - 4)
+                        * FONT_HEIGHT);
 
-                    int line =
-                        ( (gui->info.scrollabletextwindow.numlines - gui->info.scrollabletextwindow.max_drawn_lines)
-                         * percent ) / 100;
+                    int line = ((gui->info.scrollabletextwindow.numlines
+                            - gui->info.scrollabletextwindow.max_drawn_lines)
+                            * percent) / 100;
 
                     gui->info.scrollabletextwindow.currentline = line;
 
-                    if(gui->info.scrollabletextwindow.currentline >=
-                            gui->info.scrollabletextwindow.numlines - gui->info.scrollabletextwindow.max_drawn_lines)
+                    if (gui->info.scrollabletextwindow.currentline >=
+                            gui->info.scrollabletextwindow.numlines
+                            - gui->info.scrollabletextwindow.max_drawn_lines)
+                    {
                         gui->info.scrollabletextwindow.currentline =
-                                gui->info.scrollabletextwindow.numlines - gui->info.scrollabletextwindow.max_drawn_lines;
-                    if(gui->info.scrollabletextwindow.currentline < 0)
+                            gui->info.scrollabletextwindow.numlines
+                            - gui->info.scrollabletextwindow.max_drawn_lines;
+                    }
+                    if (gui->info.scrollabletextwindow.currentline < 0)
                         gui->info.scrollabletextwindow.currentline = 0;
 
                     return 1;
                 }
             }
         }
-        else if(e->type == SDL_MOUSEWHEEL)
+        else if (e->type == SDL_MOUSEWHEEL)
         {
-            gui->info.scrollabletextwindow.currentline -= e->wheel.y*3;
+            gui->info.scrollabletextwindow.currentline -= e->wheel.y * 3;
 
-            if(gui->info.scrollabletextwindow.currentline >=
-                    gui->info.scrollabletextwindow.numlines - gui->info.scrollabletextwindow.max_drawn_lines)
+            if (gui->info.scrollabletextwindow.currentline >=
+                    gui->info.scrollabletextwindow.numlines
+                    - gui->info.scrollabletextwindow.max_drawn_lines)
+            {
                 gui->info.scrollabletextwindow.currentline =
-                        gui->info.scrollabletextwindow.numlines - gui->info.scrollabletextwindow.max_drawn_lines;
-            if(gui->info.scrollabletextwindow.currentline < 0)
+                        gui->info.scrollabletextwindow.numlines
+                        - gui->info.scrollabletextwindow.max_drawn_lines;
+            }
+            if (gui->info.scrollabletextwindow.currentline < 0)
                 gui->info.scrollabletextwindow.currentline = 0;
             return 1;
         }
-        else if( e->type == SDL_KEYDOWN )
+        else if (e->type == SDL_KEYDOWN)
         {
-            if(e->key.keysym.sym == SDLK_UP)
+            if (e->key.keysym.sym == SDLK_UP)
             {
-                gui->info.scrollabletextwindow.currentline --;
-                if(gui->info.scrollabletextwindow.currentline < 0)
+                gui->info.scrollabletextwindow.currentline--;
+                if (gui->info.scrollabletextwindow.currentline < 0)
                     gui->info.scrollabletextwindow.currentline = 0;
                 return 1;
             }
-            else if(e->key.keysym.sym == SDLK_DOWN)
+            else if (e->key.keysym.sym == SDLK_DOWN)
             {
-                gui->info.scrollabletextwindow.currentline ++;
-                if(gui->info.scrollabletextwindow.currentline >=
-                        gui->info.scrollabletextwindow.numlines - gui->info.scrollabletextwindow.max_drawn_lines)
+                gui->info.scrollabletextwindow.currentline++;
+                if (gui->info.scrollabletextwindow.currentline >=
+                        gui->info.scrollabletextwindow.numlines
+                        - gui->info.scrollabletextwindow.max_drawn_lines)
+                {
                     gui->info.scrollabletextwindow.currentline =
-                        gui->info.scrollabletextwindow.numlines - gui->info.scrollabletextwindow.max_drawn_lines;
-                if(gui->info.scrollabletextwindow.currentline < 0)
+                        gui->info.scrollabletextwindow.numlines
+                        - gui->info.scrollabletextwindow.max_drawn_lines;
+                }
+                if (gui->info.scrollabletextwindow.currentline < 0)
                     gui->info.scrollabletextwindow.currentline = 0;
                 return 1;
             }
-            else if(e->key.keysym.sym == SDLK_RETURN)
+            else if (e->key.keysym.sym == SDLK_RETURN)
             {
                 gui->info.scrollabletextwindow.enabled = 0;
             }
-            else if(e->key.keysym.sym == SDLK_BACKSPACE)
+            else if (e->key.keysym.sym == SDLK_BACKSPACE)
             {
                 gui->info.scrollabletextwindow.enabled = 0;
             }
         }
     }
-    else if(gui->element_type == GUI_TYPE_SCROLLBAR)
+    else if (gui->element_type == GUI_TYPE_SCROLLBAR)
     {
-        if(e->type == SDL_MOUSEBUTTONDOWN)
+        if (e->type == SDL_MOUSEBUTTONDOWN)
         {
-            if(e->button.button == SDL_BUTTON_LEFT)
+            if (e->button.button == SDL_BUTTON_LEFT)
             {
-                //is inside the bar?
-                if(_gui_pos_is_inside_rect(e->button.x,e->button.y, gui->x,gui->w, gui->y,gui->h))
+                // Is the point inside the bar?
+                if (_gui_pos_is_inside_rect(e->button.x, e->button.y,
+                                            gui->x, gui->w, gui->y, gui->h))
                 {
                     int rel_x = e->button.x - gui->x;
                     int rel_y = e->button.y - gui->y;
 
-                    if(gui->info.scrollbar.is_vertical)
+                    if (gui->info.scrollbar.is_vertical)
                     {
-                        if(rel_y < gui->w)
+                        if (rel_y < gui->w)
                         {
-                            //up button
-                            gui->info.scrollbar.value --;
+                            // Up button
+                            gui->info.scrollbar.value--;
                         }
-                        else if(rel_y > (gui->h-gui->w) )
+                        else if (rel_y > (gui->h - gui->w))
                         {
-                            //down button
-                            gui->info.scrollbar.value ++;
+                            // Down button
+                            gui->info.scrollbar.value++;
                         }
                         else
                         {
-                            //bar
-                            int barsize = gui->h - (2 * (gui->w+1) ); // total length - side buttons
-                            barsize -= 2*gui->w; // total length - side buttons - scrollable button
-                            if(barsize < 0) return 1; // bad size...
+                            // Bar
 
-                            int range = gui->info.scrollbar.value_max - gui->info.scrollbar.value_min;
+                            // Total length - side buttons
+                            int barsize = gui->h - (2 * (gui->w + 1));
+                            // Total length - side buttons - scrollable button
+                            barsize -= 2 * gui->w;
 
-                            int minus = (gui->w+1) + gui->w; // one side button plus half scroll button
-                            gui->info.scrollbar.value = ( (rel_y - minus) * range ) / barsize;
-                            gui->info.scrollbar.value += gui->info.scrollbar.value_min;
+                            if (barsize < 0)
+                                return 1; // Invalid size...
+
+                            int range = gui->info.scrollbar.value_max
+                                      - gui->info.scrollbar.value_min;
+
+                            // One side button plus half scroll button
+                            int minus = (gui->w + 1) + gui->w;
+                            gui->info.scrollbar.value =
+                                            ((rel_y - minus) * range) / barsize;
+                            gui->info.scrollbar.value +=
+                                            gui->info.scrollbar.value_min;
                         }
                     }
                     else
                     {
-                        if(rel_x < gui->h)
+                        if (rel_x < gui->h)
                         {
-                            //up button
-                            gui->info.scrollbar.value --;
+                            // Up button
+                            gui->info.scrollbar.value--;
                         }
-                        else if(rel_x > (gui->w-gui->h) )
+                        else if (rel_x > (gui->w - gui->h))
                         {
-                            //down button
-                            gui->info.scrollbar.value ++;
+                            // Down button
+                            gui->info.scrollbar.value++;
                         }
                         else
                         {
-                            //bar
-                            int barsize = gui->w - (2 * (gui->h+1) ); // total length - side buttons
-                            barsize -= 2*gui->h; // total length - side buttons - scrollable button
-                            if(barsize < 0) return 1; // bad size...
+                            // Bar
 
-                            int range = gui->info.scrollbar.value_max - gui->info.scrollbar.value_min;
+                            // Total length - side buttons
+                            int barsize = gui->w - (2 * (gui->h + 1));
+                            // Total length - side buttons - scrollable button
+                            barsize -= 2 * gui->h;
+                            if (barsize < 0)
+                                return 1; // Invalid size...
 
-                            int minus = (gui->h+1) + gui->h; // one side button plus half scroll button
-                            gui->info.scrollbar.value = ( (rel_x - minus) * range ) / barsize;
-                            gui->info.scrollbar.value += gui->info.scrollbar.value_min;
+                            int range = gui->info.scrollbar.value_max
+                                      - gui->info.scrollbar.value_min;
+
+                            // One side button plus half scroll button
+                            int minus = (gui->h + 1) + gui->h;
+                            gui->info.scrollbar.value =
+                                            ((rel_x - minus) * range) / barsize;
+                            gui->info.scrollbar.value +=
+                                            gui->info.scrollbar.value_min;
                         }
                     }
 
-                    if(gui->info.scrollbar.value < gui->info.scrollbar.value_min)
+                    if (gui->info.scrollbar.value < gui->info.scrollbar.value_min)
                         gui->info.scrollbar.value = gui->info.scrollbar.value_min;
-                    else if(gui->info.scrollbar.value > gui->info.scrollbar.value_max)
+                    if (gui->info.scrollbar.value > gui->info.scrollbar.value_max)
                         gui->info.scrollbar.value = gui->info.scrollbar.value_max;
 
-                    if(gui->info.scrollbar.callback)
+                    if (gui->info.scrollbar.callback)
                         gui->info.scrollbar.callback(gui->info.scrollbar.value);
 
                     return 1;
                 }
             }
         }
-        else if(e->type == SDL_MOUSEMOTION)
+        else if (e->type == SDL_MOUSEMOTION)
         {
-            if(e->motion.state & SDL_BUTTON_LMASK)
+            if (e->motion.state & SDL_BUTTON_LMASK)
             {
-                //is inside the bar?
-                if(_gui_pos_is_inside_rect(e->button.x,e->button.y, gui->x,gui->w, gui->y,gui->h))
+                // Are the coordinates inside the bar?
+                if (_gui_pos_is_inside_rect(e->button.x, e->button.y,
+                                            gui->x, gui->w, gui->y, gui->h))
                 {
                     int rel_x = e->button.x - gui->x;
                     int rel_y = e->button.y - gui->y;
 
-                    if(gui->info.scrollbar.is_vertical)
+                    if (gui->info.scrollbar.is_vertical)
                     {
-                        if(rel_y < gui->w)
+                        if (rel_y < gui->w)
                         {
-                            //up button
+                            // Up button
                         }
-                        else if(rel_y > (gui->h-gui->w) )
+                        else if (rel_y > (gui->h - gui->w))
                         {
-                            //down button
+                            // Down button
                         }
                         else
                         {
-                            //bar
-                            int barsize = gui->h - (2 * (gui->w+1) ); // total length - side buttons
-                            barsize -= 2*gui->w; // total length - side buttons - scrollable button
-                            if(barsize < 0) return 1; // bad size...
+                            // Bar
 
-                            int range = gui->info.scrollbar.value_max - gui->info.scrollbar.value_min;
+                            // Total length - side buttons
+                            int barsize = gui->h - (2 * (gui->w + 1));
+                            // Total length - side buttons - scrollable button
+                            barsize -= 2 * gui->w;
+                            if (barsize < 0)
+                                return 1; // Invalid size...
 
-                            int minus = (gui->w+1) + gui->w; // one side button plus half scroll button
-                            gui->info.scrollbar.value = ( (rel_y - minus) * range ) / barsize;
-                            gui->info.scrollbar.value += gui->info.scrollbar.value_min;
+                            int range = gui->info.scrollbar.value_max
+                                      - gui->info.scrollbar.value_min;
+
+                            // One side button plus half scroll button
+                            int minus = (gui->w + 1) + gui->w;
+                            gui->info.scrollbar.value =
+                                            ((rel_y - minus) * range) / barsize;
+                            gui->info.scrollbar.value +=
+                                            gui->info.scrollbar.value_min;
                         }
                     }
                     else
                     {
-                        if(rel_x < gui->h)
+                        if (rel_x < gui->h)
                         {
-                            //up button
+                            // Up button
                         }
-                        else if(rel_x > (gui->w-gui->h) )
+                        else if (rel_x > (gui->w - gui->h))
                         {
-                            //down button
+                            // Down button
                         }
                         else
                         {
-                            //bar
-                            int barsize = gui->w - (2 * (gui->h+1) ); // total length - side buttons
-                            barsize -= 2*gui->h; // total length - side buttons - scrollable button
-                            if(barsize < 0) return 1; // bad size...
+                            // Bar
 
-                            int range = gui->info.scrollbar.value_max - gui->info.scrollbar.value_min;
+                            // Total length - side buttons
+                            int barsize = gui->w - (2 * (gui->h + 1));
+                            // Total length - side buttons - scrollable button
+                            barsize -= 2 * gui->h;
+                            if (barsize < 0)
+                                return 1; // Invalid size...
 
-                            int minus = (gui->h+1) + gui->h; // one side button plus half scroll button
-                            gui->info.scrollbar.value = ( (rel_x - minus) * range ) / barsize;
-                            gui->info.scrollbar.value += gui->info.scrollbar.value_min;
+                            int range = gui->info.scrollbar.value_max
+                                      - gui->info.scrollbar.value_min;
+
+                            // One side button plus half scroll button
+                            int minus = (gui->h + 1) + gui->h;
+                            gui->info.scrollbar.value =
+                                            ((rel_x - minus) * range) / barsize;
+                            gui->info.scrollbar.value +=
+                                            gui->info.scrollbar.value_min;
                         }
                     }
 
-                    if(gui->info.scrollbar.value < gui->info.scrollbar.value_min)
+                    if (gui->info.scrollbar.value < gui->info.scrollbar.value_min)
                         gui->info.scrollbar.value = gui->info.scrollbar.value_min;
-                    else if(gui->info.scrollbar.value > gui->info.scrollbar.value_max)
+                    if (gui->info.scrollbar.value > gui->info.scrollbar.value_max)
                         gui->info.scrollbar.value = gui->info.scrollbar.value_max;
 
-                    if(gui->info.scrollbar.callback)
+                    if (gui->info.scrollbar.callback)
                         gui->info.scrollbar.callback(gui->info.scrollbar.value);
 
                     return 1;
@@ -642,24 +737,23 @@ int __gui_send_event_element(_gui_element ** complete_gui, _gui_element * gui, S
             }
         }
     }
-    else if(gui->element_type == GUI_TYPE_GROUPBOX)
+    else if (gui->element_type == GUI_TYPE_GROUPBOX)
     {
-        //nothing
+        // Nothing
         return 0;
     }
-    else if(gui->element_type == GUI_TYPE_CHECKBOX)
+    else if (gui->element_type == GUI_TYPE_CHECKBOX)
     {
-        if(e->type == SDL_MOUSEBUTTONDOWN)
+        if (e->type == SDL_MOUSEBUTTONDOWN)
         {
-            if(e->button.button == SDL_BUTTON_LEFT)
+            if (e->button.button == SDL_BUTTON_LEFT)
             {
-                if(_gui_pos_is_inside_rect(e->button.x,e->button.y,
-                                              gui->x,gui->h,
-                                              gui->y,gui->h))
+                if (_gui_pos_is_inside_rect(e->button.x, e->button.y,
+                                            gui->x, gui->h, gui->y, gui->h))
                 {
                     gui->info.checkbox.checked = !gui->info.checkbox.checked;
 
-                    if(gui->info.checkbox.callback)
+                    if (gui->info.checkbox.callback)
                         gui->info.checkbox.callback(gui->info.checkbox.checked);
 
                     return 1;
@@ -667,9 +761,9 @@ int __gui_send_event_element(_gui_element ** complete_gui, _gui_element * gui, S
             }
         }
     }
-    else if(gui->element_type == GUI_TYPE_INPUTGET)
+    else if (gui->element_type == GUI_TYPE_INPUTGET)
     {
-        switch(e->type)
+        switch (e->type)
         {
             case SDL_KEYDOWN:
             case SDL_KEYUP:
@@ -679,7 +773,7 @@ int __gui_send_event_element(_gui_element ** complete_gui, _gui_element * gui, S
             case SDL_JOYBUTTONDOWN:
             case SDL_JOYBUTTONUP:
             {
-                if(gui->info.inputget.callback)
+                if (gui->info.inputget.callback)
                     return gui->info.inputget.callback(e);
                 break;
             }
@@ -695,15 +789,15 @@ int __gui_send_event_element(_gui_element ** complete_gui, _gui_element * gui, S
     return 0;
 }
 
-int GUI_SendEvent(_gui * gui, SDL_Event * e)
+int GUI_SendEvent(_gui *gui, SDL_Event *e)
 {
-    //highest priority = input window
-    if(GUI_InputWindowIsEnabled(gui->inputwindow))
+    // Highest priority = input window
+    if (GUI_InputWindowIsEnabled(gui->inputwindow))
     {
         return _gui_inputwindow_send_event(gui->inputwindow,e);
     }
 
-    //higher priority = menu
+    // Very high priority = menu
     if(_gui_menu_send_event(gui->menu,e))
         return 1;
 
@@ -711,28 +805,28 @@ int GUI_SendEvent(_gui * gui, SDL_Event * e)
     if(elements == NULL)
         return 0;
 
-    //high priority = message box
-    int messagebox_enabled = _gui_get_first_messagebox_enabled(gui); //
-    if(messagebox_enabled >= 0)
+    // High priority = message box
+    int messagebox_enabled = _gui_get_first_messagebox_enabled(gui);
+    if (messagebox_enabled >= 0)
     {
-        return __gui_send_event_element(gui->elements,elements[messagebox_enabled],e);
+        return __gui_send_event_element(gui->elements,
+                                        elements[messagebox_enabled], e);
     }
 
-    //normal priority = other windows
+    // Normal priority = other windows
     int window_enabled = _gui_get_first_window_enabled(gui);
-    if(window_enabled >= 0)
+    if (window_enabled >= 0)
     {
-        return __gui_send_event_element(gui->elements,elements[window_enabled],e);
+        return __gui_send_event_element(gui->elements,
+                                        elements[window_enabled], e);
     }
 
-    //low priority = the rest
-    while(*elements != NULL)
+    // Low priority = the rest
+    while (*elements != NULL)
     {
-        if(__gui_send_event_element(gui->elements,*elements++,e))
+        if (__gui_send_event_element(gui->elements, *elements++, e))
             return 1;
     }
 
     return 0;
 }
-
-//-------------------------------------------------------------------------------------------

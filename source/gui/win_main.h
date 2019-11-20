@@ -4,10 +4,10 @@
 //
 // GiiBiiAdvance - GBA/GB emulator
 
-#ifndef __WIN_MAIN__
-#define __WIN_MAIN__
+#ifndef WIN_MAIN__
+#define WIN_MAIN__
 
-int Win_MainCreate(char * rom_path); // returns 1 if error
+int Win_MainCreate(char *rom_path); // returns 1 if error
 void Win_MainRender(void);
 int Win_MainRunningGBA(void);
 int Win_MainRunningGB(void);
@@ -16,6 +16,7 @@ void Win_MainLoopHandle(void);
 void Win_MainChangeZoom(int newzoom);
 void Win_MainSetFrameskip(int frameskip); // in win_main.c
 
-void Win_MainShowMessage(int type, const char * text); // 0 = error, 1 = debug, 2 = console, 3 = sys info
+// Type: 0 = error, 1 = debug, 2 = console, 3 = sys info
+void Win_MainShowMessage(int type, const char *text);
 
-#endif // __WIN_MAIN__
+#endif // WIN_MAIN__

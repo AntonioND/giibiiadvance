@@ -4,8 +4,8 @@
 //
 // GiiBiiAdvance - GBA/GB emulator
 
-#ifndef __WIN_MAIN_CONFIG___
-#define __WIN_MAIN_CONFIG___
+#ifndef WIN_MAIN_CONFIG__
+#define WIN_MAIN_CONFIG__
 
 #include "win_utils.h"
 
@@ -16,6 +16,4 @@ void Win_MainCreateConfigWindow(void);
 void Win_MainOpenConfigWindow(void);
 void Win_MainCloseConfigWindow(void);
 
-#endif // __WIN_MAIN_CONFIG___
-
-
+#endif // WIN_MAIN_CONFIG__

@@ -4,10 +4,10 @@
 //
 // GiiBiiAdvance - GBA/GB emulator
 
+#include <ctype.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
 
 #include <SDL.h>
 

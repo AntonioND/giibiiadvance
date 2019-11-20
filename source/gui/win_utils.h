@@ -4,18 +4,10 @@
 //
 // GiiBiiAdvance - GBA/GB emulator
 
-#ifndef __WIN_UTILS__
-#define __WIN_UTILS__
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
+#ifndef WIN_UTILS__
+#define WIN_UTILS__
 
 #include <SDL.h>
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 
 #define GUI_CONSOLE_MAX_WIDTH 150
 #define GUI_CONSOLE_MAX_HEIGHT 80
@@ -23,20 +15,21 @@
 typedef struct {
     int __console_chars_w;
     int __console_chars_h;
-    char  __console_buffer[GUI_CONSOLE_MAX_WIDTH*GUI_CONSOLE_MAX_HEIGHT];
-    int  __console_buffer_color[GUI_CONSOLE_MAX_WIDTH*GUI_CONSOLE_MAX_HEIGHT];
+    char __console_buffer[GUI_CONSOLE_MAX_WIDTH * GUI_CONSOLE_MAX_HEIGHT];
+    int __console_buffer_color[GUI_CONSOLE_MAX_WIDTH * GUI_CONSOLE_MAX_HEIGHT];
 } _gui_console;
 
-void GUI_ConsoleReset(_gui_console * con, int screen_width, int screen_height); // in pixels
-void GUI_ConsoleClear(_gui_console * con);
-int GUI_ConsoleModePrintf(_gui_console * con, int x, int y, const char * txt, ...);
-int GUI_ConsoleColorizeLine(_gui_console * con, int y, int color);
-void GUI_ConsoleDraw(_gui_console * con, char * buffer, int buf_w, int buf_h); // buffer is 24 bit per pixel
-void GUI_ConsoleDrawAt(_gui_console * con, char * buffer, int buf_w, int buf_h, int scrx, int scry, int scrw, int scrh);
+// Sizes in pixels
+void GUI_ConsoleReset(_gui_console *con, int screen_width, int screen_height);
+void GUI_ConsoleClear(_gui_console *con);
+int GUI_ConsoleModePrintf(_gui_console *con, int x, int y, const char *txt, ...);
+int GUI_ConsoleColorizeLine(_gui_console *con, int y, int color);
+// The buffer is 24 bit per pixel
+void GUI_ConsoleDraw(_gui_console *con, char *buffer, int buf_w, int buf_h);
+void GUI_ConsoleDrawAt(_gui_console *con, char *buffer, int buf_w, int buf_h,
+                       int scrx, int scry, int scrw, int scrh);
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 #define GUI_TYPE_NONE                  0
 #define GUI_TYPE_TEXTBOX               1
@@ -50,22 +43,23 @@ void GUI_ConsoleDrawAt(_gui_console * con, char * buffer, int buf_w, int buf_h, 
 #define GUI_TYPE_SCROLLBAR             9
 #define GUI_TYPE_GROUPBOX             10
 #define GUI_TYPE_CHECKBOX             11
-#define GUI_TYPE_INPUTGET             12 // Helper to get callbacks when pressing keyboard or joystick buttons
+// Helper to get callbacks when pressing keyboard or joystick buttons
+#define GUI_TYPE_INPUTGET             12
 
 typedef void (*_gui_void_arg_void_fn)(void);
 typedef void (*_gui_void_arg_int_fn)(int);
-typedef void (*_gui_void_arg_int_int_fn)(int,int);
-typedef int (*_gui_int_arg_int_int_fn)(int,int);
-typedef void (*_gui_void_arg_pchar_int_fn)(char*,int);
-typedef int (*_gui_int_arg_sdl_event_fn)(SDL_Event*);
+typedef void (*_gui_void_arg_int_int_fn)(int, int);
+typedef int (*_gui_int_arg_int_int_fn)(int, int);
+typedef void (*_gui_void_arg_pchar_int_fn)(char *, int);
+typedef int (*_gui_int_arg_sdl_event_fn)(SDL_Event *);
 
 typedef struct {
     int element_type;
     int x, y, w, h;
     union {
         struct {
-            _gui_console * con;
-            _gui_void_arg_int_int_fn mouse_press_callback; // args -> x,y
+            _gui_console *con;
+            _gui_void_arg_int_int_fn mouse_press_callback; // Args -> x, y
         } textbox;
         struct {
             char name[60];
@@ -74,35 +68,35 @@ typedef struct {
         } button;
         struct {
             char name[60];
-            _gui_void_arg_int_fn callback; //arg -> btn_id of clicked button
+            _gui_void_arg_int_fn callback; // Arg -> btn_id of clicked button
             int is_pressed;
             int group_id;
-            int btn_id; // button inside group
+            int btn_id; // Button ID inside group
             int is_enabled;
         } radiobutton;
         struct {
             char text[100];
         } label;
         struct {
-            char * bitmap;
+            char *bitmap;
             _gui_int_arg_int_int_fn callback;
         } bitmap;
         struct {
             int enabled;
-            void * gui; // pointer to _gui
+            void *gui; // Pointer to _gui
             char caption[100];
         } window;
         struct {
             int enabled;
-            _gui_console * con;
+            _gui_console *con;
             char caption[100];
         } messagebox;
         struct {
             int enabled;
-            const char * text;
+            const char *text;
             char caption[100];
-            int currentline; // top line of the window
-            int numlines; // counted number of lines
+            int currentline; // Top line of the window
+            int numlines; // Counted number of lines
             int max_drawn_lines;
         } scrollabletextwindow;
         struct {
@@ -110,7 +104,7 @@ typedef struct {
             int value;
             int value_min;
             int value_max;
-            _gui_void_arg_int_fn callback; //arg -> newvalue
+            _gui_void_arg_int_fn callback; // Arg -> newvalue
         } scrollbar;
         struct {
             char label[100];
@@ -118,136 +112,143 @@ typedef struct {
         struct {
             int checked;
             char label[100];
-            _gui_void_arg_int_fn callback; //arg -> 1 = is checked
+            _gui_void_arg_int_fn callback; // Arg -> 1 = is checked
         } checkbox;
         struct {
-            _gui_int_arg_sdl_event_fn callback; // return 1 if you want to redraw the GUI
+            // Return 1 if you want to redraw the GUI
+            _gui_int_arg_sdl_event_fn callback;
         } inputget;
     } info ;
 } _gui_element;
 
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-void GUI_SetTextBox(_gui_element * e, _gui_console * con, int x, int y, int w, int h,
-                     _gui_void_arg_int_int_fn callback);
+void GUI_SetTextBox(_gui_element *e, _gui_console *con, int x, int y, int w,
+                    int h, _gui_void_arg_int_int_fn callback);
 
-void GUI_SetButton(_gui_element * e, int x, int y, int w, int h, const char * label, _gui_void_arg_void_fn callback);
+void GUI_SetButton(_gui_element *e, int x, int y, int w, int h,
+                   const char *label, _gui_void_arg_void_fn callback);
 
-void GUI_SetRadioButton(_gui_element * e, int x, int y, int w, int h, const char * label, int group_id, int btn_id,
+void GUI_SetRadioButton(_gui_element *e, int x, int y, int w, int h,
+                        const char *label, int group_id, int btn_id,
                         int start_pressed, _gui_void_arg_int_fn callback);
 
-// if(w <= 0) w = strlen(label)*FONT_WIDTH;
-void GUI_SetLabel(_gui_element * e, int x, int y, int w, int h, const char * label);
+// if (w <= 0) w = strlen(label) * FONT_WIDTH;
+void GUI_SetLabel(_gui_element *e, int x, int y, int w, int h,
+                  const char *label);
 
-// bitmap is 24 bit. return 1 from callback to redraw GUI
-void GUI_SetBitmap(_gui_element * e, int x, int y, int w, int h, char * bitmap, _gui_int_arg_int_int_fn callback);
+// Bitmap is 24 bit. return 1 from callback to redraw GUI
+void GUI_SetBitmap(_gui_element *e, int x, int y, int w, int h, char *bitmap,
+                   _gui_int_arg_int_int_fn callback);
 
 // gui is a _gui pointer
-void GUI_SetWindow(_gui_element * e, int x, int y, int w, int h, void * gui, const char * caption);
+void GUI_SetWindow(_gui_element *e, int x, int y, int w, int h, void *gui,
+                   const char *caption);
 
-void GUI_SetMessageBox(_gui_element * e, _gui_console * con, int x, int y, int w, int h, const char * caption);
+void GUI_SetMessageBox(_gui_element *e, _gui_console *con, int x, int y, int w,
+                       int h, const char *caption);
 
-void GUI_SetScrollableTextWindow(_gui_element * e, int x, int y, int w, int h, const char * text, const char * caption);
+void GUI_SetScrollableTextWindow(_gui_element *e, int x, int y, int w, int h,
+                                 const char *text, const char *caption);
 
-void GUI_SetScrollBar(_gui_element * e, int x, int y, int w, int h, int min_value, int max_value,
-                      int start_value, _gui_void_arg_int_fn callback);
+void GUI_SetScrollBar(_gui_element *e, int x, int y, int w, int h,
+                      int min_value, int max_value, int start_value,
+                      _gui_void_arg_int_fn callback);
 
-void GUI_SetGroupBox(_gui_element * e, int x, int y, int w, int h, const char * label);
+void GUI_SetGroupBox(_gui_element *e, int x, int y, int w, int h,
+                     const char *label);
 
-// w is ignored
-void GUI_SetCheckBox(_gui_element * e, int x, int y, int w, int h, const char * label,
-                        int start_pressed, _gui_void_arg_int_fn callback);
+// w is ignored, left for consistency
+void GUI_SetCheckBox(_gui_element *e, int x, int y, int w, int h,
+                     const char *label, int start_pressed,
+                     _gui_void_arg_int_fn callback);
 
-// return 1 from callback if you want to redraw the GUI
-void GUI_SetInputGet(_gui_element * e, _gui_int_arg_sdl_event_fn callback);
+// Return 1 from callback if you want to redraw the GUI
+void GUI_SetInputGet(_gui_element *e, _gui_int_arg_sdl_event_fn callback);
 
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-void GUI_SetButtonText(_gui_element * e, const char * text);
+void GUI_SetButtonText(_gui_element *e, const char *text);
 
-void GUI_SetLabelCaption(_gui_element * e, const char * label);
+void GUI_SetLabelCaption(_gui_element *e, const char *label);
 
-void GUI_ScrollBarSetValue(_gui_element * e, int value); // clamped to configured range
+// The value is clamped to the configured range
+void GUI_ScrollBarSetValue(_gui_element *e, int value);
 
-void GUI_RadioButtonSetEnabled(_gui_element * e, int enabled);
-void GUI_RadioButtonSetPressed(void * complete_gui, _gui_element * e); // complete_gui is a _gui pointer
+void GUI_RadioButtonSetEnabled(_gui_element *e, int enabled);
+// complete_gui is a _gui pointer
+void GUI_RadioButtonSetPressed(void *complete_gui, _gui_element *e);
 
-void GUI_WindowSetEnabled(_gui_element * e, int enabled);
-int GUI_WindowGetEnabled(_gui_element * e);
+void GUI_WindowSetEnabled(_gui_element *e, int enabled);
+int GUI_WindowGetEnabled(_gui_element *e);
 
-void GUI_MessageBoxSetEnabled(_gui_element * e, int enabled);
-int GUI_MessageBoxGetEnabled(_gui_element * e);
+void GUI_MessageBoxSetEnabled(_gui_element *e, int enabled);
+int GUI_MessageBoxGetEnabled(_gui_element *e);
 
-void GUI_ScrollableTextWindowSetEnabled(_gui_element * e, int enabled);
-int GUI_ScrollableTextWindowGetEnabled(_gui_element * e);
+void GUI_ScrollableTextWindowSetEnabled(_gui_element *e, int enabled);
+int GUI_ScrollableTextWindowGetEnabled(_gui_element *e);
 
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 #define GUI_INPUTWINDOW_MAX_LEN 30
-#define GUI_INPUTWINDOW_WIDTH  ( (GUI_INPUTWINDOW_MAX_LEN+2) * FONT_WIDTH )
-#define GUI_INPUTWINDOW_HEIGHT 50
+#define GUI_INPUTWINDOW_WIDTH   ((GUI_INPUTWINDOW_MAX_LEN + 2) * FONT_WIDTH)
+#define GUI_INPUTWINDOW_HEIGHT  50
 
 typedef struct {
     int enabled;
-    char window_caption[GUI_INPUTWINDOW_MAX_LEN+1];
-    char input_text[GUI_INPUTWINDOW_MAX_LEN+1];
+    char window_caption[GUI_INPUTWINDOW_MAX_LEN + 1];
+    char input_text[GUI_INPUTWINDOW_MAX_LEN + 1];
     _gui_void_arg_pchar_int_fn callback;
     //int outputtype
 } _gui_inputwindow;
 
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-//callback returns (char * text, int is_valid_text)
-void GUI_InputWindowOpen(_gui_inputwindow * win, char * caption, _gui_void_arg_pchar_int_fn callback);
-void GUI_InputWindowClose(_gui_inputwindow * win);
-int GUI_InputWindowIsEnabled(_gui_inputwindow * win);
-int GUI_InputWindowSendEvent(_gui_inputwindow * win, SDL_Event * e);
+// callback returns (char * text, int is_valid_text)
+void GUI_InputWindowOpen(_gui_inputwindow *win, char *caption,
+                         _gui_void_arg_pchar_int_fn callback);
+void GUI_InputWindowClose(_gui_inputwindow *win);
+int GUI_InputWindowIsEnabled(_gui_inputwindow *win);
+int GUI_InputWindowSendEvent(_gui_inputwindow *win, SDL_Event *e);
 
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 typedef struct {
-    char * text;
+    char *text;
     _gui_void_arg_void_fn callback;
     int enabled; // 1 -> enabled
 } _gui_menu_entry;
 
 typedef struct {
-    char * title;
-    _gui_menu_entry ** entry;
+    char *title;
+    _gui_menu_entry **entry;
 } _gui_menu_list;
 
 typedef struct {
     int element_opened;
-    _gui_menu_list ** list_entry;
+    _gui_menu_list **list_entry;
 } _gui_menu;
 
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
+//------------------------------------------------------------------------------
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 typedef struct {
-    _gui_element ** elements;
-    _gui_inputwindow * inputwindow;
-    _gui_menu * menu;
+    _gui_element **elements;
+    _gui_inputwindow *inputwindow;
+    _gui_menu *menu;
 } _gui;
 
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 #include "win_utils_draw.h"
 
 #include "win_utils_events.h"
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
-
-#endif // __WIN_UTILS__
-
-
+#endif // WIN_UTILS__

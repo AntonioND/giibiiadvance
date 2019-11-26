@@ -7,30 +7,34 @@
 #include <string.h>
 
 #include "../build_options.h"
-#include "../general_utils.h"
-#include "../debug_utils.h"
 #include "../config.h"
+#include "../debug_utils.h"
+#include "../general_utils.h"
 
-#include "gameboy.h"
-#include "cpu.h"
-#include "memory.h"
-#include "sound.h"
-#include "interrupts.h"
-#include "sgb.h"
-#include "serial.h"
-#include "video.h"
-#include "gb_main.h"
 #include "camera.h"
-#include "ppu.h"
+#include "cpu.h"
 #include "dma.h"
+#include "gameboy.h"
+#include "gb_main.h"
+#include "interrupts.h"
 #include "mbc.h"
+#include "memory.h"
+#include "ppu.h"
+#include "serial.h"
+#include "sgb.h"
+#include "sound.h"
+#include "video.h"
 
 _GB_CONTEXT_ GameBoy;
 
 void GB_PowerOn(void)
 {
-    GB_CPUInit(); // This goes first - It resets the clock counters of all subsystems
-    GB_MemInit(); // This prepares the write/read function pointers - It must be called second
+    // This goes first - It resets the clock counters of all subsystems
+    GB_CPUInit();
+
+    // This prepares the write/read function pointers - It must be called second
+    GB_MemInit();
+
     GB_InterruptsInit();
     GB_SoundInit();
     GB_Screen_Init();
@@ -39,12 +43,14 @@ void GB_PowerOn(void)
     GB_DMAInit();
     GB_MapperInit();
 
-    if(GameBoy.Emulator.SGBEnabled) SGB_Init();
+    if (GameBoy.Emulator.SGBEnabled)
+        SGB_Init();
 }
 
 void GB_PowerOff(void)
 {
-    if(GameBoy.Emulator.SGBEnabled) SGB_End();
+    if (GameBoy.Emulator.SGBEnabled)
+        SGB_End();
 
     GB_MapperEnd();
     GB_DMAEnd();
@@ -64,11 +70,11 @@ void GB_HardReset(void)
 
     GB_Screen_Init();
 
-    if(GameBoy.Emulator.boot_rom_loaded)
+    if (GameBoy.Emulator.boot_rom_loaded)
     {
         GameBoy.Emulator.enable_boot_rom = 1;
 
-        if(GameBoy.Emulator.gbc_in_gb_mode)
+        if (GameBoy.Emulator.gbc_in_gb_mode)
         {
             GameBoy.Emulator.gbc_in_gb_mode = 0;
             GameBoy.Emulator.CGBEnabled = 1;

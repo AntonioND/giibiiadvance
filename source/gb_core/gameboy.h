@@ -4,12 +4,13 @@
 //
 // GiiBiiAdvance - GBA/GB emulator
 
-#ifndef __GB_GAMEBOY__
-#define __GB_GAMEBOY__
+#ifndef GB_GAMEBOY__
+#define GB_GAMEBOY__
 
 #include <stdbool.h>
-#include "../general_utils.h"
+
 #include "../build_options.h"
+#include "../general_utils.h"
 
 //------------------------------------------------------------------------------
 //--                                                                          --
@@ -79,21 +80,21 @@
 //--                                                                          --
 //------------------------------------------------------------------------------
 
-//compiler doesn't like having the same names here than in gba
+// The compiler doesn't like having the same names here than in gba
 #ifdef F_CARRY
-#undef F_CARRY
+# undef F_CARRY
 #endif
 #ifdef F_ZERO
-#undef F_ZERO
+# undef F_ZERO
 #endif
 
-#define F_CARRY     (1<<4)
-#define F_HALFCARRY (1<<5)
-#define F_SUBTRACT (1<<6)
-#define F_ZERO      (1<<7)
+#define F_CARRY     (1 << 4)
+#define F_HALFCARRY (1 << 5)
+#define F_SUBTRACT  (1 << 6)
+#define F_ZERO      (1 << 7)
 
 #ifndef PACKED
-#define PACKED __attribute__ ((packed))
+# define PACKED __attribute__ ((packed))
 #endif
 
 #define KEY_A       BIT(0)
@@ -109,7 +110,7 @@
 
 typedef union {
     struct PACKED {
-        u8 F, A; //F can't be accesed by CPU in a normal way
+        u8 F, A; // F can't be accesed by CPU in a normal way
         u8 dummy1[2];
         u8 C, B;
         u8 dummy2[2];
@@ -127,15 +128,15 @@ typedef union {
         u32 BC;
         u32 DE;
         u32 HL;
-        u32 SP; //Stack Pointer
-        u32 PC; //Program Counter
+        u32 SP; // Stack Pointer
+        u32 PC; // Program Counter
     } R16;
     struct PACKED {
-        u8   zero :4;
-        bool C    :1; // carry
-        bool H    :1; // half carry
-        bool N    :1; // subtract
-        bool Z    :1; // zero
+        u8   zero : 4;
+        bool C    : 1; // carry
+        bool H    : 1; // half carry
+        bool N    : 1; // subtract
+        bool Z    : 1; // zero
     } F;
 } _GB_CPU_;
 
@@ -156,24 +157,28 @@ typedef struct PACKED {
     _GB_OAM_ENTRY_ Sprite[40];
 } _GB_OAM_ ;
 
-typedef void (*mapper_write_fn)(u32,u32); // address, value
+typedef void (*mapper_write_fn)(u32, u32); // address, value
 typedef u32 (*mapper_read_fn)(u32);
 
-typedef void (*gb_mem_write_fn_ptr)(u32,u32); // address, value
+typedef void (*gb_mem_write_fn_ptr)(u32, u32); // address, value
 typedef u32 (*gb_mem_read_fn_ptr)(u32);
 
 typedef struct {
-    u8 * ROM_Base;                //0000 | 16KB
-    u8 * ROM_Switch[512];         //4000 | 16KB
-    u8 VideoRAM[0x4000];          //8000 | 8KB -- 2 banks in GBC - Only 0x2000 needed in GB mode, but
-    u8 ExternRAM[16][0x2000];     //A000 | 8KB                   | let's allocate that anyway...
-    u8 WorkRAM[0x1000];           //C000 | 4KB
-    u8 WorkRAM_Switch[7][0x1000]; //D000 | 4KB -- 8 banks in GBC -- 0 only accessible from C000-CFFF
-                                  //E000 -- ram echo
-    u8 ObjAttrMem[0xA0];          //FE00 | (40 * 4) B
-    u8 StrangeRAM[0x30];          //FEA0 -- strange RAM - (GBC only, not GBA or GB)
-    u8 IO_Ports[0x80];            //FF00 | 128B
-    u8 HighRAM[0x80];             //FF80 | 128B
+    u8 *ROM_Base;                 // 0000 | 16KB
+    u8 *ROM_Switch[512];          // 4000 | 16KB
+    u8 VideoRAM[0x4000];          // 8000 | 8KB -- 2 banks in GBC - Only 0x2000
+                                  //               needed in GB mode, but
+                                  //               allocate that anyway...
+    u8 ExternRAM[16][0x2000];     // A000 | 8KB
+    u8 WorkRAM[0x1000];           // C000 | 4KB
+    u8 WorkRAM_Switch[7][0x1000]; // D000 | 4KB -- 8 banks in GBC -- 0 is only
+                                  //               accessible from C000-CFFF
+                                  // E000 -- Echo RAM
+    u8 ObjAttrMem[0xA0];          // FE00 | (40 * 4) B
+    u8 StrangeRAM[0x30];          // FEA0 -- Strange RAM - (GBC only, not GBA
+                                  //         or GB)
+    u8 IO_Ports[0x80];            // FF00 | 128B
+    u8 HighRAM[0x80];             // FF80 | 128B
 
     gb_mem_write_fn_ptr MemWrite, MemWriteReg; // 8 bit
     gb_mem_read_fn_ptr MemRead, MemReadReg; // 8 bit
@@ -183,10 +188,10 @@ typedef struct {
 
     u32 mbc_mode;
 
-    u8 * VideoRAM_Curr; //
-    u8 * ROM_Curr;      // Pointers to current banks
-    u8 * RAM_Curr;      //
-    u8 * WorkRAM_Curr;  // -> only gbc
+    u8 *VideoRAM_Curr; //
+    u8 *ROM_Curr;      // Pointers to current banks
+    u8 *RAM_Curr;      //
+    u8 *WorkRAM_Curr;  // -> only gbc
     u32 RAMEnabled;
 
     u32 interrupts_enable_count;
@@ -206,7 +211,7 @@ typedef struct {
 #define MEM_MBC1   (1)
 #define MEM_MBC2   (2)
 #define MEM_MBC3   (3)
-#define MEM_MBC4   (4) //I've never seen a game that uses it...
+#define MEM_MBC4   (4) // I've never seen a game that uses it...
 #define MEM_MBC5   (5)
 #define MEM_MBC6   (6)
 #define MEM_MBC7   (7)
@@ -217,14 +222,14 @@ typedef struct {
 #define MEM_CAMERA (12)
 #define MEM_TAMA5  (13)
 
-#define JOY_RIGHT  (1<<0)
-#define JOY_LEFT   (1<<1)
-#define JOY_UP     (1<<2)
-#define JOY_DOWN   (1<<3)
-#define JOY_A      (1<<0)
-#define JOY_B      (1<<1)
-#define JOY_SELECT (1<<2)
-#define JOY_START  (1<<3)
+#define JOY_RIGHT  (1 << 0)
+#define JOY_LEFT   (1 << 1)
+#define JOY_UP     (1 << 2)
+#define JOY_DOWN   (1 << 3)
+#define JOY_A      (1 << 0)
+#define JOY_B      (1 << 1)
+#define JOY_SELECT (1 << 2)
+#define JOY_START  (1 << 3)
 
 #define HW_GB     (0)
 #define HW_GBP    (1)
@@ -286,12 +291,12 @@ typedef struct {
 } _GB_CAMERA_CART_;
 
 typedef struct {
-    u32 selected_hardware; //HW_*** defines, -1 = auto
+    u32 selected_hardware; // HW_*** defines, -1 = auto
 
-    u32 HardwareType; //HW_*** defines
+    u32 HardwareType; // HW_*** defines
     char Title[17];
     u32 ROM_Banks, RAM_Banks;
-    u32 MemoryController; //MBCn, etc...
+    u32 MemoryController; // MBCn, etc...
     u32 HasBattery;
     u32 HasTimer;
     u32 EnableBank0Switch;
@@ -300,19 +305,20 @@ typedef struct {
     _GB_MB7_CART_ MBC7;
     _GB_MMM01_CART_ MMM01;
     _GB_CAMERA_CART_ CAM;
-    u32 rumble; //rumble enabled
-    u32 * Rom_Pointer;
+    u32 rumble; // Rumble enabled
+    u32 *Rom_Pointer;
     char save_filename[MAX_PATHLEN];
     u32 game_supports_gbc;
 
-    u8 * boot_rom;
+    u8 *boot_rom;
     u32 boot_rom_loaded;
     u32 enable_boot_rom;
 
     u32 gbc_in_gb_mode;
-    u32 CGBEnabled; // this can be 0 even if the hardware is GBC, GBA or GBA_SP (GBC in DMG mode)
+    u32 CGBEnabled; // This can be 0 even if the hardware is GBC, GBA or GBA_SP
+                    // (GBC running in DMG mode)
 
-    //CGB only
+    // CGB only
     u32 spr_pal[64];
     u32 bg_pal[64];
 
@@ -327,7 +333,7 @@ typedef struct {
     u32 OAM_DMA_last_read_byte;
 
     // GBC DMA
-    u32 GBC_DMA_enabled; //GBC_DMA_<***> defines
+    u32 GBC_DMA_enabled; // GBC_DMA_<***> defines
 
     s32 gdma_preparation_clocks_left;
     s32 gdma_copy_clocks_left;
@@ -335,9 +341,9 @@ typedef struct {
     u32 gdma_dst;
     u32 gdma_bytes_left;
 
-    u32 hdma_last_ly_copied; //To limit to 0x10 bytes per HBlank
+    u32 hdma_last_ly_copied; // To limit to 0x10 bytes per HBlank
 
-    //Other things
+    // Other things
     u32 CPUHalt;
     u32 halt_bug;
     u32 cpu_change_speed_clocks; // clocks needed to change speed
@@ -346,35 +352,35 @@ typedef struct {
     u32 SGBEnabled;
     u32 wait_cycles;
 
-    //LCD
-    s32 ly_clocks; //clocks left for ly change
-    s32 ly_drawn; //1 if this line has been drawn
-    u32 ScreenMode; //for vblank, hblank...
+    // LCD
+    s32 ly_clocks; // Clocks left for ly change
+    s32 ly_drawn; // 1 if this line has been drawn
+    u32 ScreenMode; // For vblank, hblank...
     u32 CurrentScanLine;
-    u32 stat_signal; //when this goes from 0 to 1, STAT interrupt is triggered.
+    u32 stat_signal; // When this goes from 0 to 1, STAT interrupt is triggered.
     gb_ppu_update_fn_ptr PPUUpdate; // argument = increment clocks
     gb_ppu_clocks_to_event_fn_ptr PPUClocksToNextEvent;
 
-    //DIV, Timer, Sound
+    // DIV, Timer, Sound
     u32 sys_clocks; // 16 bit register. The 8 most significant bits are DIV_REG
     u32 timer_overflow_mask;
-    u32 timer_enabled; // enable TIMA to increment
-    u32 timer_irq_delay_active; // to trigger IF flag
-    u32 timer_reload_delay_active; // to reload TIMA from TMA
+    u32 timer_enabled; // Enable TIMA to increment
+    u32 timer_irq_delay_active; // To trigger IF flag
+    u32 timer_reload_delay_active; // To reload TIMA from TMA
     u32 tima_just_reloaded;
 
-    //Serial
+    // Serial
     u32 serial_enabled;
     u32 serial_clocks_to_flip_clock_signal;
     u32 serial_transfered_bits;
-    u32 serial_clocks; //internal counter
+    u32 serial_clocks; // Internal counter
     u32 serial_clock_signal;
-    //Serial device
+    // Serial device
     u32 serial_device;
     serial_send_fn_ptr SerialSend_Fn;
     serial_recv_fn_ptr SerialRecv_Fn;
 
-    //Joypad
+    // Joypad
     u32 joypad_signal;
 
     u32 FrameDrawn;
@@ -393,5 +399,4 @@ typedef struct {
     _EMULATOR_INFO_ Emulator;
 } _GB_CONTEXT_;
 
-#endif //__GB_GAMEBOY__
-
+#endif // GB_GAMEBOY__

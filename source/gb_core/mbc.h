@@ -4,14 +4,12 @@
 //
 // GiiBiiAdvance - GBA/GB emulator
 
-#ifndef __GB_MBC__
-#define __GB_MBC__
+#ifndef GB_MBC__
+#define GB_MBC__
 
 void GB_MapperSet(int type);
 
 void GB_MapperInit(void);
 void GB_MapperEnd(void);
 
-#endif //__GB_MBC__
-
-
+#endif // GB_MBC__

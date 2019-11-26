@@ -4,8 +4,8 @@
 //
 // GiiBiiAdvance - GBA/GB emulator
 
-#ifndef __GB_GENERAL__
-#define __GB_GENERAL__
+#ifndef GB_GENERAL__
+#define GB_GENERAL__
 
 void GB_PowerOn(void); // This function doesn't allocate anything
 void GB_PowerOff(void); // This function doesn't free anything
@@ -16,5 +16,4 @@ int GB_EmulatorIsEnabledSGB(void);
 
 int GB_RumbleEnabled(void);
 
-#endif //__GB_GENERAL__
-
+#endif // GB_GENERAL__

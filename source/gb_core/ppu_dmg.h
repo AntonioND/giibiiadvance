@@ -4,25 +4,15 @@
 //
 // GiiBiiAdvance - GBA/GB emulator
 
-#ifndef __GB_PPU_DMG__
-#define __GB_PPU_DMG__
-
-//----------------------------------------------------------------
-
-#include "gameboy.h"
-
-//----------------------------------------------------------------
+#ifndef GB_PPU_DMG__
+#define GB_PPU_DMG__
 
 void GB_PPUWriteLYC_DMG(int reference_clocks, int value);
 void GB_PPUWriteLCDC_DMG(int reference_clocks, int value);
 void GB_PPUWriteSTAT_DMG(int reference_clocks, int value);
 
-//----------------------------------------------------------------
-
 void GB_PPUUpdateClocks_DMG(int increment_clocks);
 
 int GB_PPUGetClocksToNextEvent_DMG(void);
 
-//----------------------------------------------------------------
-
-#endif // __GB_PPU__
+#endif // GB_PPU__

@@ -4,19 +4,13 @@
 //
 // GiiBiiAdvance - GBA/GB emulator
 
-#ifndef __GB_DMA__
-#define __GB_DMA__
-
-//----------------------------------------------------------------
+#ifndef GB_DMA__
+#define GB_DMA__
 
 #include "gameboy.h"
 
-//----------------------------------------------------------------
-
 void GB_DMAInit(void);
 void GB_DMAEnd(void);
-
-//----------------------------------------------------------------
 
 void GB_DMAWriteDMA(int reference_clocks, int value);
 
@@ -26,17 +20,10 @@ void GB_DMAWriteHDMA3(int value);
 void GB_DMAWriteHDMA4(int value);
 void GB_DMAWriteHDMA5(int value);
 
-//----------------------------------------------------------------
-
 void GB_DMAClockCounterReset(void);
 void GB_DMAUpdateClocksCounterReference(int reference_clocks);
 int GB_DMAGetClocksToNextEvent(void);
 
-//----------------------------------------------------------------
-
 int GB_DMAExecute(int clocks);
 
-//----------------------------------------------------------------
-
-#endif // __GB_DMA__
-
+#endif // GB_DMA__

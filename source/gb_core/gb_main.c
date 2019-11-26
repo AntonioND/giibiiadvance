@@ -9,19 +9,19 @@
 #include <string.h>
 
 #include "../build_options.h"
-#include "../general_utils.h"
-#include "../file_utils.h"
 #include "../debug_utils.h"
+#include "../file_utils.h"
+#include "../general_utils.h"
 
-#include "gameboy.h"
-#include "rom.h"
-#include "general.h"
-#include "video.h"
 #include "cpu.h"
-#include "sound.h"
-#include "sgb.h"
+#include "gameboy.h"
 #include "gb_main.h"
+#include "general.h"
 #include "interrupts.h"
+#include "rom.h"
+#include "sgb.h"
+#include "sound.h"
+#include "video.h"
 
 extern _GB_CONTEXT_ GameBoy;
 
@@ -30,19 +30,20 @@ void GB_Input_Update(void);
 
 //---------------------------------
 
-int GB_ROMLoad(const char * rom_path)
+int GB_ROMLoad(const char *rom_path)
 {
-    void * ptr; u32 size;
-    FileLoad(rom_path,&ptr,&size);
+    void *ptr; u32 size;
+    FileLoad(rom_path, &ptr, &size);
 
-    if(ptr)
+    if (ptr)
     {
-        if(GB_CartridgeLoad(ptr,size))
+        if (GB_CartridgeLoad(ptr, size))
         {
-            //Init after loading the cartridge to set the hardware type value and allow
-            //GB_Screen_Init choose the correct dimensions for the texture.
+            // Init after loading the cartridge to set the hardware type value
+            // and allow GB_Screen_Init() choose the correct dimensions for the
+            // texture.
 
-            GB_Cardridge_Set_Filename((char*)rom_path);
+            GB_Cardridge_Set_Filename((char *)rom_path);
 
             GB_SRAM_Load();
 
@@ -52,20 +53,20 @@ int GB_ROMLoad(const char * rom_path)
         }
 
         Debug_ErrorMsgArg("Error while loading cartridge.\n"
-                    "Read the console output for details.");
+                          "Read the console output for details.");
 
         free(ptr);
         return 0;
     }
 
-    Debug_ErrorMsgArg("Couldn't load data from %s.",rom_path);
+    Debug_ErrorMsgArg("Couldn't load data from %s.", rom_path);
 
     return 0;
 }
 
 void GB_End(int save)
 {
-    if(save)
+    if (save)
         GB_SRAM_Save();
 
     GB_PowerOff();
@@ -80,8 +81,6 @@ int GB_IsEnabledSGB(void)
 }
 
 //---------------------------------------------------------------------------
-//---------------------------------------------------------------------------
-//---------------------------------------------------------------------------
 
 void GB_RunForOneFrame(void)
 {
@@ -90,22 +89,29 @@ void GB_RunForOneFrame(void)
 }
 
 //---------------------------------------------------------------------------
-//---------------------------------------------------------------------------
-//---------------------------------------------------------------------------
 
-int Keys[4];
+static int Keys[4];
 
-void GB_InputSet(int player, int a, int b, int st, int se, int r, int l, int u, int d)
+void GB_InputSet(int player, int a, int b, int st, int se,
+                 int r, int l, int u, int d)
 {
     Keys[player] = 0;
-    if(l) Keys[player] |= KEY_LEFT;
-    if(u) Keys[player] |= KEY_UP;
-    if(r) Keys[player] |= KEY_RIGHT;
-    if(d) Keys[player] |= KEY_DOWN;
-    if(a) Keys[player] |= KEY_A;
-    if(b) Keys[player] |= KEY_B;
-    if(st) Keys[player] |= KEY_START;
-    if(se) Keys[player] |= KEY_SELECT;
+    if (l)
+        Keys[player] |= KEY_LEFT;
+    if (u)
+        Keys[player] |= KEY_UP;
+    if (r)
+        Keys[player] |= KEY_RIGHT;
+    if (d)
+        Keys[player] |= KEY_DOWN;
+    if (a)
+        Keys[player] |= KEY_A;
+    if (b)
+        Keys[player] |= KEY_B;
+    if (st)
+        Keys[player] |= KEY_START;
+    if (se)
+        Keys[player] |= KEY_SELECT;
 }
 
 void GB_InputSetMBC7(int x, int y)
@@ -116,43 +122,47 @@ void GB_InputSetMBC7(int x, int y)
 
 void GB_InputSetMBC7Buttons(int up, int down, int right, int left)
 {
-    if(GameBoy.Emulator.MemoryController != MEM_MBC7)
+    if (GameBoy.Emulator.MemoryController != MEM_MBC7)
         return;
 
-    if(up)
+    if (up)
     {
-        if(GameBoy.Emulator.MBC7.sensorY < 2047 - 50)
+        if (GameBoy.Emulator.MBC7.sensorY < 2047 - 50)
             GameBoy.Emulator.MBC7.sensorY += 100;
-        else if(GameBoy.Emulator.MBC7.sensorY < 2047 + 100)
+        else if (GameBoy.Emulator.MBC7.sensorY < 2047 + 100)
             GameBoy.Emulator.MBC7.sensorY += 2;
     }
-    else if(down)
+    else if (down)
     {
-        if(GameBoy.Emulator.MBC7.sensorY > 2047 + 50)
+        if (GameBoy.Emulator.MBC7.sensorY > 2047 + 50)
             GameBoy.Emulator.MBC7.sensorY -= 100;
-        else if(GameBoy.Emulator.MBC7.sensorY > 2047 - 100)
+        else if (GameBoy.Emulator.MBC7.sensorY > 2047 - 100)
             GameBoy.Emulator.MBC7.sensorY -= 2;
     }
     else
     {
-        if(GameBoy.Emulator.MBC7.sensorY > 2047) GameBoy.Emulator.MBC7.sensorY -= 1;
-        else GameBoy.Emulator.MBC7.sensorY += 1;
+        if (GameBoy.Emulator.MBC7.sensorY > 2047)
+            GameBoy.Emulator.MBC7.sensorY -= 1;
+        else
+            GameBoy.Emulator.MBC7.sensorY += 1;
     }
 
-    if(left)
+    if (left)
     {
-        if(GameBoy.Emulator.MBC7.sensorX < 2047 + 100)
+        if (GameBoy.Emulator.MBC7.sensorX < 2047 + 100)
             GameBoy.Emulator.MBC7.sensorX += 2;
     }
-    else if(right)
+    else if (right)
     {
-        if(GameBoy.Emulator.MBC7.sensorX > 2047 - 100)
+        if (GameBoy.Emulator.MBC7.sensorX > 2047 - 100)
             GameBoy.Emulator.MBC7.sensorX -= 2;
     }
     else
     {
-        if(GameBoy.Emulator.MBC7.sensorX > 2047) GameBoy.Emulator.MBC7.sensorX -= 1;
-        else GameBoy.Emulator.MBC7.sensorX += 1;
+        if (GameBoy.Emulator.MBC7.sensorX > 2047)
+            GameBoy.Emulator.MBC7.sensorX -= 1;
+        else
+            GameBoy.Emulator.MBC7.sensorX += 1;
     }
 }
 
@@ -160,5 +170,3 @@ int GB_Input_Get(int player)
 {
     return Keys[player];
 }
-
-

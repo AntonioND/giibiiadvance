@@ -4,11 +4,9 @@
 //
 // GiiBiiAdvance - GBA/GB emulator
 
-#ifndef __GB_LICENSEES__
-#define __GB_LICENSEES__
+#ifndef GB_LICENSEES__
+#define GB_LICENSEES__
 
-const char * GB_GetLicenseeName(char byte1, char byte2);
+const char *GB_GetLicenseeName(char byte1, char byte2);
 
-#endif //__GB_LICENSEES__
-
-
+#endif // GB_LICENSEES__

@@ -1,27 +1,26 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+#
+# Copyright (c) 2019, Antonio Niño Díaz
+#
+# GiiBiiAdvance - GBA/GB emulator
+
+# User config
+# ------------
+
+# `make V=` builds the binary in verbose build mode
+V		:= @
+NAME		:= giibiiadvance
+
+# Tools
+# -----
+
+CC		:= gcc
+OBJDUMP		:= objdump
+RM		:= rm -rf
 PKG_CONFIG	:= pkg-config
-DEFINES		:=
 
-# `make ENABLE_OPENCV=1` builds the emulator with OpenCV support
-ifeq ($(ENABLE_OPENCV),1)
-PKG_CONFIG_LIBS	:= sdl2 libpng opencv
-else
-PKG_CONFIG_LIBS	:= sdl2 libpng
-DEFINES		+= -DNO_CAMERA_EMULATION
-endif
-
-# `make DISABLE_ASM_X86=1` builds the emulator without inline assembly
-ifneq ($(DISABLE_ASM_X86),1)
-DEFINES		+= -DENABLE_ASM_X86
-endif
-
-# `make DISABLE_OPENGL=1` builds the emulator without OpenGL support
-ifneq ($(DISABLE_OPENGL),1)
-DEFINES		+= -DENABLE_OPENGL
-endif
-
-INCS		:= `$(PKG_CONFIG) --cflags $(PKG_CONFIG_LIBS)`
-LIBS		:= `$(PKG_CONFIG) --libs $(PKG_CONFIG_LIBS)`
-LIBS		+= -lGL -lm
+# Source files
+# ------------
 
 COMMON_SOURCES := \
 	source/config.c \
@@ -107,15 +106,93 @@ GUI_SOURCES := \
 
 SOURCES := $(COMMON_SOURCES) $(GB_SOURCES) $(GBA_SOURCES) $(GUI_SOURCES)
 
-OBJS := $(SOURCES:.c=.o)
+# Defines passed to all files
+# ---------------------------
 
-all: giibiiadvance
+DEFINES		:= \
 
-giibiiadvance: $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LIBS)
+# Libraries
+# ---------
+
+LIBS		:= \
+
+# Include paths
+# -------------
+
+INCLUDES	:= \
+
+# Build options
+# -------------
+
+# `make ENABLE_OPENCV=1` builds the emulator with OpenCV support
+ifeq ($(ENABLE_OPENCV),1)
+PKG_CONFIG_LIBS	:= sdl2 libpng opencv
+else
+PKG_CONFIG_LIBS	:= sdl2 libpng
+DEFINES		+= -DNO_CAMERA_EMULATION
+endif
+
+# `make DISABLE_ASM_X86=1` builds the emulator without inline assembly
+ifneq ($(DISABLE_ASM_X86),1)
+DEFINES		+= -DENABLE_ASM_X86
+endif
+
+# `make DISABLE_OPENGL=1` builds the emulator without OpenGL support
+ifneq ($(DISABLE_OPENGL),1)
+DEFINES		+= -DENABLE_OPENGL
+endif
+
+INCLUDES	+= `$(PKG_CONFIG) --cflags $(PKG_CONFIG_LIBS)`
+LIBS		+= `$(PKG_CONFIG) --libs $(PKG_CONFIG_LIBS)`
+LIBS		+= -lGL -lm
+
+# Generated files
+# ---------------
+
+OBJS		:= $(SOURCES:.c=.o)
+DEPS		:= $(OBJS:.o=.d)
+
+# Compiler and linker flags
+# -------------------------
+
+WARNFLAGS	:=
+
+CFLAGS		+= -std=gnu11 $(WARNFLAGS) $(INCLUDES) $(DEFINES) -O3 -MMD -MP
+
+LDFLAGS		:= $(LIBS)
+
+# Rules
+# -----
 
 .c.o:
-	$(CC) $(CFLAGS) $(DEFINES) $(INCS) -c -o $*.o $<
+	@echo "  CC      $<"
+	$(V)$(CC) $(CFLAGS) -c -o $@ $<
+
+# Targets
+# -------
+
+.PHONY: all clean bin dump
+
+ELF	:= $(NAME)
+DUMP	:= $(NAME).dump
+
+all: $(ELF)
+
+$(ELF): $(OBJS)
+	@echo "  LD      $@"
+	$(V)$(CC) -o $@ $(OBJS) $(LDFLAGS)
+
+$(DUMP): $(ELF)
+	@echo "  OBJDUMP $@"
+	$(V)$(OBJDUMP) -h -C -S $< > $@
+
+dump: $(DUMP)
 
 clean:
-	rm -f $(OBJS) giibiiadvance
+	@echo "  CLEAN"
+	$(V)$(RM) $(OBJS) $(DEPS) $(ELF) $(DUMP)
+
+# Include dependency files if they exist
+# --------------------------------------
+
+-include $(DEPS)

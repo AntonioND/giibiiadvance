@@ -7,7 +7,7 @@
 #include "build_options.h"
 #include "font_utils.h"
 
-const char * readme_text = {
+const char *readme_text = {
 "                --------------------------\n"
 "                -- GiiBiiAdvance v" GIIBIIADVANCE_VERSION_STRING " --\n"
 "                --------------------------\n"
@@ -128,7 +128,7 @@ const char * readme_text = {
 "\n"
 };
 
-const char * about_text = {
+const char *about_text = {
 "        GiiBiiAdvance version " GIIBIIADVANCE_VERSION_STRING "\n"
 "    " GIIBIIADVANCE_COPYRIGHT_STRING_ASCII "\n"
 "\n"
@@ -203,7 +203,7 @@ const char * about_text = {
 "-NightFox and JuDelCo\n"
 };
 
-const char * license_text = {
+const char *license_text = {
 "                    GNU GENERAL PUBLIC LICENSE\n"
 "                       Version 2, June 1991\n"
 "\n"

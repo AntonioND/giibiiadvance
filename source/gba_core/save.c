@@ -293,7 +293,7 @@ u16 GBA_SaveRead16(u32 address)
     {
         case SAV_EEPROM:
         {
-            if(gba_dma3enabled())
+            if (gba_dma3enabled())
             {
                 //Debug_DebugMsgArg("EEPROM: DMA. Read halfword from [%08X]",
                 //                  address);
@@ -321,6 +321,8 @@ u16 GBA_SaveRead16(u32 address)
                 //                  address);
                 return 1; // Ready
             }
+
+            return 1;
         }
 
         case SAV_SRAM:

@@ -224,7 +224,7 @@ void GBA_HeaderCheck(void *rom)
 
     u8 debugging_enable = header->nintendo_logo[0x9C - 0x04];
     if (((debugging_enable & (BIT(2) | BIT(7))) == BIT(2))
-        || ((debugging_enable & (BIT(2) | BIT(7))) == BIT(9)))
+        || ((debugging_enable & (BIT(2) | BIT(7))) == BIT(7)))
     {
         if (EmulatorConfig.debug_msg_enable)
             showconsole = 1;

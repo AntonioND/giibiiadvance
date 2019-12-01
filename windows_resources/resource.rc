@@ -8,13 +8,13 @@
 
 #include "../build_options.h"
 
-//Setup the .exe icon
+// Setup the .exe icon
 MAINICON ICON "icon.ico"
 
-//include version information in .exe
+// Include version information in .exe
 VS_VERSION_INFO VERSIONINFO
-FILEVERSION GIIBIIADVANCE_VERSION_MAJOR,GIIBIIADVANCE_VERSION_MINOR,GIIBIIADVANCE_VERSION_PATCH,0
-PRODUCTVERSION GIIBIIADVANCE_VERSION_MAJOR,GIIBIIADVANCE_VERSION_MINOR,GIIBIIADVANCE_VERSION_PATCH,0
+FILEVERSION GIIBIIADVANCE_VERSION_MAJOR, GIIBIIADVANCE_VERSION_MINOR, GIIBIIADVANCE_VERSION_PATCH, 0
+PRODUCTVERSION GIIBIIADVANCE_VERSION_MAJOR, GIIBIIADVANCE_VERSION_MINOR, GIIBIIADVANCE_VERSION_PATCH, 0
 FILETYPE VFT_APP
 {
     BLOCK "StringFileInfo"
@@ -22,25 +22,23 @@ FILETYPE VFT_APP
         BLOCK "040904E4"
         {
             VALUE "Comments", "This program comes with ABSOLUTELY NO WARRANTY."
-            VALUE "CompanyName", " " //required
-            VALUE "FileDescription", "GiiBiiAdvance emulator" //required
-            VALUE "FileVersion", GIIBIIADVANCE_VERSION_STRING //required
-            VALUE "InternalName", "GiiBiiAdvance" //required
+            VALUE "CompanyName", " " // Required
+            VALUE "FileDescription", "GiiBiiAdvance emulator" // Required
+            VALUE "FileVersion", GIIBIIADVANCE_VERSION_STRING // Required
+            VALUE "InternalName", "GiiBiiAdvance" // Required
             VALUE "LegalCopyright", GIIBIIADVANCE_COPYRIGHT_STRING
             VALUE "LegalTrademarks", " "
-            VALUE "OriginalFilename", "GiiBiiAdvance.exe" //required
-            VALUE "ProductName", "GiiBiiAdvance" //required
-            VALUE "ProductVersion", GIIBIIADVANCE_VERSION_STRING //required
+            VALUE "OriginalFilename", "GiiBiiAdvance.exe" // Required
+            VALUE "ProductName", "GiiBiiAdvance" // Required
+            VALUE "ProductVersion", GIIBIIADVANCE_VERSION_STRING // Required
             VALUE "SpecialBuild", " "
         }
     }
     BLOCK "VarFileInfo"
     {
-        VALUE "Translation", 0x0809, 1252 //language codes
-        //0x0809 = MAKELANGID(LANG_ENGLISH,SUBLANG_ENGLISH_UK) -- in <winnt.h>
-        //0x0409 = MAKELANGID(LANG_ENGLISH,SUBLANG_ENGLISH_US)
-        //1252 = Windows ANSI codepage
+        VALUE "Translation", 0x0809, 1252 // Language codes
+        // 0x0809 = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_UK) -- in <winnt.h>
+        // 0x0409 = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US)
+        // 1252 = Windows ANSI codepage
     }
 }
-
-//-------------------------------------------------------------------------------------------

@@ -413,6 +413,7 @@ static void GBA_SWI_BitUnPack(void)
             case 8:
                 data = srcdata;
                 src_bitindex += 8;
+                break;
             default:
                 Debug_DebugMsgArg("SWI 0x10: Invalid src width");
                 GBA_ExecutionBreak();

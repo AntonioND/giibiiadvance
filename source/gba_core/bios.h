@@ -4,8 +4,10 @@
 //
 // GiiBiiAdvance - GBA/GB emulator
 
-#ifndef __GBA_BIOS__
-#define __GBA_BIOS__
+#ifndef GBA_BIOS__
+#define GBA_BIOS__
+
+#include "gba.h"
 
 void GBA_BiosLoaded(int loaded);
 int GBA_BiosIsLoaded(void);
@@ -14,6 +16,4 @@ void GBA_BiosEmulatedLoad(void);
 
 void GBA_Swi(u8 number);
 
-#endif //__GBA_BIOS__
-
-
+#endif // GBA_BIOS__

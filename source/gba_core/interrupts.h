@@ -4,8 +4,8 @@
 //
 // GiiBiiAdvance - GBA/GB emulator
 
-#ifndef __GBA_INTERRUPTS__
-#define __GBA_INTERRUPTS__
+#ifndef GBA_INTERRUPTS__
+#define GBA_INTERRUPTS__
 
 #include "gba.h"
 
@@ -17,7 +17,7 @@ extern u32 screenmode;
 #define HDRAW_CLOCKS (960)
 #define HBL_CLOCKS   (272)
 //#define HLINE_CLOCKS (1232)
-//#define VBL_CLOCKS   (83776) //68*HLINE_CLOCKS
+//#define VBL_CLOCKS   (83776) // 68 * HLINE_CLOCKS
 
 void GBA_CallInterrupt(u32 flag);
 
@@ -32,6 +32,4 @@ void GBA_CheckKeypadInterrupt(void);
 
 void GBA_InterruptInit(void);
 
-#endif //__GBA_INTERRUPTS__
-
-
+#endif // GBA_INTERRUPTS__

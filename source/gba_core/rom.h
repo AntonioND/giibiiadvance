@@ -4,11 +4,10 @@
 //
 // GiiBiiAdvance - GBA/GB emulator
 
-#ifndef __GBA_ROM__
-#define __GBA_ROM__
+#ifndef GBA_ROM__
+#define GBA_ROM__
 
-void GBA_HeaderCheck(void * rom);
+void GBA_HeaderCheck(void *rom);
 int GBA_ShowConsoleRequested(void);
 
-#endif //__GBA_ROM__
-
+#endif // GBA_ROM__

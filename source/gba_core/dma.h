@@ -4,8 +4,8 @@
 //
 // GiiBiiAdvance - GBA/GB emulator
 
-#ifndef __GBA_DMA__
-#define __GBA_DMA__
+#ifndef GBA_DMA__
+#define GBA_DMA__
 
 #include "gba.h"
 
@@ -20,11 +20,9 @@ int GBA_DMAisWorking(void);
 
 s32 GBA_DMAGetExtraClocksElapsed(void);
 
-int gba_dma3numchunks(void); //for EEPROM
+int gba_dma3numchunks(void); // For EEPROM
 int gba_dma3enabled(void);
 
 void GBA_DMASoundRequestData(int A, int B);
 
-#endif //__GBA_DMA__
-
-
+#endif // GBA_DMA__

@@ -12,17 +12,17 @@
 #include "../file_utils.h"
 #include "../png_utils.h"
 
-#include "gba.h"
-#include "cpu.h"
 #include "bios.h"
-#include "memory.h"
-#include "interrupts.h"
-#include "video.h"
+#include "cpu.h"
 #include "dma.h"
-#include "timers.h"
-#include "save.h"
+#include "gba.h"
+#include "interrupts.h"
+#include "memory.h"
 #include "rom.h"
+#include "save.h"
 #include "sound.h"
+#include "timers.h"
+#include "video.h"
 
 static s32 clocks_to_next_event;
 static s32 lastresidualclocks = 0;
@@ -35,18 +35,21 @@ int GBA_GetRomSize(void)
     return GBA_ROM_SIZE;
 }
 
-_cpu_t * GBA_CPUGet(void)
+_cpu_t *GBA_CPUGet(void)
 {
     return &CPU;
 }
 
-int GBA_InitRom(void * bios_ptr, void * rom_ptr, u32 romsize)
+int GBA_InitRom(void *bios_ptr, void *rom_ptr, u32 romsize)
 {
-    if(inited) GBA_EndRom(1); //shouldn't be needed here
+    if (inited)
+        GBA_EndRom(1); // Shouldn't be needed here
 
-    if(romsize > 0x02000000)
+    if (romsize > 0x02000000)
     {
-        Debug_ErrorMsgArg("Rom too big!\nSize = 0x%08X bytes\nMax = 0x02000000 bytes",romsize);
+        Debug_ErrorMsgArg("Rom too big!\n"
+                          "Size = 0x%08X bytes\n"
+                          "Max = 0x02000000 bytes", romsize);
         GBA_ROM_SIZE = 0x02000000;
     }
     else
@@ -54,7 +57,7 @@ int GBA_InitRom(void * bios_ptr, void * rom_ptr, u32 romsize)
         GBA_ROM_SIZE = romsize;
     }
 
-    GBA_DetectSaveType(rom_ptr,romsize);
+    GBA_DetectSaveType(rom_ptr, romsize);
     GBA_ResetSaveBuffer();
     GBA_SaveReadFile();
 
@@ -63,7 +66,7 @@ int GBA_InitRom(void * bios_ptr, void * rom_ptr, u32 romsize)
     GBA_CPUInit();
     GBA_InterruptInit();
     GBA_TimerInitAll();
-    GBA_MemoryInit(bios_ptr,rom_ptr,GBA_ROM_SIZE);
+    GBA_MemoryInit(bios_ptr, rom_ptr, GBA_ROM_SIZE);
     GBA_UpdateDrawScanlineFn();
     GBA_DMA0Setup();
     GBA_DMA1Setup();
@@ -79,16 +82,19 @@ int GBA_InitRom(void * bios_ptr, void * rom_ptr, u32 romsize)
 
     inited = 1;
 
-    //GBA_DebugAddBreakpoint(0x1954); // BIOS switch to GBC mode - Never used in real hardware
+    // BIOS switch to GBC mode - Never used in real hardware
+    //GBA_DebugAddBreakpoint(0x1954);
 
     return 1;
 }
 
 int GBA_EndRom(int save)
 {
-    if(inited == 0) return 0;
+    if (inited == 0)
+        return 0;
 
-    if(save) GBA_SaveWriteFile();
+    if (save)
+        GBA_SaveWriteFile();
 
     GBA_MemoryEnd();
 
@@ -101,31 +107,44 @@ void GBA_Reset(void)
 {
     GBA_CPUClearHalted();
     GBA_Swi(0x26);
-    //it will be enough for now
+    // Enough for now
 }
 
-void GBA_HandleInput(int a, int b, int l, int r, int st, int se, int dr, int dl, int du, int dd)
+void GBA_HandleInput(int a, int b, int l, int r, int st, int se,
+                     int dr, int dl, int du, int dd)
 {
     u16 input = 0;
-    if(a == 0) input |= BIT(0);
-    if(b == 0) input |= BIT(1);
-    if(se == 0) input |= BIT(2);
-    if(st == 0) input |= BIT(3);
-    if(dr == 0) input |= BIT(4);
-    if(dl == 0) input |= BIT(5);
-    if(du == 0) input |= BIT(6);
-    if(dd == 0) input |= BIT(7);
-    if(r == 0) input |= BIT(8);
-    if(l == 0) input |= BIT(9);
+
+    if (a == 0)
+        input |= BIT(0);
+    if (b == 0)
+        input |= BIT(1);
+    if (se == 0)
+        input |= BIT(2);
+    if (st == 0)
+        input |= BIT(3);
+    if (dr == 0)
+        input |= BIT(4);
+    if (dl == 0)
+        input |= BIT(5);
+    if (du == 0)
+        input |= BIT(6);
+    if (dd == 0)
+        input |= BIT(7);
+    if (r == 0)
+        input |= BIT(8);
+    if (l == 0)
+        input |= BIT(9);
+
     REG_KEYINPUT = input;
 }
 
 void GBA_Screenshot(void)
 {
-    char * name = FU_GetNewTimestampFilename("gba_screenshot");
-    u32 * buffer = malloc(240*160*4);
+    char *name = FU_GetNewTimestampFilename("gba_screenshot");
+    u32 *buffer = malloc(240 * 160 * 4);
     GBA_ConvertScreenBufferTo32RGB(buffer);
-    Save_PNG(name,240,160,buffer,0);
+    Save_PNG(name, 240, 160, buffer, 0);
     free(buffer);
 }
 
@@ -135,6 +154,7 @@ static s32 min(s32 a, s32 b)
 }
 
 int gba_execution_break = 0;
+
 void GBA_RunFor_ExecutionBreak(void)
 {
     gba_execution_break = 1;
@@ -143,7 +163,7 @@ void GBA_RunFor_ExecutionBreak(void)
 void GBA_RunForOneFrame(void)
 {
     GBA_CheckKeypadInterrupt();
-    GBA_RunFor(280896); //clocksperframe = 280896
+    GBA_RunFor(280896); // Clocksperframe = 280896
 }
 
 u32 GBA_RunFor(s32 totalclocks)
@@ -152,18 +172,21 @@ u32 GBA_RunFor(s32 totalclocks)
     totalclocks += lastresidualclocks;
     u32 has_executed = 0;
 
-    while(totalclocks >= clocks_to_next_event)
+    while (totalclocks >= clocks_to_next_event)
     {
-        if(GBA_DMAisWorking())
+        if (GBA_DMAisWorking())
         {
-            executedclocks = GBA_DMAGetExtraClocksElapsed() + clocks_to_next_event;
+            executedclocks = GBA_DMAGetExtraClocksElapsed()
+                           + clocks_to_next_event;
         }
         else
         {
-            if(GBA_InterruptCheck())
+            if (GBA_InterruptCheck())
             {
-                executedclocks = GBA_MemoryGetAccessCycles(0,1,CPU.OldPC) + GBA_MemoryGetAccessCyclesNoSeq(1,CPU.R[R_PC]) +
-                        GBA_MemoryGetAccessCyclesSeq(1,CPU.R[R_PC]); //2S + 1N cycles ?
+                // 2S + 1N cycles ?
+                executedclocks = GBA_MemoryGetAccessCycles(0, 1, CPU.OldPC)
+                               + GBA_MemoryGetAccessCyclesNoSeq(1, CPU.R[R_PC])
+                               + GBA_MemoryGetAccessCyclesSeq(1, CPU.R[R_PC]);
             }
             else
             {
@@ -181,11 +204,11 @@ u32 GBA_RunFor(s32 totalclocks)
         clocks_to_next_event = min(tmp,clocks_to_next_event);
         tmp = GBA_SoundUpdate(executedclocks);
         clocks_to_next_event = min(tmp,clocks_to_next_event);
-        //check if any other event is going to happen before
+        // Check if any other event is going to happen before
 
         totalclocks -= executedclocks;
 
-        if(gba_execution_break)
+        if (gba_execution_break)
         {
             lastresidualclocks = totalclocks;
             gba_execution_break = 0;
@@ -193,18 +216,21 @@ u32 GBA_RunFor(s32 totalclocks)
         }
     }
 
-    while(totalclocks > 0)
+    while (totalclocks > 0)
     {
-        if(GBA_DMAisWorking())
+        if (GBA_DMAisWorking())
         {
-            executedclocks = GBA_DMAGetExtraClocksElapsed() + clocks_to_next_event;
+            executedclocks = GBA_DMAGetExtraClocksElapsed()
+                           + clocks_to_next_event;
         }
         else
         {
-            if(GBA_InterruptCheck())
+            if (GBA_InterruptCheck())
             {
-                executedclocks = GBA_MemoryGetAccessCycles(0,1,CPU.OldPC) + GBA_MemoryGetAccessCyclesNoSeq(1,CPU.R[R_PC]) +
-                        GBA_MemoryGetAccessCyclesSeq(1,CPU.R[R_PC]); //2S + 1N cycles ?
+                // 2S + 1N cycles ?
+                executedclocks = GBA_MemoryGetAccessCycles(0, 1, CPU.OldPC)
+                               + GBA_MemoryGetAccessCyclesNoSeq(1, CPU.R[R_PC])
+                               + GBA_MemoryGetAccessCyclesSeq(1, CPU.R[R_PC]);
             }
             else
             {
@@ -216,14 +242,17 @@ u32 GBA_RunFor(s32 totalclocks)
         }
 
         clocks_to_next_event = GBA_UpdateScreenTimings(executedclocks);
-        clocks_to_next_event = min(GBA_DMAUpdate(executedclocks),clocks_to_next_event);
-        clocks_to_next_event = min(GBA_TimersUpdate(executedclocks),clocks_to_next_event);
-        clocks_to_next_event = min(GBA_SoundUpdate(executedclocks),clocks_to_next_event);
-        //mirar si otros eventos van a suceder antes y cambiar clocks por eso
+        clocks_to_next_event = min(GBA_DMAUpdate(executedclocks),
+                                   clocks_to_next_event);
+        clocks_to_next_event = min(GBA_TimersUpdate(executedclocks),
+                                   clocks_to_next_event);
+        clocks_to_next_event = min(GBA_SoundUpdate(executedclocks),
+                                   clocks_to_next_event);
+        // Check if other events are going to happen earlier
 
         totalclocks -= executedclocks;
 
-        if(gba_execution_break)
+        if (gba_execution_break)
         {
             lastresidualclocks = totalclocks;
             gba_execution_break = 0;
@@ -239,20 +268,19 @@ u32 GBA_RunFor(s32 totalclocks)
 
 void GBA_DebugStep(void)
 {
-    int saved_lastresidualclocks = lastresidualclocks; // hack to make it always execute ONLY one instruction
+    // Hack to make it always execute ONLY one instruction
+    int saved_lastresidualclocks = lastresidualclocks;
     lastresidualclocks = 0;
 
-    //Debug_DebugMsgArg("lastresidualclocks = %d",lastresidualclocks);
-    int count = 280896; //clocksperframe = 280896
-    while(!GBA_RunFor(1))
+    //Debug_DebugMsgArg("lastresidualclocks = %d", lastresidualclocks);
+    int count = 280896; // Clocksperframe = 280896
+
+    while (!GBA_RunFor(1))
     {
         count--;
-        if(count == 0) break;
+        if (count == 0)
+            break;
     }
 
     lastresidualclocks += saved_lastresidualclocks;
-    //GLWindow_MemViewerUpdate();
-    //GLWindow_IOViewerUpdate();
-    //GLWindow_DisassemblerUpdate();
 }
-

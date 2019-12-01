@@ -4,8 +4,8 @@
 //
 // GiiBiiAdvance - GBA/GB emulator
 
-#ifndef __BUILD_OPTIONS__
-#define __BUILD_OPTIONS__
+#ifndef BUILD_OPTIONS__
+#define BUILD_OPTIONS__
 
 // Changing this file will force to recompile everything.
 
@@ -60,4 +60,4 @@
 
 //---------------------------------------------------------------------
 
-#endif //__BUILD_OPTIONS__
+#endif // BUILD_OPTIONS__

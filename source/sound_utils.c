@@ -8,10 +8,11 @@
 
 #include <SDL.h>
 
-#include "sound_utils.h"
-#include "debug_utils.h"
 #include "config.h"
+#include "debug_utils.h"
+#include "general_utils.h"
 #include "input_utils.h"
+#include "sound_utils.h"
 
 #define SDL_BUFFER_SAMPLES (1 * 1024)
 
@@ -19,7 +20,7 @@ static Sound_CallbackPointer *_sound_callback;
 static int _sound_enabled = 0;
 static SDL_AudioSpec obtained_spec;
 
-static void __sound_callback(void *userdata, Uint8 *buffer, int len)
+static void __sound_callback(unused__ void *userdata, Uint8 *buffer, int len)
 {
     // Don't play audio during speedup or if it is disabled in the configuration
     if ((_sound_enabled == 0) || EmulatorConfig.snd_mute ||

@@ -71,7 +71,7 @@ void GB_PPUWriteLCDC_GBC(int reference_clocks, int value)
     GB_CPUBreakLoop();
 }
 
-void GB_PPUWriteSTAT_GBC(int reference_clocks, int value)
+void GB_PPUWriteSTAT_GBC(unused__ int reference_clocks, int value)
 {
     _GB_MEMORY_ *mem = &GameBoy.Memory;
 

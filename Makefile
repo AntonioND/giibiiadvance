@@ -158,6 +158,8 @@ DEPS		:= $(OBJS:.o=.d)
 WARNFLAGS	:= \
 		-Wall \
 		-Wformat-truncation=0 \
+		-Wextra \
+		-Wno-sign-compare \
 
 CFLAGS		+= -std=gnu11 $(WARNFLAGS) $(INCLUDES) $(DEFINES) -O3 -MMD -MP
 

@@ -395,6 +395,7 @@ int gb_debug_get_address_increment(u32 address)
         case 0:
             if ((address > 0x103) && (address < 0x150))
                 return 1;
+            // fallthrough
         case 1:
         case 2:
         case 3:
@@ -644,6 +645,7 @@ char *GB_Dissasemble(u16 addr, int *step)
                 break;
             case JMP_HL:
                 param = (int)(u16)GameBoy.CPU.R16.HL;
+                // fallthrough
             case JMP_REL:
             case JMP_ABS:
                 if (param > op_addr)

@@ -367,7 +367,7 @@ static int _win_gba_disassembler_callback(SDL_Event *e)
     return 0;
 }
 
-static void _win_gba_disassembly_textbox_callback(int x, int y)
+static void _win_gba_disassembly_textbox_callback(unused__ int x, int y)
 {
     _cpu_t *cpu = GBA_CPUGet();
 
@@ -443,7 +443,7 @@ static void _win_gba_disassembly_inputwindow_callback(char *text, int is_valid)
     }
 }
 
-static void _win_gba_registers_textbox_callback(int x, int y)
+static void _win_gba_registers_textbox_callback(unused__ int x, int y)
 {
     int reg = y / FONT_HEIGHT;
 

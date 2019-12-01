@@ -93,7 +93,7 @@ static int WinMain_FPS;
 static int WinMain_frames_drawn = 0;
 static SDL_TimerID WinMain_FPS_timer;
 
-static Uint32 _fps_callback_function(Uint32 interval, void *param)
+static Uint32 _fps_callback_function(Uint32 interval, unused__ void *param)
 {
     if (WIN_MAIN_RUNNING == RUNNING_GB)
         GB_HandleRTC();
@@ -640,7 +640,7 @@ static void _win_main_file_explorer_open_index(int i)
     }
 }
 
-static void _win_main_file_explorer_text_box_callback(int x, int y)
+static void _win_main_file_explorer_text_box_callback(unused__ int x, int y)
 {
     int i = _win_main_file_explorer_get_starting_drawing_index()
           + (y / FONT_HEIGHT);
@@ -1101,7 +1101,7 @@ static void _win_main_clear_message(void)
 
 //------------------------------------------------------------------
 
-int _win_main_background_image_callback(int x, int y)
+int _win_main_background_image_callback(unused__ int x, unused__ int y)
 {
     _win_main_switch_to_game_delayed();
     return 1;

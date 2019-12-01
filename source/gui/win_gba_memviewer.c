@@ -74,7 +74,8 @@ static char win_gba_memviewer_character_fix(char c)
 {
     if ((c >= '-') && (c <= '_'))
         return c;
-    if ((c >= 'a') && (c <= 127))
+    //if ((c >= 'a') && (c <= 127))
+    if (c >= 'a') // char is signed, so its max possible value is 127
         return c;
 
     return '.';

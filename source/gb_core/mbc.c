@@ -56,7 +56,7 @@ void GB_MapperEnd(void)
 
 //------------------------------------------------------------------------------
 
-static void GB_NoMapperWrite(u32 address, u32 value)
+static void GB_NoMapperWrite(unused__ u32 address, unused__ u32 value)
 {
     //Debug_DebugMsgArg("NO MAPPER WROTE - %02x to %04x", value, address);
     return;
@@ -778,7 +778,7 @@ static void GB_CameraWrite(u32 address, u32 value)
 
 //------------------------------------------------------------------------------
 
-static u32 GB_NoMapperRead(u32 address)
+static u32 GB_NoMapperRead(unused__ u32 address)
 {
     //Debug_DebugMsgArg("NO MAPPER READ - %04x", address);
     return 0xFF;

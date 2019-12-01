@@ -9,15 +9,16 @@
 #include <png.h>
 
 #include "debug_utils.h"
+#include "general_utils.h"
 
-static void png_warn_fn_(png_structp sp, png_const_charp cp)
+static void png_warn_fn_(unused__ png_structp sp, png_const_charp cp)
 {
-    Debug_LogMsgArg("Save_PNG(): libpng warning: %s",cp);
+    Debug_LogMsgArg("Save_PNG(): libpng warning: %s", cp);
 }
 
-static void png_err_fn_(png_structp sp, png_const_charp cp)
+static void png_err_fn_(unused__ png_structp sp, png_const_charp cp)
 {
-    Debug_LogMsgArg("Save_PNG(): libpng error: %s",cp);
+    Debug_LogMsgArg("Save_PNG(): libpng error: %s", cp);
 }
 
 // Save a RGBA buffer into a PNG file

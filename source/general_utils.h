@@ -16,7 +16,9 @@ typedef signed short int s16;
 typedef unsigned char u8;
 typedef signed char s8;
 
-#define BIT(n) (1<<(n))
+#define BIT(n) (1 << (n))
+
+#define unused__ __attribute__((unused))
 
 // Safe versions of strncpy and strncat that set a terminating character if
 // needed.

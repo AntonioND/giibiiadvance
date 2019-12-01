@@ -181,14 +181,14 @@ void GB_SerialWriteSC(int reference_clocks, int value)
         GameBoy.Emulator.serial_transfered_bits = 0;
     }
 
-    GameBoy.Memory.IO_Ports[SC_REG-0xFF00]  = value;
+    GameBoy.Memory.IO_Ports[SC_REG - 0xFF00]  = value;
     GB_CPUBreakLoop();
 }
 
 //------------------------------------------------------------------------------
 //                                NO DEVICE
 
-static void GB_SendNone(u32 data)
+static void GB_SendNone(unused__ u32 data)
 {
     return;
 }

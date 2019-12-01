@@ -273,7 +273,7 @@ u8 GBA_SaveRead8(u32 address)
     }
 }
 
-u16 GBA_SaveRead16(u32 address)
+u16 GBA_SaveRead16(unused__ u32 address)
 {
     if (SAVE_TYPE == SAV_AUTODETECT)
     {

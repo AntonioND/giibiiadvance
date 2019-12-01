@@ -435,7 +435,7 @@ static void GB_TimerIncreaseTIMA(void)
 
 //----------------------------------------------------------------
 
-void GB_TimersWriteDIV(int reference_clocks, int value)
+void GB_TimersWriteDIV(int reference_clocks, unused__ int value)
 {
     GB_CPUBreakLoop();
 

@@ -53,7 +53,7 @@ void GB_MemUpdateReadWriteFunctionPointers(void)
             default:
                 Debug_ErrorMsg("GB_MemUpdateReadWriteFunctionPointers():\n"
                                "Unknown hardware");
-                // Fall to GBC
+                // fallthrough
             case HW_GBC:
             case HW_GBA:
             case HW_GBA_SP:
@@ -81,7 +81,7 @@ void GB_MemUpdateReadWriteFunctionPointers(void)
             default:
                 Debug_ErrorMsg("GB_MemUpdateReadWriteFunctionPointers():\n"
                                "Unknown hardware");
-                // Fall to GBC
+                // fallthrough
             case HW_GBC:
             case HW_GBA:
             case HW_GBA_SP:

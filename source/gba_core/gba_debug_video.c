@@ -6,6 +6,8 @@
 
 #include <string.h>
 
+#include "../general_utils.h"
+
 #include "gba.h"
 #include "memory.h"
 
@@ -27,7 +29,7 @@ static int min(int a, int b)
 //----------------------------------------------------------------
 
 void GBA_Debug_PrintZoomedSpriteAt(int spritenum, int buf_has_alpha_channel,
-                                   char *buffer, int bufw, int bufh,
+                                   char *buffer, int bufw, unused__ int bufh,
                                    int posx, int posy, int sizex, int sizey)
 {
     // Temp buffer
@@ -244,7 +246,7 @@ void GBA_Debug_PrintSpritesPage(int page, int buf_has_alpha_channel,
 
 //----------------------------------------------------------------
 
-void GBA_Debug_PrintTiles(char *buffer, int bufw, int bufh, int cbb,
+void GBA_Debug_PrintTiles(char *buffer, int bufw, unused__ int bufh, int cbb,
                           int colors, int palette)
 {
     u8 *charbaseblockptr = (u8 *)&Mem.vram[cbb - 0x06000000];
@@ -442,8 +444,9 @@ void GBA_Debug_PrintTilesAlpha(char *buffer, int bufw, int bufh, int cbb,
     }
 }
 
-void GBA_Debug_TilePrint64x64(char *buffer, int bufw, int bufh, int cbb,
-                              int tile, int palcolors, int selected_pal)
+void GBA_Debug_TilePrint64x64(char *buffer, unused__ int bufw,
+                              unused__ int bufh, int cbb, int tile,
+                              int palcolors, int selected_pal)
 {
     int tiletempbuffer[8 * 8];
     int tiletempvis[8 * 8];

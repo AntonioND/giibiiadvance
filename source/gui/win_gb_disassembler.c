@@ -301,7 +301,7 @@ static int _win_gb_disassembler_callback(SDL_Event *e)
     return 0;
 }
 
-static void _win_gb_disassembly_textbox_callback(int x, int y)
+static void _win_gb_disassembly_textbox_callback(unused__ int x, int y)
 {
     u32 addr = gb_cpu_line_address[y / FONT_HEIGHT];
 
@@ -340,7 +340,7 @@ static void _win_gb_disassembly_inputwindow_callback(char *text, int is_valid)
     }
 }
 
-static void _win_gb_registers_textbox_callback(int x, int y)
+static void _win_gb_registers_textbox_callback(unused__ int x, int y)
 {
     int reg = y/FONT_HEIGHT;
 

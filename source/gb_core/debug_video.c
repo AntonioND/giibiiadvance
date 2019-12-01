@@ -174,8 +174,8 @@ void GB_Debug_GetSpriteInfo(int sprnum, u8 *x, u8 *y, u8 *tile, u8 *info)
     *info = GB_Sprite->Info;
 }
 
-void GB_Debug_PrintSprite(char *buf, int bufw, int bufh, int buff_x, int buff_y,
-                          int sprite)
+void GB_Debug_PrintSprite(char *buf, int bufw, unused__ int bufh, int buff_x,
+                          int buff_y, int sprite)
 {
     _GB_MEMORY_ *mem = &GameBoy.Memory;
     s32 spriteheight =  8 << ((mem->IO_Ports[LCDC_REG - 0xFF00] & (1<<2)) != 0);
@@ -507,8 +507,9 @@ void GB_Debug_PrintZoomedSprite(char *buf, int sprite)
 //------------------------------------------------------------------------------
 
 static void _gb_debug_print_sprite_alpha_at_position(char *buf, int bufw,
-                                                     int bufh, int buff_x,
-                                                     int buff_y, int sprite)
+                                                     unused__ int bufh,
+                                                     int buff_x, int buff_y,
+                                                     int sprite)
 {
     _GB_MEMORY_ *mem = &GameBoy.Memory;
     s32 spriteheight =  8 << ((mem->IO_Ports[LCDC_REG - 0xFF00] & (1<<2)) != 0);
@@ -801,8 +802,8 @@ void GB_Debug_PrintSpriteAlpha(char *buf, int sprite)
 
 //------------------------------------------------------------------------------
 
-void GB_Debug_TileVRAMDraw(char *buffer0, int bufw0, int bufh0,
-                           char *buffer1, int bufw1, int bufh1)
+void GB_Debug_TileVRAMDraw(char *buffer0, int bufw0, unused__ int bufh0,
+                           char *buffer1, int bufw1, unused__ int bufh1)
 {
     _GB_MEMORY_ *mem = &GameBoy.Memory;
 
@@ -850,8 +851,9 @@ void GB_Debug_TileVRAMDraw(char *buffer0, int bufw0, int bufh0,
     }
 }
 
-void GB_Debug_TileVRAMDrawPaletted(char *buffer0, int bufw0, int bufh0,
-                                   char *buffer1, int bufw1, int bufh1,
+void GB_Debug_TileVRAMDrawPaletted(char *buffer0, unused__ int bufw0,
+                                   unused__ int bufh0, char *buffer1,
+                                   unused__ int bufw1, unused__ int bufh1,
                                    int pal, int pal_is_spr)
 {
     _GB_MEMORY_ *mem = &GameBoy.Memory;
@@ -1061,7 +1063,8 @@ void GB_Debug_TileDrawZoomedPaletted64x64(char *buffer, int tile, int bank,
 
 //------------------------------------------------------------------------------
 
-void GB_Debug_MapPrint(char *buffer, int bufw, int bufh, int map, int tile_base)
+void GB_Debug_MapPrint(char *buffer, int bufw, unused__ int bufh, int map,
+                       int tile_base)
 {
     _GB_MEMORY_ *mem = &GameBoy.Memory;
 
@@ -1154,7 +1157,7 @@ void GB_Debug_MapPrint(char *buffer, int bufw, int bufh, int map, int tile_base)
     }
 }
 
-void GB_Debug_MapPrintBW(char *buffer, int bufw, int bufh, int map,
+void GB_Debug_MapPrintBW(char *buffer, int bufw, unused__ int bufh, int map,
                          int tile_base)
 {
     _GB_MEMORY_ *mem = &GameBoy.Memory;
@@ -1239,7 +1242,7 @@ void GB_Debug_MapPrintBW(char *buffer, int bufw, int bufh, int map,
 
 //------------------------------------------------------------------------------
 
-void GB_Debug_GBCameraMiniPhotoPrint(char *buffer, int bufw, int bufh,
+void GB_Debug_GBCameraMiniPhotoPrint(char *buffer, int bufw, unused__ int bufh,
                                      int posx, int posy, int index)
 {
     int ramaddr = index * 0x1000 + 0x2E00;
@@ -1272,7 +1275,8 @@ void GB_Debug_GBCameraMiniPhotoPrint(char *buffer, int bufw, int bufh,
     }
 }
 
-void GB_Debug_GBCameraPhotoPrint(char *buffer, int bufw, int bufh, int index)
+void GB_Debug_GBCameraPhotoPrint(char *buffer, int bufw, unused__ int bufh,
+                                 int index)
 {
     int ramaddr = index * 0x1000 + 0x2000;
     if (index == -1)
@@ -1327,7 +1331,8 @@ void GB_Debug_GBCameraMiniPhotoPrintAll(char *buf)
     }
 }
 
-void GB_Debug_GBCameraWebcamOutputPrint(char *buffer, int bufw, int bufh)
+void GB_Debug_GBCameraWebcamOutputPrint(char *buffer, int bufw,
+                                        unused__ int bufh)
 {
     for (int y = 0; y < 14 * 8; y ++)
     {
@@ -1342,7 +1347,8 @@ void GB_Debug_GBCameraWebcamOutputPrint(char *buffer, int bufw, int bufh)
     }
 }
 
-void GB_Debug_GBCameraRetinaProcessedPrint(char *buffer, int bufw, int bufh)
+void GB_Debug_GBCameraRetinaProcessedPrint(char *buffer, int bufw,
+                                           unused__ int bufh)
 {
     for (int y = 0; y < 14 * 8; y ++)
     {

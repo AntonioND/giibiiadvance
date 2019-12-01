@@ -103,7 +103,8 @@ void GUI_ConsoleDraw(_gui_console * con, char * buffer, int buf_w, int buf_h) //
     }
 }
 
-void GUI_ConsoleDrawAt(_gui_console * con, char * buffer, int buf_w, int buf_h, int scrx, int scry, int scrw, int scrh)
+void GUI_ConsoleDrawAt(_gui_console *con, char *buffer, int buf_w, int buf_h,
+                       int scrx, int scry, unused__ int scrw, unused__ int scrh)
 {
     int x,y;
     for(y = 0; y < con->__console_chars_h; y++) for(x = 0; x < con->__console_chars_w; x++)

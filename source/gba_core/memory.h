@@ -51,7 +51,7 @@ extern u32 wait_table_seq[];
 extern u32 wait_table_nonseq[];
 extern const s32 mem_bus_is_16[];
 
-static u32 GBA_MemoryGetAccessCycles(u32 seq, u32 _32bit, u32 address)
+static inline u32 GBA_MemoryGetAccessCycles(u32 seq, u32 _32bit, u32 address)
 {
     //if ((address & 0x1FFFF) == 0)
     //    seq = 0;
@@ -70,7 +70,7 @@ static u32 GBA_MemoryGetAccessCycles(u32 seq, u32 _32bit, u32 address)
     }
 }
 
-static u32 GBA_MemoryGetAccessCyclesNoSeq(u32 _32bit, u32 address)
+static inline u32 GBA_MemoryGetAccessCyclesNoSeq(u32 _32bit, u32 address)
 {
     u32 index = (address >> 24) & 0xF;
     if (_32bit && mem_bus_is_16[index])
@@ -79,7 +79,7 @@ static u32 GBA_MemoryGetAccessCyclesNoSeq(u32 _32bit, u32 address)
         return (wait_table_nonseq[index] + 1);
 }
 
-static u32 GBA_MemoryGetAccessCyclesSeq(u32 _32bit, u32 address)
+static inline u32 GBA_MemoryGetAccessCyclesSeq(u32 _32bit, u32 address)
 {
     //if ((address & 0x1FFFF) == 0)
     //    return GBA_MemoryGetAccessCyclesNoSeq(_32bit, address);
@@ -87,7 +87,7 @@ static u32 GBA_MemoryGetAccessCyclesSeq(u32 _32bit, u32 address)
     return (wait_table_seq[index] + 1) << (_32bit && mem_bus_is_16[index]);
 }
 
-static u32 GBA_MemoryGetAccessCyclesNoSeq32(u32 address)
+static inline u32 GBA_MemoryGetAccessCyclesNoSeq32(u32 address)
 {
     u32 index = (address >> 24) & 0xF;
     if (mem_bus_is_16[index])
@@ -96,12 +96,12 @@ static u32 GBA_MemoryGetAccessCyclesNoSeq32(u32 address)
         return (wait_table_nonseq[index] + 1);
 }
 
-static u32 GBA_MemoryGetAccessCyclesNoSeq16(u32 address)
+static inline u32 GBA_MemoryGetAccessCyclesNoSeq16(u32 address)
 {
     return (wait_table_nonseq[(address >> 24) & 0xF] + 1);
 }
 
-static u32 GBA_MemoryGetAccessCyclesSeq32(u32 address)
+static inline u32 GBA_MemoryGetAccessCyclesSeq32(u32 address)
 {
     //if ((address & 0x1FFFF) == 0)
     //    return GBA_MemoryGetAccessCyclesNoSeq32(address);
@@ -109,7 +109,7 @@ static u32 GBA_MemoryGetAccessCyclesSeq32(u32 address)
     return (wait_table_seq[index] + 1) << (mem_bus_is_16[index]);
 }
 
-static u32 GBA_MemoryGetAccessCyclesSeq16(u32 address)
+static inline u32 GBA_MemoryGetAccessCyclesSeq16(u32 address)
 {
     //if ((address & 0x1FFFF) == 0)
     //    return GBA_MemoryGetAccessCyclesNoSeq16(address);

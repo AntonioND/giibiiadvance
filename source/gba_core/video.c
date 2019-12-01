@@ -37,11 +37,6 @@ static u32 Win1X1, Win1X2, Win1Y1, Win1Y2;
 
 //-----------------------------------------------------------
 
-static s32 max(s32 a, s32 b)
-{
-    return ((a < b) ? b : a);
-}
-
 static void mem_clear_32(u32 *ptr, u32 size)
 {
     size >>= 2;

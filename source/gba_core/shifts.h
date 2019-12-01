@@ -12,7 +12,7 @@
 // For building immediate values in ARM mode (shift = 0~31)
 // --------------------------------------------------------
 
-static u32 ror_immed_no_carry(u32 value, u8 shift)
+static inline u32 ror_immed_no_carry(u32 value, u8 shift)
 {
 #ifdef ENABLE_ASM_X86
     // eax = eax ror cl
@@ -23,7 +23,7 @@ static u32 ror_immed_no_carry(u32 value, u8 shift)
 #endif
 }
 
-static u32 ror_immed(u32 value, u8 shift, u8 *carry)
+static inline u32 ror_immed(u32 value, u8 shift, u8 *carry)
 {
     if (shift)
     {
@@ -49,7 +49,7 @@ static u32 ror_immed(u32 value, u8 shift, u8 *carry)
 // For shifted by immediate values registers (shift = 0~31)
 // --------------------------------------------------------
 
-static u32 lsl_shift_by_immed(u32 value, u8 shift, u8 *carry)
+static inline u32 lsl_shift_by_immed(u32 value, u8 shift, u8 *carry)
 {
     if (shift == 0) // lsl #0
     {
@@ -70,7 +70,7 @@ static u32 lsl_shift_by_immed(u32 value, u8 shift, u8 *carry)
     }
 }
 
-static u32 lsr_shift_by_immed(u32 value, u8 shift, u8 *carry)
+static inline u32 lsr_shift_by_immed(u32 value, u8 shift, u8 *carry)
 {
     if (shift == 0) // lsr #32
     {
@@ -91,7 +91,7 @@ static u32 lsr_shift_by_immed(u32 value, u8 shift, u8 *carry)
     }
 }
 
-static u32 asr_shift_by_immed(u32 value, u8 shift, u8 *carry)
+static inline u32 asr_shift_by_immed(u32 value, u8 shift, u8 *carry)
 {
     if (shift == 0) // asr #32
     {
@@ -112,7 +112,7 @@ static u32 asr_shift_by_immed(u32 value, u8 shift, u8 *carry)
     }
 }
 
-static u32 ror_shift_by_immed(u32 value, u8 shift, u8 *carry)
+static inline u32 ror_shift_by_immed(u32 value, u8 shift, u8 *carry)
 {
     if (shift == 0)  // rrx #1
     {
@@ -133,7 +133,7 @@ static u32 ror_shift_by_immed(u32 value, u8 shift, u8 *carry)
     }
 }
 
-static u32 cpu_shift_by_immed(u32 type, u32 value, u8 shift, u8 *carry)
+static inline u32 cpu_shift_by_immed(u32 type, u32 value, u8 shift, u8 *carry)
 {
     switch (type & 3)
     {
@@ -153,7 +153,7 @@ static u32 cpu_shift_by_immed(u32 type, u32 value, u8 shift, u8 *carry)
 
 //-----------------------------------------------
 
-static u32 lsl_shift_by_immed_no_carry(u32 value, u8 shift)
+static inline u32 lsl_shift_by_immed_no_carry(u32 value, u8 shift)
 {
     if (shift == 0) // lsl #0
     {
@@ -170,7 +170,7 @@ static u32 lsl_shift_by_immed_no_carry(u32 value, u8 shift)
     }
 }
 
-static u32 lsr_shift_by_immed_no_carry(u32 value, u8 shift)
+static inline u32 lsr_shift_by_immed_no_carry(u32 value, u8 shift)
 {
     if (shift == 0) // lsr #32
     {
@@ -187,7 +187,7 @@ static u32 lsr_shift_by_immed_no_carry(u32 value, u8 shift)
     }
 }
 
-static u32 asr_shift_by_immed_no_carry(u32 value, u8 shift)
+static inline u32 asr_shift_by_immed_no_carry(u32 value, u8 shift)
 {
     if (shift == 0) // asr #32
     {
@@ -204,7 +204,7 @@ static u32 asr_shift_by_immed_no_carry(u32 value, u8 shift)
     }
 }
 
-static u32 ror_shift_by_immed_no_carry(u32 value, u8 shift)
+static inline u32 ror_shift_by_immed_no_carry(u32 value, u8 shift)
 {
     if (shift == 0) // rrx #1
     {
@@ -221,7 +221,7 @@ static u32 ror_shift_by_immed_no_carry(u32 value, u8 shift)
     }
 }
 
-static u32 cpu_shift_by_immed_no_carry(u32 type, u32 value, u8 shift)
+static inline u32 cpu_shift_by_immed_no_carry(u32 type, u32 value, u8 shift)
 {
     switch (type & 3)
     {
@@ -245,7 +245,7 @@ static u32 cpu_shift_by_immed_no_carry(u32 type, u32 value, u8 shift)
 // --------------------------------------------------
 // Used only in ALU operations
 
-static u32 lsl_shift_by_reg(u32 value, u8 shift, u8 *carry)
+static inline u32 lsl_shift_by_reg(u32 value, u8 shift, u8 *carry)
 {
     if (shift)
     {
@@ -280,7 +280,7 @@ static u32 lsl_shift_by_reg(u32 value, u8 shift, u8 *carry)
     }
 }
 
-static u32 lsr_shift_by_reg(u32 value, u8 shift, u8 *carry)
+static inline u32 lsr_shift_by_reg(u32 value, u8 shift, u8 *carry)
 {
     if (shift)
     {
@@ -320,7 +320,7 @@ static u32 lsr_shift_by_reg(u32 value, u8 shift, u8 *carry)
     //}
 }
 
-static u32 asr_shift_by_reg(u32 value, u8 shift, u8 * carry)
+static inline u32 asr_shift_by_reg(u32 value, u8 shift, u8 * carry)
 {
     if(shift)
     {
@@ -354,7 +354,7 @@ static u32 asr_shift_by_reg(u32 value, u8 shift, u8 * carry)
     //}
 }
 
-static u32 ror_shift_by_reg(u32 value, u8 shift, u8 *carry)
+static inline u32 ror_shift_by_reg(u32 value, u8 shift, u8 *carry)
 {
     if (shift)
     {
@@ -389,7 +389,7 @@ static u32 ror_shift_by_reg(u32 value, u8 shift, u8 *carry)
     //}
 }
 
-static u32 cpu_shift_by_reg(u32 type, u32 value, u8 shift, u8 *carry)
+static inline u32 cpu_shift_by_reg(u32 type, u32 value, u8 shift, u8 *carry)
 {
     switch (type & 3)
     {
@@ -409,7 +409,7 @@ static u32 cpu_shift_by_reg(u32 type, u32 value, u8 shift, u8 *carry)
 
 //-----------------------------------------------
 
-static u32 lsl_shift_by_reg_no_carry(u32 value, u8 shift)
+static inline u32 lsl_shift_by_reg_no_carry(u32 value, u8 shift)
 {
     if (shift)
     {
@@ -424,7 +424,7 @@ static u32 lsl_shift_by_reg_no_carry(u32 value, u8 shift)
     }
 }
 
-static u32 lsr_shift_by_reg_no_carry(u32 value, u8 shift)
+static inline u32 lsr_shift_by_reg_no_carry(u32 value, u8 shift)
 {
     if (shift)
     {
@@ -440,7 +440,7 @@ static u32 lsr_shift_by_reg_no_carry(u32 value, u8 shift)
     //return 0;
 }
 
-static u32 asr_shift_by_reg_no_carry(u32 value, u8 shift)
+static inline u32 asr_shift_by_reg_no_carry(u32 value, u8 shift)
 {
     if (shift)
     {
@@ -457,7 +457,7 @@ static u32 asr_shift_by_reg_no_carry(u32 value, u8 shift)
     //    return (u32)(((s32)value) >> 31);
 }
 
-static u32 ror_shift_by_reg_no_carry(u32 value, u8 shift)
+static inline u32 ror_shift_by_reg_no_carry(u32 value, u8 shift)
 {
 #if 0
     if (shift)
@@ -489,7 +489,7 @@ static u32 ror_shift_by_reg_no_carry(u32 value, u8 shift)
 
 }
 
-static u32 cpu_shift_by_reg_no_carry(u32 type, u32 value, u8 shift)
+static inline u32 cpu_shift_by_reg_no_carry(u32 type, u32 value, u8 shift)
 {
     switch (type & 3)
     {
@@ -510,7 +510,8 @@ static u32 cpu_shift_by_reg_no_carry(u32 type, u32 value, u8 shift)
 //---------------------------------------------------------
 
 // Only for ARM mode
-static u32 cpu_shift_by_reg_no_carry_arm_ldr_str(u32 type, u32 value, u8 shift)
+static inline u32 cpu_shift_by_reg_no_carry_arm_ldr_str(u32 type, u32 value,
+                                                        u8 shift)
 {
     switch (type & 3)
     {

@@ -63,7 +63,7 @@ int FU_Print(char *buffer, int bufw, int bufh, int tx, int ty,
         for (int y = 0; y < FONT_HEIGHT; y ++)
         {
             char *bufcopy = &(buffer[buf_offset]);
-            const char *texcopy = &(fnt_data[tex_offset]);
+            const u8 *texcopy = &(fnt_data[tex_offset]);
 
             for (int x = 0; x < FONT_WIDTH; x++)
             {
@@ -135,7 +135,7 @@ int FU_PrintColor(char *buffer, int bufw, int bufh, int tx, int ty, int color,
         for (int y = 0; y < FONT_HEIGHT; y ++)
         {
             char *bufcopy = &(buffer[buf_offset]);
-            const char *texcopy = &(fnt_data[tex_offset]);
+            const u8 *texcopy = &(fnt_data[tex_offset]);
 
             for (int x = 0; x < FONT_WIDTH; x++)
             {
@@ -182,7 +182,7 @@ int FU_PrintChar(char *buffer, int bufw, int bufh, int tx, int ty,
     for (int y = 0; y < FONT_HEIGHT; y ++)
     {
         char *bufcopy = &(buffer[buf_offset]);
-        const char *texcopy = &(fnt_data[tex_offset]);
+        const u8 *texcopy = &(fnt_data[tex_offset]);
 
         for (int x = 0; x < FONT_WIDTH; x++)
         {

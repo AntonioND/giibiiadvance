@@ -9,13 +9,13 @@
 
 //#define POS(n) ((~(u32)(n)) >> 31)
 //#define NEG(n) (((u32)(n)) >> 31)
-//#define ADD_OVERFLOW(a, b, res) \
+//#define ADD_OVERFLOW(a, b, res)
 //              ((NEG(a) & NEG(b) & POS(res)) || (POS(a) & POS(b) & NEG(res)))
-//#define ADD_OVERFLOW(a ,b, res) \
+//#define ADD_OVERFLOW(a ,b, res)
 //              ((((~(a)) & (~(b)) & (res)) | ((a) & (b) & (~(res))) ) >> 31 )
 #define ADD_OVERFLOW(a, b, res) \
                 (( ((~((a) | (b))) & (res)) | ((a) & (b) & (~(res))) ) >> 31 )
-//#define SUB_OVERFLOW(a, b, res) \
+//#define SUB_OVERFLOW(a, b, res)
 //              ((POS(a) & NEG(b) & NEG(res)) || (NEG(a) & POS(b) & POS(res)))
 
 static void arm_and_immed(u32 Rd, u32 Rn, u32 val, u32 ror_bits)

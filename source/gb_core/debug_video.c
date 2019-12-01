@@ -179,12 +179,9 @@ void GB_Debug_PrintSprite(char *buf, int bufw, int bufh, int buff_x, int buff_y,
 {
     _GB_MEMORY_ *mem = &GameBoy.Memory;
     s32 spriteheight =  8 << ((mem->IO_Ports[LCDC_REG - 0xFF00] & (1<<2)) != 0);
-    _GB_OAM_ENTRY_ *GB_Sprite =
-                            &(((_GB_OAM_ *)(mem->ObjAttrMem))->Sprite[sprite]);
+    _GB_OAM_ENTRY_ *GB_Sprite = &(((_GB_OAM_ *)(mem->ObjAttrMem))->Sprite[sprite]);
     u32 tile = GB_Sprite->Tile & ((spriteheight == 16) ? 0xFE : 0xFF);
     u8 *spr_data = &mem->VideoRAM[tile << 4]; // Bank 0
-
-    u32 x, y;
 
     bool isvisible = false;
 

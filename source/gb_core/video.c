@@ -1393,7 +1393,6 @@ void SGB_ScreenDrawScanline(s32 y)
                         data += (y - real_y) * 2;
 
                     // Let's draw the sprite...
-                    u32 x__;
                     s32 real_x = GB_Sprite->X - 8;
                     for (int x__ = 0; x__ < 8; x__ ++)
                     {

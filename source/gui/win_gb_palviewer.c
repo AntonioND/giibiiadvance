@@ -70,15 +70,6 @@ static _gui gb_palviewer_window_gui = {
 
 //----------------------------------------------------------------
 
-static void rgb16to32(u16 color, u8 *r, u8 *g, u8 *b)
-{
-    *r = (color & 31) << 3;
-    *g = ((color >> 5) & 31) << 3;
-    *b = ((color >> 10) & 31) << 3;
-}
-
-//----------------------------------------------------------------
-
 static int _win_gb_palviewer_bg_bmp_callback(int x, int y)
 {
     if (x >= GB_PAL_BUFFER_WIDTH - 1)

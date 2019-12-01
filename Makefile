@@ -155,7 +155,9 @@ DEPS		:= $(OBJS:.o=.d)
 # Compiler and linker flags
 # -------------------------
 
-WARNFLAGS	:=
+WARNFLAGS	:= \
+		-Wall \
+		-Wformat-truncation=0 \
 
 CFLAGS		+= -std=gnu11 $(WARNFLAGS) $(INCLUDES) $(DEFINES) -O3 -MMD -MP
 

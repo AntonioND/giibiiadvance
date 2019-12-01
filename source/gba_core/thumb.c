@@ -96,18 +96,18 @@ static void thumb_stm(u32 address, u32 reg)
 
 //#define POS(n) ((~(u32)(n)) >> 31)
 //#define NEG(n) (((u32)(n)) >> 31)
-//#define ADD_OVERFLOW(a, b, res) ((NEG(a) & NEG(b) & POS(res)) \
-//                                 || (POS(a)&POS(b)&NEG(res)) )
-//#define ADD_OVERFLOW(a, b, res) ((((~(a)) & (~(b)) & (res)) \
-//                                 | ((a) & (b) & (~(res)))) >> 31)
-#define ADD_OVERFLOW(a, b, res) ((((~((a) | (b))) & (res)) \
-                                 | ((a) & (b) & (~(res)))) >> 31)
-//#define ADD_OVERFLOW(a, b, res) (((((~((a) | (b))) & (res)) \
-//                                 | ((a) & (b) & (~(res)))) >> 3) & BIT(28))
-//#define SUB_OVERFLOW(a, b, res) ((POS(a) & NEG(b) & NEG(res)) \
-//                                 || (NEG(a) & POS(b) & POS(res)))
-//#define SUB_OVERFLOW(a, b, res) ((((~(a)) & (b) & (res)) \
-//                                 | ((a) & (~((b) & (res))))) >> 31)
+//#define ADD_OVERFLOW(a, b, res)
+//          ((NEG(a) & NEG(b) & POS(res)) || (POS(a) & POS(b) & NEG(res)))
+//#define ADD_OVERFLOW(a, b, res)
+//          ((((~(a)) & (~(b)) & (res)) | ((a) & (b) & (~(res)))) >> 31)
+#define ADD_OVERFLOW(a, b, res) \
+            ((((~((a) | (b))) & (res)) | ((a) & (b) & (~(res)))) >> 31)
+//#define ADD_OVERFLOW(a, b, res)
+//      (((((~((a) | (b))) & (res)) | ((a) & (b) & (~(res)))) >> 3) & BIT(28))
+//#define SUB_OVERFLOW(a, b, res)
+//      ((POS(a) & NEG(b) & NEG(res)) || (NEG(a) & POS(b) & POS(res)))
+//#define SUB_OVERFLOW(a, b, res)
+//      ((((~(a)) & (b) & (res)) | ((a) & (~((b) & (res))))) >> 31)
 
 static void thumb_and(u16 Rd, u16 Rs)
 {

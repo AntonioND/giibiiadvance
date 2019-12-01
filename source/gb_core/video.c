@@ -87,7 +87,7 @@ void GB_ConfigLoadPalette(void)
 static u32 gb_framebuffer_bgcolor0[256];
 static u32 gb_framebuffer_bgpriority[256]; // For GBC
 
-static u32 window_current_line;
+static int window_current_line;
 
 static u32 gbpalettes[4] = {
     GB_RGB(31, 31, 31), GB_RGB(21, 21, 21), GB_RGB(10, 10, 10), GB_RGB(0, 0, 0)

@@ -16,8 +16,15 @@ NAME		:= giibiiadvance
 
 CC		:= gcc
 OBJDUMP		:= objdump
+MKDIR		:= mkdir
 RM		:= rm -rf
 PKG_CONFIG	:= pkg-config
+
+# Directories
+# -----------
+
+SOURCEDIR	:= source
+BUILDDIR	:= build
 
 # Source files
 # ------------
@@ -146,12 +153,6 @@ INCLUDES	+= `$(PKG_CONFIG) --cflags $(PKG_CONFIG_LIBS)`
 LIBS		+= `$(PKG_CONFIG) --libs $(PKG_CONFIG_LIBS)`
 LIBS		+= -lGL -lm
 
-# Generated files
-# ---------------
-
-OBJS		:= $(SOURCES:.c=.o)
-DEPS		:= $(OBJS:.o=.d)
-
 # Compiler and linker flags
 # -------------------------
 
@@ -161,16 +162,23 @@ WARNFLAGS	:= \
 		-Wextra \
 		-Wno-sign-compare \
 
-CFLAGS		+= -std=gnu11 $(WARNFLAGS) $(INCLUDES) $(DEFINES) -O3 -MMD -MP
+CFLAGS		+= -std=gnu11 $(WARNFLAGS) $(INCLUDES) $(DEFINES) -O3
 
 LDFLAGS		:= $(LIBS)
+
+# Intermediate build files
+# ------------------------
+
+OBJS		:= $(patsubst $(SOURCEDIR)/%.c,$(BUILDDIR)/%.o,$(SOURCES))
+DEPS		:= $(OBJS:.o=.d)
 
 # Rules
 # -----
 
-.c.o:
+$(BUILDDIR)/%.o : $(SOURCEDIR)/%.c
 	@echo "  CC      $<"
-	$(V)$(CC) $(CFLAGS) -c -o $@ $<
+	@$(MKDIR) -p $(@D) # Build target's directory if it doesn't exist
+	$(V)$(CC) $(CFLAGS) -MMD -MP -c -o $@ $<
 
 # Targets
 # -------
@@ -194,7 +202,7 @@ dump: $(DUMP)
 
 clean:
 	@echo "  CLEAN"
-	$(V)$(RM) $(OBJS) $(DEPS) $(ELF) $(DUMP)
+	$(V)$(RM) $(ELF) $(DUMP) $(BUILDDIR)
 
 # Include dependency files if they exist
 # --------------------------------------

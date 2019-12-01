@@ -1,6 +1,7 @@
 # Other files and folders #
 ###########################
 bios/
+build/
 screenshots/
 ./*.gb
 ./*.gbc

@@ -125,7 +125,8 @@ DEFINES		:= \
 # ---------
 
 LIBS		:= \
-		-lstdc++
+		-lm \
+		-lstdc++ \
 
 # Include paths
 # -------------
@@ -135,11 +136,12 @@ INCLUDES	:= \
 # Build options
 # -------------
 
+PKG_CONFIG_LIBS	:= sdl2 libpng
+
 # `make ENABLE_OPENCV=1` builds the emulator with OpenCV support
 ifeq ($(ENABLE_OPENCV),1)
-PKG_CONFIG_LIBS	:= sdl2 libpng opencv4
+PKG_CONFIG_LIBS	+= opencv4
 else
-PKG_CONFIG_LIBS	:= sdl2 libpng
 DEFINES		+= -DNO_CAMERA_EMULATION
 endif
 
@@ -148,14 +150,14 @@ ifneq ($(DISABLE_ASM_X86),1)
 DEFINES		+= -DENABLE_ASM_X86
 endif
 
+INCLUDES	+= `$(PKG_CONFIG) --cflags $(PKG_CONFIG_LIBS)`
+LIBS		+= `$(PKG_CONFIG) --libs $(PKG_CONFIG_LIBS)`
+
 # `make DISABLE_OPENGL=1` builds the emulator without OpenGL support
 ifneq ($(DISABLE_OPENGL),1)
 DEFINES		+= -DENABLE_OPENGL
+LIBS		+= -lGL
 endif
-
-INCLUDES	+= `$(PKG_CONFIG) --cflags $(PKG_CONFIG_LIBS)`
-LIBS		+= `$(PKG_CONFIG) --libs $(PKG_CONFIG_LIBS)`
-LIBS		+= -lGL -lm
 
 # Compiler and linker flags
 # -------------------------

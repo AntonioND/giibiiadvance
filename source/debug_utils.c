@@ -159,11 +159,6 @@ static void _sys_info_printf(const char *msg, ...)
     s_strncat(sys_info_buffer, buffer, sizeof(sys_info_buffer));
 }
 
-static void _sys_info_print(const char *msg)
-{
-    s_strncat(sys_info_buffer, msg, sizeof(sys_info_buffer));
-}
-
 static void _sys_info_reset(void)
 {
     memset(sys_info_buffer, 0, sizeof(sys_info_buffer));
@@ -229,9 +224,9 @@ static void _sys_info_reset(void)
                      (char *)glGetString(GL_RENDERER),
                      (char *)glGetString(GL_VERSION),
                      (char *)glGetString(GL_VENDOR));
-    _sys_info_print((char *)glGetString(GL_EXTENSIONS));
+    _sys_info_printf("%s\n", (char *)glGetString(GL_EXTENSIONS));
 #endif
-    _sys_info_printf("\n\nEND LOG\n");
+    _sys_info_printf("\nEND LOG\n");
 }
 
 void SysInfoShow(void)

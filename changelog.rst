@@ -19,6 +19,8 @@ General
 - Update memory and I/O viewers pressing F7 in dissasembler. [GB/GBA]
 - MBC3 timer data is now appended to the .sav file like other emulators do to
   make them compatible.
+- Update OpenCV code (needed for webcam support) to work with OpenCV 4.
+- Huge cleanup of the codebase.
 
 GB emulation
 

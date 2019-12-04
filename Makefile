@@ -113,6 +113,9 @@ GUI_SOURCES := \
 
 SOURCES := $(COMMON_SOURCES) $(GB_SOURCES) $(GBA_SOURCES) $(GUI_SOURCES)
 
+CPPSOURCES := \
+	source/webcam_utils.cpp \
+
 # Defines passed to all files
 # ---------------------------
 
@@ -122,6 +125,7 @@ DEFINES		:= \
 # ---------
 
 LIBS		:= \
+		-lstdc++
 
 # Include paths
 # -------------
@@ -133,7 +137,7 @@ INCLUDES	:= \
 
 # `make ENABLE_OPENCV=1` builds the emulator with OpenCV support
 ifeq ($(ENABLE_OPENCV),1)
-PKG_CONFIG_LIBS	:= sdl2 libpng opencv
+PKG_CONFIG_LIBS	:= sdl2 libpng opencv4
 else
 PKG_CONFIG_LIBS	:= sdl2 libpng
 DEFINES		+= -DNO_CAMERA_EMULATION
@@ -164,12 +168,16 @@ WARNFLAGS	:= \
 
 CFLAGS		+= -std=gnu11 $(WARNFLAGS) $(INCLUDES) $(DEFINES) -O3
 
+CXXFLAGS	+= -std=gnu++14 $(WARNFLAGS) $(INCLUDES) $(DEFINES) -O3
+
 LDFLAGS		:= $(LIBS)
 
 # Intermediate build files
 # ------------------------
 
-OBJS		:= $(patsubst $(SOURCEDIR)/%.c,$(BUILDDIR)/%.o,$(SOURCES))
+OBJS		:= $(patsubst $(SOURCEDIR)/%.c,$(BUILDDIR)/%.o,$(SOURCES)) \
+		   $(patsubst $(SOURCEDIR)/%.cpp,$(BUILDDIR)/%.o,$(CPPSOURCES))
+
 DEPS		:= $(OBJS:.o=.d)
 
 # Rules
@@ -179,6 +187,11 @@ $(BUILDDIR)/%.o : $(SOURCEDIR)/%.c
 	@echo "  CC      $<"
 	@$(MKDIR) -p $(@D) # Build target's directory if it doesn't exist
 	$(V)$(CC) $(CFLAGS) -MMD -MP -c -o $@ $<
+
+$(BUILDDIR)/%.o : $(SOURCEDIR)/%.cpp
+	@echo "  CXX     $<"
+	@$(MKDIR) -p $(@D) # Build target's directory if it doesn't exist
+	$(V)$(CXX) $(CXXFLAGS) -MMD -MP -c -o $@ $<
 
 # Targets
 # -------

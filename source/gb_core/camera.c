@@ -11,6 +11,7 @@
 #include "../config.h"
 #include "../debug_utils.h"
 #include "../general_utils.h"
+#include "../webcam_utils.h"
 
 #include "cpu.h"
 #include "gameboy.h"
@@ -21,200 +22,24 @@ extern _GB_CONTEXT_ GameBoy;
 
 //------------------------------------------------------------------------------
 
-// The actual sensor is 128x126 or so
-#define GBCAM_SENSOR_EXTRA_LINES    (8)
-#define GBCAM_SENSOR_W              (128)
-#define GBCAM_SENSOR_H              (112 + GBCAM_SENSOR_EXTRA_LINES)
-
-#define GBCAM_W                     (128)
-#define GBCAM_H                     (112)
-
-//------------------------------------------------------------------------------
-
-#ifndef NO_CAMERA_EMULATION
-
-//#include <opencv/cv.h>
-//#include <opencv/highgui.h>
-#include <opencv4/opencv2/core/core_c.h>
-//#include <opencv/highgui.h>
-
-static CvCapture *capture;
-static int gbcamera_enabled = 0;
-static int gbcamera_zoomfactor = 1;
-
-#endif
-
-//----------------------------------------------------------------------------
-
-// Webcam image
-static int gb_camera_webcam_output[GBCAM_SENSOR_W][GBCAM_SENSOR_H];
+// Webcam image (exposed in gc_core/camera.h, values in the range 0-255)
+int gb_camera_webcam_output[GBCAM_SENSOR_W][GBCAM_SENSOR_H];
 // Image processed by the retina chip
 static int gb_cam_retina_output_buf[GBCAM_SENSOR_W][GBCAM_SENSOR_H];
 
 void GB_CameraEnd(void)
 {
-#ifndef NO_CAMERA_EMULATION
-    if (gbcamera_enabled == 0)
-        return;
-
-    cvReleaseCapture(&capture);
-
-    gbcamera_enabled = 0;
-#endif
+    Webcam_End();
 }
 
 int GB_CameraInit(void)
 {
-#ifndef NO_CAMERA_EMULATION
-    if (gbcamera_enabled)
-        return 1;
-
-    if (EmulatorConfig.webcam_select == 0)
-    {
-        capture = cvCaptureFromCAM(CV_CAP_ANY);
-        if (!capture)
-        {
-            Debug_DebugMsgArg("OpenCV error:\n"
-                              "cvCaptureFromCAM(CV_CAP_ANY) is NULL.\n"
-                              "No camera detected?");
-            return 0;
-        }
-    }
-    else
-    {
-        capture = cvCaptureFromCAM(EmulatorConfig.webcam_select);
-        if (!capture)
-        {
-            Debug_DebugMsgArg("OpenCV error:\n"
-                              "cvCaptureFromCAM(%d) is NULL.\n"
-                              "No camera detected?",
-                              EmulatorConfig.webcam_select);
-            return 0;
-        }
-    }
-
-    gbcamera_enabled = 1;
-
-    // TODO : Select resolution from configuration file?
-
-    // This is the minimum standard resolution that works with GB Camera
-    // (128 x (112 + 4))
-    int w = 160;
-    int h = 120;
-
-    while (1) // Get the smallest valid resolution
-    {
-        cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, w);
-        cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, h);
-
-        w = cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH);
-        h = cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT);
-
-        if ((w >= GBCAM_SENSOR_W) && (h >= GBCAM_SENSOR_H))
-        {
-            break;
-        }
-        else
-        {
-            w *= 2;
-            h *= 2;
-        }
-
-        if (w >= 1024) // Too big, stop now.
-            break;
-    }
-
-    IplImage *frame = cvQueryFrame(capture);
-    if (!frame)
-    {
-        Debug_DebugMsgArg("OpenCV error: frame is NULL");
-        GB_CameraEnd();
-        return 0;
-    }
-    else
-    {
-        Debug_LogMsgArg("Camera resolution is: %dx%d",
-                        frame->width, frame->height);
-        if ((frame->width < GBCAM_SENSOR_W) || (frame->height < GBCAM_SENSOR_H))
-        {
-            Debug_ErrorMsgArg("Camera resolution is too small..");
-            GB_CameraEnd();
-            return 0;
-        }
-
-        int xfactor = frame->width / GBCAM_SENSOR_W;
-        int yfactor = frame->height / GBCAM_SENSOR_H;
-
-        gbcamera_zoomfactor = (xfactor > yfactor) ? yfactor : xfactor; // Min
-    }
-
-    return 1;
-#else
-    Debug_ErrorMsgArg("This version of GiiBiiAdvance was compiled without webcam support.");
-    return 0;
-#endif
+    return Webcam_Init();
 }
 
 void GB_CameraWebcamCapture(void)
 {
-#ifdef NO_CAMERA_EMULATION
-    // Random output...
-    for (int i = 0; i < GBCAM_SENSOR_W; i++)
-    {
-        for (int j = 0; j < GBCAM_SENSOR_H; j++)
-            gb_camera_webcam_output[i][j] = rand();
-    }
-#else
-    // Get image
-    if (gbcamera_enabled == 0)
-    {
-        // Random output...
-        for (int i = 0; i < GBCAM_SENSOR_W; i++)
-        {
-            for (int j = 0; j < GBCAM_SENSOR_H; j++)
-                gb_camera_webcam_output[i][j] = rand();
-        }
-    }
-    else
-    {
-        // Get image from webcam
-        IplImage *frame = cvQueryFrame(capture);
-        if (!frame)
-        {
-            GB_CameraEnd();
-            Debug_ErrorMsgArg("OpenCV error: frame is null...\n");
-        }
-        else
-        {
-            if ((frame->depth == 8) && (frame->nChannels == 3))
-            {
-                for (int i = 0; i < GBCAM_SENSOR_W; i++)
-                {
-                    for (int j = 0; j < GBCAM_SENSOR_H; j++)
-                    {
-                        u8 *data = &(((u8 *)frame->imageData)
-                                [((j * gbcamera_zoomfactor) * frame->widthStep)
-                                 + ((i * gbcamera_zoomfactor) * 3)]);
-
-                        u32 r = *data++;
-                        u32 g = *data++;
-                        u32 b = *data;
-
-                        gb_camera_webcam_output[i][j] =
-                                                (2 * r + 5 * g + 1 * b) >> 3;
-                    }
-                }
-            }
-            else
-            {
-                Debug_ErrorMsgArg("Invalid camera output.\n"
-                                  "Depth = %d bits\n"
-                                  "Channels = %d",
-                                  frame->depth, frame->nChannels);
-            }
-        }
-    }
-#endif // NO_CAMERA_EMULATION
+    Webcam_GetFrame();
 }
 
 //----------------------------------------------------------------

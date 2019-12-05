@@ -182,10 +182,13 @@ int GB_CartridgeLoad(const u8 *pointer, const u32 rom_size)
     }
     else
     {
+        // In order to have a nice list with all licensees (old and new),
+        // both bytes are converted from hex (A-F, 0-9) to ASCII ('A'-'F',
+        // '0', '9')
         char byte1 = (GB_Header->old_licensee >> 4) & 0x0F;
-        byte1 += (byte1 < 10) ? 0x30 : (0x41 - 10);
+        byte1 += (byte1 < 10) ? '0' : ('A' - 10);
         char byte2 = GB_Header->old_licensee & 0x0F;
-        byte2 += (byte2 < 10) ? 0x30 : (0x41 - 10);
+        byte2 += (byte2 < 10) ? '0' : ('A' - 10);
         ConsolePrint("Licensee (old): %s (%02X)\n",
                      GB_GetLicenseeName(byte1, byte2), GB_Header->old_licensee);
     }
@@ -718,7 +721,9 @@ void GB_Cardridge_Set_Filename(char *filename)
             return;
         }
 
-        if (--len == 0)
+        len--;
+
+        if (len == 0)
             break;
     }
 }

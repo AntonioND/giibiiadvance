@@ -162,9 +162,9 @@ void Win_GBASprViewerUpdate(void)
                           vflip ? "V" : " ",
                           doublesize ? "D" : " ");
 
-    for (int i = 0; i < GBA_SPR_ZOOMED_BUFFER_WIDTH; i++)
+    for (int j = 0; j < GBA_SPR_ZOOMED_BUFFER_HEIGHT; j++)
     {
-        for (int j = 0; j < GBA_SPR_ZOOMED_BUFFER_HEIGHT; j++)
+        for (int i = 0; i < GBA_SPR_ZOOMED_BUFFER_WIDTH; i++)
         {
             unsigned char v = ((i & 32) ^ (j & 32)) ? 0x80 : 0xB0;
             unsigned int index = (j * GBA_SPR_ZOOMED_BUFFER_HEIGHT + i) * 3;

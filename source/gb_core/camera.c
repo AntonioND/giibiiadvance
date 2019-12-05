@@ -255,17 +255,17 @@ static void GB_CameraTakePicture(void)
         // 1-D filtering
         case 0x0:
         {
-            for (int i = 0; i < GBCAM_SENSOR_W; i++)
+            for (int j = 0; j < GBCAM_SENSOR_H; j++)
             {
-                for (int j = 0; j < GBCAM_SENSOR_H; j++)
+                for (int i = 0; i < GBCAM_SENSOR_W; i++)
                 {
                     temp_buf[i][j] = gb_cam_retina_output_buf[i][j];
                 }
             }
 
-            for (int i = 0; i < GBCAM_SENSOR_W; i++)
+            for (int j = 0; j < GBCAM_SENSOR_H; j++)
             {
-                for (int j = 0; j < GBCAM_SENSOR_H; j++)
+                for (int i = 0; i < GBCAM_SENSOR_W; i++)
                 {
                     int ms = temp_buf[i][gb_min_int(j + 1, GBCAM_SENSOR_H - 1)];
                     int px = temp_buf[i][j];
@@ -289,9 +289,9 @@ static void GB_CameraTakePicture(void)
         // 1-D filtering + Horiz. enhancement : P + {2P - (MW + ME)} * alpha
         case 0x2:
         {
-            for (int i = 0; i < GBCAM_SENSOR_W; i++)
+            for (int j = 0; j < GBCAM_SENSOR_H; j++)
             {
-                for (int j = 0; j < GBCAM_SENSOR_H; j++)
+                for (int i = 0; i < GBCAM_SENSOR_W; i++)
                 {
                     int mw = gb_cam_retina_output_buf[gb_max_int(0, i - 1)][j];
                     int me = gb_cam_retina_output_buf
@@ -303,9 +303,9 @@ static void GB_CameraTakePicture(void)
                                         255);
                 }
             }
-            for (int i = 0; i < GBCAM_SENSOR_W; i++)
+            for (int j = 0; j < GBCAM_SENSOR_H; j++)
             {
-                for (int j = 0; j < GBCAM_SENSOR_H; j++)
+                for (int i = 0; i < GBCAM_SENSOR_W; i++)
                 {
                     int ms = temp_buf[i][gb_min_int(j + 1, GBCAM_SENSOR_H - 1)];
                     int px = temp_buf[i][j];
@@ -329,9 +329,9 @@ static void GB_CameraTakePicture(void)
         // 2D enhancement : P + {4P - (MN + MS + ME + MW)} * alpha
         case 0xE:
         {
-            for (int i = 0; i < GBCAM_SENSOR_W; i++)
+            for (int j = 0; j < GBCAM_SENSOR_H; j++)
             {
-                for (int j = 0; j < GBCAM_SENSOR_H; j++)
+                for (int i = 0; i < GBCAM_SENSOR_W; i++)
                 {
                     int ms = gb_cam_retina_output_buf[i]
                                     [gb_min_int(j + 1, GBCAM_SENSOR_H - 1)];
@@ -346,9 +346,9 @@ static void GB_CameraTakePicture(void)
                             127);
                 }
             }
-            for (int i = 0; i < GBCAM_SENSOR_W; i++)
+            for (int j = 0; j < GBCAM_SENSOR_H; j++)
             {
-                for (int j = 0; j < GBCAM_SENSOR_H; j++)
+                for (int i = 0; i < GBCAM_SENSOR_W; i++)
                 {
                     gb_cam_retina_output_buf[i][j] = temp_buf[i][j];
                 }
@@ -361,9 +361,9 @@ static void GB_CameraTakePicture(void)
         // Maybe this is a bug?
         case 0x1:
         {
-            for (int i = 0; i < GBCAM_SENSOR_W; i++)
+            for (int j = 0; j < GBCAM_SENSOR_H; j++)
             {
-                for (int j = 0; j < GBCAM_SENSOR_H; j++)
+                for (int i = 0; i < GBCAM_SENSOR_W; i++)
                 {
                     gb_cam_retina_output_buf[i][j] = 0;
                 }
@@ -383,9 +383,9 @@ static void GB_CameraTakePicture(void)
     }
 
     // Make unsigned
-    for (int i = 0; i < GBCAM_SENSOR_W; i++)
+    for (int j = 0; j < GBCAM_SENSOR_H; j++)
     {
-        for (int j = 0; j < GBCAM_SENSOR_H; j++)
+        for (int i = 0; i < GBCAM_SENSOR_W; i++)
         {
             gb_cam_retina_output_buf[i][j] =
                                         gb_cam_retina_output_buf[i][j] + 128;
@@ -400,9 +400,9 @@ static void GB_CameraTakePicture(void)
     int fourcolorsbuffer[GBCAM_W][GBCAM_H]; // Buffer after controller matrix
 
     // Convert to Game Boy colors using the controller matrix
-    for (int i = 0; i < GBCAM_W; i++)
+    for (int j = 0; j < GBCAM_H; j++)
     {
-        for (int j = 0; j < GBCAM_H; j++)
+        for (int i = 0; i < GBCAM_W; i++)
         {
             int v;
             v = gb_cam_retina_output_buf[i][j + (GBCAM_SENSOR_EXTRA_LINES / 2)];
@@ -413,9 +413,9 @@ static void GB_CameraTakePicture(void)
     // Convert to tiles
     u8 finalbuffer[14][16][16]; // Final buffer
     memset(finalbuffer, 0, sizeof(finalbuffer));
-    for (int i = 0; i < GBCAM_W; i++)
+    for (int j = 0; j < GBCAM_H; j++)
     {
-        for (int j = 0; j < GBCAM_H; j++)
+        for (int i = 0; i < GBCAM_W; i++)
         {
             u8 outcolor = 3 - (fourcolorsbuffer[i][j] >> 6);
 

@@ -33,35 +33,34 @@ void GB_Input_Update(void);
 int GB_ROMLoad(const char *rom_path)
 {
     void *ptr; u32 size;
+
     FileLoad(rom_path, &ptr, &size);
 
-    if (ptr)
+    if (ptr == NULL)
     {
-        if (GB_CartridgeLoad(ptr, size))
-        {
-            // Init after loading the cartridge to set the hardware type value
-            // and allow GB_Screen_Init() choose the correct dimensions for the
-            // texture.
+        Debug_ErrorMsgArg("Couldn't load data from %s.", rom_path);
+        return 0;
+    }
 
-            GB_Cardridge_Set_Filename((char *)rom_path);
-
-            GB_SRAM_Load();
-
-            GB_PowerOn();
-            GB_SkipFrame(0);
-            return 1;
-        }
-
+    if (GB_CartridgeLoad(ptr, size) == 0)
+    {
         Debug_ErrorMsgArg("Error while loading cartridge.\n"
                           "Read the console output for details.");
-
         free(ptr);
         return 0;
     }
 
-    Debug_ErrorMsgArg("Couldn't load data from %s.", rom_path);
+    // Init after loading the cartridge to set the hardware type value and allow
+    // GB_Screen_Init() choose the correct dimensions for the texture.
 
-    return 0;
+    GB_Cardridge_Set_Filename((char *)rom_path);
+
+    GB_SRAM_Load();
+
+    GB_PowerOn();
+    GB_SkipFrame(0);
+
+    return 1;
 }
 
 void GB_End(int save)

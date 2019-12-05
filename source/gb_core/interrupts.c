@@ -32,37 +32,41 @@ static const u32 gb_timer_clock_overflow_mask[4] = {
 
 void GB_HandleRTC(void)
 {
-    if (GameBoy.Emulator.HasTimer) //Handle time...
-    {
-        if (GameBoy.Emulator.Timer.halt == 0) //Increase timer...
-        {
-            GameBoy.Emulator.Timer.sec ++;
-            if (GameBoy.Emulator.Timer.sec > 59)
-            {
-                GameBoy.Emulator.Timer.sec -= 60;
+    if (!GameBoy.Emulator.HasTimer)
+        return;
 
-                GameBoy.Emulator.Timer.min ++;
-                if (GameBoy.Emulator.Timer.min > 59)
-                {
-                    GameBoy.Emulator.Timer.min -= 60;
+    // Handle RTC
 
-                    GameBoy.Emulator.Timer.hour ++;
-                    if (GameBoy.Emulator.Timer.hour > 23)
-                    {
-                        GameBoy.Emulator.Timer.hour -= 24;
+    if (GameBoy.Emulator.Timer.halt != 0)
+        return;
 
-                        GameBoy.Emulator.Timer.days ++;
-                        if (GameBoy.Emulator.Timer.days > 511)
-                        {
-                            GameBoy.Emulator.Timer.days -= 512;
+    // Increase timer
 
-                            GameBoy.Emulator.Timer.carry = 1;
-                        }
-                    }
-                }
-            }
-        }
-    }
+    GameBoy.Emulator.Timer.sec++;
+    if (GameBoy.Emulator.Timer.sec < 60)
+        return;
+
+    GameBoy.Emulator.Timer.sec -= 60;
+    GameBoy.Emulator.Timer.min++;
+
+    if (GameBoy.Emulator.Timer.min < 60)
+        return;
+
+    GameBoy.Emulator.Timer.min -= 60;
+    GameBoy.Emulator.Timer.hour++;
+
+    if (GameBoy.Emulator.Timer.hour < 24)
+        return;
+
+    GameBoy.Emulator.Timer.hour -= 24;
+    GameBoy.Emulator.Timer.days++;
+
+    if (GameBoy.Emulator.Timer.days < 512)
+        return;
+
+    GameBoy.Emulator.Timer.days -= 512;
+    GameBoy.Emulator.Timer.carry = 1;
+    // The carry flag persists until the user clears it
 }
 
 //----------------------------------------------------------------

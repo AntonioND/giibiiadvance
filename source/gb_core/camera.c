@@ -68,18 +68,16 @@ void GB_CameraUpdateClocksCounterReference(int reference_clocks)
 
     int increment_clocks = reference_clocks - GB_CameraClockCounterGet();
 
+    _GB_CAMERA_CART_ *cam = &GameBoy.Emulator.CAM;
+
+    if (cam->clocks_left > 0)
     {
-        _GB_CAMERA_CART_ *cam = &GameBoy.Emulator.CAM;
+        cam->clocks_left -= increment_clocks;
 
-        if (cam->clocks_left > 0)
+        if (cam->clocks_left <= 0)
         {
-            cam->clocks_left -= increment_clocks;
-
-            if (cam->clocks_left <= 0)
-            {
-                cam->reg[0] &= ~BIT(0); // Ready
-                cam->clocks_left = 0;
-            }
+            cam->reg[0] &= ~BIT(0); // Ready
+            cam->clocks_left = 0;
         }
     }
 

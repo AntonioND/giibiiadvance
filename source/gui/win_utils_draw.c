@@ -13,7 +13,7 @@
 
 //------------------------------------------------------------------------------
 
-int _gui_word_fits(const char *text, int x_start, int x_end); // in win_utils.h
+int _gui_word_fits(const char *text, int x_start, int x_end); // in win_utils.c
 
 //------------------------------------------------------------------------------
 

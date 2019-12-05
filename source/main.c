@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
 {
     // Try to get the path where the binary is running from. Try with SDL's
     // helper, but fallback to argv[0] if it doesn't work or it's not available.
-#if SDL_VERSION_ATLEAST(2,0,1)
+#if SDL_VERSION_ATLEAST(2, 0, 1)
     char *base_path = SDL_GetBasePath();
     if (base_path)
     {

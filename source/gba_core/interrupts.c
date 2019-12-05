@@ -47,11 +47,11 @@ int GBA_InterruptCheck(void)
             GBA_CPUChangeMode(M_IRQ);
             CPU.R[R_LR] = CPU.R[R_PC] + 4;
             //CPU.R[R_LR] = CPU.R[R_PC] // Save return address
-            //            + (CPU.EXECUTION_MODE==EXEC_ARM?4:2);
+            //            + (CPU.EXECUTION_MODE==EXEC_ARM ? 4 : 2);
             CPU.SPSR = CPU.CPSR; // Save CPSR flags
             // Enter IRQ mode, ARM state, IRQs disabled
             CPU.CPSR &= ~(0x1F | F_T | F_I);
-            CPU.CPSR |= M_IRQ|F_I;
+            CPU.CPSR |= M_IRQ | F_I;
             CPU.R[R_PC] = 0x18; // Jump to IRQ vector address
             CPU.EXECUTION_MODE = EXEC_ARM;
             return 1;

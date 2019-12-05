@@ -871,13 +871,13 @@ void GB_Debug_TileVRAMDrawPaletted(char *buffer0, unused__ int bufw0,
         {
             u32 tile = (x >> 3) + ((y >> 3) * 16);
 
-            u8 *data = &mem->VideoRAM[tile << 4]; //Bank 0
+            u8 *data = &mem->VideoRAM[tile << 4]; // Bank 0
 
             data += (y & 7) * 2;
 
             u32 x_ = 7 - (x & 7);
 
-            u32 color = ((*data >> x_) & 1 )
+            u32 color = ((*data >> x_) & 1)
                       | ((((*(data + 1)) >> x_) << 1) & 2);
 
             if (GameBoy.Emulator.CGBEnabled)
@@ -916,7 +916,7 @@ void GB_Debug_TileVRAMDrawPaletted(char *buffer0, unused__ int bufw0,
             u32 tile = (x >> 3) + ((y >> 3) * 16);
 
             u8 *data = &mem->VideoRAM[tile << 4];
-            data += 0x2000; //Bank 1;
+            data += 0x2000; // Bank 1
 
             data += (y & 7) * 2;
 
@@ -961,7 +961,7 @@ void GB_Debug_TileDrawZoomed64x64(char *buffer, int tile, int bank)
 
     u8 *tile_data = &GameBoy.Memory.VideoRAM[tile<<4]; // Bank 0
     if (bank)
-        tile_data += 0x2000; // Bank 1;
+        tile_data += 0x2000; // Bank 1
 
     for (int y = 0; y < 8 ; y++)
     {
@@ -1000,9 +1000,9 @@ void GB_Debug_TileDrawZoomedPaletted64x64(char *buffer, int tile, int bank,
 
     int tiletempbuffer[8 * 8];
 
-    u8 *tile_data = &GameBoy.Memory.VideoRAM[tile<<4]; // Bank 0
+    u8 *tile_data = &GameBoy.Memory.VideoRAM[tile << 4]; // Bank 0
     if (bank)
-        tile_data += 0x2000; // Bank 1;
+        tile_data += 0x2000; // Bank 1
 
     u32 bg_pal[4];
     u32 bgp_reg = mem->IO_Ports[BGP_REG - 0xFF00];

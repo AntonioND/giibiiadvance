@@ -245,42 +245,42 @@ static void SGB_ATTR_BLK(void)
     for (int i = 0; i < sets; i++)
     {
         u32 ctrl = SGBInfo.data[curpacket][curbyte];
-        curbyte ++;
+        curbyte++;
         if (curbyte == 16)
         {
             curbyte = 0;
             curpacket++;
         }
         u32 palettes = SGBInfo.data[curpacket][curbyte];
-        curbyte ++;
+        curbyte++;
         if (curbyte == 16)
         {
             curbyte = 0;
             curpacket++;
         }
         u32 x1 = SGBInfo.data[curpacket][curbyte];
-        curbyte ++;
+        curbyte++;
         if (curbyte == 16)
         {
             curbyte = 0;
             curpacket++;
         }
         u32 y1 = SGBInfo.data[curpacket][curbyte];
-        curbyte ++;
+        curbyte++;
         if (curbyte == 16)
         {
             curbyte = 0;
             curpacket++;
         }
         u32 x2 = SGBInfo.data[curpacket][curbyte];
-        curbyte ++;
+        curbyte++;
         if (curbyte == 16)
         {
             curbyte = 0;
             curpacket++;
         }
         u32 y2 = SGBInfo.data[curpacket][curbyte];
-        curbyte ++;
+        curbyte++;
         if (curbyte == 16)
         {
             curbyte = 0;
@@ -652,10 +652,10 @@ static void SGB_OBJ_TRN(void)
 
     if (SGBInfo.data[0][1] & (1 << 1)) // Set palettes
     {
-        u32 pal4 = SGBInfo.data[0][2] | (SGBInfo.data[0][3]<<8);
-        u32 pal5 = SGBInfo.data[0][4] | (SGBInfo.data[0][5]<<8);
-        u32 pal6 = SGBInfo.data[0][6] | (SGBInfo.data[0][7]<<8);
-        u32 pal7 = SGBInfo.data[0][8] | (SGBInfo.data[0][9]<<8);
+        u32 pal4 = SGBInfo.data[0][2] | (SGBInfo.data[0][3] << 8);
+        u32 pal5 = SGBInfo.data[0][4] | (SGBInfo.data[0][5] << 8);
+        u32 pal6 = SGBInfo.data[0][6] | (SGBInfo.data[0][7] << 8);
+        u32 pal7 = SGBInfo.data[0][8] | (SGBInfo.data[0][9] << 8);
 
         for (int i = 0; i < 16; i++)
         {

@@ -141,9 +141,9 @@ int GB_CartridgeLoad(const u8 *pointer, const u32 rom_size)
     ConsolePrint("Checking cartridge...\n");
 
     int k;
-    for(k = 0; k < 11; k++)
+    for (k = 0; k < 11; k++)
         GameBoy.Emulator.Title[k] = GB_Header->title[k];
-    for(; k < 15; k++)
+    for (; k < 15; k++)
         GameBoy.Emulator.Title[k] = GB_Header->manufacturer[k - 11];
 
     GameBoy.Emulator.Title[15] = GB_Header->cgb_flag;
@@ -237,7 +237,7 @@ int GB_CartridgeLoad(const u8 *pointer, const u32 rom_size)
     }
 
     // SGB
-    if((GB_Header->sgb_flag == 0x03) && (GB_Header->old_licensee == 0x33))
+    if ((GB_Header->sgb_flag == 0x03) && (GB_Header->old_licensee == 0x33))
     {
         enable_sgb = 1;
     }

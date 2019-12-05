@@ -295,7 +295,7 @@ int GB_DMAExecute(int clocks)
     if (GameBoy.Emulator.CPUHalt != 0) // Only copy if CPU is not halted
         return 0;
 
-    if(GameBoy.Emulator.GBC_DMA_enabled == GBC_DMA_GENERAL)
+    if (GameBoy.Emulator.GBC_DMA_enabled == GBC_DMA_GENERAL)
     {
         //This copy has to be divided. Only execute the specified clocks.
 

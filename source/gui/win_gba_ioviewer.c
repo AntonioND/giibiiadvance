@@ -954,8 +954,10 @@ void Win_GBAIOViewerUpdate(void)
 
             if (REG_TM1CNT_H & BIT(2))
             {
-                GUI_ConsoleModePrintf(&gba_ioview_timers_tmr1_con,0,3, "[--------] Frequency");
-                GUI_ConsoleModePrintf(&gba_ioview_timers_tmr1_con,0,5, "[----] CPU clocks per tick");
+                GUI_ConsoleModePrintf(&gba_ioview_timers_tmr1_con, 0, 3,
+                        "[--------] Frequency");
+                GUI_ConsoleModePrintf(&gba_ioview_timers_tmr1_con, 0, 5,
+                        "[----] CPU clocks per tick");
             }
             else
             {

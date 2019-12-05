@@ -813,7 +813,7 @@ int GB_TimersGetClocksToNextEvent(void)
         int clocks_left_for_timer = (mask + 1) - timer_counter;
         // Clocks left for next overflow
         clocks_left_for_timer +=
-            (255 - GameBoy.Memory.IO_Ports[TIMA_REG-0xFF00]) * (mask + 1);
+            (255 - GameBoy.Memory.IO_Ports[TIMA_REG - 0xFF00]) * (mask + 1);
 
         if (clocks_left_for_timer < clocks_to_next_event)
             clocks_to_next_event = clocks_left_for_timer;

@@ -108,6 +108,6 @@ int FU_Print(char *buffer, int bufw, int bufh, int tx, int ty,
 int FU_PrintChar(char *buffer, int bufw, int bufh, int tx, int ty,
                  unsigned char c, int color);
 int FU_PrintColor(char *buffer, int bufw, int bufh, int tx, int ty, int color,
-                  const char * txt, ...);
+                  const char *txt, ...);
 
 #endif // FONT_UTILS__

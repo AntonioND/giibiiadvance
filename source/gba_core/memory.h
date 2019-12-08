@@ -26,13 +26,13 @@ u8 GBA_MemoryReadFast8(u32 address);
 //void GBA_MemoryWriteFast8(u32 address,u8 data);
 
 u32 GBA_MemoryRead32(u32 address);
-void GBA_MemoryWrite32(u32 address,u32 data);
+void GBA_MemoryWrite32(u32 address, u32 data);
 
 u16 GBA_MemoryRead16(u32 address);
-void GBA_MemoryWrite16(u32 address,u16 data);
+void GBA_MemoryWrite16(u32 address, u16 data);
 
 u8 GBA_MemoryRead8(u32 address);
-void GBA_MemoryWrite8(u32 address,u8 data);
+void GBA_MemoryWrite8(u32 address, u8 data);
 
 //----------------------------------------------------------------------
 

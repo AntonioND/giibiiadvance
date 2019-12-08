@@ -14,7 +14,8 @@
 #include "sound.h"
 #include "timers.h"
 
-typedef struct {
+typedef struct
+{
     u16 start;
 
     s32 remainingclocks;
@@ -205,7 +206,7 @@ s32 GBA_TimersUpdate(s32 clocks)
 
             returnclocks = min(returnclocks,
                                Timer[1].remainingclocks
-                                   * (0x10000 - (u32)REG_TM1CNT_L));
+                                       * (0x10000 - (u32)REG_TM1CNT_L));
         }
         else if (timer0overflowed)
         {
@@ -239,7 +240,7 @@ s32 GBA_TimersUpdate(s32 clocks)
 
             returnclocks = min(returnclocks,
                                Timer[2].remainingclocks
-                                   * (0x10000 - (u32)REG_TM2CNT_L));
+                                       * (0x10000 - (u32)REG_TM2CNT_L));
         }
         else if (timer1overflowed)
         {
@@ -272,7 +273,7 @@ s32 GBA_TimersUpdate(s32 clocks)
 
             returnclocks = min(returnclocks,
                                Timer[3].remainingclocks
-                                   * (0x10000 - (u32)REG_TM3CNT_L));
+                                       * (0x10000 - (u32)REG_TM3CNT_L));
         }
         else if (timer2overflowed)
         {

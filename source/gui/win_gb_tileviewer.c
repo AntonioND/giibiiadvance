@@ -162,8 +162,8 @@ void Win_GBTileViewerUpdate(void)
 
     int l = ((gb_tileview_selected_index % 16) * 8); // Left
     int t = ((gb_tileview_selected_index / 16) * 8); // Top
-    int r = l + 7; // Right
-    int b = t + 7; // Bottom
+    int r = l + 7;                                   // Right
+    int b = t + 7;                                   // Bottom
     GUI_Draw_Rect(buf, GB_TILE_BUFFER_WIDTH, GB_TILE_BUFFER_HEIGHT, l, r, t, b);
 
     if (gb_tile_zoomed_tile_is_pal == 0)
@@ -359,7 +359,7 @@ int Win_GBTileViewerCreate(void)
                        _win_gb_tileviewer_zoomed_tile_bw_radbtn_callback);
     GUI_SetRadioButton(&gb_tileview_zoomed_tile_pal_bg_radbtn,
                        6 + 4 * FONT_WIDTH + 6, 118, 4 * FONT_WIDTH, 18,
-                       "Bg",  0, 1, 1,
+                       "Bg", 0, 1, 1,
                        _win_gb_tileviewer_zoomed_tile_bw_radbtn_callback);
     GUI_SetRadioButton(&gb_tileview_zoomed_tile_pal_spr_radbtn,
                        12 + 8 * FONT_WIDTH + 6, 118, 4 * FONT_WIDTH, 18,

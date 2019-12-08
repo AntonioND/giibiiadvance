@@ -172,8 +172,8 @@ void Win_GBATileViewerUpdate(void)
     GUI_Draw_SetDrawingColor(255, 0, 0);
     int l = (gba_tileview_selected_index % 32) * 8; // Left
     int t = (gba_tileview_selected_index / 32) * 8; // Top
-    int r = l + 7; // Right
-    int b = t + 7; // Bottom
+    int r = l + 7;                                  // Right
+    int b = t + 7;                                  // Bottom
     GUI_Draw_Rect(gba_tile_buffer,
                   GBA_TILE_BUFFER_WIDTH, GBA_TILE_BUFFER_HEIGHT,
                   l, r, t, b);
@@ -309,19 +309,19 @@ int Win_GBATileViewerCreate(void)
                        "0x06010000 - OBJ/BG     ", 0, 4, 0,
                        _win_gba_tileviewer_cbb_radbtn_callback);
     GUI_SetRadioButton(&gba_tileview_cbb_06014000_radbtn, 6, 124,
-                       25 * FONT_WIDTH,18,
+                       25 * FONT_WIDTH, 18,
                        "0x06014000 - (OBJ)      ", 0, 5, 0,
                        _win_gba_tileviewer_cbb_radbtn_callback);
 
     GUI_SetLabel(&gba_tileview_colornum_label,
-                6, 148, 6 * FONT_WIDTH, FONT_HEIGHT, "Colors");
+                 6, 148, 6 * FONT_WIDTH, FONT_HEIGHT, "Colors");
     GUI_SetRadioButton(&gba_tileview_colornum_16_radbtn,
-                6, 166, 8 * FONT_WIDTH, 18,
-                "16",  1, 0, 1,
-                _win_gba_tileviewer_colors_radbtn_callback);
+                       6, 166, 8 * FONT_WIDTH, 18,
+                       "16", 1, 0, 1,
+                       _win_gba_tileviewer_colors_radbtn_callback);
     GUI_SetRadioButton(&gba_tileview_colornum_256_radbtn,
-                12 + 8 * FONT_WIDTH, 166, 8 * FONT_WIDTH, 18,
-                  "256", 1, 1, 0, _win_gba_tileviewer_colors_radbtn_callback);
+                       12 + 8 * FONT_WIDTH, 166, 8 * FONT_WIDTH, 18,
+                       "256", 1, 1, 0, _win_gba_tileviewer_colors_radbtn_callback);
 
     GUI_SetBitmap(&gba_tileview_zoomed_tile_bmp, 6, 198, 64, 64,
                   gba_tile_zoomed_tile_buffer, NULL);
@@ -330,7 +330,7 @@ int Win_GBATileViewerCreate(void)
                   139, 160, FONT_WIDTH * 6, FONT_HEIGHT * 2, "Dump",
                   _win_gba_tileviewer_dump_btn_callback);
 
-    GUI_SetTextBox(&gba_tileview_textbox,&gba_tileview_con,
+    GUI_SetTextBox(&gba_tileview_textbox, &gba_tileview_con,
                    76, 198, 15 * FONT_WIDTH, 3 * FONT_HEIGHT, NULL);
 
     GUI_SetScrollBar(&gba_tileview_pal_scrollbar,
@@ -339,8 +339,7 @@ int Win_GBATileViewerCreate(void)
 
     GUI_SetBitmap(&gba_tileview_tiles_bmp, 76 + 15 * FONT_WIDTH + 6, 6,
                   GBA_TILE_BUFFER_WIDTH, GBA_TILE_BUFFER_HEIGHT,
-                  gba_tile_buffer,
-                  _win_gba_tileviewer_tiles_bmp_callback);
+                  gba_tile_buffer, _win_gba_tileviewer_tiles_bmp_callback);
 
     GBATileViewerCreated = 1;
 

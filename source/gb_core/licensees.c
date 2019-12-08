@@ -8,7 +8,8 @@
 
 #include "gameboy.h"
 
-typedef struct {
+typedef struct
+{
     // A hexadecimal value would work for most codes, but some of them
     // (new licensees only) use other ASCII characters.
     const char code[2];

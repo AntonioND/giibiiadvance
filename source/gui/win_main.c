@@ -9,9 +9,9 @@
 
 #include <SDL.h>
 
+#include "win_main.h"
 #include "win_main_config.h"
 #include "win_main_config_input.h"
-#include "win_main.h"
 #include "win_utils.h"
 
 #include "../build_options.h"
@@ -434,14 +434,14 @@ static int _win_main_load_rom_autodetect(char *path)
         }
         return 0;
     }
-    else if(type == RUNNING_GBA)
+    else if (type == RUNNING_GBA)
     {
         // There should be some error checking...
 
         char bios_path[MAX_PATHLEN];
         unsigned int bios_size;
         snprintf(bios_path, sizeof(bios_path), "%s" GBA_BIOS_FILENAME,
-                DirGetBiosFolderPath());
+                 DirGetBiosFolderPath());
 
         // Don't show error messages...
         FileLoad_NoError(bios_path, &bios_buffer, &bios_size);
@@ -557,14 +557,14 @@ static int _win_main_file_explorer_get_starting_drawing_index(void)
         start_print_index = 0;
     }
     else if (_win_main_file_explorer_windows_selection
-                                    < (WIN_MAIN_FILE_EXPLORER_NUM_ELEMENTS / 2))
+             < (WIN_MAIN_FILE_EXPLORER_NUM_ELEMENTS / 2))
     {
         start_print_index = 0;
     }
     else
     {
         start_print_index = _win_main_file_explorer_windows_selection
-                          - (WIN_MAIN_FILE_EXPLORER_NUM_ELEMENTS / 2);
+                            - (WIN_MAIN_FILE_EXPLORER_NUM_ELEMENTS / 2);
     }
 
     return start_print_index;
@@ -643,7 +643,7 @@ static void _win_main_file_explorer_open_index(int i)
 static void _win_main_file_explorer_text_box_callback(unused__ int x, int y)
 {
     int i = _win_main_file_explorer_get_starting_drawing_index()
-          + (y / FONT_HEIGHT);
+            + (y / FONT_HEIGHT);
     _win_main_file_explorer_open_index(i);
 }
 
@@ -727,7 +727,7 @@ static void _win_main_reset(void)
 
         if (WIN_MAIN_RUNNING == RUNNING_GBA)
             GBA_Reset();
-        else if(WIN_MAIN_RUNNING == RUNNING_GB)
+        else if (WIN_MAIN_RUNNING == RUNNING_GB)
             GB_HardReset();
 
         //if (EmulatorConfig.frameskip == -1)
@@ -815,20 +815,19 @@ static void _win_main_menu_open_gbcamera_viewer(void)
     Win_GB_GBCameraViewerCreate();
 }
 
-
 //------------------------------------------------------------------
 
 // Window Menu
 
 static _gui_menu_entry mm_separator = {
-    " " , NULL, 1
+    " ", NULL, 1
 };
 
 static _gui_menu_entry mmfile_open = {
-    "Load (CTRL+L)" , _win_main_file_explorer_load, 1
+    "Load (CTRL+L)", _win_main_file_explorer_load, 1
 };
 static _gui_menu_entry mmfile_close = {
-    "Close (CTRL+C)" , _win_main_menu_close, 1
+    "Close (CTRL+C)", _win_main_menu_close, 1
 };
 static _gui_menu_entry mmfile_closenosav = {
     "Close without saving", _win_main_menu_close_no_save, 1
@@ -860,16 +859,16 @@ static _gui_menu_list main_menu_file = {
 };
 
 static _gui_menu_entry mmoptions_configuration = {
-    "Configuration" , _win_main_menu_open_configuration_window, 1
+    "Configuration", _win_main_menu_open_configuration_window, 1
 };
 static _gui_menu_entry mmoptions_configure_joysticks = {
-    "Input Configuration" , _win_main_menu_open_configure_input_window, 1
+    "Input Configuration", _win_main_menu_open_configure_input_window, 1
 };
 static _gui_menu_entry mmoptions_mutesound = {
-    "Mute Sound (CTRL+M)" , _win_main_menu_toggle_mute_sound, 1
+    "Mute Sound (CTRL+M)", _win_main_menu_toggle_mute_sound, 1
 };
 static _gui_menu_entry mmoptions_sysinfo = {
-    "System Information" , SysInfoShow, 1
+    "System Information", SysInfoShow, 1
 };
 
 static _gui_menu_entry *mmoptions_elements[] = {
@@ -882,33 +881,33 @@ static _gui_menu_list main_menu_options = {
 };
 
 static _gui_menu_entry mmdebug_disas = {
-    "Disassembler (F5)" , _win_main_menu_open_disassembler, 1
+    "Disassembler (F5)", _win_main_menu_open_disassembler, 1
 };
 static _gui_menu_entry mmdebug_memview = {
-    "Memory Viewer (F6)" , _win_main_menu_open_mem_viewer, 1
+    "Memory Viewer (F6)", _win_main_menu_open_mem_viewer, 1
 };
 static _gui_menu_entry mmdebug_ioview = {
-    "I/O Viewer (F7)" , _win_main_menu_open_io_viewer, 1
+    "I/O Viewer (F7)", _win_main_menu_open_io_viewer, 1
 };
 
 static _gui_menu_entry mmdebug_tileview = {
-    "Tile Viewer" , _win_main_menu_open_tile_viewer, 1
+    "Tile Viewer", _win_main_menu_open_tile_viewer, 1
 };
 static _gui_menu_entry mmdebug_mapview = {
-    "Map Viewer" , _win_main_menu_open_map_viewer, 1
+    "Map Viewer", _win_main_menu_open_map_viewer, 1
 };
 static _gui_menu_entry mmdebug_sprview = {
-    "Sprite Viewer" , _win_main_menu_open_spr_viewer, 1
+    "Sprite Viewer", _win_main_menu_open_spr_viewer, 1
 };
 static _gui_menu_entry mmdebug_palview = {
-    "Palette Viewer" , _win_main_menu_open_pal_viewer, 1
+    "Palette Viewer", _win_main_menu_open_pal_viewer, 1
 };
 
 static _gui_menu_entry mmdebug_sgbview = {
-    "SGB Viewer" , _win_main_menu_open_sgb_viewer, 1
+    "SGB Viewer", _win_main_menu_open_sgb_viewer, 1
 };
 static _gui_menu_entry mmdebug_gbcameraview = {
-    "GB Camera Viewer" , _win_main_menu_open_gbcamera_viewer, 1
+    "GB Camera Viewer", _win_main_menu_open_gbcamera_viewer, 1
 };
 
 static _gui_menu_entry *mmdisas_elements[] = {
@@ -922,13 +921,13 @@ static _gui_menu_list main_menu_debug = {
 };
 
 static _gui_menu_entry mmhelp_readme = {
-    "Readme (F1)" , _win_main_scrollable_text_window_show_readme, 1
+    "Readme (F1)", _win_main_scrollable_text_window_show_readme, 1
 };
 static _gui_menu_entry mmhelp_license = {
-    "License" , _win_main_scrollable_text_window_show_license, 1
+    "License", _win_main_scrollable_text_window_show_license, 1
 };
 static _gui_menu_entry mmhelp_about = {
-    "About" , _win_main_scrollable_text_window_show_about, 1
+    "About", _win_main_scrollable_text_window_show_about, 1
 };
 
 static _gui_menu_entry *mmhelp_elements[] = {
@@ -1003,7 +1002,7 @@ static void _win_main_menu_update_elements_enabled(void)
             if (GB_MapperIsGBCamera())
                 mmdebug_gbcameraview.enabled = 1;
         }
-        else if(WIN_MAIN_RUNNING == RUNNING_GBA)
+        else if (WIN_MAIN_RUNNING == RUNNING_GBA)
         {
             // Enable other debugger windows for GBA
         }
@@ -1023,7 +1022,7 @@ static _gui_element mainwindow_bg;
 
 static _gui_element *mainwindow_gui_elements[] = {
     &mainwindow_bg,
-    &mainwindow_configwin, // in win_main_config.c
+    &mainwindow_configwin,        // in win_main_config.c
     &mainwindow_config_input_win, // in win_main_config_input.c
     &mainwindow_fileexplorer_win,
     &mainwindow_scrollable_text_window,
@@ -1070,9 +1069,9 @@ void Win_MainShowMessage(int type, const char *text)
         //                  &mainwindow_show_message_con,
         //                  50, 50, 256 * 2 - 100, 224 * 2 - 100, "Console");
         GUI_SetScrollableTextWindow(&mainwindow_scrollable_text_window, 25, 25,
-                                _win_main_get_menu_texture_width() - 50,
-                                _win_main_get_menu_texture_height() - 50,
-                                text, "Console");
+                                    _win_main_get_menu_texture_width() - 50,
+                                    _win_main_get_menu_texture_height() - 50,
+                                    text, "Console");
         GUI_ScrollableTextWindowSetEnabled(&mainwindow_scrollable_text_window,
                                            1);
     }
@@ -1081,9 +1080,9 @@ void Win_MainShowMessage(int type, const char *text)
         Win_MainCloseAllSubwindows();
 
         GUI_SetScrollableTextWindow(&mainwindow_scrollable_text_window, 25, 25,
-                                _win_main_get_menu_texture_width() - 50,
-                                _win_main_get_menu_texture_height() - 50,
-                                text, "System Information");
+                                    _win_main_get_menu_texture_width() - 50,
+                                    _win_main_get_menu_texture_height() - 50,
+                                    text, "System Information");
         GUI_ScrollableTextWindowSetEnabled(&mainwindow_scrollable_text_window,
                                            1);
     }
@@ -1206,7 +1205,7 @@ static int Win_MainEventCallback(SDL_Event *e)
                 if (GUI_WindowGetEnabled(&mainwindow_fileexplorer_win))
                 {
                     if (_win_main_file_explorer_windows_selection
-                                            < (FileExplorer_GetNumFiles() - 1))
+                        < (FileExplorer_GetNumFiles() - 1))
                     {
                         _win_main_file_explorer_windows_selection++;
                     }
@@ -1240,7 +1239,7 @@ static int Win_MainEventCallback(SDL_Event *e)
             case SDLK_l:
                 if (SDL_GetModState() & KMOD_CTRL)
                 {
-                    if(WIN_MAIN_MENU_ENABLED == 0)
+                    if (WIN_MAIN_MENU_ENABLED == 0)
                         _win_main_switch_to_menu();
 
                     _win_main_file_explorer_load();
@@ -1284,7 +1283,7 @@ static int Win_MainEventCallback(SDL_Event *e)
                                             (FileExplorer_GetNumFiles() - 1))
         {
             _win_main_file_explorer_windows_selection =
-                                            FileExplorer_GetNumFiles() - 1;
+                    FileExplorer_GetNumFiles() - 1;
         }
 
         WIN_MAIN_MENU_HAS_TO_UPDATE = 1;
@@ -1297,7 +1296,7 @@ static int Win_MainEventCallback(SDL_Event *e)
             _win_main_switch_to_menu_delayed();
         }
         WIN_MAIN_MENU_HAS_TO_UPDATE = 1;
-   }
+    }
     else if (e->type == SDL_MOUSEBUTTONUP)
     {
         WIN_MAIN_MENU_HAS_TO_UPDATE = 1;

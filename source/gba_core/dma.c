@@ -14,7 +14,8 @@
 #include "memory.h"
 #include "video.h"
 
-typedef struct {
+typedef struct
+{
     u32 enabled;
 
     u32 srcaddr;
@@ -78,30 +79,30 @@ void GBA_DMA0Setup(void)
     if (DMA[0].copywords)
     {
         DMA[0].clockstotal =
-            // Read clocks
-            GBA_MemoryGetAccessCyclesNoSeq32(DMA[0].srcaddr)  // 1N+(n-1)S
-            + (GBA_MemoryGetAccessCyclesSeq32(DMA[0].srcaddr)
-                * (DMA[0].num_chunks - 1))
-            // Write clocks
-            + GBA_MemoryGetAccessCyclesNoSeq32(DMA[0].dstaddr)  // 1N+(n-1)S
-            + (GBA_MemoryGetAccessCyclesSeq32(DMA[0].dstaddr)
-                * (DMA[0].num_chunks - 1))
-            // Processing
-            + 2; // 2I
+                // Read clocks
+                GBA_MemoryGetAccessCyclesNoSeq32(DMA[0].srcaddr) // 1N+(n-1)S
+                + (GBA_MemoryGetAccessCyclesSeq32(DMA[0].srcaddr)
+                   * (DMA[0].num_chunks - 1))
+                // Write clocks
+                + GBA_MemoryGetAccessCyclesNoSeq32(DMA[0].dstaddr) // 1N+(n-1)S
+                + (GBA_MemoryGetAccessCyclesSeq32(DMA[0].dstaddr)
+                   * (DMA[0].num_chunks - 1))
+                // Processing
+                + 2; // 2I
     }
     else
     {
         DMA[0].clockstotal =
-            // Read clocks
-            GBA_MemoryGetAccessCyclesNoSeq16(DMA[0].srcaddr) // 1N+(n-1)S
-            + (GBA_MemoryGetAccessCyclesSeq16(DMA[0].srcaddr)
-                * (DMA[0].num_chunks - 1))
-            // Write clocks
-            + GBA_MemoryGetAccessCyclesNoSeq16(DMA[0].dstaddr) // 1N+(n-1)S
-            + (GBA_MemoryGetAccessCyclesSeq16(DMA[0].dstaddr)
-                * (DMA[0].num_chunks - 1))
-            // Processing
-            + 2; // 2I
+                // Read clocks
+                GBA_MemoryGetAccessCyclesNoSeq16(DMA[0].srcaddr) // 1N+(n-1)S
+                + (GBA_MemoryGetAccessCyclesSeq16(DMA[0].srcaddr)
+                   * (DMA[0].num_chunks - 1))
+                // Write clocks
+                + GBA_MemoryGetAccessCyclesNoSeq16(DMA[0].dstaddr) // 1N+(n-1)S
+                + (GBA_MemoryGetAccessCyclesSeq16(DMA[0].dstaddr)
+                   * (DMA[0].num_chunks - 1))
+                // Processing
+                + 2; // 2I
     }
     DMA[0].clocksremaining = DMA[0].clockstotal;
     DMA[0].srcadd = gba_dma_src_add[(REG_DMA0CNT_H >> 7) & 3];
@@ -162,30 +163,30 @@ void GBA_DMA1Setup(void)
     if (DMA[1].copywords)
     {
         DMA[1].clockstotal =
-            // Read clocks
-            GBA_MemoryGetAccessCyclesNoSeq32(DMA[1].srcaddr) // 1N+(n-1)S
-            + (GBA_MemoryGetAccessCyclesSeq32(DMA[1].srcaddr)
-                * (DMA[1].num_chunks - 1))
-            // Write clocks
-            + GBA_MemoryGetAccessCyclesNoSeq32(DMA[1].dstaddr) // 1N+(n-1)S
-            + (GBA_MemoryGetAccessCyclesSeq32(DMA[1].dstaddr)
-                * (DMA[1].num_chunks - 1))
-            // Processing
-            + 2; // 2I
+                // Read clocks
+                GBA_MemoryGetAccessCyclesNoSeq32(DMA[1].srcaddr) // 1N+(n-1)S
+                + (GBA_MemoryGetAccessCyclesSeq32(DMA[1].srcaddr)
+                   * (DMA[1].num_chunks - 1))
+                // Write clocks
+                + GBA_MemoryGetAccessCyclesNoSeq32(DMA[1].dstaddr) // 1N+(n-1)S
+                + (GBA_MemoryGetAccessCyclesSeq32(DMA[1].dstaddr)
+                   * (DMA[1].num_chunks - 1))
+                // Processing
+                + 2; // 2I
     }
     else
     {
         DMA[1].clockstotal =
-            // Read clocks
-            GBA_MemoryGetAccessCyclesNoSeq16(DMA[1].srcaddr) // 1N+(n-1)S
-            + (GBA_MemoryGetAccessCyclesSeq16(DMA[1].srcaddr)
-                * (DMA[1].num_chunks - 1))
-            // Write clocks
-            + GBA_MemoryGetAccessCyclesNoSeq16(DMA[1].dstaddr) // 1N+(n-1)S
-            + (GBA_MemoryGetAccessCyclesSeq16(DMA[1].dstaddr)
-                * (DMA[1].num_chunks - 1))
-            // Processing
-            + 2; // 2I
+                // Read clocks
+                GBA_MemoryGetAccessCyclesNoSeq16(DMA[1].srcaddr) // 1N+(n-1)S
+                + (GBA_MemoryGetAccessCyclesSeq16(DMA[1].srcaddr)
+                   * (DMA[1].num_chunks - 1))
+                // Write clocks
+                + GBA_MemoryGetAccessCyclesNoSeq16(DMA[1].dstaddr) // 1N+(n-1)S
+                + (GBA_MemoryGetAccessCyclesSeq16(DMA[1].dstaddr)
+                   * (DMA[1].num_chunks - 1))
+                // Processing
+                + 2; // 2I
     }
     DMA[1].clocksremaining = DMA[1].clockstotal;
     DMA[1].srcadd = gba_dma_src_add[(REG_DMA1CNT_H >> 7) & 3];
@@ -195,7 +196,7 @@ void GBA_DMA1Setup(void)
         DMA[1].srcadd <<= 1;
         DMA[1].dstadd <<= 1;
     }
-    DMA[1].dst_reload = (((REG_DMA1CNT_H >>5) & 3) == 3);
+    DMA[1].dst_reload = (((REG_DMA1CNT_H >> 5) & 3) == 3);
     DMA[1].starttime = (REG_DMA1CNT_H >> 12) & 3;
     DMA[1].repeat = REG_DMA1CNT_H & BIT(9);
 
@@ -224,30 +225,30 @@ void GBA_DMA2Setup(void)
     if (DMA[2].copywords)
     {
         DMA[2].clockstotal =
-            // Read clocks
-            GBA_MemoryGetAccessCyclesNoSeq32(DMA[2].srcaddr) // 1N+(n-1)S
-            + (GBA_MemoryGetAccessCyclesSeq32(DMA[2].srcaddr)
-                * (DMA[2].num_chunks - 1))
-            // Write clocks
-            + GBA_MemoryGetAccessCyclesNoSeq32(DMA[2].dstaddr) // 1N+(n-1)S
-            + (GBA_MemoryGetAccessCyclesSeq32(DMA[2].dstaddr)
-                * (DMA[2].num_chunks - 1))
-            // Processing
-            + 2; // 2I
+                // Read clocks
+                GBA_MemoryGetAccessCyclesNoSeq32(DMA[2].srcaddr) // 1N+(n-1)S
+                + (GBA_MemoryGetAccessCyclesSeq32(DMA[2].srcaddr)
+                   * (DMA[2].num_chunks - 1))
+                // Write clocks
+                + GBA_MemoryGetAccessCyclesNoSeq32(DMA[2].dstaddr) // 1N+(n-1)S
+                + (GBA_MemoryGetAccessCyclesSeq32(DMA[2].dstaddr)
+                   * (DMA[2].num_chunks - 1))
+                // Processing
+                + 2; // 2I
     }
     else
     {
         DMA[2].clockstotal =
-            // Read clocks
-            GBA_MemoryGetAccessCyclesNoSeq16(DMA[2].srcaddr) // 1N+(n-1)S
-            + (GBA_MemoryGetAccessCyclesSeq16(DMA[2].srcaddr)
-                * (DMA[2].num_chunks - 1))
-            // Write clocks
-            + GBA_MemoryGetAccessCyclesNoSeq16(DMA[2].dstaddr) // 1N+(n-1)S
-            + (GBA_MemoryGetAccessCyclesSeq16(DMA[2].dstaddr)
-                * (DMA[2].num_chunks - 1))
-            // Processing
-            + 2; //2I
+                // Read clocks
+                GBA_MemoryGetAccessCyclesNoSeq16(DMA[2].srcaddr) // 1N+(n-1)S
+                + (GBA_MemoryGetAccessCyclesSeq16(DMA[2].srcaddr)
+                   * (DMA[2].num_chunks - 1))
+                // Write clocks
+                + GBA_MemoryGetAccessCyclesNoSeq16(DMA[2].dstaddr) // 1N+(n-1)S
+                + (GBA_MemoryGetAccessCyclesSeq16(DMA[2].dstaddr)
+                   * (DMA[2].num_chunks - 1))
+                // Processing
+                + 2; //2I
     }
     DMA[2].clocksremaining = DMA[2].clockstotal;
     DMA[2].srcadd = gba_dma_src_add[(REG_DMA2CNT_H >> 7) & 3];
@@ -286,30 +287,30 @@ void GBA_DMA3Setup(void)
     if (DMA[3].copywords)
     {
         DMA[3].clockstotal =
-            // Read clocks
-            GBA_MemoryGetAccessCyclesNoSeq32(DMA[3].srcaddr) // 1N+(n-1)S
-            + (GBA_MemoryGetAccessCyclesSeq32(DMA[3].srcaddr)
-                * (DMA[3].num_chunks - 1))
-            // Write clocks
-            + GBA_MemoryGetAccessCyclesNoSeq32(DMA[3].dstaddr) // 1N+(n-1)S
-            + (GBA_MemoryGetAccessCyclesSeq32(DMA[3].dstaddr)
-                * (DMA[3].num_chunks - 1))
-            // Processing
-            + 2; // 2I
+                // Read clocks
+                GBA_MemoryGetAccessCyclesNoSeq32(DMA[3].srcaddr) // 1N+(n-1)S
+                + (GBA_MemoryGetAccessCyclesSeq32(DMA[3].srcaddr)
+                   * (DMA[3].num_chunks - 1))
+                // Write clocks
+                + GBA_MemoryGetAccessCyclesNoSeq32(DMA[3].dstaddr) // 1N+(n-1)S
+                + (GBA_MemoryGetAccessCyclesSeq32(DMA[3].dstaddr)
+                   * (DMA[3].num_chunks - 1))
+                // Processing
+                + 2; // 2I
     }
     else
     {
         DMA[3].clockstotal =
-            // Read clocks
-            GBA_MemoryGetAccessCyclesNoSeq16(DMA[3].srcaddr)  // 1N+(n-1)S
-            + (GBA_MemoryGetAccessCyclesSeq16(DMA[3].srcaddr)
-                * (DMA[3].num_chunks - 1))
-            // Write clocks
-            + GBA_MemoryGetAccessCyclesNoSeq16(DMA[3].dstaddr) // 1N+(n-1)S
-            + (GBA_MemoryGetAccessCyclesSeq16(DMA[3].dstaddr)
-                * (DMA[3].num_chunks - 1))
-            // Processing
-            + 2; // 2I
+                // Read clocks
+                GBA_MemoryGetAccessCyclesNoSeq16(DMA[3].srcaddr) // 1N+(n-1)S
+                + (GBA_MemoryGetAccessCyclesSeq16(DMA[3].srcaddr)
+                   * (DMA[3].num_chunks - 1))
+                // Write clocks
+                + GBA_MemoryGetAccessCyclesNoSeq16(DMA[3].dstaddr) // 1N+(n-1)S
+                + (GBA_MemoryGetAccessCyclesSeq16(DMA[3].dstaddr)
+                   * (DMA[3].num_chunks - 1))
+                // Processing
+                + 2; // 2I
     }
     if ((DMA[3].srcaddr & 0x08000000) && (DMA[3].dstaddr & 0x08000000))
         DMA[3].clockstotal += 2; // Processing 4I
@@ -613,11 +614,11 @@ static s32 GBA_DMA2Update(s32 clocks)
         return 0x7FFFFFFF;
     }
 
-    if(DMA[2].clocksremaining == DMA[2].clockstotal)
+    if (DMA[2].clocksremaining == DMA[2].clockstotal)
     {
         u32 copy = 0;
 
-        switch(DMA[2].starttime)
+        switch (DMA[2].starttime)
         {
             case START_NOW:
             {
@@ -924,7 +925,7 @@ void GBA_DMASoundRequestData(int A, int B)
     if (DMA[1].starttime == START_SPECIAL)
     {
         if ((A && (DMA[1].dstaddr == FIFO_A))
-                || (B && (DMA[1].dstaddr == FIFO_B)))
+            || (B && (DMA[1].dstaddr == FIFO_B)))
         {
             // Copy words
             for (int i = 0; i < 4; i++)
@@ -946,7 +947,7 @@ void GBA_DMASoundRequestData(int A, int B)
     if (DMA[2].starttime == START_SPECIAL)
     {
         if ((A && (DMA[2].dstaddr == FIFO_A))
-                || (B && (DMA[2].dstaddr == FIFO_B)))
+            || (B && (DMA[2].dstaddr == FIFO_B)))
         {
             // Copy words
             for (int i = 0; i < 4; i++)

@@ -114,7 +114,8 @@ static void GB_MBC1Write(u32 address, u32 value)
         case 0xB:
             if (mem->RAMEnabled == 0)
                 return;
-            else mem->RAM_Curr[address - 0xA000] = value;
+            else
+                mem->RAM_Curr[address - 0xA000] = value;
             break;
         default:
             //Debug_DebugMsgArg("MBC1 WROTE - %02x to %04x", value, address);
@@ -251,7 +252,7 @@ static void GB_MBC3Write(u32 address, u32 value)
                         GameBoy.Emulator.Timer.carry = (value & (1 << 7)) >> 7;
                         GameBoy.Emulator.Timer.halt = (value & (1 << 6)) >> 6;
                         GameBoy.Emulator.LatchedTime.halt =
-                                                    GameBoy.Emulator.Timer.halt;
+                                GameBoy.Emulator.Timer.halt;
                         return;
                     default:
                         return;
@@ -453,9 +454,9 @@ static void GB_MBC7Write(u32 address, u32 value)
                         if (mbc7->writeEnable)
                         {
                             mem->RAM_Curr[mbc7->address * 2] =
-                                                            mbc7->buffer >> 8;
+                                    mbc7->buffer >> 8;
                             mem->RAM_Curr[mbc7->address * 2 + 1] =
-                                                            mbc7->buffer & 0xFF;
+                                    mbc7->buffer & 0xFF;
                         }
                         mbc7->state = 0;
                         mbc7->value = 1;
@@ -543,9 +544,9 @@ static void GB_MBC7Write(u32 address, u32 value)
                                                     for (int i = 0; i < 256; i++)
                                                     {
                                                         mem->RAM_Curr[i * 2] =
-                                                            mbc7->buffer >> 8;
+                                                                mbc7->buffer >> 8;
                                                         mem->RAM_Curr[i * 2 + 1] =
-                                                            mbc7->buffer & 0xFF;
+                                                                mbc7->buffer & 0xFF;
                                                     }
                                                 }
                                                 mbc7->state = 5;
@@ -585,8 +586,8 @@ static void GB_MBC7Write(u32 address, u32 value)
                                             mbc7->state = 4;
                                             mbc7->count = 0;
                                             mbc7->buffer =
-                                                (mem->RAM_Curr[mbc7->address * 2] << 8)
-                                                | (mem->RAM_Curr[mbc7->address * 2 + 1]);
+                                                    (mem->RAM_Curr[mbc7->address * 2] << 8)
+                                                    | (mem->RAM_Curr[mbc7->address * 2 + 1]);
                                         }
                                         break;
                                     case 3:
@@ -642,10 +643,10 @@ static void GB_MMM01Write(u32 address, u32 value)
                 if (value & 0x40) // Taito Pack
                 {
                     mem->ROM_Base =
-                        mem->ROM_Switch[GameBoy.Emulator.MMM01.offset &
-                                            (GameBoy.Emulator.ROM_Banks - 1)];
+                            mem->ROM_Switch[GameBoy.Emulator.MMM01.offset
+                            & (GameBoy.Emulator.ROM_Banks - 1)];
                     mem->selected_rom = (GameBoy.Emulator.MMM01.offset + 1)
-                                      & (GameBoy.Emulator.ROM_Banks - 1);
+                                        & (GameBoy.Emulator.ROM_Banks - 1);
                     mem->ROM_Curr = mem->ROM_Switch[mem->selected_rom];
                     GameBoy.Emulator.EnableBank0Switch = 0;
                 }
@@ -656,14 +657,14 @@ static void GB_MMM01Write(u32 address, u32 value)
             if (GameBoy.Emulator.EnableBank0Switch == 1) // Taito Pack
             {
                 GameBoy.Emulator.MMM01.offset =
-                    0x02 // first 2 banks, used by game selection menu
-                    + (value & 0x1F);
+                        0x02 // first 2 banks, used by game selection menu
+                        + (value & 0x1F);
             }
             else
             {
                 // Taito Pack
                 mem->selected_rom = (value & GameBoy.Emulator.MMM01.mask)
-                                  + GameBoy.Emulator.MMM01.offset;
+                                    + GameBoy.Emulator.MMM01.offset;
                 mem->ROM_Curr = mem->ROM_Switch[mem->selected_rom];
             }
             //Debug_DebugMsgArg("MMM01 WROTE - %02x to %04x", value, address);
@@ -784,7 +785,7 @@ static u32 GB_NoMapperRead(unused__ u32 address)
     return 0xFF;
 }
 
-//Used by MBC1, HuC-1, MBC5 (and rumble), MBC6, MMM01
+// Used by MBC1, HuC-1, MBC5 (and rumble), MBC6, MMM01
 static u32 GB_MBC1Read(u32 address)
 {
     _GB_MEMORY_ *mem = &GameBoy.Memory;
@@ -833,8 +834,8 @@ static u32 GB_MBC3Read(u32 address)
                 return GameBoy.Emulator.LatchedTime.days & 0xFF;
             case 0x0C: // carry-halt- - - - - -upper bit days
                 return (GameBoy.Emulator.LatchedTime.days >> 8)
-                     | (GameBoy.Emulator.LatchedTime.halt << 6)
-                     | (GameBoy.Emulator.LatchedTime.carry << 7);
+                       | (GameBoy.Emulator.LatchedTime.halt << 6)
+                       | (GameBoy.Emulator.LatchedTime.carry << 7);
             default:
                 return 0xFF;
         }

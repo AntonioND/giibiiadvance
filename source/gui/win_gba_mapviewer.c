@@ -243,17 +243,17 @@ void Win_GBAMapViewerUpdate(void)
             GUI_RadioButtonSetPressed(&gba_mapviewer_window_gui,
                                       &gba_mapview_bg0_radbtn);
         }
-        else if(gba_mapview_selected_bg == 1)
+        else if (gba_mapview_selected_bg == 1)
         {
             GUI_RadioButtonSetPressed(&gba_mapviewer_window_gui,
                                       &gba_mapview_bg1_radbtn);
         }
-        else if(gba_mapview_selected_bg == 2)
+        else if (gba_mapview_selected_bg == 2)
         {
             GUI_RadioButtonSetPressed(&gba_mapviewer_window_gui,
                                       &gba_mapview_bg2_radbtn);
         }
-        else if(gba_mapview_selected_bg == 3)
+        else if (gba_mapview_selected_bg == 3)
         {
             GUI_RadioButtonSetPressed(&gba_mapviewer_window_gui,
                                       &gba_mapview_bg3_radbtn);
@@ -284,7 +284,7 @@ void Win_GBAMapViewerUpdate(void)
             control = REG_BG3CNT;
             break;
         default:
-                return;
+            return;
     }
 
     // 1 = text, 2 = affine, 3,4,5 = bmp mode 3,4,5
@@ -319,7 +319,7 @@ void Win_GBAMapViewerUpdate(void)
     else if (gba_mapview_bgmode == 1) // Text
     {
         static const u32 text_bg_size[4][2] = {
-            {256, 256}, {512, 256}, {256, 512}, {512, 512}
+            { 256, 256 }, { 512, 256 }, { 256, 512 }, { 512, 512 }
         };
 
         u32 CBB = (((control >> 2) & 3) * (16 * 1024)) + 0x06000000;
@@ -350,7 +350,7 @@ void Win_GBAMapViewerUpdate(void)
         u32 SBB = (((control >> 8) & 0x1F) * (2 * 1024)) + 0x06000000;
         gba_mapview_sizex = affine_bg_size[control >> 14];
         gba_mapview_sizey = gba_mapview_sizex;
-        int mosaic = (control & BIT(6)) != 0; //mosaic
+        int mosaic = (control & BIT(6)) != 0; // mosaic
         int wrap = (control & BIT(13)) != 0;
         int prio = control & 3;
         GUI_ConsoleModePrintf(&gba_mapview_con, 0, 0,
@@ -387,7 +387,7 @@ void Win_GBAMapViewerUpdate(void)
     }
     else if (gba_mapview_bgmode == 4) // BG2 mode 4
     {
-        int mosaic = (control & BIT(6)) != 0; //mosaic
+        int mosaic = (control & BIT(6)) != 0; // mosaic
         int prio = control & 3;
         u32 SBB = 0x06000000 + (gba_mapview_selected_bitmap_page ? 0xA000 : 0);
         gba_mapview_sizex = 240;
@@ -473,9 +473,9 @@ void Win_GBAMapViewerUpdate(void)
     if (gba_mapview_bgmode == 1)
     {
         u8 *charbaseblockptr =
-            (u8 *)&Mem.vram[((control >> 2) & 3) * (16 * 1024)];
+                (u8 *)&Mem.vram[((control >> 2) & 3) * (16 * 1024)];
         u16 *scrbaseblockptr =
-            (u16 *)&Mem.vram[((control >> 8) & 0x1F) * (2 * 1024)];
+                (u16 *)&Mem.vram[((control >> 8) & 0x1F) * (2 * 1024)];
 
         u32 TileSEIndex = se_index(gba_mapview_selected_tilex,
                                    gba_mapview_selected_tiley,
@@ -489,7 +489,7 @@ void Win_GBAMapViewerUpdate(void)
 
             for (int i = 0; i < 8; i++)
             {
-                for(int j = 0; j < 8; j++)
+                for (int j = 0; j < 8; j++)
                 {
                     u8 dat_ = data[j * 8 + i];
                     u32 color = rgb16to32(((u16 *)Mem.pal_ram)[dat_]);
@@ -498,8 +498,8 @@ void Win_GBAMapViewerUpdate(void)
                 }
             }
 
-            u32 address = ((control >> 8) & 0x1F) * (2 * 1024)
-                        + TileSEIndex + 0x06000000;
+            u32 address = ((control >> 8) & 0x1F) * (2 * 1024) + TileSEIndex
+                          + 0x06000000;
 
             GUI_ConsoleModePrintf(&gba_mapview_tileinfo_con, 0, 0,
                                   "Tile: %d (%s%s)\n"
@@ -507,10 +507,9 @@ void Win_GBAMapViewerUpdate(void)
                                   "Pal: --\n"
                                   "Ad: 0x%08X\n",
                                   SE & 0x3FF, (SE & BIT(10)) ? "H" : "-",
-                                  (SE & BIT(11)) ? "V" : "-" ,
+                                  (SE & BIT(11)) ? "V" : "-",
                                   gba_mapview_selected_tilex,
-                                  gba_mapview_selected_tiley,
-                                  address);
+                                  gba_mapview_selected_tiley, address);
         }
         else // 16 Colors
         {
@@ -532,8 +531,8 @@ void Win_GBAMapViewerUpdate(void)
                 }
             }
 
-            u32 address = ((control >> 8) & 0x1F) * (2 * 1024)
-                        + TileSEIndex + 0x06000000;
+            u32 address = ((control >> 8) & 0x1F) * (2 * 1024) + TileSEIndex
+                          + 0x06000000;
 
             GUI_ConsoleModePrintf(&gba_mapview_tileinfo_con, 0, 0,
                                   "Tile: %d (%s%s)\n"
@@ -541,7 +540,7 @@ void Win_GBAMapViewerUpdate(void)
                                   "Pal: %d\n"
                                   "Ad: 0x%08X\n",
                                   SE & 0x3FF, (SE & BIT(10)) ? "H" : "-",
-                                  (SE & BIT(11)) ? "V" : "-" ,
+                                  (SE & BIT(11)) ? "V" : "-",
                                   gba_mapview_selected_tilex,
                                   gba_mapview_selected_tiley,
                                   (SE >> 12) & 0xF, address);
@@ -574,7 +573,7 @@ void Win_GBAMapViewerUpdate(void)
         }
 
         u32 address = ((control >> 8) & 0x1F) * (2 * 1024)
-                    + TileSEIndex + 0x06000000;
+                      + TileSEIndex + 0x06000000;
 
         GUI_ConsoleModePrintf(&gba_mapview_tileinfo_con, 0, 0,
                               "Tile: %d (--)\n"
@@ -713,7 +712,8 @@ static void _win_gba_mapviewer_dump_btn_callback(void)
         return;
 
     char *buf = malloc(gba_mapview_sizex * gba_mapview_sizey * 4);
-    if(buf == NULL) return;
+    if (buf == NULL)
+        return;
 
     for (int j = 0; j < gba_mapview_sizey; j++)
     {
@@ -767,7 +767,7 @@ int Win_GBAMapViewerCreate(void)
                       _win_gba_mapviewer_bgnum_radbtn_callback);
 
     GUI_SetLabel(&gba_mapview_page_label,
-                 12 + 15 * FONT_WIDTH, 6, 4 * FONT_WIDTH,FONT_HEIGHT,
+                 12 + 15 * FONT_WIDTH, 6, 4 * FONT_WIDTH, FONT_HEIGHT,
                  "Page");
     GUI_SetRadioButton(&gba_mapview_page0_radbtn,
                        12 + 15 * FONT_WIDTH, 24, 8 * FONT_WIDTH, 18,
@@ -785,7 +785,7 @@ int Win_GBAMapViewerCreate(void)
                   19 + 15 * FONT_WIDTH, 71, FONT_WIDTH * 6, FONT_HEIGHT * 2,
                   "Dump", _win_gba_mapviewer_dump_btn_callback);
 
-    GUI_SetTextBox(&gba_mapview_textbox,&gba_mapview_con,
+    GUI_SetTextBox(&gba_mapview_textbox, &gba_mapview_con,
                    6, 108, 25 * FONT_WIDTH, 7 * FONT_HEIGHT, NULL);
 
     GUI_SetTextBox(&gba_mapview_tileinfo_textbox, &gba_mapview_tileinfo_con,

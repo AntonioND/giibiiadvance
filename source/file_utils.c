@@ -156,7 +156,7 @@ void FileLoad(const char *filename, void **buffer, unsigned int *size_)
         return;
     }
 
-    if(fread(*buffer, size, 1, f) != 1)
+    if (fread(*buffer, size, 1, f) != 1)
     {
         Debug_ErrorMsgArg("Error while reading: %s", filename);
         fclose(f);

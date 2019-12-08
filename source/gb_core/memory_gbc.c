@@ -19,8 +19,8 @@
 #include "general.h"
 #include "interrupts.h"
 #include "memory.h"
-#include "ppu_gbc.h"
 #include "ppu.h"
+#include "ppu_gbc.h"
 #include "serial.h"
 #include "sgb.h"
 #include "sound.h"
@@ -110,7 +110,8 @@ u32 GB_MemRead8_GBC_BootEnabled(u32 address)
         default:
             Debug_ErrorMsgArg("Read address %04X\n"
                               "PC: %04X\n"
-                              "ROM: %d", address, GameBoy.CPU.R16.PC,
+                              "ROM: %d",
+                              address, GameBoy.CPU.R16.PC,
                               GameBoy.Memory.selected_rom);
 
             return GB_MemReadReg8(address & 0xFFFF);
@@ -203,7 +204,8 @@ u32 GB_MemRead8_GBC_BootDisabled(u32 address)
         default:
             Debug_ErrorMsgArg("Read address %04X\n"
                               "PC: %04X\n"
-                              "ROM: %d", address, GameBoy.CPU.R16.PC,
+                              "ROM: %d",
+                              address, GameBoy.CPU.R16.PC,
                               GameBoy.Memory.selected_rom);
             return GB_MemReadReg8(address & 0xFFFF);
     }
@@ -264,7 +266,7 @@ void GB_MemWrite8_GBC(u32 address, u32 value)
             {
 #ifdef VRAM_MEM_CHECKING
                 if (GameBoy.Emulator.lcd_on
-                        && (GameBoy.Emulator.ScreenMode & 0x02))
+                    && (GameBoy.Emulator.ScreenMode & 0x02))
                     return;
 #endif
                 mem->ObjAttrMem[address - 0xFE00] = value;
@@ -300,7 +302,8 @@ void GB_MemWrite8_GBC(u32 address, u32 value)
         default:
             Debug_ErrorMsgArg("Wrote address %04x\n"
                               "PC: %04x\n"
-                              "ROM: %d", address, GameBoy.CPU.R16.PC,
+                              "ROM: %d",
+                              address, GameBoy.CPU.R16.PC,
                               GameBoy.Memory.selected_rom);
             GB_MemWrite8(address & 0xFFFF, value);
             return;
@@ -322,7 +325,7 @@ u32 GB_MemReadReg8_GBC(u32 address)
         case SC_REG:
             GB_SerialUpdateClocksCounterReference(GB_CPUClockCounterGet());
             return mem->IO_Ports[SC_REG - 0xFF00]
-                 | ((GameBoy.Emulator.CGBEnabled == 1) ? 0x7C : 0x7E);
+                   | ((GameBoy.Emulator.CGBEnabled == 1) ? 0x7C : 0x7E);
 
         // Timer
         case TMA_REG:
@@ -375,7 +378,7 @@ u32 GB_MemReadReg8_GBC(u32 address)
 
         // Speed switch
         case KEY1_REG:
-            if(GameBoy.Emulator.CGBEnabled == 0)
+            if (GameBoy.Emulator.CGBEnabled == 0)
                 return 0xFF;
             return mem->IO_Ports[KEY1_REG - 0xFF00] | 0x7E;
 
@@ -410,7 +413,7 @@ u32 GB_MemReadReg8_GBC(u32 address)
             GB_PPUUpdateClocksCounterReference(GB_CPUClockCounterGet());
             if (GameBoy.Emulator.lcd_on)
                 return mem->IO_Ports[STAT_REG - 0xFF00] | 0x80;
-            return (mem->IO_Ports[STAT_REG-0xFF00] | 0x80) & 0xFC;
+            return (mem->IO_Ports[STAT_REG - 0xFF00] | 0x80) & 0xFC;
 
         case P1_REG:
             //GB_SGBUpdate(GB_CPUClockCounterGet()); TODO
@@ -422,7 +425,7 @@ u32 GB_MemReadReg8_GBC(u32 address)
 
             u32 p1_reg = mem->IO_Ports[P1_REG - 0xFF00];
             int Keys = GB_Input_Get(0);
-            if ((p1_reg & (1<<5)) == 0) // A-B-SEL-STA
+            if ((p1_reg & (1 << 5)) == 0) // A-B-SEL-STA
             {
                 result |= (Keys & KEY_A) ? JOY_A : 0;
                 result |= (Keys & KEY_B) ? JOY_B : 0;
@@ -499,7 +502,8 @@ u32 GB_MemReadReg8_GBC(u32 address)
 
             if (mem->IO_Ports[NR52_REG - 0xFF00] & (1 << 2)) // If playing...
                 return 0xFF;
-            else return mem->IO_Ports[address - 0xFF00];
+            else
+                return mem->IO_Ports[address - 0xFF00];
 
         case LY_REG:
             if (GameBoy.Emulator.lcd_on)
@@ -682,7 +686,8 @@ void GB_MemWriteReg8_GBC(u32 address, u32 value)
 
         // Video ram bank
         case VBK_REG:
-            if(GameBoy.Emulator.CGBEnabled == 0) return;
+            if (GameBoy.Emulator.CGBEnabled == 0)
+                return;
             GB_MemoryWriteVBK(value);
             return;
 
@@ -726,7 +731,7 @@ void GB_MemWriteReg8_GBC(u32 address, u32 value)
             return;
         case NR52_REG:
             GB_SoundUpdateClocksCounterReference(GB_CPUClockCounterGet());
-            mem->IO_Ports[NR52_REG - 0xFF00] &= 0x0F; //Status flags
+            mem->IO_Ports[NR52_REG - 0xFF00] &= 0x0F; // Status flags
             mem->IO_Ports[NR52_REG - 0xFF00] |= (value & 0xF0);
             GB_SoundRegWrite(address, value);
             return;
@@ -773,7 +778,7 @@ void GB_MemWriteReg8_GBC(u32 address, u32 value)
             if (GameBoy.Emulator.ScreenMode == 3 && GameBoy.Emulator.lcd_on)
                 return;
 #endif
-            u8 index = mem->IO_Ports[BCPS_REG-0xFF00] & 0x3F;
+            u8 index = mem->IO_Ports[BCPS_REG - 0xFF00] & 0x3F;
             GameBoy.Emulator.bg_pal[index] = value;
             mem->IO_Ports[BCPD_REG - 0xFF00] = value;
 
@@ -781,7 +786,7 @@ void GB_MemWriteReg8_GBC(u32 address, u32 value)
             {
                 u32 index = (mem->IO_Ports[BCPS_REG - 0xFF00] + 1) & 0x3F;
                 index |= (mem->IO_Ports[BCPS_REG - 0xFF00] & (1 << 7))
-                       | (1 << 6);
+                         | (1 << 6);
                 mem->IO_Ports[BCPS_REG - 0xFF00] = index;
             }
             return;
@@ -802,7 +807,7 @@ void GB_MemWriteReg8_GBC(u32 address, u32 value)
             if (GameBoy.Emulator.ScreenMode == 3 && GameBoy.Emulator.lcd_on)
                 return;
 #endif
-            u8 index = mem->IO_Ports[OCPS_REG-0xFF00] & 0x3F;
+            u8 index = mem->IO_Ports[OCPS_REG - 0xFF00] & 0x3F;
             GameBoy.Emulator.spr_pal[index] = value;
             mem->IO_Ports[OCPD_REG - 0xFF00] = value;
 
@@ -810,7 +815,7 @@ void GB_MemWriteReg8_GBC(u32 address, u32 value)
             {
                 u32 index = (mem->IO_Ports[OCPS_REG - 0xFF00] + 1) & 0x3F;
                 index |= (mem->IO_Ports[OCPS_REG - 0xFF00] & (1 << 7))
-                       | (1 << 6);
+                         | (1 << 6);
                 mem->IO_Ports[OCPS_REG - 0xFF00] = index;
             }
             return;
@@ -820,7 +825,7 @@ void GB_MemWriteReg8_GBC(u32 address, u32 value)
             if (GameBoy.Emulator.CGBEnabled == 0)
                 return;
 
-            mem->IO_Ports[RP_REG-0xFF00] |= 0x3C;
+            mem->IO_Ports[RP_REG - 0xFF00] |= 0x3C;
             return;
 
         // Undocumented registers...
@@ -865,14 +870,14 @@ void GB_MemWriteReg8_GBC(u32 address, u32 value)
                 GameBoy.Emulator.enable_boot_rom = 0;
 
                 if (GameBoy.Emulator.CGBEnabled
-                            && (mem->IO_Ports[0xFF6C - 0xFF00] & 1))
+                    && (mem->IO_Ports[0xFF6C - 0xFF00] & 1))
                 {
                     //if (value == 0x11) // CGB
 
                     GameBoy.Emulator.CGBEnabled = 0;
                     GameBoy.Emulator.gbc_in_gb_mode = 1;
                     GameBoy.Emulator.DrawScanlineFn =
-                                                &GBC_GB_ScreenDrawScanline;
+                            &GBC_GB_ScreenDrawScanline;
                 }
 
                 GB_MemUpdateReadWriteFunctionPointers();

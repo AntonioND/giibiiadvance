@@ -52,11 +52,13 @@ static const s8 GB_SquareWave[4][32] = {
 
 static s8 GB_WavePattern[32];
 
-extern const u8 gb_noise_7[16]; // In file noise.c
+extern const u8 gb_noise_7[16];    // In file noise.c
 extern const u8 gb_noise_15[4096]; // In file noise.c
 
-typedef struct {
-    struct { // Tone & Sweep
+typedef struct
+{
+    struct // Tone & Sweep
+    {
         u8 reg[5];
 
         s32 freq;
@@ -86,7 +88,8 @@ typedef struct {
         u32 samplecount;
     } Chn1;
 
-    struct { // Tone
+    struct // Tone
+    {
         u8 reg[5];
 
         s32 freq;
@@ -109,7 +112,8 @@ typedef struct {
         u32 samplecount;
     } Chn2;
 
-    struct { // Wave Output
+    struct // Wave Output
+    {
         u8 reg[5];
 
         u32 playing;
@@ -129,7 +133,8 @@ typedef struct {
         u32 samplecount;
     } Chn3;
 
-    struct { // Noise
+    struct // Noise
+    {
         u8 reg[5];
 
         u32 shift;
@@ -370,7 +375,7 @@ void GB_SoundLoadWave(void)
 
     s8 *bufferptr = GB_WavePattern;
 
-    for (int count = 0x30; count < 0x40; count ++)
+    for (int count = 0x30; count < 0x40; count++)
     {
         *bufferptr++ = (mem->IO_Ports[count] & 0xF0) - 127;
         *bufferptr++ = ((mem->IO_Ports[count] & 0xF) << 4) - 127;
@@ -484,9 +489,9 @@ void GB_SoundMix(void)
         outvalue_right = -32768;
 
     Sound.buffer[Sound.buffer_next_input_sample++] =
-                            (outvalue_left * EmulatorConfig.volume) / 128;
+            (outvalue_left * EmulatorConfig.volume) / 128;
     Sound.buffer[Sound.buffer_next_input_sample++] =
-                            (outvalue_right * EmulatorConfig.volume) / 128;
+            (outvalue_right * EmulatorConfig.volume) / 128;
     Sound.buffer_next_input_sample &= GB_BUFFER_SAMPLES - 1;
 }
 
@@ -798,7 +803,7 @@ void GB_SoundRegWrite(u32 address, u32 value)
             };
 
             Sound.Chn4.outfreq = NoiseFreqRatio[Sound.Chn4.freq_ratio]
-                               >> (Sound.Chn4.shift + 1);
+                                 >> (Sound.Chn4.shift + 1);
             if (Sound.Chn4.outfreq > (1 << 18))
                 Sound.Chn4.outfreq = 1 << 18;
             return;
@@ -829,7 +834,6 @@ void GB_SoundRegWrite(u32 address, u32 value)
                 //mem->IO_Ports[NR52_REG - 0xFF00] &= ~(1 << 3);
             }
             return;
-
 
         // Control
         // -------
@@ -1027,19 +1031,19 @@ void GB_SoundUpdateClocksCounterReference(int reference_clocks)
                         if (Sound.Chn1.sweepinc)
                         {
                             Sound.Chn1.sweepfreq += Sound.Chn1.sweepfreq
-                                                 / (1 << Sound.Chn1.sweepshift);
+                                                    / (1 << Sound.Chn1.sweepshift);
                         }
                         else
                         {
                             Sound.Chn1.sweepfreq -= Sound.Chn1.sweepfreq
-                                                 / (1 << Sound.Chn1.sweepshift);
+                                                    / (1 << Sound.Chn1.sweepshift);
                         }
 
                         // Incorrect, to prevent a "divide by zero" exception
                         Sound.Chn1.sweepfreq &= 2047;
 
                         Sound.Chn1.outfreq = 131072
-                                           / (2048 - Sound.Chn1.sweepfreq);
+                                             / (2048 - Sound.Chn1.sweepfreq);
                     }
                     else
                     {
@@ -1126,7 +1130,7 @@ void GB_SoundUpdateClocksCounterReference(int reference_clocks)
                 {
                     if (Sound.Chn4.stepsleft > 0)
                     {
-                        Sound.Chn4.stepsleft --;
+                        Sound.Chn4.stepsleft--;
                     }
                     else
                     {

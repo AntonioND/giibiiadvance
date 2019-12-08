@@ -9,17 +9,17 @@
 #include <SDL.h>
 
 #include "../debug_utils.h"
-#include "../window_handler.h"
 #include "../font_utils.h"
 #include "../general_utils.h"
+#include "../window_handler.h"
 
 #include "win_gba_debugger.h"
 #include "win_main.h"
 #include "win_utils.h"
 
-#include "../gba_core/gba.h"
 #include "../gba_core/cpu.h"
 #include "../gba_core/disassembler.h"
+#include "../gba_core/gba.h"
 #include "../gba_core/memory.h"
 
 //------------------------------------------------------------------------------
@@ -56,7 +56,7 @@ static _gui_element gba_disassembler_disassembly_mode_label;
 static _gui_element gba_disassembler_auto_radbtn, gba_disassembler_arm_radbtn,
                     gba_disassembler_thumb_radbtn;
 
-static _gui_element * gba_disassembler_window_gui_elements[] = {
+static _gui_element *gba_disassembler_window_gui_elements[] = {
     &gba_disassembly_textbox,
     &gba_regs_textbox,
     &gba_disassembler_step_btn,
@@ -107,18 +107,18 @@ void Win_GBADisassemblerUpdate(void)
 
         u32 address = cpu->R[R_PC];
 
-        if (((disassemble_mode == GBA_DISASM_CPU_AUTO) &&
-             (cpu->EXECUTION_MODE == EXEC_ARM)) ||
-            (disassemble_mode == GBA_DISASM_CPU_ARM)) // ARM
+        if (((disassemble_mode == GBA_DISASM_CPU_AUTO)
+             && (cpu->EXECUTION_MODE == EXEC_ARM))
+            || (disassemble_mode == GBA_DISASM_CPU_ARM)) // ARM
         {
-            if(address > ((CPU_DISASSEMBLER_MAX_INSTRUCTIONS / 2) - 2) * 4)
+            if (address > ((CPU_DISASSEMBLER_MAX_INSTRUCTIONS / 2) - 2) * 4)
                 address -= ((CPU_DISASSEMBLER_MAX_INSTRUCTIONS / 2) - 2) * 4;
             else
                 address = 0;
         }
         else // THUMB
         {
-            if(address > ((CPU_DISASSEMBLER_MAX_INSTRUCTIONS / 2) - 2) * 2)
+            if (address > ((CPU_DISASSEMBLER_MAX_INSTRUCTIONS / 2) - 2) * 2)
                 address -= ((CPU_DISASSEMBLER_MAX_INSTRUCTIONS / 2) - 2) * 2;
             else
                 address = 0;
@@ -179,7 +179,7 @@ void Win_GBADisassemblerUpdate(void)
 
             if (GBA_DebugIsBreakpoint(address))
             {
-                if(address == cpu->R[R_PC])
+                if (address == cpu->R[R_PC])
                 {
                     GUI_ConsoleColorizeLine(&gba_disassembly_con, i,
                                             0xFFFF8000);
@@ -190,7 +190,7 @@ void Win_GBADisassemblerUpdate(void)
                                             0xFF0000FF);
                 }
             }
-            else if(address == cpu->R[R_PC])
+            else if (address == cpu->R[R_PC])
             {
                 GUI_ConsoleColorizeLine(&gba_disassembly_con, i, 0xFFFFFF00);
             }
@@ -226,7 +226,7 @@ void Win_GBADisassemblerUpdate(void)
                                             0xFF0000FF);
                 }
             }
-            else if(address == cpu->R[R_PC])
+            else if (address == cpu->R[R_PC])
             {
                 GUI_ConsoleColorizeLine(&gba_disassembly_con, i, 0xFFFFFF00);
             }

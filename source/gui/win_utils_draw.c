@@ -134,10 +134,8 @@ static void _gui_draw_menu(_gui_menu *menu, char *buffer, int w, int h)
                       0, x, FONT_HEIGHT, FONT_HEIGHT + (FONT_HEIGHT / 2) - 1);
 
     GUI_Draw_SetDrawingColor(0, 0, 0);
-    GUI_Draw_HorizontalLine(buffer, w, h,
-                            0, x, FONT_HEIGHT + FONT_HEIGHT / 2);
-    GUI_Draw_VerticalLine(buffer, w, h,
-                          x, 0, FONT_HEIGHT + FONT_HEIGHT / 2);
+    GUI_Draw_HorizontalLine(buffer, w, h, 0, x, FONT_HEIGHT + FONT_HEIGHT / 2);
+    GUI_Draw_VerticalLine(buffer, w, h, x, 0, FONT_HEIGHT + FONT_HEIGHT / 2);
 
     // Draw the menu bar, but not any menu
     if (menu->element_opened < 0)
@@ -247,7 +245,7 @@ static void __gui_draw_init_buffer(char *buffer, int w, int h)
 {
     GUI_Draw_SetDrawingColor(GUI_BACKGROUND_GREY, GUI_BACKGROUND_GREY,
                              GUI_BACKGROUND_GREY);
-    GUI_Draw_FillRect(buffer, w, h, 0, w - 1, 0,h - 1);
+    GUI_Draw_FillRect(buffer, w, h, 0, w - 1, 0, h - 1);
 }
 
 static void __gui_draw_element(_gui_element *e, char *buffer, int w, int h)
@@ -466,8 +464,8 @@ static void __gui_draw_element(_gui_element *e, char *buffer, int w, int h)
                           e->x, e->x + e->w - 1,
                           e->y + FONT_HEIGHT + 2, e->y + e->h - 1);
 
-        int caption_width = strlen(e->info.scrollabletextwindow.caption)
-                          * FONT_WIDTH;
+        int caption_width =
+                strlen(e->info.scrollabletextwindow.caption) * FONT_WIDTH;
 
         int x_off = (e->w - caption_width) / 2;
 
@@ -496,7 +494,7 @@ static void __gui_draw_element(_gui_element *e, char *buffer, int w, int h)
                     while (1)
                     {
                         if (!((c == ' ') || (c == '\0')))
-                           break;
+                            break;
                         c = e->info.scrollabletextwindow.text[i++];
                     }
                     skipspaces = 0;
@@ -518,7 +516,7 @@ static void __gui_draw_element(_gui_element *e, char *buffer, int w, int h)
                                 curx, textwidth) == 0)
                     {
                         curx = 0;
-                        countlines ++;
+                        countlines++;
                         i--;
                         skipspaces = 1;
                     }
@@ -554,7 +552,7 @@ static void __gui_draw_element(_gui_element *e, char *buffer, int w, int h)
                     while (1)
                     {
                         if (!((c == ' ') || (c == '\0')))
-                           break;
+                            break;
                         c = e->info.scrollabletextwindow.text[i++];
                     }
                     skipspaces = 0;
@@ -585,7 +583,7 @@ static void __gui_draw_element(_gui_element *e, char *buffer, int w, int h)
                     else
                     {
                         FU_PrintChar(buffer, w, h,
-                                     basexcoord + curx *FONT_WIDTH,
+                                     basexcoord + curx * FONT_WIDTH,
                                      baseycoord + cury * FONT_HEIGHT,
                                      c, 0xFFFFFFFF);
                         curx++;
@@ -600,7 +598,6 @@ static void __gui_draw_element(_gui_element *e, char *buffer, int w, int h)
                             curx = 0;
                         }
                     }
-
                 }
 
                 if (e->info.scrollabletextwindow.max_drawn_lines == countlines)
@@ -624,7 +621,7 @@ static void __gui_draw_element(_gui_element *e, char *buffer, int w, int h)
                 + (percent * (e->info.scrollabletextwindow.max_drawn_lines - 5)
                     / 100);
 
-            FU_PrintChar(buffer,w,h,
+            FU_PrintChar(buffer, w, h,
                          basexcoord + textwidth * FONT_WIDTH,
                          baseycoord + bar_position * FONT_HEIGHT,
                          CHR_SHADED_DARK, 0xFFE0E0E0);
@@ -691,7 +688,7 @@ static void __gui_draw_element(_gui_element *e, char *buffer, int w, int h)
             range = 1;
 
         int position = (e->info.scrollbar.value - e->info.scrollbar.value_min)
-                     * barsize / range;
+                       * barsize / range;
 
         if (e->info.scrollbar.is_vertical)
         {
@@ -792,8 +789,7 @@ static void __gui_draw_element(_gui_element *e, char *buffer, int w, int h)
                               e->y + 3, e->y + e->h - 1 - 3);
         }
 
-        FU_PrintColor(buffer, w, h,
-                      e->x + e->h + FONT_WIDTH / 2, e->y,
+        FU_PrintColor(buffer, w, h, e->x + e->h + FONT_WIDTH / 2, e->y,
                       GUI_BACKGROUND_GREY_RGBA, e->info.checkbox.label);
     }
     else if (e->element_type == GUI_TYPE_INPUTGET)

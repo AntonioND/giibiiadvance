@@ -52,10 +52,10 @@ u32 arm_check_condition(u32 cond)
             return ((CPU.CPSR & F_N) != 0) ^ ((CPU.CPSR & F_V) != 0);
         case 12:
             return ((CPU.CPSR & F_Z) == 0)
-                    && !(((CPU.CPSR & F_N) != 0) ^ ((CPU.CPSR & F_V) != 0));
+                   && !(((CPU.CPSR & F_N) != 0) ^ ((CPU.CPSR & F_V) != 0));
         case 13:
             return (CPU.CPSR & F_Z)
-                    || (((CPU.CPSR & F_N) != 0) ^ ((CPU.CPSR & F_V) != 0));
+                   || (((CPU.CPSR & F_N) != 0) ^ ((CPU.CPSR & F_V) != 0));
         case 14:
             return 1;
         default:
@@ -160,7 +160,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                         {
                             // X.24.23.22:21.20.6.5
                             u32 switchval = ((opcode >> 5) & 3)
-                                          | ((opcode >> 18) & 0x7C);
+                                            | ((opcode >> 18) & 0x7C);
                             switch (switchval)
                             {
                                 // Multiplication
@@ -174,7 +174,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 {
                                     // 1S+mI
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.R[R_PC])
-                                            + arm_signed_mul_extra_cycles((opcode >> 16) & 0xF);
+                                              + arm_signed_mul_extra_cycles((opcode >> 16) & 0xF);
                                     arm_mul((opcode >> 16) & 0xF, opcode & 0xF, (opcode >> 8) & 0xF);
                                     break;
                                 }
@@ -182,7 +182,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 {
                                     // 1S+mI
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.R[R_PC])
-                                            + arm_signed_mul_extra_cycles((opcode >> 16) & 0xF);
+                                              + arm_signed_mul_extra_cycles((opcode >> 16) & 0xF);
                                     arm_muls((opcode >> 16) & 0xF, opcode & 0xF, (opcode >> 8) & 0xF);
                                     break;
                                 }
@@ -190,7 +190,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 {
                                     // 1S+mI+1I
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.R[R_PC])
-                                            + arm_signed_mul_extra_cycles((opcode >> 16) & 0xF) + 1;
+                                              + arm_signed_mul_extra_cycles((opcode >> 16) & 0xF) + 1;
                                     arm_mla((opcode >> 16) & 0xF, opcode & 0xF,
                                             (opcode >> 8) & 0xF, (opcode >> 12) & 0xF);
                                     break;
@@ -199,7 +199,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 {
                                     // 1S+mI+1I
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.R[R_PC])
-                                            + arm_signed_mul_extra_cycles((opcode >> 16) & 0xF) + 1;
+                                              + arm_signed_mul_extra_cycles((opcode >> 16) & 0xF) + 1;
                                     arm_mlas((opcode >> 16) & 0xF, opcode & 0xF,
                                              (opcode >> 8) & 0xF, (opcode >> 12) & 0xF);
                                     break;
@@ -210,14 +210,14 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 case 0x1C:
                                 {
                                     CPU.R[R_PC] -= 4; // Undefined Instruction #0-2
-                                    clocks -= 100; // Don't trap!!! ???
+                                    clocks -= 100;    // Don't trap!!! ???
                                     break;
                                 }
                                 case 0x20: // UMULL{cond}
                                 {
                                     // 1S+mI+1I
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.R[R_PC])
-                                            + arm_unsigned_mul_extra_cycles((opcode >> 16) & 0xF) + 1;
+                                              + arm_unsigned_mul_extra_cycles((opcode >> 16) & 0xF) + 1;
                                     arm_umull((opcode >> 12) & 0xF, (opcode >> 16) & 0xF,
                                               opcode & 0xF, (opcode >> 8) & 0xF);
                                     break;
@@ -226,7 +226,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 {
                                     // 1S+mI+1I
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.R[R_PC])
-                                            + arm_unsigned_mul_extra_cycles((opcode >> 16) & 0xF) + 1;
+                                              + arm_unsigned_mul_extra_cycles((opcode >> 16) & 0xF) + 1;
                                     arm_umulls((opcode >> 12) & 0xF, (opcode >> 16) & 0xF,
                                                opcode & 0xF, (opcode >> 8) & 0xF);
                                     break;
@@ -235,7 +235,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 {
                                     // 1S+mI+2I
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.R[R_PC])
-                                            + arm_unsigned_mul_extra_cycles((opcode >> 16) & 0xF) + 2;
+                                              + arm_unsigned_mul_extra_cycles((opcode >> 16) & 0xF) + 2;
                                     arm_umlal((opcode >> 12) & 0xF, (opcode >> 16) & 0xF,
                                               opcode & 0xF, (opcode >> 8) & 0xF);
                                     break;
@@ -244,7 +244,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 {
                                     // 1S+mI+2I
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.R[R_PC])
-                                            + arm_unsigned_mul_extra_cycles((opcode >> 16) & 0xF) + 2;
+                                              + arm_unsigned_mul_extra_cycles((opcode >> 16) & 0xF) + 2;
                                     arm_umlals((opcode >> 12) & 0xF, (opcode >> 16) & 0xF,
                                                opcode & 0xF, (opcode >> 8) & 0xF);
                                     break;
@@ -253,7 +253,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 {
                                     // 1S+mI+1I
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.R[R_PC])
-                                            + arm_signed_mul_extra_cycles((opcode >> 16) & 0xF) + 1;
+                                              + arm_signed_mul_extra_cycles((opcode >> 16) & 0xF) + 1;
                                     arm_smull((opcode >> 12) & 0xF, (opcode >> 16) & 0xF,
                                               opcode & 0xF, (opcode >> 8) & 0xF);
                                     break;
@@ -262,7 +262,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 {
                                     // 1S+mI+1I
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.R[R_PC])
-                                            + arm_signed_mul_extra_cycles((opcode >> 16) & 0xF) + 1;
+                                              + arm_signed_mul_extra_cycles((opcode >> 16) & 0xF) + 1;
                                     arm_smulls((opcode >> 12) & 0xF, (opcode >> 16) & 0xF,
                                                opcode & 0xF, (opcode >> 8) & 0xF);
                                     break;
@@ -270,8 +270,8 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 case 0x38: // SMLAL{cond}
                                 {
                                     // 1S+mI+2I
-                                    clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.R[R_PC]) +
-                                        arm_signed_mul_extra_cycles((opcode >> 16) & 0xF) + 2;
+                                    clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.R[R_PC])
+                                              + arm_signed_mul_extra_cycles((opcode >> 16) & 0xF) + 2;
                                     arm_smlal((opcode >> 12) & 0xF, (opcode >> 16) & 0xF,
                                               opcode & 0xF, (opcode >> 8) & 0xF);
                                     break;
@@ -280,7 +280,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 {
                                     // 1S+mI+2I
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.R[R_PC])
-                                            + arm_signed_mul_extra_cycles((opcode >> 16) & 0xF) + 2;
+                                              + arm_signed_mul_extra_cycles((opcode >> 16) & 0xF) + 2;
                                     arm_smlals((opcode >> 12) & 0xF, (opcode >> 16) & 0xF,
                                                opcode & 0xF, (opcode >> 8) & 0xF);
                                     break;
@@ -299,7 +299,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 case 0x7C:
                                 {
                                     CPU.R[R_PC] -= 4; // Undefined Instruction #0-1
-                                    clocks -= 100; // Don't trap!!! ???
+                                    clocks -= 100;    // Don't trap!!! ???
                                     break;
                                 }
 
@@ -311,7 +311,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     if ((opcode & (0xF00 | (3 << 20))))
                                     {
                                         CPU.R[R_PC] -= 4; // Undefined Instruction #0-1
-                                        clocks -= 100; // Don't trap!!! ???
+                                        clocks -= 100;    // Don't trap!!! ???
                                         break;
                                     }
                                     // SWP{cond} Rd,Rm,[Rn]
@@ -321,7 +321,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     GBA_MemoryWrite32(addr, val);
                                     // 1S+2N+1I
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.R[R_PC])
-                                            + (2 * GBA_MemoryGetAccessCyclesNoSeq32(addr)) + 1;
+                                              + (2 * GBA_MemoryGetAccessCyclesNoSeq32(addr)) + 1;
 
                                     break;
                                 }
@@ -333,7 +333,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     if ((opcode & (0xF00 | (3 << 20))))
                                     {
                                         CPU.R[R_PC] -= 4; // Undefined Instruction #0-1
-                                        clocks -= 100; // DON'T TRAP!!! ???
+                                        clocks -= 100;    // DON'T TRAP!!! ???
                                         break;
                                     }
                                     // SWP{cond}B Rd,Rm,[Rn]
@@ -343,7 +343,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     GBA_MemoryWrite8(addr, (u8)val);
                                     // 1S+2N+1I
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.R[R_PC])
-                                            + (2 * GBA_MemoryGetAccessCyclesNoSeq16(addr)) + 1;
+                                              + (2 * GBA_MemoryGetAccessCyclesNoSeq16(addr)) + 1;
                                     break;
                                 }
 
@@ -388,7 +388,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 case 0x7B:
                                 {
                                     CPU.R[R_PC] -= 4; // Undefined Instruction
-                                    clocks -= 100; // Don't trap!!! ???
+                                    clocks -= 100;    // Don't trap!!! ???
                                     break;
                                 }
                                 // In post-indexing mode, writeback always enabled
@@ -403,7 +403,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     GBA_MemoryWrite16(address, CPU.R[Rd] + ((Rd == R_PC) ? 12 : 0));
                                     // 2N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesNoSeq16(address);
+                                              + GBA_MemoryGetAccessCyclesNoSeq16(address);
                                     if (Rn == R_PC)
                                         CPU.R[R_PC] -= 4;
                                     break;
@@ -420,11 +420,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     if (address & 1)
                                         CPU.R[Rd] = ror_immed_no_carry(CPU.R[Rd], 8);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     else if (Rn == R_PC)
@@ -443,11 +443,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     CPU.R[Rn] = address - CPU.R[Rm];
                                     CPU.R[Rd] = (s32)(s8)GBA_MemoryRead8(address);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     else if (Rn == R_PC)
@@ -469,11 +469,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     else
                                         CPU.R[Rd] = (s32)(s16)GBA_MemoryRead16(address);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     else if (Rn == R_PC)
@@ -493,8 +493,9 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     GBA_MemoryWrite16(address, CPU.R[Rd] + ((Rd == R_PC) ? 12 : 0));
                                     // 2N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesNoSeq16(address);
-                                    if (Rn == R_PC) CPU.R[R_PC] -= 4;
+                                              + GBA_MemoryGetAccessCyclesNoSeq16(address);
+                                    if (Rn == R_PC)
+                                        CPU.R[R_PC] -= 4;
                                     break;
                                 }
                                 case 0x15:
@@ -505,15 +506,15 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     u32 address = CPU.R[Rn] + ((Rn == R_PC) ? 8 : 0);
                                     u32 offset = ((opcode >> 4) & 0xF0) | (opcode & 0xF);
                                     CPU.R[Rn] = address - offset;
-                                    CPU.R[Rd] = (u32)GBA_MemoryRead16(address &~1);
+                                    CPU.R[Rd] = (u32)GBA_MemoryRead16(address & ~1);
                                     if (address & 1)
                                         CPU.R[Rd] = ror_immed_no_carry(CPU.R[Rd], 8);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     else if (Rn == R_PC)
@@ -532,11 +533,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     CPU.R[Rn] = address - offset;
                                     CPU.R[Rd] = (s32)(s8)GBA_MemoryRead8(address);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     else if (Rn == R_PC)
@@ -558,11 +559,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     else
                                         CPU.R[Rd] = (s32)(s16)GBA_MemoryRead16(address);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     else if (Rn == R_PC)
@@ -582,7 +583,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     GBA_MemoryWrite16(address, CPU.R[Rd] + ((Rd == R_PC) ? 12 : 0));
                                     // 2N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesNoSeq16(address);
+                                              + GBA_MemoryGetAccessCyclesNoSeq16(address);
                                     if (Rn == R_PC)
                                         CPU.R[R_PC] -= 4;
                                     break;
@@ -595,15 +596,15 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     u32 address = CPU.R[Rn] + ((Rn == R_PC) ? 8 : 0);
                                     u32 Rm = opcode & 0xF; // (not including R15)
                                     CPU.R[Rn] = address + CPU.R[Rm];
-                                    CPU.R[Rd] = (u32)GBA_MemoryRead16(address &~1);
+                                    CPU.R[Rd] = (u32)GBA_MemoryRead16(address & ~1);
                                     if (address & 1)
                                         CPU.R[Rd] = ror_immed_no_carry(CPU.R[Rd], 8);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     else if (Rn == R_PC)
@@ -622,11 +623,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     CPU.R[Rn] = address + CPU.R[Rm];
                                     CPU.R[Rd] = (s32)(s8)GBA_MemoryRead8(address);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     else if (Rn == R_PC)
@@ -648,11 +649,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     else
                                         CPU.R[Rd] = (s32)(s16)GBA_MemoryRead16(address);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     else if (Rn == R_PC)
@@ -670,12 +671,14 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     u32 offset = ((opcode >> 4) & 0xF0) | (opcode & 0xF);
                                     CPU.R[Rn] = address + offset;
                                     GBA_MemoryWrite16(address, CPU.R[Rd] + ((Rd == R_PC) ? 12 : 0));
-                                    clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC]) +
-                                        GBA_MemoryGetAccessCyclesNoSeq16(address); //2N
-                                    if (Rn == R_PC) CPU.R[R_PC] -= 4;
+                                    clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
+                                              + GBA_MemoryGetAccessCyclesNoSeq16(address); // 2N
+                                    if (Rn == R_PC)
+                                        CPU.R[R_PC] -= 4;
                                     break;
                                 }
-                                case 0x35: case 0x3D: // LDR{cond}H  Rd,[Rn],#
+                                case 0x35:
+                                case 0x3D: // LDR{cond}H  Rd,[Rn],#
                                 {
                                     u32 Rn = (opcode >> 16) & 0xF; // (including R15=PC+8)
                                     u32 Rd = (opcode >> 12) & 0xF; // (including R15=PC+12)
@@ -686,11 +689,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     if (address & 1)
                                         CPU.R[Rd] = ror_immed_no_carry(CPU.R[Rd], 8);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     else if (Rn == R_PC)
@@ -709,11 +712,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     CPU.R[Rn] = address + offset;
                                     CPU.R[Rd] = (s32)(s8)GBA_MemoryRead8(address);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     else if (Rn == R_PC)
@@ -735,11 +738,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     else
                                         CPU.R[Rd] = (s32)(s16)GBA_MemoryRead16(address);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     else if (Rn == R_PC)
@@ -759,7 +762,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     GBA_MemoryWrite16(address, CPU.R[Rd] + ((Rd == R_PC) ? 12 : 0));
                                     // 2N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesNoSeq16(address);
+                                              + GBA_MemoryGetAccessCyclesNoSeq16(address);
                                     break;
                                 }
                                 case 0x45: // LDR{cond}H  Rd,[Rn,-Rm]
@@ -773,11 +776,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     if (address & 1)
                                         CPU.R[Rd] = ror_immed_no_carry(CPU.R[Rd], 8);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     break;
@@ -791,11 +794,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     address -= CPU.R[Rm];
                                     CPU.R[Rd] = (s32)(s8)GBA_MemoryRead8(address);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     break;
@@ -812,11 +815,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     else
                                         CPU.R[Rd] = (s32)(s16)GBA_MemoryRead16(address);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     break;
@@ -832,7 +835,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     GBA_MemoryWrite16(address, CPU.R[Rd] + ((Rd == R_PC) ? 12 : 0));
                                     // 2N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesNoSeq16(address);
+                                              + GBA_MemoryGetAccessCyclesNoSeq16(address);
                                     if (Rn == R_PC)
                                         CPU.R[R_PC] -= 4;
                                     break;
@@ -849,11 +852,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     if (address & 1)
                                         CPU.R[Rd] = ror_immed_no_carry(CPU.R[Rd], 8);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     else if (Rn == R_PC)
@@ -872,11 +875,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     CPU.R[Rn] = address;
                                     CPU.R[Rd] = (s32)(s8)GBA_MemoryRead8(address);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     else if (Rn == R_PC)
@@ -898,11 +901,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     else
                                         CPU.R[Rd] = (s32)(s16)GBA_MemoryRead16(address);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     else if (Rn == R_PC)
@@ -921,7 +924,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     GBA_MemoryWrite16(address, CPU.R[Rd] + ((Rd == R_PC) ? 12 : 0));
                                     // 2N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesNoSeq16(address);
+                                              + GBA_MemoryGetAccessCyclesNoSeq16(address);
                                     break;
                                 }
                                 case 0x55: // LDR{cond}H  Rd,[Rn,-#]
@@ -931,15 +934,15 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     u32 address = CPU.R[Rn] + ((Rn == R_PC) ? 8 : 0);
                                     u32 offset = ((opcode >> 4) & 0xF0) | (opcode & 0xF);
                                     address -= offset;
-                                    CPU.R[Rd] = (u32)GBA_MemoryRead16(address &~1);
+                                    CPU.R[Rd] = (u32)GBA_MemoryRead16(address & ~1);
                                     if (address & 1)
                                         CPU.R[Rd] = ror_immed_no_carry(CPU.R[Rd], 8);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     break;
@@ -953,11 +956,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     address -= offset;
                                     CPU.R[Rd] = (s32)(s8)GBA_MemoryRead8(address);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     break;
@@ -974,11 +977,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     else
                                         CPU.R[Rd] = (s32)(s16)GBA_MemoryRead16(address);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     break;
@@ -994,7 +997,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     GBA_MemoryWrite16(address, CPU.R[Rd] + ((Rd == R_PC) ? 12 : 0));
                                     // 2N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesNoSeq16(address);
+                                              + GBA_MemoryGetAccessCyclesNoSeq16(address);
                                     if (Rn == R_PC)
                                         CPU.R[R_PC] -= 4;
                                     break;
@@ -1011,11 +1014,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     if (address & 1)
                                         CPU.R[Rd] = ror_immed_no_carry(CPU.R[Rd], 8);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     if (Rn == R_PC)
@@ -1032,11 +1035,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     CPU.R[Rn] = address;
                                     CPU.R[Rd] = (s32)(s8)GBA_MemoryRead8(address);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     if (Rn == R_PC)
@@ -1058,11 +1061,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     else
                                         CPU.R[Rd] = (s32)(s16)GBA_MemoryRead16(address);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     if (Rn == R_PC)
@@ -1081,7 +1084,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     GBA_MemoryWrite16(address, CPU.R[Rd] + ((Rd == R_PC) ? 12 : 0));
                                     // 2N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesNoSeq16(address);
+                                              + GBA_MemoryGetAccessCyclesNoSeq16(address);
                                     break;
                                 }
                                 case 0x65: // LDR{cond}H  Rd,[Rn,Rm]
@@ -1091,15 +1094,15 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     u32 address = CPU.R[Rn] + ((Rn == R_PC) ? 8 : 0);
                                     u32 Rm = opcode & 0xF; // (not including R15)
                                     address += CPU.R[Rm];
-                                    CPU.R[Rd] = (u32)GBA_MemoryRead16(address &~1);
+                                    CPU.R[Rd] = (u32)GBA_MemoryRead16(address & ~1);
                                     if (address & 1)
                                         CPU.R[Rd] = ror_immed_no_carry(CPU.R[Rd], 8);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     break;
@@ -1113,11 +1116,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     address += CPU.R[Rm];
                                     CPU.R[Rd] = (s32)(s8)GBA_MemoryRead8(address);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     break;
@@ -1134,11 +1137,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     else
                                         CPU.R[Rd] = (s32)(s16)GBA_MemoryRead16(address);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     break;
@@ -1154,7 +1157,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     GBA_MemoryWrite16(address, CPU.R[Rd] + ((Rd == R_PC) ? 12 : 0));
                                     // 2N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesNoSeq16(address);
+                                              + GBA_MemoryGetAccessCyclesNoSeq16(address);
                                     if (Rn == R_PC)
                                         CPU.R[R_PC] -= 4;
                                     break;
@@ -1171,11 +1174,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     if (address & 1)
                                         CPU.R[Rd] = ror_immed_no_carry(CPU.R[Rd], 8);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     else if (Rn == R_PC)
@@ -1194,11 +1197,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     CPU.R[Rn] = address;
                                     CPU.R[Rd] = (s32)(s8)GBA_MemoryRead8(address);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     else if (Rn == R_PC)
@@ -1220,11 +1223,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     else
                                         CPU.R[Rd] = (s32)(s16)GBA_MemoryRead16(address);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     else if (Rn == R_PC)
@@ -1243,7 +1246,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     GBA_MemoryWrite16(address, CPU.R[Rd] + ((Rd == R_PC) ? 12 : 0));
                                     // 2N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesNoSeq16(address);
+                                              + GBA_MemoryGetAccessCyclesNoSeq16(address);
                                     break;
                                 }
                                 case 0x75: // LDR{cond}H  Rd,[Rn,#]
@@ -1257,11 +1260,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     if (address & 1)
                                         CPU.R[Rd] = ror_immed_no_carry(CPU.R[Rd], 8);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     break;
@@ -1275,11 +1278,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     address += offset;
                                     CPU.R[Rd] = (s32)(s8)GBA_MemoryRead8(address);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     break;
@@ -1296,11 +1299,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     else
                                         CPU.R[Rd] = (s32)(s16)GBA_MemoryRead16(address);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     break;
@@ -1316,7 +1319,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     GBA_MemoryWrite16(address, CPU.R[Rd] + ((Rd == R_PC) ? 12 : 0));
                                     // 2N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesNoSeq16(address);
+                                              + GBA_MemoryGetAccessCyclesNoSeq16(address);
                                     if (Rn == R_PC)
                                         CPU.R[R_PC] -= 4;
                                     break;
@@ -1333,11 +1336,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     if (address & 1)
                                         CPU.R[Rd] = ror_immed_no_carry(CPU.R[Rd], 8);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     else if (Rn == R_PC)
@@ -1356,11 +1359,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     CPU.R[Rn] = address;
                                     CPU.R[Rd] = (s32)(s8)GBA_MemoryRead8(address);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     else if (Rn == R_PC)
@@ -1382,11 +1385,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     else
                                         CPU.R[Rd] = (s32)(s16)GBA_MemoryRead16(address);
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                            + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                              + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                                     if (Rd == 15)
                                     {
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         CPU.R[R_PC] -= 4;
                                     }
                                     else if (Rn == R_PC)
@@ -1420,7 +1423,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                             CPU.R[R_PC] = (CPU.R[Rn] + (Rn == R_PC ? 8 : 0)) & (~1);
                                             // 2S+1N
                                             clocks -= (2 * GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC))
-                                                    + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC]);
+                                                      + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC]);
 
                                             return GBA_ExecuteTHUMB(clocks);
                                         }
@@ -1431,13 +1434,13 @@ s32 GBA_ExecuteARM(s32 clocks)
                                         CPU.R[R_PC] -= 4; // To avoid skipping an instruction
                                         // 2S+1N
                                         clocks -= (2 * GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC))
-                                                + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC]);
                                         break;
                                     }
                                     else
                                     {
                                         CPU.R[R_PC] -= 4; // Undefined Instruction
-                                        clocks -= 100; // Don't trap!!! ???
+                                        clocks -= 100;    // Don't trap!!! ???
                                         break;
                                     }
                                 }
@@ -1458,7 +1461,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     {
                                         // 1S+1N
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         if (CPU.CPSR & F_T)
                                         {
                                             CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -1477,7 +1480,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     {
                                         // 1S+1N
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         if (CPU.CPSR & F_T)
                                         {
                                             CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -1494,8 +1497,8 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.R[R_PC]);
                                     if (((opcode >> 12) & 0xF) == 0xF)
                                     {
-                                        clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC]) +
-                                            GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]); // 1S+1N
+                                        clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]); // 1S+1N
                                         if (CPU.CPSR & F_T)
                                         {
                                             CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -1514,7 +1517,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     {
                                         // 1S+1N
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         if (CPU.CPSR & F_T)
                                         {
                                             CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -1533,7 +1536,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     {
                                         // 1S+1N
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         if (CPU.CPSR & F_T)
                                         {
                                             CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -1552,7 +1555,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     {
                                         // 1S+1N
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         if (CPU.CPSR & F_T)
                                         {
                                             CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -1571,7 +1574,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     {
                                         // 1S+1N
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         if (CPU.CPSR & F_T)
                                         {
                                             CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -1590,7 +1593,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     {
                                         // 1S+1N
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         if (CPU.CPSR & F_T)
                                         {
                                             CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -1609,7 +1612,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     {
                                         // 1S+1N
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         if (CPU.CPSR & F_T)
                                         {
                                             CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -1628,7 +1631,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     {
                                         // 1S+1N
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         if (CPU.CPSR & F_T)
                                         {
                                             CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -1647,7 +1650,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     {
                                         // 1S+1N
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         if (CPU.CPSR & F_T)
                                         {
                                             CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -1666,7 +1669,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     {
                                         // 1S+1N
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         if (CPU.CPSR & F_T)
                                         {
                                             CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -1685,7 +1688,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     {
                                         // 1S+1N
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         if (CPU.CPSR & F_T)
                                         {
                                             CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -1704,7 +1707,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     {
                                         // 1S+1N
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         if (CPU.CPSR & F_T)
                                         {
                                             CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -1723,7 +1726,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     {
                                         // 1S+1N
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         if (CPU.CPSR & F_T)
                                         {
                                             CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -1742,7 +1745,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     {
                                         // 1S+1N
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         if (CPU.CPSR & F_T)
                                         {
                                             CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -1785,7 +1788,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     {
                                         // 1S+1N
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         if (CPU.CPSR & F_T)
                                         {
                                             CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -1804,7 +1807,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     {
                                         // 1S+1N
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         if (CPU.CPSR & F_T)
                                         {
                                             CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -1822,7 +1825,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     {
                                         // 1S+1N
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         if (CPU.CPSR & F_T)
                                         {
                                             CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -1840,7 +1843,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     {
                                         // 1S+1N
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         if (CPU.CPSR & F_T)
                                         {
                                             CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -1859,7 +1862,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     {
                                         // 1S+1N
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         if (CPU.CPSR & F_T)
                                         {
                                             CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -1878,7 +1881,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     {
                                         // 1S+1N
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         if (CPU.CPSR & F_T)
                                         {
                                             CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -1896,7 +1899,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     {
                                         // 1S+1N
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         if (CPU.CPSR & F_T)
                                         {
                                             CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -1914,7 +1917,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                     {
                                         // 1S+1N
                                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                         if (CPU.CPSR & F_T)
                                         {
                                             CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -1927,7 +1930,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 case 0x14:
                                 case 0x16:
                                     CPU.R[R_PC] -= 4; // Undefined Instruction
-                                    clocks -= 100; // Don't trap!!! ???
+                                    clocks -= 100;    // Don't trap!!! ???
                                     break;
                                 default: // ???
                                     CPU.R[R_PC] -= 4;
@@ -2028,7 +2031,8 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 if (CPU.MODE == CPU_USER || CPU.MODE == CPU_SYSTEM)
                                 {
                                     Debug_DebugMsgArg("msr spsr,Rm -- in user/system mode.\n"
-                                                      "pc = 0x%08X", CPU.R[R_PC]);
+                                                      "pc = 0x%08X",
+                                                      CPU.R[R_PC]);
                                     GBA_ExecutionBreak();
                                     clocks--;
                                     break;
@@ -2077,7 +2081,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 {
                                     // 1S+1N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                              + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                     if (CPU.CPSR & F_T)
                                     {
                                         CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2096,7 +2100,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 {
                                     // 1S+1N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                              + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                     if (CPU.CPSR & F_T)
                                     {
                                         CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2115,7 +2119,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 {
                                     // 1S+1N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                              + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                     if (CPU.CPSR & F_T)
                                     {
                                         CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2134,7 +2138,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 {
                                     // 1S+1N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                              + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                     if (CPU.CPSR & F_T)
                                     {
                                         CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2153,7 +2157,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 {
                                     // 1S+1N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                              + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                     if (CPU.CPSR & F_T)
                                     {
                                         CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2172,7 +2176,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 {
                                     // 1S+1N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                              + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                     if (CPU.CPSR & F_T)
                                     {
                                         CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2191,7 +2195,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 {
                                     // 1S+1N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                              + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                     if (CPU.CPSR & F_T)
                                     {
                                         CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2210,7 +2214,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 {
                                     // 1S+1N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                              + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                     if (CPU.CPSR & F_T)
                                     {
                                         CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2229,7 +2233,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 {
                                     // 1S+1N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                              + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                     if (CPU.CPSR & F_T)
                                     {
                                         CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2248,7 +2252,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 {
                                     // 1S+1N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                              + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                     if (CPU.CPSR & F_T)
                                     {
                                         CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2267,7 +2271,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 {
                                     // 1S+1N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                              + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                     if (CPU.CPSR & F_T)
                                     {
                                         CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2286,7 +2290,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 {
                                     // 1S+1N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                              + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                     if (CPU.CPSR & F_T)
                                     {
                                         CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2305,7 +2309,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 {
                                     // 1S+1N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                              + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                     if (CPU.CPSR & F_T)
                                     {
                                         CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2324,7 +2328,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 {
                                     // 1S+1N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                              + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                     if (CPU.CPSR & F_T)
                                     {
                                         CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2343,7 +2347,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 {
                                     // 1S+1N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                              + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                     if (CPU.CPSR & F_T)
                                     {
                                         CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2362,7 +2366,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 {
                                     // 1S+1N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                              + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                     if (CPU.CPSR & F_T)
                                     {
                                         CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2405,7 +2409,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 {
                                     // 1S+1N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                              + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                     if (CPU.CPSR & F_T)
                                     {
                                         CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2424,7 +2428,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 {
                                     // 1S+1N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                              + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                     if (CPU.CPSR & F_T)
                                     {
                                         CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2442,7 +2446,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 {
                                     // 1S+1N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                              + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                     if (CPU.CPSR & F_T)
                                     {
                                         CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2460,7 +2464,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 {
                                     // 1S+1N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                              + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                     if (CPU.CPSR & F_T)
                                     {
                                         CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2479,7 +2483,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 {
                                     // 1S+1N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                              + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                     if (CPU.CPSR & F_T)
                                     {
                                         CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2498,7 +2502,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 {
                                     // 1S+1N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                              + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                     if (CPU.CPSR & F_T)
                                     {
                                         CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2516,7 +2520,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 {
                                     // 1S+1N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                              + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                     if (CPU.CPSR & F_T)
                                     {
                                         CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2534,7 +2538,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 {
                                     // 1S+1N
                                     clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                            + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                              + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                     if (CPU.CPSR & F_T)
                                     {
                                         CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2608,7 +2612,8 @@ s32 GBA_ExecuteARM(s32 clocks)
                             if (CPU.MODE == CPU_USER || CPU.MODE == CPU_SYSTEM)
                             {
                                 Debug_DebugMsgArg("msr spsr,Inm -- in user/system mode.\n"
-                                                  "pc = 0x%08X", CPU.R[R_PC]);
+                                                  "pc = 0x%08X",
+                                                  CPU.R[R_PC]);
                                 GBA_ExecutionBreak();
                                 clocks--;
                                 break;
@@ -2656,7 +2661,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                             {
                                 // 1S+1N
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 if (CPU.CPSR & F_T)
                                 {
                                     CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2674,7 +2679,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                             {
                                 // 1S+1N
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 if (CPU.CPSR & F_T)
                                 {
                                     CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2692,7 +2697,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                             {
                                 // 1S+1N
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 if (CPU.CPSR & F_T)
                                 {
                                     CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2710,7 +2715,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                             {
                                 // 1S+1N
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 if (CPU.CPSR & F_T)
                                 {
                                     CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2728,7 +2733,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                             {
                                 // 1S+1N
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 if (CPU.CPSR & F_T)
                                 {
                                     CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2746,7 +2751,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                             {
                                 // 1S+1N
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 if (CPU.CPSR & F_T)
                                 {
                                     CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2764,7 +2769,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                             {
                                 // 1S+1N
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 if (CPU.CPSR & F_T)
                                 {
                                     CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2782,7 +2787,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                             {
                                 // 1S+1N
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 if (CPU.CPSR & F_T)
                                 {
                                     CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2800,7 +2805,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                             {
                                 // 1S+1N
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 if (CPU.CPSR & F_T)
                                 {
                                     CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2818,7 +2823,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                             {
                                 // 1S+1N
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 if (CPU.CPSR & F_T)
                                 {
                                     CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2836,7 +2841,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                             {
                                 // 1S+1N
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 if (CPU.CPSR & F_T)
                                 {
                                     CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2854,7 +2859,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                             {
                                 // 1S+1N
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 if (CPU.CPSR & F_T)
                                 {
                                     CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2872,7 +2877,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                             {
                                 // 1S+1N
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 if (CPU.CPSR & F_T)
                                 {
                                     CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2890,7 +2895,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                             {
                                 // 1S+1N
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 if (CPU.CPSR & F_T)
                                 {
                                     CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2908,7 +2913,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                             {
                                 // 1S+1N
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 if (CPU.CPSR & F_T)
                                 {
                                     CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2926,7 +2931,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                             {
                                 // 1S+1N
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 if (CPU.CPSR & F_T)
                                 {
                                     CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2968,7 +2973,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                             {
                                 // 1S+1N
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 if (CPU.CPSR & F_T)
                                 {
                                     CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -2986,7 +2991,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                             {
                                 // 1S+1N
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 if (CPU.CPSR & F_T)
                                 {
                                     CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -3004,7 +3009,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                             {
                                 // 1S+1N
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 if (CPU.CPSR & F_T)
                                 {
                                     CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -3022,7 +3027,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                             {
                                 // 1S+1N
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 if (CPU.CPSR & F_T)
                                 {
                                     CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -3040,7 +3045,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                             {
                                 // 1S+1N
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 if (CPU.CPSR & F_T)
                                 {
                                     CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -3058,7 +3063,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                             {
                                 // 1S+1N
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 if (CPU.CPSR & F_T)
                                 {
                                     CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -3076,7 +3081,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                             {
                                 // 1S+1N
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 if (CPU.CPSR & F_T)
                                 {
                                     CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -3094,7 +3099,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                             {
                                 // 1S+1N
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 if (CPU.CPSR & F_T)
                                 {
                                     CPU.EXECUTION_MODE = EXEC_THUMB;
@@ -3107,7 +3112,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                         case 0x14:
                             ARM_UNDEFINED_INSTRUCTION(); // Undefined Instruction
                             break;
-                         default: // ???
+                        default: // ???
                             CPU.R[R_PC] -= 4;
                             clocks -= 100;
                             break;
@@ -3121,7 +3126,7 @@ s32 GBA_ExecuteARM(s32 clocks)
                     u32 Rd = ((opcode >> 12) & 0xF); // (including R15=PC+12)
                     s32 offset = opcode & 0xFFF;
 
-                    switch (opcode >>20)
+                    switch (opcode >> 20)
                     {
                         case 0x00: // STR{cond} Rd, [Rn], -#
                         case 0x02: // STR{cond}T Rd, [Rn], -#
@@ -3142,11 +3147,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                             CPU.R[Rn] = address - offset;
                             CPU.R[Rd] = GBA_MemoryRead32(address);
                             clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                    + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                      + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                             if (Rd == 15)
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4;
                             }
 
@@ -3170,11 +3175,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                             CPU.R[Rn] = address - offset;
                             CPU.R[Rd] = GBA_MemoryRead8(address);
                             clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                    + GBA_MemoryGetAccessCyclesNoSeq16(address) + 1;
+                                      + GBA_MemoryGetAccessCyclesNoSeq16(address) + 1;
                             if (Rd == 15)
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4;
                             }
                             break;
@@ -3196,11 +3201,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                             CPU.R[Rn] = address + offset;
                             CPU.R[Rd] = GBA_MemoryRead32(address);
                             clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                    + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                      + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                             if (Rd == 15)
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4;
                             }
                             break;
@@ -3222,11 +3227,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                             CPU.R[Rn] = address + offset;
                             CPU.R[Rd] = GBA_MemoryRead8(address);
                             clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                    + GBA_MemoryGetAccessCyclesNoSeq16(address) + 1;
+                                      + GBA_MemoryGetAccessCyclesNoSeq16(address) + 1;
                             if (Rd == 15)
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4;
                             }
                             break;
@@ -3244,11 +3249,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                             u32 address = CPU.R[Rn] + (Rn == 15 ? 8 : 0) - offset;
                             CPU.R[Rd] = GBA_MemoryRead32(address);
                             clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                    + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                      + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                             if (Rd == 15)
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4;
                             }
                             break;
@@ -3268,11 +3273,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                             CPU.R[Rn] = address;
                             CPU.R[Rd] = GBA_MemoryRead32(address);
                             clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                    + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                      + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                             if (Rd == 15)
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4;
                             }
                             break;
@@ -3290,11 +3295,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                             u32 address = CPU.R[Rn] + (Rn == 15 ? 8 : 0) - offset;
                             CPU.R[Rd] = GBA_MemoryRead8(address);
                             clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                    + GBA_MemoryGetAccessCyclesNoSeq16(address) + 1;
+                                      + GBA_MemoryGetAccessCyclesNoSeq16(address) + 1;
                             if (Rd == 15)
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4;
                             }
                             break;
@@ -3314,11 +3319,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                             CPU.R[Rn] = address;
                             CPU.R[Rd] = GBA_MemoryRead8(address);
                             clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                    + GBA_MemoryGetAccessCyclesNoSeq16(address) + 1;
+                                      + GBA_MemoryGetAccessCyclesNoSeq16(address) + 1;
                             if (Rd == 15)
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4;
                             }
                             break;
@@ -3336,11 +3341,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                             u32 address = CPU.R[Rn] + (Rn == 15 ? 8 : 0) + offset;
                             CPU.R[Rd] = GBA_MemoryRead32(address);
                             clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                    + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                      + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                             if (Rd == 15)
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4;
                             }
                             break;
@@ -3360,11 +3365,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                             CPU.R[Rn] = address;
                             CPU.R[Rd] = GBA_MemoryRead32(address);
                             clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                    + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                      + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                             if (Rd == 15)
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4;
                             }
                             break;
@@ -3382,11 +3387,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                             u32 address = CPU.R[Rn] + (Rn == 15 ? 8 : 0) + offset;
                             CPU.R[Rd] = GBA_MemoryRead8(address);
                             clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                    + GBA_MemoryGetAccessCyclesNoSeq16(address) + 1;
+                                      + GBA_MemoryGetAccessCyclesNoSeq16(address) + 1;
                             if (Rd == 15)
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4;
                             }
                             break;
@@ -3406,11 +3411,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                             CPU.R[Rn] = address;
                             CPU.R[Rd] = GBA_MemoryRead8(address);
                             clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                    + GBA_MemoryGetAccessCyclesNoSeq16(address) + 1;
+                                      + GBA_MemoryGetAccessCyclesNoSeq16(address) + 1;
                             if (Rd == 15)
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4;
                             }
                             break;
@@ -3436,8 +3441,8 @@ s32 GBA_ExecuteARM(s32 clocks)
                     //u32 Rm = opcode & 0xF; // (not including PC=R15)
 
                     s32 offset = cpu_shift_by_reg_no_carry_arm_ldr_str(
-                                    (opcode >> 5) & 3, CPU.R[opcode & 0xF],
-                                    (opcode >> 7) & 0x1F);
+                            (opcode >> 5) & 3, CPU.R[opcode & 0xF],
+                            (opcode >> 7) & 0x1F);
 
                     switch (opcode >> 20)
                     {
@@ -3461,11 +3466,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                             CPU.R[Rn] = address - offset;
                             CPU.R[Rd] = GBA_MemoryRead32(address);
                             clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                    + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                      + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                             if (Rd == 15)
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4;
                             }
 
@@ -3489,11 +3494,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                             CPU.R[Rn] = address - offset;
                             CPU.R[Rd] = GBA_MemoryRead8(address);
                             clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                    + GBA_MemoryGetAccessCyclesNoSeq16(address) + 1;
+                                      + GBA_MemoryGetAccessCyclesNoSeq16(address) + 1;
                             if (Rd == 15)
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4;
                             }
                             break;
@@ -3515,11 +3520,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                             CPU.R[Rn] = address + offset;
                             CPU.R[Rd] = GBA_MemoryRead32(address);
                             clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                    + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                      + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                             if (Rd == 15)
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4;
                             }
                             break;
@@ -3541,11 +3546,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                             CPU.R[Rn] = address + offset;
                             CPU.R[Rd] = GBA_MemoryRead8(address);
                             clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                    + GBA_MemoryGetAccessCyclesNoSeq16(address) + 1;
+                                      + GBA_MemoryGetAccessCyclesNoSeq16(address) + 1;
                             if (Rd == 15)
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4;
                             }
                             break;
@@ -3563,11 +3568,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                             u32 address = CPU.R[Rn] + (Rn == 15 ? 8 : 0) - offset;
                             CPU.R[Rd] = GBA_MemoryRead32(address);
                             clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                    + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                      + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                             if (Rd == 15)
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4;
                             }
                             break;
@@ -3587,11 +3592,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                             CPU.R[Rn] = address;
                             CPU.R[Rd] = GBA_MemoryRead32(address);
                             clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                    + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                      + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                             if (Rd == 15)
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4;
                             }
                             break;
@@ -3609,11 +3614,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                             u32 address = CPU.R[Rn] + (Rn == 15 ? 8 : 0) - offset;
                             CPU.R[Rd] = GBA_MemoryRead8(address);
                             clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                    + GBA_MemoryGetAccessCyclesNoSeq16(address) + 1;
+                                      + GBA_MemoryGetAccessCyclesNoSeq16(address) + 1;
                             if (Rd == 15)
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4;
                             }
                             break;
@@ -3633,11 +3638,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                             CPU.R[Rn] = address;
                             CPU.R[Rd] = GBA_MemoryRead8(address);
                             clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                    + GBA_MemoryGetAccessCyclesNoSeq16(address) + 1;
+                                      + GBA_MemoryGetAccessCyclesNoSeq16(address) + 1;
                             if (Rd == 15)
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4;
                             }
                             break;
@@ -3655,11 +3660,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                             u32 address = CPU.R[Rn] + (Rn == 15 ? 8 : 0) + offset;
                             CPU.R[Rd] = GBA_MemoryRead32(address);
                             clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                    + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                      + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                             if (Rd == 15)
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4;
                             }
                             break;
@@ -3679,11 +3684,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                             CPU.R[Rn] = address;
                             CPU.R[Rd] = GBA_MemoryRead32(address);
                             clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                    + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
+                                      + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;
                             if (Rd == 15)
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4;
                             }
                             break;
@@ -3701,11 +3706,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                             u32 address = CPU.R[Rn] + (Rn == 15 ? 8 : 0) + offset;
                             CPU.R[Rd] = GBA_MemoryRead8(address);
                             clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                    + GBA_MemoryGetAccessCyclesNoSeq16(address) + 1;
+                                      + GBA_MemoryGetAccessCyclesNoSeq16(address) + 1;
                             if (Rd == 15)
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4;
                             }
                             break;
@@ -3725,11 +3730,11 @@ s32 GBA_ExecuteARM(s32 clocks)
                             CPU.R[Rn] = address;
                             CPU.R[Rd] = GBA_MemoryRead8(address);
                             clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                    + GBA_MemoryGetAccessCyclesNoSeq16(address) + 1;
+                                      + GBA_MemoryGetAccessCyclesNoSeq16(address) + 1;
                             if (Rd == 15)
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4;
                             }
                             break;
@@ -3803,8 +3808,8 @@ s32 GBA_ExecuteARM(s32 clocks)
                             }
 
                             clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                    + GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                    + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1));
+                                      + GBA_MemoryGetAccessCyclesNoSeq32(address)
+                                      + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1));
                             break;
                         }
                         case 0x01: // LDM{cond}DA Rn,<Rlist>
@@ -3825,16 +3830,16 @@ s32 GBA_ExecuteARM(s32 clocks)
                             if (opcode & BIT(15))
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                        + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
-                                        + 1 + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
+                                          + 1 + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4; // To avoid skipping an instruction
                             }
                             else
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                        + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
-                                        + 1;
+                                          + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
+                                          + 1;
                             }
                             break;
                         }
@@ -3861,8 +3866,8 @@ s32 GBA_ExecuteARM(s32 clocks)
                             }
 
                             clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                    + GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                    + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1));
+                                      + GBA_MemoryGetAccessCyclesNoSeq32(address)
+                                      + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1));
                             break;
                         }
                         case 0x03: // LDM{cond}DA Rn!,<Rlist>
@@ -3884,16 +3889,16 @@ s32 GBA_ExecuteARM(s32 clocks)
                             if (opcode & BIT(15))
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                        + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
-                                        + 1 + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
+                                          + 1 + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4; // To avoid skipping an instruction
                             }
                             else
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                        + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
-                                        + 1;
+                                          + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
+                                          + 1;
                             }
                             break;
                         }
@@ -3918,8 +3923,8 @@ s32 GBA_ExecuteARM(s32 clocks)
                             GBA_CPUChangeMode(oldcpu);
 
                             clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                    + GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                    + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1));
+                                      + GBA_MemoryGetAccessCyclesNoSeq32(address)
+                                      + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1));
                             break;
                         }
                         case 0x05: // LDM{cond}DA Rn,<Rlist>^
@@ -3951,9 +3956,9 @@ s32 GBA_ExecuteARM(s32 clocks)
                             if (opcode & BIT(15))
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                        + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
-                                        + 1 + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
+                                          + 1 + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4; // To avoid skipping an instruction
                             }
                             else
@@ -3961,8 +3966,8 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 GBA_CPUChangeMode(oldcpu); // Change registers
 
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                        + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
-                                        + 1;
+                                          + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
+                                          + 1;
                             }
                             break;
                         }
@@ -3994,8 +3999,8 @@ s32 GBA_ExecuteARM(s32 clocks)
                             GBA_CPUChangeMode(oldcpu);
 
                             clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                    + GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                    + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1));
+                                      + GBA_MemoryGetAccessCyclesNoSeq32(address)
+                                      + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1));
                             break;
                         }
                         case 0x07: // LDM{cond}DA Rn!,<Rlist>^
@@ -4028,9 +4033,9 @@ s32 GBA_ExecuteARM(s32 clocks)
                             if (opcode & BIT(15))
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                        + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
-                                        + 1 + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
+                                          + 1 + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4; // To avoid skipping an instruction
                             }
                             else
@@ -4038,8 +4043,8 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 GBA_CPUChangeMode(oldcpu); // Change registers
 
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                        + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
-                                        + 1;
+                                          + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
+                                          + 1;
                             }
                             break;
                         }
@@ -4058,8 +4063,8 @@ s32 GBA_ExecuteARM(s32 clocks)
                             }
 
                             clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                    + GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                    + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1));
+                                      + GBA_MemoryGetAccessCyclesNoSeq32(address)
+                                      + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1));
                             break;
                         }
                         case 0x09: // LDM{cond}IA Rn,<Rlist>
@@ -4079,16 +4084,16 @@ s32 GBA_ExecuteARM(s32 clocks)
                             if (opcode & BIT(15))
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                        + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
-                                        + 1 + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
+                                          + 1 + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4; // To avoid skipping an instruction
                             }
                             else
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                        + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
-                                        + 1;
+                                          + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
+                                          + 1;
                             }
                             break;
                         }
@@ -4116,8 +4121,8 @@ s32 GBA_ExecuteARM(s32 clocks)
                             //CPU.R[Rn] = address;
 
                             clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                    + GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                    + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1));
+                                      + GBA_MemoryGetAccessCyclesNoSeq32(address)
+                                      + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1));
                             break;
                         }
                         case 0x0B: // LDM{cond}IA Rn!,<Rlist>
@@ -4144,16 +4149,16 @@ s32 GBA_ExecuteARM(s32 clocks)
                             if (opcode & BIT(15))
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                        + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
-                                        + 1 + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
+                                          + 1 + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4; // To avoid skipping an instruction
                             }
                             else
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                        + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
-                                        + 1;
+                                          + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
+                                          + 1;
                             }
                             break;
                         }
@@ -4177,8 +4182,8 @@ s32 GBA_ExecuteARM(s32 clocks)
                             GBA_CPUChangeMode(oldcpu);
 
                             clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                    + GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                    + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1));
+                                      + GBA_MemoryGetAccessCyclesNoSeq32(address)
+                                      + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1));
                             break;
                         }
                         case 0x0D: // LDM{cond}IA Rn,<Rlist>^
@@ -4209,17 +4214,17 @@ s32 GBA_ExecuteARM(s32 clocks)
                             if (opcode & BIT(15))
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                        + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
-                                        + 1 + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
+                                          + 1 + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4; // To avoid skipping an instruction
                             }
                             else
                             {
                                 GBA_CPUChangeMode(oldcpu);
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                        + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
-                                        + 1;
+                                          + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
+                                          + 1;
                             }
                             break;
                         }
@@ -4252,8 +4257,8 @@ s32 GBA_ExecuteARM(s32 clocks)
                             GBA_CPUChangeMode(oldcpu);
 
                             clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                    + GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                    + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1));
+                                      + GBA_MemoryGetAccessCyclesNoSeq32(address)
+                                      + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1));
                             break;
                         }
                         case 0x0F: // LDM{cond}IA Rn!,<Rlist>^
@@ -4287,17 +4292,17 @@ s32 GBA_ExecuteARM(s32 clocks)
                             if (opcode & BIT(15))
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                        + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
-                                        + 1 + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
+                                          + 1 + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4; // To avoid skipping an instruction
                             }
                             else
                             {
                                 GBA_CPUChangeMode(oldcpu);
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                        + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
-                                        + 1;
+                                          + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
+                                          + 1;
                             }
                             break;
                         }
@@ -4317,8 +4322,8 @@ s32 GBA_ExecuteARM(s32 clocks)
                             }
 
                             clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                    + GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                    + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1));
+                                      + GBA_MemoryGetAccessCyclesNoSeq32(address)
+                                      + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1));
                             break;
                         }
                         case 0x11: // LDM{cond}DB Rn,<Rlist>
@@ -4339,16 +4344,16 @@ s32 GBA_ExecuteARM(s32 clocks)
                             if (opcode & BIT(15))
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                        + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
-                                        + 1 + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
+                                          + 1 + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4; // To avoid skipping an instruction
                             }
                             else
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                        + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
-                                        + 1;
+                                          + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
+                                          + 1;
                             }
                             break;
                         }
@@ -4377,8 +4382,8 @@ s32 GBA_ExecuteARM(s32 clocks)
                             }
 
                             clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                    + GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                    + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1));
+                                      + GBA_MemoryGetAccessCyclesNoSeq32(address)
+                                      + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1));
                             break;
                         }
                         case 0x13: // LDM{cond}DB Rn!,<Rlist>
@@ -4400,16 +4405,16 @@ s32 GBA_ExecuteARM(s32 clocks)
                             if (opcode & BIT(15))
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                        + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
-                                        + 1 + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
+                                          + 1 + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4; // To avoid skipping an instruction
                             }
                             else
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                        + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
-                                        + 1;
+                                          + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
+                                          + 1;
                             }
                             break;
                         }
@@ -4434,8 +4439,8 @@ s32 GBA_ExecuteARM(s32 clocks)
                             GBA_CPUChangeMode(oldcpu);
 
                             clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                    + GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                    + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1));
+                                      + GBA_MemoryGetAccessCyclesNoSeq32(address)
+                                      + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1));
                             break;
                         }
                         case 0x15: // LDM{cond}DB Rn,<Rlist>^
@@ -4467,9 +4472,9 @@ s32 GBA_ExecuteARM(s32 clocks)
                             if (opcode & BIT(15))
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                        + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
-                                        + 1 + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
+                                          + 1 + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4; // To avoid skipping an instruction
                             }
                             else
@@ -4477,8 +4482,8 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 GBA_CPUChangeMode(oldcpu); // Change registers
 
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                        + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
-                                        + 1;
+                                          + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
+                                          + 1;
                             }
                             break;
                         }
@@ -4512,8 +4517,8 @@ s32 GBA_ExecuteARM(s32 clocks)
                             GBA_CPUChangeMode(oldcpu);
 
                             clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                    + GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                    + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1));
+                                      + GBA_MemoryGetAccessCyclesNoSeq32(address)
+                                      + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1));
                             break;
                         }
                         case 0x17: // LDM{cond}DB Rn!,<Rlist>^
@@ -4546,9 +4551,9 @@ s32 GBA_ExecuteARM(s32 clocks)
                             if (opcode & BIT(15))
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                        + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
-                                        + 1 + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
+                                          + 1 + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4; // To avoid skipping an instruction
                             }
                             else
@@ -4556,8 +4561,8 @@ s32 GBA_ExecuteARM(s32 clocks)
                                 GBA_CPUChangeMode(oldcpu); // Change registers
 
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                        + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
-                                        + 1;
+                                          + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
+                                          + 1;
                             }
                             break;
                         }
@@ -4576,8 +4581,8 @@ s32 GBA_ExecuteARM(s32 clocks)
                             }
 
                             clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                    + GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                    + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1));
+                                      + GBA_MemoryGetAccessCyclesNoSeq32(address)
+                                      + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1));
                             break;
                         }
                         case 0x19: // LDM{cond}IB Rn,<Rlist>
@@ -4597,16 +4602,16 @@ s32 GBA_ExecuteARM(s32 clocks)
                             if (opcode & BIT(15))
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                        + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
-                                        + 1 + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
+                                          + 1 + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4; // To avoid skipping an instruction
                             }
                             else
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                        + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
-                                        + 1;
+                                          + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
+                                          + 1;
                             }
                             break;
                         }
@@ -4634,8 +4639,8 @@ s32 GBA_ExecuteARM(s32 clocks)
                             //CPU.R[Rn] = address;
 
                             clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                    + GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                    + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1));
+                                      + GBA_MemoryGetAccessCyclesNoSeq32(address)
+                                      + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1));
                             break;
                         }
                         case 0x1B: // LDM{cond}IB Rn!,<Rlist>
@@ -4659,16 +4664,16 @@ s32 GBA_ExecuteARM(s32 clocks)
                             if (opcode & BIT(15))
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                        + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
-                                        + 1 + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
+                                          + 1 + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4; // To avoid skipping an instruction
                             }
                             else
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                        + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
-                                        + 1;
+                                          + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
+                                          + 1;
                             }
                             break;
                         }
@@ -4692,8 +4697,8 @@ s32 GBA_ExecuteARM(s32 clocks)
                             GBA_CPUChangeMode(oldcpu);
 
                             clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                    + GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                    + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1));
+                                      + GBA_MemoryGetAccessCyclesNoSeq32(address)
+                                      + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1));
                             break;
                         }
                         case 0x1D: // LDM{cond}IB Rn,<Rlist>^
@@ -4724,17 +4729,17 @@ s32 GBA_ExecuteARM(s32 clocks)
                             if (opcode & BIT(15))
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                        + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
-                                        + 1 + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
+                                          + 1 + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4; // To avoid skipping an instruction
                             }
                             else
                             {
                                 GBA_CPUChangeMode(oldcpu);
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                        + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
-                                        + 1;
+                                          + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
+                                          + 1;
                             }
                             break;
                         }
@@ -4767,8 +4772,8 @@ s32 GBA_ExecuteARM(s32 clocks)
                             GBA_CPUChangeMode(oldcpu);
 
                             clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                    + GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                    + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1));
+                                      + GBA_MemoryGetAccessCyclesNoSeq32(address)
+                                      + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1));
                             break;
                         }
                         case 0x1F: // LDM{cond}IB Rn!,<Rlist>^
@@ -4802,17 +4807,17 @@ s32 GBA_ExecuteARM(s32 clocks)
                             if (opcode & BIT(15))
                             {
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                        + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
-                                        + 1 + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                        + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                          + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
+                                          + 1 + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
+                                          + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                                 CPU.R[R_PC] -= 4; // To avoid skipping an instruction
                             }
                             else
                             {
                                 GBA_CPUChangeMode(oldcpu);
                                 clocks -= GBA_MemoryGetAccessCyclesNoSeq32(address)
-                                        + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
-                                        + 1;
+                                          + (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1))
+                                          + 1;
                             }
                             break;
                         }
@@ -4837,8 +4842,8 @@ s32 GBA_ExecuteARM(s32 clocks)
 
                     // 2S + 1N cycles
                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                            + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                            + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                              + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
+                              + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                     break;
                 }
                 case 6:
@@ -4875,8 +4880,8 @@ s32 GBA_ExecuteARM(s32 clocks)
                         }
 
                         GBA_CPUChangeMode(M_SUPERVISOR);
-                        CPU.R[14] = CPU.R[R_PC] + 4; // Save return address
-                        CPU.SPSR = CPU.CPSR; // Save CPSR flags
+                        CPU.R[14] = CPU.R[R_PC] + 4;       // Save return address
+                        CPU.SPSR = CPU.CPSR;               // Save CPSR flags
                         CPU.CPSR &= ~((0x1F) | F_T | F_I); // Enter SVC, ARM state, IRQs disabled
                         CPU.CPSR |= M_SUPERVISOR | F_I;
 
@@ -4886,8 +4891,8 @@ s32 GBA_ExecuteARM(s32 clocks)
                         CPU.R[R_PC] = 4;
                         // 2S + 1N cycles
                         clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.OldPC)
-                                + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
-                                + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
+                                  + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_PC])
+                                  + GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_PC]);
                         break;
                     }
                     else

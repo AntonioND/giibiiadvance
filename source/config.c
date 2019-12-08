@@ -4,41 +4,41 @@
 //
 // GiiBiiAdvance - GBA/GB emulator
 
-#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "build_options.h"
-#include "file_utils.h"
 #include "config.h"
+#include "file_utils.h"
 #include "input_utils.h"
 
 #include "gb_core/gameboy.h"
-#include "gb_core/sound.h"
 #include "gb_core/gb_main.h"
+#include "gb_core/sound.h"
 #include "gb_core/video.h"
 
 #include "gba_core/sound.h"
 
 // Default values...
 t_config EmulatorConfig = {
-    0,      // debug_msg_enable
-    2,      // screen_size
-    0,      // load_from_boot_rom
-    0,      // frameskip
-    0,      // oglfilter
-    0,      // auto_close_debugger
-    0,      // webcam_select
+    0, // debug_msg_enable
+    2, // screen_size
+    0, // load_from_boot_rom
+    0, // frameskip
+    0, // oglfilter
+    0, // auto_close_debugger
+    0, // webcam_select
     //---------
-    64,     // volume
-    0x3F,   // chn_flags
-    0,      // snd_mute
+    64,   // volume
+    0x3F, // chn_flags
+    0,    // snd_mute
     //---------
-    -1,     // hardware_type
+    -1,               // hardware_type
     SERIAL_GBPRINTER, // serial_device
-    0,      // enableblur
-    0,      // realcolors
-    0x0200, // gbcam_exposure_reference
+    0,                // enableblur
+    0,                // realcolors
+    0x0200,           // gbcam_exposure_reference
 
     // The GB palette is not stored here, it is stored in gb_main.c
     // The input config not here, either... it's in input_utils.c
@@ -124,7 +124,7 @@ void Config_Save(void)
     fprintf(ini_file, CFG_SCREEN_SIZE "=%d\n", EmulatorConfig.screen_size);
     fprintf(ini_file, CFG_LOAD_BOOT_ROM "=%s\n",
             EmulatorConfig.load_from_boot_rom ? "true" : "false");
-    fprintf(ini_file, CFG_FRAMESKIP "=%d\n",EmulatorConfig.frameskip);
+    fprintf(ini_file, CFG_FRAMESKIP "=%d\n", EmulatorConfig.frameskip);
     fprintf(ini_file, CFG_OPENGL_FILTER "=%s\n",
             oglfiltertype[EmulatorConfig.oglfilter]);
     fprintf(ini_file, CFG_AUTO_CLOSE_DEBUGGER "=%s\n",
@@ -165,7 +165,7 @@ void Config_Save(void)
         // Check if the player is enabled (P1 is always enabled)
         if (!(Input_PlayerGetEnabled(player) || (player == 0)))
         {
-            fprintf(ini_file,"P%d_Enabled=false\n",player+1);
+            fprintf(ini_file, "P%d_Enabled=false\n", player + 1);
             continue;
         }
 
@@ -175,8 +175,8 @@ void Config_Save(void)
 
         if (controller != -1) // If this is a joystick
         {
-            char *controllername = Input_GetJoystickName(
-                                        Input_PlayerGetController(player));
+            char *controllername =
+                    Input_GetJoystickName(Input_PlayerGetController(player));
             if (strlen(controllername) > 0)
             {
                 fprintf(ini_file, "P%d_Enabled=true\n", player + 1);
@@ -241,7 +241,7 @@ void Config_Load(void)
 
     char *ini;
     unsigned int size;
-    FileLoad_NoError(path, (void*)&ini, &size);
+    FileLoad_NoError(path, (void *)&ini, &size);
     if (ini == NULL)
         return;
 
@@ -262,7 +262,7 @@ void Config_Load(void)
     if (tmp)
     {
         tmp += strlen(CFG_DB_MSG_ENABLE) + 1;
-        if(strncmp(tmp, "true", strlen("true")) == 0)
+        if (strncmp(tmp, "true", strlen("true")) == 0)
             EmulatorConfig.debug_msg_enable = 1;
         else
             EmulatorConfig.debug_msg_enable = 0;
@@ -275,11 +275,11 @@ void Config_Load(void)
         EmulatorConfig.screen_size = atoi(tmp);
         if (EmulatorConfig.screen_size > 4)
             EmulatorConfig.screen_size = 4;
-        else if(EmulatorConfig.screen_size < 2)
+        else if (EmulatorConfig.screen_size < 2)
             EmulatorConfig.screen_size = 2;
     }
 
-    tmp = strstr(ini,CFG_LOAD_BOOT_ROM);
+    tmp = strstr(ini, CFG_LOAD_BOOT_ROM);
     if (tmp)
     {
         tmp += strlen(CFG_LOAD_BOOT_ROM) + 1;
@@ -295,7 +295,7 @@ void Config_Load(void)
     {
         tmp += strlen(CFG_FRAMESKIP) + 1;
         if (*tmp == '-') //&& (*(tmp+1) == 1)
-             EmulatorConfig.frameskip = -1;
+            EmulatorConfig.frameskip = -1;
         else
             EmulatorConfig.frameskip = *tmp - '0';
 
@@ -310,7 +310,7 @@ void Config_Load(void)
 
         int result = 0;
         for (int i = 0; i < ARRAY_NUM_ELEMENTS(oglfiltertype); i++)
-            if(strncmp(tmp, oglfiltertype[i], strlen(oglfiltertype[i])) == 0)
+            if (strncmp(tmp, oglfiltertype[i], strlen(oglfiltertype[i])) == 0)
                 result = i;
 
         EmulatorConfig.oglfilter = result;
@@ -320,7 +320,7 @@ void Config_Load(void)
     if (tmp)
     {
         tmp += strlen(CFG_AUTO_CLOSE_DEBUGGER) + 1;
-        if(strncmp(tmp, "true", strlen("true")) == 0)
+        if (strncmp(tmp, "true", strlen("true")) == 0)
             EmulatorConfig.auto_close_debugger = 1;
         else
             EmulatorConfig.auto_close_debugger = 0;
@@ -343,7 +343,7 @@ void Config_Load(void)
         tmp += strlen(CFG_SND_CHN_ENABLE) + 1;
         if (*tmp == '#')
         {
-            tmp ++;
+            tmp++;
             char aux[3];
             aux[0] = *tmp++;
             aux[1] = *tmp;
@@ -374,7 +374,7 @@ void Config_Load(void)
     if (tmp)
     {
         tmp += strlen(CFG_SND_MUTE) + 1;
-        if(strncmp(tmp, "true", strlen("true")) == 0)
+        if (strncmp(tmp, "true", strlen("true")) == 0)
             EmulatorConfig.snd_mute = 1;
         else
             EmulatorConfig.snd_mute = 0;
@@ -388,7 +388,7 @@ void Config_Load(void)
 
         int result = -1;
         for (int i = 0; i < ARRAY_NUM_ELEMENTS(hwtype); i++)
-            if(strncmp(tmp, hwtype[i], strlen(hwtype[i])) == 0)
+            if (strncmp(tmp, hwtype[i], strlen(hwtype[i])) == 0)
                 result = i;
 
         EmulatorConfig.hardware_type = result - 1;
@@ -401,7 +401,7 @@ void Config_Load(void)
 
         int result = 0;
         for (int i = 0; i < ARRAY_NUM_ELEMENTS(serialdevice); i++)
-            if(strncmp(tmp, serialdevice[i], strlen(serialdevice[i])) == 0)
+            if (strncmp(tmp, serialdevice[i], strlen(serialdevice[i])) == 0)
                 result = i;
 
         EmulatorConfig.serial_device = result;
@@ -411,7 +411,7 @@ void Config_Load(void)
     if (tmp)
     {
         tmp += strlen(CFG_ENABLE_BLUR) + 1;
-        if(strncmp(tmp, "true", strlen("true")) == 0)
+        if (strncmp(tmp, "true", strlen("true")) == 0)
             EmulatorConfig.enableblur = 1;
         else
             EmulatorConfig.enableblur = 0;
@@ -423,7 +423,7 @@ void Config_Load(void)
     if (tmp)
     {
         tmp += strlen(CFG_REAL_GB_COLORS) + 1;
-        if(strncmp(tmp, "true", strlen("true")) == 0)
+        if (strncmp(tmp, "true", strlen("true")) == 0)
             EmulatorConfig.realcolors = 1;
         else
             EmulatorConfig.realcolors = 0;
@@ -437,7 +437,7 @@ void Config_Load(void)
         tmp += strlen(CFG_GBCAM_EXPOSURE_REFERENCE) + 1;
         if (*tmp == '#')
         {
-            tmp ++;
+            tmp++;
             char aux[5];
             aux[0] = *tmp++;
             aux[1] = *tmp++;
@@ -447,7 +447,7 @@ void Config_Load(void)
 
             unsigned int value = asciihex_to_int(aux);
 
-            if(value <= 0xFFFF)
+            if (value <= 0xFFFF)
                 EmulatorConfig.gbcam_exposure_reference = value;
         }
     }
@@ -516,10 +516,10 @@ void Config_Load(void)
 
                 for (int i = 0; i < sizeof(temp_str); i++)
                 {
-                    if(temp_str[i] == ']')
+                    if (temp_str[i] == ']')
                         temp_str[i] = '\0';
                 }
-                //temp_str now has the name of the controller
+                // temp_str now has the name of the controller
 
                 int index = Input_GetJoystickFromName(temp_str);
                 if (index == -2)
@@ -537,8 +537,8 @@ void Config_Load(void)
                     // Now, read keys
                     for (int key = 0; key < P_NUM_KEYS; key++)
                     {
-                        snprintf(temp_str, sizeof(temp_str), "P%d_%s=",
-                                 player + 1, GBKeyNames[key]);
+                        snprintf(temp_str, sizeof(temp_str),
+                                 "P%d_%s=", player + 1, GBKeyNames[key]);
                         tmp = strstr(ini, temp_str);
                         if (tmp)
                         {
@@ -552,7 +552,6 @@ void Config_Load(void)
                         }
                     }
                 }
-
             }
             else
             {

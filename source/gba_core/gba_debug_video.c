@@ -15,9 +15,9 @@
 
 static u32 rgb16to32(u16 color)
 {
-    int r = (color & 31)<<3;
-    int g = ((color >> 5) & 31)<<3;
-    int b = ((color >> 10) & 31)<<3;
+    int r = (color & 31) << 3;
+    int g = ((color >> 5) & 31) << 3;
+    int b = ((color >> 10) & 31) << 3;
     return (b << 16) | (g << 8) | r;
 }
 
@@ -38,10 +38,10 @@ void GBA_Debug_PrintZoomedSpriteAt(int spritenum, int buf_has_alpha_channel,
     memset(sprbuffer_vis, 0, sizeof(sprbuffer_vis));
 
     static const int spr_size[4][4][2] = { // Shape, Size, (x,y)
-        {{8, 8}, {16, 16}, {32, 32}, {64, 64}}, // Square
-        {{16, 8}, {32, 8}, {32, 16}, {64, 32}}, // Horizontal
-        {{8, 16}, {8, 32}, {16, 32}, {32, 64}}, // Vertical
-        {{0, 0}, {0, 0}, {0, 0}, {0, 0}} // Prohibited
+        { { 8, 8 }, { 16, 16 }, { 32, 32 }, { 64, 64 } }, // Square
+        { { 16, 8 }, { 32, 8 }, { 32, 16 }, { 64, 32 } }, // Horizontal
+        { { 8, 16 }, { 8, 32 }, { 16, 32 }, { 32, 64 } }, // Vertical
+        { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }        // Prohibited
     };
 
     _oam_spr_entry_t *spr = &(((_oam_spr_entry_t *)Mem.oam)[spritenum]);
@@ -241,7 +241,6 @@ void GBA_Debug_PrintSpritesPage(int page, int buf_has_alpha_channel,
                     64);
         }
     }
-
 }
 
 //----------------------------------------------------------------
@@ -261,7 +260,6 @@ void GBA_Debug_PrintTiles(char *buffer, int bufw, unused__ int bufh, int cbb,
             buffer[index + 2] = ((i & 16) ^ (j & 16)) ? 0x80 : 0xB0;
         }
     }
-
 
     if (colors == 256) // 256 Colors
     {
@@ -468,7 +466,7 @@ void GBA_Debug_TilePrint64x64(char *buffer, unused__ int bufw,
                 u8 dat_ = data[j * 8 + i];
 
                 tiletempbuffer[j * 8 + i] =
-                                    rgb16to32(((u16 *)Mem.pal_ram)[dat_ + pal]);
+                        rgb16to32(((u16 *)Mem.pal_ram)[dat_ + pal]);
                 tiletempvis[j * 8 + i] = dat_;
             }
         }
@@ -498,13 +496,16 @@ void GBA_Debug_TilePrint64x64(char *buffer, unused__ int bufw,
     }
 
     // Expand to 64x64
-    for (int i = 0; i < 64; i++) for (int j = 0; j < 64; j++)
+    for (int i = 0; i < 64; i++)
     {
-        int dst = (j * 64 + i) * 3;
-        u8 color =  ((i & 16) ^ (j & 16)) ? 0x80 : 0xB0;
-        buffer[dst + 0] = color;
-        buffer[dst + 1] = color;
-        buffer[dst + 2] = color;
+        for (int j = 0; j < 64; j++)
+        {
+            int dst = (j * 64 + i) * 3;
+            u8 color = ((i & 16) ^ (j & 16)) ? 0x80 : 0xB0;
+            buffer[dst + 0] = color;
+            buffer[dst + 1] = color;
+            buffer[dst + 2] = color;
+        }
     }
 
     for (int i = 0; i < 64; i++)
@@ -548,13 +549,13 @@ void GBA_Debug_PrintBackgroundAlpha(char *buffer, int bufw, int bufh,
     if (bgmode == 1) // Text
     {
         static const u32 text_bg_size[4][2] = {
-            {256, 256}, {512, 256}, {256, 512}, {512, 512}
+            { 256, 256 }, { 512, 256 }, { 256, 512 }, { 512, 512 }
         };
 
         u8 *charbaseblockptr =
-                        (u8 *)&Mem.vram[((control >> 2) & 3) * (16 * 1024)];
+                (u8 *)&Mem.vram[((control >> 2) & 3) * (16 * 1024)];
         u16 *scrbaseblockptr =
-                        (u16 *)&Mem.vram[((control >> 8) & 0x1F) * (2 * 1024)];
+                (u16 *)&Mem.vram[((control >> 8) & 0x1F) * (2 * 1024)];
 
         u32 sizex = text_bg_size[control >> 14][0];
         u32 sizey = text_bg_size[control >> 14][1];
@@ -635,9 +636,9 @@ void GBA_Debug_PrintBackgroundAlpha(char *buffer, int bufw, int bufh,
         static const u32 affine_bg_size[4] = { 128, 256, 512, 1024 };
 
         u8 *charbaseblockptr =
-                        (u8 *)&Mem.vram[((control >> 2) & 3) * (16 * 1024)];
+                (u8 *)&Mem.vram[((control >> 2) & 3) * (16 * 1024)];
         u8 *scrbaseblockptr =
-                        (u8 *)&Mem.vram[((control >> 8) & 0x1F) * (2 * 1024)];
+                (u8 *)&Mem.vram[((control >> 8) & 0x1F) * (2 * 1024)];
 
         u32 size = affine_bg_size[control >> 14];
         u32 tilesize = size / 8;

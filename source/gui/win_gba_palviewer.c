@@ -114,7 +114,7 @@ void Win_GBAPalViewerUpdate(void)
     GUI_ConsoleClear(&gba_palview_con);
 
     u32 address = 0x05000000 + (gba_palview_sprpal * (256 * 2))
-                + (gba_palview_selectedindex * 2);
+                  + (gba_palview_selectedindex * 2);
 
     GUI_ConsoleModePrintf(&gba_palview_con, 0, 0, "Address: 0x%08X", address);
 
@@ -163,8 +163,8 @@ void Win_GBAPalViewerUpdate(void)
 
     int l = ((gba_palview_selectedindex % 16) * 10); // Left
     int t = ((gba_palview_selectedindex / 16) * 10); // Top
-    int r = l + 10; // Right
-    int b = t + 10; // Bottom
+    int r = l + 10;                                  // Right
+    int b = t + 10;                                  // Bottom
     GUI_Draw_Rect(buf, GBA_PAL_BUFFER_SIDE, GBA_PAL_BUFFER_SIDE, l, r, t, b);
     l++;
     t++;
@@ -279,7 +279,6 @@ static void _win_gba_palviewer_dump_btn_callback(void)
 
     char *name_bg = FU_GetNewTimestampFilename("gba_palette_bg");
     Save_PNG(name_bg, GBA_PAL_BUFFER_SIDE, GBA_PAL_BUFFER_SIDE, buffer_temp, 0);
-
 
     src = gba_pal_spr_buffer;
     dst = buffer_temp;

@@ -8,7 +8,7 @@
 #define FILE_EXPLORER__
 
 int FileExplorer_GetNumFiles(void);
-void FileExplorer_SetPath(char * path);
+void FileExplorer_SetPath(char *path);
 void FileExplorer_ListFree(void);
 char *FileExplorer_GetName(int index);
 int FileExplorer_GetIsDir(int index);

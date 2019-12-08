@@ -99,7 +99,7 @@ void Win_GBMemViewerUpdate(void)
             snprintf(textbuf, sizeof(textbuf), "%04X : ", address);
 
             u16 tmpaddr = address;
-            for (int j = 0; j < 8; j ++)
+            for (int j = 0; j < 8; j++)
             {
                 char tmp[30];
                 snprintf(tmp, sizeof(tmp), "%04X ", GB_MemRead16(tmpaddr));
@@ -109,7 +109,7 @@ void Win_GBMemViewerUpdate(void)
             s_strncat(textbuf, ": ", sizeof(textbuf));
 
             tmpaddr = address;
-            for (int j = 0; j < 16; j ++)
+            for (int j = 0; j < 16; j++)
             {
                 char tmp[30];
                 snprintf(tmp, sizeof(tmp), "%c",
@@ -132,7 +132,7 @@ void Win_GBMemViewerUpdate(void)
             snprintf(textbuf, sizeof(textbuf), "%04X : ", address);
 
             u16 tmpaddr = address;
-            for (int j = 0; j < 16; j ++)
+            for (int j = 0; j < 16; j++)
             {
                 char tmp[30];
                 snprintf(tmp, sizeof(tmp), "%02X ", GB_MemRead8(tmpaddr));
@@ -142,7 +142,7 @@ void Win_GBMemViewerUpdate(void)
             s_strncat(textbuf, ": ", sizeof(textbuf));
 
             tmpaddr = address;
-            for (int j = 0; j < 16; j ++)
+            for (int j = 0; j < 16; j++)
             {
                 char tmp[30];
                 snprintf(tmp, sizeof(tmp), "%c",
@@ -192,7 +192,7 @@ static int _win_gba_mem_viewer_callback(SDL_Event *e)
         if (e->type == SDL_MOUSEWHEEL)
         {
             gb_memviewer_start_address -=
-                            e->wheel.y * 3 * GB_MEMVIEWER_ADDRESS_JUMP_LINE;
+                    e->wheel.y * 3 * GB_MEMVIEWER_ADDRESS_JUMP_LINE;
             redraw = 1;
         }
         else if (e->type == SDL_KEYDOWN)
@@ -303,7 +303,7 @@ static void _win_gb_mem_view_textbox_callback(int x, int y)
     int numbits;
 
     u32 line_base_addr = gb_memviewer_start_address
-                       + (ytile * GB_MEMVIEWER_ADDRESS_JUMP_LINE);
+                         + (ytile * GB_MEMVIEWER_ADDRESS_JUMP_LINE);
 
     if (gb_memviewer_mode == GB_MEMVIEWER_16)
     {

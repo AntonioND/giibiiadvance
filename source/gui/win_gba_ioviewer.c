@@ -9,9 +9,9 @@
 #include <SDL.h>
 
 #include "../debug_utils.h"
-#include "../window_handler.h"
 #include "../font_utils.h"
 #include "../general_utils.h"
+#include "../window_handler.h"
 
 #include "win_gba_debugger.h"
 #include "win_main.h"
@@ -19,8 +19,8 @@
 
 #include "../gba_core/gba.h"
 #include "../gba_core/memory.h"
-#include "../gba_core/timers.h"
 #include "../gba_core/sound.h"
+#include "../gba_core/timers.h"
 
 //------------------------------------------------------------------------------
 
@@ -107,7 +107,6 @@ static _gui_console gba_ioview_dma_dma2_con;
 static _gui_element gba_ioview_dma_dma2_textbox, gba_ioview_dma_dma2_label;
 static _gui_console gba_ioview_dma_dma3_con;
 static _gui_element gba_ioview_dma_dma3_textbox, gba_ioview_dma_dma3_label;
-
 
 static _gui_element *gba_ioviwer_dma_elements[] = {
     &gba_ioview_display_tabbtn, &gba_ioview_backgrounds_tabbtn,
@@ -208,12 +207,12 @@ static _gui_element *gba_ioviwer_other_elements[] = {
 //-----------------------
 
 static _gui gba_ioviewer_page_gui[] = {
-    {gba_ioviwer_display_elements, NULL, NULL},
-    {gba_ioviwer_backgrounds_elements, NULL, NULL},
-    {gba_ioviwer_dma_elements, NULL, NULL},
-    {gba_ioviwer_timers_elements, NULL, NULL},
-    {gba_ioviwer_sound_elements, NULL, NULL},
-    {gba_ioviwer_other_elements, NULL, NULL}
+    { gba_ioviwer_display_elements, NULL, NULL },
+    { gba_ioviwer_backgrounds_elements, NULL, NULL },
+    { gba_ioviwer_dma_elements, NULL, NULL },
+    { gba_ioviwer_timers_elements, NULL, NULL },
+    { gba_ioviwer_sound_elements, NULL, NULL },
+    { gba_ioviwer_other_elements, NULL, NULL }
 };
 
 //------------------------------------------------------------------------------
@@ -226,7 +225,7 @@ void Win_GBAIOViewerUpdate(void)
     if (Win_MainRunningGBA() == 0)
         return;
 
-    #define CHECK(a) ((a) ? CHR_SQUAREBLACK_MID : ' ')
+#define CHECK(a) ((a) ? CHR_SQUAREBLACK_MID : ' ')
 
     switch (gba_ioview_selected_tab)
     {
@@ -427,7 +426,7 @@ void Win_GBAIOViewerUpdate(void)
         {
             int scrmode = REG_DISPCNT & 7;
 
-            //BG Control
+            // BG Control
 
             GUI_ConsoleClear(&gba_ioview_bgs_bgcontrol_con);
 
@@ -752,14 +751,14 @@ void Win_GBAIOViewerUpdate(void)
                 "Increment ", "Decrement ", "Fixed     ", "Inc/Reload"
             };
             const char *startmode[4][4] = {
-                {"Start immediately", "Start immediately", "Start immediately",
-                 "Start immediately"},
-                {"  Start at VBlank", "  Start at VBlank", "  Start at VBlank",
-                 "  Start at VBlank"},
-                {"  Start at HBlank", "  Start at HBlank", "  Start at HBlank",
-                 "  Start at HBlank"},
-                {"       Prohibited", "       Sound FIFO", "       Sound FIFO",
-                 "    Video Capture"}
+                { "Start immediately", "Start immediately", "Start immediately",
+                  "Start immediately" },
+                { "  Start at VBlank", "  Start at VBlank", "  Start at VBlank",
+                  "  Start at VBlank" },
+                { "  Start at HBlank", "  Start at HBlank", "  Start at HBlank",
+                  "  Start at HBlank" },
+                { "       Prohibited", "       Sound FIFO", "       Sound FIFO",
+                  "    Video Capture" }
             };
 
             // DMA 0

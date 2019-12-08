@@ -4,8 +4,8 @@
 //
 // GiiBiiAdvance - GBA/GB emulator
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "../build_options.h"
@@ -32,7 +32,8 @@ void GB_Input_Update(void);
 
 int GB_ROMLoad(const char *rom_path)
 {
-    void *ptr; u32 size;
+    void *ptr;
+    u32 size;
 
     FileLoad(rom_path, &ptr, &size);
 

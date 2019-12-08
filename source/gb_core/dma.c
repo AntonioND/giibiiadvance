@@ -69,9 +69,10 @@ static void GB_DMAInitGBCCopy(int register_value)
 
         u32 blocks = (((u32)register_value) & 0x7F) + 1;
         GameBoy.Emulator.gdma_src = (mem->IO_Ports[HDMA1_REG - 0xFF00] << 8)
-                                  | mem->IO_Ports[HDMA2_REG - 0xFF00];
+                                    | mem->IO_Ports[HDMA2_REG - 0xFF00];
         GameBoy.Emulator.gdma_dst = ((mem->IO_Ports[HDMA3_REG - 0xFF00] << 8)
-                                  | mem->IO_Ports[HDMA4_REG - 0xFF00]) + 0x8000;
+                                     | mem->IO_Ports[HDMA4_REG - 0xFF00])
+                                    + 0x8000;
         GameBoy.Emulator.gdma_bytes_left = blocks * 16;
         GameBoy.Emulator.gdma_preparation_clocks_left = 0;
         GameBoy.Emulator.hdma_last_ly_copied = -1; // Reset
@@ -101,9 +102,10 @@ static void GB_DMAInitGBCCopy(int register_value)
         }
 
         GameBoy.Emulator.gdma_src = (mem->IO_Ports[HDMA1_REG - 0xFF00] << 8)
-                                  | mem->IO_Ports[HDMA2_REG - 0xFF00];
+                                    | mem->IO_Ports[HDMA2_REG - 0xFF00];
         GameBoy.Emulator.gdma_dst = ((mem->IO_Ports[HDMA3_REG - 0xFF00] << 8)
-                                  | mem->IO_Ports[HDMA4_REG - 0xFF00]) + 0x8000;
+                                     | mem->IO_Ports[HDMA4_REG - 0xFF00])
+                                    + 0x8000;
         GameBoy.Emulator.gdma_bytes_left = blocks * 16;
 
         //_gb_break_to_debugger();
@@ -157,7 +159,7 @@ void GB_DMAUpdateClocksCounterReference(int reference_clocks)
         GameBoy.Emulator.OAM_DMA_clocks_elapsed += increment_clocks;
 
         int last_destination_to_copy =
-                    0xFE00 + (GameBoy.Emulator.OAM_DMA_clocks_elapsed / 4) - 2;
+                0xFE00 + (GameBoy.Emulator.OAM_DMA_clocks_elapsed / 4) - 2;
 
         while (GameBoy.Emulator.OAM_DMA_dst <= last_destination_to_copy)
         {
@@ -165,7 +167,7 @@ void GB_DMAUpdateClocksCounterReference(int reference_clocks)
                 break;
 
             GameBoy.Emulator.OAM_DMA_last_read_byte =
-                                GB_MemReadDMA8(GameBoy.Emulator.OAM_DMA_src++);
+                    GB_MemReadDMA8(GameBoy.Emulator.OAM_DMA_src++);
             GB_MemWriteDMA8(GameBoy.Emulator.OAM_DMA_dst++,
                             GameBoy.Emulator.OAM_DMA_last_read_byte);
         }
@@ -224,7 +226,7 @@ void GB_DMAWriteHDMA1(int value) // reference_clocks not needed
     _GB_MEMORY_ *mem = &GameBoy.Memory;
     mem->IO_Ports[HDMA1_REG - 0xFF00] = value;
     GameBoy.Emulator.gdma_src = (mem->IO_Ports[HDMA1_REG - 0xFF00] << 8)
-                              | GameBoy.Memory.IO_Ports[HDMA2_REG - 0xFF00];
+                                | GameBoy.Memory.IO_Ports[HDMA2_REG - 0xFF00];
 }
 
 void GB_DMAWriteHDMA2(int value)
@@ -232,7 +234,7 @@ void GB_DMAWriteHDMA2(int value)
     _GB_MEMORY_ *mem = &GameBoy.Memory;
     mem->IO_Ports[HDMA2_REG - 0xFF00] = value & 0xF0; // 4 lower bits ignored
     GameBoy.Emulator.gdma_src = (mem->IO_Ports[HDMA1_REG - 0xFF00] << 8)
-                              | GameBoy.Memory.IO_Ports[HDMA2_REG - 0xFF00];
+                                | GameBoy.Memory.IO_Ports[HDMA2_REG - 0xFF00];
 }
 
 void GB_DMAWriteHDMA3(int value)
@@ -240,7 +242,8 @@ void GB_DMAWriteHDMA3(int value)
     _GB_MEMORY_ *mem = &GameBoy.Memory;
     mem->IO_Ports[HDMA3_REG - 0xFF00] = value & 0x1F; // Dest is VRAM
     GameBoy.Emulator.gdma_dst = ((mem->IO_Ports[HDMA3_REG - 0xFF00] << 8)
-                              | mem->IO_Ports[HDMA4_REG - 0xFF00]) + 0x8000;
+                                 | mem->IO_Ports[HDMA4_REG - 0xFF00])
+                                + 0x8000;
 }
 
 void GB_DMAWriteHDMA4(int value)
@@ -248,7 +251,8 @@ void GB_DMAWriteHDMA4(int value)
     _GB_MEMORY_ *mem = &GameBoy.Memory;
     mem->IO_Ports[HDMA4_REG - 0xFF00] = value & 0xF0; // 4 lower bits ignored
     GameBoy.Emulator.gdma_dst = ((mem->IO_Ports[HDMA3_REG - 0xFF00] << 8)
-                              | mem->IO_Ports[HDMA4_REG - 0xFF00]) + 0x8000;
+                                 | mem->IO_Ports[HDMA4_REG - 0xFF00])
+                                + 0x8000;
 }
 
 void GB_DMAWriteHDMA5(int value)
@@ -308,7 +312,7 @@ int GB_DMAExecute(int clocks)
                 if (clocks >= GameBoy.Emulator.gdma_preparation_clocks_left)
                 {
                     GB_CPUClockCounterAdd(
-                                GameBoy.Emulator.gdma_preparation_clocks_left);
+                            GameBoy.Emulator.gdma_preparation_clocks_left);
                     clocks -= GameBoy.Emulator.gdma_preparation_clocks_left;
                     GameBoy.Emulator.gdma_preparation_clocks_left = 0;
                 }
@@ -326,13 +330,13 @@ int GB_DMAExecute(int clocks)
                         clocks : GameBoy.Emulator.gdma_copy_clocks_left;
 
                 int clocks_per_byte_mask =
-                                        (2 << GameBoy.Emulator.DoubleSpeed) - 1;
+                        (2 << GameBoy.Emulator.DoubleSpeed) - 1;
 
                 u32 bytes = GameBoy.Emulator.gdma_bytes_left;
 
                 while (execute_now_clocks--)
                 {
-                    GameBoy.Emulator.gdma_copy_clocks_left --;
+                    GameBoy.Emulator.gdma_copy_clocks_left--;
                     GB_CPUClockCounterAdd(1);
 
                     if ((GameBoy.Emulator.gdma_copy_clocks_left
@@ -341,7 +345,7 @@ int GB_DMAExecute(int clocks)
                         u8 val = GB_MemReadHDMA8(GameBoy.Emulator.gdma_src++);
                         GB_MemWriteHDMA8(GameBoy.Emulator.gdma_dst++, val);
 
-                        bytes --;
+                        bytes--;
                         if (bytes == 0)
                         {
                             GameBoy.Emulator.GBC_DMA_enabled = GBC_DMA_NONE;
@@ -353,18 +357,18 @@ int GB_DMAExecute(int clocks)
                 GameBoy.Emulator.gdma_bytes_left = bytes;
 
                 mem->IO_Ports[HDMA1_REG - 0xFF00] =
-                                        GameBoy.Emulator.gdma_src >> 8;
+                        GameBoy.Emulator.gdma_src >> 8;
                 mem->IO_Ports[HDMA2_REG - 0xFF00] =
-                                        GameBoy.Emulator.gdma_src & 0xFF;
+                        GameBoy.Emulator.gdma_src & 0xFF;
                 mem->IO_Ports[HDMA3_REG - 0xFF00] =
-                                        (GameBoy.Emulator.gdma_dst >> 8) & 0x1F;
+                        (GameBoy.Emulator.gdma_dst >> 8) & 0x1F;
                 mem->IO_Ports[HDMA4_REG - 0xFF00] =
-                                        GameBoy.Emulator.gdma_dst & 0xFF;
+                        GameBoy.Emulator.gdma_dst & 0xFF;
 
                 if (GameBoy.Emulator.gdma_bytes_left > 0)
                 {
                     mem->IO_Ports[HDMA5_REG - 0xFF00] =
-                                    (GameBoy.Emulator.gdma_bytes_left - 1) / 16;
+                            (GameBoy.Emulator.gdma_bytes_left - 1) / 16;
                 }
                 else
                 {
@@ -422,13 +426,13 @@ int GB_DMAExecute(int clocks)
                         }
 
                         mem->IO_Ports[HDMA1_REG - 0xFF00] =
-                                        GameBoy.Emulator.gdma_src >> 8;
+                                GameBoy.Emulator.gdma_src >> 8;
                         mem->IO_Ports[HDMA2_REG - 0xFF00] =
-                                        GameBoy.Emulator.gdma_src & 0xFF;
+                                GameBoy.Emulator.gdma_src & 0xFF;
                         mem->IO_Ports[HDMA3_REG - 0xFF00] =
-                                        (GameBoy.Emulator.gdma_dst >> 8) & 0x1F;
+                                (GameBoy.Emulator.gdma_dst >> 8) & 0x1F;
                         mem->IO_Ports[HDMA4_REG - 0xFF00] =
-                                        GameBoy.Emulator.gdma_dst & 0xFF;
+                                GameBoy.Emulator.gdma_dst & 0xFF;
 
                         GameBoy.Emulator.gdma_bytes_left -= 16;
 

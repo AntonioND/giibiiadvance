@@ -19,7 +19,8 @@
 
 #define MAX_WINDOWS 20
 
-typedef struct {
+typedef struct
+{
     // Window data
     SDL_Window *mWindow;
     SDL_Renderer *mRenderer;
@@ -82,9 +83,9 @@ static void _wh_set_window_icon(SDL_Window *window)
 {
     SDL_Surface *surface;
 
-    surface = SDL_CreateRGBSurfaceFrom((void *)icon_data, 32, 32,
-                                       32, 32 * 4, 0x000000FF, 0x0000FF00,
-                                       0x00FF0000, 0xFF000000);
+    surface = SDL_CreateRGBSurfaceFrom((void *)icon_data, 32, 32, 32, 32 * 4,
+                                       0x000000FF, 0x0000FF00, 0x00FF0000,
+                                       0xFF000000);
 
     SDL_SetWindowIcon(window, surface);
 
@@ -131,8 +132,7 @@ int WH_Create(int width, int height, int texw, int texh, int scale)
 
     // Create window
     w->mWindow = SDL_CreateWindow("Window", SDL_WINDOWPOS_UNDEFINED,
-                                  SDL_WINDOWPOS_UNDEFINED,
-                                  width, height,
+                                  SDL_WINDOWPOS_UNDEFINED, width, height,
                                   SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
     if (w->mWindow == NULL)
     {
@@ -182,7 +182,7 @@ int WH_Create(int width, int height, int texw, int texh, int scale)
         return -1;
     }
 
-    //SDL_RenderSetLogicalSize(w->mRenderer, w->mWidth, w->mHeight);
+    // SDL_RenderSetLogicalSize(w->mRenderer, w->mWidth, w->mHeight);
 
     // Grab window identifier
     w->mWindowID = SDL_GetWindowID(w->mWindow);
@@ -265,7 +265,7 @@ int WH_SetEventCallback(int index, WH_CallbackFn fn)
 {
     WindowHandle *w = _wh_get_from_index(index);
 
-    if(w == NULL)
+    if (w == NULL)
         return 0;
 
     w->mEventCallback = fn;
@@ -276,7 +276,7 @@ int WH_SetEventMainWindow(int index)
 {
     WindowHandle *w = _wh_get_from_index(index);
 
-    if(w == NULL)
+    if (w == NULL)
         return 0;
 
     gMainWindow = w;
@@ -288,7 +288,7 @@ static int _wh_handle_event(SDL_Event *e)
 {
     if (e->type == SDL_QUIT)
     {
-        for(int i = 0; i < MAX_WINDOWS; i++)
+        for (int i = 0; i < MAX_WINDOWS; i++)
             WH_Close(i);
         return 1;
     }
@@ -473,17 +473,19 @@ void WH_Render(int index, const char *buffer)
     {
         glColor3f(1.0, 1.0, 1.0);
         glBegin(GL_QUADS);
-            glTexCoord2i(0, 0); // Top-left vertex
-            glVertex3f(0, 0, 0);
 
-            glTexCoord2i(w->mTexWidth, 0); // Bottom-left vertex
-            glVertex3f(w->mWidth, 0, 0);
+        glTexCoord2i(0, 0); // Top-left vertex
+        glVertex3f(0, 0, 0);
 
-            glTexCoord2i(w->mTexWidth, w->mTexHeight); // Bottom-right vertex
-            glVertex3f(w->mWidth, w->mHeight, 0);
+        glTexCoord2i(w->mTexWidth, 0); // Bottom-left vertex
+        glVertex3f(w->mWidth, 0, 0);
 
-            glTexCoord2i(0, w->mTexHeight); // Top-right vertex
-            glVertex3f(0, w->mHeight, 0);
+        glTexCoord2i(w->mTexWidth, w->mTexHeight); // Bottom-right vertex
+        glVertex3f(w->mWidth, w->mHeight, 0);
+
+        glTexCoord2i(0, w->mTexHeight); // Top-right vertex
+        glVertex3f(0, w->mHeight, 0);
+
         glEnd();
     }
     else
@@ -642,7 +644,7 @@ int WH_IsShown(int index)
 {
     WindowHandle *w = _wh_get_from_index(index);
 
-    if(w == NULL)
+    if (w == NULL)
         return 0;
 
     return w->mShown;

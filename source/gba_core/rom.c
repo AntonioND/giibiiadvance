@@ -14,7 +14,8 @@
 #include "memory.h"
 #include "save.h"
 
-typedef struct {
+typedef struct
+{
     u32 entry_point; // 32bit ARM branch opcode, eg. "B rom_start"
     // Usually: entry_point & 0xFFC00000 = 0xEA000000.
     // Most times this value is 0xEA00002E
@@ -168,11 +169,11 @@ void GBA_HeaderCheck(void *rom)
     text[12] = '\0';
     ConsolePrint("Game title: %s\n", text);
 
-    memcpy(text,header->game_code, 4);
+    memcpy(text, header->game_code, 4);
     text[4] = '\0';
     ConsolePrint("Game code: %s\n", text);
 
-    memcpy(text,header->maker_code, 2);
+    memcpy(text, header->maker_code, 2);
     text[2] = '\0';
     ConsolePrint("Maker code: %s\n", text);
 

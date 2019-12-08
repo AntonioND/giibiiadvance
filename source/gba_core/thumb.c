@@ -74,22 +74,23 @@ static void thumb_stm(u32 address, u32 reg)
 
 //------------------------------------------------------------------------------
 
-#define THUMB_UNDEFINED_INSTRUCTION()                               \
-{                                                                   \
-    Debug_DebugMsgArg("Undefined instruction.\n"                    \
-                      "THUMB: [0x%08X]=0x%04X", CPU.R[R_PC],        \
-                      GBA_MemoryRead16(CPU.R[R_PC]));               \
-    GBA_CPUChangeMode(M_UNDEFINED);                                 \
-    CPU.R[14] = CPU.R[R_PC] + 2;                                    \
-    CPU.SPSR = CPU.CPSR;                                            \
-    CPU.EXECUTION_MODE = EXEC_ARM;                                  \
-    CPU.CPSR &= ~(0x1F | F_T | F_I);                                \
-    CPU.CPSR |= M_UNDEFINED | F_I;                                  \
-    CPU.R[R_PC] = 4;                                                \
-    clocks -= GBA_MemoryGetAccessCyclesNoSeq16(CPU.R[R_PC])         \
-              + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]) + 1;    \
-    return clocks;                                                  \
-} // 1S+1N+1I ?
+#define THUMB_UNDEFINED_INSTRUCTION()                                \
+    {                                                                \
+        Debug_DebugMsgArg("Undefined instruction.\n"                 \
+                          "THUMB: [0x%08X]=0x%04X",                  \
+                          CPU.R[R_PC],                               \
+                          GBA_MemoryRead16(CPU.R[R_PC]));            \
+        GBA_CPUChangeMode(M_UNDEFINED);                              \
+        CPU.R[14] = CPU.R[R_PC] + 2;                                 \
+        CPU.SPSR = CPU.CPSR;                                         \
+        CPU.EXECUTION_MODE = EXEC_ARM;                               \
+        CPU.CPSR &= ~(0x1F | F_T | F_I);                             \
+        CPU.CPSR |= M_UNDEFINED | F_I;                               \
+        CPU.R[R_PC] = 4;                                             \
+        clocks -= GBA_MemoryGetAccessCyclesNoSeq16(CPU.R[R_PC])      \
+                  + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]) + 1; \
+        return clocks;                                               \
+    } // 1S+1N+1I ?
 // GBA_ExecutionBreak() not needed
 
 //------------------------------------------------------------------------------
@@ -101,7 +102,7 @@ static void thumb_stm(u32 address, u32 reg)
 //#define ADD_OVERFLOW(a, b, res)
 //          ((((~(a)) & (~(b)) & (res)) | ((a) & (b) & (~(res)))) >> 31)
 #define ADD_OVERFLOW(a, b, res) \
-            ((((~((a) | (b))) & (res)) | ((a) & (b) & (~(res)))) >> 31)
+    ((((~((a) | (b))) & (res)) | ((a) & (b) & (~(res)))) >> 31)
 //#define ADD_OVERFLOW(a, b, res)
 //      (((((~((a) | (b))) & (res)) | ((a) & (b) & (~(res)))) >> 3) & BIT(28))
 //#define SUB_OVERFLOW(a, b, res)
@@ -154,9 +155,9 @@ static void thumb_adc(u16 Rd, u16 Rs)
     u64 temp = (u64)t1 + (u64)t2 + (u64)((CPU.CPSR & F_C) ? 1ULL : 0ULL);
     CPU.CPSR &= ~(F_Z | F_C | F_N | F_V);
     CPU.CPSR |= (((u32)temp) ? 0 : F_Z)
-              | (((u32)temp) & F_N)
-              | ((temp & 0xFFFFFFFF00000000ULL) ? F_C : 0)
-              | (ADD_OVERFLOW(t1, t2, (u32)temp) ? F_V : 0);
+                | (((u32)temp) & F_N)
+                | ((temp & 0xFFFFFFFF00000000ULL) ? F_C : 0)
+                | (ADD_OVERFLOW(t1, t2, (u32)temp) ? F_V : 0);
     CPU.R[Rd] = (u32)temp;
 }
 
@@ -167,9 +168,9 @@ static void thumb_sbc(u16 Rd, u16 Rs)
     u64 temp = (u64)t1 + (u64)t2 + ((CPU.CPSR & F_C) ? 1ULL : 0ULL);
     CPU.CPSR &= ~(F_Z | F_C | F_N | F_V);
     CPU.CPSR |= ((u32)temp ? 0 : F_Z)
-              | (((u32)temp) & F_N)
-              | ((temp & 0xFFFFFFFF00000000ULL) ? F_C : 0)
-              | (ADD_OVERFLOW(t1, t2, (u32)temp) ? F_V : 0);
+                | (((u32)temp) & F_N)
+                | ((temp & 0xFFFFFFFF00000000ULL) ? F_C : 0)
+                | (ADD_OVERFLOW(t1, t2, (u32)temp) ? F_V : 0);
     CPU.R[Rd] = (u32)temp;
 }
 
@@ -194,9 +195,9 @@ static void thumb_neg(u16 Rd, u16 Rs)
     CPU.R[Rd] = -(s32)tmp;
     CPU.CPSR &= ~(F_Z | F_C | F_N | F_V);
     CPU.CPSR |= (CPU.R[Rd] ? 0 : F_Z)
-              | (CPU.R[Rd] & F_N)
-              | (tmp ? 0 : F_C)
-              | (ADD_OVERFLOW(0, ~tmp, CPU.R[Rd]) ? F_V : 0);
+                | (CPU.R[Rd] & F_N)
+                | (tmp ? 0 : F_C)
+                | (ADD_OVERFLOW(0, ~tmp, CPU.R[Rd]) ? F_V : 0);
 }
 
 static void thumb_cmp(u16 Rd, u16 Rs)
@@ -206,9 +207,9 @@ static void thumb_cmp(u16 Rd, u16 Rs)
     u64 temp = (u64)t1 + (u64)t2 + 1ULL;
     CPU.CPSR &= ~(F_Z | F_C | F_N | F_V);
     CPU.CPSR |= (((u32)temp) ? 0 : F_Z)
-              | (((u32)temp) & F_N)
-              | ((temp & 0xFFFFFFFF00000000ULL) ? F_C : 0)
-              | (ADD_OVERFLOW(t1, t2, (u32)temp) ? F_V : 0);
+                | (((u32)temp) & F_N)
+                | ((temp & 0xFFFFFFFF00000000ULL) ? F_C : 0)
+                | (ADD_OVERFLOW(t1, t2, (u32)temp) ? F_V : 0);
 }
 
 static void thumb_cmn(u16 Rd, u16 Rs)
@@ -218,20 +219,20 @@ static void thumb_cmn(u16 Rd, u16 Rs)
     asm("add %3,%2 \n\t"
         "setc %%al \n\t"
         "seto %%bl \n\t"
-        : "=a" (carry), "=b" (overflow)
-        : "r" (CPU.R[Rd]), "r" (CPU.R[Rs]));
+        : "=a"(carry), "=b"(overflow)
+        : "r"(CPU.R[Rd]), "r"(CPU.R[Rs]));
     CPU.CPSR &= ~(F_Z | F_C | F_N | F_V);
     CPU.CPSR |= (CPU.R[Rd] ? 0 : F_Z)
-              | (CPU.R[Rd] & F_N)
-              | (carry ? F_C : 0)
-              | (overflow ? F_V : 0);
+                | (CPU.R[Rd] & F_N)
+                | (carry ? F_C : 0)
+                | (overflow ? F_V : 0);
 #else
     u64 temp = (u64)CPU.R[Rd] + (u64)CPU.R[Rs];
     CPU.CPSR &= ~(F_Z | F_C | F_N | F_V);
     CPU.CPSR |= (((u32)temp) ? 0 : F_Z)
-              | (((u32)temp) & F_N)
-              | ((temp & 0xFFFFFFFF00000000ULL) ? F_C : 0)
-              | (ADD_OVERFLOW(CPU.R[Rd], CPU.R[Rs], (u32)temp) ? F_V : 0);
+                | (((u32)temp) & F_N)
+                | ((temp & 0xFFFFFFFF00000000ULL) ? F_C : 0)
+                | (ADD_OVERFLOW(CPU.R[Rd], CPU.R[Rs], (u32)temp) ? F_V : 0);
 #endif
 }
 
@@ -305,7 +306,7 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                 CPU.R[Rd] = lsl_shift_by_immed(CPU.R[Rs], immed, &carry);
                 CPU.CPSR &= ~(F_Z | F_N | F_C);
                 CPU.CPSR |= (CPU.R[Rd] ? 0 : F_Z) | (CPU.R[Rd] & F_N)
-                          | (carry ? F_C : 0);
+                            | (carry ? F_C : 0);
                 clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]);
                 // 1S cycle
                 break;
@@ -320,7 +321,7 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                 CPU.R[Rd] = lsr_shift_by_immed(CPU.R[Rs], immed, &carry);
                 CPU.CPSR &= ~(F_Z | F_N | F_C);
                 CPU.CPSR |= (CPU.R[Rd] ? 0 : F_Z) | (CPU.R[Rd] & F_N)
-                          | (carry ? F_C : 0);
+                            | (carry ? F_C : 0);
                 clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]);
                 // 1S cycle
                 break;
@@ -335,7 +336,7 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                 CPU.R[Rd] = asr_shift_by_immed(CPU.R[Rs], immed, &carry);
                 CPU.CPSR &= ~(F_Z | F_N | F_C);
                 CPU.CPSR |= (CPU.R[Rd] ? 0 : F_Z) | (CPU.R[Rd] & F_N)
-                          | (carry ? F_C : 0);
+                            | (carry ? F_C : 0);
                 clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]);
                 // 1S cycle
                 break;
@@ -352,19 +353,21 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                     "mov %3,%0 \n\t"
                     "setc %%al \n\t"
                     "seto %%bl \n\t"
-                    : "=r" (CPU.R[Rd]), "=a" (carry), "=b" (overflow)
-                    : "r" (CPU.R[Rs]), "r" (CPU.R[Rn]));
+                    : "=r"(CPU.R[Rd]), "=a"(carry), "=b"(overflow)
+                    : "r"(CPU.R[Rs]), "r"(CPU.R[Rn]));
                 CPU.CPSR &= ~(F_Z | F_C | F_N | F_V);
                 CPU.CPSR |= (CPU.R[Rd] ? 0 : F_Z) | (CPU.R[Rd] & F_N)
-                          | (carry ? F_C : 0) | (overflow ? F_V : 0);
+                            | (carry ? F_C : 0) | (overflow ? F_V : 0);
 #else
                 u64 temp = (u64)CPU.R[Rs] + (u64)CPU.R[Rn];
                 CPU.R[Rd] = (u32)temp;
                 CPU.CPSR &= ~(F_Z | F_C | F_N | F_V);
                 CPU.CPSR |= ((temp & 0xFFFFFFFF00000000ULL) ? F_C : 0)
-                          | (CPU.R[Rd] ? 0 : F_Z) | (CPU.R[Rd] & F_N)
-                          | (ADD_OVERFLOW(CPU.R[Rs], CPU.R[Rn],
-                                          CPU.R[Rd]) ? F_V : 0);
+                            | (CPU.R[Rd] ? 0 : F_Z) | (CPU.R[Rd] & F_N)
+                            | (ADD_OVERFLOW(CPU.R[Rs], CPU.R[Rn],
+                                            CPU.R[Rd])
+                                       ? F_V
+                                       : 0);
 #endif
                 clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]);
                 // 1S cycle
@@ -381,9 +384,11 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                 CPU.R[Rd] = (u32)temp;
                 CPU.CPSR &= ~(F_Z | F_C | F_N | F_V);
                 CPU.CPSR |= ((temp & 0xFFFFFFFF00000000ULL) ? F_C : 0)
-                          | (CPU.R[Rd] ? 0 : F_Z) | (CPU.R[Rd] & F_N)
-                          | (ADD_OVERFLOW(CPU.R[Rs], (u32)(addval - 1),
-                                          CPU.R[Rd]) ? F_V : 0);
+                            | (CPU.R[Rd] ? 0 : F_Z) | (CPU.R[Rd] & F_N)
+                            | (ADD_OVERFLOW(CPU.R[Rs], (u32)(addval - 1),
+                                            CPU.R[Rd])
+                                       ? F_V
+                                       : 0);
                 clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]);
                 // 1S cycle
                 break;
@@ -400,19 +405,21 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                     "mov %3,%0 \n\t"
                     "setc %%al \n\t"
                     "seto %%bl \n\t"
-                    : "=r" (CPU.R[Rd]), "=a" (carry), "=b" (overflow)
-                    : "r" (CPU.R[Rs]), "r" (immed));
+                    : "=r"(CPU.R[Rd]), "=a"(carry), "=b"(overflow)
+                    : "r"(CPU.R[Rs]), "r"(immed));
                 CPU.CPSR &= ~(F_Z | F_C | F_N | F_V);
                 CPU.CPSR |= (CPU.R[Rd] ? 0 : F_Z) | (CPU.R[Rd] & F_N)
-                          | (carry ? F_C : 0) | (overflow ? F_V : 0);
+                            | (carry ? F_C : 0) | (overflow ? F_V : 0);
 #else
                 u64 temp = (u64)CPU.R[Rs] + (u64)immed;
                 CPU.R[Rd] = (u32)temp;
                 CPU.CPSR &= ~(F_Z | F_C | F_N | F_V);
                 CPU.CPSR |= ((temp & 0xFFFFFFFF00000000ULL) ? F_C : 0)
-                          | (CPU.R[Rd] ? 0 : F_Z) | (CPU.R[Rd] & F_N)
-                          | (ADD_OVERFLOW(CPU.R[Rs], immed,
-                                          CPU.R[Rd]) ? F_V : 0);
+                            | (CPU.R[Rd] ? 0 : F_Z) | (CPU.R[Rd] & F_N)
+                            | (ADD_OVERFLOW(CPU.R[Rs], immed,
+                                            CPU.R[Rd])
+                                       ? F_V
+                                       : 0);
 #endif
                 clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]);
                 // 1S cycle
@@ -423,28 +430,31 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                 // SUB Rd,Rs,#nn
                 u16 Rd = opcode & 7;
                 u16 Rs = (opcode >> 3) & 7;
-                u64 immed = 1ULL + (u64)(u32)~((opcode >> 6) & 0x7);
+                u64 immed = 1ULL + (u64)(u32) ~((opcode >> 6) & 0x7);
                 u64 temp = (u64)CPU.R[Rs] + (u64)immed;
                 CPU.R[Rd] = (u32)temp;
                 CPU.CPSR &= ~(F_Z | F_C | F_N | F_V);
                 CPU.CPSR |= ((temp & 0xFFFFFFFF00000000ULL) ? F_C : 0)
-                          | (CPU.R[Rd] ? 0 : F_Z) | (CPU.R[Rd] & F_N)
-                          | (ADD_OVERFLOW(CPU.R[Rs], (u32)(immed - 1),
-                                          CPU.R[Rd]) ? F_V : 0);
+                            | (CPU.R[Rd] ? 0 : F_Z) | (CPU.R[Rd] & F_N)
+                            | (ADD_OVERFLOW(CPU.R[Rs], (u32)(immed - 1),
+                                            CPU.R[Rd])
+                                       ? F_V
+                                       : 0);
                 clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]);
                 // 1S cycle
                 break;
             }
 
-#define MOV_REG_IMM(Rd)                                         \
-{                                                               \
-    clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]); \
-    CPU.R[Rd] = opcode & 0xFF;                                  \
-    CPU.CPSR &= ~(F_Z | F_N);                                   \
-    CPU.CPSR |= (CPU.R[Rd] ? 0 : F_Z);                          \
-    break;                                                      \
-} // 1S cycle
-            // MOV Rd,#nn
+#define MOV_REG_IMM(Rd)                                             \
+    {                                                               \
+        clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]); \
+        CPU.R[Rd] = opcode & 0xFF;                                  \
+        CPU.CPSR &= ~(F_Z | F_N);                                   \
+        CPU.CPSR |= (CPU.R[Rd] ? 0 : F_Z);                          \
+        break;                                                      \
+    } // 1S cycle
+
+    // MOV Rd,#nn
             case 0x20:
                 MOV_REG_IMM(0);
             case 0x21:
@@ -462,18 +472,18 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
             case 0x27:
                 MOV_REG_IMM(7);
 
-#define CMP_REG_IMM(Rd)                                                     \
-{                                                                           \
-    u32 immed = opcode & 0xFF;                                              \
-    clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]);             \
-    u64 val = (u64)~immed;                                                  \
-    u64 temp = (u64)CPU.R[Rd] + (u64)val + 1ULL;                            \
-    CPU.CPSR &= ~(F_Z | F_C | F_N | F_V);                                   \
-    CPU.CPSR |= ((temp & 0xFFFFFFFF00000000ULL) ? F_C : 0)                  \
-              | ((u32)temp ? 0 : F_Z) | (((u32)temp) & F_N)                 \
-              | (ADD_OVERFLOW(CPU.R[Rd], (u32)val, (u32)temp) ? F_V : 0);   \
-    break;                                                                  \
-}
+#define CMP_REG_IMM(Rd)                                                         \
+    {                                                                           \
+        u32 immed = opcode & 0xFF;                                              \
+        clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]);             \
+        u64 val = (u64)~immed;                                                  \
+        u64 temp = (u64)CPU.R[Rd] + (u64)val + 1ULL;                            \
+        CPU.CPSR &= ~(F_Z | F_C | F_N | F_V);                                   \
+        CPU.CPSR |= ((temp & 0xFFFFFFFF00000000ULL) ? F_C : 0)                  \
+                    | ((u32)temp ? 0 : F_Z) | (((u32)temp) & F_N)               \
+                    | (ADD_OVERFLOW(CPU.R[Rd], (u32)val, (u32)temp) ? F_V : 0); \
+        break;                                                                  \
+    }
             // CMP Rd,#nn
             case 0x28:
                 CMP_REG_IMM(0);
@@ -494,35 +504,35 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
 
 #ifdef ENABLE_ASM_X86
 #define ADD_REG_IMM(Rd)                                             \
-{                                                                   \
-    u32 immed = opcode & 0xFF;                                      \
-    clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]);     \
-    u8 carry, overflow;                                             \
-    asm("add %3,%4 \n\t"                                            \
-        "mov %4,%0 \n\t"                                            \
-        "setc %%al \n\t"                                            \
-        "seto %%bl \n\t"                                            \
-        : "=r" (CPU.R[Rd]), "=a" (carry), "=b" (overflow)           \
-        : "r" (CPU.R[Rd]), "r" (immed));                            \
-    CPU.CPSR &= ~(F_Z | F_C | F_N | F_V);                           \
-    CPU.CPSR |= (CPU.R[Rd] ? 0 : F_Z) | (CPU.R[Rd] & F_N)           \
-              | (carry ? F_C : 0) | (overflow ? F_V : 0);           \
-    break;                                                          \
-}
+    {                                                               \
+        u32 immed = opcode & 0xFF;                                  \
+        clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]); \
+        u8 carry, overflow;                                         \
+        asm("add %3,%4 \n\t"                                        \
+            "mov %4,%0 \n\t"                                        \
+            "setc %%al \n\t"                                        \
+            "seto %%bl \n\t"                                        \
+            : "=r"(CPU.R[Rd]), "=a"(carry), "=b"(overflow)          \
+            : "r"(CPU.R[Rd]), "r"(immed));                          \
+        CPU.CPSR &= ~(F_Z | F_C | F_N | F_V);                       \
+        CPU.CPSR |= (CPU.R[Rd] ? 0 : F_Z) | (CPU.R[Rd] & F_N)       \
+                    | (carry ? F_C : 0) | (overflow ? F_V : 0);     \
+        break;                                                      \
+    }
 #else
 #define ADD_REG_IMM(Rd)                                             \
-{                                                                   \
-    u32 immed = opcode & 0xFF;                                      \
-    clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]);     \
-    u64 temp = (u64)CPU.R[Rd] + (u64)immed;                         \
-    u32 overflow = ADD_OVERFLOW(CPU.R[Rd], immed, temp);            \
-    CPU.R[Rd] = (u32)temp;                                          \
-    CPU.CPSR &= ~(F_Z | F_C | F_N | F_V);                           \
-    CPU.CPSR |= ((temp & 0xFFFFFFFF00000000LL) ? F_C : 0)           \
-              | (CPU.R[Rd] ? 0 : F_Z) | (CPU.R[Rd] & F_N)           \
-              | (overflow ? F_V : 0);                               \
-    break;                                                          \
-}
+    {                                                               \
+        u32 immed = opcode & 0xFF;                                  \
+        clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]); \
+        u64 temp = (u64)CPU.R[Rd] + (u64)immed;                     \
+        u32 overflow = ADD_OVERFLOW(CPU.R[Rd], immed, temp);        \
+        CPU.R[Rd] = (u32)temp;                                      \
+        CPU.CPSR &= ~(F_Z | F_C | F_N | F_V);                       \
+        CPU.CPSR |= ((temp & 0xFFFFFFFF00000000LL) ? F_C : 0)       \
+                    | (CPU.R[Rd] ? 0 : F_Z) | (CPU.R[Rd] & F_N)     \
+                    | (overflow ? F_V : 0);                         \
+        break;                                                      \
+    }
 #endif
             // ADD Rd,#nn
             case 0x30:
@@ -542,20 +552,20 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
             case 0x37:
                 ADD_REG_IMM(7);
 
-#define SUB_REG_IMM(Rd)                                             \
-{                                                                   \
-    u32 immed = opcode & 0xFF;                                      \
-    clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]);     \
-    u64 val = (u64)~immed;                                          \
-    u64 temp = (u64)CPU.R[Rd] + (u64)val + 1ULL;                    \
-    u32 overflow = ADD_OVERFLOW(CPU.R[Rd], (u32)val, (u32)temp);    \
-    CPU.R[Rd] = (u32)temp;                                          \
-    CPU.CPSR &= ~(F_Z | F_C | F_N | F_V);                           \
-    CPU.CPSR |= ((temp & 0xFFFFFFFF00000000ULL) ? F_C : 0)          \
-              | (CPU.R[Rd] ? 0 : F_Z) | (CPU.R[Rd] & F_N)           \
-              | (overflow ? F_V : 0);                               \
-    break;                                                          \
-}
+#define SUB_REG_IMM(Rd)                                              \
+    {                                                                \
+        u32 immed = opcode & 0xFF;                                   \
+        clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]);  \
+        u64 val = (u64)~immed;                                       \
+        u64 temp = (u64)CPU.R[Rd] + (u64)val + 1ULL;                 \
+        u32 overflow = ADD_OVERFLOW(CPU.R[Rd], (u32)val, (u32)temp); \
+        CPU.R[Rd] = (u32)temp;                                       \
+        CPU.CPSR &= ~(F_Z | F_C | F_N | F_V);                        \
+        CPU.CPSR |= ((temp & 0xFFFFFFFF00000000ULL) ? F_C : 0)       \
+                    | (CPU.R[Rd] ? 0 : F_Z) | (CPU.R[Rd] & F_N)      \
+                    | (overflow ? F_V : 0);                          \
+        break;                                                       \
+    }
             // SUB Rd,#nn
             case 0x38:
                 SUB_REG_IMM(0);
@@ -649,13 +659,13 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                 // ADD Rd,Rs
                 clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]);
                 // 1S cycle
-                u16 Rd = (opcode & 7) | ((opcode >>4) & 8);
+                u16 Rd = (opcode & 7) | ((opcode >> 4) & 8);
                 u16 Rs = (opcode >> 3) & 0xF;
-                CPU.R[Rd] += CPU.R[Rs] + (Rs == R_PC ? 4 :0);
+                CPU.R[Rd] += CPU.R[Rs] + (Rs == R_PC ? 4 : 0);
                 if (Rd == R_PC)
                 {
                     clocks -= GBA_MemoryGetAccessCyclesNoSeq(1, CPU.R[R_PC])
-                            + GBA_MemoryGetAccessCyclesSeq(1, CPU.R[R_PC]);
+                              + GBA_MemoryGetAccessCyclesSeq(1, CPU.R[R_PC]);
                     // 1N+1S
                     CPU.R[R_PC] = (CPU.R[R_PC] - 2) & ~1;
                 }
@@ -672,13 +682,15 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                 u16 Rd = (opcode & 7) | ((opcode >> 4) & 8);
                 u16 Rs = (opcode >> 3) & 0xF;
                 u32 t1 = CPU.R[Rd] + (Rd == R_PC ? 4 : 0);
-                u64 t2 = (u64)~(CPU.R[Rs] + (Rs == R_PC ? 4 : 0));
+                u64 t2 = (u64) ~(CPU.R[Rs] + (Rs == R_PC ? 4 : 0));
                 u64 temp = (u64)t1 + (u64)t2 + 1ULL;
                 CPU.CPSR &= ~(F_Z | F_C | F_N | F_V);
                 CPU.CPSR |= ((u32)temp ? 0 : F_Z) | (((u32)temp) & F_N)
-                          | ((temp & 0xFFFFFFFF00000000ULL) ? F_C : 0)
-                          | (ADD_OVERFLOW(t1, (u32)(t2 - 1),
-                                          (u32)temp) ? F_V : 0);
+                            | ((temp & 0xFFFFFFFF00000000ULL) ? F_C : 0)
+                            | (ADD_OVERFLOW(t1, (u32)(t2 - 1),
+                                            (u32)temp)
+                                       ? F_V
+                                       : 0);
                 clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]);
                 // 1S cycle
 
@@ -722,8 +734,7 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                 {
                     // BX  Rs
                     u16 Rs = (opcode >> 3) & 0xF;
-                    u32 val = ((Rs == R_PC) ?
-                                    ((CPU.R[R_PC] + 4) & (~2)) : CPU.R[Rs]);
+                    u32 val = ((Rs == R_PC) ? ((CPU.R[R_PC] + 4) & (~2)) : CPU.R[Rs]);
                     clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]);
                     // 1S cycle
                     if ((val & BIT(0)) == 0) // Switch to ARM
@@ -735,7 +746,6 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                                   + GBA_MemoryGetAccessCyclesSeq(1, CPU.R[R_PC]);
                         // 1N+1S
                         return GBA_ExecuteARM(clocks);
-
                     }
                     CPU.R[R_PC] = val & (~1);
                     CPU.R[R_PC] -= 2; // To avoid skipping an instruction
@@ -746,16 +756,17 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                 }
             }
 
-#define LDR_REG_PC_IMM(Rd)                                      \
-{                                                               \
-    u32 offset = (opcode & 0xFF) << 2;                          \
-    u32 addr = ((CPU.R[R_PC] + 4) & (~2)) + offset;             \
-    CPU.R[Rd] = GBA_MemoryRead32(addr);                         \
-    clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC])  \
-              + GBA_MemoryGetAccessCyclesSeq32(addr) + 1;       \
-    break;                                                      \
-} // 1S+1N+1I
-            // LDR Rd,[PC,#nn]
+#define LDR_REG_PC_IMM(Rd)                                         \
+    {                                                              \
+        u32 offset = (opcode & 0xFF) << 2;                         \
+        u32 addr = ((CPU.R[R_PC] + 4) & (~2)) + offset;            \
+        CPU.R[Rd] = GBA_MemoryRead32(addr);                        \
+        clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]) \
+                  + GBA_MemoryGetAccessCyclesSeq32(addr) + 1;      \
+        break;                                                     \
+    } // 1S+1N+1I
+
+    // LDR Rd,[PC,#nn]
             case 0x48:
                 LDR_REG_PC_IMM(0);
             case 0x49:
@@ -956,16 +967,17 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                 // 1S+1N+1I
                 break;
             }
-#define STR_REG_SP_IMM(Rd)                                  \
-{                                                           \
-    u32 offset = (opcode & 0xFF) << 2;                      \
-    u32 addr = CPU.R[R_SP] + offset;                        \
-    GBA_MemoryWrite32(addr, CPU.R[Rd]);                     \
-    clocks -= GBA_MemoryGetAccessCyclesNoSeq16(CPU.R[R_PC]) \
-              + GBA_MemoryGetAccessCyclesNoSeq32(addr);     \
-    break;                                                  \
-} // 2N
-            // STR  Rd,[SP,#nn]
+#define STR_REG_SP_IMM(Rd)                                      \
+    {                                                           \
+        u32 offset = (opcode & 0xFF) << 2;                      \
+        u32 addr = CPU.R[R_SP] + offset;                        \
+        GBA_MemoryWrite32(addr, CPU.R[Rd]);                     \
+        clocks -= GBA_MemoryGetAccessCyclesNoSeq16(CPU.R[R_PC]) \
+                  + GBA_MemoryGetAccessCyclesNoSeq32(addr);     \
+        break;                                                  \
+    } // 2N
+
+    // STR  Rd,[SP,#nn]
             case 0x90:
                 STR_REG_SP_IMM(0);
             case 0x91:
@@ -983,16 +995,17 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
             case 0x97:
                 STR_REG_SP_IMM(7);
 
-#define LDR_REG_SP_IMM(Rd)                                      \
-{                                                               \
-    u32 offset = (opcode & 0xFF) << 2;                          \
-    u32 addr = CPU.R[R_SP] + offset;                            \
-    CPU.R[Rd] = GBA_MemoryRead32(addr);                         \
-    clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC])  \
-              + GBA_MemoryGetAccessCyclesNoSeq32(addr) + 1;     \
-    break;                                                      \
-} // 1S+1N+1I
-            // LDR  Rd,[SP,#nn]
+#define LDR_REG_SP_IMM(Rd)                                         \
+    {                                                              \
+        u32 offset = (opcode & 0xFF) << 2;                         \
+        u32 addr = CPU.R[R_SP] + offset;                           \
+        CPU.R[Rd] = GBA_MemoryRead32(addr);                        \
+        clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]) \
+                  + GBA_MemoryGetAccessCyclesNoSeq32(addr) + 1;    \
+        break;                                                     \
+    } // 1S+1N+1I
+
+    // LDR  Rd,[SP,#nn]
             case 0x98:
                 LDR_REG_SP_IMM(0);
             case 0x99:
@@ -1010,14 +1023,15 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
             case 0x9F:
                 LDR_REG_SP_IMM(7);
 
-#define ADD_REG_PC_IMM(Rd)                                      \
-{                                                               \
-    u32 offset = (opcode & 0xFF) << 2;                          \
-    CPU.R[Rd] = ((CPU.R[R_PC] + 4) & (~2)) + offset;            \
-    clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]); \
-    break;                                                      \
-} // 1S cycle
-            // ADD  Rd,PC,#nn
+#define ADD_REG_PC_IMM(Rd)                                          \
+    {                                                               \
+        u32 offset = (opcode & 0xFF) << 2;                          \
+        CPU.R[Rd] = ((CPU.R[R_PC] + 4) & (~2)) + offset;            \
+        clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]); \
+        break;                                                      \
+    } // 1S cycle
+
+    // ADD  Rd,PC,#nn
             case 0xA0:
                 ADD_REG_PC_IMM(0);
             case 0xA1:
@@ -1035,14 +1049,15 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
             case 0xA7:
                 ADD_REG_PC_IMM(7);
 
-#define ADD_REG_SP_IMM(Rd)                                      \
-{                                                               \
-    u32 offset = (opcode & 0xFF) << 2;                          \
-    CPU.R[Rd] = CPU.R[R_SP] + offset;                           \
-    clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]); \
-    break;                                                      \
-} // 1S cycle
-            // ADD  Rd,SP,#nn
+#define ADD_REG_SP_IMM(Rd)                                          \
+    {                                                               \
+        u32 offset = (opcode & 0xFF) << 2;                          \
+        CPU.R[Rd] = CPU.R[R_SP] + offset;                           \
+        clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]); \
+        break;                                                      \
+    } // 1S cycle
+
+    // ADD  Rd,SP,#nn
             case 0xA8:
                 ADD_REG_SP_IMM(0);
             case 0xA9:
@@ -1096,7 +1111,7 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                 {
                     clocks -= (GBA_MemoryGetAccessCyclesSeq32(address)
                                * (bitcount - 1))
-                            + GBA_MemoryGetAccessCyclesNoSeq32(address);
+                              + GBA_MemoryGetAccessCyclesNoSeq32(address);
                     // (n-1)S+1N
                 }
                 clocks -= GBA_MemoryGetAccessCyclesNoSeq16(CPU.R[R_PC]);
@@ -1119,13 +1134,13 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                     }
                 }
                 clocks -= (GBA_MemoryGetAccessCyclesSeq32(address)
-                                * (bitcount - 1))
-                        + GBA_MemoryGetAccessCyclesNoSeq32(address)
-                        + GBA_MemoryGetAccessCyclesNoSeq16(CPU.R[R_PC]);
+                           * (bitcount - 1))
+                          + GBA_MemoryGetAccessCyclesNoSeq32(address)
+                          + GBA_MemoryGetAccessCyclesNoSeq16(CPU.R[R_PC]);
                 // (n-1)S+2N
                 break;
             }
-            case 0xB6 ...  0xBB:
+            case 0xB6 ... 0xBB:
             {
                 // Undefined opcode #B -- tested on hardware
                 THUMB_UNDEFINED_INSTRUCTION();
@@ -1158,8 +1173,8 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                     if (count)
                     {
                         clocks -= GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_SP])
-                                + (GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_SP])
-                                    * (count - 1)); // nS+1N+1I
+                                  + (GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_SP])
+                                     * (count - 1)); // nS+1N+1I
                     }
                 }
                 break;
@@ -1182,11 +1197,11 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                 CPU.R[R_PC] = (CPU.R[R_PC] - 2) & (~1);
 
                 clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]) + 1
-                        + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_SP])
-                        + (GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_SP])
-                                * (count - 1))
-                        + GBA_MemoryGetAccessCyclesNoSeq16(CPU.R[R_PC])
-                        + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]);
+                          + GBA_MemoryGetAccessCyclesNoSeq32(CPU.R[R_SP])
+                          + (GBA_MemoryGetAccessCyclesSeq32(CPU.R[R_SP])
+                             * (count - 1))
+                          + GBA_MemoryGetAccessCyclesNoSeq16(CPU.R[R_PC])
+                          + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]);
                 // (n+1)S+2N+1I (POP PC)
                 break;
                 // Empty rlist DOESN'T trigger Undefined instruction exception.
@@ -1205,33 +1220,33 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                 break;
             }
 
-#define STMIA(Rb)                                                           \
-{                                                                           \
-    u32 address = CPU.R[Rb];                                                \
-    clocks -= GBA_MemoryGetAccessCyclesNoSeq16(CPU.R[R_PC]);                \
-    int bitcount = 0;                                                       \
-    for (int i = 0; i < 8; i++)                                             \
-    {                                                                       \
-        if (opcode & BIT(i))                                                \
-        {                                                                   \
-            thumb_stm(address, i);                                          \
-            address += 4;                                                   \
-            bitcount++;                                                     \
-        }                                                                   \
-    }                                                                       \
-    if (bitcount)                                                           \
-    {                                                                       \
-        clocks -= (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1)) \
-                + GBA_MemoryGetAccessCyclesNoSeq32(address);                \
-    }                                                                       \
-    else                                                                    \
-    {                                                                       \
-        CPU.R[Rb] += 0x40;                                                  \
-    }                                                                       \
-    CPU.R[Rb] = address;                                                    \
-    break;                                                                  \
-} // Execution Time: (n-1)S+2N
-// Empty rlist adds 0x40 to base register. Tested on hardware.
+#define STMIA(Rb)                                                                \
+    {                                                                            \
+        u32 address = CPU.R[Rb];                                                 \
+        clocks -= GBA_MemoryGetAccessCyclesNoSeq16(CPU.R[R_PC]);                 \
+        int bitcount = 0;                                                        \
+        for (int i = 0; i < 8; i++)                                              \
+        {                                                                        \
+            if (opcode & BIT(i))                                                 \
+            {                                                                    \
+                thumb_stm(address, i);                                           \
+                address += 4;                                                    \
+                bitcount++;                                                      \
+            }                                                                    \
+        }                                                                        \
+        if (bitcount)                                                            \
+        {                                                                        \
+            clocks -= (GBA_MemoryGetAccessCyclesSeq32(address) * (bitcount - 1)) \
+                      + GBA_MemoryGetAccessCyclesNoSeq32(address);               \
+        }                                                                        \
+        else                                                                     \
+        {                                                                        \
+            CPU.R[Rb] += 0x40;                                                   \
+        }                                                                        \
+        CPU.R[Rb] = address;                                                     \
+        break;                                                                   \
+    }           // Execution Time: (n-1)S+2N
+                // Empty rlist adds 0x40 to base register. Tested on hardware.
 
             // STMIA Rb!,{Rlist}
             case 0xC0:
@@ -1251,38 +1266,38 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
             case 0xC7:
                 STMIA(7);
 
-#define LDMIA(Rb)                                                       \
-{                                                                       \
-    if ((opcode & 0xFF) == 0)                                           \
-    {                                                                   \
-        THUMB_UNDEFINED_INSTRUCTION();                                  \
-    }                                                                   \
-    else                                                                \
-    {                                                                   \
-        u32 address = CPU.R[Rb];                                        \
-        clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]);     \
-        int bitcount = 0;                                               \
-        for (int i = 0; i < 8; i++)                                     \
-        {                                                               \
-            if (opcode & BIT(i))                                        \
-            {                                                           \
-                thumb_ldm(address, i);                                  \
-                address += 4;                                           \
-                bitcount++;                                             \
-            }                                                           \
-        }                                                               \
-        if (bitcount)                                                   \
-        {                                                               \
-            clocks -= (GBA_MemoryGetAccessCyclesSeq32(address)          \
-                            * (bitcount - 1))                           \
-                    + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1;    \
-        }                                                               \
-        CPU.R[Rb] = address;                                            \
-        break;                                                          \
-    }                                                                   \
-} // Execution Time: nS+1N+1I
-// Empty rlist == undefined instruction. Tested on hardware, but not sure
-// about it...
+#define LDMIA(Rb)                                                          \
+    {                                                                      \
+        if ((opcode & 0xFF) == 0)                                          \
+        {                                                                  \
+            THUMB_UNDEFINED_INSTRUCTION();                                 \
+        }                                                                  \
+        else                                                               \
+        {                                                                  \
+            u32 address = CPU.R[Rb];                                       \
+            clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]);    \
+            int bitcount = 0;                                              \
+            for (int i = 0; i < 8; i++)                                    \
+            {                                                              \
+                if (opcode & BIT(i))                                       \
+                {                                                          \
+                    thumb_ldm(address, i);                                 \
+                    address += 4;                                          \
+                    bitcount++;                                            \
+                }                                                          \
+            }                                                              \
+            if (bitcount)                                                  \
+            {                                                              \
+                clocks -= (GBA_MemoryGetAccessCyclesSeq32(address)         \
+                           * (bitcount - 1))                               \
+                          + GBA_MemoryGetAccessCyclesNoSeq32(address) + 1; \
+            }                                                              \
+            CPU.R[Rb] = address;                                           \
+            break;                                                         \
+        }                                                                  \
+    }           // Execution Time: nS+1N+1I
+                // Empty rlist == undefined instruction. Tested on hardware, but not sure
+                // about it...
 
             // LDMIA Rb!,{Rlist}
             case 0xC8:
@@ -1312,7 +1327,7 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                     u16 data = opcode & 0xFF;
                     CPU.R[R_PC] = CPU.R[R_PC] + 4 + (((s32)(s8)data) << 1);
                     clocks -= GBA_MemoryGetAccessCyclesNoSeq16(CPU.R[R_PC])
-                            + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]);
+                              + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]);
                     // 1S+1N
                     CPU.R[R_PC] -= 2;
                 }
@@ -1328,7 +1343,7 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                     u16 data = opcode & 0xFF;
                     CPU.R[R_PC] = CPU.R[R_PC] + 4 + (((s32)(s8)data) << 1);
                     clocks -= GBA_MemoryGetAccessCyclesNoSeq16(CPU.R[R_PC])
-                            + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]);
+                              + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]);
                     // 1S+1N
                     CPU.R[R_PC] -= 2;
                 }
@@ -1344,7 +1359,7 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                     u16 data = opcode & 0xFF;
                     CPU.R[R_PC] = CPU.R[R_PC] + 4 + (((s32)(s8)data) << 1);
                     clocks -= GBA_MemoryGetAccessCyclesNoSeq16(CPU.R[R_PC])
-                            + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]);
+                              + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]);
                     // 1S+1N
                     CPU.R[R_PC] -= 2;
                 }
@@ -1360,7 +1375,7 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                     u16 data = opcode & 0xFF;
                     CPU.R[R_PC] = CPU.R[R_PC] + 4 + (((s32)(s8)data) << 1);
                     clocks -= GBA_MemoryGetAccessCyclesNoSeq16(CPU.R[R_PC])
-                            + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]);
+                              + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]);
                     // 1S+1N
                     CPU.R[R_PC] -= 2;
                 }
@@ -1376,7 +1391,7 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                     u16 data = opcode & 0xFF;
                     CPU.R[R_PC] = CPU.R[R_PC] + 4 + (((s32)(s8)data) << 1);
                     clocks -= GBA_MemoryGetAccessCyclesNoSeq16(CPU.R[R_PC])
-                            + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]);
+                              + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]);
                     // 1S+1N
                     CPU.R[R_PC] -= 2;
                 }
@@ -1392,7 +1407,7 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                     u16 data = opcode & 0xFF;
                     CPU.R[R_PC] = CPU.R[R_PC] + 4 + (((s32)(s8)data) << 1);
                     clocks -= GBA_MemoryGetAccessCyclesNoSeq16(CPU.R[R_PC])
-                            + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]);
+                              + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]);
                     // 1S+1N
                     CPU.R[R_PC] -= 2;
                 }
@@ -1408,7 +1423,7 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                     u16 data = opcode & 0xFF;
                     CPU.R[R_PC] = CPU.R[R_PC] + 4 + (((s32)(s8)data) << 1);
                     clocks -= GBA_MemoryGetAccessCyclesNoSeq16(CPU.R[R_PC])
-                            + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]);
+                              + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]);
                     // 1S+1N
                     CPU.R[R_PC] -= 2;
                 }
@@ -1424,7 +1439,7 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                     u16 data = opcode & 0xFF;
                     CPU.R[R_PC] = CPU.R[R_PC] + 4 + (((s32)(s8)data) << 1);
                     clocks -= GBA_MemoryGetAccessCyclesNoSeq16(CPU.R[R_PC])
-                            + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]);
+                              + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]);
                     // 1S+1N
                     CPU.R[R_PC] -= 2;
                 }
@@ -1440,7 +1455,7 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                     u16 data = opcode & 0xFF;
                     CPU.R[R_PC] = CPU.R[R_PC] + 4 + (((s32)(s8)data) << 1);
                     clocks -= GBA_MemoryGetAccessCyclesNoSeq16(CPU.R[R_PC])
-                            + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]);
+                              + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]);
                     // 1S+1N
                     CPU.R[R_PC] -= 2;
                 }
@@ -1456,7 +1471,7 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                     u16 data = opcode & 0xFF;
                     CPU.R[R_PC] = CPU.R[R_PC] + 4 + (((s32)(s8)data) << 1);
                     clocks -= GBA_MemoryGetAccessCyclesNoSeq16(CPU.R[R_PC])
-                            + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]);
+                              + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]);
                     // 1S+1N
                     CPU.R[R_PC] -= 2;
                 }
@@ -1472,7 +1487,7 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                     u16 data = opcode & 0xFF;
                     CPU.R[R_PC] = CPU.R[R_PC] + 4 + (((s32)(s8)data) << 1);
                     clocks -= GBA_MemoryGetAccessCyclesNoSeq16(CPU.R[R_PC])
-                            + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]);
+                              + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]);
                     // 1S+1N
                     CPU.R[R_PC] -= 2;
                 }
@@ -1488,7 +1503,7 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                     u16 data = opcode & 0xFF;
                     CPU.R[R_PC] = CPU.R[R_PC] + 4 + (((s32)(s8)data) << 1);
                     clocks -= GBA_MemoryGetAccessCyclesNoSeq16(CPU.R[R_PC])
-                            + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]);
+                              + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]);
                     // 1S+1N
                     CPU.R[R_PC] -= 2;
                 }
@@ -1505,7 +1520,7 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                     u16 data = opcode & 0xFF;
                     CPU.R[R_PC] = CPU.R[R_PC] + 4 + (((s32)(s8)data) << 1);
                     clocks -= GBA_MemoryGetAccessCyclesNoSeq16(CPU.R[R_PC])
-                            + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]);
+                              + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]);
                     // 1S+1N
                     CPU.R[R_PC] -= 2;
                 }
@@ -1522,7 +1537,7 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                     u16 data = opcode & 0xFF;
                     CPU.R[R_PC] = CPU.R[R_PC] + 4 + (((s32)(s8)data) << 1);
                     clocks -= GBA_MemoryGetAccessCyclesNoSeq16(CPU.R[R_PC])
-                            + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]);
+                              + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]);
                     // 1S+1N
                     CPU.R[R_PC] -= 2;
                 }
@@ -1556,11 +1571,11 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                     }
                 }
 
-                clocks -= GBA_MemoryGetAccessCycles(PCseq,0,CPU.R[R_PC]);
+                clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]);
                 // 1S cycle
 
                 CPU.R14_svc = CPU.R[R_PC] + 2; // Save return address
-                CPU.SPSR_svc = CPU.CPSR; // Save CPSR flags
+                CPU.SPSR_svc = CPU.CPSR;       // Save CPSR flags
                 // Enter SVC, ARM state, IRQs disabled
                 GBA_CPUChangeMode(M_SUPERVISOR);
                 CPU.EXECUTION_MODE = EXEC_ARM;
@@ -1570,7 +1585,7 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                 //CPU.R[R_PC] -= 2; // Jump to SWI vector address
                 CPU.R[R_PC] = 0x00000008;
                 clocks -= GBA_MemoryGetAccessCyclesNoSeq16(CPU.R[R_PC])
-                        + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]); // 1S+1N
+                          + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]); // 1S+1N
                 return clocks;
                 //return GBA_ExecuteARM(clocks);
             }
@@ -1583,7 +1598,7 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                 s32 offset = (opcode & 0x3FF) << 1;
                 CPU.R[R_PC] = CPU.R[R_PC] + 4 + offset;
                 clocks -= GBA_MemoryGetAccessCyclesNoSeq16(CPU.R[R_PC])
-                        + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]); // 1S+1N
+                          + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]); // 1S+1N
                 CPU.R[R_PC] -= 2;
                 break;
             }
@@ -1596,7 +1611,7 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                 offset |= 0xFFFFF800;
                 CPU.R[R_PC] = CPU.R[R_PC] + 4 + offset;
                 clocks -= GBA_MemoryGetAccessCyclesNoSeq16(CPU.R[R_PC])
-                        + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]); // 1S+1N
+                          + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]); // 1S+1N
                 CPU.R[R_PC] -= 2;
                 break;
             }
@@ -1611,7 +1626,7 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                 // BL label -- First part
                 // LR = PC + 4 + (nn SHL 12)
                 CPU.R[R_LR] = CPU.R[R_PC] + 4
-                            + (((u32)opcode & 0x7FF) << 12);
+                              + (((u32)opcode & 0x7FF) << 12);
                 clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]);
                 // 1S cycle
                 break;
@@ -1621,7 +1636,7 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                 // BL label -- First part
                 // LR = PC + 4 + (nn SHL 12)
                 CPU.R[R_LR] = CPU.R[R_PC] + 4
-                            + ((((u32)opcode & 0x7FF) << 12) | 0xFF800000);
+                              + ((((u32)opcode & 0x7FF) << 12) | 0xFF800000);
                 clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]);
                 // 1S cycle
                 break;
@@ -1636,7 +1651,7 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                 CPU.R[R_LR] = (CPU.R[R_PC] + 2) | 1;
                 CPU.R[R_PC] = temp;
                 clocks -= GBA_MemoryGetAccessCyclesNoSeq16(CPU.R[R_PC])
-                        + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]); // 1S+1N
+                          + GBA_MemoryGetAccessCyclesSeq16(CPU.R[R_PC]); // 1S+1N
                 CPU.R[R_PC] -= 2;
                 break;
             }

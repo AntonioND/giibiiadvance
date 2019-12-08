@@ -54,11 +54,13 @@ static int Init(void)
     Config_Load();
     atexit(Config_Save);
 
-    //Enable VSync
-    //if (!SDL_SetHint( SDL_HINT_RENDER_VSYNC, "1"))
-    //{
-    //    Debug_LogMsgArg("Warning: VSync not enabled!");
-    //}
+    // Enable VSync
+#if 0
+    if (!SDL_SetHint( SDL_HINT_RENDER_VSYNC, "1"))
+    {
+        Debug_LogMsgArg("Warning: VSync not enabled!");
+    }
+#endif
 
     Sound_Init();
 
@@ -114,8 +116,8 @@ int main(int argc, char *argv[])
 
     double waitforticks = 0;
 
-    while (!WH_AreAllWindowsClosed()) {
-
+    while (!WH_AreAllWindowsClosed())
+    {
         // Handle events for all windows
         WH_HandleEvents();
 

@@ -11,8 +11,8 @@
 
 #include <SDL.h>
 
-#include "win_utils_draw.h"
 #include "win_utils.h"
+#include "win_utils_draw.h"
 
 #include "../font_utils.h"
 #include "../general_utils.h"
@@ -179,8 +179,8 @@ int GUI_InputWindowIsEnabled(_gui_inputwindow *win)
 
 //------------------------------------------------------------------------------
 
-void GUI_SetTextBox(_gui_element *e, _gui_console *con, int x, int y,
-                    int w, int h, _gui_void_arg_int_int_fn callback)
+void GUI_SetTextBox(_gui_element *e, _gui_console *con, int x, int y, int w,
+                    int h, _gui_void_arg_int_int_fn callback)
 {
     if (e == NULL)
         return;
@@ -231,10 +231,12 @@ void GUI_SetRadioButton(_gui_element *e, int x, int y, int w, int h,
     e->info.radiobutton.btn_id = btn_id;
     e->info.radiobutton.is_pressed = start_pressed;
     e->info.radiobutton.is_enabled = 1;
-    s_strncpy(e->info.radiobutton.name, label, sizeof(e->info.radiobutton.name));
+    s_strncpy(e->info.radiobutton.name, label,
+              sizeof(e->info.radiobutton.name));
 }
 
-void GUI_SetLabel(_gui_element *e, int x, int y, int w, int h, const char *label)
+void GUI_SetLabel(_gui_element *e, int x, int y, int w, int h,
+                  const char *label)
 {
     if (e == NULL)
         return;
@@ -301,8 +303,8 @@ void GUI_SetWindow(_gui_element *e, int x, int y, int w, int h, void *gui,
     }
 }
 
-void GUI_SetMessageBox(_gui_element *e, _gui_console *con, int x, int y,
-                       int w, int h, const char *caption)
+void GUI_SetMessageBox(_gui_element *e, _gui_console *con, int x, int y, int w,
+                       int h, const char *caption)
 {
     if (e == NULL)
         return;
@@ -351,7 +353,7 @@ void GUI_SetScrollableTextWindow(_gui_element *e, int x, int y, int w, int h,
 
     w = FONT_WIDTH * (w / FONT_WIDTH);
     h = (FONT_HEIGHT * ((h - (FONT_HEIGHT + 2)) / FONT_HEIGHT))
-      + (FONT_HEIGHT + 2);
+        + (FONT_HEIGHT + 2);
 
     e->x = x;
     e->y = y;
@@ -365,7 +367,7 @@ void GUI_SetScrollableTextWindow(_gui_element *e, int x, int y, int w, int h,
     e->info.scrollabletextwindow.currentline = 0;
 
     e->info.scrollabletextwindow.max_drawn_lines =
-                                    (e->h - (FONT_HEIGHT + 1)) / FONT_HEIGHT;
+            (e->h - (FONT_HEIGHT + 1)) / FONT_HEIGHT;
 
     // Count number of text lines
 
@@ -383,7 +385,7 @@ void GUI_SetScrollableTextWindow(_gui_element *e, int x, int y, int w, int h,
             while (1)
             {
                 if (!((c == ' ') || (c == '\0')))
-                   break;
+                    break;
                 c = text[i++];
             }
             skipspaces = 0;

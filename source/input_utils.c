@@ -9,8 +9,8 @@
 
 #include <SDL.h>
 
-#include "input_utils.h"
 #include "debug_utils.h"
+#include "input_utils.h"
 
 #include "gb_core/gb_main.h"
 #include "gb_core/sgb.h"
@@ -19,7 +19,8 @@
 
 //------------------------------------------------------------------------------
 
-typedef struct {
+typedef struct
+{
     int is_opened;
     SDL_Joystick *joystick;
     char name[50]; // Should be more than enough to identify a joystick
@@ -31,16 +32,17 @@ static int joystick_number;
 
 //------------------------------------------------------------------------------
 
-typedef struct {
+typedef struct
+{
     int index;
     int enabled;
 } _controller_player_info_;
 
 static _controller_player_info_ ControllerPlayerInfo[4] = {
-    {-1, 1}, // keyboard, enabled
-    { 0, 0}, // controller 0, disabled
-    { 1, 0}, // controller 1, disabled
-    { 2, 0}  // controller 2, disabled
+    { -1, 1 }, // keyboard, enabled
+    { 0, 0 },  // controller 0, disabled
+    { 1, 0 },  // controller 1, disabled
+    { 2, 0 }   // controller 2, disabled
 };
 
 // Default to keyboard the first player, the rest to unused
@@ -51,11 +53,11 @@ static SDL_Scancode _player_key_[4][P_NUM_KEYS] = {
     // number
 
     // A, B, L, R, UP, RIGHT, DOWN, LEFT, START, SELECT,
-    {SDLK_x, SDLK_z, SDLK_a, SDLK_s, SDLK_UP, SDLK_RIGHT, SDLK_DOWN, SDLK_LEFT,
-     SDLK_RETURN, SDLK_RSHIFT},
-    {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-    {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-    {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
+    { SDLK_x, SDLK_z, SDLK_a, SDLK_s, SDLK_UP, SDLK_RIGHT, SDLK_DOWN, SDLK_LEFT,
+      SDLK_RETURN, SDLK_RSHIFT },
+    { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+    { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+    { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }
 };
 
 static SDL_Scancode player_key_speedup = SDLK_SPACE;
@@ -148,7 +150,7 @@ int Input_IsGameBoyKeyPressed(int player, _key_config_enum_ keyindex)
     if (ControllerPlayerInfo[player].index == -1) // Keyboard
     {
         const Uint8 *state = SDL_GetKeyboardState(NULL);
-        int key = Input_ControlsGetKey(player,keyindex);
+        int key = Input_ControlsGetKey(player, keyindex);
         if (key == 0)
             return 0;
 
@@ -285,8 +287,8 @@ void Input_Update_GB(void)
     int accd = state[SDL_SCANCODE_KP_2];
 
     GB_InputSetMBC7Buttons(accu, accd, accr, accl);
-//void GB_InputSetMBC7Joystick(int x, int y); // -200 to 200
-//void GB_InputSetMBC7Buttons(int up, int down, int right, int left);
+    //void GB_InputSetMBC7Joystick(int x, int y); // -200 to 200
+    //void GB_InputSetMBC7Buttons(int up, int down, int right, int left);
 }
 
 void Input_Update_GBA(void)
@@ -396,7 +398,7 @@ void Input_InitSystem(void)
             s_strncpy(Joystick[i].name, name, sizeof(Joystick[i].name));
         else
             s_strncpy(Joystick[i].name, "Unknown Joystick",
-                        sizeof(Joystick[i].name));
+                      sizeof(Joystick[i].name));
 
         // Not available
         if (Joystick[i].joystick == NULL)
@@ -417,14 +419,14 @@ void Input_InitSystem(void)
         {
             Debug_LogMsgArg("Rumble not supported by joystick %d", i);
             SDL_HapticClose(Joystick[i].haptic);
-            Joystick[i].haptic = (void*)-1;
+            Joystick[i].haptic = (void *)-1;
             continue;
         }
 
         if (SDL_HapticRumbleInit(Joystick[i].haptic) != 0)
         {
-            Debug_LogMsgArg("SDL_HapticRumbleInit() error joystick %d: %s",
-                            i, SDL_GetError());
+            Debug_LogMsgArg("SDL_HapticRumbleInit() error joystick %d: %s", i,
+                            SDL_GetError());
             SDL_HapticClose(Joystick[i].haptic);
             Joystick[i].haptic = (void *)-1;
             continue;

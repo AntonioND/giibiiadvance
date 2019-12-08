@@ -27,7 +27,7 @@ extern _GB_CONTEXT_ GameBoy;
 //------------------------------------------------------------------------------
 
 static u32 gb_pal_colors[4][3] = {
-    {255, 255, 255}, {168, 168, 168}, {80, 80, 80}, {0, 0, 0}
+    { 255, 255, 255 }, { 168, 168, 168 }, { 80, 80, 80 }, { 0, 0, 0 }
 };
 
 //------------------------------------------------------------------------------
@@ -54,12 +54,12 @@ void GB_Debug_GetPalette(int is_sprite, int num, int color,
         if (is_sprite)
         {
             color_ = GameBoy.Emulator.spr_pal[(num * 8) + (color * 2)]
-                   | GameBoy.Emulator.spr_pal[(num * 8) + (color * 2) + 1] << 8;
+                     | GameBoy.Emulator.spr_pal[(num * 8) + (color * 2) + 1] << 8;
         }
         else
         {
             color_ = GameBoy.Emulator.bg_pal[(num * 8) + (color * 2)]
-                   | GameBoy.Emulator.bg_pal[(num * 8) + (color * 2) + 1] << 8;
+                     | GameBoy.Emulator.bg_pal[(num * 8) + (color * 2) + 1] << 8;
         }
 
         *red = (color_ & 0x1F) << 3;
@@ -166,7 +166,7 @@ void GB_Debug_GetPalette(int is_sprite, int num, int color,
 void GB_Debug_GetSpriteInfo(int sprnum, u8 *x, u8 *y, u8 *tile, u8 *info)
 {
     _GB_OAM_ENTRY_ *GB_Sprite =
-                &(((_GB_OAM_ *)(GameBoy.Memory.ObjAttrMem))->Sprite[sprnum]);
+            &(((_GB_OAM_ *)(GameBoy.Memory.ObjAttrMem))->Sprite[sprnum]);
 
     *x = GB_Sprite->X;
     *y = GB_Sprite->Y;
@@ -178,7 +178,7 @@ void GB_Debug_PrintSprite(char *buf, int bufw, unused__ int bufh, int buff_x,
                           int buff_y, int sprite)
 {
     _GB_MEMORY_ *mem = &GameBoy.Memory;
-    s32 spriteheight =  8 << ((mem->IO_Ports[LCDC_REG - 0xFF00] & (1<<2)) != 0);
+    s32 spriteheight = 8 << ((mem->IO_Ports[LCDC_REG - 0xFF00] & (1 << 2)) != 0);
     _GB_OAM_ENTRY_ *GB_Sprite = &(((_GB_OAM_ *)(mem->ObjAttrMem))->Sprite[sprite]);
     u32 tile = GB_Sprite->Tile & ((spriteheight == 16) ? 0xFE : 0xFF);
     u8 *spr_data = &mem->VideoRAM[tile << 4]; // Bank 0
@@ -208,23 +208,24 @@ void GB_Debug_PrintSprite(char *buf, int bufw, unused__ int bufh, int buff_x,
 
         u32 palette[4];
         palette[0] = GameBoy.Emulator.spr_pal[pal_index]
-                   | (GameBoy.Emulator.spr_pal[pal_index + 1] << 8);
+                     | (GameBoy.Emulator.spr_pal[pal_index + 1] << 8);
         palette[1] = GameBoy.Emulator.spr_pal[pal_index + 2]
-                   | (GameBoy.Emulator.spr_pal[pal_index + 3] << 8);
+                     | (GameBoy.Emulator.spr_pal[pal_index + 3] << 8);
         palette[2] = GameBoy.Emulator.spr_pal[pal_index + 4]
-                   | (GameBoy.Emulator.spr_pal[pal_index + 5] << 8);
+                     | (GameBoy.Emulator.spr_pal[pal_index + 5] << 8);
         palette[3] = GameBoy.Emulator.spr_pal[pal_index + 6]
-                   | (GameBoy.Emulator.spr_pal[pal_index + 7] << 8);
+                     | (GameBoy.Emulator.spr_pal[pal_index + 7] << 8);
 
         for (int y = 0; y < spriteheight; y++)
         {
-            for (int x = 0; x < 8; x ++)
+            for (int x = 0; x < 8; x++)
             {
                 u8 *data = spr_data;
 
                 if (GB_Sprite->Info & (1 << 6))
                     data += (spriteheight - y - 1) * 2; // Flip Y
-                else data += y*2;
+                else
+                    data += y * 2;
 
                 int x_;
 
@@ -236,14 +237,14 @@ void GB_Debug_PrintSprite(char *buf, int bufw, unused__ int bufh, int buff_x,
                 x_ = 7 - x_;
 
                 u32 color = ((*data >> x_) & 1)
-                          | ((((*(data + 1)) >> x_) << 1) & 2);
+                            | ((((*(data + 1)) >> x_) << 1) & 2);
 
-                for (int i = 0; i < 2; i ++)
+                for (int i = 0; i < 2; i++)
                 {
                     for (int j = 0; j < 2; j++)
                     {
-                        if (!isvisible &&
-                                (((((x * 2) + i) ^ ((y * 2) + j)) & 3) == 0))
+                        if (!isvisible
+                            && (((((x * 2) + i) ^ ((y * 2) + j)) & 3) == 0))
                         {
                             int xx_ = buff_x + (x * 2) + i;
                             int yy_ = buff_y + (y * 2) + j;
@@ -286,13 +287,14 @@ void GB_Debug_PrintSprite(char *buf, int bufw, unused__ int bufh, int buff_x,
 
         for (int y = 0; y < spriteheight; y++)
         {
-            for (int x = 0; x < 8; x ++)
+            for (int x = 0; x < 8; x++)
             {
                 u8 *data = spr_data;
 
                 if (GB_Sprite->Info & (1 << 6))
                     data += (spriteheight - y - 1) * 2; // Flip Y
-                else data += y*2;
+                else
+                    data += y * 2;
 
                 int x_;
 
@@ -303,15 +305,15 @@ void GB_Debug_PrintSprite(char *buf, int bufw, unused__ int bufh, int buff_x,
 
                 x_ = 7 - x_;
 
-                u32 color = ((*data >> x_) & 1)
-                          | ((((*(data + 1)) >> x_) << 1) & 2);
+                u32 color =
+                        ((*data >> x_) & 1) | ((((*(data + 1)) >> x_) << 1) & 2);
 
-                for (int i = 0; i < 2; i ++)
+                for (int i = 0; i < 2; i++)
                 {
                     for (int j = 0; j < 2; j++)
                     {
-                        if (!isvisible &&
-                                (((((x * 2) + i) ^ ((y * 2) + j)) & 3) == 0))
+                        if (!isvisible
+                            && (((((x * 2) + i) ^ ((y * 2) + j)) & 3) == 0))
                         {
                             int xx_ = buff_x + (x * 2) + i;
                             int yy_ = buff_y + (y * 2) + j;
@@ -342,7 +344,7 @@ void GB_Debug_PrintSprite(char *buf, int bufw, unused__ int bufh, int buff_x,
 
 void GB_Debug_PrintSprites(char *buf)
 {
-    for (int y = 0; y < 256; y ++)
+    for (int y = 0; y < 256; y++)
     {
         for (int x = 0; x < 256; x++)
         {
@@ -354,9 +356,9 @@ void GB_Debug_PrintSprites(char *buf)
 
     u32 i = 0;
 
-    for (int y = 0; y < 5; y ++)
+    for (int y = 0; y < 5; y++)
     {
-        for (int x = 0; x < 8; x ++)
+        for (int x = 0; x < 8; x++)
         {
             GB_Debug_PrintSprite(buf, 256, 256,
                                  8 + (x * 32), 10 + (y * 52), i++);
@@ -373,11 +375,11 @@ void GB_Debug_PrintZoomedSprite(char *buf, int sprite)
     GB_Sprite = &(((_GB_OAM_ *)(mem->ObjAttrMem))->Sprite[sprite]);
 
     u32 tile = GB_Sprite->Tile & ((spriteheight == 16) ? 0xFE : 0xFF);
-    u8 *spr_data = &mem->VideoRAM[tile<<4]; // Bank 0
+    u8 *spr_data = &mem->VideoRAM[tile << 4]; // Bank 0
 
-    for (int y = 0; y < 16 * 8; y ++)
+    for (int y = 0; y < 16 * 8; y++)
     {
-        for (int x = 0; x < 8*8; x++)
+        for (int x = 0; x < 8 * 8; x++)
         {
             buf[(y * (8 * 8) + x) * 3 + 0] = ((x ^ y) & 4) ? 192 : 128;
             buf[(y * (8 * 8) + x) * 3 + 1] = ((x ^ y) & 4) ? 192 : 128;
@@ -394,17 +396,17 @@ void GB_Debug_PrintZoomedSprite(char *buf, int sprite)
 
         u32 palette[4];
         palette[0] = GameBoy.Emulator.spr_pal[pal_index]
-                   | (GameBoy.Emulator.spr_pal[pal_index + 1] << 8);
+                     | (GameBoy.Emulator.spr_pal[pal_index + 1] << 8);
         palette[1] = GameBoy.Emulator.spr_pal[pal_index + 2]
-                   | (GameBoy.Emulator.spr_pal[pal_index + 3] << 8);
+                     | (GameBoy.Emulator.spr_pal[pal_index + 3] << 8);
         palette[2] = GameBoy.Emulator.spr_pal[pal_index + 4]
-                   | (GameBoy.Emulator.spr_pal[pal_index + 5] << 8);
+                     | (GameBoy.Emulator.spr_pal[pal_index + 5] << 8);
         palette[3] = GameBoy.Emulator.spr_pal[pal_index + 6]
-                   | (GameBoy.Emulator.spr_pal[pal_index + 7] << 8);
+                     | (GameBoy.Emulator.spr_pal[pal_index + 7] << 8);
 
         for (int y = 0; y < spriteheight; y++)
         {
-            for (int x = 0; x < 8; x ++)
+            for (int x = 0; x < 8; x++)
             {
                 u8 *data = spr_data;
 
@@ -422,8 +424,8 @@ void GB_Debug_PrintZoomedSprite(char *buf, int sprite)
 
                 x_ = 7 - x_;
 
-                u32 color = ((*data >> x_) & 1)
-                           | ((((*(data + 1)) >> x_) << 1) & 2);
+                u32 color =
+                        ((*data >> x_) & 1) | ((((*(data + 1)) >> x_) << 1) & 2);
 
                 for (int i = 0; i < 8; i++)
                 {
@@ -461,14 +463,14 @@ void GB_Debug_PrintZoomedSprite(char *buf, int sprite)
 
         for (int y = 0; y < spriteheight; y++)
         {
-            for (int x = 0; x < 8; x ++)
+            for (int x = 0; x < 8; x++)
             {
                 u8 *data = spr_data;
 
                 if (GB_Sprite->Info & (1 << 6)) // Flip Y
                     data += (spriteheight - y - 1) * 2;
                 else
-                    data += y*2;
+                    data += y * 2;
 
                 int x_;
 
@@ -477,10 +479,10 @@ void GB_Debug_PrintZoomedSprite(char *buf, int sprite)
                 else
                     x_ = x;
 
-                x_ = 7-x_;
+                x_ = 7 - x_;
 
                 u32 color = ((*data >> x_) & 1)
-                          | ((((*(data + 1)) >> x_) << 1) & 2);
+                            | ((((*(data + 1)) >> x_) << 1) & 2);
 
                 for (int i = 0; i < 8; i++)
                 {
@@ -512,7 +514,8 @@ static void _gb_debug_print_sprite_alpha_at_position(char *buf, int bufw,
                                                      int sprite)
 {
     _GB_MEMORY_ *mem = &GameBoy.Memory;
-    s32 spriteheight =  8 << ((mem->IO_Ports[LCDC_REG - 0xFF00] & (1<<2)) != 0);
+    s32 spriteheight =
+            8 << ((mem->IO_Ports[LCDC_REG - 0xFF00] & (1 << 2)) != 0);
 
     _GB_OAM_ENTRY_ *GB_Sprite;
     GB_Sprite = &(((_GB_OAM_ *)(mem->ObjAttrMem))->Sprite[sprite]);
@@ -529,17 +532,17 @@ static void _gb_debug_print_sprite_alpha_at_position(char *buf, int bufw,
 
         u32 palette[4];
         palette[0] = GameBoy.Emulator.spr_pal[pal_index]
-                   | (GameBoy.Emulator.spr_pal[pal_index + 1] << 8);
+                     | (GameBoy.Emulator.spr_pal[pal_index + 1] << 8);
         palette[1] = GameBoy.Emulator.spr_pal[pal_index + 2]
-                   | (GameBoy.Emulator.spr_pal[pal_index + 3] << 8);
+                     | (GameBoy.Emulator.spr_pal[pal_index + 3] << 8);
         palette[2] = GameBoy.Emulator.spr_pal[pal_index + 4]
-                   | (GameBoy.Emulator.spr_pal[pal_index + 5] << 8);
+                     | (GameBoy.Emulator.spr_pal[pal_index + 5] << 8);
         palette[3] = GameBoy.Emulator.spr_pal[pal_index + 6]
-                   | (GameBoy.Emulator.spr_pal[pal_index + 7] << 8);
+                     | (GameBoy.Emulator.spr_pal[pal_index + 7] << 8);
 
         for (int y = 0; y < spriteheight; y++)
         {
-            for (int x = 0; x < 8; x ++)
+            for (int x = 0; x < 8; x++)
             {
                 u8 *data = spr_data;
 
@@ -557,10 +560,10 @@ static void _gb_debug_print_sprite_alpha_at_position(char *buf, int bufw,
 
                 x_ = 7 - x_;
 
-                u32 color = ((*data >> x_) & 1)
-                          | ((((*(data + 1)) >> x_) << 1) & 2);
+                u32 color =
+                        ((*data >> x_) & 1) | ((((*(data + 1)) >> x_) << 1) & 2);
 
-                for (int i = 0; i < 2; i ++)
+                for (int i = 0; i < 2; i++)
                 {
                     for (int j = 0; j < 2; j++)
                     {
@@ -606,7 +609,7 @@ static void _gb_debug_print_sprite_alpha_at_position(char *buf, int bufw,
 
         for (int y = 0; y < spriteheight; y++)
         {
-            for (int x = 0; x < 8; x ++)
+            for (int x = 0; x < 8; x++)
             {
                 u8 *data = spr_data;
 
@@ -624,10 +627,10 @@ static void _gb_debug_print_sprite_alpha_at_position(char *buf, int bufw,
 
                 x_ = 7 - x_;
 
-                u32 color = ((*data >> x_) & 1)
-                          | ((((*(data + 1)) >> x_) << 1) & 2);
+                u32 color =
+                        ((*data >> x_) & 1) | ((((*(data + 1)) >> x_) << 1) & 2);
 
-                for (int i = 0; i < 2; i ++)
+                for (int i = 0; i < 2; i++)
                 {
                     for (int j = 0; j < 2; j++)
                     {
@@ -637,11 +640,11 @@ static void _gb_debug_print_sprite_alpha_at_position(char *buf, int bufw,
                         if (color != 0) // Don't display transparent color
                         {
                             buf[(yy_ * bufw + xx_) * 4 + 0] =
-                                        gb_pal_colors[palette[color]][0];
+                                    gb_pal_colors[palette[color]][0];
                             buf[(yy_ * bufw + xx_) * 4 + 1] =
-                                        gb_pal_colors[palette[color]][1];
+                                    gb_pal_colors[palette[color]][1];
                             buf[(yy_ * bufw + xx_) * 4 + 2] =
-                                        gb_pal_colors[palette[color]][2];
+                                    gb_pal_colors[palette[color]][2];
                             buf[(yy_ * bufw + xx_) * 4 + 3] = 255;
                         }
                         else
@@ -663,12 +666,12 @@ void GB_Debug_PrintSpritesAlpha(char *buf)
     memset(buf, 0, 256 * 256 * 4);
 
     u32 i = 0;
-    for (int y = 0; y < 5; y ++)
+    for (int y = 0; y < 5; y++)
     {
-        for (int x = 0; x < 8; x ++)
+        for (int x = 0; x < 8; x++)
         {
             _gb_debug_print_sprite_alpha_at_position(buf, 256, 256,
-                                            8 + (x * 32), 10 + (y * 52), i++);
+                    8 + (x * 32), 10 + (y * 52), i++);
         }
     }
 }
@@ -676,7 +679,8 @@ void GB_Debug_PrintSpritesAlpha(char *buf)
 void GB_Debug_PrintSpriteAlpha(char *buf, int sprite)
 {
     _GB_MEMORY_ *mem = &GameBoy.Memory;
-    s32 spriteheight = 8 << ((mem->IO_Ports[LCDC_REG - 0xFF00] & (1 << 2)) != 0);
+    s32 spriteheight =
+            8 << ((mem->IO_Ports[LCDC_REG - 0xFF00] & (1 << 2)) != 0);
 
     _GB_OAM_ENTRY_ *GB_Sprite;
     GB_Sprite = &(((_GB_OAM_ *)(mem->ObjAttrMem))->Sprite[sprite]);
@@ -693,17 +697,17 @@ void GB_Debug_PrintSpriteAlpha(char *buf, int sprite)
 
         u32 palette[4];
         palette[0] = GameBoy.Emulator.spr_pal[pal_index]
-                   | (GameBoy.Emulator.spr_pal[pal_index + 1] << 8);
+                     | (GameBoy.Emulator.spr_pal[pal_index + 1] << 8);
         palette[1] = GameBoy.Emulator.spr_pal[pal_index + 2]
-                   | (GameBoy.Emulator.spr_pal[pal_index + 3] << 8);
+                     | (GameBoy.Emulator.spr_pal[pal_index + 3] << 8);
         palette[2] = GameBoy.Emulator.spr_pal[pal_index + 4]
-                   | (GameBoy.Emulator.spr_pal[pal_index + 5] << 8);
+                     | (GameBoy.Emulator.spr_pal[pal_index + 5] << 8);
         palette[3] = GameBoy.Emulator.spr_pal[pal_index + 6]
-                   | (GameBoy.Emulator.spr_pal[pal_index + 7] << 8);
+                     | (GameBoy.Emulator.spr_pal[pal_index + 7] << 8);
 
         for (int y = 0; y < spriteheight; y++)
         {
-            for (int x = 0; x < 8; x ++)
+            for (int x = 0; x < 8; x++)
             {
                 u8 *data = spr_data;
 
@@ -722,16 +726,16 @@ void GB_Debug_PrintSpriteAlpha(char *buf, int sprite)
                 x_ = 7 - x_;
 
                 u32 color = ((*data >> x_) & 1)
-                          | ((((*(data + 1)) >> x_) << 1) & 2);
+                            | ((((*(data + 1)) >> x_) << 1) & 2);
 
                 if (color != 0) // Don't display transparent color
                 {
                     buf[(y * 8 + x) * 4 + 0] =
-                                        (palette[color] & 0x1F) << 3;
+                            (palette[color] & 0x1F) << 3;
                     buf[(y * 8 + x) * 4 + 1] =
-                                        ((palette[color] >> 5) & 0x1F) << 3;
+                            ((palette[color] >> 5) & 0x1F) << 3;
                     buf[(y * 8 + x) * 4 + 2] =
-                                        ((palette[color] >> 10) & 0x1F) << 3;
+                            ((palette[color] >> 10) & 0x1F) << 3;
                     buf[(y * 8 + x) * 4 + 3] = 255;
                 }
                 else
@@ -760,7 +764,7 @@ void GB_Debug_PrintSpriteAlpha(char *buf, int sprite)
 
         for (int y = 0; y < spriteheight; y++)
         {
-            for (int x = 0; x < 8; x ++)
+            for (int x = 0; x < 8; x++)
             {
                 u8 *data = spr_data;
 
@@ -778,8 +782,8 @@ void GB_Debug_PrintSpriteAlpha(char *buf, int sprite)
 
                 x_ = 7 - x_;
 
-                u32 color = ((*data >> x_) & 1)
-                          | ((((*(data + 1)) >> x_) << 1) & 2);
+                u32 color =
+                        ((*data >> x_) & 1) | ((((*(data + 1)) >> x_) << 1) & 2);
 
                 if (color != 0) // Don't display transparent color
                 {
@@ -807,7 +811,7 @@ void GB_Debug_TileVRAMDraw(char *buffer0, int bufw0, unused__ int bufh0,
 {
     _GB_MEMORY_ *mem = &GameBoy.Memory;
 
-    for (int y = 0; y < 192 ; y++)
+    for (int y = 0; y < 192; y++)
     {
         for (int x = 0; x < 128; x++)
         {
@@ -819,8 +823,8 @@ void GB_Debug_TileVRAMDraw(char *buffer0, int bufw0, unused__ int bufh0,
 
             u32 x_ = 7 - (x & 7);
 
-            u32 color = ((*data >> x_) & 1)
-                      | ((((*(data + 1)) >> x_) << 1) & 2);
+            u32 color =
+                    ((*data >> x_) & 1) | ((((*(data + 1)) >> x_) << 1) & 2);
 
             buffer0[(y * bufw0 + x) * 3 + 0] = gb_pal_colors[color][0];
             buffer0[(y * bufw0 + x) * 3 + 1] = gb_pal_colors[color][1];
@@ -828,21 +832,21 @@ void GB_Debug_TileVRAMDraw(char *buffer0, int bufw0, unused__ int bufh0,
         }
     }
 
-    for (int y = 0; y < 192 ; y++)
+    for (int y = 0; y < 192; y++)
     {
         for (int x = 0; x < 128; x++)
         {
             u32 tile = (x >> 3) + ((y >> 3) * 16);
 
             u8 *data = &mem->VideoRAM[tile << 4];
-            data += 0x2000; //Bank 1;
+            data += 0x2000; // Bank 1;
 
             data += (y & 7) * 2;
 
             u32 x_ = 7 - (x & 7);
 
-            u32 color = ((*data >> x_) & 1)
-                      | ((((*(data + 1)) >> x_) << 1) & 2);
+            u32 color =
+                    ((*data >> x_) & 1) | ((((*(data + 1)) >> x_) << 1) & 2);
 
             buffer1[(y * bufw1 + x) * 3 + 0] = gb_pal_colors[color][0];
             buffer1[(y * bufw1 + x) * 3 + 1] = gb_pal_colors[color][1];
@@ -865,7 +869,7 @@ void GB_Debug_TileVRAMDrawPaletted(char *buffer0, unused__ int bufw0,
     bg_pal[2] = gb_pal_colors[(bgp_reg >> 4) & 0x3][0];
     bg_pal[3] = gb_pal_colors[(bgp_reg >> 6) & 0x3][0];
 
-    for (int y = 0; y < 192 ; y++)
+    for (int y = 0; y < 192; y++)
     {
         for (int x = 0; x < 128; x++)
         {
@@ -878,7 +882,7 @@ void GB_Debug_TileVRAMDrawPaletted(char *buffer0, unused__ int bufw0,
             u32 x_ = 7 - (x & 7);
 
             u32 color = ((*data >> x_) & 1)
-                      | ((((*(data + 1)) >> x_) << 1) & 2);
+                        | ((((*(data + 1)) >> x_) << 1) & 2);
 
             if (GameBoy.Emulator.CGBEnabled)
             {
@@ -887,20 +891,20 @@ void GB_Debug_TileVRAMDrawPaletted(char *buffer0, unused__ int bufw0,
                 if (pal_is_spr)
                 {
                     color = GameBoy.Emulator.spr_pal[pal_index]
-                          | (GameBoy.Emulator.spr_pal[pal_index + 1] << 8);
+                            | (GameBoy.Emulator.spr_pal[pal_index + 1] << 8);
                 }
                 else
                 {
                     color = GameBoy.Emulator.bg_pal[pal_index]
-                          | (GameBoy.Emulator.bg_pal[pal_index + 1] << 8);
+                            | (GameBoy.Emulator.bg_pal[pal_index + 1] << 8);
                 }
                 color = rgb16to32(color);
             }
             else
             {
                 color = bg_pal[color]
-                      | (bg_pal[color] << 8)
-                      | (bg_pal[color] << 16);
+                        | (bg_pal[color] << 8)
+                        | (bg_pal[color] << 16);
             }
 
             buffer0[(y * bufw0 + x) * 3 + 0] = color & 0xFF;
@@ -909,7 +913,7 @@ void GB_Debug_TileVRAMDrawPaletted(char *buffer0, unused__ int bufw0,
         }
     }
 
-    for (int y = 0; y < 192 ; y++)
+    for (int y = 0; y < 192; y++)
     {
         for (int x = 0; x < 128; x++)
         {
@@ -923,7 +927,7 @@ void GB_Debug_TileVRAMDrawPaletted(char *buffer0, unused__ int bufw0,
             u32 x_ = 7 - (x & 7);
 
             u32 color = ((*data >> x_) & 1)
-                      | ((((*(data + 1)) >> x_) << 1) & 2);
+                        | ((((*(data + 1)) >> x_) << 1) & 2);
 
             if (GameBoy.Emulator.CGBEnabled)
             {
@@ -932,20 +936,20 @@ void GB_Debug_TileVRAMDrawPaletted(char *buffer0, unused__ int bufw0,
                 if (pal_is_spr)
                 {
                     color = GameBoy.Emulator.spr_pal[pal_index]
-                          | (GameBoy.Emulator.spr_pal[pal_index + 1] << 8);
+                            | (GameBoy.Emulator.spr_pal[pal_index + 1] << 8);
                 }
                 else
                 {
                     color = GameBoy.Emulator.bg_pal[pal_index]
-                          | (GameBoy.Emulator.bg_pal[pal_index + 1] << 8);
+                            | (GameBoy.Emulator.bg_pal[pal_index + 1] << 8);
                 }
                 color = rgb16to32(color);
             }
             else
             {
                 color = bg_pal[color]
-                      | (bg_pal[color] << 8)
-                      | (bg_pal[color] << 16);
+                        | (bg_pal[color] << 8)
+                        | (bg_pal[color] << 16);
             }
 
             buffer1[(y * bufw0 + x) * 3 + 0] = color & 0xFF;
@@ -959,22 +963,22 @@ void GB_Debug_TileDrawZoomed64x64(char *buffer, int tile, int bank)
 {
     int tiletempbuffer[8 * 8];
 
-    u8 *tile_data = &GameBoy.Memory.VideoRAM[tile<<4]; // Bank 0
+    u8 *tile_data = &GameBoy.Memory.VideoRAM[tile << 4]; // Bank 0
     if (bank)
         tile_data += 0x2000; // Bank 1
 
-    for (int y = 0; y < 8 ; y++)
+    for (int y = 0; y < 8; y++)
     {
         for (int x = 0; x < 8; x++)
         {
             u8 *data = tile_data + ((y & 7) * 2);
             u32 x_ = 7 - (x & 7);
-            u32 color = ((*data >> x_) & 1)
-                      | ((((*(data + 1)) >> x_) << 1) & 2);
+            u32 color =
+                    ((*data >> x_) & 1) | ((((*(data + 1)) >> x_) << 1) & 2);
 
             tiletempbuffer[x + y * 8] = (gb_pal_colors[color][0] << 16)
-                                      | (gb_pal_colors[color][1] << 8)
-                                      | gb_pal_colors[color][2];
+                                        | (gb_pal_colors[color][1] << 8)
+                                        | gb_pal_colors[color][2];
         }
     }
 
@@ -984,11 +988,11 @@ void GB_Debug_TileDrawZoomed64x64(char *buffer, int tile, int bank)
         for (int j = 0; j < 64; j++)
         {
             buffer[(j * 64 + i) * 3 + 0] =
-                        tiletempbuffer[(j / 8) * 8 + (i / 8)] & 0xFF;
+                    tiletempbuffer[(j / 8) * 8 + (i / 8)] & 0xFF;
             buffer[(j * 64 + i) * 3 + 1] =
-                        (tiletempbuffer[(j / 8) * 8 + (i / 8)] >> 8) & 0xFF;
+                    (tiletempbuffer[(j / 8) * 8 + (i / 8)] >> 8) & 0xFF;
             buffer[(j * 64 + i) * 3 + 2] =
-                        (tiletempbuffer[(j / 8) * 8 + (i / 8)] >> 16) & 0xFF;
+                    (tiletempbuffer[(j / 8) * 8 + (i / 8)] >> 16) & 0xFF;
         }
     }
 }
@@ -1011,14 +1015,14 @@ void GB_Debug_TileDrawZoomedPaletted64x64(char *buffer, int tile, int bank,
     bg_pal[2] = gb_pal_colors[(bgp_reg >> 4) & 0x3][0];
     bg_pal[3] = gb_pal_colors[(bgp_reg >> 6) & 0x3][0];
 
-    for (int y = 0; y < 8 ; y++)
+    for (int y = 0; y < 8; y++)
     {
         for (int x = 0; x < 8; x++)
         {
             u8 *data = tile_data + ((y & 7) * 2);
             u32 x_ = 7 - (x & 7);
-            u32 color = ((*data >> x_) & 1)
-                      | ((((*(data + 1)) >> x_) << 1) & 2);
+            u32 color =
+                    ((*data >> x_) & 1) | ((((*(data + 1)) >> x_) << 1) & 2);
 
             if (GameBoy.Emulator.CGBEnabled)
             {
@@ -1027,21 +1031,20 @@ void GB_Debug_TileDrawZoomedPaletted64x64(char *buffer, int tile, int bank,
                 if (is_sprite_palette)
                 {
                     color = GameBoy.Emulator.spr_pal[pal_index]
-                          | (GameBoy.Emulator.spr_pal[pal_index + 1] << 8);
+                            | (GameBoy.Emulator.spr_pal[pal_index + 1] << 8);
                 }
                 else
                 {
                     color = GameBoy.Emulator.bg_pal[pal_index]
-                          | (GameBoy.Emulator.bg_pal[pal_index + 1] << 8);
+                            | (GameBoy.Emulator.bg_pal[pal_index + 1] << 8);
                 }
 
                 tiletempbuffer[x + y * 8] = rgb16to32(color);
             }
             else
             {
-                tiletempbuffer[x + y * 8] = bg_pal[color]
-                                          | (bg_pal[color] << 8)
-                                          | (bg_pal[color] << 16);
+                tiletempbuffer[x + y * 8] = bg_pal[color] | (bg_pal[color] << 8)
+                                            | (bg_pal[color] << 16);
             }
         }
     }
@@ -1073,9 +1076,9 @@ void GB_Debug_MapPrint(char *buffer, int bufw, unused__ int bufh, int map,
 
     if (GameBoy.Emulator.CGBEnabled)
     {
-        for (int y = 0; y < 256; y ++)
+        for (int y = 0; y < 256; y++)
         {
-            for (int x = 0; x < 256; x ++)
+            for (int x = 0; x < 256; x++)
             {
                 u32 tile_location = (((y >> 3) & 31) * 32) + ((x >> 3) & 31);
                 u32 tile = bgtilemap[tile_location];
@@ -1106,12 +1109,12 @@ void GB_Debug_MapPrint(char *buffer, int bufw, unused__ int bufh, int map,
                 else
                     x_ = 7 - (x & 7);
 
-                u32 color = ((*data >> x_) & 1 )
-                          | ((((*(data + 1)) >> x_) << 1) & 2);
+                u32 color =
+                        ((*data >> x_) & 1) | ((((*(data + 1)) >> x_) << 1) & 2);
                 u32 pal_index = ((tileinfo & 7) * 8) + (2 * color);
 
                 color = GameBoy.Emulator.bg_pal[pal_index]
-                      | (GameBoy.Emulator.bg_pal[pal_index + 1] << 8);
+                        | (GameBoy.Emulator.bg_pal[pal_index + 1] << 8);
 
                 buffer[(y * bufw + x) * 3 + 0] = (color & 0x1F) << 3;
                 buffer[(y * bufw + x) * 3 + 1] = ((color >> 5) & 0x1F) << 3;
@@ -1128,9 +1131,9 @@ void GB_Debug_MapPrint(char *buffer, int bufw, unused__ int bufh, int map,
         bg_pal[2] = gb_pal_colors[(bgp_reg >> 4) & 0x3][0];
         bg_pal[3] = gb_pal_colors[(bgp_reg >> 6) & 0x3][0];
 
-        for (int y = 0; y < 256; y ++)
+        for (int y = 0; y < 256; y++)
         {
-            for (int x = 0; x < 256; x ++)
+            for (int x = 0; x < 256; x++)
             {
                 u32 tile = bgtilemap[(((y >> 3) & 31) * 32) + ((x >> 3) & 31)];
 
@@ -1147,7 +1150,7 @@ void GB_Debug_MapPrint(char *buffer, int bufw, unused__ int bufh, int map,
                 u32 x_ = 7 - (x & 7);
 
                 u32 color = ((*data >> x_) & 1)
-                          | ((((*(data + 1)) >> x_) << 1) & 2);
+                            | ((((*(data + 1)) >> x_) << 1) & 2);
 
                 buffer[(y * bufw + x) * 3 + 0] = bg_pal[color];
                 buffer[(y * bufw + x) * 3 + 1] = bg_pal[color];
@@ -1167,9 +1170,9 @@ void GB_Debug_MapPrintBW(char *buffer, int bufw, unused__ int bufh, int map,
 
     if (GameBoy.Emulator.CGBEnabled)
     {
-        for (int y = 0; y < 256; y ++)
+        for (int y = 0; y < 256; y++)
         {
-            for (int x = 0; x < 256; x ++)
+            for (int x = 0; x < 256; x++)
             {
                 u32 tile_location = (((y >> 3) & 31) * 32) + ((x >> 3) & 31);
                 u32 tile = bgtilemap[tile_location];
@@ -1201,7 +1204,7 @@ void GB_Debug_MapPrintBW(char *buffer, int bufw, unused__ int bufh, int map,
                     x_ = 7 - (x & 7);
 
                 u32 color = ((*data >> x_) & 1)
-                          | ((((*(data + 1)) >> x_) << 1) & 2);
+                            | ((((*(data + 1)) >> x_) << 1) & 2);
 
                 buffer[(y * bufw + x) * 3 + 0] = gb_pal_colors[color][0];
                 buffer[(y * bufw + x) * 3 + 1] = gb_pal_colors[color][1];
@@ -1211,9 +1214,9 @@ void GB_Debug_MapPrintBW(char *buffer, int bufw, unused__ int bufh, int map,
     }
     else
     {
-        for (int y = 0; y < 256; y ++)
+        for (int y = 0; y < 256; y++)
         {
-            for (int x = 0; x < 256; x ++)
+            for (int x = 0; x < 256; x++)
             {
                 u32 tile = bgtilemap[(((y >> 3) & 31) * 32) + ((x >> 3) & 31)];
 
@@ -1230,7 +1233,7 @@ void GB_Debug_MapPrintBW(char *buffer, int bufw, unused__ int bufh, int map,
                 u32 x_ = 7 - (x & 7);
 
                 u32 color = ((*data >> x_) & 1)
-                          | ((((*(data + 1)) >> x_) << 1) & 2);
+                            | ((((*(data + 1)) >> x_) << 1) & 2);
 
                 buffer[(y * bufw + x) * 3 + 0] = gb_pal_colors[color][0];
                 buffer[(y * bufw + x) * 3 + 1] = gb_pal_colors[color][1];
@@ -1251,11 +1254,11 @@ void GB_Debug_GBCameraMiniPhotoPrint(char *buffer, int bufw, unused__ int bufh,
 
     _GB_MEMORY_ *mem = &GameBoy.Memory;
 
-    for (int y = 0; y < 4 * 8; y ++)
+    for (int y = 0; y < 4 * 8; y++)
     {
-        for (int x = 0; x < 4 * 8; x ++)
+        for (int x = 0; x < 4 * 8; x++)
         {
-            int basetileaddr = bankaddr + (((y >> 3) * 4 +(x >> 3)) * 16);
+            int basetileaddr = bankaddr + (((y >> 3) * 4 + (x >> 3)) * 16);
 
             int baselineaddr = basetileaddr + ((y & 7) << 1);
 
@@ -1264,8 +1267,7 @@ void GB_Debug_GBCameraMiniPhotoPrint(char *buffer, int bufw, unused__ int bufh,
 
             u32 x_ = 7 - (x & 7);
 
-            u32 color = ((data >> x_) & 1)
-                      | (((data2 >> x_) << 1) & 2);
+            u32 color = ((data >> x_) & 1) | (((data2 >> x_) << 1) & 2);
 
             int bufindex = ((y + posy) * bufw + (x + posx)) * 3;
             buffer[bufindex + 0] = gb_pal_colors[color][0];
@@ -1287,9 +1289,9 @@ void GB_Debug_GBCameraPhotoPrint(char *buffer, int bufw, unused__ int bufh,
 
     _GB_MEMORY_ *mem = &GameBoy.Memory;
 
-    for (int y = 0; y < 14 * 8; y ++)
+    for (int y = 0; y < 14 * 8; y++)
     {
-        for (int x = 0; x < 16 * 8; x ++)
+        for (int x = 0; x < 16 * 8; x++)
         {
             int basetileaddr = bankaddr + (((y >> 3) * 16 + (x >> 3)) * 16);
 
@@ -1300,8 +1302,7 @@ void GB_Debug_GBCameraPhotoPrint(char *buffer, int bufw, unused__ int bufh,
 
             u32 x_ = 7 - (x & 7);
 
-            u32 color = ((data >> x_) & 1)
-                      | (((data2 >> x_) << 1) & 2);
+            u32 color = ((data >> x_) & 1) | (((data2 >> x_) << 1) & 2);
 
             int bufindex = (y * bufw + x) * 3;
             buffer[bufindex + 0] = gb_pal_colors[color][0];
@@ -1313,9 +1314,9 @@ void GB_Debug_GBCameraPhotoPrint(char *buffer, int bufw, unused__ int bufh,
 
 void GB_Debug_GBCameraMiniPhotoPrintAll(char *buf)
 {
-    for (int y = 0; y < 208; y ++)
+    for (int y = 0; y < 208; y++)
     {
-        for(int x = 0; x < 248; x++)
+        for (int x = 0; x < 248; x++)
         {
             buf[(y * 248 + x) * 3 + 0] = ((x ^ y) & 4) ? 192 : 128;
             buf[(y * 248 + x) * 3 + 1] = ((x ^ y) & 4) ? 192 : 128;
@@ -1334,9 +1335,9 @@ void GB_Debug_GBCameraMiniPhotoPrintAll(char *buf)
 void GB_Debug_GBCameraWebcamOutputPrint(char *buffer, int bufw,
                                         unused__ int bufh)
 {
-    for (int y = 0; y < 14 * 8; y ++)
+    for (int y = 0; y < 14 * 8; y++)
     {
-        for (int x = 0; x < 16*8; x ++)
+        for (int x = 0; x < 16 * 8; x++)
         {
             int color = GB_CameraWebcamImageGetPixel(x, y);
             int bufindex = (y * bufw + x) * 3;
@@ -1350,9 +1351,9 @@ void GB_Debug_GBCameraWebcamOutputPrint(char *buffer, int bufw,
 void GB_Debug_GBCameraRetinaProcessedPrint(char *buffer, int bufw,
                                            unused__ int bufh)
 {
-    for (int y = 0; y < 14 * 8; y ++)
+    for (int y = 0; y < 14 * 8; y++)
     {
-        for (int x = 0; x < 16 * 8; x ++)
+        for (int x = 0; x < 16 * 8; x++)
         {
             int color = GB_CameraRetinaProcessedImageGetPixel(x, y);
             int bufindex = (y * bufw + x) * 3;

@@ -218,7 +218,7 @@ static void GB_CameraTakePicture(void)
         {
             int value = gb_camera_webcam_output[i][j];
             value = (value * EXPOSURE_bits)
-                  / EmulatorConfig.gbcam_exposure_reference;
+                    / EmulatorConfig.gbcam_exposure_reference;
 
             value = 128 + (((value - 128) * 1) / 8); // "adapt" to "3.1"/5.0 V
             gb_cam_retina_output_buf[i][j] = gb_clamp_int(0, value, 255);
@@ -232,7 +232,7 @@ static void GB_CameraTakePicture(void)
             for (int j = 0; j < GBCAM_SENSOR_H; j++)
             {
                 gb_cam_retina_output_buf[i][j] =
-                                        255 - gb_cam_retina_output_buf[i][j];
+                        255 - gb_cam_retina_output_buf[i][j];
             }
         }
     }
@@ -243,7 +243,7 @@ static void GB_CameraTakePicture(void)
         for (int j = 0; j < GBCAM_SENSOR_H; j++)
         {
             gb_cam_retina_output_buf[i][j] =
-                                        gb_cam_retina_output_buf[i][j] - 128;
+                    gb_cam_retina_output_buf[i][j] - 128;
         }
     }
 
@@ -280,7 +280,7 @@ static void GB_CameraTakePicture(void)
                     if (M_bits & BIT(1))
                         value -= ms;
                     gb_cam_retina_output_buf[i][j] =
-                                                gb_clamp_int(-128, value, 127);
+                            gb_clamp_int(-128, value, 127);
                 }
             }
             break;
@@ -295,12 +295,12 @@ static void GB_CameraTakePicture(void)
                 {
                     int mw = gb_cam_retina_output_buf[gb_max_int(0, i - 1)][j];
                     int me = gb_cam_retina_output_buf
-                                    [gb_min_int(i + 1, GBCAM_SENSOR_W - 1)][j];
+                            [gb_min_int(i + 1, GBCAM_SENSOR_W - 1)][j];
                     int px = gb_cam_retina_output_buf[i][j];
 
                     temp_buf[i][j] = gb_clamp_int(0,
-                                        px + ((2 * px - mw - me) * EDGE_alpha),
-                                        255);
+                            px + ((2 * px - mw - me) * EDGE_alpha),
+                            255);
                 }
             }
             for (int j = 0; j < GBCAM_SENSOR_H; j++)
@@ -320,7 +320,7 @@ static void GB_CameraTakePicture(void)
                     if (M_bits & BIT(1))
                         value -= ms;
                     gb_cam_retina_output_buf[i][j] =
-                                                gb_clamp_int(-128, value, 127);
+                            gb_clamp_int(-128, value, 127);
                 }
             }
             break;
@@ -334,12 +334,12 @@ static void GB_CameraTakePicture(void)
                 for (int i = 0; i < GBCAM_SENSOR_W; i++)
                 {
                     int ms = gb_cam_retina_output_buf[i]
-                                    [gb_min_int(j + 1, GBCAM_SENSOR_H - 1)];
+                            [gb_min_int(j + 1, GBCAM_SENSOR_H - 1)];
                     int mn = gb_cam_retina_output_buf[i][gb_max_int(0, j - 1)];
                     int mw = gb_cam_retina_output_buf[gb_max_int(0, i - 1)][j];
                     int me = gb_cam_retina_output_buf
-                                    [gb_min_int(i + 1, GBCAM_SENSOR_W-1)][j];
-                    int px  = gb_cam_retina_output_buf[i][j];
+                            [gb_min_int(i + 1, GBCAM_SENSOR_W - 1)][j];
+                    int px = gb_cam_retina_output_buf[i][j];
 
                     temp_buf[i][j] = gb_clamp_int(-128,
                             px + ((4 * px - mw - me - mn - ms) * EDGE_alpha),
@@ -375,9 +375,10 @@ static void GB_CameraTakePicture(void)
         default:
         {
             Debug_DebugMsgArg("Unsupported GB Cam mode: 0x%X\n%02X %02X %02X "
-                              "%02X %02X %02X", filtering_mode, cam->reg[0],
-                              cam->reg[1], cam->reg[2], cam->reg[3],
-                              cam->reg[4], cam->reg[5]);
+                              "%02X %02X %02X",
+                              filtering_mode, cam->reg[0], cam->reg[1],
+                              cam->reg[2], cam->reg[3], cam->reg[4],
+                              cam->reg[5]);
             break;
         }
     }
@@ -388,7 +389,7 @@ static void GB_CameraTakePicture(void)
         for (int i = 0; i < GBCAM_SENSOR_W; i++)
         {
             gb_cam_retina_output_buf[i][j] =
-                                        gb_cam_retina_output_buf[i][j] + 128;
+                    gb_cam_retina_output_buf[i][j] + 128;
         }
     }
 

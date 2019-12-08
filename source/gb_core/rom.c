@@ -26,7 +26,6 @@
 #include "rom.h"
 #include "video.h"
 
-
 // Seen:
 //
 // 00 - 01 - 02 - 03 - 06 - 0B - 0D - 10 - 11 - 13 - 19 - 1A - 1B - 1C - 1E - 20
@@ -106,7 +105,7 @@ static const char *gb_memorycontrollers[256] = {
     "Unknown", "Unknown", "Unknown", "Unknown",
     "Unknown", "Unknown", "Unknown", "Unknown",
     "CAMERA", "BANDAI TAMA5", "HuC3", "HuC1+RAM+BATTERY"
-} ;
+};
 
 static const u8 gb_nintendo_logo[48] = {
     0xCE, 0xED, 0x66, 0x66, 0xCC, 0x0D, 0x00, 0x0B,
@@ -178,7 +177,7 @@ int GB_CartridgeLoad(const u8 *pointer, const u32 rom_size)
         ConsolePrint("Licensee (new): %s (%c%c)\n",
                      GB_GetLicenseeName(GB_Header->new_licensee[0],
                                         GB_Header->new_licensee[1]),
-                                        byte1, byte2);
+                     byte1, byte2);
     }
     else
     {
@@ -364,7 +363,7 @@ int GB_CartridgeLoad(const u8 *pointer, const u32 rom_size)
             if (DirGetBiosFolderPath())
             {
                 int size = strlen(DirGetBiosFolderPath())
-                         + strlen(boot_rom_filename) + 2;
+                           + strlen(boot_rom_filename) + 2;
                 char *completepath = malloc(size);
                 snprintf(completepath, size, "%s%s", DirGetBiosFolderPath(),
                          boot_rom_filename);
@@ -534,9 +533,9 @@ int GB_CartridgeLoad(const u8 *pointer, const u32 rom_size)
             GameBoy.Emulator.RAM_Banks = 8;
             break;
         default:
-             ConsolePrint("[!]RAM SIZE UNKNOWN: %02X\n", GB_Header->ram_size);
-             showconsole = 1;
-             return 0;
+            ConsolePrint("[!]RAM SIZE UNKNOWN: %02X\n", GB_Header->ram_size);
+            showconsole = 1;
+            return 0;
     }
 
     if (GameBoy.Emulator.MemoryController == MEM_MBC2)
@@ -586,9 +585,9 @@ int GB_CartridgeLoad(const u8 *pointer, const u32 rom_size)
             GameBoy.Emulator.ROM_Banks = 512;
             break;
         default:
-             ConsolePrint("[!]ROM SIZE UNKNOWN: %02X\n", GB_Header->rom_size);
-             showconsole = 1;
-             return 0;
+            ConsolePrint("[!]ROM SIZE UNKNOWN: %02X\n", GB_Header->rom_size);
+            showconsole = 1;
+            return 0;
     }
 
     ConsolePrint("ROM size %02X -- %d banks\n", GB_Header->rom_size,
@@ -619,7 +618,7 @@ int GB_CartridgeLoad(const u8 *pointer, const u32 rom_size)
     // Header checksum
     u32 sum = 0;
     u32 count;
-    for (count = 0x0134; count <= 0x014C; count ++)
+    for (count = 0x0134; count <= 0x014C; count++)
         sum = sum - pointer[count] - 1;
 
     sum &= 0xFF;
@@ -638,7 +637,7 @@ int GB_CartridgeLoad(const u8 *pointer, const u32 rom_size)
     // Global checksum
     u32 size = GameBoy.Emulator.ROM_Banks * 16 * 1024;
     sum = 0;
-    for (count = 0; count < size; count ++)
+    for (count = 0; count < size; count++)
         sum += (u32)pointer[count];
 
     sum -= GB_Header->global_checksum & 0xFF; // Checksum bytes not included
@@ -750,8 +749,8 @@ void GB_RTC_Save(FILE *savefile)
 
     u32 days_low = GameBoy.Emulator.Timer.days & 0xFF;
     u32 days_hi = (GameBoy.Emulator.Timer.days >> 8)
-                | (GameBoy.Emulator.Timer.halt << 6)
-                | (GameBoy.Emulator.Timer.carry << 7);
+                  | (GameBoy.Emulator.Timer.halt << 6)
+                  | (GameBoy.Emulator.Timer.carry << 7);
 
     if (fwrite(&days_low, 1, 4, savefile) != 4)
         error = 1;
@@ -769,8 +768,8 @@ void GB_RTC_Save(FILE *savefile)
 
     days_low = GameBoy.Emulator.LatchedTime.days & 0xFF;
     days_hi = (GameBoy.Emulator.LatchedTime.days >> 8)
-            | (GameBoy.Emulator.LatchedTime.halt << 6)
-            | (GameBoy.Emulator.LatchedTime.carry << 7);
+              | (GameBoy.Emulator.LatchedTime.halt << 6)
+              | (GameBoy.Emulator.LatchedTime.carry << 7);
 
     if (fwrite(&days_low, 1, 4, savefile) != 4)
         error = 1;
@@ -854,7 +853,7 @@ void GB_RTC_Load(FILE *savefile)
         error = 1;
 
     GameBoy.Emulator.LatchedTime.days = (days_low & 0xFF)
-                                      | ((days_hi & 0x01) << 8);
+                                        | ((days_hi & 0x01) << 8);
     GameBoy.Emulator.LatchedTime.halt = (days_hi & (1 << 6)) >> 6;
     GameBoy.Emulator.LatchedTime.carry = (days_hi & (1 << 7)) >> 7;
 
@@ -922,7 +921,7 @@ void GB_SRAM_Save(void)
     char *name = malloc(size);
     snprintf(name, size, "%s.sav", GameBoy.Emulator.save_filename);
 
-    FILE *savefile = fopen(name,"wb+");
+    FILE *savefile = fopen(name, "wb+");
 
     if (!savefile)
     {
@@ -976,7 +975,7 @@ void GB_SRAM_Load(void)
     char *name = malloc(size);
     snprintf(name, size, "%s.sav", GameBoy.Emulator.save_filename);
 
-    FILE *savefile = fopen(name,"rb");
+    FILE *savefile = fopen(name, "rb");
 
     if (!savefile) // No save file...
     {

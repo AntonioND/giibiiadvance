@@ -138,10 +138,10 @@ void Win_GBSprViewerUpdate(void)
     GB_Debug_PrintSprites(gb_spr_allspr_buffer);
 
     GUI_Draw_SetDrawingColor(255, 0, 0);
-    int l = (gb_sprview_selected_spr % 8) * 32 + 8; // Left
+    int l = (gb_sprview_selected_spr % 8) * 32 + 8;  // Left
     int t = (gb_sprview_selected_spr / 8) * 52 + 10; // Top
-    int r = l + 15; // Right
-    int b = t + 2 * sy - 1; // Bottom
+    int r = l + 15;                                  // Right
+    int b = t + 2 * sy - 1;                          // Bottom
     l--;
     r++;
     t--;

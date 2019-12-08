@@ -109,7 +109,8 @@
 #define KEY_SPEEDUP BIT(10)
 
 typedef union {
-    struct PACKED {
+    struct PACKED
+    {
         u8 F, A; // F can't be accesed by CPU in a normal way
         u8 dummy1[2];
         u8 C, B;
@@ -123,7 +124,8 @@ typedef union {
         u8 PCL, PCH;
         u8 dummy6[2];
     } R8;
-    struct PACKED {
+    struct PACKED
+    {
         u32 AF;
         u32 BC;
         u32 DE;
@@ -131,7 +133,8 @@ typedef union {
         u32 SP; // Stack Pointer
         u32 PC; // Program Counter
     } R16;
-    struct PACKED {
+    struct PACKED
+    {
         u8   zero : 4;
         bool C    : 1; // carry
         bool H    : 1; // half carry
@@ -146,16 +149,18 @@ typedef union {
 //--                                                                          --
 //------------------------------------------------------------------------------
 
-typedef struct PACKED {
+typedef struct PACKED
+{
     u8 Y;
     u8 X;
     u8 Tile;
     u8 Info;
 } _GB_OAM_ENTRY_;
 
-typedef struct PACKED {
+typedef struct PACKED
+{
     _GB_OAM_ENTRY_ Sprite[40];
-} _GB_OAM_ ;
+} _GB_OAM_;
 
 typedef void (*mapper_write_fn)(u32, u32); // address, value
 typedef u32 (*mapper_read_fn)(u32);
@@ -163,7 +168,8 @@ typedef u32 (*mapper_read_fn)(u32);
 typedef void (*gb_mem_write_fn_ptr)(u32, u32); // address, value
 typedef u32 (*gb_mem_read_fn_ptr)(u32);
 
-typedef struct {
+typedef struct
+{
     u8 *ROM_Base;                 // 0000 | 16KB
     u8 *ROM_Switch[512];          // 4000 | 16KB
     u8 VideoRAM[0x4000];          // 8000 | 8KB -- 2 banks in GBC - Only 0x2000
@@ -181,7 +187,7 @@ typedef struct {
     u8 HighRAM[0x80];             // FF80 | 128B
 
     gb_mem_write_fn_ptr MemWrite, MemWriteReg; // 8 bit
-    gb_mem_read_fn_ptr MemRead, MemReadReg; // 8 bit
+    gb_mem_read_fn_ptr MemRead, MemReadReg;    // 8 bit
 
     u32 selected_rom, selected_ram;
     u32 selected_wram, selected_vram; //gbc only
@@ -255,7 +261,8 @@ typedef void (*draw_scanline_fn_ptr)(s32);
 typedef void (*serial_send_fn_ptr)(u32);
 typedef u32 (*serial_recv_fn_ptr)(void);
 
-typedef struct {
+typedef struct
+{
     u32 sec;
     u32 min;
     u32 hour;
@@ -264,33 +271,37 @@ typedef struct {
     u32 halt;
 } _GB_MB3_TIMER_;
 
-typedef struct {
-    u32 cs; // chip select
-    u32 sk; // ?
-    u32 state; // mapper state
-    u32 buffer; // buffer for receiving serial data
-    u32 idle; // idle state
-    u32 count; // count of bits received
-    u32 code; // command received
-    u32 address; // address received
+typedef struct
+{
+    u32 cs;          // chip select
+    u32 sk;          // ?
+    u32 state;       // mapper state
+    u32 buffer;      // buffer for receiving serial data
+    u32 idle;        // idle state
+    u32 count;       // count of bits received
+    u32 code;        // command received
+    u32 address;     // address received
     u32 writeEnable; // write enable
-    u32 value; // value to return on ram
+    u32 value;       // value to return on ram
 
     u32 sensorX;
     u32 sensorY;
 } _GB_MB7_CART_;
 
-typedef struct {
+typedef struct
+{
     u32 mask;
     u32 offset;
 } _GB_MMM01_CART_;
 
-typedef struct {
+typedef struct
+{
     u8 reg[0x36];
     int clocks_left; // when taking a picture
 } _GB_CAMERA_CART_;
 
-typedef struct {
+typedef struct
+{
     u32 selected_hardware; // HW_*** defines, -1 = auto
 
     u32 HardwareType; // HW_*** defines
@@ -353,8 +364,8 @@ typedef struct {
     u32 wait_cycles;
 
     // LCD
-    s32 ly_clocks; // Clocks left for ly change
-    s32 ly_drawn; // 1 if this line has been drawn
+    s32 ly_clocks;  // Clocks left for ly change
+    s32 ly_drawn;   // 1 if this line has been drawn
     u32 ScreenMode; // For vblank, hblank...
     u32 CurrentScanLine;
     u32 stat_signal; // When this goes from 0 to 1, STAT interrupt is triggered.
@@ -364,8 +375,8 @@ typedef struct {
     // DIV, Timer, Sound
     u32 sys_clocks; // 16 bit register. The 8 most significant bits are DIV_REG
     u32 timer_overflow_mask;
-    u32 timer_enabled; // Enable TIMA to increment
-    u32 timer_irq_delay_active; // To trigger IF flag
+    u32 timer_enabled;             // Enable TIMA to increment
+    u32 timer_irq_delay_active;    // To trigger IF flag
     u32 timer_reload_delay_active; // To reload TIMA from TMA
     u32 tima_just_reloaded;
 
@@ -393,7 +404,8 @@ typedef struct {
 //--                                                                          --
 //------------------------------------------------------------------------------
 
-typedef struct {
+typedef struct
+{
     _GB_CPU_ CPU;
     _GB_MEMORY_ Memory;
     _EMULATOR_INFO_ Emulator;

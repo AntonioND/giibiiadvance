@@ -15,7 +15,7 @@ void GBA_CPUInit(void);
 
 void GBA_CPUChangeMode(u32 value);
 
-s32 GBA_ExecuteARM(s32 clocks); // In arm.c
+s32 GBA_ExecuteARM(s32 clocks);   // In arm.c
 s32 GBA_ExecuteTHUMB(s32 clocks); // In thumb.c
 
 // Returns total clocks not executed

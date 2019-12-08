@@ -300,7 +300,7 @@ static void GBA_SWI_BgAffineSet(void)
         float sy = ((float)(s16)GBA_MemoryRead16(src)) / (float)(1 << 8);
         src += 2;
         float angle = (float)2.0 * (float)M_PI
-                    * (((float)(u8)(GBA_MemoryRead16(src) >> 8)) / (float)0xFF);
+                      * (((float)(u8)(GBA_MemoryRead16(src) >> 8)) / (float)0xFF);
         src += 4; // Align
 
         float sin_ = sin(angle);
@@ -345,7 +345,7 @@ static void GBA_SWI_ObjAffineSet(void)
         float sy = ((float)(s16)GBA_MemoryRead16(src)) / (float)(1 << 8);
         src += 2;
         float angle = (float)2.0 * (float)M_PI
-                    * (((float)(u8)(GBA_MemoryRead16(src) >> 8)) / (float)0xFF);
+                      * (((float)(u8)(GBA_MemoryRead16(src) >> 8)) / (float)0xFF);
         src += 4; // Align
 
         float sin_ = sin(angle);
@@ -424,7 +424,7 @@ static void GBA_SWI_BitUnPack(void)
 
         if (data)
             data += dataoffset;
-        else if(zerodataflag)
+        else if (zerodataflag)
             data += dataoffset;
 
         if (dst_bitindex == 0)
@@ -499,9 +499,9 @@ static void GBA_SWI_LZ77UnCompWram(void)
                 }
                 while (num--)
                 {
-                    *buffertmp++ = ((u8*)buffer)[offset++];
+                    *buffertmp++ = ((u8 *)buffer)[offset++];
                     total++;
-                    if(size <= total)
+                    if (size <= total)
                         break;
                 }
             }
@@ -536,7 +536,7 @@ static void GBA_SWI_LZ77UnCompVram(void)
     //                      ((header >> 4) & 7));
     //    return;
     //}
-    int size = (header>>8)&0x00FFFFFF;
+    int size = (header >> 8) & 0x00FFFFFF;
     u16 *buffer = malloc(size + 2);
     if (buffer == NULL)
     {
@@ -655,7 +655,7 @@ static void GBA_SWI_HuffUnComp(void)
             if ((node == 0) && (nodeinfo & BIT(7)))
                 searching = 0;
             nodeaddr = (nodeaddr & ~1)
-                     + ((int)(nodeinfo & 0x3F)) * 2 + 2 + node;
+                       + ((int)(nodeinfo & 0x3F)) * 2 + 2 + node;
         }
         //Debug_DebugMsgArg("Data: %02X", GBA_MemoryRead8(nodeaddr));
         if (chunk_size == 8)
@@ -726,7 +726,7 @@ static void GBA_SWI_RLUnCompWram(void)
             int len = (flg & 0x7F) + 1;
             while (len)
             {
-                GBA_MemoryWrite8(dst,GBA_MemoryRead8(src));
+                GBA_MemoryWrite8(dst, GBA_MemoryRead8(src));
                 src++;
                 dst++;
                 size--;
@@ -789,7 +789,7 @@ static void GBA_SWI_RLUnCompVram(void)
                 {
                     writedata |= ((u16)GBA_MemoryRead8(src)) << 8;
                     src++;
-                    GBA_MemoryWrite16(dst,writedata);
+                    GBA_MemoryWrite16(dst, writedata);
                     dst += 2;
                     writedata = 0;
                 }
@@ -835,7 +835,7 @@ static void GBA_SWI_Diff8bitUnFilterWram(void)
         src++;
         GBA_MemoryWrite8(dst, value);
         dst++;
-        size --;
+        size--;
         if (size <= 0)
             break;
     }
@@ -876,7 +876,7 @@ static void GBA_SWI_Diff8bitUnFilterVram(void)
             writeval |= ((u16)value) << 8;
             GBA_MemoryWrite16(dst, writeval);
             dst += 2;
-            size -=2;
+            size -= 2;
             if (size <= 0)
                 break;
         }
@@ -942,7 +942,7 @@ void GBA_Swi(u8 number)
         }
         case 0x03: // Stop
         {
-            GBA_MemoryWrite8(HALTCNT,0x80);
+            GBA_MemoryWrite8(HALTCNT, 0x80);
             return;
         }
         case 0x04: // IntrWait
@@ -1137,6 +1137,7 @@ void GBA_Swi(u8 number)
     Debug_ErrorMsgArg(
             "SWI 0x%02X -- Not emulated!!\n"
             "Please, get a GBA BIOS file, name it \"" GBA_BIOS_FILENAME
-            "\" and place it in the \"bios\" folder.", number);
+            "\" and place it in the \"bios\" folder.",
+            number);
     GBA_ExecutionBreak();
 }

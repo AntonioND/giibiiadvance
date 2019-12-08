@@ -7,7 +7,8 @@
 #ifndef CONFIG__
 #define CONFIG__
 
-typedef struct {
+typedef struct
+{
     int debug_msg_enable;
     int screen_size;
     // GBA always tries to load the BIOS, this only skips the initial logo
@@ -17,13 +18,13 @@ typedef struct {
     int auto_close_debugger;
     unsigned int webcam_select; // 0 = CV_CAP_ANY
 
-    //Sound
+    // Sound
     //-----
     int volume;
     int chn_flags;
     int snd_mute;
 
-    //GameBoy
+    // GameBoy
     //-------
     int hardware_type;
     int serial_device;

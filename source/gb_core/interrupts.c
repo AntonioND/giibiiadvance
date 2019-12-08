@@ -78,7 +78,7 @@ void GB_InterruptsInit(void)
     GameBoy.Memory.IO_Ports[IF_REG - 0xFF00] = 0xE0;
 
     GameBoy.Memory.IO_Ports[TIMA_REG - 0xFF00] = 0x00; // Verified on hardware
-    GameBoy.Memory.IO_Ports[TMA_REG - 0xFF00] = 0x00; // Verified on hardware
+    GameBoy.Memory.IO_Ports[TMA_REG - 0xFF00] = 0x00;  // Verified on hardware
 
     GB_MemWrite8(TAC_REG, 0x00); // Verified on hardware
 
@@ -223,7 +223,7 @@ int GB_InterruptsExecute(void)
     int executed_clocks = 0;
 
     int interrupts = mem->IO_Ports[IF_REG - 0xFF00]
-                   & mem->HighRAM[IE_REG-0xFF80] & 0x1F;
+                     & mem->HighRAM[IE_REG - 0xFF80] & 0x1F;
     if (interrupts != 0)
     {
         if (mem->InterruptMasterEnable) // Execute interrupt and clear IME
@@ -451,7 +451,7 @@ void GB_TimersWriteDIV(int reference_clocks, unused__ int value)
     {
         // Falling edge in timer bit
         if (GameBoy.Emulator.sys_clocks
-                & ((GameBoy.Emulator.timer_overflow_mask + 1) >> 1))
+            & ((GameBoy.Emulator.timer_overflow_mask + 1) >> 1))
         {
             GB_TimerIncreaseTIMA();
         }
@@ -553,7 +553,7 @@ void GB_TimersWriteTAC(int reference_clocks, int value)
             else
             {
                 glitch = (sys_clocks & old_clocks_half)
-                       && ((sys_clocks & new_clocks_half) == 0);
+                         && ((sys_clocks & new_clocks_half) == 0);
             }
         }
     }
@@ -575,7 +575,7 @@ void GB_TimersWriteTAC(int reference_clocks, int value)
             {
                 // Approximate
                 glitch = (sys_clocks & old_clocks_half)
-                       && ((sys_clocks & new_clocks_half) == 0);
+                         && ((sys_clocks & new_clocks_half) == 0);
 
 #if 0
                 // Hardware simulation?
@@ -676,7 +676,7 @@ void GB_TimersWriteTAC(int reference_clocks, int value)
             else
             {
                 glitch = (sys_clocks & old_clocks_half)
-                       && ((sys_clocks & new_clocks_half) == 0);
+                         && ((sys_clocks & new_clocks_half) == 0);
             }
         }
     }
@@ -690,7 +690,7 @@ void GB_TimersWriteTAC(int reference_clocks, int value)
         GameBoy.Emulator.timer_enabled = 0;
 
     GameBoy.Emulator.timer_overflow_mask =
-                                        gb_timer_clock_overflow_mask[value & 3];
+            gb_timer_clock_overflow_mask[value & 3];
 
     mem->IO_Ports[TAC_REG - 0xFF00] = value;
 }
@@ -726,7 +726,7 @@ static void GB_TimersUpdateDelays(int increment_clocks)
 
             GameBoy.Emulator.timer_reload_delay_active = 0;
             GameBoy.Memory.IO_Ports[TIMA_REG - 0xFF00] =
-                                    GameBoy.Memory.IO_Ports[TMA_REG - 0xFF00];
+                    GameBoy.Memory.IO_Ports[TMA_REG - 0xFF00];
         }
     }
 }
@@ -756,8 +756,8 @@ void GB_TimersUpdateClocksCounterReference(int reference_clocks)
     if (GameBoy.Emulator.timer_enabled)
     {
         int timer_update_clocks =
-            (GameBoy.Emulator.sys_clocks & GameBoy.Emulator.timer_overflow_mask)
-            + increment_clocks;
+                (GameBoy.Emulator.sys_clocks & GameBoy.Emulator.timer_overflow_mask)
+                + increment_clocks;
 
         int timer_overflow_count = GameBoy.Emulator.timer_overflow_mask + 1;
 
@@ -782,7 +782,7 @@ void GB_TimersUpdateClocksCounterReference(int reference_clocks)
     // ---
 
     GameBoy.Emulator.sys_clocks =
-                    (GameBoy.Emulator.sys_clocks + increment_clocks) & 0xFFFF;
+            (GameBoy.Emulator.sys_clocks + increment_clocks) & 0xFFFF;
 
     // Upper 8 bits of the 16 register sys_clocks
     mem->IO_Ports[DIV_REG - 0xFF00] = (GameBoy.Emulator.sys_clocks >> 8);
@@ -807,13 +807,13 @@ int GB_TimersGetClocksToNextEvent(void)
     if (GameBoy.Emulator.timer_enabled)
     {
         int mask = GameBoy.Emulator.timer_overflow_mask;
-        int timer_counter = GameBoy.Emulator.sys_clocks&mask;
+        int timer_counter = GameBoy.Emulator.sys_clocks & mask;
 
         // Clocks left for next increment
         int clocks_left_for_timer = (mask + 1) - timer_counter;
         // Clocks left for next overflow
         clocks_left_for_timer +=
-            (255 - GameBoy.Memory.IO_Ports[TIMA_REG - 0xFF00]) * (mask + 1);
+                (255 - GameBoy.Memory.IO_Ports[TIMA_REG - 0xFF00]) * (mask + 1);
 
         if (clocks_left_for_timer < clocks_to_next_event)
             clocks_to_next_event = clocks_left_for_timer;

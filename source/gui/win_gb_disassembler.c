@@ -102,9 +102,9 @@ void Win_GBDisassemblerUpdate(void)
 
     int flags = GameBoy.CPU.R16.AF;
     GUI_ConsoleModePrintf(&gb_regs_con, 0, 7, "C:%d H:%d",
-            (flags & F_CARRY) != 0, (flags & F_HALFCARRY) != 0);
+                          (flags & F_CARRY) != 0, (flags & F_HALFCARRY) != 0);
     GUI_ConsoleModePrintf(&gb_regs_con, 0, 8, "N:%d Z:%d",
-            (flags & F_SUBTRACT) != 0, (flags & F_ZERO) != 0);
+                          (flags & F_SUBTRACT) != 0, (flags & F_ZERO) != 0);
 
     // DISASSEMBLER
 
@@ -151,7 +151,7 @@ void Win_GBDisassemblerUpdate(void)
                 int tempaddr = address, commands = 0;
                 while (tempaddr < GameBoy.CPU.R16.PC)
                 {
-                    commands ++;
+                    commands++;
                     tempaddr += gb_debug_get_address_increment(tempaddr);
                 }
 
@@ -185,7 +185,7 @@ void Win_GBDisassemblerUpdate(void)
         }
         else if (address == GameBoy.CPU.R16.PC)
         {
-                GUI_ConsoleColorizeLine(&gb_disassembly_con, i, 0xFFFFFF00);
+            GUI_ConsoleColorizeLine(&gb_disassembly_con, i, 0xFFFFFF00);
         }
         address += step;
     }
@@ -217,7 +217,8 @@ static void _win_gb_dissasembler_render(void)
 
 static int _win_gb_disassembler_callback(SDL_Event *e)
 {
-    if (GBDisassemblerCreated == 0) return 1;
+    if (GBDisassemblerCreated == 0)
+        return 1;
 
     int redraw = GUI_SendEvent(&gb_disassembler_window_gui, e);
 
@@ -335,14 +336,14 @@ static void _win_gb_disassembly_inputwindow_callback(char *text, int is_valid)
         else if (gb_debugger_register_to_change == 100)
         {
             gb_disassembler_start_address =
-                        newvalue - CPU_DISASSEMBLER_MAX_INSTRUCTIONS / 2;
+                    newvalue - CPU_DISASSEMBLER_MAX_INSTRUCTIONS / 2;
         }
     }
 }
 
 static void _win_gb_registers_textbox_callback(unused__ int x, int y)
 {
-    int reg = y/FONT_HEIGHT;
+    int reg = y / FONT_HEIGHT;
 
     if (reg > 5)
         return;

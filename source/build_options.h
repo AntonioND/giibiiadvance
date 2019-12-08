@@ -13,7 +13,7 @@
 #define MAX_PATHLEN (2048)
 #endif
 
-#define ARRAY_NUM_ELEMENTS(a) (sizeof(a)/sizeof(a[0]))
+#define ARRAY_NUM_ELEMENTS(a) (sizeof(a) / sizeof(a[0]))
 
 //---------------------------------------------------------------
 //----------------------- GENERAL DEFINES -----------------------
@@ -22,8 +22,9 @@
 #define GIIBIIADVANCE_VERSION_MAJOR (0)
 #define GIIBIIADVANCE_VERSION_MINOR (2)
 #define GIIBIIADVANCE_VERSION_PATCH (0)
-#define GIIBIIADVANCE_VERSION ((GIIBIIADVANCE_VERSION_MAJOR<<16) | (GIIBIIADVANCE_VERSION_MINOR<<8) | \
-                             (GIIBIIADVANCE_VERSION_PATCH))
+#define GIIBIIADVANCE_VERSION                                                 \
+    ((GIIBIIADVANCE_VERSION_MAJOR << 16) | (GIIBIIADVANCE_VERSION_MINOR << 8) \
+     | (GIIBIIADVANCE_VERSION_PATCH))
 
 #define GIIBIIADVANCE_VERSION_STRING "0.2.X"
 

@@ -11,7 +11,7 @@
 
 void GBA_DebugAddBreakpoint(u32 addr);
 void GBA_DebugClearBreakpoint(u32 addr);
-int GBA_DebugIsBreakpoint(u32 addr); // Used in debugger
+int GBA_DebugIsBreakpoint(u32 addr);    // Used in debugger
 int GBA_DebugCPUIsBreakpoint(u32 addr); // Used in CPU loop
 void GBA_DebugClearBreakpointAll(void);
 

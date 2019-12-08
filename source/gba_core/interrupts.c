@@ -79,7 +79,7 @@ void GBA_CheckKeypadInterrupt(void)
     }
     else // OR
     {
-        if (keys&keyspressed)
+        if (keys & keyspressed)
         {
             if (REG_KEYCNT & BIT(14))
                 GBA_CallInterrupt(BIT(12)); // IRQ Enable Flag
@@ -149,7 +149,7 @@ s32 GBA_UpdateScreenTimings(s32 clocks)
                 {
                     REG_DISPSTAT &= ~BIT(1);
                     screenmode = SCR_DRAW;
-                    scrclocks = HDRAW_CLOCKS+scrclocks;
+                    scrclocks = HDRAW_CLOCKS + scrclocks;
                 }
 
                 if ((REG_DISPSTAT >> 8) == ly)

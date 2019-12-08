@@ -9,7 +9,8 @@
 
 #include "gameboy.h"
 
-typedef struct PACKED {
+typedef struct PACKED
+{
     u8 padding[0x100];
     u8 entrypoint[4]; // Usually NOP + JP nn
     u8 nintendologo[0x30];

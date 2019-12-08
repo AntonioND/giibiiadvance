@@ -9,9 +9,9 @@
 #include <SDL.h>
 
 #include "../debug_utils.h"
-#include "../window_handler.h"
 #include "../font_utils.h"
 #include "../general_utils.h"
+#include "../window_handler.h"
 
 #include "win_gba_debugger.h"
 #include "win_main.h"
@@ -103,7 +103,7 @@ void Win_GBAMemViewerUpdate(void)
 
             u32 tmpaddr = address;
 
-            for (int j = 0; j < 4; j ++)
+            for (int j = 0; j < 4; j++)
             {
                 char tmp[30];
                 snprintf(tmp, sizeof(tmp), "%08X ",
@@ -115,7 +115,7 @@ void Win_GBAMemViewerUpdate(void)
 
             tmpaddr = address;
 
-            for (int j = 0; j < 16; j ++)
+            for (int j = 0; j < 16; j++)
             {
                 char tmp[30];
                 u8 val = GBA_MemoryReadFast8(tmpaddr);
@@ -126,7 +126,7 @@ void Win_GBAMemViewerUpdate(void)
                     s_strncat(tmp, " ", sizeof(tmp));
 
                 s_strncat(textbuf, tmp, sizeof(textbuf));
-                tmpaddr ++;
+                tmpaddr++;
             }
 
             GUI_ConsoleModePrintf(&gba_memview_con, 0, i, textbuf);
@@ -141,7 +141,7 @@ void Win_GBAMemViewerUpdate(void)
             snprintf(textbuf, sizeof(textbuf), "%08X : ", address);
 
             u32 tmpaddr = address;
-            for (int j = 0; j < 8; j ++)
+            for (int j = 0; j < 8; j++)
             {
                 char tmp[30];
                 snprintf(tmp, sizeof(tmp), "%04X ",
@@ -152,18 +152,18 @@ void Win_GBAMemViewerUpdate(void)
             s_strncat(textbuf, ": ", sizeof(textbuf));
 
             tmpaddr = address;
-            for (int j = 0; j < 16; j ++)
+            for (int j = 0; j < 16; j++)
             {
                 char tmp[30];
                 u8 val = GBA_MemoryReadFast8(tmpaddr);
                 snprintf(tmp, sizeof(tmp), "%c",
-                        win_gba_memviewer_character_fix(val));
+                         win_gba_memviewer_character_fix(val));
 
                 if ((j & 3) == 3)
                     s_strncat(tmp, " ", sizeof(tmp));
 
                 s_strncat(textbuf, tmp, sizeof(textbuf));
-                tmpaddr ++;
+                tmpaddr++;
             }
 
             GUI_ConsoleModePrintf(&gba_memview_con, 0, i, textbuf);
@@ -178,18 +178,18 @@ void Win_GBAMemViewerUpdate(void)
             snprintf(textbuf, sizeof(textbuf), "%08X : ", address);
 
             u32 tmpaddr = address;
-            for (int j = 0; j < 16; j ++)
+            for (int j = 0; j < 16; j++)
             {
                 char tmp[30];
                 snprintf(tmp, sizeof(tmp), "%02X ",
                          GBA_MemoryReadFast8(tmpaddr));
                 s_strncat(textbuf, tmp, sizeof(textbuf));
-                tmpaddr ++;
+                tmpaddr++;
             }
             s_strncat(textbuf, ": ", sizeof(textbuf));
 
             tmpaddr = address;
-            for (int j = 0; j < 16; j ++)
+            for (int j = 0; j < 16; j++)
             {
                 char tmp[30];
                 u8 val = GBA_MemoryReadFast8(tmpaddr);
@@ -200,7 +200,7 @@ void Win_GBAMemViewerUpdate(void)
                     s_strncat(tmp, " ", sizeof(tmp));
 
                 s_strncat(textbuf, tmp, sizeof(textbuf));
-                tmpaddr ++;
+                tmpaddr++;
             }
 
             GUI_ConsoleModePrintf(&gba_memview_con, 0, i, textbuf);
@@ -241,8 +241,8 @@ static int _win_gba_mem_viewer_callback(SDL_Event *e)
     {
         if (e->type == SDL_MOUSEWHEEL)
         {
-            gba_memviewer_start_address -= e->wheel.y * 3
-                                         * GBA_MEMVIEWER_ADDRESS_JUMP_LINE;
+            gba_memviewer_start_address -=
+                    e->wheel.y * 3 * GBA_MEMVIEWER_ADDRESS_JUMP_LINE;
             redraw = 1;
         }
         else if (e->type == SDL_KEYDOWN)
@@ -363,7 +363,7 @@ static void _win_gba_mem_view_textbox_callback(int x, int y)
     int numbits;
 
     u32 line_base_addr = gba_memviewer_start_address
-                       + (ytile * GBA_MEMVIEWER_ADDRESS_JUMP_LINE);
+                         + (ytile * GBA_MEMVIEWER_ADDRESS_JUMP_LINE);
 
     if (gba_memviewer_mode == GBA_MEMVIEWER_32)
     {
@@ -419,7 +419,7 @@ static void _win_gba_mem_view_textbox_callback(int x, int y)
         gba_memviewer_clicked_address = clicked_addr;
         gba_memviewer_inputwindow_is_goto = 0;
         char caption[100];
-        snprintf(caption, sizeof(caption)," Change [0x%08X] (%d bits)",
+        snprintf(caption, sizeof(caption), " Change [0x%08X] (%d bits)",
                  clicked_addr, numbits);
         GUI_InputWindowOpen(&gui_iw_gba_memviewer, caption,
                             _win_gba_mem_viewer_inputwindow_callback);
@@ -475,7 +475,7 @@ int Win_GBAMemViewerCreate(void)
                   68 + 39 * FONT_WIDTH + 36, 6, 16 * FONT_WIDTH, 24,
                   "Goto (F8)", _win_gba_mem_viewer_goto);
 
-    GUI_SetTextBox(&gba_memview_textbox,&gba_memview_con,
+    GUI_SetTextBox(&gba_memview_textbox, &gba_memview_con,
                    6, 36,
                    69 * FONT_WIDTH, GBA_MEMVIEWER_MAX_LINES * FONT_HEIGHT,
                    _win_gba_mem_view_textbox_callback);

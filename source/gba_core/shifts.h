@@ -16,7 +16,9 @@ static inline u32 ror_immed_no_carry(u32 value, u8 shift)
 {
 #ifdef ENABLE_ASM_X86
     // eax = eax ror cl
-    asm("ror %%cl,%%eax \n\t" : "=a" (value) : "a" (value), "c" (shift));
+    asm("ror %%cl,%%eax \n\t"
+        : "=a"(value)
+        : "a"(value), "c"(shift));
     return value;
 #else
     return ((value >> shift) | (value << (32 - shift)));
@@ -114,7 +116,7 @@ static inline u32 asr_shift_by_immed(u32 value, u8 shift, u8 *carry)
 
 static inline u32 ror_shift_by_immed(u32 value, u8 shift, u8 *carry)
 {
-    if (shift == 0)  // rrx #1
+    if (shift == 0) // rrx #1
     {
         *carry = value & BIT(0);
         return ((value >> 1) | ((CPU.CPSR & F_C) ? BIT(31) : 0));
@@ -162,7 +164,9 @@ static inline u32 lsl_shift_by_immed_no_carry(u32 value, u8 shift)
     else
     {
 #ifdef ENABLE_ASM_X86
-        asm("shl %%cl,%%eax \n\t" : "=a" (value) : "a" (value), "c" (shift));
+        asm("shl %%cl,%%eax \n\t"
+            : "=a"(value)
+            : "a"(value), "c"(shift));
         return value;
 #else
         return (value << shift);
@@ -179,7 +183,9 @@ static inline u32 lsr_shift_by_immed_no_carry(u32 value, u8 shift)
     else
     {
 #ifdef ENABLE_ASM_X86
-        asm("shr %%cl,%%eax \n\t" : "=a" (value) : "a" (value), "c" (shift));
+        asm("shr %%cl,%%eax \n\t"
+            : "=a"(value)
+            : "a"(value), "c"(shift));
         return value;
 #else
         return (value >> shift);
@@ -196,7 +202,9 @@ static inline u32 asr_shift_by_immed_no_carry(u32 value, u8 shift)
     else
     {
 #ifdef ENABLE_ASM_X86
-        asm("sar %%cl,%%eax \n\t" : "=a" (value) : "a" (value), "c" (shift));
+        asm("sar %%cl,%%eax \n\t"
+            : "=a"(value)
+            : "a"(value), "c"(shift));
         return value;
 #else
         return (u32)(((s32)value) >> shift);
@@ -213,7 +221,9 @@ static inline u32 ror_shift_by_immed_no_carry(u32 value, u8 shift)
     else
     {
 #ifdef ENABLE_ASM_X86
-        asm("ror %%cl,%%eax \n\t" : "=a" (value) : "a" (value), "c" (shift));
+        asm("ror %%cl,%%eax \n\t"
+            : "=a"(value)
+            : "a"(value), "c"(shift));
         return value;
 #else
         return ((value >> shift) | (value << (32 - shift)));
@@ -284,7 +294,6 @@ static inline u32 lsr_shift_by_reg(u32 value, u8 shift, u8 *carry)
 {
     if (shift)
     {
-
         if (shift < 32)
         {
 //#ifdef ENABLE_ASM_X86
@@ -320,11 +329,11 @@ static inline u32 lsr_shift_by_reg(u32 value, u8 shift, u8 *carry)
     //}
 }
 
-static inline u32 asr_shift_by_reg(u32 value, u8 shift, u8 * carry)
+static inline u32 asr_shift_by_reg(u32 value, u8 shift, u8 *carry)
 {
-    if(shift)
+    if (shift)
     {
-        if(shift < 32)
+        if (shift < 32)
         {
 //#ifdef ENABLE_ASM_X86
 //            asm("sar %%cl,%%eax \n\t"
@@ -332,8 +341,8 @@ static inline u32 asr_shift_by_reg(u32 value, u8 shift, u8 * carry)
 //                : "=a" (value) : "a" (value), "b" (carry), "c" (shift));
 //            return value;
 //#else
-            *carry = (value&BIT(shift-1)) != 0;
-            return (u32)(((s32)value)>>shift);
+            *carry = (value & BIT(shift - 1)) != 0;
+            return (u32)(((s32)value) >> shift);
 //#endif
         }
         else
@@ -367,7 +376,7 @@ static inline u32 ror_shift_by_reg(u32 value, u8 shift, u8 *carry)
 //                : "=a" (value) : "a" (value), "b" (carry), "c" (shift));
 //            return value;
 //#else
-            *carry = (value & BIT(shift-1)) != 0;
+            *carry = (value & BIT(shift - 1)) != 0;
             return ((value >> shift) | (value << (32 - shift)));
 //#endif
         }
@@ -476,7 +485,9 @@ static inline u32 ror_shift_by_reg_no_carry(u32 value, u8 shift)
 
     shift &= 31;
 #ifdef ENABLE_ASM_X86
-    asm("ror %%cl,%%eax \n\t" : "=a" (value) : "a" (value), "c" (shift));
+    asm("ror %%cl,%%eax \n\t"
+        : "=a"(value)
+        : "a"(value), "c"(shift));
     return value;
 #else
     if (shift)
@@ -486,7 +497,6 @@ static inline u32 ror_shift_by_reg_no_carry(u32 value, u8 shift)
     //else
     //    return ((CPU.CPSR & F_C) << 2) | (value >> 1);
 #endif
-
 }
 
 static inline u32 cpu_shift_by_reg_no_carry(u32 type, u32 value, u8 shift)

@@ -16,7 +16,7 @@
 
 static int _gui_pos_is_inside_rect(int xm, int ym, int x, int w, int y, int h)
 {
-    return (xm >= x) && (xm < (x+w)) && (ym >= y) && (ym < (y + h));
+    return (xm >= x) && (xm < (x + w)) && (ym >= y) && (ym < (y + h));
 }
 
 //------------------------------------------------------------------------------
@@ -30,7 +30,7 @@ static int _gui_inputwindow_send_event(_gui_inputwindow *win, SDL_Event *e)
     {
         int key = e->key.keysym.sym;
         if (((key >= SDLK_a) && (key <= SDLK_f))
-                || ((key >= SDLK_0) && (key <= SDLK_9)))
+            || ((key >= SDLK_0) && (key <= SDLK_9)))
         {
             int l = strlen(win->input_text);
             if (l < (sizeof(win->input_text) - 1))
@@ -190,7 +190,7 @@ static int _gui_get_first_window_enabled(_gui *gui)
     {
         if ((*gui_elements)->element_type == GUI_TYPE_WINDOW)
         {
-            if ((*gui_elements)->info.window.enabled )
+            if ((*gui_elements)->info.window.enabled)
                 return i;
         }
         if ((*gui_elements)->element_type == GUI_TYPE_SCROLLABLETEXTWINDOW)
@@ -212,7 +212,8 @@ static int _gui_get_first_messagebox_enabled(_gui *gui)
 
     _gui_element **gui_elements = gui->elements;
 
-    if (gui_elements == NULL) return -1;
+    if (gui_elements == NULL)
+        return -1;
 
     int i = 0;
     while (*gui_elements != NULL)
@@ -230,7 +231,6 @@ static int _gui_get_first_messagebox_enabled(_gui *gui)
 }
 
 //------------------------------------------------------------------------------
-
 
 //------------------------------------------------------------------------------
 
@@ -253,8 +253,8 @@ int __gui_send_event_element(_gui_element **complete_gui, _gui_element *gui,
                 {
                     if (gui->info.textbox.mouse_press_callback)
                     {
-                            gui->info.textbox.mouse_press_callback(
-                                    e->button.x - gui->x, e->button.y - gui->y);
+                        gui->info.textbox.mouse_press_callback(
+                                e->button.x - gui->x, e->button.y - gui->y);
                     }
                     return 1;
                 }
@@ -273,7 +273,7 @@ int __gui_send_event_element(_gui_element **complete_gui, _gui_element *gui,
                     gui->info.button.is_pressed = 1;
 
                     if (gui->info.button.callback)
-                            gui->info.button.callback();
+                        gui->info.button.callback();
 
                     return 1;
                 }
@@ -315,8 +315,8 @@ int __gui_send_event_element(_gui_element **complete_gui, _gui_element *gui,
 
                         if (gui->info.radiobutton.callback)
                         {
-                                gui->info.radiobutton.callback(
-                                        gui->info.radiobutton.btn_id);
+                            gui->info.radiobutton.callback(
+                                    gui->info.radiobutton.btn_id);
                         }
 
                         return 1;
@@ -345,8 +345,8 @@ int __gui_send_event_element(_gui_element **complete_gui, _gui_element *gui,
                 {
                     if (gui->info.bitmap.callback)
                     {
-                            return gui->info.bitmap.callback(
-                                    e->button.x - gui->x, e->button.y - gui->y);
+                        return gui->info.bitmap.callback(e->button.x - gui->x,
+                                                         e->button.y - gui->y);
                     }
 
                     return 0;
@@ -409,7 +409,7 @@ int __gui_send_event_element(_gui_element **complete_gui, _gui_element *gui,
                 {
                     gui->info.scrollabletextwindow.currentline--;
                     if (gui->info.scrollabletextwindow.currentline < 0)
-                            gui->info.scrollabletextwindow.currentline = 0;
+                        gui->info.scrollabletextwindow.currentline = 0;
                     return 1;
                 }
 
@@ -536,8 +536,8 @@ int __gui_send_event_element(_gui_element **complete_gui, _gui_element *gui,
                         - gui->info.scrollabletextwindow.max_drawn_lines)
                 {
                     gui->info.scrollabletextwindow.currentline =
-                        gui->info.scrollabletextwindow.numlines
-                        - gui->info.scrollabletextwindow.max_drawn_lines;
+                            gui->info.scrollabletextwindow.numlines
+                            - gui->info.scrollabletextwindow.max_drawn_lines;
                 }
                 if (gui->info.scrollabletextwindow.currentline < 0)
                     gui->info.scrollabletextwindow.currentline = 0;
@@ -591,14 +591,14 @@ int __gui_send_event_element(_gui_element **complete_gui, _gui_element *gui,
                                 return 1; // Invalid size...
 
                             int range = gui->info.scrollbar.value_max
-                                      - gui->info.scrollbar.value_min;
+                                        - gui->info.scrollbar.value_min;
 
                             // One side button plus half scroll button
                             int minus = (gui->w + 1) + gui->w;
                             gui->info.scrollbar.value =
-                                            ((rel_y - minus) * range) / barsize;
+                                    ((rel_y - minus) * range) / barsize;
                             gui->info.scrollbar.value +=
-                                            gui->info.scrollbar.value_min;
+                                    gui->info.scrollbar.value_min;
                         }
                     }
                     else
@@ -625,14 +625,14 @@ int __gui_send_event_element(_gui_element **complete_gui, _gui_element *gui,
                                 return 1; // Invalid size...
 
                             int range = gui->info.scrollbar.value_max
-                                      - gui->info.scrollbar.value_min;
+                                        - gui->info.scrollbar.value_min;
 
                             // One side button plus half scroll button
                             int minus = (gui->h + 1) + gui->h;
                             gui->info.scrollbar.value =
-                                            ((rel_x - minus) * range) / barsize;
+                                    ((rel_x - minus) * range) / barsize;
                             gui->info.scrollbar.value +=
-                                            gui->info.scrollbar.value_min;
+                                    gui->info.scrollbar.value_min;
                         }
                     }
 
@@ -681,14 +681,14 @@ int __gui_send_event_element(_gui_element **complete_gui, _gui_element *gui,
                                 return 1; // Invalid size...
 
                             int range = gui->info.scrollbar.value_max
-                                      - gui->info.scrollbar.value_min;
+                                        - gui->info.scrollbar.value_min;
 
                             // One side button plus half scroll button
                             int minus = (gui->w + 1) + gui->w;
                             gui->info.scrollbar.value =
-                                            ((rel_y - minus) * range) / barsize;
+                                    ((rel_y - minus) * range) / barsize;
                             gui->info.scrollbar.value +=
-                                            gui->info.scrollbar.value_min;
+                                    gui->info.scrollbar.value_min;
                         }
                     }
                     else
@@ -713,14 +713,14 @@ int __gui_send_event_element(_gui_element **complete_gui, _gui_element *gui,
                                 return 1; // Invalid size...
 
                             int range = gui->info.scrollbar.value_max
-                                      - gui->info.scrollbar.value_min;
+                                        - gui->info.scrollbar.value_min;
 
                             // One side button plus half scroll button
                             int minus = (gui->h + 1) + gui->h;
                             gui->info.scrollbar.value =
-                                            ((rel_x - minus) * range) / barsize;
+                                    ((rel_x - minus) * range) / barsize;
                             gui->info.scrollbar.value +=
-                                            gui->info.scrollbar.value_min;
+                                    gui->info.scrollbar.value_min;
                         }
                     }
 
@@ -794,15 +794,15 @@ int GUI_SendEvent(_gui *gui, SDL_Event *e)
     // Highest priority = input window
     if (GUI_InputWindowIsEnabled(gui->inputwindow))
     {
-        return _gui_inputwindow_send_event(gui->inputwindow,e);
+        return _gui_inputwindow_send_event(gui->inputwindow, e);
     }
 
     // Very high priority = menu
-    if(_gui_menu_send_event(gui->menu,e))
+    if (_gui_menu_send_event(gui->menu, e))
         return 1;
 
-    _gui_element ** elements = gui->elements;
-    if(elements == NULL)
+    _gui_element **elements = gui->elements;
+    if (elements == NULL)
         return 0;
 
     // High priority = message box

@@ -335,9 +335,9 @@ u32 GBA_MemoryRead32(u32 address)
         "shl %%cl,%%eax  \n\t" // eax = (address & 3) << 3
         "mov %%eax,%%ecx \n\t" // ecx = shift = (address & 3) << 3
         "ror %%cl,%%ebx  \n\t" // ebx = [ data ] ror [ shift ]
-        : "=b" (data)
-        : "a" (address), "b" (data)
-        : "ecx" );
+        : "=b"(data)
+        : "a"(address), "b"(data)
+        : "ecx");
     return data;
 #else
     u32 shift = (address & 3) << 3;
@@ -443,7 +443,7 @@ u16 GBA_MemoryRead16(u32 address)
     return 0;
 }
 
-void GBA_MemoryWrite16(u32 address,u16 data)
+void GBA_MemoryWrite16(u32 address, u16 data)
 {
     if (address < 0x02000000)
         return;
@@ -496,7 +496,6 @@ void GBA_MemoryWrite16(u32 address,u16 data)
 
     return;
 }
-
 
 u8 GBA_MemoryRead8(u32 address)
 {
@@ -625,7 +624,7 @@ void GBA_RegisterWrite32(u32 address, u32 data)
 u32 GBA_RegisterRead32(u32 address)
 {
     return ((u32)GBA_RegisterRead16(address))
-        | (((u32)GBA_RegisterRead16(address + 2)) << 16);
+           | (((u32)GBA_RegisterRead16(address + 2)) << 16);
 }
 
 void GBA_RegisterWrite16(u32 address, u16 data)

@@ -9,8 +9,8 @@
 #include <string.h>
 
 #include "../build_options.h"
-#include "../general_utils.h"
 #include "../font_utils.h"
+#include "../general_utils.h"
 
 #include "cpu.h"
 #include "debug.h"
@@ -150,7 +150,7 @@ static const int debug_command_param_size[256] = {
     1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 2, 0, 0, 0, 1, 0
 };
 
-static const char * debug_commands[256] = {
+static const char *debug_commands[256] = {
     "nop", "ld bc,#0x%04X", "ld [bc],a", "inc bc",
     "inc b", "dec b", "ld b,#0x%02X", "rlca",
     "ld [#0x%04X],sp", "add hl,bc", "ld a,[bc]", "dec bc",
@@ -217,7 +217,7 @@ static const char * debug_commands[256] = {
     "[!] Undefined opcode", "[!] Undefined opcode", "cp a,#0x%02X", "rst #0x38"
 };
 
-static const char * debug_commands_cb[256] = {
+static const char *debug_commands_cb[256] = {
     "rlc b", "rlc c", "rlc d", "rlc e",
     "rlc h", "rlc l", "rlc [hl]", "rlc a",
     "rrc b", "rrc c", "rrc d", "rrc e",
@@ -456,7 +456,8 @@ int gb_debug_get_address_is_code(u32 address)
 
 //------------------------------------------------------------------------------
 
-static struct {
+static struct
+{
     char *name;
     u32 address;
 } gb_io_reg_struct[] = {
@@ -509,7 +510,6 @@ int gb_dissasemble_add_io_register_name(int reg_address, char *dest,
     }
     return 0;
 }
-
 
 static char text[128];
 char *GB_Dissasemble(u16 addr, int *step)
@@ -616,32 +616,32 @@ char *GB_Dissasemble(u16 addr, int *step)
                 break;
             case RW_BC:
                 comment_added = gb_dissasemble_add_io_register_name(
-                                    GameBoy.CPU.R16.BC, text, 1, sizeof(text));
+                        GameBoy.CPU.R16.BC, text, 1, sizeof(text));
                 break;
             case RW_DE:
                 comment_added = gb_dissasemble_add_io_register_name(
-                                    GameBoy.CPU.R16.DE, text, 1, sizeof(text));
+                        GameBoy.CPU.R16.DE, text, 1, sizeof(text));
                 break;
             case RW_HL:
                 comment_added = gb_dissasemble_add_io_register_name(
-                                    GameBoy.CPU.R16.HL, text, 1, sizeof(text));
+                        GameBoy.CPU.R16.HL, text, 1, sizeof(text));
                 break;
             case RW_SP:
                 comment_added = gb_dissasemble_add_io_register_name(
-                                    GameBoy.CPU.R16.SP, text, 1, sizeof(text));
+                        GameBoy.CPU.R16.SP, text, 1, sizeof(text));
                 break;
             case RW_INST:
                 comment_added = gb_dissasemble_add_io_register_name(
-                                    param, text, 1, sizeof(text));
+                        param, text, 1, sizeof(text));
                 break;
             case RW_FF_INST:
                 comment_added = gb_dissasemble_add_io_register_name(
-                                    param | 0xFF00, text, 1, sizeof(text));
+                        param | 0xFF00, text, 1, sizeof(text));
                 break;
             case RW_FF_C:
                 comment_added = gb_dissasemble_add_io_register_name(
-                                    ((int)(u8)GameBoy.CPU.R8.C) | 0xFF00,
-                                    text, 1, sizeof(text));
+                        ((int)(u8)GameBoy.CPU.R8.C) | 0xFF00,
+                        text, 1, sizeof(text));
                 break;
             case JMP_HL:
                 param = (int)(u16)GameBoy.CPU.R16.HL;

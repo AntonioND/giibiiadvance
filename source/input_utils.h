@@ -9,7 +9,8 @@
 
 #include <SDL.h>
 
-typedef enum {
+typedef enum
+{
     P_KEY_A,
     P_KEY_B,
     P_KEY_L,
@@ -55,8 +56,8 @@ int Input_Speedup_Enabled(void);
 //-----------------------------------------------------------------------------
 
 // btncode is a SDL_Scancode
-void Input_GetKeyboardElementName(char * name, int namelen, int btncode);
-void Input_GetJoystickElementName(char * name, int namelen, int btncode);
+void Input_GetKeyboardElementName(char *name, int namelen, int btncode);
+void Input_GetJoystickElementName(char *name, int namelen, int btncode);
 
 //------------------------------------------------------------------------------
 

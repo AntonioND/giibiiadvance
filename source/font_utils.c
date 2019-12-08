@@ -31,7 +31,7 @@ int FU_Print(char *buffer, int bufw, int bufh, int tx, int ty,
     char txtbuffer[300];
 
     va_list args;
-    va_start(args,txt);
+    va_start(args, txt);
     int ret = vsnprintf(txtbuffer, sizeof(txtbuffer), txt, args);
     va_end(args);
 
@@ -57,10 +57,10 @@ int FU_Print(char *buffer, int bufw, int bufh, int tx, int ty,
         int texy = (c / FONT_CHARS_IN_ROW) * FONT_HEIGHT;
 
         int tex_offset = (texy * (FONT_CHARS_IN_ROW * FONT_WIDTH * 4))
-                       + texx * 4; // Font is 4 bytes per pixel
+                         + texx * 4;             // Font is 4 bytes per pixel
         int buf_offset = ((ty * bufw) + tx) * 3; // Buffer is 3 bytes per pixel
 
-        for (int y = 0; y < FONT_HEIGHT; y ++)
+        for (int y = 0; y < FONT_HEIGHT; y++)
         {
             char *bufcopy = &(buffer[buf_offset]);
             const u8 *texcopy = &(fnt_data[tex_offset]);
@@ -98,12 +98,12 @@ int FU_Print(char *buffer, int bufw, int bufh, int tx, int ty,
 }
 
 int FU_PrintColor(char *buffer, int bufw, int bufh, int tx, int ty, int color,
-                  const char * txt, ...)
+                  const char *txt, ...)
 {
     char txtbuffer[300];
 
     va_list args;
-    va_start(args,txt);
+    va_start(args, txt);
     int ret = vsnprintf(txtbuffer, sizeof(txtbuffer), txt, args);
     va_end(args);
 
@@ -129,10 +129,10 @@ int FU_PrintColor(char *buffer, int bufw, int bufh, int tx, int ty, int color,
         int texy = (c / FONT_CHARS_IN_ROW) * FONT_HEIGHT;
 
         int tex_offset = (texy * (FONT_CHARS_IN_ROW * FONT_WIDTH * 4))
-                       + texx * 4; // Font is 4 bytes per pixel
+                         + texx * 4;             // Font is 4 bytes per pixel
         int buf_offset = ((ty * bufw) + tx) * 3; // Buffer is 3 bytes per pixel
 
-        for (int y = 0; y < FONT_HEIGHT; y ++)
+        for (int y = 0; y < FONT_HEIGHT; y++)
         {
             char *bufcopy = &(buffer[buf_offset]);
             const u8 *texcopy = &(fnt_data[tex_offset]);
@@ -179,7 +179,7 @@ int FU_PrintChar(char *buffer, int bufw, int bufh, int tx, int ty,
     int tex_offset = (texy * (FONT_CHARS_IN_ROW * FONT_WIDTH * 4)) + texx * 4;
     int buf_offset = ((ty * bufw) + tx) * 3; // Buffer is 3 bytes per pixel
 
-    for (int y = 0; y < FONT_HEIGHT; y ++)
+    for (int y = 0; y < FONT_HEIGHT; y++)
     {
         char *bufcopy = &(buffer[buf_offset]);
         const u8 *texcopy = &(fnt_data[tex_offset]);
@@ -190,9 +190,9 @@ int FU_PrintChar(char *buffer, int bufw, int bufh, int tx, int ty,
             int g = (uint8_t)(*texcopy++);
             int b = (uint8_t)(*texcopy++);
 
-            *bufcopy++ = (r * (color&0xFF) ) >> 8;
-            *bufcopy++ = (g * ((color>>8)&0xFF) ) >> 8;
-            *bufcopy++ = (b * ((color>>16)&0xFF) ) >> 8;
+            *bufcopy++ = (r * (color & 0xFF)) >> 8;
+            *bufcopy++ = (g * ((color >> 8) & 0xFF)) >> 8;
+            *bufcopy++ = (b * ((color >> 16) & 0xFF)) >> 8;
 
             texcopy++; // Skip alpha
         }

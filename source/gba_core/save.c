@@ -27,7 +27,8 @@ static const char *save_type_strings[5] = {
     "FLASH1M_V"   // FLASH 128 Kbytes (1Mbit)
 };
 
-typedef enum {
+typedef enum
+{
     SAV_EEPROM = 0,
     SAV_SRAM,
     SAV_FLASH,
@@ -113,7 +114,6 @@ u32 EEPROM_CMD_LEN;
 u32 EEPROM_DATA_STREAMING;
 u64 EEPROM_READ_BUFFER;
 
-
 static const char *savetype[SAV_TYPES + 3] = {
     "EEPROM", "SRAM (32KB)", "FLASH 64KB", "FLASH 64KB", "FLASH 128KB",
     "-", "None", "Unknown/None. Autodetecting...\n"
@@ -126,7 +126,7 @@ const char *GBA_GetSaveTypeString(void)
 
 void GBA_ResetSaveBuffer(void)
 {
-    switch(SAVE_TYPE)
+    switch (SAVE_TYPE)
     {
         case SAV_SRAM:
             memset(SRAM_BUFFER, 0, sizeof(SRAM_BUFFER));
@@ -172,7 +172,7 @@ void GBA_SaveSetFilename(char *rom_path)
         exit(1);
     }
 
-    s_strncpy(SAVE_PATH,rom_path, sizeof(SAVE_PATH));
+    s_strncpy(SAVE_PATH, rom_path, sizeof(SAVE_PATH));
     int cursor = strlen(SAVE_PATH);
 
     // The path should end in ".gba" or ".bin"
@@ -399,7 +399,7 @@ void GBA_SaveWrite8(u32 address, u8 data)
                     if (FLASH_CMD == 0x80)
                     {
                         memset((void *)((uintptr_t)FLASH_BUFFER512
-                                    + (address & 0x0000F000)),
+                                        + (address & 0x0000F000)),
                                0xFF, 0xFFF);
                         FLASH_CMD = 0x30;
                         FLASH_STATE = 1;
@@ -503,8 +503,8 @@ void GBA_SaveWrite8(u32 address, u8 data)
                     if (FLASH_CMD == 0x80)
                     {
                         memset((void *)((uintptr_t)FLASH_1M_PTR
-                                    + (address & 0x0000F000)),
-                                0xFF, 0xFFF);
+                                        + (address & 0x0000F000)),
+                               0xFF, 0xFFF);
                         FLASH_CMD = 0x30;
                         FLASH_STATE = 1;
                     }

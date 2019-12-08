@@ -131,135 +131,135 @@ void Win_GBIOViewerUpdate(void)
 
     // Screen
     GUI_ConsoleModePrintf(&gb_ioview_screen_con, 0, 0, "40h LCDC - %02X",
-            GB_MemReadReg8(0xFF40));
+                          GB_MemReadReg8(0xFF40));
     GUI_ConsoleModePrintf(&gb_ioview_screen_con, 0, 1, "41h STAT - %02X",
-            GB_MemReadReg8(0xFF41));
+                          GB_MemReadReg8(0xFF41));
     GUI_ConsoleModePrintf(&gb_ioview_screen_con, 0, 2, "42h SCY  - %02X",
-            GB_MemReadReg8(0xFF42));
+                          GB_MemReadReg8(0xFF42));
     GUI_ConsoleModePrintf(&gb_ioview_screen_con, 0, 3, "43h SCX  - %02X",
-            GB_MemReadReg8(0xFF43));
+                          GB_MemReadReg8(0xFF43));
     GUI_ConsoleModePrintf(&gb_ioview_screen_con, 0, 4, "44h LY   - %02X",
-            GB_MemReadReg8(0xFF44));
+                          GB_MemReadReg8(0xFF44));
     GUI_ConsoleModePrintf(&gb_ioview_screen_con, 0, 5, "45h LYC  - %02X",
-            GB_MemReadReg8(0xFF45));
+                          GB_MemReadReg8(0xFF45));
     GUI_ConsoleModePrintf(&gb_ioview_screen_con, 0, 6, "46h DMA  - %02X",
-            GB_MemReadReg8(0xFF46));
+                          GB_MemReadReg8(0xFF46));
     GUI_ConsoleModePrintf(&gb_ioview_screen_con, 0, 7, "4Ah WY   - %02X",
-            GB_MemReadReg8(0xFF4A));
+                          GB_MemReadReg8(0xFF4A));
     GUI_ConsoleModePrintf(&gb_ioview_screen_con, 0, 8, "4Bh WX   - %02X",
-            GB_MemReadReg8(0xFF4B));
+                          GB_MemReadReg8(0xFF4B));
 
     // GB Palettes
     GUI_ConsoleModePrintf(&gb_ioview_gbpal_con, 0, 0, "47h BGP  - %02X",
-            GB_MemReadReg8(0xFF47));
+                          GB_MemReadReg8(0xFF47));
     GUI_ConsoleModePrintf(&gb_ioview_gbpal_con, 0, 1, "48h OBP0 - %02X",
-            GB_MemReadReg8(0xFF48));
+                          GB_MemReadReg8(0xFF48));
     GUI_ConsoleModePrintf(&gb_ioview_gbpal_con, 0, 2, "49h OBP1 - %02X",
-            GB_MemReadReg8(0xFF49));
+                          GB_MemReadReg8(0xFF49));
 
     // GBC Palettes
     GUI_ConsoleModePrintf(&gb_ioview_gbcpal_con, 0, 0, "68h BCPS - %02X",
-            GB_MemReadReg8(0xFF68));
+                          GB_MemReadReg8(0xFF68));
     GUI_ConsoleModePrintf(&gb_ioview_gbcpal_con, 0, 1, "69h BCPD - %02X",
-            GB_MemReadReg8(0xFF69));
+                          GB_MemReadReg8(0xFF69));
     GUI_ConsoleModePrintf(&gb_ioview_gbcpal_con, 0, 2, "6Ah OCPS - %02X",
-            GB_MemReadReg8(0xFF6A));
+                          GB_MemReadReg8(0xFF6A));
     GUI_ConsoleModePrintf(&gb_ioview_gbcpal_con, 0, 3, "6Bh OCPD - %02X",
-            GB_MemReadReg8(0xFF6B));
+                          GB_MemReadReg8(0xFF6B));
 
     // Other
     GUI_ConsoleModePrintf(&gb_ioview_other_con, 0, 0, "00h P1   - %02X",
-            GB_MemReadReg8(0xFF00));
+                          GB_MemReadReg8(0xFF00));
     GUI_ConsoleModePrintf(&gb_ioview_other_con, 0, 1, "01h SB   - %02X",
-            GB_MemReadReg8(0xFF01));
+                          GB_MemReadReg8(0xFF01));
     GUI_ConsoleModePrintf(&gb_ioview_other_con, 0, 2, "02h SC   - %02X",
-            GB_MemReadReg8(0xFF02));
+                          GB_MemReadReg8(0xFF02));
     GUI_ConsoleModePrintf(&gb_ioview_other_con, 0, 3, "04h DIV  - %02X",
-            GB_MemReadReg8(0xFF04));
+                          GB_MemReadReg8(0xFF04));
     GUI_ConsoleModePrintf(&gb_ioview_other_con, 0, 4, "05h TIMA - %02X",
-            GB_MemReadReg8(0xFF05));
+                          GB_MemReadReg8(0xFF05));
     GUI_ConsoleModePrintf(&gb_ioview_other_con, 0, 5, "06h TMA  - %02X",
-            GB_MemReadReg8(0xFF06));
+                          GB_MemReadReg8(0xFF06));
     GUI_ConsoleModePrintf(&gb_ioview_other_con, 0, 6, "07h TAC  - %02X",
-            GB_MemReadReg8(0xFF07));
+                          GB_MemReadReg8(0xFF07));
     GUI_ConsoleModePrintf(&gb_ioview_other_con, 0, 7, "0Fh IF   - %02X",
-            GB_MemReadReg8(0xFF0F));
+                          GB_MemReadReg8(0xFF0F));
     GUI_ConsoleModePrintf(&gb_ioview_other_con, 0, 8, "4Dh KEY1 - %02X",
-            GB_MemReadReg8(0xFF4D));
+                          GB_MemReadReg8(0xFF4D));
     GUI_ConsoleModePrintf(&gb_ioview_other_con, 0, 9, "4Fh VBK  - %02X",
-            GB_MemReadReg8(0xFF4F));
+                          GB_MemReadReg8(0xFF4F));
     GUI_ConsoleModePrintf(&gb_ioview_other_con, 0, 10, "56h RP   - %02X",
-            GB_MemReadReg8(0xFF56));
+                          GB_MemReadReg8(0xFF56));
     GUI_ConsoleModePrintf(&gb_ioview_other_con, 0, 11, "70h SVBK - %02X",
-            GB_MemReadReg8(0xFF70));
+                          GB_MemReadReg8(0xFF70));
     GUI_ConsoleModePrintf(&gb_ioview_other_con, 0, 12, "FFh IE   - %02X",
-            GB_MemRead8(0xFFFF));
+                          GB_MemRead8(0xFFFF));
 
     // GBC DMA
     GUI_ConsoleModePrintf(&gb_ioview_gbcdma_con, 0, 0, "51h SRCH - %02X",
-            GB_MemReadReg8(0xFF51));
+                          GB_MemReadReg8(0xFF51));
     GUI_ConsoleModePrintf(&gb_ioview_gbcdma_con, 0, 1, "52h SRCL - %02X",
-            GB_MemReadReg8(0xFF52));
+                          GB_MemReadReg8(0xFF52));
     GUI_ConsoleModePrintf(&gb_ioview_gbcdma_con, 0, 2, "53h DSTH - %02X",
-            GB_MemReadReg8(0xFF53));
+                          GB_MemReadReg8(0xFF53));
     GUI_ConsoleModePrintf(&gb_ioview_gbcdma_con, 0, 3, "54h DSTL - %02X",
-            GB_MemReadReg8(0xFF54));
+                          GB_MemReadReg8(0xFF54));
     GUI_ConsoleModePrintf(&gb_ioview_gbcdma_con, 0, 4, "55h CTRL - %02X",
-            GB_MemReadReg8(0xFF55));
+                          GB_MemReadReg8(0xFF55));
 
     // Sound channel 1
     GUI_ConsoleModePrintf(&gb_ioview_sndchannel1_con, 0, 0, "10h NR10 - %02X",
-            GB_MemReadReg8(0xFF10));
+                          GB_MemReadReg8(0xFF10));
     GUI_ConsoleModePrintf(&gb_ioview_sndchannel1_con, 0, 1, "11h NR11 - %02X",
-            GB_MemReadReg8(0xFF11));
+                          GB_MemReadReg8(0xFF11));
     GUI_ConsoleModePrintf(&gb_ioview_sndchannel1_con, 0, 2, "12h NR12 - %02X",
-            GB_MemReadReg8(0xFF12));
+                          GB_MemReadReg8(0xFF12));
     GUI_ConsoleModePrintf(&gb_ioview_sndchannel1_con, 0, 3, "13h NR13 - %02X",
-            GB_MemReadReg8(0xFF13));
+                          GB_MemReadReg8(0xFF13));
     GUI_ConsoleModePrintf(&gb_ioview_sndchannel1_con, 0, 4, "14h NR14 - %02X",
-            GB_MemReadReg8(0xFF14));
+                          GB_MemReadReg8(0xFF14));
 
     // Sound channel 2
     GUI_ConsoleModePrintf(&gb_ioview_sndchannel2_con, 0, 0, "             ");
     GUI_ConsoleModePrintf(&gb_ioview_sndchannel2_con, 0, 1, "16h NR21 - %02X",
-            GB_MemReadReg8(0xFF16));
+                          GB_MemReadReg8(0xFF16));
     GUI_ConsoleModePrintf(&gb_ioview_sndchannel2_con, 0, 2, "17h NR22 - %02X",
-            GB_MemReadReg8(0xFF17));
+                          GB_MemReadReg8(0xFF17));
     GUI_ConsoleModePrintf(&gb_ioview_sndchannel2_con, 0, 3, "18h NR23 - %02X",
-            GB_MemReadReg8(0xFF18));
+                          GB_MemReadReg8(0xFF18));
     GUI_ConsoleModePrintf(&gb_ioview_sndchannel2_con, 0, 4, "19h NR24 - %02X",
-            GB_MemReadReg8(0xFF19));
+                          GB_MemReadReg8(0xFF19));
 
     // Sound channel 3
     GUI_ConsoleModePrintf(&gb_ioview_sndchannel3_con, 0, 0, "1Ah NR30 - %02X",
-            GB_MemReadReg8(0xFF1A));
+                          GB_MemReadReg8(0xFF1A));
     GUI_ConsoleModePrintf(&gb_ioview_sndchannel3_con, 0, 1, "1Bh NR31 - %02X",
-            GB_MemReadReg8(0xFF1B));
+                          GB_MemReadReg8(0xFF1B));
     GUI_ConsoleModePrintf(&gb_ioview_sndchannel3_con, 0, 2, "1Ch NR32 - %02X",
-            GB_MemReadReg8(0xFF1C));
+                          GB_MemReadReg8(0xFF1C));
     GUI_ConsoleModePrintf(&gb_ioview_sndchannel3_con, 0, 3, "1Dh NR33 - %02X",
-            GB_MemReadReg8(0xFF1D));
+                          GB_MemReadReg8(0xFF1D));
     GUI_ConsoleModePrintf(&gb_ioview_sndchannel3_con, 0, 4, "1Eh NR34 - %02X",
-            GB_MemReadReg8(0xFF1E));
+                          GB_MemReadReg8(0xFF1E));
 
     // Sound channel 4
     GUI_ConsoleModePrintf(&gb_ioview_sndchannel4_con, 0, 0, "             ");
     GUI_ConsoleModePrintf(&gb_ioview_sndchannel4_con, 0, 1, "20h NR41 - %02X",
-            GB_MemReadReg8(0xFF20));
+                          GB_MemReadReg8(0xFF20));
     GUI_ConsoleModePrintf(&gb_ioview_sndchannel4_con, 0, 2, "21h NR42 - %02X",
-            GB_MemReadReg8(0xFF21));
+                          GB_MemReadReg8(0xFF21));
     GUI_ConsoleModePrintf(&gb_ioview_sndchannel4_con, 0, 3, "22h NR43 - %02X",
-            GB_MemReadReg8(0xFF22));
+                          GB_MemReadReg8(0xFF22));
     GUI_ConsoleModePrintf(&gb_ioview_sndchannel4_con, 0, 4, "23h NR44 - %02X",
-            GB_MemReadReg8(0xFF23));
+                          GB_MemReadReg8(0xFF23));
 
     // Sound control
     GUI_ConsoleModePrintf(&gb_ioview_sndcontrol_con, 0, 0, "24h NR50 - %02X",
-            GB_MemReadReg8(0xFF24));
+                          GB_MemReadReg8(0xFF24));
     GUI_ConsoleModePrintf(&gb_ioview_sndcontrol_con, 0, 1, "25h NR51 - %02X",
-            GB_MemReadReg8(0xFF25));
+                          GB_MemReadReg8(0xFF25));
     GUI_ConsoleModePrintf(&gb_ioview_sndcontrol_con, 0, 2, "26h NR52 - %02X",
-            GB_MemReadReg8(0xFF26));
+                          GB_MemReadReg8(0xFF26));
 
     // GBC DMA Information
     char *mode = (GameBoy.Emulator.GBC_DMA_enabled == GBC_DMA_NONE) ? "None" :
@@ -267,22 +267,22 @@ void Win_GBIOViewerUpdate(void)
                         "GDMA" : "HDMA");
     GUI_ConsoleModePrintf(&gb_ioview_dmainfo_con, 0, 0, "Mode:   %s", mode);
     GUI_ConsoleModePrintf(&gb_ioview_dmainfo_con, 0, 1, "Source: %04X",
-            GameBoy.Emulator.gdma_src);
+                          GameBoy.Emulator.gdma_src);
     GUI_ConsoleModePrintf(&gb_ioview_dmainfo_con, 0, 2, "Dest:   %04X",
-            GameBoy.Emulator.gdma_dst);
+                          GameBoy.Emulator.gdma_dst);
     GUI_ConsoleModePrintf(&gb_ioview_dmainfo_con, 0, 3, "Size:   %04X",
-            GameBoy.Emulator.gdma_bytes_left);
+                          GameBoy.Emulator.gdma_bytes_left);
 
     // MBC Information
     GUI_ConsoleModePrintf(&gb_ioview_mbc_con, 0, 0, "MBC: %d",
-            GameBoy.Emulator.MemoryController);
+                          GameBoy.Emulator.MemoryController);
     GUI_ConsoleModePrintf(&gb_ioview_mbc_con, 0, 1, "ROM: %d(%X)",
-            GameBoy.Memory.selected_rom, GameBoy.Memory.selected_rom);
+                          GameBoy.Memory.selected_rom, GameBoy.Memory.selected_rom);
     GUI_ConsoleModePrintf(&gb_ioview_mbc_con, 0, 2, "RAM: %d(%X)-%s",
-            GameBoy.Memory.selected_ram, GameBoy.Memory.selected_ram,
-            GameBoy.Memory.RAMEnabled ? "En" : "Dis");
+                          GameBoy.Memory.selected_ram, GameBoy.Memory.selected_ram,
+                          GameBoy.Memory.RAMEnabled ? "En" : "Dis");
     GUI_ConsoleModePrintf(&gb_ioview_mbc_con, 0, 3, "Mode: %d",
-            GameBoy.Memory.mbc_mode);
+                          GameBoy.Memory.mbc_mode);
 
     // CPU Speed
     GUI_ConsoleModePrintf(&gb_ioview_cpuspeed_con, 0, 0,
@@ -298,20 +298,20 @@ void Win_GBIOViewerUpdate(void)
     int __if = GB_MemRead8(IF_REG);
     GUI_ConsoleModePrintf(&gb_ioview_irq_con, 0, 1, "       IE IF");
     GUI_ConsoleModePrintf(&gb_ioview_irq_con, 0, 2, "VBLANK [%c][%c]",
-            (__ie & 1) ? CHR_SQUAREBLACK_MID : ' ',
-            (__if & 1) ? CHR_SQUAREBLACK_MID : ' ');
+                          (__ie & 1) ? CHR_SQUAREBLACK_MID : ' ',
+                          (__if & 1) ? CHR_SQUAREBLACK_MID : ' ');
     GUI_ConsoleModePrintf(&gb_ioview_irq_con, 0, 3, "STAT   [%c][%c]",
-            (__ie & 2) ? CHR_SQUAREBLACK_MID : ' ',
-            (__if & 2) ? CHR_SQUAREBLACK_MID : ' ');
+                          (__ie & 2) ? CHR_SQUAREBLACK_MID : ' ',
+                          (__if & 2) ? CHR_SQUAREBLACK_MID : ' ');
     GUI_ConsoleModePrintf(&gb_ioview_irq_con, 0, 4, "TIMER  [%c][%c]",
-            (__ie & 4) ? CHR_SQUAREBLACK_MID : ' ',
-            (__if & 4) ? CHR_SQUAREBLACK_MID : ' ');
+                          (__ie & 4) ? CHR_SQUAREBLACK_MID : ' ',
+                          (__if & 4) ? CHR_SQUAREBLACK_MID : ' ');
     GUI_ConsoleModePrintf(&gb_ioview_irq_con, 0, 5, "SERIAL [%c][%c]",
-            (__ie & 8) ? CHR_SQUAREBLACK_MID : ' ',
-            (__if & 8) ? CHR_SQUAREBLACK_MID : ' ');
+                          (__ie & 8) ? CHR_SQUAREBLACK_MID : ' ',
+                          (__if & 8) ? CHR_SQUAREBLACK_MID : ' ');
     GUI_ConsoleModePrintf(&gb_ioview_irq_con, 0, 6, "JOYPAD [%c][%c]",
-            (__ie & 16) ? CHR_SQUAREBLACK_MID : ' ',
-            (__if & 16) ? CHR_SQUAREBLACK_MID : ' ');
+                          (__ie & 16) ? CHR_SQUAREBLACK_MID : ' ',
+                          (__if & 16) ? CHR_SQUAREBLACK_MID : ' ');
 
     // Clocks
     GUI_ConsoleModePrintf(&gb_ioview_clocks_con, 0, 0, "LY: %d",
@@ -474,7 +474,7 @@ int Win_GBIOViewerCreate(void)
                    315, 184, 13 * FONT_WIDTH + 2, 4 * FONT_HEIGHT, NULL);
 
     GUI_SetTextBox(&gb_ioview_cpuspeed_textbox, &gb_ioview_cpuspeed_con,
-                   212, 244, 28 * FONT_WIDTH,FONT_HEIGHT, NULL);
+                   212, 244, 28 * FONT_WIDTH, FONT_HEIGHT, NULL);
 
     GUI_SetLabel(&gb_ioview_irq_label,
                  418, 62, 13 * FONT_WIDTH + 2, FONT_HEIGHT, "IRQs");

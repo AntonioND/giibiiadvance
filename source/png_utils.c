@@ -33,9 +33,8 @@ int Save_PNG(const char *file_name, int width, int height, void *buffer,
         return 1;
     }
 
-    png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING,
-                                                  NULL, png_err_fn_,
-                                                  png_warn_fn_);
+    png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL,
+                                                  png_err_fn_, png_warn_fn_);
     if (png_ptr == NULL)
     {
         Debug_LogMsgArg("Save_PNG(): libpng error: png_ptr == NULL");
@@ -157,8 +156,8 @@ int Read_PNG(const char *file_name, char **_buffer, int *_width, int *_height)
     }
 
     // Initialize structs
-    png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL,
-                                     png_err_fn_, png_warn_fn_);
+    png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, png_err_fn_,
+                                     png_warn_fn_);
     if (!png_ptr)
     {
         fclose(fp);
@@ -202,11 +201,11 @@ int Read_PNG(const char *file_name, char **_buffer, int *_width, int *_height)
     if (bit_depth == 16)
         png_set_strip_16(png_ptr);
 
-    if ((color_type == PNG_COLOR_TYPE_GRAY) ||
-        (color_type == PNG_COLOR_TYPE_GRAY_ALPHA))
+    if ((color_type == PNG_COLOR_TYPE_GRAY)
+        || (color_type == PNG_COLOR_TYPE_GRAY_ALPHA))
         png_set_gray_to_rgb(png_ptr);
 
-    if(!(color_type & PNG_COLOR_MASK_ALPHA))
+    if (!(color_type & PNG_COLOR_MASK_ALPHA))
         png_set_filler(png_ptr, 0xff, PNG_FILLER_AFTER);
 
     png_read_update_info(png_ptr, info_ptr);
@@ -220,7 +219,7 @@ int Read_PNG(const char *file_name, char **_buffer, int *_width, int *_height)
         return 1;
     }
 
-    row_pointers = (png_bytep *)malloc(sizeof(png_bytep) * height);
+    row_pointers = malloc(sizeof(png_bytep) * height);
     if (row_pointers == NULL)
     {
         Debug_LogMsgArg("Read_PNG(): Couldn't allocate row_pointers");
@@ -231,15 +230,14 @@ int Read_PNG(const char *file_name, char **_buffer, int *_width, int *_height)
 
     for (int y = 0; y < height; y++)
     {
-        row_pointers[y] = (png_byte *)malloc(png_get_rowbytes(png_ptr,
-                                                              info_ptr));
+        row_pointers[y] = malloc(png_get_rowbytes(png_ptr, info_ptr));
         if (row_pointers[y] == NULL)
         {
             Debug_LogMsgArg("Read_PNG(): Couldn't allocate row_pointers[%d]",
                             y);
             png_read_end(png_ptr, NULL);
             fclose(fp);
-            for( ; y >= 0; y --)
+            for (; y >= 0; y--)
                 free(row_pointers[y]);
             free(row_pointers);
             return 1;
@@ -255,7 +253,7 @@ int Read_PNG(const char *file_name, char **_buffer, int *_width, int *_height)
     char *buffer = malloc(width * height * 4);
     if (buffer == NULL)
     {
-        for(int y = 0; y < height; y++)
+        for (int y = 0; y < height; y++)
             free(row_pointers[y]);
         free(row_pointers);
         Debug_LogMsgArg("Read_PNG(): Couldn't allocate buffer for image");

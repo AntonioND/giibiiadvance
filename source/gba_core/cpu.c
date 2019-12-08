@@ -241,8 +241,8 @@ void GBA_CPUSetHalted(s32 value)
     //                      "STOP/HALT ignored.");
     //    GBA_ExecutionBreak();
     //}
-    //gba_halt = 1 => halt
-    //gba_halt = 2 => stop
+    // gba_halt = 1 => halt
+    // gba_halt = 2 => stop
 }
 
 s32 GBA_CPUGetHalted(void)

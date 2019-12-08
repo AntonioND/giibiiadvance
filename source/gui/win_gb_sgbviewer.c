@@ -157,7 +157,7 @@ static void _win_gb_sgbviewer_draw_border(void)
             u32 tile = info & 0xFF;
             u32 *tile_ptr = &SGBInfo.tile_data[((8 * 8 * 4) / 8) * tile];
 
-            u32 pal =  (info >> 10) & 7; // 4 to 7 (officially 4 to 6)
+            u32 pal = (info >> 10) & 7; // 4 to 7 (officially 4 to 6)
             if (pal < 4)
                 pal += 4;
 
@@ -168,7 +168,7 @@ static void _win_gb_sgbviewer_draw_border(void)
 
             for (int y = 0; y < 8; y++)
             {
-                for(int x = 0; x < 8; x++)
+                for (int x = 0; x < 8; x++)
                 {
                     u32 *data = tile_ptr;
                     u32 *data2 = tile_ptr + 16;
@@ -188,7 +188,7 @@ static void _win_gb_sgbviewer_draw_border(void)
                     if (xflip)
                         x_ = x;
                     else
-                        x_ = 7-x;
+                        x_ = 7 - x;
 
                     u32 color = (*data >> x_) & 1;
                     color |= ((((*(data + 1)) >> x_) << 1) & (1 << 1));
@@ -241,7 +241,7 @@ static void _win_gb_sgbviewer_draw_border_zoomed_tile(void)
 
     u32 *tile_ptr = &SGBInfo.tile_data[((8 * 8 * 4) / 8) * tile];
 
-    u32 pal =  (info >> 10) & 7; // 4 to 7 (officially 4 to 6)
+    u32 pal = (info >> 10) & 7; // 4 to 7 (officially 4 to 6)
     if (pal < 4)
         pal += 4;
 
@@ -263,9 +263,9 @@ static void _win_gb_sgbviewer_draw_border_zoomed_tile(void)
             u32 x_ = 7 - x;
 
             u32 color = (*data >> x_) & 1;
-            color |= ( ( ( (*(data + 1)) >> x_) << 1) & (1 << 1));
-            color |= ( ( ( (*data2) >> x_) << 2) & (1 << 2));
-            color |= ( ( ( (*(data2 + 1)) >> x_) << 3) & (1 << 3));
+            color |= ((((*(data + 1)) >> x_) << 1) & (1 << 1));
+            color |= ((((*data2) >> x_) << 2) & (1 << 2));
+            color |= ((((*(data2 + 1)) >> x_) << 3) & (1 << 3));
             color = SGBInfo.palette[pal][color];
 
             for (int i = 0; i < 8; i++)
@@ -299,8 +299,8 @@ static void _win_gb_sgbviewer_draw_border_zoomed_tile(void)
     GUI_Draw_SetDrawingColor(255, 0, 0);
     int l = gb_sgb_border_tilex * 8; // Left
     int t = gb_sgb_border_tiley * 8; // Top
-    int r = l + 7; // Right
-    int b = t + 7; // Bottom
+    int r = l + 7;                   // Right
+    int b = t + 7;                   // Bottom
     GUI_Draw_Rect(gb_sgb_border_buffer, 256, 256, l, r, t, b);
 }
 
@@ -335,9 +335,9 @@ static void _win_gb_sgbviewer_draw_tiles(void)
                     u32 x_ = 7 - x;
 
                     u32 color = (*data >> x_) & 1;
-                    color |= ( ( ( (*(data + 1)) >> x_) << 1) & (1 << 1));
-                    color |= ( ( ( (*data2) >> x_) << 2) & (1 << 2));
-                    color |= ( ( ( (*(data2 + 1)) >> x_) << 3) & (1 << 3));
+                    color |= ((((*(data + 1)) >> x_) << 1) & (1 << 1));
+                    color |= ((((*data2) >> x_) << 2) & (1 << 2));
+                    color |= ((((*(data2 + 1)) >> x_) << 3) & (1 << 3));
                     color = SGBInfo.palette[gb_sgb_tiles_selected_pal][color];
 
                     int temp = ((y + (j << 3)) * 128) + (x + (i << 3));
@@ -371,9 +371,9 @@ static void _win_gb_sgbviewer_draw_tiles_zoomed_tile(void)
             u32 x_ = 7 - x;
 
             u32 color = (*data >> x_) & 1;
-            color |= ( ( ( (*(data + 1)) >> x_) << 1) & (1 << 1));
-            color |= ( ( ( (*data2) >> x_) << 2) & (1 << 2));
-            color |= ( ( ( (*(data2 + 1)) >> x_) << 3) & (1 << 3));
+            color |= ((((*(data + 1)) >> x_) << 1) & (1 << 1));
+            color |= ((((*data2) >> x_) << 2) & (1 << 2));
+            color |= ((((*(data2 + 1)) >> x_) << 3) & (1 << 3));
             color = SGBInfo.palette[gb_sgb_tiles_selected_pal][color];
 
             for (int i = 0; i < 8; i++)
@@ -395,8 +395,8 @@ static void _win_gb_sgbviewer_draw_tiles_zoomed_tile(void)
     GUI_Draw_SetDrawingColor(255, 0, 0);
     int l = (gb_sgb_tiles_selected_index % 16) * 8; // Left
     int t = (gb_sgb_tiles_selected_index / 16) * 8; // Top
-    int r = l + 7; // Right
-    int b = t + 7; // Bottom
+    int r = l + 7;                                  // Right
+    int b = t + 7;                                  // Bottom
     GUI_Draw_Rect(gb_sgb_tiles_buffer, 128, 128, l, r, t, b);
 }
 
@@ -434,7 +434,7 @@ static void _win_gb_sgbviewer_draw_atf(void)
                         }
 
                         int temp = ((y + (j << 3)) * (160 + 1))
-                                 + (x + (i << 3));
+                                   + (x + (i << 3));
 
                         color = SGBInfo.palette[pal][color];
 
@@ -453,8 +453,8 @@ static void _win_gb_sgbviewer_draw_atf(void)
     GUI_Draw_SetDrawingColor(255, 0, 0);
     int l = gb_sgb_atf_selected_x * 8; // Left
     int t = gb_sgb_atf_selected_y * 8; // Top
-    int r = l + 8; // Right
-    int b = t + 8; // Bottom
+    int r = l + 8;                     // Right
+    int b = t + 8;                     // Bottom
     GUI_Draw_Rect(gb_sgb_atf_buffer, 160 + 1, 144 + 1, l, r, t, b);
     l++;
     r--;
@@ -463,7 +463,7 @@ static void _win_gb_sgbviewer_draw_atf(void)
     GUI_Draw_Rect(gb_sgb_atf_buffer, 160 + 1, 144 + 1, l, r, t, b);
 
     u32 pal = SGBInfo.ATF_list[gb_sgb_atf_selected_index]
-                        [(20 * gb_sgb_atf_selected_y) + gb_sgb_atf_selected_x];
+                              [(20 * gb_sgb_atf_selected_y) + gb_sgb_atf_selected_x];
 
     GUI_ConsoleClear(&gb_sgbview_atf_con);
 
@@ -482,7 +482,7 @@ static void _win_gb_sgbviewer_draw_pal(void)
     GUI_ConsoleClear(&gb_sgbview_pal_con);
 
     u32 color = SGBInfo.palette[gb_sgb_pal_selected_pal]
-                                                    [gb_sgb_pal_selected_color];
+                               [gb_sgb_pal_selected_color];
     GUI_ConsoleModePrintf(&gb_sgbview_pal_con, 0, 0,
                           "Color: P%d[%d]\n"
                           "RGB: %d,%d,%d",
@@ -492,7 +492,7 @@ static void _win_gb_sgbviewer_draw_pal(void)
 
     memset(gb_sgb_pal_buffer, 192, 160 * 80 * 3);
 
-    for (int i = 0; i < 8*16; i++)
+    for (int i = 0; i < 8 * 16; i++)
     {
         if (!(((i / 16) < 4) && ((i % 16) >= 4)))
         {
@@ -528,9 +528,9 @@ static void _win_gb_sgbviewer_draw_pal(void)
     // Mark in buffer the selected color
     GUI_Draw_SetDrawingColor(255, 0, 0);
     int l = gb_sgb_pal_selected_color * 10; // Left
-    int t = gb_sgb_pal_selected_pal * 10; // Top
-    int r = l + 9; // Right
-    int b = t + 9; // Bottom
+    int t = gb_sgb_pal_selected_pal * 10;   // Top
+    int r = l + 9;                          // Right
+    int b = t + 9;                          // Bottom
     GUI_Draw_Rect(gb_sgb_pal_buffer, 160, 80, l, r, t, b);
     l++;
     r--;
@@ -552,14 +552,14 @@ static void _win_gb_sgbviewer_packetdata_update(void)
     while (numpackets--)
     {
         GUI_ConsoleModePrintf(&gb_sgbview_packet_con, 0, i + 2,
-            "%d : %02X%02X %02X%02X %02X%02X %02X%02X "
-            "%02X%02X %02X%02X %02X%02X %02X%02X",
-            i + 1, SGBInfo.data[i][0], SGBInfo.data[i][1], SGBInfo.data[i][2],
-            SGBInfo.data[i][3], SGBInfo.data[i][4], SGBInfo.data[i][5],
-            SGBInfo.data[i][6], SGBInfo.data[i][7], SGBInfo.data[i][8],
-            SGBInfo.data[i][9], SGBInfo.data[i][10], SGBInfo.data[i][11],
-            SGBInfo.data[i][12], SGBInfo.data[i][13], SGBInfo.data[i][14],
-            SGBInfo.data[i][15]);
+                "%d : %02X%02X %02X%02X %02X%02X %02X%02X "
+                "%02X%02X %02X%02X %02X%02X %02X%02X",
+                i + 1, SGBInfo.data[i][0], SGBInfo.data[i][1],
+                SGBInfo.data[i][2], SGBInfo.data[i][3], SGBInfo.data[i][4],
+                SGBInfo.data[i][5], SGBInfo.data[i][6], SGBInfo.data[i][7],
+                SGBInfo.data[i][8], SGBInfo.data[i][9], SGBInfo.data[i][10],
+                SGBInfo.data[i][11], SGBInfo.data[i][12], SGBInfo.data[i][13],
+                SGBInfo.data[i][14], SGBInfo.data[i][15]);
 
         i++;
     }
@@ -772,9 +772,9 @@ static void _win_gb_sgbviewer_border_dump_btn_callback(void)
             u32 info = SGBInfo.tile_map[(j * 32) + i];
 
             u32 tile = info & 0xFF;
-            u32 * tile_ptr = &SGBInfo.tile_data[((8 * 8 * 4) / 8) * tile];
+            u32 *tile_ptr = &SGBInfo.tile_data[((8 * 8 * 4) / 8) * tile];
 
-            u32 pal =  (info >> 10) & 7; // 4 to 7 (officially 4 to 6)
+            u32 pal = (info >> 10) & 7; // 4 to 7 (officially 4 to 6)
             if (pal < 4)
                 pal += 4;
 
@@ -787,7 +787,6 @@ static void _win_gb_sgbviewer_border_dump_btn_callback(void)
             {
                 for (int x = 0; x < 8; x++)
                 {
-
                     u32 *data = tile_ptr;
                     u32 *data2 = tile_ptr + 16;
 
@@ -806,7 +805,7 @@ static void _win_gb_sgbviewer_border_dump_btn_callback(void)
                     if (xflip)
                         x_ = x;
                     else
-                        x_ = 7-x;
+                        x_ = 7 - x;
 
                     u32 color = (*data >> x_) & 1;
                     color |= ((((*(data + 1)) >> x_) << 1) & (1 << 1));
@@ -888,7 +887,7 @@ static void _win_gb_sgbviewer_tiles_dump_btn_callback(void)
                     data += y << 1;
                     data2 += y << 1;
 
-                    u32 x_ = 7-x;
+                    u32 x_ = 7 - x;
 
                     u32 color = (*data >> x_) & 1;
                     color |= ((((*(data + 1)) >> x_) << 1) & (1 << 1));
@@ -906,7 +905,7 @@ static void _win_gb_sgbviewer_tiles_dump_btn_callback(void)
                     tiles_buff[temp * 4 + 3] = 0xFF;
                 }
             }
-            }
+        }
     }
 
     char *name = FU_GetNewTimestampFilename("gb_sgb_tiles");
@@ -958,7 +957,7 @@ static void _win_gb_sgbviewer_atf_dump_btn_callback(void)
                         }
 
                         int temp = ((y + (j << 3)) * (160 + 1))
-                                 + (x + (i << 3));
+                                   + (x + (i << 3));
 
                         color = SGBInfo.palette[pal][color];
 
@@ -991,7 +990,7 @@ static void _win_gb_sgbviewer_pal_dump_btn_callback(void)
         return;
 
     char *buf = malloc(160 * 80 * 4);
-    if(buf == NULL)
+    if (buf == NULL)
         return;
 
     // Draw as normal

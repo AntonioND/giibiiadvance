@@ -104,12 +104,12 @@ void Win_GBPalViewerUpdate(void)
 
     GUI_ConsoleClear(&gb_palview_con);
 
-    u32 r,g,b;
+    u32 r, g, b;
     GB_Debug_GetPalette(gb_palview_sprpal, gb_palview_selectedindex / 4,
                         gb_palview_selectedindex % 4, &r, &g, &b);
     u16 value = ((r >> 3) & 0x1F)
-              | (((g >> 3) & 0x1F) << 5)
-              | (((b >> 3) & 0x1F) << 10);
+                | (((g >> 3) & 0x1F) << 5)
+                | (((b >> 3) & 0x1F) << 10);
 
     GUI_ConsoleModePrintf(&gb_palview_con, 0, 0, "Value: 0x%04X", value);
 
@@ -133,7 +133,7 @@ void Win_GBPalViewerUpdate(void)
                           1 + ((i % 4) * 20), 19 + ((i % 4) * 20),
                           1 + ((i / 4) * 20), 19 + ((i / 4) * 20));
         // SPR
-        GB_Debug_GetPalette(1, i / 4,i % 4, &r, &g, &b);
+        GB_Debug_GetPalette(1, i / 4, i % 4, &r, &g, &b);
         GUI_Draw_SetDrawingColor(r, g, b);
         GUI_Draw_FillRect(gb_pal_spr_buffer,
                           GB_PAL_BUFFER_WIDTH, GB_PAL_BUFFER_HEIGHT,
@@ -151,8 +151,8 @@ void Win_GBPalViewerUpdate(void)
 
     int ll = (gb_palview_selectedindex % 4) * 20; // Left
     int tt = (gb_palview_selectedindex / 4) * 20; // Top
-    int rr = ll + 20; // Right
-    int bb = tt + 20; // Bottom
+    int rr = ll + 20;                             // Right
+    int bb = tt + 20;                             // Bottom
     GUI_Draw_Rect(buf, GB_PAL_BUFFER_WIDTH, GB_PAL_BUFFER_HEIGHT,
                   ll, rr, tt, bb);
     ll++;
@@ -271,7 +271,6 @@ static void _win_gb_palviewer_dump_btn_callback(void)
     char *name_bg = FU_GetNewTimestampFilename("gb_palette_bg");
     Save_PNG(name_bg, GB_PAL_BUFFER_WIDTH, GB_PAL_BUFFER_HEIGHT,
              buffer_temp, 0);
-
 
     src = gb_pal_spr_buffer;
     dst = buffer_temp;

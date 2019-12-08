@@ -14,9 +14,9 @@
 #include "general.h"
 #include "interrupts.h"
 #include "memory.h"
+#include "ppu.h"
 #include "ppu_dmg.h"
 #include "ppu_gbc.h"
-#include "ppu.h"
 #include "video.h"
 
 //----------------------------------------------------------------
@@ -56,7 +56,7 @@ void GB_PPUInit(void)
                 GameBoy.Emulator.ScreenMode = 1;
                 GameBoy.Emulator.CurrentScanLine = 0;
                 GameBoy.Memory.IO_Ports[STAT_REG - 0xFF00] =
-                                                GameBoy.Emulator.ScreenMode;
+                        GameBoy.Emulator.ScreenMode;
                 break;
             }
             case HW_SGB:
@@ -66,7 +66,7 @@ void GB_PPUInit(void)
                 GameBoy.Emulator.ScreenMode = 1;
                 GameBoy.Emulator.CurrentScanLine = 0;
                 GameBoy.Memory.IO_Ports[STAT_REG - 0xFF00] =
-                                                GameBoy.Emulator.ScreenMode;
+                        GameBoy.Emulator.ScreenMode;
                 break;
             }
             case HW_GBC:
@@ -77,7 +77,7 @@ void GB_PPUInit(void)
                 GameBoy.Emulator.ScreenMode = 1;
                 GameBoy.Emulator.CurrentScanLine = 0;
                 GameBoy.Memory.IO_Ports[STAT_REG - 0xFF00] =
-                                                GameBoy.Emulator.ScreenMode;
+                        GameBoy.Emulator.ScreenMode;
                 break;
             }
             default:
@@ -86,7 +86,7 @@ void GB_PPUInit(void)
                 GameBoy.Emulator.ScreenMode = 1;
                 GameBoy.Emulator.CurrentScanLine = 0;
                 GameBoy.Memory.IO_Ports[STAT_REG - 0xFF00] =
-                                                GameBoy.Emulator.ScreenMode;
+                        GameBoy.Emulator.ScreenMode;
                 Debug_ErrorMsg("GB_PPUInit():\n"
                                "Unknown hardware");
             }
@@ -119,7 +119,7 @@ void GB_PPUInit(void)
                 GameBoy.Emulator.ScreenMode = 1;
                 GameBoy.Emulator.CurrentScanLine = 0;
                 GameBoy.Memory.IO_Ports[STAT_REG - 0xFF00] =
-                                        GameBoy.Emulator.ScreenMode | BIT(2);
+                        GameBoy.Emulator.ScreenMode | BIT(2);
                 break;
             }
             case HW_SGB:
@@ -129,7 +129,7 @@ void GB_PPUInit(void)
                 GameBoy.Emulator.ScreenMode = 1;
                 GameBoy.Emulator.CurrentScanLine = 0;
                 GameBoy.Memory.IO_Ports[STAT_REG - 0xFF00] =
-                                        GameBoy.Emulator.ScreenMode;
+                        GameBoy.Emulator.ScreenMode;
                 break;
             }
             case HW_GBC:
@@ -140,7 +140,7 @@ void GB_PPUInit(void)
                 GameBoy.Emulator.ScreenMode = 1;
                 GameBoy.Emulator.CurrentScanLine = 0x90;
                 GameBoy.Memory.IO_Ports[STAT_REG - 0xFF00] =
-                                        GameBoy.Emulator.ScreenMode;
+                        GameBoy.Emulator.ScreenMode;
                 break;
             }
             default:
@@ -149,7 +149,7 @@ void GB_PPUInit(void)
                 GameBoy.Emulator.ScreenMode = 0;
                 GameBoy.Emulator.CurrentScanLine = 0;
                 GameBoy.Memory.IO_Ports[STAT_REG - 0xFF00] =
-                                        GameBoy.Emulator.ScreenMode;
+                        GameBoy.Emulator.ScreenMode;
                 Debug_ErrorMsg("GB_PPUInit():\n"
                                "Unknown hardware");
             }
@@ -167,7 +167,7 @@ void GB_PPUInit(void)
         {
             GameBoy.Emulator.PPUUpdate = GB_PPUUpdateClocks_DMG;
             GameBoy.Emulator.PPUClocksToNextEvent =
-                                                GB_PPUGetClocksToNextEvent_DMG;
+                    GB_PPUGetClocksToNextEvent_DMG;
             break;
         }
         default:
@@ -179,7 +179,7 @@ void GB_PPUInit(void)
         {
             GameBoy.Emulator.PPUUpdate = GB_PPUUpdateClocks_GBC;
             GameBoy.Emulator.PPUClocksToNextEvent =
-                                                GB_PPUGetClocksToNextEvent_GBC;
+                    GB_PPUGetClocksToNextEvent_GBC;
             break;
         }
     }

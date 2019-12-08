@@ -20,7 +20,6 @@
 #include "sgb.h"
 #include "sound.h"
 #include "video.h"
-#include "video.h"
 
 extern _GB_CONTEXT_ GameBoy;
 extern _SGB_INFO_ SGBInfo;
@@ -57,7 +56,7 @@ void GB_EnableRealColors(int enable)
     gb_realcolors = enable;
 }
 
-static u32 pal_red,pal_green,pal_blue;
+static u32 pal_red, pal_green, pal_blue;
 
 void GB_ConfigGetPalette(u8 *red, u8 *green, u8 *blue)
 {
@@ -75,7 +74,7 @@ void GB_ConfigSetPalette(u8 red, u8 green, u8 blue)
 
 void GB_ConfigLoadPalette(void)
 {
-    GB_SetPalette(pal_red,pal_green,pal_blue);
+    GB_SetPalette(pal_red, pal_green, pal_blue);
 }
 
 // -------------------------------------------------------------
@@ -95,11 +94,11 @@ static u32 gbpalettes[4] = {
 
 void GB_SetPalette(u32 red, u32 green, u32 blue)
 {
-     gbpalettes[0] = GB_RGB(red >> 3, green >> 3, blue >> 3);
-     gbpalettes[1] = GB_RGB(((red * 2) / 3) >> 3, ((green * 2) / 3) >> 3,
-                            ((blue * 2) / 3) >> 3);
-     gbpalettes[2] = GB_RGB((red / 3) >> 3, (green / 3) >> 3, (blue / 3) >> 3);
-     gbpalettes[3] = GB_RGB(0, 0, 0);
+    gbpalettes[0] = GB_RGB(red >> 3, green >> 3, blue >> 3);
+    gbpalettes[1] = GB_RGB(((red * 2) / 3) >> 3, ((green * 2) / 3) >> 3,
+                           ((blue * 2) / 3) >> 3);
+    gbpalettes[2] = GB_RGB((red / 3) >> 3, (green / 3) >> 3, (blue / 3) >> 3);
+    gbpalettes[3] = GB_RGB(0, 0, 0);
 }
 
 u32 GB_GameBoyGetGray(u32 number)
@@ -183,7 +182,7 @@ void GB_ScreenDrawScanline(s32 y)
         bool increase_win = false;
 
         // Draw BG + window
-        for (int x = 0; x < 160; x ++)
+        for (int x = 0; x < 160; x++)
         {
             u32 color = bg_pal[0];
             bool window_draw = 0;
@@ -220,7 +219,7 @@ void GB_ScreenDrawScanline(s32 y)
                             x_ = 7 - ((x_ + 7) & 7);
 
                             color = ((*data >> x_) & 1)
-                                  | ((((*(data + 1)) >> x_) << 1) & 2);
+                                    | ((((*(data + 1)) >> x_) << 1) & 2);
 
                             bg_color0 = (color == 0);
 
@@ -252,8 +251,8 @@ void GB_ScreenDrawScanline(s32 y)
 
                 x_ = 7 - (x_ & 7);
 
-                color = ((*data >> x_) & 1)
-                      | ((((*(data + 1)) >> x_) << 1) & 2);
+                color =
+                        ((*data >> x_) & 1) | ((((*(data + 1)) >> x_) << 1) & 2);
 
                 bg_color0 = (color == 0);
 
@@ -289,7 +288,7 @@ void GB_ScreenDrawScanline(s32 y)
 
                 s32 real_y = GB_Sprite->Y - 16;
 
-                if (( real_y <= y) && ((real_y + spriteheight) > y))
+                if ((real_y <= y) && ((real_y + spriteheight) > y))
                 {
                     if (spritesdrawn < 10)
                     {
@@ -327,10 +326,10 @@ void GB_ScreenDrawScanline(s32 y)
 
                         // Lets draw the sprite...
                         s32 real_x = GB_Sprite->X - 8;
-                        for (int x__ = 0; x__ < 8; x__ ++)
+                        for (int x__ = 0; x__ < 8; x__++)
                         {
                             u32 color = ((*data >> x__) & 1)
-                                      | ((((*(data + 1)) >> x__) << 1) & 2);
+                                        | ((((*(data + 1)) >> x__) << 1) & 2);
 
                             if (color != 0) // Color 0 is transparent
                             {
@@ -343,7 +342,7 @@ void GB_ScreenDrawScanline(s32 y)
 
                                 // Flip X
                                 if (GB_Sprite->Info & (1 << 5))
-                                    x_ = x_+ x__;
+                                    x_ = x_ + x__;
                                 else
                                     x_ += 7 - x__;
 
@@ -351,18 +350,18 @@ void GB_ScreenDrawScanline(s32 y)
                                 {
                                     // If BG has priority and it is enabled...
                                     if ((GB_Sprite->Info & (1 << 7))
-                                            && (lcd_reg & (1 << 0)))
+                                        && (lcd_reg & (1 << 0)))
                                     {
                                         if (gb_framebuffer_bgcolor0[x_])
                                         {
                                             gb_framebuffer[gb_cur_fb]
-                                                    [base_index + x_] = color;
+                                                          [base_index + x_] = color;
                                         }
                                     }
                                     else
                                     {
                                         gb_framebuffer[gb_cur_fb]
-                                                    [base_index + x_] = color;
+                                                      [base_index + x_] = color;
                                     }
                                 }
                             }
@@ -459,7 +458,7 @@ void GBC_ScreenDrawScanline(s32 y)
         bool increase_win = false;
 
         // Draw BG + window
-        for (int x = 0; x < 160; x ++)
+        for (int x = 0; x < 160; x++)
         {
             u32 color = GB_RGB(31, 31, 31);
             bool window_draw = 0;
@@ -481,7 +480,7 @@ void GBC_ScreenDrawScanline(s32 y)
                             u32 x_ = x - wx_reg;
 
                             u32 tile_location = ((y_ >> 3) * 32)
-                                              + ((x_ + 7) >> 3);
+                                                + ((x_ + 7) >> 3);
                             u32 tile = wintilemap[tile_location];
                             tileinfo = wintilemap[tile_location + 0x2000];
 
@@ -512,13 +511,13 @@ void GBC_ScreenDrawScanline(s32 y)
                                 x_ = 7 - ((x_ + 7) & 7);
 
                             color = ((*data >> x_) & 1)
-                                  | ((((*(data + 1)) >> x_) << 1) & 2);
+                                    | ((((*(data + 1)) >> x_) << 1) & 2);
 
                             color0 = (color == 0);
 
                             u32 pal_ram_index = (pal_index * 8) + (2 * color);
                             color = GameBoy.Emulator.bg_pal[pal_ram_index]
-                              | (GameBoy.Emulator.bg_pal[pal_ram_index + 1] << 8);
+                                    | (GameBoy.Emulator.bg_pal[pal_ram_index + 1] << 8);
                             window_draw = true;
                         }
                     }
@@ -559,14 +558,14 @@ void GBC_ScreenDrawScanline(s32 y)
                     x_ = 7 - (x_ & 7);
 
                 color = ((*data >> x_) & 1)
-                      | ((((*(data + 1)) >> x_) << 1) & 2);
+                        | ((((*(data + 1)) >> x_) << 1) & 2);
                 color0 = (color == 0);
 
                 u32 pal_index = tileinfo & 7;
 
                 u32 pal_ram_index = (pal_index * 8) + (2 * color);
                 color = GameBoy.Emulator.bg_pal[pal_ram_index]
-                      | (GameBoy.Emulator.bg_pal[pal_ram_index + 1] << 8);
+                        | (GameBoy.Emulator.bg_pal[pal_ram_index + 1] << 8);
             }
 
             gb_framebuffer[gb_cur_fb][base_index + x] = color;
@@ -649,7 +648,7 @@ void GBC_ScreenDrawScanline(s32 y)
 
                         u32 pal_mem_pointer = pal_index + (2 * color);
                         color = GameBoy.Emulator.spr_pal[pal_mem_pointer]
-                          | (GameBoy.Emulator.spr_pal[pal_mem_pointer + 1] << 8);
+                                | (GameBoy.Emulator.spr_pal[pal_mem_pointer + 1] << 8);
 
                         s32 x_ = real_x;
 
@@ -665,13 +664,13 @@ void GBC_ScreenDrawScanline(s32 y)
                             if ((lcd_reg & (1 << 0)) == 0) // Master priority
                             {
                                 gb_framebuffer[gb_cur_fb][base_index + x_] =
-                                                                        color;
+                                        color;
                             }
                             else if (gb_framebuffer_bgpriority[x_]) // BG priority
                             {
                                 if (gb_framebuffer_bgcolor0[x_])
                                     gb_framebuffer[gb_cur_fb][base_index + x_] =
-                                                                        color;
+                                            color;
                             }
                             else // OAM priority
                             {
@@ -680,13 +679,13 @@ void GBC_ScreenDrawScanline(s32 y)
                                     if (gb_framebuffer_bgcolor0[x_])
                                     {
                                         gb_framebuffer[gb_cur_fb]
-                                                    [base_index + x_] = color;
+                                                      [base_index + x_] = color;
                                     }
                                 }
                                 else
                                 {
                                     gb_framebuffer[gb_cur_fb]
-                                                    [base_index + x_] = color;
+                                                  [base_index + x_] = color;
                                 }
                             }
                         }
@@ -806,7 +805,7 @@ void GBC_GB_ScreenDrawScanline(s32 y)
 
                                 u32 y_ = window_current_line;
                                 u32 x_ = x - wx_reg;
-                                u32 tile = wintilemap[((y_>>3) * 32)
+                                u32 tile = wintilemap[((y_ >> 3) * 32)
                                                       + ((x_ + 7) >> 3)];
 
                                 // If tile base is 0x8800
@@ -825,7 +824,7 @@ void GBC_GB_ScreenDrawScanline(s32 y)
                                 x_ = 7 - ((x_ + 7) & 7);
 
                                 color = ((*data >> x_) & 1)
-                                      | ((((*(data + 1)) >> x_) << 1) & 2);
+                                        | ((((*(data + 1)) >> x_) << 1) & 2);
 
                                 bg_color0 = (color == 0);
 
@@ -859,7 +858,7 @@ void GBC_GB_ScreenDrawScanline(s32 y)
                     x_ = 7 - (x_ & 7);
 
                     color = ((*data >> x_) & 1)
-                          | ((((*(data + 1)) >> x_) << 1) & 2);
+                            | ((((*(data + 1)) >> x_) << 1) & 2);
 
                     bg_color0 = (color == 0);
 
@@ -884,7 +883,7 @@ void GBC_GB_ScreenDrawScanline(s32 y)
         if (lcd_reg & (1 << 1))
         {
             s32 spriteheight = 8 << ((lcd_reg & (1 << 2)) != 0);
-            _GB_OAM_ *GB_OAM = (void*)mem->ObjAttrMem;
+            _GB_OAM_ *GB_OAM = (void *)mem->ObjAttrMem;
             _GB_OAM_ENTRY_ *GB_Sprite;
 
             // For 8x16 sprites, last bit is ignored
@@ -936,14 +935,14 @@ void GBC_GB_ScreenDrawScanline(s32 y)
                     if (GB_Sprite->Info & (1 << 6))
                         data += (spriteheight - y + real_y - 1) * 2;
                     else
-                        data += (y -real_y) * 2;
+                        data += (y - real_y) * 2;
 
                     // Lets draw the sprite...
                     s32 real_x = GB_Sprite->X - 8;
                     for (int x__ = 0; x__ < 8; x__++)
                     {
                         u32 color = ((*data >> x__) & 1)
-                                  | ((((*(data + 1)) >> x__) << 1) & 2);
+                                    | ((((*(data + 1)) >> x__) << 1) & 2);
 
                         if (color != 0) // Color 0 is transparent
                         {
@@ -956,7 +955,7 @@ void GBC_GB_ScreenDrawScanline(s32 y)
 
                             // Flip X
                             if (GB_Sprite->Info & (1 << 5))
-                                x_ = x_+ x__;
+                                x_ = x_ + x__;
                             else
                                 x_ += 7 - x__;
 
@@ -964,7 +963,7 @@ void GBC_GB_ScreenDrawScanline(s32 y)
                             {
                                 // If BG has priority and it is enabled...
                                 if ((GB_Sprite->Info & (1 << 7))
-                                                        && (lcd_reg & (1 << 0)))
+                                    && (lcd_reg & (1 << 0)))
                                 {
                                     if (gb_framebuffer_bgcolor0[x_])
                                         gb_framebuffer[gb_cur_fb][base_index + x_] = color;
@@ -1073,7 +1072,7 @@ void SGB_ScreenDrawBorderInside(void)
             u32 info = SGBInfo.tile_map[(j * 32) + i];
 
             u32 *tile_ptr =
-                        &SGBInfo.tile_data[((8 * 8 * 4) / 8) * (info & 0xFF)];
+                    &SGBInfo.tile_data[((8 * 8 * 4) / 8) * (info & 0xFF)];
 
             u32 pal = (info >> 10) & 7; // 4 to 7 (officially 4 to 6)
             if (pal < 4)
@@ -1086,8 +1085,8 @@ void SGB_ScreenDrawBorderInside(void)
 
             for (int y = 0; y < 8; y++)
             {
-                u32 * data = tile_ptr;
-                u32 * data2 = tile_ptr + 16;
+                u32 *data = tile_ptr;
+                u32 *data2 = tile_ptr + 16;
 
                 if (yflip)
                 {
@@ -1198,7 +1197,7 @@ void SGB_ScreenDrawScanline(s32 y)
             for (int x = 0; x < 160; x++)
             {
                 gb_framebuffer[gb_cur_fb][base_index + x + 48] =
-                                                            GB_RGB(31, 31, 31);
+                        GB_RGB(31, 31, 31);
             }
 
             if (y == 143)
@@ -1249,7 +1248,7 @@ void SGB_ScreenDrawScanline(s32 y)
         bool increase_win = false;
 
         // Draw BG + window
-        for (int x = 0; x < 160; x ++)
+        for (int x = 0; x < 160; x++)
         {
             u32 color = SGB_GetPixelColor(x, y, bg_pal[0]);
             bool window_draw = 0;
@@ -1285,7 +1284,7 @@ void SGB_ScreenDrawScanline(s32 y)
                             x_ = 7 - ((x_ + 7) & 7);
 
                             color = ((*data >> x_) & 1)
-                                  | ((((*(data + 1)) >> x_) << 1) & 2);
+                                    | ((((*(data + 1)) >> x_) << 1) & 2);
 
                             bg_color0 = (color == 0);
 
@@ -1298,8 +1297,8 @@ void SGB_ScreenDrawScanline(s32 y)
 
             if ((lcd_reg & (1 << 0)) && (!window_draw)) // BG
             {
-                u32 x_ = x+scx_reg;
-                u32 y_ = y+scy_reg;
+                u32 x_ = x + scx_reg;
+                u32 y_ = y + scy_reg;
 
                 u32 tile = bgtilemap[(((y_ >> 3) & 31) * 32)
                                      + ((x_ >> 3) & 31)];
@@ -1319,7 +1318,7 @@ void SGB_ScreenDrawScanline(s32 y)
                 x_ = 7 - (x_ & 7);
 
                 color = ((*data >> x_) & 1)
-                      | ((((*(data + 1)) >> x_) << 1) & 2);
+                        | ((((*(data + 1)) >> x_) << 1) & 2);
 
                 bg_color0 = (color == 0);
 
@@ -1365,7 +1364,7 @@ void SGB_ScreenDrawScanline(s32 y)
                 }
             }
 
-            for (int a = 39; a >= 0; a --)
+            for (int a = 39; a >= 0; a--)
             {
                 // TODO: Fix.
                 // When sprites with different x coordinate values overlap, the
@@ -1378,7 +1377,7 @@ void SGB_ScreenDrawScanline(s32 y)
 
                 GB_Sprite = &GB_OAM->Sprite[a];
 
-                s32 real_y = (GB_Sprite->Y-16);
+                s32 real_y = (GB_Sprite->Y - 16);
 
                 if ((real_y <= y) && ((real_y + spriteheight) > y))
                 {
@@ -1394,10 +1393,10 @@ void SGB_ScreenDrawScanline(s32 y)
 
                     // Let's draw the sprite...
                     s32 real_x = GB_Sprite->X - 8;
-                    for (int x__ = 0; x__ < 8; x__ ++)
+                    for (int x__ = 0; x__ < 8; x__++)
                     {
                         u32 color = ((*data >> x__) & 1)
-                                  | ((((*(data + 1)) >> x__) << 1) & 2);
+                                    | ((((*(data + 1)) >> x__) << 1) & 2);
 
                         if (color != 0) // Color 0 is transparent
                         {
@@ -1405,7 +1404,7 @@ void SGB_ScreenDrawScanline(s32 y)
 
                             // Flip X
                             if (GB_Sprite->Info & (1 << 5))
-                                x_ = x_+ x__;
+                                x_ = x_ + x__;
                             else
                                 x_ += 7 - x__;
 
@@ -1427,13 +1426,13 @@ void SGB_ScreenDrawScanline(s32 y)
                                     if (gb_framebuffer_bgcolor0[x_])
                                     {
                                         gb_framebuffer[gb_cur_fb]
-                                                [base_index + x_ + 48] = color;
+                                                      [base_index + x_ + 48] = color;
                                     }
                                 }
                                 else
                                 {
                                     gb_framebuffer[gb_cur_fb]
-                                                [base_index + x_ + 48] = color;
+                                                  [base_index + x_ + 48] = color;
                                 }
                             }
                         }
@@ -1559,7 +1558,7 @@ static void gb_scr_writebuffer_dmg_cgb_realcolors(char *buffer)
             int g = (data >> 5) & 0x1F;
             int b = (data >> 10) & 0x1F;
 
-            int _r =  ((r * 13 + g * 2 + b) >> 1);
+            int _r = ((r * 13 + g * 2 + b) >> 1);
             int _g = (g * 3 + b) << 1;
             int _b = ((r * 3 + g * 2 + b * 11) >> 1);
             GB_Screen_WritePixel(buffer, i, j, _r, _g, _b);
@@ -1584,7 +1583,7 @@ static void gb_scr_writebuffer_dmg_cgb_blur_realcolors(char *buffer)
             int r = (r1 + r2) >> 1;
             int g = (g1 + g2) >> 1;
             int b = (b1 + b2) >> 1;
-            int _r =  ((r * 13 + g * 2 + b) >> 1);
+            int _r = ((r * 13 + g * 2 + b) >> 1);
             int _g = (g * 3 + b) << 1;
             int _b = ((r * 3 + g * 2 + b * 11) >> 1);
             GB_Screen_WritePixel(buffer, i, j, _r, _g, _b);
@@ -1599,12 +1598,12 @@ void GB_Screen_WriteBuffer_24RGB(char *buffer)
     draw_to_buf_fn draw_fn = NULL;
 
     if ((GameBoy.Emulator.HardwareType == HW_SGB)
-            || (GameBoy.Emulator.HardwareType == HW_SGB2))
+        || (GameBoy.Emulator.HardwareType == HW_SGB2))
     {
         draw_fn = &gb_scr_writebuffer_sgb;
     }
     else if ((GameBoy.Emulator.HardwareType == HW_GBA)
-                || (GameBoy.Emulator.HardwareType == HW_GBA_SP))
+             || (GameBoy.Emulator.HardwareType == HW_GBA_SP))
     {
         if (gb_blur)
             draw_fn = &gb_scr_writebuffer_dmg_cgb_blur;
@@ -1638,7 +1637,7 @@ void GB_Screen_WriteBuffer_24RGB(char *buffer)
         int w, h;
 
         if ((GameBoy.Emulator.HardwareType == HW_SGB)
-                || (GameBoy.Emulator.HardwareType == HW_SGB2))
+            || (GameBoy.Emulator.HardwareType == HW_SGB2))
         {
             w = 256;
             h = 224;
@@ -1708,14 +1707,14 @@ void GB_Screenshot(void)
     u32 *buf_temp = calloc(width * height * 4, 1);
     int last_fb = gb_cur_fb ^ 1;
 
-    for (int y = 0; y < height; y ++)
+    for (int y = 0; y < height; y++)
     {
-        for (int x = 0; x < width; x ++)
+        for (int x = 0; x < width; x++)
         {
             u32 data = gb_framebuffer[last_fb][y * 256 + x];
             buf_temp[y * width + x] = ((data & 0x1F) << 3)
-                                    | ((((data >> 5) & 0x1F) << 3) << 8)
-                                    | ((((data >> 10) & 0x1F) << 3) << 16);
+                                      | ((((data >> 5) & 0x1F) << 3) << 8)
+                                      | ((((data >> 10) & 0x1F) << 3) << 16);
         }
     }
     Save_PNG(name, width, height, buf_temp, 0);

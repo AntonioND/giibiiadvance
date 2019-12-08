@@ -7,7 +7,7 @@
 #ifndef SOUND_UTILS__
 #define SOUND_UTILS__
 
-typedef void (Sound_CallbackPointer)(void *, long);
+typedef void(Sound_CallbackPointer)(void *, long);
 
 void Sound_Init(void);
 

@@ -181,7 +181,7 @@ void GB_SerialWriteSC(int reference_clocks, int value)
         GameBoy.Emulator.serial_transfered_bits = 0;
     }
 
-    GameBoy.Memory.IO_Ports[SC_REG - 0xFF00]  = value;
+    GameBoy.Memory.IO_Ports[SC_REG - 0xFF00] = value;
     GB_CPUBreakLoop();
 }
 
@@ -204,7 +204,8 @@ static u32 GB_RecvNone(void)
 // Screen is 20x18 tiles -> 20x18x16 bytes -> 20x18x16 / 0x280 = 9 (+ 1 empty)
 #define GBPRINTER_NUMPACKETS (10)
 
-typedef struct {
+typedef struct
+{
     int state;
     int output;
 
@@ -230,7 +231,7 @@ int printer_file_number = 0;
 static void GB_PrinterPrint(void)
 {
     char *endbuffer = malloc(20 * 18 * 16);
-    memset(endbuffer,0,20 * 18 * 16);
+    memset(endbuffer, 0, 20 * 18 * 16);
 
     char *ptr = endbuffer;
 
@@ -281,7 +282,7 @@ static void GB_PrinterPrint(void)
     u32 buf_temp[160 * 144 * 4];
     memset(buf_temp, 0, sizeof(buf_temp));
     const u32 gb_pal_colors[4][3] = {
-        {255, 255, 255}, {168, 168, 168}, {80, 80, 80}, {0, 0, 0}
+        { 255, 255, 255 }, { 168, 168, 168 }, { 80, 80, 80 }, { 0, 0, 0 }
     };
 
     for (int y = 0; y < 144; y++)
@@ -290,18 +291,18 @@ static void GB_PrinterPrint(void)
         {
             int tile = ((y >> 3) * 20) + (x >> 3);
 
-            char * tileptr = &endbuffer[tile * 16];
+            char *tileptr = &endbuffer[tile * 16];
 
             tileptr += (y & 7) * 2;
 
             int x_ = 7 - (x & 7);
 
-            int color = ((*tileptr >> x_) & 1)
-                      | ((((*(tileptr + 1)) >> x_) << 1) & 2);
+            int color =
+                    ((*tileptr >> x_) & 1) | ((((*(tileptr + 1)) >> x_) << 1) & 2);
 
             buf_temp[y * 160 + x] = (gb_pal_colors[color][0] << 16)
-                                  | (gb_pal_colors[color][1] << 8)
-                                  | gb_pal_colors[color][2];
+                                    | (gb_pal_colors[color][1] << 8)
+                                    | gb_pal_colors[color][2];
         }
     }
 
@@ -340,9 +341,9 @@ static int GB_PrinterChecksumIsCorrect(void)
 {
     // Checksum
     u32 checksum = (GB_Printer.end[0] & 0xFF)
-                 | ((GB_Printer.end[1] & 0xFF) << 8);
+                   | ((GB_Printer.end[1] & 0xFF) << 8);
     u32 result = GB_Printer.cmd
-               + GB_Printer.packetcompressed[GB_Printer.curpacket];
+                 + GB_Printer.packetcompressed[GB_Printer.curpacket];
 
     if (GB_Printer.size > 0)
     {
@@ -356,7 +357,8 @@ static int GB_PrinterChecksumIsCorrect(void)
     if (result != checksum)
     {
         Debug_DebugMsgArg("GB Printer packet corrupted.\n"
-                          "Obtained: 0x%04x (0x%04x)", result, checksum);
+                          "Obtained: 0x%04x (0x%04x)",
+                          result, checksum);
     }
 
     return (result == checksum);
@@ -371,7 +373,7 @@ static void GB_PrinterExecute(void)
             break;
 
         case 0x02: // End - Print
-            //data = palettes?, but... what do they do?
+            // data = palettes?, but... what do they do?
             GB_PrinterPrint();
             break;
 
@@ -425,7 +427,7 @@ static void GB_SendPrinter(u32 data)
 
             GB_Printer.dataindex = 0;
 
-            if(GB_Printer.size > 0)
+            if (GB_Printer.size > 0)
             {
                 GB_Printer.data = malloc(GB_Printer.size);
                 GB_Printer.state = 6;
@@ -516,7 +518,7 @@ void GB_SerialInit(void)
 
     if (GameBoy.Emulator.enable_boot_rom) // Unknown
     {
-        switch(GameBoy.Emulator.HardwareType)
+        switch (GameBoy.Emulator.HardwareType)
         {
             case HW_GB:
             case HW_GBP: // TODO: Can't verify until PPU is emulated correctly
@@ -583,7 +585,6 @@ void GB_SerialInit(void)
                 break;
         }
     }
-
 
     GameBoy.Emulator.serial_device = SERIAL_NONE;
     GB_SerialPlug(EmulatorConfig.serial_device);

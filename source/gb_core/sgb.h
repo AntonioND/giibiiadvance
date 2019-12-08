@@ -21,7 +21,8 @@
 
 #include "gameboy.h"
 
-typedef struct {
+typedef struct
+{
     u32 delay; // for delay between frames (not used for now)
 
     u32 sending;

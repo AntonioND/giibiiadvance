@@ -4,7 +4,8 @@
 //
 // GiiBiiAdvance - GBA/GB emulator
 
-extern "C" {
+extern "C"
+{
 #include <stdlib.h>
 
 #include "config.h"
@@ -159,7 +160,8 @@ extern "C" int Webcam_GetFrame(void)
         if (channels != 3)
         {
             Debug_ErrorMsgArg("Invalid camera output.\n"
-                              "Channels = %d", channels);
+                              "Channels = %d",
+                              channels);
             return -1;
         }
 
@@ -171,7 +173,7 @@ extern "C" int Webcam_GetFrame(void)
             for (int i = 0; i < GBCAM_SENSOR_W; i++)
             {
                 int index = ((j * camera_zoomfactor) * w * step)
-                          + ((i * camera_zoomfactor) * 3);
+                            + ((i * camera_zoomfactor) * 3);
 
                 int r = p[index + 0];
                 int g = p[index + 1];

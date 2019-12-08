@@ -88,7 +88,7 @@ void Debug_ErrorMsgArg(const char *msg, ...)
     char dest[2000];
 
     va_list args;
-    va_start(args,msg);
+    va_start(args, msg);
     vsnprintf(dest, sizeof(dest), msg, args);
     va_end(args);
     dest[sizeof(dest) - 1] = '\0';
@@ -98,7 +98,7 @@ void Debug_ErrorMsgArg(const char *msg, ...)
     Win_MainShowMessage(0, dest);
 }
 
-void Debug_DebugMsg(const char * msg)
+void Debug_DebugMsg(const char *msg)
 {
     if (EmulatorConfig.debug_msg_enable == 0)
         return;
@@ -124,12 +124,12 @@ void ConsoleReset(void)
     console_buffer[0] = '\0';
 }
 
-void ConsolePrint(const char * msg, ...)
+void ConsolePrint(const char *msg, ...)
 {
     va_list args;
     char buffer[1024];
 
-    va_start(args,msg);
+    va_start(args, msg);
     vsnprintf(buffer, sizeof(buffer), msg, args);
     va_end(args);
 
@@ -168,12 +168,12 @@ static void _sys_info_reset(void)
                      "\n"
                      "SDL_GetPlatform(): %s\n\n"
                      "SDL_GetCPUCount(): %d (Number of logical CPU cores)\n"
-#if SDL_VERSION_ATLEAST(2,0,1)
+#if SDL_VERSION_ATLEAST(2, 0, 1)
                      "SDL_GetSystemRAM(): %d MB\n"
 #endif
                      "SDL_GetCPUCacheLineSize(): %d kB (Cache L1)\n\n",
                      SDL_GetPlatform(), SDL_GetCPUCount(),
-#if SDL_VERSION_ATLEAST(2,0,1)
+#if SDL_VERSION_ATLEAST(2, 0, 1)
                      SDL_GetSystemRAM(),
 #endif
                      SDL_GetCPUCacheLineSize());
@@ -212,7 +212,7 @@ static void _sys_info_reset(void)
                      "  Time left: %d:%02d:%02d\n"
                      "  Percentage: %3d%%\n"
                      "\n",
-                     st_string,hours,min,secs,pct);
+                     st_string, hours, min, secs, pct);
 #ifdef ENABLE_OPENGL
     _sys_info_printf("OpenGL information:\n"
                      "-------------------\n"

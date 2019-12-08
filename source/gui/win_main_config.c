@@ -8,8 +8,8 @@
 
 #include <SDL.h>
 
-#include "win_main_config.h"
 #include "win_main.h"
+#include "win_main_config.h"
 #include "win_utils.h"
 
 #include "../config.h"
@@ -395,7 +395,7 @@ void Win_MainCreateConfigWindow(void)
                        _win_main_config_frameskip_radbtn_callback);
     GUI_SetRadioButton(&mainwindow_configwin_gameboy_frameskip_2_radbtn,
                        12 + 19 * FONT_WIDTH + 24, 126, 2 * FONT_WIDTH, 18,
-                       "2", 2,  2, EmulatorConfig.frameskip == 2,
+                       "2", 2, 2, EmulatorConfig.frameskip == 2,
                        _win_main_config_frameskip_radbtn_callback);
     GUI_SetRadioButton(&mainwindow_configwin_gameboy_frameskip_3_radbtn,
                        12 + 21 * FONT_WIDTH + 30, 126, 2 * FONT_WIDTH, 18,
@@ -464,8 +464,8 @@ void Win_MainCreateConfigWindow(void)
                        _win_main_config_hardware_type_radbtn_callback);
     GUI_SetRadioButton(&mainwindow_configwin_gameboy_hard_type_gb_radbtn,
                        12 + 20 * FONT_WIDTH + 30, 210, 4 * FONT_WIDTH, 18,
-                      "DMG", 3, 0, EmulatorConfig.hardware_type == 0,
-                      _win_main_config_hardware_type_radbtn_callback);
+                       "DMG", 3, 0, EmulatorConfig.hardware_type == 0,
+                       _win_main_config_hardware_type_radbtn_callback);
     GUI_SetRadioButton(&mainwindow_configwin_gameboy_hard_type_gbp_radbtn,
                        12, 231, 4 * FONT_WIDTH, 18,
                        "MGB", 3, 1, EmulatorConfig.hardware_type == 1,
@@ -509,7 +509,7 @@ void Win_MainCreateConfigWindow(void)
                        _win_main_config_serial_device_radbtn_callback);
     // Game Boy serial to another Game Boy not implemented, disable it.
     GUI_RadioButtonSetEnabled(
-                &mainwindow_configwin_gameboy_serial_device_gameboy_radbtn, 0);
+            &mainwindow_configwin_gameboy_serial_device_gameboy_radbtn, 0);
 
     GUI_SetCheckBox(&mainwindow_configwin_gameboy_enableblur_checkbox,
                     12, 302, -1, 12, "Enable blur", EmulatorConfig.enableblur,

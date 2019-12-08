@@ -19,9 +19,9 @@
 #include "gb_main.h"
 #include "general.h"
 #include "interrupts.h"
+#include "memory.h"
 #include "memory_dmg.h"
 #include "memory_gbc.h"
-#include "memory.h"
 #include "ppu.h"
 #include "serial.h"
 #include "sgb.h"
@@ -110,7 +110,7 @@ void GB_MemInit(void)
 
     for (int i = 0; i < GameBoy.Emulator.ROM_Banks; i++)
         mem->ROM_Switch[i] = (u8 *)GameBoy.Emulator.Rom_Pointer
-                           + (16 * 1024 * i);
+                             + (16 * 1024 * i);
 
     memset(mem->VideoRAM, 0, 0x4000);
 
@@ -198,7 +198,7 @@ void GB_MemInit(void)
 
 void GB_MemEnd(void)
 {
-    //Nothing to do
+    // Nothing to do
 }
 
 //----------------------------------------------------------------
@@ -284,7 +284,8 @@ u32 GB_MemReadDMA8(u32 address) // Not verified yet - different for GBC and DMG
         default:
             Debug_ErrorMsgArg("GB_MemReadDMA8() Read address %04X\n"
                               "PC: %04X\n"
-                              "ROM: %d", address, GameBoy.CPU.R16.PC,
+                              "ROM: %d",
+                              address, GameBoy.CPU.R16.PC,
                               GameBoy.Memory.selected_rom);
             return GB_MemReadReg8(address & 0xFFFF);
     }
@@ -358,7 +359,8 @@ u32 GB_MemReadHDMA8(u32 address)
         default:
             Debug_ErrorMsgArg("GB_MemReadHDMA8() Read address %04X\n"
                               "PC: %04X\n"
-                              "ROM: %d", address, GameBoy.CPU.R16.PC,
+                              "ROM: %d",
+                              address, GameBoy.CPU.R16.PC,
                               GameBoy.Memory.selected_rom);
             return GB_MemReadReg8(address & 0xFFFF);
     }

@@ -4,8 +4,8 @@
 //
 // GiiBiiAdvance - GBA/GB emulator
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "../build_options.h"
 #include "../debug_utils.h"
@@ -49,7 +49,8 @@ int GBA_InitRom(void *bios_ptr, void *rom_ptr, u32 romsize)
     {
         Debug_ErrorMsgArg("Rom too big!\n"
                           "Size = 0x%08X bytes\n"
-                          "Max = 0x02000000 bytes", romsize);
+                          "Max = 0x02000000 bytes",
+                          romsize);
         GBA_ROM_SIZE = 0x02000000;
     }
     else
@@ -177,7 +178,7 @@ u32 GBA_RunFor(s32 totalclocks)
         if (GBA_DMAisWorking())
         {
             executedclocks = GBA_DMAGetExtraClocksElapsed()
-                           + clocks_to_next_event;
+                             + clocks_to_next_event;
         }
         else
         {
@@ -185,13 +186,13 @@ u32 GBA_RunFor(s32 totalclocks)
             {
                 // 2S + 1N cycles ?
                 executedclocks = GBA_MemoryGetAccessCycles(0, 1, CPU.OldPC)
-                               + GBA_MemoryGetAccessCyclesNoSeq(1, CPU.R[R_PC])
-                               + GBA_MemoryGetAccessCyclesSeq(1, CPU.R[R_PC]);
+                                 + GBA_MemoryGetAccessCyclesNoSeq(1, CPU.R[R_PC])
+                                 + GBA_MemoryGetAccessCyclesSeq(1, CPU.R[R_PC]);
             }
             else
             {
                 residualclocks = GBA_Execute(clocks_to_next_event);
-                executedclocks = clocks_to_next_event-residualclocks;
+                executedclocks = clocks_to_next_event - residualclocks;
             }
 
             has_executed = executedclocks && !GBA_CPUGetHalted();
@@ -199,11 +200,11 @@ u32 GBA_RunFor(s32 totalclocks)
 
         clocks_to_next_event = GBA_UpdateScreenTimings(executedclocks);
         int tmp = GBA_DMAUpdate(executedclocks);
-        clocks_to_next_event = min(tmp,clocks_to_next_event);
+        clocks_to_next_event = min(tmp, clocks_to_next_event);
         tmp = GBA_TimersUpdate(executedclocks);
-        clocks_to_next_event = min(tmp,clocks_to_next_event);
+        clocks_to_next_event = min(tmp, clocks_to_next_event);
         tmp = GBA_SoundUpdate(executedclocks);
-        clocks_to_next_event = min(tmp,clocks_to_next_event);
+        clocks_to_next_event = min(tmp, clocks_to_next_event);
         // Check if any other event is going to happen before
 
         totalclocks -= executedclocks;
@@ -221,7 +222,7 @@ u32 GBA_RunFor(s32 totalclocks)
         if (GBA_DMAisWorking())
         {
             executedclocks = GBA_DMAGetExtraClocksElapsed()
-                           + clocks_to_next_event;
+                             + clocks_to_next_event;
         }
         else
         {
@@ -229,13 +230,13 @@ u32 GBA_RunFor(s32 totalclocks)
             {
                 // 2S + 1N cycles ?
                 executedclocks = GBA_MemoryGetAccessCycles(0, 1, CPU.OldPC)
-                               + GBA_MemoryGetAccessCyclesNoSeq(1, CPU.R[R_PC])
-                               + GBA_MemoryGetAccessCyclesSeq(1, CPU.R[R_PC]);
+                                 + GBA_MemoryGetAccessCyclesNoSeq(1, CPU.R[R_PC])
+                                 + GBA_MemoryGetAccessCyclesSeq(1, CPU.R[R_PC]);
             }
             else
             {
                 residualclocks = GBA_Execute(totalclocks);
-                executedclocks = totalclocks-residualclocks;
+                executedclocks = totalclocks - residualclocks;
             }
 
             has_executed = executedclocks && !GBA_CPUGetHalted();
@@ -264,7 +265,6 @@ u32 GBA_RunFor(s32 totalclocks)
 
     return has_executed;
 }
-
 
 void GBA_DebugStep(void)
 {

@@ -20,8 +20,8 @@
 #include "win_utils.h"
 
 #include "../gba_core/gba.h"
-#include "../gba_core/memory.h"
 #include "../gba_core/gba_debug_video.h"
+#include "../gba_core/memory.h"
 
 //------------------------------------------------------------------------------
 
@@ -102,14 +102,14 @@ void Win_GBASprViewerUpdate(void)
     GUI_ConsoleClear(&gba_sprview_con);
 
     static const int spr_size[4][4][2] = { // Shape, size, (x,y)
-        { {8, 8}, {16, 16}, {32, 32}, {64, 64} }, // Square
-        { {16, 8}, {32, 8}, {32, 16}, {64, 32} }, // Horizontal
-        { {8, 16}, {8, 32}, {16, 32}, {32, 64} }, // Vertical
-        { {0, 0}, {0, 0}, {0, 0}, {0, 0} } // Prohibited
+        { { 8, 8 }, { 16, 16 }, { 32, 32 }, { 64, 64 } }, // Square
+        { { 16, 8 }, { 32, 8 }, { 32, 16 }, { 64, 32 } }, // Horizontal
+        { { 8, 16 }, { 8, 32 }, { 16, 32 }, { 32, 64 } }, // Vertical
+        { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }        // Prohibited
     };
 
     _oam_spr_entry_t *spr =
-                &(((_oam_spr_entry_t *)Mem.oam)[gba_sprview_selected_spr]);
+            &(((_oam_spr_entry_t *)Mem.oam)[gba_sprview_selected_spr]);
 
     u16 attr0 = spr->attr0;
     u16 attr1 = spr->attr1;
@@ -129,12 +129,13 @@ void Win_GBASprViewerUpdate(void)
     u16 tilebaseno = attr2 & 0x3FF;
 
     // Tiles need double space in 256 colors mode
-    if(attr0 & BIT(13)) tilebaseno >>= 1;
+    if (attr0 & BIT(13))
+        tilebaseno >>= 1;
 
     int vflip = (attr1 & BIT(13));
     int hflip = (attr1 & BIT(12));
     u16 prio = (attr2 >> 10) & 3;
-    u16 palno = (attr0 & BIT(13)) ?  0 : (attr2 >> 12);
+    u16 palno = (attr0 & BIT(13)) ? 0 : (attr2 >> 12);
     int doublesize = (attr0 & BIT(9));
     static const char *spr_mode[4] = {
         "Normal", "Transp.", "Window", "Prohibited"
@@ -196,8 +197,8 @@ void Win_GBASprViewerUpdate(void)
 
         int l = (sprnum_in_page % 8) * (64 + 16) + 16; // Left
         int t = (sprnum_in_page / 8) * (64 + 16) + 16; // Top
-        int r = l + 63; // Right
-        int b = t + 63; // Bottom
+        int r = l + 63;                                // Right
+        int b = t + 63;                                // Bottom
         l--;
         r++;
         t--;
@@ -222,7 +223,7 @@ void Win_GBASprViewerUpdate(void)
                           "Matrix index: %d", gba_sprview_selected_matrix);
 
     _oam_matrix_entry_t *mat =
-        &(((_oam_matrix_entry_t *)Mem.oam)[gba_sprview_selected_matrix & 0x1F]);
+            &(((_oam_matrix_entry_t *)Mem.oam)[gba_sprview_selected_matrix & 0x1F]);
 
     int pa = (s32)(s16)(mat[gba_sprview_selected_matrix].pa);
     int pb = (s32)(s16)(mat[gba_sprview_selected_matrix].pb);
@@ -230,9 +231,9 @@ void Win_GBASprViewerUpdate(void)
     int pd = (s32)(s16)(mat[gba_sprview_selected_matrix].pd);
 
     GUI_ConsoleModePrintf(&gba_sprview_matrixinfo_con, 0, 2,
-                "     [%04X,%04X]", (u16)pa, (u16)pb);
+                          "     [%04X,%04X]", (u16)pa, (u16)pb);
     GUI_ConsoleModePrintf(&gba_sprview_matrixinfo_con, 0, 3,
-                "     [%04X,%04X]", (u16)pc, (u16)pd);
+                          "     [%04X,%04X]", (u16)pc, (u16)pd);
 
     char text_a[7], text_b[7], text_c[7], text_d[7];
     snprintf(text_a, sizeof(text_a), "%.8f", ((float)pa) / (1 << 8));
@@ -240,9 +241,9 @@ void Win_GBASprViewerUpdate(void)
     snprintf(text_c, sizeof(text_c), "%.8f", ((float)pc) / (1 << 8));
     snprintf(text_d, sizeof(text_d), "%.8f", ((float)pd) / (1 << 8));
     GUI_ConsoleModePrintf(&gba_sprview_matrixinfo_con, 0, 5,
-            "   (%s,%s)", text_a, text_b);
+                          "   (%s,%s)", text_a, text_b);
     GUI_ConsoleModePrintf(&gba_sprview_matrixinfo_con, 0, 6,
-            "   (%s,%s)", text_c, text_d);
+                          "   (%s,%s)", text_c, text_d);
 }
 
 //----------------------------------------------------------------
@@ -365,9 +366,9 @@ static void _win_gba_sprviewer_page_dump_btn_callback(void)
                                GBA_SPR_ALLSPR_BUFFER_WIDTH,
                                GBA_SPR_ALLSPR_BUFFER_HEIGHT);
 
-    char *name = (gba_sprview_selected_page == 0) ?
-                            FU_GetNewTimestampFilename("gba_sprite_page0") :
-                            FU_GetNewTimestampFilename("gba_sprite_page1");
+    char *name = (gba_sprview_selected_page == 0)
+                         ? FU_GetNewTimestampFilename("gba_sprite_page0")
+                         : FU_GetNewTimestampFilename("gba_sprite_page1");
 
     Save_PNG(name, GBA_SPR_ALLSPR_BUFFER_WIDTH, GBA_SPR_ALLSPR_BUFFER_HEIGHT,
              pagebuf, 1);
@@ -410,10 +411,10 @@ static void _win_gba_sprviewer_zoomed_dump_btn_callback(void)
         return;
 
     static const int spr_size[4][4][2] = { // Shape, size, (x,y)
-        { {8, 8}, {16, 16}, {32, 32}, {64, 64} }, // Square
-        { {16, 8}, {32, 8}, {32, 16}, {64, 32} }, // Horizontal
-        { {8, 16}, {8, 32}, {16, 32}, {32, 64} }, // Vertical
-        { {0, 0}, {0, 0}, {0, 0}, {0, 0} } // Prohibited
+        { { 8, 8 }, { 16, 16 }, { 32, 32 }, { 64, 64 } }, // Square
+        { { 16, 8 }, { 32, 8 }, { 32, 16 }, { 64, 32 } }, // Horizontal
+        { { 8, 16 }, { 8, 32 }, { 16, 32 }, { 32, 64 } }, // Vertical
+        { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }        // Prohibited
     };
 
     _oam_spr_entry_t *spr =
@@ -460,9 +461,9 @@ int Win_GBASprViewerCreate(void)
                   gba_spr_zoomed_buffer, NULL);
 
     GUI_SetRadioButton(&gba_sprview_page0_radbtn, 668, 290, 12 * FONT_WIDTH, 24,
-                  "  0 -  63", 0, 0, 1, _win_gba_sprviewer_radbtn_callback);
+                       "  0 -  63", 0, 0, 1, _win_gba_sprviewer_radbtn_callback);
     GUI_SetRadioButton(&gba_sprview_page1_radbtn, 668, 321, 12 * FONT_WIDTH, 24,
-                  " 64 - 127", 0, 1, 0, _win_gba_sprviewer_radbtn_callback);
+                       " 64 - 127", 0, 1, 0, _win_gba_sprviewer_radbtn_callback);
 
     GUI_SetButton(&gba_sprview_zoomed_spr_dumpbtn, 668, 352,
                   FONT_WIDTH * 13, FONT_HEIGHT * 2, "Dump zoomed",

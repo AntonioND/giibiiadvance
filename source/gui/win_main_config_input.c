@@ -221,13 +221,14 @@ static void _win_main_config_input_update_window(void)
         }
 
         GUI_ConsoleModePrintf(&mwciw_win_status_con, 0, 0,
-                              "Setting key [ %s ] for player %d ...",
-                              name, win_main_config_selected_player);
+                              "Setting key [ %s ] for player %d ...", name,
+                              win_main_config_selected_player);
     }
 
     GUI_SetButtonText(&mwciw_change_disable_btn,
-                      Input_PlayerGetEnabled(win_main_config_selected_player) ?
-                          "Disable player" : "Enable player");
+                      Input_PlayerGetEnabled(win_main_config_selected_player)
+                              ? "Disable player"
+                              : "Enable player");
 
     if (Input_PlayerGetController(win_main_config_selected_player) == -1)
     {
@@ -285,11 +286,11 @@ static void _win_main_config_input_update_window(void)
         Input_GetJoystickElementName(name, sizeof(name), btn);
         GUI_SetLabelCaption(&mwciw_selected_up_label, name);
         btn = Input_ControlsGetKey(win_main_config_selected_player, P_KEY_RIGHT);
-        Input_GetJoystickElementName(name, sizeof(name),btn);
+        Input_GetJoystickElementName(name, sizeof(name), btn);
         GUI_SetLabelCaption(&mwciw_selected_right_label, name);
         btn = Input_ControlsGetKey(win_main_config_selected_player, P_KEY_DOWN);
         Input_GetJoystickElementName(name, sizeof(name), btn);
-        GUI_SetLabelCaption(&mwciw_selected_down_label,name);
+        GUI_SetLabelCaption(&mwciw_selected_down_label, name);
         btn = Input_ControlsGetKey(win_main_config_selected_player, P_KEY_LEFT);
         Input_GetJoystickElementName(name, sizeof(name), btn);
         GUI_SetLabelCaption(&mwciw_selected_left_label, name);
@@ -424,8 +425,8 @@ static int _win_main_config_input_inputget_callback(SDL_Event *e)
             if (e->jbutton.which == controller)
             {
                 int btn = KEYCODE_IS_AXIS
-                        + ((e->jaxis.value > 0) ? KEYCODE_POSITIVE_AXIS : 0)
-                        + e->jaxis.axis;
+                          + ((e->jaxis.value > 0) ? KEYCODE_POSITIVE_AXIS : 0)
+                          + e->jaxis.axis;
 
                 if (win_main_config_is_changing_button < P_NUM_KEYS)
                 {
@@ -700,30 +701,30 @@ void Win_MainCreateConfigInputWindow(void)
                   _win_main_config_change_default_btn_callback);
 
     GUI_SetLabel(&mwciw_selected_a_label, 18 + 6 + 8 * FONT_WIDTH,
-                 78 + 6, 20 * FONT_WIDTH,FONT_HEIGHT, "-");
+                 78 + 6, 20 * FONT_WIDTH, FONT_HEIGHT, "-");
     GUI_SetLabel(&mwciw_selected_b_label, 18 + 6 + 8 * FONT_WIDTH,
-                 108 + 6, 20 * FONT_WIDTH,FONT_HEIGHT, "-");
+                 108 + 6, 20 * FONT_WIDTH, FONT_HEIGHT, "-");
     GUI_SetLabel(&mwciw_selected_l_label, 18 + 6 + 8 * FONT_WIDTH,
-                 138 + 6, 20 * FONT_WIDTH,FONT_HEIGHT, "-");
+                 138 + 6, 20 * FONT_WIDTH, FONT_HEIGHT, "-");
     GUI_SetLabel(&mwciw_selected_r_label, 18 + 6 + 8 * FONT_WIDTH,
-                 168 + 6, 20 * FONT_WIDTH,FONT_HEIGHT, "-");
+                 168 + 6, 20 * FONT_WIDTH, FONT_HEIGHT, "-");
     GUI_SetLabel(&mwciw_selected_start_label, 18 + 6 + 8 * FONT_WIDTH,
-                 198 + 6, 20 * FONT_WIDTH,FONT_HEIGHT, "-");
+                 198 + 6, 20 * FONT_WIDTH, FONT_HEIGHT, "-");
     GUI_SetLabel(&mwciw_selected_select_label, 18 + 6 + 8 * FONT_WIDTH,
-                 228 + 6, 20 * FONT_WIDTH,FONT_HEIGHT, "-");
+                 228 + 6, 20 * FONT_WIDTH, FONT_HEIGHT, "-");
 
     GUI_SetLabel(&mwciw_selected_up_label,
                  (256 * 2 - 50) / 2 + 6 + 8 * FONT_WIDTH,
-                 78 + 6, 20 * FONT_WIDTH,FONT_HEIGHT, "-");
+                 78 + 6, 20 * FONT_WIDTH, FONT_HEIGHT, "-");
     GUI_SetLabel(&mwciw_selected_right_label,
                  (256 * 2 - 50) / 2 + 6 + 8 * FONT_WIDTH, 108 + 6,
-                 20 * FONT_WIDTH,FONT_HEIGHT, "-");
+                 20 * FONT_WIDTH, FONT_HEIGHT, "-");
     GUI_SetLabel(&mwciw_selected_down_label,
                  (256 * 2 - 50) / 2 + 6 + 8 * FONT_WIDTH,
                  138 + 6, 20 * FONT_WIDTH, FONT_HEIGHT, "-");
     GUI_SetLabel(&mwciw_selected_left_label,
                  (256 * 2 - 50) / 2 + 6 + 8 * FONT_WIDTH,
-                 168 + 6, 20 * FONT_WIDTH,FONT_HEIGHT, "-");
+                 168 + 6, 20 * FONT_WIDTH, FONT_HEIGHT, "-");
 
     GUI_SetTextBox(&mwciw_win_controller_textbox, &mwciw_win_controller_con,
                    7, 270, 64 * FONT_WIDTH, 4 * FONT_HEIGHT, NULL);

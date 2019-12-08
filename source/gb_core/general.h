@@ -7,7 +7,7 @@
 #ifndef GB_GENERAL__
 #define GB_GENERAL__
 
-void GB_PowerOn(void); // This function doesn't allocate anything
+void GB_PowerOn(void);  // This function doesn't allocate anything
 void GB_PowerOff(void); // This function doesn't free anything
 
 void GB_HardReset(void);

@@ -68,7 +68,7 @@ void GB_CPUBreakLoop(void)
 
 //----------------------------------------------------------------
 
-//This is used for CPU, IRQ and GBC DMA
+// This is used for CPU, IRQ and GBC DMA
 
 static int gb_cpu_clock_counter = 0;
 
@@ -98,16 +98,16 @@ static int GB_ClocksForNextEvent(void)
 {
     int clocks_to_next_event = GB_TimersGetClocksToNextEvent();
 
-    clocks_to_next_event = min(clocks_to_next_event,
-                               GB_PPUGetClocksToNextEvent());
-    clocks_to_next_event = min(clocks_to_next_event,
-                               GB_SerialGetClocksToNextEvent());
-    clocks_to_next_event = min(clocks_to_next_event,
-                               GB_DMAGetClocksToNextEvent());
-    clocks_to_next_event = min(clocks_to_next_event,
-                               GB_SoundGetClocksToNextEvent());
-    clocks_to_next_event = min(clocks_to_next_event,
-                               GB_SoundGetClocksToNextEvent());
+    clocks_to_next_event =
+            min(clocks_to_next_event, GB_PPUGetClocksToNextEvent());
+    clocks_to_next_event =
+            min(clocks_to_next_event, GB_SerialGetClocksToNextEvent());
+    clocks_to_next_event =
+            min(clocks_to_next_event, GB_DMAGetClocksToNextEvent());
+    clocks_to_next_event =
+            min(clocks_to_next_event, GB_SoundGetClocksToNextEvent());
+    clocks_to_next_event =
+            min(clocks_to_next_event, GB_SoundGetClocksToNextEvent());
 
     // SGB?, CAMERA?
 
@@ -188,7 +188,7 @@ void GB_CPUInit(void)
                 GameBoy.CPU.R16.HL = 0xC060;
                 break;
             case HW_GBC: // Verified on hardware
-                if(GameBoy.Emulator.game_supports_gbc)
+                if (GameBoy.Emulator.game_supports_gbc)
                 {
                     GameBoy.CPU.R16.AF = 0x1180;
                     GameBoy.CPU.R16.BC = 0x0000;
@@ -205,7 +205,7 @@ void GB_CPUInit(void)
                 break;
             case HW_GBA:
             case HW_GBA_SP: // Verified on hardware
-                if(GameBoy.Emulator.game_supports_gbc)
+                if (GameBoy.Emulator.game_supports_gbc)
                 {
                     GameBoy.CPU.R16.AF = 0x1180;
                     GameBoy.CPU.R16.BC = 0x0100;
@@ -259,404 +259,443 @@ void _gb_break_to_debugger(void)
 //----------------------------------------------------------------
 
 // LD r16,nnnn - 3
-#define gb_ld_r16_nnnn(reg_hi, reg_low) {           \
-    GB_CPUClockCounterAdd(4);                       \
-    reg_low = GB_MemRead8(cpu->R16.PC++);           \
-    GB_CPUClockCounterAdd(4);                       \
-    reg_hi = GB_MemRead8(cpu->R16.PC++);            \
-    GB_CPUClockCounterAdd(4);                       \
-}
+#define gb_ld_r16_nnnn(reg_hi, reg_low)                                        \
+    {                                                                          \
+        GB_CPUClockCounterAdd(4);                                              \
+        reg_low = GB_MemRead8(cpu->R16.PC++);                                  \
+        GB_CPUClockCounterAdd(4);                                              \
+        reg_hi = GB_MemRead8(cpu->R16.PC++);                                   \
+        GB_CPUClockCounterAdd(4);                                              \
+    }
 
 // LD r8,nn - 2
-#define gb_ld_r8_nn(reg8) {                         \
-    GB_CPUClockCounterAdd(4);                       \
-    reg8 = GB_MemRead8(cpu->R16.PC++);              \
-    GB_CPUClockCounterAdd(4);                       \
-}
+#define gb_ld_r8_nn(reg8)                                                      \
+    {                                                                          \
+        GB_CPUClockCounterAdd(4);                                              \
+        reg8 = GB_MemRead8(cpu->R16.PC++);                                     \
+        GB_CPUClockCounterAdd(4);                                              \
+    }
 
 // LD [r16],r8 - 2
-#define gb_ld_ptr_r16_r8(reg16, r8) {               \
-    GB_CPUClockCounterAdd(4);                       \
-    GB_MemWrite8(reg16,r8);                         \
-    GB_CPUClockCounterAdd(4);                       \
-}
+#define gb_ld_ptr_r16_r8(reg16, r8)                                            \
+    {                                                                          \
+        GB_CPUClockCounterAdd(4);                                              \
+        GB_MemWrite8(reg16, r8);                                               \
+        GB_CPUClockCounterAdd(4);                                              \
+    }
 
 // LD r8,[r16] - 2
-#define gb_ld_r8_ptr_r16(r8, reg16) {               \
-    GB_CPUClockCounterAdd(4);                       \
-    r8 = GB_MemRead8(reg16);                        \
-    GB_CPUClockCounterAdd(4);                       \
-}
+#define gb_ld_r8_ptr_r16(r8, reg16)                                            \
+    {                                                                          \
+        GB_CPUClockCounterAdd(4);                                              \
+        r8 = GB_MemRead8(reg16);                                               \
+        GB_CPUClockCounterAdd(4);                                              \
+    }
 
 // INC r16 - 2
-#define gb_inc_r16(reg16) {                         \
-    reg16 = (reg16 + 1) & 0xFFFF;                   \
-    GB_CPUClockCounterAdd(8);                       \
-}
+#define gb_inc_r16(reg16)                                                      \
+    {                                                                          \
+        reg16 = (reg16 + 1) & 0xFFFF;                                          \
+        GB_CPUClockCounterAdd(8);                                              \
+    }
 
 // DEC r16 - 2
-#define gb_dec_r16(reg16) {                         \
-    reg16 = (reg16 - 1) & 0xFFFF;                   \
-    GB_CPUClockCounterAdd(8);                       \
-}
+#define gb_dec_r16(reg16)                                                      \
+    {                                                                          \
+        reg16 = (reg16 - 1) & 0xFFFF;                                          \
+        GB_CPUClockCounterAdd(8);                                              \
+    }
 
 // INC r8 - 1
-#define gb_inc_r8(reg8) {                           \
-    cpu->R16.AF &= ~F_SUBTRACT;                     \
-    cpu->F.H = ((reg8 & 0xF) == 0xF);               \
-    reg8++;                                         \
-    cpu->F.Z = (reg8 == 0);                         \
-    GB_CPUClockCounterAdd(4);                       \
-}
+#define gb_inc_r8(reg8)                                                        \
+    {                                                                          \
+        cpu->R16.AF &= ~F_SUBTRACT;                                            \
+        cpu->F.H = ((reg8 & 0xF) == 0xF);                                      \
+        reg8++;                                                                \
+        cpu->F.Z = (reg8 == 0);                                                \
+        GB_CPUClockCounterAdd(4);                                              \
+    }
 
 // DEC r8 - 1
-#define gb_dec_r8(reg8) {                           \
-    cpu->R16.AF |= F_SUBTRACT;                      \
-    cpu->F.H = ((reg8 & 0xF) == 0x0);               \
-    reg8--;                                         \
-    cpu->F.Z = (reg8 == 0);                         \
-    GB_CPUClockCounterAdd(4);                       \
-}
+#define gb_dec_r8(reg8)                                                        \
+    {                                                                          \
+        cpu->R16.AF |= F_SUBTRACT;                                             \
+        cpu->F.H = ((reg8 & 0xF) == 0x0);                                      \
+        reg8--;                                                                \
+        cpu->F.Z = (reg8 == 0);                                                \
+        GB_CPUClockCounterAdd(4);                                              \
+    }
 
 // ADD HL,r16 - 2
-#define gb_add_hl_r16(reg16) {                                          \
-    cpu->R16.AF &= ~F_SUBTRACT;                                         \
-    u32 temp = cpu->R16.HL + reg16;                                     \
-    cpu->F.C = (temp > 0xFFFF);                                         \
-    cpu->F.H = (((cpu->R16.HL & 0x0FFF) + (reg16 & 0x0FFF)) > 0x0FFF ); \
-    cpu->R16.HL = temp & 0xFFFF;                                        \
-    GB_CPUClockCounterAdd(8);                                           \
-}
+#define gb_add_hl_r16(reg16)                                                   \
+    {                                                                          \
+        cpu->R16.AF &= ~F_SUBTRACT;                                            \
+        u32 temp = cpu->R16.HL + reg16;                                        \
+        cpu->F.C = (temp > 0xFFFF);                                            \
+        cpu->F.H = (((cpu->R16.HL & 0x0FFF) + (reg16 & 0x0FFF)) > 0x0FFF);     \
+        cpu->R16.HL = temp & 0xFFFF;                                           \
+        GB_CPUClockCounterAdd(8);                                              \
+    }
 
 // ADD A,r8 - 1
-#define gb_add_a_r8(reg8) {                                             \
-    cpu->R16.AF &= ~F_SUBTRACT;                                         \
-    u32 temp = cpu->R8.A;                                               \
-    cpu->F.H = ((temp & 0xF) + ((u32)reg8 & 0xF)) > 0xF;                \
-    cpu->R8.A += reg8;                                                  \
-    cpu->F.Z = (cpu->R8.A == 0);                                        \
-    cpu->F.C = (temp > cpu->R8.A);                                      \
-    GB_CPUClockCounterAdd(4);                                           \
-}
+#define gb_add_a_r8(reg8)                                                      \
+    {                                                                          \
+        cpu->R16.AF &= ~F_SUBTRACT;                                            \
+        u32 temp = cpu->R8.A;                                                  \
+        cpu->F.H = ((temp & 0xF) + ((u32)reg8 & 0xF)) > 0xF;                   \
+        cpu->R8.A += reg8;                                                     \
+        cpu->F.Z = (cpu->R8.A == 0);                                           \
+        cpu->F.C = (temp > cpu->R8.A);                                         \
+        GB_CPUClockCounterAdd(4);                                              \
+    }
 
 // ADC A,r8 - 1
-#define gb_adc_a_r8(reg8) {                                             \
-    cpu->R16.AF &= ~F_SUBTRACT;                                         \
-    u32 temp = cpu->R8.A + reg8 + cpu->F.C;                             \
-    cpu->F.H = (((cpu->R8.A & 0xF) + (reg8 & 0xF)) + cpu->F.C) > 0xF;   \
-    cpu->F.C = (temp > 0xFF);                                           \
-    temp &= 0xFF;                                                       \
-    cpu->R8.A = temp;                                                   \
-    cpu->F.Z = (temp == 0);                                             \
-    GB_CPUClockCounterAdd(4);                                           \
-}
+#define gb_adc_a_r8(reg8)                                                      \
+    {                                                                          \
+        cpu->R16.AF &= ~F_SUBTRACT;                                            \
+        u32 temp = cpu->R8.A + reg8 + cpu->F.C;                                \
+        cpu->F.H = (((cpu->R8.A & 0xF) + (reg8 & 0xF)) + cpu->F.C) > 0xF;      \
+        cpu->F.C = (temp > 0xFF);                                              \
+        temp &= 0xFF;                                                          \
+        cpu->R8.A = temp;                                                      \
+        cpu->F.Z = (temp == 0);                                                \
+        GB_CPUClockCounterAdd(4);                                              \
+    }
 
 // SUB A,r8 - 1
-#define gb_sub_a_r8(reg8) {                         \
-    cpu->R8.F = F_SUBTRACT;                         \
-    cpu->F.H = (cpu->R8.A & 0xF) < (reg8 & 0xF);    \
-    cpu->F.C = (u32)cpu->R8.A < (u32)reg8;          \
-    cpu->R8.A -= reg8;                              \
-    cpu->F.Z = (cpu->R8.A == 0);                    \
-    GB_CPUClockCounterAdd(4);                       \
-}
+#define gb_sub_a_r8(reg8)                                                      \
+    {                                                                          \
+        cpu->R8.F = F_SUBTRACT;                                                \
+        cpu->F.H = (cpu->R8.A & 0xF) < (reg8 & 0xF);                           \
+        cpu->F.C = (u32)cpu->R8.A < (u32)reg8;                                 \
+        cpu->R8.A -= reg8;                                                     \
+        cpu->F.Z = (cpu->R8.A == 0);                                           \
+        GB_CPUClockCounterAdd(4);                                              \
+    }
 
 // SBC A,r8 - 1
-#define gb_sbc_a_r8(reg8) {                                            \
-    u32 temp = cpu->R8.A - reg8 - ((cpu->R8.F & F_CARRY) ? 1 : 0);     \
-    cpu->R8.F = ((temp & ~0xFF) ? F_CARRY : 0)                         \
-              | ((temp & 0xFF) ? 0 : F_ZERO)                           \
-              | F_SUBTRACT;                                            \
-    cpu->F.H = ( (cpu->R8.A^reg8^temp) & 0x10 ) != 0 ;                 \
-    cpu->R8.A = temp;                                                  \
-    GB_CPUClockCounterAdd(4);                                          \
-}
+#define gb_sbc_a_r8(reg8)                                                      \
+    {                                                                          \
+        u32 temp = cpu->R8.A - reg8 - ((cpu->R8.F & F_CARRY) ? 1 : 0);         \
+        cpu->R8.F = ((temp & ~0xFF) ? F_CARRY : 0)                             \
+                    | ((temp & 0xFF) ? 0 : F_ZERO) | F_SUBTRACT;               \
+        cpu->F.H = ((cpu->R8.A ^ reg8 ^ temp) & 0x10) != 0;                    \
+        cpu->R8.A = temp;                                                      \
+        GB_CPUClockCounterAdd(4);                                              \
+    }
 
 // AND A,r8 - 1
-#define gb_and_a_r8(reg8) {                                 \
-    cpu->R16.AF |= F_HALFCARRY;                             \
-    cpu->R16.AF &= ~(F_SUBTRACT | F_CARRY);                 \
-    cpu->R8.A &= reg8;                                      \
-    cpu->F.Z = (cpu->R8.A == 0);                            \
-    GB_CPUClockCounterAdd(4);                               \
-}
+#define gb_and_a_r8(reg8)                                                      \
+    {                                                                          \
+        cpu->R16.AF |= F_HALFCARRY;                                            \
+        cpu->R16.AF &= ~(F_SUBTRACT | F_CARRY);                                \
+        cpu->R8.A &= reg8;                                                     \
+        cpu->F.Z = (cpu->R8.A == 0);                                           \
+        GB_CPUClockCounterAdd(4);                                              \
+    }
 
 // XOR A,r8 - 1
-#define gb_xor_a_r8(reg8) {                                 \
-    cpu->R16.AF &= ~(F_SUBTRACT | F_CARRY | F_HALFCARRY);   \
-    cpu->R8.A ^= reg8;                                      \
-    cpu->F.Z = (cpu->R8.A == 0);                            \
-    GB_CPUClockCounterAdd(4);                               \
-}
+#define gb_xor_a_r8(reg8)                                                      \
+    {                                                                          \
+        cpu->R16.AF &= ~(F_SUBTRACT | F_CARRY | F_HALFCARRY);                  \
+        cpu->R8.A ^= reg8;                                                     \
+        cpu->F.Z = (cpu->R8.A == 0);                                           \
+        GB_CPUClockCounterAdd(4);                                              \
+    }
 
 // OR A,r8 - 1
-#define gb_or_a_r8(reg8) {                                  \
-    cpu->R16.AF &= ~(F_SUBTRACT | F_CARRY | F_HALFCARRY);   \
-    cpu->R8.A |= reg8;                                      \
-    cpu->F.Z = (cpu->R8.A == 0);                            \
-    GB_CPUClockCounterAdd(4);                               \
-}
+#define gb_or_a_r8(reg8)                                                       \
+    {                                                                          \
+        cpu->R16.AF &= ~(F_SUBTRACT | F_CARRY | F_HALFCARRY);                  \
+        cpu->R8.A |= reg8;                                                     \
+        cpu->F.Z = (cpu->R8.A == 0);                                           \
+        GB_CPUClockCounterAdd(4);                                              \
+    }
 
 // CP A,r8 - 1
-#define gb_cp_a_r8(reg8) {                                  \
-    cpu->R16.AF |= F_SUBTRACT;                              \
-    cpu->F.H = (cpu->R8.A & 0xF) < (reg8 & 0xF);            \
-    cpu->F.C = (u32)cpu->R8.A < (u32)reg8;                  \
-    cpu->F.Z = (cpu->R8.A == reg8);                         \
-    GB_CPUClockCounterAdd(4);                               \
-}
+#define gb_cp_a_r8(reg8)                                                       \
+    {                                                                          \
+        cpu->R16.AF |= F_SUBTRACT;                                             \
+        cpu->F.H = (cpu->R8.A & 0xF) < (reg8 & 0xF);                           \
+        cpu->F.C = (u32)cpu->R8.A < (u32)reg8;                                 \
+        cpu->F.Z = (cpu->R8.A == reg8);                                        \
+        GB_CPUClockCounterAdd(4);                                              \
+    }
 
 // RST nnnn - 4
-#define gb_rst_nnnn(addr) {                                 \
-    GB_CPUClockCounterAdd(8);                               \
-    cpu->R16.SP--;                                          \
-    cpu->R16.SP &= 0xFFFF;                                  \
-    GB_MemWrite8(cpu->R16.SP, cpu->R8.PCH);                 \
-    GB_CPUClockCounterAdd(4);                               \
-    cpu->R16.SP--;                                          \
-    cpu->R16.SP &= 0xFFFF;                                  \
-    GB_MemWrite8(cpu->R16.SP, cpu->R8.PCL);                 \
-    cpu->R16.PC = addr;                                     \
-    GB_CPUClockCounterAdd(4);                               \
-}
+#define gb_rst_nnnn(addr)                                                      \
+    {                                                                          \
+        GB_CPUClockCounterAdd(8);                                              \
+        cpu->R16.SP--;                                                         \
+        cpu->R16.SP &= 0xFFFF;                                                 \
+        GB_MemWrite8(cpu->R16.SP, cpu->R8.PCH);                                \
+        GB_CPUClockCounterAdd(4);                                              \
+        cpu->R16.SP--;                                                         \
+        cpu->R16.SP &= 0xFFFF;                                                 \
+        GB_MemWrite8(cpu->R16.SP, cpu->R8.PCL);                                \
+        cpu->R16.PC = addr;                                                    \
+        GB_CPUClockCounterAdd(4);                                              \
+    }
 
 // PUSH r16 - 4
-#define gb_push_r16(reg_hi, reg_low) {                      \
-    GB_CPUClockCounterAdd(8);                               \
-    cpu->R16.SP--;                                          \
-    cpu->R16.SP &= 0xFFFF;                                  \
-    GB_MemWrite8(cpu->R16.SP, reg_hi);                      \
-    GB_CPUClockCounterAdd(4);                               \
-    cpu->R16.SP--;                                          \
-    cpu->R16.SP &= 0xFFFF;                                  \
-    GB_MemWrite8(cpu->R16.SP, reg_low);                     \
-    GB_CPUClockCounterAdd(4);                               \
-}
+#define gb_push_r16(reg_hi, reg_low)                                           \
+    {                                                                          \
+        GB_CPUClockCounterAdd(8);                                              \
+        cpu->R16.SP--;                                                         \
+        cpu->R16.SP &= 0xFFFF;                                                 \
+        GB_MemWrite8(cpu->R16.SP, reg_hi);                                     \
+        GB_CPUClockCounterAdd(4);                                              \
+        cpu->R16.SP--;                                                         \
+        cpu->R16.SP &= 0xFFFF;                                                 \
+        GB_MemWrite8(cpu->R16.SP, reg_low);                                    \
+        GB_CPUClockCounterAdd(4);                                              \
+    }
 
 // POP r16 - 4
-#define gb_pop_r16(reg_hi,reg_low) {                        \
-    GB_CPUClockCounterAdd(4);                               \
-    reg_low = GB_MemRead8(cpu->R16.SP++);                   \
-    cpu->R16.SP &= 0xFFFF;                                  \
-    GB_CPUClockCounterAdd(4);                               \
-    reg_hi = GB_MemRead8(cpu->R16.SP++);                    \
-    cpu->R16.SP &= 0xFFFF;                                  \
-    GB_CPUClockCounterAdd(4);                               \
-}
+#define gb_pop_r16(reg_hi, reg_low)                                            \
+    {                                                                          \
+        GB_CPUClockCounterAdd(4);                                              \
+        reg_low = GB_MemRead8(cpu->R16.SP++);                                  \
+        cpu->R16.SP &= 0xFFFF;                                                 \
+        GB_CPUClockCounterAdd(4);                                              \
+        reg_hi = GB_MemRead8(cpu->R16.SP++);                                   \
+        cpu->R16.SP &= 0xFFFF;                                                 \
+        GB_CPUClockCounterAdd(4);                                              \
+    }
 
 // CALL cond,nnnn - 6/3
-#define gb_call_cond_nnnn(cond) {                           \
-    if (cond)                                               \
-    {                                                       \
-        GB_CPUClockCounterAdd(4);                           \
-        u32 temp = GB_MemRead8(cpu->R16.PC++);              \
-        GB_CPUClockCounterAdd(4);                           \
-        temp |= ((u32)GB_MemRead8(cpu->R16.PC++)) << 8;     \
-        GB_CPUClockCounterAdd(8);                           \
-        cpu->R16.SP--;                                      \
-        cpu->R16.SP &= 0xFFFF;                              \
-        GB_MemWrite8(cpu->R16.SP, cpu->R8.PCH);             \
-        GB_CPUClockCounterAdd(4);                           \
-        cpu->R16.SP--;                                      \
-        cpu->R16.SP &= 0xFFFF;                              \
-        GB_MemWrite8(cpu->R16.SP, cpu->R8.PCL);             \
-        cpu->R16.PC = temp;                                 \
-        GB_CPUClockCounterAdd(4);                           \
-    }                                                       \
-    else                                                    \
-    {                                                       \
-        cpu->R16.PC += 2;                                   \
-        cpu->R16.PC &= 0xFFFF;                              \
-        GB_CPUClockCounterAdd(12);                          \
-    }                                                       \
-}
+#define gb_call_cond_nnnn(cond)                                                \
+    {                                                                          \
+        if (cond)                                                              \
+        {                                                                      \
+            GB_CPUClockCounterAdd(4);                                          \
+            u32 temp = GB_MemRead8(cpu->R16.PC++);                             \
+            GB_CPUClockCounterAdd(4);                                          \
+            temp |= ((u32)GB_MemRead8(cpu->R16.PC++)) << 8;                    \
+            GB_CPUClockCounterAdd(8);                                          \
+            cpu->R16.SP--;                                                     \
+            cpu->R16.SP &= 0xFFFF;                                             \
+            GB_MemWrite8(cpu->R16.SP, cpu->R8.PCH);                            \
+            GB_CPUClockCounterAdd(4);                                          \
+            cpu->R16.SP--;                                                     \
+            cpu->R16.SP &= 0xFFFF;                                             \
+            GB_MemWrite8(cpu->R16.SP, cpu->R8.PCL);                            \
+            cpu->R16.PC = temp;                                                \
+            GB_CPUClockCounterAdd(4);                                          \
+        }                                                                      \
+        else                                                                   \
+        {                                                                      \
+            cpu->R16.PC += 2;                                                  \
+            cpu->R16.PC &= 0xFFFF;                                             \
+            GB_CPUClockCounterAdd(12);                                         \
+        }                                                                      \
+    }
 
 // RET cond - 5/2
-#define gb_ret_cond(cond) {                                 \
-    if (cond)                                               \
-    {                                                       \
-        GB_CPUClockCounterAdd(4);                           \
-        u32 temp = GB_MemRead8(cpu->R16.SP++);              \
-        cpu->R16.SP &= 0xFFFF;                              \
-        GB_CPUClockCounterAdd(4);                           \
-        temp |= ((u32)GB_MemRead8(cpu->R16.SP++)) << 8;     \
-        cpu->R16.SP &= 0xFFFF;                              \
-        GB_CPUClockCounterAdd(4);                           \
-        cpu->R16.PC = temp;                                 \
-        GB_CPUClockCounterAdd(8);                           \
-    }                                                       \
-    else                                                    \
-    {                                                       \
-        GB_CPUClockCounterAdd(8);                           \
-    }                                                       \
-}
+#define gb_ret_cond(cond)                                                      \
+    {                                                                          \
+        if (cond)                                                              \
+        {                                                                      \
+            GB_CPUClockCounterAdd(4);                                          \
+            u32 temp = GB_MemRead8(cpu->R16.SP++);                             \
+            cpu->R16.SP &= 0xFFFF;                                             \
+            GB_CPUClockCounterAdd(4);                                          \
+            temp |= ((u32)GB_MemRead8(cpu->R16.SP++)) << 8;                    \
+            cpu->R16.SP &= 0xFFFF;                                             \
+            GB_CPUClockCounterAdd(4);                                          \
+            cpu->R16.PC = temp;                                                \
+            GB_CPUClockCounterAdd(8);                                          \
+        }                                                                      \
+        else                                                                   \
+        {                                                                      \
+            GB_CPUClockCounterAdd(8);                                          \
+        }                                                                      \
+    }
 
 // JP cond,nnnn - 4/3
-#define gb_jp_cond_nnnn(cond) {                             \
-    if (cond)                                               \
-    {                                                       \
-        GB_CPUClockCounterAdd(4);                           \
-        u32 temp = GB_MemRead8(cpu->R16.PC++);              \
-        GB_CPUClockCounterAdd(4);                           \
-        temp |= ((u32)GB_MemRead8(cpu->R16.PC++)) << 8;     \
-        GB_CPUClockCounterAdd(4);                           \
-        cpu->R16.PC = temp;                                 \
-        GB_CPUClockCounterAdd(4);                           \
-    }                                                       \
-    else                                                    \
-    {                                                       \
-        cpu->R16.PC += 2;                                   \
-        cpu->R16.PC &= 0xFFFF;                              \
-        GB_CPUClockCounterAdd(12);                          \
-    }                                                       \
-}
+#define gb_jp_cond_nnnn(cond)                                                  \
+    {                                                                          \
+        if (cond)                                                              \
+        {                                                                      \
+            GB_CPUClockCounterAdd(4);                                          \
+            u32 temp = GB_MemRead8(cpu->R16.PC++);                             \
+            GB_CPUClockCounterAdd(4);                                          \
+            temp |= ((u32)GB_MemRead8(cpu->R16.PC++)) << 8;                    \
+            GB_CPUClockCounterAdd(4);                                          \
+            cpu->R16.PC = temp;                                                \
+            GB_CPUClockCounterAdd(4);                                          \
+        }                                                                      \
+        else                                                                   \
+        {                                                                      \
+            cpu->R16.PC += 2;                                                  \
+            cpu->R16.PC &= 0xFFFF;                                             \
+            GB_CPUClockCounterAdd(12);                                         \
+        }                                                                      \
+    }
 
 // JR cond,nn - 3/2
-#define gb_jr_cond_nn(cond) {                               \
-    if (cond)                                               \
-    {                                                       \
-        GB_CPUClockCounterAdd(4);                           \
-        u32 temp = GB_MemRead8(cpu->R16.PC++);              \
-        cpu->R16.PC = (cpu->R16.PC + (s8)temp) & 0xFFFF;    \
-        GB_CPUClockCounterAdd(8);                           \
-    }                                                       \
-    else                                                    \
-    {                                                       \
-        cpu->R16.PC++;                                      \
-        GB_CPUClockCounterAdd(8);                           \
-    }                                                       \
-}
+#define gb_jr_cond_nn(cond)                                                    \
+    {                                                                          \
+        if (cond)                                                              \
+        {                                                                      \
+            GB_CPUClockCounterAdd(4);                                          \
+            u32 temp = GB_MemRead8(cpu->R16.PC++);                             \
+            cpu->R16.PC = (cpu->R16.PC + (s8)temp) & 0xFFFF;                   \
+            GB_CPUClockCounterAdd(8);                                          \
+        }                                                                      \
+        else                                                                   \
+        {                                                                      \
+            cpu->R16.PC++;                                                     \
+            GB_CPUClockCounterAdd(8);                                          \
+        }                                                                      \
+    }
 
 // RLC r8 - 2
-#define gb_rlc_r8(reg8) {                                   \
-    cpu->R16.AF &= ~(F_SUBTRACT | F_HALFCARRY);             \
-    cpu->F.C = (reg8 & 0x80) != 0;                          \
-    reg8 = (reg8 << 1) | cpu->F.C;                          \
-    cpu->F.Z = (reg8 == 0);                                 \
-    GB_CPUClockCounterAdd(4);                               \
-}
+#define gb_rlc_r8(reg8)                                                        \
+    {                                                                          \
+        cpu->R16.AF &= ~(F_SUBTRACT | F_HALFCARRY);                            \
+        cpu->F.C = (reg8 & 0x80) != 0;                                         \
+        reg8 = (reg8 << 1) | cpu->F.C;                                         \
+        cpu->F.Z = (reg8 == 0);                                                \
+        GB_CPUClockCounterAdd(4);                                              \
+    }
 
 // RRC r8 - 2
-#define gb_rrc_r8(reg8) { \
-    cpu->R16.AF &= ~(F_SUBTRACT | F_HALFCARRY);             \
-    cpu->F.C = (reg8 & 0x01) != 0;                          \
-    reg8 = (reg8 >> 1) | (cpu->F.C << 7);                   \
-    cpu->F.Z = (reg8 == 0);                                 \
-    GB_CPUClockCounterAdd(4);                               \
-}
+#define gb_rrc_r8(reg8)                                                        \
+    {                                                                          \
+        cpu->R16.AF &= ~(F_SUBTRACT | F_HALFCARRY);                            \
+        cpu->F.C = (reg8 & 0x01) != 0;                                         \
+        reg8 = (reg8 >> 1) | (cpu->F.C << 7);                                  \
+        cpu->F.Z = (reg8 == 0);                                                \
+        GB_CPUClockCounterAdd(4);                                              \
+    }
 
 // RL r8 - 2
-#define gb_rl_r8(reg8) {                                    \
-    cpu->R16.AF &= ~(F_SUBTRACT | F_HALFCARRY);             \
-    u32 temp = cpu->F.C;                                    \
-    cpu->F.C = (reg8 & 0x80) != 0;                          \
-    reg8 = (reg8 << 1) | temp;                              \
-    cpu->F.Z = (reg8 == 0);                                 \
-    GB_CPUClockCounterAdd(4);                               \
-}
+#define gb_rl_r8(reg8)                                                         \
+    {                                                                          \
+        cpu->R16.AF &= ~(F_SUBTRACT | F_HALFCARRY);                            \
+        u32 temp = cpu->F.C;                                                   \
+        cpu->F.C = (reg8 & 0x80) != 0;                                         \
+        reg8 = (reg8 << 1) | temp;                                             \
+        cpu->F.Z = (reg8 == 0);                                                \
+        GB_CPUClockCounterAdd(4);                                              \
+    }
 
 // RR r8 - 2
-#define gb_rr_r8(reg8) {                                    \
-    cpu->R16.AF &= ~(F_SUBTRACT | F_HALFCARRY);             \
-    u32 temp = cpu->F.C;                                    \
-    cpu->F.C = (reg8 & 0x01) != 0;                          \
-    reg8 = (reg8 >> 1) | (temp << 7);                       \
-    cpu->F.Z = (reg8 == 0);                                 \
-    GB_CPUClockCounterAdd(4);                               \
-}
+#define gb_rr_r8(reg8)                                                         \
+    {                                                                          \
+        cpu->R16.AF &= ~(F_SUBTRACT | F_HALFCARRY);                            \
+        u32 temp = cpu->F.C;                                                   \
+        cpu->F.C = (reg8 & 0x01) != 0;                                         \
+        reg8 = (reg8 >> 1) | (temp << 7);                                      \
+        cpu->F.Z = (reg8 == 0);                                                \
+        GB_CPUClockCounterAdd(4);                                              \
+    }
 
 // SLA r8 - 2
-#define gb_sla_r8(reg8) {                                   \
-    cpu->R16.AF &= ~(F_SUBTRACT | F_HALFCARRY);             \
-    cpu->F.C = (reg8 & 0x80) != 0;                          \
-    reg8 = reg8 << 1;                                       \
-    cpu->F.Z = (reg8 == 0);                                 \
-    GB_CPUClockCounterAdd(4);                               \
-}
+#define gb_sla_r8(reg8)                                                        \
+    {                                                                          \
+        cpu->R16.AF &= ~(F_SUBTRACT | F_HALFCARRY);                            \
+        cpu->F.C = (reg8 & 0x80) != 0;                                         \
+        reg8 = reg8 << 1;                                                      \
+        cpu->F.Z = (reg8 == 0);                                                \
+        GB_CPUClockCounterAdd(4);                                              \
+    }
 
 // SRA r8 - 2
-#define gb_sra_r8(reg8) {                                   \
-    cpu->R16.AF &= ~(F_SUBTRACT | F_HALFCARRY);             \
-    cpu->F.C = (reg8 & 0x01) != 0;                          \
-    reg8 = (reg8 & 0x80) | (reg8 >> 1);                     \
-    cpu->F.Z = (reg8 == 0);                                 \
-    GB_CPUClockCounterAdd(4);                               \
-}
+#define gb_sra_r8(reg8)                                                        \
+    {                                                                          \
+        cpu->R16.AF &= ~(F_SUBTRACT | F_HALFCARRY);                            \
+        cpu->F.C = (reg8 & 0x01) != 0;                                         \
+        reg8 = (reg8 & 0x80) | (reg8 >> 1);                                    \
+        cpu->F.Z = (reg8 == 0);                                                \
+        GB_CPUClockCounterAdd(4);                                              \
+    }
 
 // SWAP r8 - 2
-#define gb_swap_r8(reg8) {                                  \
-    cpu->R16.AF &= ~(F_SUBTRACT | F_HALFCARRY | F_CARRY);   \
-    reg8 = ((reg8 >> 4) | (reg8 << 4));                     \
-    cpu->F.Z = (reg8 == 0);                                 \
-    GB_CPUClockCounterAdd(4);                               \
-}
+#define gb_swap_r8(reg8)                                                       \
+    {                                                                          \
+        cpu->R16.AF &= ~(F_SUBTRACT | F_HALFCARRY | F_CARRY);                  \
+        reg8 = ((reg8 >> 4) | (reg8 << 4));                                    \
+        cpu->F.Z = (reg8 == 0);                                                \
+        GB_CPUClockCounterAdd(4);                                              \
+    }
 
 // SRL r8 - 2
-#define gb_srl_r8(reg8) {                                   \
-    cpu->R16.AF &= ~(F_SUBTRACT | F_HALFCARRY);             \
-    cpu->F.C = (reg8 & 0x01) != 0;                          \
-    reg8 = reg8 >> 1;                                       \
-    cpu->F.Z = (reg8 == 0);                                 \
-    GB_CPUClockCounterAdd(4);                               \
-}
+#define gb_srl_r8(reg8)                                                        \
+    {                                                                          \
+        cpu->R16.AF &= ~(F_SUBTRACT | F_HALFCARRY);                            \
+        cpu->F.C = (reg8 & 0x01) != 0;                                         \
+        reg8 = reg8 >> 1;                                                      \
+        cpu->F.Z = (reg8 == 0);                                                \
+        GB_CPUClockCounterAdd(4);                                              \
+    }
 
 // BIT n,r8 - 2
-#define gb_bit_n_r8(bitn, reg8) {                           \
-    cpu->R16.AF &= ~F_SUBTRACT;                             \
-    cpu->R16.AF |= F_HALFCARRY;                             \
-    cpu->F.Z = (reg8 & (1 << bitn)) == 0;                   \
-    GB_CPUClockCounterAdd(4);                               \
-}
+#define gb_bit_n_r8(bitn, reg8)                                                \
+    {                                                                          \
+        cpu->R16.AF &= ~F_SUBTRACT;                                            \
+        cpu->R16.AF |= F_HALFCARRY;                                            \
+        cpu->F.Z = (reg8 & (1 << bitn)) == 0;                                  \
+        GB_CPUClockCounterAdd(4);                                              \
+    }
 
 // BIT n,[HL] - 3
-#define gb_bit_n_ptr_hl(bitn) {                                 \
-    GB_CPUClockCounterAdd(4);                                   \
-    cpu->R16.AF &= ~F_SUBTRACT;                                 \
-    cpu->R16.AF |= F_HALFCARRY;                                 \
-    cpu->F.Z = (GB_MemRead8(cpu->R16.HL) & (1 << bitn)) == 0;   \
-    GB_CPUClockCounterAdd(4);                                   \
-}
+#define gb_bit_n_ptr_hl(bitn)                                                  \
+    {                                                                          \
+        GB_CPUClockCounterAdd(4);                                              \
+        cpu->R16.AF &= ~F_SUBTRACT;                                            \
+        cpu->R16.AF |= F_HALFCARRY;                                            \
+        cpu->F.Z = (GB_MemRead8(cpu->R16.HL) & (1 << bitn)) == 0;              \
+        GB_CPUClockCounterAdd(4);                                              \
+    }
 
 // RES n,r8 - 2
-#define gb_res_n_r8(bitn, reg8) {                           \
-    reg8 &= ~(1 << bitn);                                   \
-    GB_CPUClockCounterAdd(4);                               \
-}
+#define gb_res_n_r8(bitn, reg8)                                                \
+    {                                                                          \
+        reg8 &= ~(1 << bitn);                                                  \
+        GB_CPUClockCounterAdd(4);                                              \
+    }
 
 // RES n,[HL] - 4
-#define gb_res_n_ptr_hl(bitn) {                             \
-    GB_CPUClockCounterAdd(4);                               \
-    u32 temp = GB_MemRead8(cpu->R16.HL);                    \
-    GB_CPUClockCounterAdd(4);                               \
-    GB_MemWrite8(cpu->R16.HL, temp & (~(1 << bitn)));       \
-    GB_CPUClockCounterAdd(4);                               \
-}
+#define gb_res_n_ptr_hl(bitn)                                                  \
+    {                                                                          \
+        GB_CPUClockCounterAdd(4);                                              \
+        u32 temp = GB_MemRead8(cpu->R16.HL);                                   \
+        GB_CPUClockCounterAdd(4);                                              \
+        GB_MemWrite8(cpu->R16.HL, temp &(~(1 << bitn)));                       \
+        GB_CPUClockCounterAdd(4);                                              \
+    }
 
 // SET n,r8 - 2
-#define gb_set_n_r8(bitn, reg8) {                           \
-    reg8 |= (1 << bitn);                                    \
-    GB_CPUClockCounterAdd(4);                               \
-}
+#define gb_set_n_r8(bitn, reg8)                                                \
+    {                                                                          \
+        reg8 |= (1 << bitn);                                                   \
+        GB_CPUClockCounterAdd(4);                                              \
+    }
 
 // SET n,[HL] - 4
-#define gb_set_n_ptr_hl(bitn) {                             \
-    GB_CPUClockCounterAdd(4);                               \
-    u32 temp = GB_MemRead8(cpu->R16.HL);                    \
-    GB_CPUClockCounterAdd(4);                               \
-    GB_MemWrite8(cpu->R16.HL, temp | (1 << bitn));          \
-    GB_CPUClockCounterAdd(4);                               \
-}
+#define gb_set_n_ptr_hl(bitn)                                                  \
+    {                                                                          \
+        GB_CPUClockCounterAdd(4);                                              \
+        u32 temp = GB_MemRead8(cpu->R16.HL);                                   \
+        GB_CPUClockCounterAdd(4);                                              \
+        GB_MemWrite8(cpu->R16.HL, temp | (1 << bitn));                         \
+        GB_CPUClockCounterAdd(4);                                              \
+    }
 
 // Undefined opcode - *
-#define gb_undefined_opcode(op) {                                       \
-    GB_CPUClockCounterAdd(4);                                           \
-    cpu->R16.PC--;                                                      \
-    _gb_break_to_debugger();                                            \
-    Debug_DebugMsgArg("Undefined opcode. 0x%02X\n"                      \
-                      "PC: %04X\n"                                      \
-                      "ROM: %d", op, GameBoy.CPU.R16.PC,                \
-                      GameBoy.Memory.selected_rom);                     \
-}
+#define gb_undefined_opcode(op)                                                \
+    {                                                                          \
+        GB_CPUClockCounterAdd(4);                                              \
+        cpu->R16.PC--;                                                         \
+        _gb_break_to_debugger();                                               \
+        Debug_DebugMsgArg("Undefined opcode. 0x%02X\n"                         \
+                          "PC: %04X\n"                                         \
+                          "ROM: %d",                                           \
+                          op, GameBoy.CPU.R16.PC,                              \
+                          GameBoy.Memory.selected_rom);                        \
+    }
 
 //----------------------------------------------------------------
 
@@ -705,10 +744,10 @@ static int GB_CPUExecute(int clocks)
                 GB_CPUClockCounterAdd(4);
                 break;
             case 0x01: // LD BC,nnnn - 3
-                gb_ld_r16_nnnn(cpu->R8.B,cpu->R8.C);
+                gb_ld_r16_nnnn(cpu->R8.B, cpu->R8.C);
                 break;
             case 0x02: // LD [BC],A - 2
-                gb_ld_ptr_r16_r8(cpu->R16.BC,cpu->R8.A);
+                gb_ld_ptr_r16_r8(cpu->R16.BC, cpu->R8.A);
                 break;
             case 0x03: // INC BC - 2
                 gb_inc_r16(cpu->R16.BC);
@@ -771,7 +810,8 @@ static int GB_CPUExecute(int clocks)
                 {
                     Debug_DebugMsgArg("Corrupted stop.\n"
                                       "PC: %04X\n"
-                                      "ROM: %d", GameBoy.CPU.R16.PC,
+                                      "ROM: %d",
+                                      GameBoy.CPU.R16.PC,
                                       GameBoy.Memory.selected_rom);
                 }
                 GB_CPUClockCounterAdd(4);
@@ -792,7 +832,7 @@ static int GB_CPUExecute(int clocks)
 
                         GameBoy.Emulator.DoubleSpeed ^= 1;
                         mem->IO_Ports[KEY1_REG - 0xFF00] =
-                                            GameBoy.Emulator.DoubleSpeed << 7;
+                                GameBoy.Emulator.DoubleSpeed << 7;
                     }
                     else
                     {
@@ -802,7 +842,7 @@ static int GB_CPUExecute(int clocks)
                 GB_CPUBreakLoop();
                 break;
             case 0x11: // LD DE,nnnn - 3
-                gb_ld_r16_nnnn(cpu->R8.D,cpu->R8.E);
+                gb_ld_r16_nnnn(cpu->R8.D, cpu->R8.E);
                 break;
             case 0x12: // LD [DE],A - 2
                 gb_ld_ptr_r16_r8(cpu->R16.DE, cpu->R8.A);
@@ -890,8 +930,8 @@ static int GB_CPUExecute(int clocks)
                 break;
             case 0x27: // DAA - 1
             {
-                u32 temp = (((u32)cpu->R8.A) << (3 + 1) )
-                         | ((((u32)cpu->R8.F >> 4) & 7) << 1);
+                u32 temp = (((u32)cpu->R8.A) << (3 + 1))
+                           | ((((u32)cpu->R8.F >> 4) & 7) << 1);
                 cpu->R8.A = gb_daa_table[temp];
                 cpu->R8.F = gb_daa_table[temp + 1];
                 GB_CPUClockCounterAdd(4);
@@ -1212,7 +1252,7 @@ static int GB_CPUExecute(int clocks)
             case 0x75: // LD [HL],L - 2
                 gb_ld_ptr_r16_r8(cpu->R16.HL, cpu->R8.L);
                 break;
-            case 0x76: //HALT - 1*
+            case 0x76: // HALT - 1*
                 GB_CPUClockCounterAdd(4);
                 if (GameBoy.Memory.InterruptMasterEnable == 1)
                 {
@@ -1409,8 +1449,8 @@ static int GB_CPUExecute(int clocks)
                 u32 temp2 = GB_MemRead8(cpu->R16.HL);
                 u32 temp = cpu->R8.A - temp2 - ((cpu->R8.F & F_CARRY) ? 1 : 0);
                 cpu->R8.F = ((temp & ~0xFF) ? F_CARRY : 0)
-                          | ((temp & 0xFF) ? 0 : F_ZERO)
-                          | F_SUBTRACT;
+                            | ((temp & 0xFF) ? 0 : F_ZERO)
+                            | F_SUBTRACT;
                 cpu->F.H = ((cpu->R8.A ^ temp2 ^ temp) & 0x10) != 0;
                 cpu->R8.A = temp;
                 GB_CPUClockCounterAdd(4);
@@ -1856,7 +1896,7 @@ static int GB_CPUExecute(int clocks)
                         GB_CPUClockCounterAdd(4);
                         cpu->R16.AF &= ~(F_SUBTRACT | F_HALFCARRY | F_CARRY);
                         temp = ((temp >> 4) | (temp << 4)) & 0xFF;
-                        GB_MemWrite8(cpu->R16.HL,temp);
+                        GB_MemWrite8(cpu->R16.HL, temp);
                         cpu->F.Z = (temp == 0);
                         GB_CPUClockCounterAdd(4);
                         break;
@@ -2485,7 +2525,8 @@ static int GB_CPUExecute(int clocks)
                         _gb_break_to_debugger();
                         Debug_ErrorMsgArg("Unidentified opcode. 0xCB 0x%X\n"
                                           "PC: %04X\n"
-                                          "ROM: %d", opcode, GameBoy.CPU.R16.PC,
+                                          "ROM: %d",
+                                          opcode, GameBoy.CPU.R16.PC,
                                           GameBoy.Memory.selected_rom);
                         break;
                 } // End of inner 0xCB switch
@@ -2598,8 +2639,8 @@ static int GB_CPUExecute(int clocks)
                 u32 temp2 = GB_MemRead8(cpu->R16.PC++);
                 u32 temp = cpu->R8.A - temp2 - ((cpu->R8.F & F_CARRY) ? 1 : 0);
                 cpu->R8.F = ((temp & ~0xFF) ? F_CARRY : 0)
-                          | ((temp & 0xFF) ? 0 : F_ZERO)
-                          | F_SUBTRACT;
+                            | ((temp & 0xFF) ? 0 : F_ZERO)
+                            | F_SUBTRACT;
                 cpu->F.H = ((cpu->R8.A ^ temp2 ^ temp) & 0x10) != 0;
                 cpu->R8.A = temp;
                 GB_CPUClockCounterAdd(4);
@@ -2613,7 +2654,7 @@ static int GB_CPUExecute(int clocks)
                 GB_CPUClockCounterAdd(4);
                 u32 temp = 0xFF00 + (u32)GB_MemRead8(cpu->R16.PC++);
                 GB_CPUClockCounterAdd(4);
-                GB_MemWrite8(temp,cpu->R8.A);
+                GB_MemWrite8(temp, cpu->R8.A);
                 GB_CPUClockCounterAdd(4);
                 break;
             }
@@ -2672,7 +2713,7 @@ static int GB_CPUExecute(int clocks)
                 temp |= ((u32)GB_MemRead8(cpu->R16.PC++)) << 8;
                 cpu->R16.PC &= 0xFFFF;
                 GB_CPUClockCounterAdd(4);
-                GB_MemWrite8(temp,cpu->R8.A);
+                GB_MemWrite8(temp, cpu->R8.A);
                 GB_CPUClockCounterAdd(4);
                 break;
             }
@@ -2797,7 +2838,8 @@ static int GB_CPUExecute(int clocks)
                 _gb_break_to_debugger();
                 Debug_ErrorMsgArg("Unidentified opcode. 0x%X\n"
                                   "PC: %04X\n"
-                                  "ROM: %d", opcode, GameBoy.CPU.R16.PC,
+                                  "ROM: %d",
+                                  opcode, GameBoy.CPU.R16.PC,
                                   GameBoy.Memory.selected_rom);
                 break;
         } // End switch
@@ -2848,7 +2890,7 @@ int GB_RunFor(s32 run_for_clocks) // 1 frame = 70224 clocks
             if (GameBoy.Emulator.cpu_change_speed_clocks)
             {
                 if (clocks_to_next_event
-                                >= GameBoy.Emulator.cpu_change_speed_clocks)
+                    >= GameBoy.Emulator.cpu_change_speed_clocks)
                 {
                     executed_clocks = GameBoy.Emulator.cpu_change_speed_clocks;
                     GameBoy.Emulator.cpu_change_speed_clocks = 0;
@@ -2857,8 +2899,8 @@ int GB_RunFor(s32 run_for_clocks) // 1 frame = 70224 clocks
                 else
                 {
                     executed_clocks = clocks_to_next_event;
-                    GameBoy.Emulator.cpu_change_speed_clocks
-                                                    -= clocks_to_next_event;
+                    GameBoy.Emulator.cpu_change_speed_clocks -=
+                            clocks_to_next_event;
                 }
                 GB_CPUClockCounterAdd(executed_clocks);
             }
@@ -2875,7 +2917,8 @@ int GB_RunFor(s32 run_for_clocks) // 1 frame = 70224 clocks
                         if (GameBoy.Emulator.CPUHalt == 0) // No halt
                         {
                             // GB_CPUClockCounterAdd() internal
-                            executed_clocks = GB_CPUExecute(clocks_to_next_event);
+                            executed_clocks =
+                                    GB_CPUExecute(clocks_to_next_event);
                         }
                         else // Halt or stop
                         {

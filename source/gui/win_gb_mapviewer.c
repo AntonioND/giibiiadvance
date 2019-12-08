@@ -131,7 +131,7 @@ void Win_GBMapViewerUpdate(void)
     int info = GameBoy.Emulator.CGBEnabled ?
                         bgtilemap[tile_location + 0x2000] : 0;
     u32 addr = (gb_mapview_selected_mapbase ? 0x9C00 : 0x9800)
-             + (gb_mapview_selected_y * 32) + gb_mapview_selected_x;
+               + (gb_mapview_selected_y * 32) + gb_mapview_selected_x;
     int bank = (info & (1 << 3)) != 0;
 
     GUI_ConsoleModePrintf(&gb_mapview_con, 0, 0,
@@ -142,7 +142,7 @@ void Win_GBMapViewerUpdate(void)
                           "Pal: %d\n"
                           "Priority: %d",
                           gb_mapview_selected_x, gb_mapview_selected_y,
-                          addr, tile, bank, (info & (1<<6)) ? "V" : "-",
+                          addr, tile, bank, (info & (1 << 6)) ? "V" : "-",
                           (info & (1 << 5)) ? "H" : "-", info & 7,
                           (info & (1 << 7)) != 0);
 
@@ -162,8 +162,8 @@ void Win_GBMapViewerUpdate(void)
     GUI_Draw_SetDrawingColor(255, 0, 0);
     int l = gb_mapview_selected_x * 8; // Left
     int t = gb_mapview_selected_y * 8; // Top
-    int r = l + 7; // Right
-    int b = t + 7; // Bottom
+    int r = l + 7;                     // Right
+    int b = t + 7;                     // Bottom
     GUI_Draw_Rect(gb_map_buffer, GB_MAP_BUFFER_WIDTH, GB_MAP_BUFFER_HEIGHT,
                   l, r, t, b);
 
@@ -288,7 +288,7 @@ static void _win_gb_mapviewer_dump_btn_callback(void)
 
     char *src = gb_map_buffer;
     char *dst = buffer_temp;
-    for (int i = 0; i < GB_MAP_BUFFER_WIDTH*GB_MAP_BUFFER_HEIGHT; i++)
+    for (int i = 0; i < GB_MAP_BUFFER_WIDTH * GB_MAP_BUFFER_HEIGHT; i++)
     {
         *dst++ = *src++;
         *dst++ = *src++;

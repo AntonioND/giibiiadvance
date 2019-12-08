@@ -11,7 +11,8 @@
 
 //------------------------------------------------------------------------------
 
-typedef enum {
+typedef enum
+{
     CPU_USER = 0,
     CPU_FIQ = 1,
     CPU_IRQ = 2,
@@ -20,7 +21,7 @@ typedef enum {
     CPU_UNDEFINED = 5,
     CPU_SYSTEM = 6,
     CPU_MODE_NUMBER = 7
-}_cpu_mode_e;
+} _cpu_mode_e;
 
 #define M_USER       (0x10)
 #define M_FIQ        (0x11)
@@ -30,10 +31,11 @@ typedef enum {
 #define M_UNDEFINED  (0x1B)
 #define M_SYSTEM     (0x1F)
 
-typedef enum {
+typedef enum
+{
     EXEC_ARM,
     EXEC_THUMB
-}_exec_mode_e;
+} _exec_mode_e;
 
 #define R_SP (13)
 #define R_LR (14)
@@ -62,7 +64,8 @@ typedef enum {
 #define F_STATE    BIT(5) // (0=ARM, 1=THUMB) - Do not change manually!
 #define F_T        BIT(5)
 
-typedef struct {
+typedef struct
+{
     u32 R[16]; // 0-15
     u32 CPSR;
     u32 SPSR;
@@ -92,7 +95,6 @@ typedef struct {
     _exec_mode_e EXECUTION_MODE;
 } _cpu_t;
 
-
 //------------------------------------------------------------------------------
 
 typedef struct {
@@ -101,14 +103,14 @@ typedef struct {
                           // 00004000-01FFFFFF | Not used      |
     u8 ewram[256 * 1024]; // 02000000-0203FFFF | On-board WRAM | 256 KB (2 Wait)
                           // 02040000-02FFFFFF | Not used      |
-    u8 iwram[32*1024];    // 03000000-03007FFF | In-chip WRAM  | 32 KB
+    u8 iwram[32 * 1024];  // 03000000-03007FFF | In-chip WRAM  | 32 KB
                           // 03008000-03FFFFFF | Not used      |
     u8 io_regs[0x3FF];    // 04000000-040003FE | I/O Registers |
                           // 04000400-04FFFFFF | Not used      |
     // Internal Display Memory                 |
     u8 pal_ram[1024];     // 05000000-050003FF | BG/OBJ Palette RAM   | 1 KB
                           // 05000400-05FFFFFF | Not used             |
-    u8 vram[128*1024];    // 06000000-06017FFF | VRAM - Video RAM     | 96 KB
+    u8 vram[128 * 1024];  // 06000000-06017FFF | VRAM - Video RAM     | 96 KB
     // To fix bitmasks    // 06018000-06FFFFFF | Not used             |
     u8 oam[1024];         // 07000000-070003FF | OAM - OBJ Attributes | 1 KB
                           // 07000400-07FFFFFF | Not used             |
@@ -116,20 +118,22 @@ typedef struct {
     u8 *rom_wait0;        // 08000000-09FFFFFF | Cart ROM  | 32 MB | Wait State 0
     u8 *rom_wait1;        // 0A000000-0BFFFFFF | Cart ROM  | 32 MB | Wait State 1
     u8 *rom_wait2;        // 0C000000-0DFFFFFF | Cart ROM  | 32 MB | Wait State 2
-    //u8 sram[64*1024];   // 0E000000-0E00FFFF | Cart SRAM | 64 KB | 8-bit Bus
+    //u8 sram[64 * 1024]; // 0E000000-0E00FFFF | Cart SRAM | 64 KB | 8-bit Bus
                           // 0E010000-0FFFFFFF | Not used  |
     // Unused Memory Area                      |           |
                           // 10000000-FFFFFFFF | Not used  |
 } _mem_t;
 
-typedef struct {
+typedef struct
+{
     u16 attr0;
     u16 attr1;
     u16 attr2;
     u16 dummy;
 } _oam_spr_entry_t;
 
-typedef struct {
+typedef struct
+{
     u16 dummy0[3];
     s16 pa;
     u16 dummy1[3];

@@ -58,7 +58,7 @@ char GetFolderSeparator(char *path)
             return '\\';
         if (*path == '/')
             return '/';
-        path ++;
+        path++;
     }
 
     // Default
@@ -73,8 +73,8 @@ static int filenum;
 // FileExplorer_ListFree().
 static char fileselected[MAX_PATHLEN];
 
-static char ** filename = NULL;
-static int * list_isdir = NULL;
+static char **filename = NULL;
+static int *list_isdir = NULL;
 static int maxfiles; // Allocated space for files
 static int is_root = 0;
 static char exploring_path[MAX_PATHLEN];
@@ -87,7 +87,7 @@ int FileExplorer_GetNumFiles(void)
 
 void FileExplorer_SetPath(char *path)
 {
-    if(path)
+    if (path)
         s_strncpy(exploring_path, path, sizeof(exploring_path));
     else
         s_strncpy(exploring_path, ".", sizeof(exploring_path));
@@ -128,7 +128,8 @@ void FileExplorer_ListInit(int numfiles)
 
 void FileExplorer_ListAdd(char *name, int isdir)
 {
-    if (strcmp(name, ".") == 0) return;
+    if (strcmp(name, ".") == 0)
+        return;
 
     if (strcmp(name, "..") == 0)
     {
@@ -149,7 +150,7 @@ void FileExplorer_ListAdd(char *name, int isdir)
         list_isdir[filenum] = isdir;
         int size = strlen(name) + 1;
         filename[filenum] = malloc(size);
-        s_strncpy(filename[filenum],name,size);
+        s_strncpy(filename[filenum], name, size);
         filenum++;
     }
 }
@@ -252,7 +253,7 @@ void FileExplorer_GoUp(void)
     }
 }
 
-int FileExplorer_SelectEntry(char * file)
+int FileExplorer_SelectEntry(char *file)
 {
     if (strcmp(file, ".") == 0)
         return 1;
@@ -271,7 +272,6 @@ int FileExplorer_SelectEntry(char * file)
 
     if (S_ISDIR(statbuf.st_mode))
     {
-
         char separator_str[2];
         separator_str[0] = GetFolderSeparator(exploring_path);
         separator_str[1] = '\0';
@@ -302,6 +302,3 @@ char *FileExplorer_GetCurrentPath(void)
 {
     return (char *)exploring_path;
 }
-
-
-

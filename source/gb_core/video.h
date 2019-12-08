@@ -21,7 +21,7 @@ void GB_ConfigLoadPalette(void);
 
 //----------------------------------------------------
 
-#define GB_RGB(r, g, b) ((r) | ((g) << 5)| ((b) << 10))
+#define GB_RGB(r, g, b) ((r) | ((g) << 5) | ((b) << 10))
 void GB_SetPalette(u32 red, u32 green, u32 blue);
 u32 GB_GameBoyGetGray(u32 number);
 

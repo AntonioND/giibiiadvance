@@ -19,8 +19,8 @@
 #include "general.h"
 #include "interrupts.h"
 #include "memory.h"
-#include "ppu_dmg.h"
 #include "ppu.h"
+#include "ppu_dmg.h"
 #include "serial.h"
 #include "sgb.h"
 #include "sound.h"
@@ -66,7 +66,7 @@ u32 GB_MemRead8_DMG_BootEnabled(u32 address)
             return mem->WorkRAM_Curr[address - 0xD000];
         case 0xE: // Echo RAM
             return (mem->WorkRAM[address - 0xE000]
-                   & GameBoy.Memory.MapperRead(address - 0xE000 + 0xA000));
+                    & GameBoy.Memory.MapperRead(address - 0xE000 + 0xA000));
         case 0xF:
             if (address < 0xFE00) // Echo RAM
             {
@@ -96,7 +96,8 @@ u32 GB_MemRead8_DMG_BootEnabled(u32 address)
         default:
             Debug_ErrorMsgArg("Read address %04X\n"
                               "PC: %04X\n"
-                              "ROM: %d", address, GameBoy.CPU.R16.PC,
+                              "ROM: %d",
+                              address, GameBoy.CPU.R16.PC,
                               GameBoy.Memory.selected_rom);
             return GB_MemReadReg8(address & 0xFFFF);
     }
@@ -136,7 +137,7 @@ u32 GB_MemRead8_DMG_BootDisabled(u32 address)
             return mem->WorkRAM_Curr[address - 0xD000];
         case 0xE: // Echo RAM
             return (mem->WorkRAM[address - 0xE000]
-                   & GameBoy.Memory.MapperRead(address - 0xE000 + 0xA000));
+                    & GameBoy.Memory.MapperRead(address - 0xE000 + 0xA000));
         case 0xF:
             if (address < 0xFE00) // Echo RAM
             {
@@ -165,7 +166,8 @@ u32 GB_MemRead8_DMG_BootDisabled(u32 address)
         default:
             Debug_ErrorMsgArg("Read address %04X\n"
                               "PC: %04X\n"
-                              "ROM: %d", address, GameBoy.CPU.R16.PC,
+                              "ROM: %d",
+                              address, GameBoy.CPU.R16.PC,
                               GameBoy.Memory.selected_rom);
             return GB_MemReadReg8(address & 0xFFFF);
     }
@@ -226,7 +228,7 @@ void GB_MemWrite8_DMG(u32 address, u32 value)
             {
 #ifdef VRAM_MEM_CHECKING
                 if (GameBoy.Emulator.lcd_on
-                                    && (GameBoy.Emulator.ScreenMode & 0x02))
+                    && (GameBoy.Emulator.ScreenMode & 0x02))
                 {
                     return;
                 }
@@ -256,7 +258,8 @@ void GB_MemWrite8_DMG(u32 address, u32 value)
         default:
             Debug_ErrorMsgArg("Wrote address %04x\n"
                               "PC: %04x\n"
-                              "ROM: %d", address, GameBoy.CPU.R16.PC,
+                              "ROM: %d",
+                              address, GameBoy.CPU.R16.PC,
                               GameBoy.Memory.selected_rom);
             GB_MemWrite8(address & 0xFFFF, value);
             return;
@@ -323,7 +326,7 @@ u32 GB_MemReadReg8_DMG(u32 address)
             GB_PPUUpdateClocksCounterReference(GB_CPUClockCounterGet());
             if (GameBoy.Emulator.lcd_on)
                 return mem->IO_Ports[STAT_REG - 0xFF00] | 0x80;
-            return (mem->IO_Ports[STAT_REG-0xFF00] | 0x80) & 0xFC;
+            return (mem->IO_Ports[STAT_REG - 0xFF00] | 0x80) & 0xFC;
 
         case LY_REG:
             if (GameBoy.Emulator.lcd_on)
@@ -342,7 +345,7 @@ u32 GB_MemReadReg8_DMG(u32 address)
         case NR43_REG:
         case NR50_REG:
         case NR51_REG:
-            return mem->IO_Ports[address-0xFF00];
+            return mem->IO_Ports[address - 0xFF00];
 
         case P1_REG:
             //GB_SGBUpdate(GB_CPUClockCounterGet()); TODO
@@ -524,7 +527,6 @@ void GB_MemWriteReg8_DMG(u32 address, u32 value)
             // Note: Writing to this register can trigger the joypad interrupt
             GB_CheckJoypadInterrupt();
             return;
-
 
         // Sound
         case NR10_REG:

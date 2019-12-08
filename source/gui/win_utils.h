@@ -12,7 +12,8 @@
 #define GUI_CONSOLE_MAX_WIDTH 150
 #define GUI_CONSOLE_MAX_HEIGHT 80
 
-typedef struct {
+typedef struct
+{
     int __console_chars_w;
     int __console_chars_h;
     char __console_buffer[GUI_CONSOLE_MAX_WIDTH * GUI_CONSOLE_MAX_HEIGHT];
@@ -53,20 +54,24 @@ typedef int (*_gui_int_arg_int_int_fn)(int, int);
 typedef void (*_gui_void_arg_pchar_int_fn)(char *, int);
 typedef int (*_gui_int_arg_sdl_event_fn)(SDL_Event *);
 
-typedef struct {
+typedef struct
+{
     int element_type;
     int x, y, w, h;
     union {
-        struct {
+        struct
+        {
             _gui_console *con;
             _gui_void_arg_int_int_fn mouse_press_callback; // Args -> x, y
         } textbox;
-        struct {
+        struct
+        {
             char name[60];
             _gui_void_arg_void_fn callback;
             int is_pressed;
         } button;
-        struct {
+        struct
+        {
             char name[60];
             _gui_void_arg_int_fn callback; // Arg -> btn_id of clicked button
             int is_pressed;
@@ -74,51 +79,60 @@ typedef struct {
             int btn_id; // Button ID inside group
             int is_enabled;
         } radiobutton;
-        struct {
+        struct
+        {
             char text[100];
         } label;
-        struct {
+        struct
+        {
             char *bitmap;
             _gui_int_arg_int_int_fn callback;
         } bitmap;
-        struct {
+        struct
+        {
             int enabled;
             void *gui; // Pointer to _gui
             char caption[100];
         } window;
-        struct {
+        struct
+        {
             int enabled;
             _gui_console *con;
             char caption[100];
         } messagebox;
-        struct {
+        struct
+        {
             int enabled;
             const char *text;
             char caption[100];
             int currentline; // Top line of the window
-            int numlines; // Counted number of lines
+            int numlines;    // Counted number of lines
             int max_drawn_lines;
         } scrollabletextwindow;
-        struct {
+        struct
+        {
             int is_vertical;
             int value;
             int value_min;
             int value_max;
             _gui_void_arg_int_fn callback; // Arg -> newvalue
         } scrollbar;
-        struct {
+        struct
+        {
             char label[100];
         } groupbox;
-        struct {
+        struct
+        {
             int checked;
             char label[100];
             _gui_void_arg_int_fn callback; // Arg -> 1 = is checked
         } checkbox;
-        struct {
+        struct
+        {
             // Return 1 if you want to redraw the GUI
             _gui_int_arg_sdl_event_fn callback;
         } inputget;
-    } info ;
+    } info;
 } _gui_element;
 
 //------------------------------------------------------------------------------
@@ -196,7 +210,8 @@ int GUI_ScrollableTextWindowGetEnabled(_gui_element *e);
 #define GUI_INPUTWINDOW_WIDTH   ((GUI_INPUTWINDOW_MAX_LEN + 2) * FONT_WIDTH)
 #define GUI_INPUTWINDOW_HEIGHT  50
 
-typedef struct {
+typedef struct
+{
     int enabled;
     char window_caption[GUI_INPUTWINDOW_MAX_LEN + 1];
     char input_text[GUI_INPUTWINDOW_MAX_LEN + 1];
@@ -217,18 +232,21 @@ int GUI_InputWindowSendEvent(_gui_inputwindow *win, SDL_Event *e);
 
 //------------------------------------------------------------------------------
 
-typedef struct {
+typedef struct
+{
     char *text;
     _gui_void_arg_void_fn callback;
     int enabled; // 1 -> enabled
 } _gui_menu_entry;
 
-typedef struct {
+typedef struct
+{
     char *title;
     _gui_menu_entry **entry;
 } _gui_menu_list;
 
-typedef struct {
+typedef struct
+{
     int element_opened;
     _gui_menu_list **list_entry;
 } _gui_menu;
@@ -239,7 +257,8 @@ typedef struct {
 
 //------------------------------------------------------------------------------
 
-typedef struct {
+typedef struct
+{
     _gui_element **elements;
     _gui_inputwindow *inputwindow;
     _gui_menu *menu;

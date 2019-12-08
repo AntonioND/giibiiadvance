@@ -111,9 +111,9 @@ void SGB_RenderScreenBuffer(void)
 
     u32 tile_count = 0;
     // Draw BG
-    for (int y = 0; y < 18; y ++)
+    for (int y = 0; y < 18; y++)
     {
-        for (int x = 0; x < 20; x ++)
+        for (int x = 0; x < 20; x++)
         {
             u32 tile = bgtilemap[(y * 32) + x];
 
@@ -290,8 +290,8 @@ static void SGB_ATTR_BLK(void)
         //Debug_DebugMsgArg("B:%d P:%d 1:%d,%d 2:%d,%d", curbyte, curpacket,
         //                  x1, y1, x2, y2);
 
-        if ((ctrl & (1 << 1)) || ((ctrl & 0x05) == 0x01) ||
-            ((ctrl & 0x05) == 0x04)) // Line
+        if ((ctrl & (1 << 1)) || ((ctrl & 0x05) == 0x01)
+            || ((ctrl & 0x05) == 0x04)) // Line
         {
             u32 pal;
 
@@ -309,12 +309,12 @@ static void SGB_ATTR_BLK(void)
             }
 
             // Draw lines...
-            for (int x = x1; x <= x2; x ++)
+            for (int x = x1; x <= x2; x++)
             {
                 SGBInfo.ATF_list[SGBInfo.curr_ATF][(y1 * 20) + x] = pal;
                 SGBInfo.ATF_list[SGBInfo.curr_ATF][(y2 * 20) + x] = pal;
             }
-            for (int y = y1; y <= y2; y ++)
+            for (int y = y1; y <= y2; y++)
             {
                 SGBInfo.ATF_list[SGBInfo.curr_ATF][(y * 20) + x1] = pal;
                 SGBInfo.ATF_list[SGBInfo.curr_ATF][(y * 20) + x2] = pal;
@@ -323,9 +323,9 @@ static void SGB_ATTR_BLK(void)
         if (ctrl & (1 << 0)) // Inside
         {
             u32 pal = palettes & 3;
-            for (int x = x1 + 1; x < x2; x ++)
+            for (int x = x1 + 1; x < x2; x++)
             {
-                for (int y = y1 + 1; y < y2; y ++)
+                for (int y = y1 + 1; y < y2; y++)
                 {
                     SGBInfo.ATF_list[SGBInfo.curr_ATF][(y * 20) + x] = pal;
                 }
@@ -334,9 +334,9 @@ static void SGB_ATTR_BLK(void)
         if (ctrl & (1 << 2)) // Outside
         {
             u32 pal = (palettes >> 4) & 3;
-            for (int x = 0; x < 20; x ++)
+            for (int x = 0; x < 20; x++)
             {
-                for (int y = 0; y < 18; y ++)
+                for (int y = 0; y < 18; y++)
                 {
                     if ((x < x1 || x > x2) && (y < y1 || y > y2))
                         SGBInfo.ATF_list[SGBInfo.curr_ATF][(y * 20) + x] = pal;
@@ -374,7 +374,7 @@ static void SGB_ATTR_LIN(void)
             if (coord > 17)
                 coord = 17;
 
-            for (int x = 0; x < 20; x ++)
+            for (int x = 0; x < 20; x++)
             {
                 SGBInfo.ATF_list[SGBInfo.curr_ATF][(coord * 20) + x] = pal;
             }
@@ -384,7 +384,7 @@ static void SGB_ATTR_LIN(void)
             if (coord > 19)
                 coord = 19;
 
-            for (int y = 0; y < 18; y ++)
+            for (int y = 0; y < 18; y++)
             {
                 SGBInfo.ATF_list[SGBInfo.curr_ATF][(y * 20) + coord] = pal;
             }
@@ -424,9 +424,9 @@ static void SGB_ATTR_DIV(void)
 
         u32 x_ = SGBInfo.data[0][2];
 
-        for (int x = 0; x < 20; x ++)
+        for (int x = 0; x < 20; x++)
         {
-            for (int y = 0; y < 18; y ++)
+            for (int y = 0; y < 18; y++)
             {
                 u32 pal = pal_line;
                 if (x_ < x)
@@ -539,9 +539,9 @@ static void SGB_PAL_TRN(void)
     {
         for (int j = 0; j < 8; j += 2)
         {
-           SGBInfo.snes_palette[i][j >> 1] =
-                            (u32)sgb_screenbuffer[(i * 8) + j]
-                            | ((u32)sgb_screenbuffer[(i * 8) + j + 1] << 8);
+            SGBInfo.snes_palette[i][j >> 1] =
+                    (u32)sgb_screenbuffer[(i * 8) + j]
+                    | ((u32)sgb_screenbuffer[(i * 8) + j + 1] << 8);
         }
     }
 }
@@ -594,7 +594,7 @@ static void SGB_CHR_TRN(void)
     SGB_RenderScreenBuffer();
 
     u32 *dest = SGBInfo.tile_data
-              + ((SGBInfo.data[0][1] & (1 << 0)) ?  0x1000 : 0);
+                + ((SGBInfo.data[0][1] & (1 << 0)) ? 0x1000 : 0);
 
     for (int i = 0; i < 0x1000; i++)
         dest[i] = sgb_screenbuffer[i];
@@ -610,14 +610,14 @@ static void SGB_PCT_TRN(void)
 
     for (int i = 0; i < 0x800; i += 2)
         dest[i >> 1] = (u32)sgb_screenbuffer[i]
-                     | ((u32)sgb_screenbuffer[i + 1] << 8);
+                       | ((u32)sgb_screenbuffer[i + 1] << 8);
 
     for (int i = 0x800; i < 0x880; i += 2)
     {
         u32 pal = ((i & 0xFF) >> 5) + 4;
         u32 color = (i >> 1) & 0xF;
         SGBInfo.palette[pal][color] = (u32)sgb_screenbuffer[i]
-                                    | ((u32)sgb_screenbuffer[i + 1] << 8);
+                                      | ((u32)sgb_screenbuffer[i + 1] << 8);
     }
 
     SGB_ScreenDrawBorder();
@@ -848,7 +848,7 @@ void SGB_WriteP1(u32 value)
                     {
                         SGBInfo.current_joypad = 0;
                     }
-                    if( (SGBInfo.multiplayer == 4) && (SGBInfo.current_joypad > 3) )
+                    if ((SGBInfo.multiplayer == 4) && (SGBInfo.current_joypad > 3))
                     {
                         SGBInfo.current_joypad = 0;
                     }
@@ -856,11 +856,11 @@ void SGB_WriteP1(u32 value)
                 }
                 return;
             }
-            else if(p14)
+            else if (p14)
             {
                 SGBInfo.read_joypad |= 1 << 4;
             }
-            else if(p15)
+            else if (p15)
             {
                 SGBInfo.read_joypad |= 1 << 5;
             }
@@ -886,7 +886,7 @@ void SGB_WriteP1(u32 value)
             return;
         }
     }
-    else if(SGBInfo.sending == 1)
+    else if (SGBInfo.sending == 1)
     {
         //if (SGBInfo.delay > 0)
         //    return;
@@ -953,7 +953,7 @@ void SGB_WriteP1(u32 value)
         if (p15 == 0)
         {
             SGBInfo.data[SGBInfo.currpacket][SGBInfo.currbyte] |=
-                                                        1 << SGBInfo.currbit;
+                    1 << SGBInfo.currbit;
         }
 
         SGBInfo.currbit++;

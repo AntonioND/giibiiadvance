@@ -98,7 +98,7 @@ static int _win_gb_camviewer_allphotos_bmp_callback(int x, int y)
     if (y >= ((32 + 8) * 5))
         y = ((32 + 8) * 5) - 1;
     int x_ = x / (32 + 8);
-    int y_ = y/ (32 + 8);
+    int y_ = y / (32 + 8);
 
     gb_cameraview_selected_photo_index = x_ + y_ * 6;
 
@@ -153,7 +153,6 @@ void Win_GB_GBCameraViewerUpdate(void)
     GB_Debug_GBCameraRetinaProcessedPrint(gb_camera_retina_processed_buffer,
                                           128, 112);
     GB_Debug_GBCameraPhotoPrint(gb_camera_scratch_photo_buffer, 128, 112, -1);
-
 }
 
 //----------------------------------------------------------------
@@ -292,8 +291,7 @@ int Win_GB_GBCameraViewerCreate(void)
 
     GUI_SetBitmap(&gb_camview_photos_all_bmp, 12, 18,
                   GB_CAMERA_ALLPHOTOS_BUFFER_WIDTH,
-                  GB_CAMERA_ALLPHOTOS_BUFFER_HEIGHT,
-                  gb_allphotos_buffer,
+                  GB_CAMERA_ALLPHOTOS_BUFFER_HEIGHT, gb_allphotos_buffer,
                   _win_gb_camviewer_allphotos_bmp_callback);
 
     GUI_SetBitmap(&gb_camview_photos_zoomed_bmp,
@@ -307,8 +305,8 @@ int Win_GB_GBCameraViewerCreate(void)
 
     //-------------------------------------------------------------------
 
-    GUI_SetGroupBox(&gb_camview_cam_output_groupbox, 406, 6,
-                    6 + 128 + 6, 366, "Webcam|Retina|RAM");
+    GUI_SetGroupBox(&gb_camview_cam_output_groupbox, 406, 6, 6 + 128 + 6, 366,
+                    "Webcam|Retina|RAM");
 
     GUI_SetBitmap(&gb_camview_webcam_output_bmp, 412, 18, 128, 112,
                   gb_camera_webcam_output_buffer, NULL);

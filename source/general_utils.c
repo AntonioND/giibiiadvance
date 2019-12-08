@@ -53,7 +53,7 @@ u64 asciihex_to_int(const char *text)
     }
 }
 
-u64 asciidec_to_int(const char * text)
+u64 asciidec_to_int(const char *text)
 {
     long int value = 0, i = 0;
     while (1)
@@ -88,14 +88,14 @@ void ScaleImage24RGB(int zoom, char *srcbuf, int srcw, int srch, char *dstbuf,
     //int destx = dest_x_offset;
     int desty = dest_y_offset;
 
-    for ( ; desty < dest_y_end; desty ++)
+    for (; desty < dest_y_end; desty++)
     {
         srcx = 0;
         int destx = dest_x_offset;
-        char * dstline = &(dstbuf[(desty * dstw + destx) * 3]);
-        char * srcline = &(srcbuf[(srcy * srcw + srcx) * 3]);
+        char *dstline = &(dstbuf[(desty * dstw + destx) * 3]);
+        char *srcline = &(srcbuf[(srcy * srcw + srcx) * 3]);
 
-        for ( ; destx < dest_x_end; destx++)
+        for (; destx < dest_x_end; destx++)
         {
             *dstline++ = *(srcline + 0);
             *dstline++ = *(srcline + 1);

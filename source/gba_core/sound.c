@@ -52,8 +52,10 @@ static s8 GBA_WavePattern[64];
 extern const u8 gb_noise_7[16]; // See gb_core/noise.c
 extern const u8 gb_noise_15[4096];
 
-typedef struct {
-    struct { // Tone & Sweep
+typedef struct
+{
+    struct // Tone & Sweep
+    {
         u16 reg[3];
 
         s32 freq;
@@ -78,13 +80,13 @@ typedef struct {
         u32 speakerright;
         u32 speakerleft;
 
-
         u32 running;
         u32 outfreq;
         u32 samplecount;
     } Chn1;
 
-    struct { // Tone
+    struct // Tone
+    {
         u16 reg[3];
 
         s32 freq;
@@ -102,13 +104,13 @@ typedef struct {
         u32 speakerright;
         u32 speakerleft;
 
-
         u32 running;
         u32 outfreq;
         u32 samplecount;
     } Chn2;
 
-    struct { // Wave Output
+    struct // Wave Output
+    {
         u16 reg[5];
 
         u32 playing;
@@ -123,7 +125,7 @@ typedef struct {
         u32 speakerright;
         u32 speakerleft;
 
-        int doublesize; // 0 - 1
+        int doublesize;     // 0 - 1
         int buffer_playing; // 0 - 1
         u8 wave_ram_buffer[2][16];
 
@@ -132,7 +134,8 @@ typedef struct {
         u32 samplecount;
     } Chn3;
 
-    struct { // Noise
+    struct // Noise
+    {
         u16 reg[5];
 
         u32 shift;
@@ -151,7 +154,6 @@ typedef struct {
         u32 speakerright;
         u32 speakerleft;
 
-
         int seed;
 
         u32 running;
@@ -160,7 +162,9 @@ typedef struct {
     } Chn4;
 
 #define FIFO_BUFFER_SIZE 128
-    struct { // DMA A
+
+    struct // DMA A
+    {
         int vol;
 
         u32 speakerright;
@@ -178,7 +182,8 @@ typedef struct {
         u32 running;
     } FifoA;
 
-    struct { // DMA B
+    struct // DMA B
+    {
         int vol;
 
         u32 speakerright;
@@ -395,7 +400,7 @@ void GBA_SoundInit(void)
     Sound.FifoA.running = 0;
     Sound.FifoB.running = 0;
 
-    for (int i = 0; i < 16; i+=2)
+    for (int i = 0; i < 16; i += 2)
     {
         Sound.Chn3.wave_ram_buffer[0][i] = 0x00;
         Sound.Chn3.wave_ram_buffer[0][i + 1] = 0xFF;
@@ -421,7 +426,7 @@ void GBA_SoundLoadWave(void)
 
         srcptr = Sound.Chn3.wave_ram_buffer[Sound.Chn3.buffer_playing];
 
-        for (int count = 0; count < 0x10; count ++)
+        for (int count = 0; count < 0x10; count++)
         {
             *bufferptr++ = (srcptr[count] & 0xF0) - 127;
             *bufferptr++ = ((srcptr[count] & 0x0F) << 4) - 127;
@@ -431,13 +436,13 @@ void GBA_SoundLoadWave(void)
     {
         u8 *srcptr = Sound.Chn3.wave_ram_buffer[Sound.Chn3.buffer_playing];
 
-        for (int count = 0; count < 0x10; count ++)
+        for (int count = 0; count < 0x10; count++)
         {
             *bufferptr++ = (srcptr[count] & 0xF0) - 127;
             *bufferptr++ = ((srcptr[count] & 0x0F) << 4) - 127;
         }
 
-        for (int count = 0; count < 0x10; count ++)
+        for (int count = 0; count < 0x10; count++)
         {
             *bufferptr++ = (srcptr[count] & 0xF0) - 127;
             *bufferptr++ = ((srcptr[count] & 0x0F) << 4) - 127;
@@ -529,7 +534,7 @@ void GBA_SoundMix(void)
     if (Sound.FifoA.running && (EmulatorConfig.chn_flags & 0x10))
     {
         int out_A = (int)(s8)Sound.FifoA.out_sample;
-        outvalue_left += out_A * Sound.leftvol_A * 256; // leftvol_A = 0..2
+        outvalue_left += out_A * Sound.leftvol_A * 256;   // leftvol_A = 0..2
         outvalue_right += out_A * Sound.rightvol_A * 256; // "* 2" ????
         //Debug_DebugMsgArg("%d - %d %d - %d %d", Sound.FifoA.out_sample,
         //                  Sound.leftvol_A, Sound.rightvol_A,
@@ -538,7 +543,7 @@ void GBA_SoundMix(void)
     if (Sound.FifoB.running && (EmulatorConfig.chn_flags & 0x20))
     {
         int out_B = (int)(s8)Sound.FifoB.out_sample;
-        outvalue_left += out_B * Sound.leftvol_B * 256; // leftvol_B = 0..2
+        outvalue_left += out_B * Sound.leftvol_B * 256;   // leftvol_B = 0..2
         outvalue_right += out_B * Sound.rightvol_B * 256; // "* 2" ????
     }
     // -128..128 * 0..2 * 256 = -65536 .. +65536
@@ -561,9 +566,9 @@ void GBA_SoundMix(void)
     outvalue_right >>= 1;
 
     Sound.buffer[Sound.buffer_next_input_sample++] =
-                            (outvalue_left * EmulatorConfig.volume) / 128;
+            (outvalue_left * EmulatorConfig.volume) / 128;
     Sound.buffer[Sound.buffer_next_input_sample++] =
-                            (outvalue_right * EmulatorConfig.volume) / 128;
+            (outvalue_right * EmulatorConfig.volume) / 128;
     Sound.buffer_next_input_sample &= GBA_BUFFER_SAMPLES - 1;
 }
 
@@ -583,7 +588,7 @@ u32 GBA_SoundUpdate(u32 clocks)
 
         //This is an ugly hack to make sound buffer not overflow or underflow...
         if (Sound.samples_left_to_output
-                    > Sound.samples_left_to_input - (GBA_BUFFER_SAMPLES / 2))
+            > Sound.samples_left_to_input - (GBA_BUFFER_SAMPLES / 2))
         {
             if (Sound.nextsample_clocks > (761 + 10))
             {
@@ -617,7 +622,7 @@ u32 GBA_SoundUpdate(u32 clocks)
         {
             if (Sound.Chn1.stepsleft > 0)
             {
-                Sound.Chn1.stepsleft --;
+                Sound.Chn1.stepsleft--;
             }
             else
             {
@@ -778,7 +783,7 @@ u32 GBA_SoundUpdate(u32 clocks)
         {
             if (Sound.Chn4.stepsleft > 0)
             {
-                Sound.Chn4.stepsleft --;
+                Sound.Chn4.stepsleft--;
             }
             else
             {
@@ -1084,7 +1089,7 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
             };
 
             Sound.Chn4.outfreq = NoiseFreqRatio[Sound.Chn4.freq_ratio]
-                                        >> (Sound.Chn4.shift + 1);
+                                 >> (Sound.Chn4.shift + 1);
 
             if (Sound.Chn4.outfreq > (1 << 18))
                 Sound.Chn4.outfreq = 1 << 18;
@@ -1337,7 +1342,7 @@ void GBA_SoundTimerCheck(int number)
             Sound.FifoB.cursample &= FIFO_BUFFER_SIZE - 1;
             Sound.FifoB.running = 1;
         }
-        if(Sound.FifoB.datalen <= 16) // Request data!!!
+        if (Sound.FifoB.datalen <= 16) // Request data!!!
             GBA_DMASoundRequestData(0, 1);
     }
 }

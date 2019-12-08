@@ -88,7 +88,8 @@ void GBA_UpdateDrawScanlineFn(void)
         case 7:
         default:
             // TODO: Check how this works in real hardware
-            DrawScanlineFn = &GBA_DrawScanlineMode3; break;
+            DrawScanlineFn = &GBA_DrawScanlineMode3;
+            break;
     }
 }
 
@@ -147,14 +148,14 @@ void GBA_DrawScanlineWhite(s32 y)
 u16 sprfb[4][240];
 int sprvisible[4][240];
 int sprwin[240];
-int sprblend[4][240]; // This sprite pixel is in blending mode
+int sprblend[4][240];   // This sprite pixel is in blending mode
 u16 sprblendfb[4][240]; // One line for each sprite priority
 
 static const int spr_size[4][4][2] = { // Inputs = [Shape][Size][{x, y}]
-    {{8, 8}, {16, 16}, {32, 32}, {64, 64}}, // Square
-    {{16, 8}, {32, 8}, {32, 16}, {64, 32}}, // Horizontal
-    {{8, 16}, {8, 32}, {16, 32}, {32, 64}}, // Vertical
-    {{0, 0}, {0, 0}, {0, 0}, {0, 0}} // Prohibited
+    { { 8, 8 }, { 16, 16 }, { 32, 32 }, { 64, 64 } }, // Square
+    { { 16, 8 }, { 32, 8 }, { 32, 16 }, { 64, 32 } }, // Horizontal
+    { { 8, 16 }, { 8, 32 }, { 16, 32 }, { 32, 64 } }, // Vertical
+    { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }        // Prohibited
 };
 
 static void gba_sprites_draw_mode012(s32 ly)
@@ -212,7 +213,7 @@ static void gba_sprites_draw_mode012(s32 ly)
                     {
                         if ((sprvisible[prio][j] == 0) || (mode == 2))
                         {
-                            int xdiff = j-cx;
+                            int xdiff = j - cx;
                             if (mosaic)
                                 xdiff = xdiff - xdiff % MosSprX;
 
@@ -242,7 +243,7 @@ static void gba_sprites_draw_mode012(s32 ly)
                                 }
 
                                 u8 *tile_ptr = (u8 *)&(Mem.vram[0x10000
-                                            + ((tilebaseno + tileadd) * 64)]);
+                                        + ((tilebaseno + tileadd) * 64)]);
 
                                 int _x = px & 7;
                                 int _y = py & 7;
@@ -368,13 +369,13 @@ static void gba_sprites_draw_mode012(s32 ly)
                 int y = (attr0 & 0xFF);
                 y |= (y < 160) ? 0 : 0xFFFFFF00;
                 int x = (int)(attr1 & 0x1FF)
-                      | ((attr1 & BIT(8)) ? 0xFFFFFE00 : 0);
+                        | ((attr1 & BIT(8)) ? 0xFFFFFE00 : 0);
 
                 if ((y <= ly) && ((y + sy) > ly)) // If in this line
                 {
                     int mode = (attr0 >> 10) & 3;
 
-                    int ydiff = ly-y;
+                    int ydiff = ly - y;
 
                     if (attr1 & BIT(13))
                         ydiff = sy - ydiff - 1; // V flip
@@ -441,7 +442,7 @@ static void gba_sprites_draw_mode012(s32 ly)
                                         sprfb[prio][j] = palptr[data];
                                         sprvisible[prio][j] = 1;
                                     }
-                                    else if (mode == 2) //3 = prohibited
+                                    else if (mode == 2) // 3 = prohibited
                                     {
                                         sprwin[j] = 1;
                                     }
@@ -450,7 +451,7 @@ static void gba_sprites_draw_mode012(s32 ly)
                             j++;
                         }
                     }
-                    else //16 colors
+                    else // 16 colors
                     {
                         u16 palno = attr2 >> 12;
                         u16 *palptr = (u16 *)&Mem.pal_ram[512 + (palno * 32)];
@@ -583,7 +584,7 @@ static void gba_sprites_draw_mode345(s32 ly)
                         {
                             int xdiff = j - cx;
                             if (mosaic)
-                                xdiff = xdiff - xdiff%MosSprX;
+                                xdiff = xdiff - xdiff % MosSprX;
 
                             // Get texture coordinates (relative to center)
                             u32 px = (mat->pa * xdiff + mat->pb * ydiff) >> 8;
@@ -635,7 +636,7 @@ static void gba_sprites_draw_mode345(s32 ly)
                                             sprfb[prio][j] = palptr[data];
                                             sprvisible[prio][j] = 1;
                                         }
-                                        else if (mode == 2) //3 = prohibited
+                                        else if (mode == 2) // 3 = prohibited
                                         {
                                             sprwin[j] = 1;
                                         }
@@ -744,7 +745,7 @@ static void gba_sprites_draw_mode345(s32 ly)
                 int y = (attr0 & 0xFF);
                 y |= (y < 160) ? 0 : 0xFFFFFF00;
                 int x = (int)(attr1 & 0x1FF)
-                      | ((attr1 & BIT(8)) ? 0xFFFFFE00 : 0);
+                        | ((attr1 & BIT(8)) ? 0xFFFFFE00 : 0);
 
                 if ((y <= ly) && ((y + sy) > ly)) // If in this line
                 {
@@ -761,11 +762,11 @@ static void gba_sprites_draw_mode345(s32 ly)
                     u16 prio = (attr2 >> 10) & 3;
                     u16 tilebaseno = attr2 & 0x3FF;
 
-                    if(attr0&BIT(13)) //256 colors
+                    if (attr0 & BIT(13)) // 256 colors
                     {
-                        tilebaseno >>= 1; //in 256 mode, they need double space
+                        tilebaseno >>= 1; // in 256 mode, they need double space
 
-                        u16 * palptr = (u16*)&(Mem.pal_ram[256*2]);
+                        u16 *palptr = (u16 *)&(Mem.pal_ram[256 * 2]);
 
                         int j = (x < 0) ? 0 : x; // Search start point
                         while (j < (x + sx) && (j < 240))
@@ -919,7 +920,7 @@ u16 backdrop[240];
 int backdropvisible[240]; // This array is filled in GBA_FillFadeTables()
 
 static const u32 text_bg_size[4][2] = {
-    {256, 256}, {512, 256}, {256, 512}, {512, 512}
+    { 256, 256 }, { 512, 256 }, { 256, 512 }, { 512, 512 }
 };
 
 static u32 se_index(u32 tx, u32 ty, u32 pitch) // From tonc
@@ -986,7 +987,8 @@ static void gba_bg0drawtext(s32 y)
         for (int i = 0; i < 240; i++)
         {
             startx = (sx + i) & maskx;
-            if (mosaic) startx -= startx % MosBgX;
+            if (mosaic)
+                startx -= startx % MosBgX;
 
             u32 index = se_index(startx / 8, starty / 8, sizex);
             u16 SE = scrbaseblockptr[index];
@@ -1003,10 +1005,10 @@ static void gba_bg0drawtext(s32 y)
 
             int _y = starty & 7;
             if (SE & BIT(11))
-                _y = 7-_y; // V flip
+                _y = 7 - _y; // V flip
 
-            u32 data = charbaseblockptr[((SE & 0x3FF) * 32)
-                                        + ((_x / 2) + (_y * 4))];
+            u32 data =
+                    charbaseblockptr[((SE & 0x3FF) * 32) + ((_x / 2) + (_y * 4))];
 
             if (_x & 1)
                 data = data >> 4;
@@ -1028,7 +1030,8 @@ static void gba_bg1drawtext(s32 y)
     u16 control = REG_BG1CNT;
 
     u8 *charbaseblockptr = (u8 *)&Mem.vram[((control >> 2) & 3) * (16 * 1024)];
-    u16 *scrbaseblockptr = (u16 *)&Mem.vram[((control >> 8) & 0x1F) * (2 * 1024)];
+    u16 *scrbaseblockptr =
+            (u16 *)&Mem.vram[((control >> 8) & 0x1F) * (2 * 1024)];
 
     u32 maskx = text_bg_size[control >> 14][0] - 1;
     u32 masky = text_bg_size[control >> 14][1] - 1;
@@ -1099,8 +1102,8 @@ static void gba_bg1drawtext(s32 y)
             if (SE & BIT(11))
                 _y = 7 - _y; // V flip
 
-            u32 data = charbaseblockptr[((SE & 0x3FF) * 32)
-                                        + ((_x / 2) + (_y * 4))];
+            u32 data =
+                    charbaseblockptr[((SE & 0x3FF) * 32) + ((_x / 2) + (_y * 4))];
 
             if (_x & 1)
                 data = data >> 4;
@@ -1122,7 +1125,8 @@ static void gba_bg2drawtext(s32 y)
     u16 control = REG_BG2CNT;
 
     u8 *charbaseblockptr = (u8 *)&Mem.vram[((control >> 2) & 3) * (16 * 1024)];
-    u16 *scrbaseblockptr = (u16 *)&Mem.vram[((control >> 8) & 0x1F) * (2 * 1024)];
+    u16 *scrbaseblockptr =
+            (u16 *)&Mem.vram[((control >> 8) & 0x1F) * (2 * 1024)];
 
     u32 maskx = text_bg_size[control >> 14][0] - 1;
     u32 masky = text_bg_size[control >> 14][1] - 1;
@@ -1170,7 +1174,7 @@ static void gba_bg2drawtext(s32 y)
             //startx = (startx + 1) & maskx;
         }
     }
-    else //16 colors
+    else // 16 colors
     {
         for (int i = 0; i < 240; i++)
         {
@@ -1195,8 +1199,8 @@ static void gba_bg2drawtext(s32 y)
             if (SE & BIT(11))
                 _y = 7 - _y; // V flip
 
-            u32 data = charbaseblockptr[((SE & 0x3FF) * 32)
-                                        + ((_x / 2) + (_y * 4))];
+            u32 data =
+                    charbaseblockptr[((SE & 0x3FF) * 32) + ((_x / 2) + (_y * 4))];
 
             if (_x & 1)
                 data = data >> 4;
@@ -1218,7 +1222,8 @@ static void gba_bg3drawtext(s32 y)
     u16 control = REG_BG3CNT;
 
     u8 *charbaseblockptr = (u8 *)&Mem.vram[((control >> 2) & 3) * (16 * 1024)];
-    u16 *scrbaseblockptr = (u16 *)&Mem.vram[((control >> 8) & 0x1F) * (2 * 1024)];
+    u16 *scrbaseblockptr =
+            (u16 *)&Mem.vram[((control >> 8) & 0x1F) * (2 * 1024)];
 
     u32 maskx = text_bg_size[control >> 14][0] - 1;
     u32 masky = text_bg_size[control >> 14][1] - 1;
@@ -1278,7 +1283,7 @@ static void gba_bg3drawtext(s32 y)
             // 0-9 tile id
             // 10-hflip
             // 11-vflip
-            //12-15-pal
+            // 12-15-pal
             u16 *palptr = (u16 *)&Mem.pal_ram[(SE >> 12) * (2 * 16)];
 
             int _x = startx & 7;
@@ -1289,8 +1294,8 @@ static void gba_bg3drawtext(s32 y)
             if (SE & BIT(11))
                 _y = 7 - _y; // V flip
 
-            u32 data = charbaseblockptr[((SE & 0x3FF) * 32)
-                                        + ((_x / 2)+(_y * 4))];
+            u32 data =
+                    charbaseblockptr[((SE & 0x3FF) * 32) + ((_x / 2) + (_y * 4))];
 
             if (_x & 1)
                 data = data >> 4;
@@ -1451,7 +1456,7 @@ static void gba_bg3drawaffine(s32 y)
         u32 _x = (currx >> 8);
         u32 _y = (curry >> 8);
 
-        if (!mosaic || ((i%MosBgX) == 0))
+        if (!mosaic || ((i % MosBgX) == 0))
         {
             data = 0;
             if (control & BIT(13)) // Wrap
@@ -1556,7 +1561,7 @@ static void gba_bg2drawbitmapmode5(unused__ s32 y)
     s32 currx = BG2lastx;
     s32 curry = BG2lasty;
 
-    u16 *srcptr = (u16*)&Mem.vram[((REG_DISPCNT & BIT(4)) ? 0xA000 : 0)];
+    u16 *srcptr = (u16 *)&Mem.vram[((REG_DISPCNT & BIT(4)) ? 0xA000 : 0)];
 
     // | PA PB |
     // | PC PD |
@@ -1599,7 +1604,8 @@ static void gba_video_all_buffers_clear(void)
 
 //------------------------------------------------------------------------------
 
-typedef enum {
+typedef enum
+{
     BG0 = 0,
     BG1,
     BG2,
@@ -1743,7 +1749,7 @@ static void gba_blit_layers(int y)
 {
     u16 *destptr = (u16 *)&screen_buffer[240 * y];
 
-    for (int i = 0; i < layer_active_num; i ++)
+    for (int i = 0; i < layer_active_num; i++)
     {
         u16 *dest = destptr;
 
@@ -2340,29 +2346,29 @@ void GBA_FillFadeTables(void)
 static u16 fade_white(u16 col, u16 evy)
 {
     return (white_table[(col >> 10) & 0x1F][evy] << 10)
-         | (white_table[(col >> 5) & 0x1F][evy] << 5)
-         | white_table[col & 0x1F][evy];
+           | (white_table[(col >> 5) & 0x1F][evy] << 5)
+           | white_table[col & 0x1F][evy];
 }
 static u16 fade_black(u16 col, u16 evy)
 {
     return (black_table[(col >> 10) & 0x1F][evy] << 10)
-         | (black_table[(col >> 5) & 0x1F][evy] << 5)
-         | black_table[col & 0x1F][evy];
+           | (black_table[(col >> 5) & 0x1F][evy] << 5)
+           | black_table[col & 0x1F][evy];
 }
 
 static u16 min(u16 a, u16 b)
 {
-    return (a < b) ? a : b ;
+    return (a < b) ? a : b;
 }
 
 static u16 blend(u16 col_1, u16 col_2, u16 eva, u16 evb)
 {
     u16 r = min(31, (((col_1 & 0x1F) * eva) >> 4)
-                    + (((col_2 & 0x1F) * evb) >> 4));
+                            + (((col_2 & 0x1F) * evb) >> 4));
     u16 g = min(31, ((((col_1 >> 5) & 0x1F) * eva) >> 4)
-                    + ((((col_2 >> 5) & 0x1F) * evb) >> 4));
+                            + ((((col_2 >> 5) & 0x1F) * evb) >> 4));
     u16 b = min(31, ((((col_1 >> 10) & 0x1F) * eva) >> 4)
-                    + ((((col_2 >> 10) & 0x1F) * evb) >> 4));
+                            + ((((col_2 >> 10) & 0x1F) * evb) >> 4));
     return (b << 10) | (g << 5) | r;
 }
 
@@ -2394,10 +2400,10 @@ static void gba_effects_apply(void)
         // priority
         for (int i = 0; i < 240; i++)
         {
-            if(sprvisible[l][i])
+            if (sprvisible[l][i])
             {
                 int k = l + 1;
-                for ( ; k < 4; k++)
+                for (; k < 4; k++)
                 {
                     sprvisible[k][i] = 0;
                     sprblend[k][i] = 0;
@@ -2421,7 +2427,7 @@ static void gba_effects_apply(void)
                 if (win_coloreffect_enable[i])
                 {
                     if (sprblend[0][i] | sprblend[1][i] | sprblend[2][i]
-                            | sprblend[3][i])
+                        | sprblend[3][i])
                     {
                         ret = 0;
                         break;
@@ -2506,9 +2512,10 @@ static void gba_effects_apply(void)
         // Disable blending for transparent sprites when a 1st-target visible
         // pixel of any layer has higher priority
         int already_first_target[240];
-        mem_clear_32((void *)already_first_target, sizeof(already_first_target));
+        mem_clear_32((void *)already_first_target,
+                     sizeof(already_first_target));
 
-        for (int l = (layer_active_num - 1); l >= 0; l --)
+        for (int l = (layer_active_num - 1); l >= 0; l--)
         {
             if (!((layer_id[l] >= SPR0) && (layer_id[l] <= SPR3)))
             {
@@ -2545,7 +2552,7 @@ static void gba_effects_apply(void)
                 {
                     // Search a non-transparent second target pixel
                     int k = l - 1;
-                    for ( ; k >= 0; k--)
+                    for (; k >= 0; k--)
                     {
                         if (layer_vis[k][i])
                         {
@@ -2583,9 +2590,9 @@ static void gba_effects_apply(void)
                     {
                         // Search a non-transparent second target pixel
                         int k = l - 1;
-                        for ( ; k >= 0; k--)
+                        for (; k >= 0; k--)
                         {
-                            if(layer_vis[k][i])
+                            if (layer_vis[k][i])
                             {
                                 // Blending is only applied if the two layers
                                 // are together, not if anything in between
@@ -2605,7 +2612,8 @@ static void gba_effects_apply(void)
                                     else
                                     {
                                         layer_fb[l][i] = blend(layer_fb[l][i],
-                                                    layer_fb[k][i], eva, evb);
+                                                               layer_fb[k][i],
+                                                               eva, evb);
                                     }
                                 }
                                 break;
@@ -2654,7 +2662,7 @@ static void gba_effects_apply(void)
             }
         }
     }
-    if (mode ==3) // Black
+    if (mode == 3) // Black
     {
         u32 evy = REG_BLDY & 0x1F;
         if (evy > 16)
@@ -2700,7 +2708,7 @@ static void gba_greenswap_apply(int y)
 {
     if (REG_GREENSWAP & 1)
     {
-        u16 *destptr = (u16*)&screen_buffer[240 * y];
+        u16 *destptr = (u16 *)&screen_buffer[240 * y];
         for (int i = 0; i < 240; i += 2)
         {
             u16 pix1 = *destptr;
@@ -2891,7 +2899,7 @@ void GBA_VideoUpdateRegister(u32 address)
         case BG2Y_L:
         case BG2Y_H:
             BG2lasty = REG_BG2Y;
-            if (BG2lasty&BIT(27))
+            if (BG2lasty & BIT(27))
                 BG2lasty |= 0xF0000000;
             break;
 
@@ -2974,9 +2982,9 @@ void GBA_ConvertScreenBufferTo32RGB(void *dst)
     {
         u32 data = (u32)*src++;
         *dest++ = ((data & 0x1F) << 3)
-                | ((data & (0x1F << 5)) << 6)
-                | ((data & (0x1F << 10)) << 9)
-                | (0xFF << 24);
+                  | ((data & (0x1F << 5)) << 6)
+                  | ((data & (0x1F << 10)) << 9)
+                  | (0xFF << 24);
     }
 }
 

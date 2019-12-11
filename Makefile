@@ -198,7 +198,7 @@ $(BUILDDIR)/%.o : $(SOURCEDIR)/%.cpp
 # Targets
 # -------
 
-.PHONY: all clean bin dump
+.PHONY: all clean dump
 
 ELF	:= $(NAME)
 DUMP	:= $(NAME).dump

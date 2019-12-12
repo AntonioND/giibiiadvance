@@ -114,6 +114,7 @@ void FileLoad_NoError(const char *filename, void **buffer, unsigned int *size_)
     if (fread(*buffer, size, 1, f) != 1)
     {
         fclose(f);
+        free(*buffer);
         return;
     }
 
@@ -160,6 +161,7 @@ void FileLoad(const char *filename, void **buffer, unsigned int *size_)
     {
         Debug_ErrorMsgArg("Error while reading: %s", filename);
         fclose(f);
+        free(*buffer);
         return;
     }
 

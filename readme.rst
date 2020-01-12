@@ -1,9 +1,9 @@
 GiiBiiAdvance
 =============
 
-Another GB, GBC and GBA emulator writen in C. By Antonio Niño Díaz (AntonioND).
-It's licensed under the GPL v2 license. The source code is available
-`in GitHub <https://github.com/AntonioND/giibiiadvance>`_.
+Another GB, GBC and GBA cross-platform emulator writen in C. By Antonio Niño
+Díaz (AntonioND). It's licensed under the GPL v2 license. The source code is
+available `in GitHub <https://github.com/AntonioND/giibiiadvance>`_.
 
 This is an emulator I started several years ago. I didn't release any version in
 a few years after 0.1.0. At some point I did some changes that improved
@@ -32,16 +32,19 @@ My website: www.skylyrac.net
 Build instructions (Linux)
 --------------------------
 
-This program depends on SDL2, libpng and zlib.
+This program depends on CMake, SDL2, libpng and zlib.
 
 .. code:: bash
 
-    sudo apt install libsdl2-dev libpng-dev
+    sudo apt install cmake libsdl2-dev libpng-dev
 
 In order to built the program with the default set of options, type:
 
 .. code:: bash
 
+    mkdir build
+    cd build
+    cmake ..
     make
 
 To build it faster, do a parallel build with:
@@ -51,17 +54,14 @@ To build it faster, do a parallel build with:
     make -j`nproc`
 
 If you want to build the emulator with GB Camera support, you need to install
-OpenCV 4 as well as the other libraries:
+OpenCV 4 as well:
 
 .. code:: bash
 
     sudo apt install libopencv-dev
 
-Then, build it with:
-
-.. code:: bash
-
-    make -j`nproc` ENABLE_OPENCV=1
+CMake will detect it during the build process and compile the emulator with Game
+Boy Camera support.
 
 Planned features:
 -----------------

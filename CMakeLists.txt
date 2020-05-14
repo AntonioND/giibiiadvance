@@ -150,7 +150,7 @@ else()
     )
 endif()
 
-# OpenCV is optional. It can be used as library to output graphics.
+# OpenGL is optional. It can be used as library to output graphics.
 
 find_package(OpenGL)
 

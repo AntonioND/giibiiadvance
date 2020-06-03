@@ -35,6 +35,13 @@ elseif(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
     )
 endif()
 
+if(WIN32)
+    target_sources(giibiiadvance
+        PRIVATE
+            windows_resources/resource.rc
+    )
+endif()
+
 target_sources(giibiiadvance
     PRIVATE
         source/config.c

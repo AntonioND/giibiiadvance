@@ -6,7 +6,7 @@
 
 #include <windows.h>
 
-#include "../build_options.h"
+#include "../source/build_options.h"
 
 // Setup the .exe icon
 MAINICON ICON "icon.ico"

@@ -6,7 +6,9 @@ Version 0.3.0
 
 General
 
-- Changed GPL v3 license by GPL v2.
+- The build system is now CMake, tested on Windows and Linux.
+- Replaced GPL v3 license by GPL v2.
+- General code cleanup.
 - Added a lot of documentation about GB hardware. [GB]
 - Controls can be configured.
 - Support for game controllers.

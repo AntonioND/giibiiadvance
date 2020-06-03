@@ -149,7 +149,7 @@ void GBA_Screenshot(void)
     free(buffer);
 }
 
-static s32 min(s32 a, s32 b)
+static s32 min_(s32 a, s32 b)
 {
     return ((a < b) ? a : b);
 }
@@ -200,11 +200,11 @@ u32 GBA_RunFor(s32 totalclocks)
 
         clocks_to_next_event = GBA_UpdateScreenTimings(executedclocks);
         int tmp = GBA_DMAUpdate(executedclocks);
-        clocks_to_next_event = min(tmp, clocks_to_next_event);
+        clocks_to_next_event = min_(tmp, clocks_to_next_event);
         tmp = GBA_TimersUpdate(executedclocks);
-        clocks_to_next_event = min(tmp, clocks_to_next_event);
+        clocks_to_next_event = min_(tmp, clocks_to_next_event);
         tmp = GBA_SoundUpdate(executedclocks);
-        clocks_to_next_event = min(tmp, clocks_to_next_event);
+        clocks_to_next_event = min_(tmp, clocks_to_next_event);
         // Check if any other event is going to happen before
 
         totalclocks -= executedclocks;
@@ -243,11 +243,11 @@ u32 GBA_RunFor(s32 totalclocks)
         }
 
         clocks_to_next_event = GBA_UpdateScreenTimings(executedclocks);
-        clocks_to_next_event = min(GBA_DMAUpdate(executedclocks),
+        clocks_to_next_event = min_(GBA_DMAUpdate(executedclocks),
                                    clocks_to_next_event);
-        clocks_to_next_event = min(GBA_TimersUpdate(executedclocks),
+        clocks_to_next_event = min_(GBA_TimersUpdate(executedclocks),
                                    clocks_to_next_event);
-        clocks_to_next_event = min(GBA_SoundUpdate(executedclocks),
+        clocks_to_next_event = min_(GBA_SoundUpdate(executedclocks),
                                    clocks_to_next_event);
         // Check if other events are going to happen earlier
 

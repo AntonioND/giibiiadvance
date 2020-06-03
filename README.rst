@@ -91,8 +91,8 @@ used. If not, the emulator won't have webcam support.
     .\vcpkg install opencv4 --triplet x64-windows
 
 In order to build GiiBiiAdvance with the default set of options, type the
-following commands (replacing the path to the ``vcpkg`` folder by the one in
-your system):
+following commands in a Visual Studio command line shell (replacing the path to
+the ``vcpkg`` folder by the one in your system):
 
 .. code:: bash
 

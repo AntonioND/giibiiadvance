@@ -11,7 +11,12 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <time.h>
-#include <unistd.h>
+
+#if defined(_MSC_VER)
+# include <windows.h>
+#else
+# include <unistd.h>
+#endif
 
 #include "build_options.h"
 #include "debug_utils.h"
@@ -180,8 +185,59 @@ int FileExists(const char *filename)
 
 //-------------------------------------------------
 
+int PathIsDir(char *path)
+{
+#if defined(_MSC_VER)
+    HANDLE hFind;
+    WIN32_FIND_DATA FindFileData;
+
+    hFind = FindFirstFile(path, &FindFileData);
+    if (hFind == INVALID_HANDLE_VALUE)
+    {
+        return 0;
+    }
+
+    int isdir = FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
+
+    FindClose(hFind);
+
+    if (isdir)
+        return 1;
+
+    return 0;
+#else
+    struct stat statbuf;
+    stat(path, &statbuf);
+
+    if (S_ISDIR(statbuf.st_mode))
+        return 1;
+
+    return 0;
+#endif
+}
+
 int DirCheckExistence(char *path)
 {
+#if defined(_MSC_VER)
+    HANDLE hFind;
+    WIN32_FIND_DATA FindFileData;
+
+    hFind = FindFirstFile(path, &FindFileData);
+    if (hFind == INVALID_HANDLE_VALUE)
+    {
+        return 0;
+    }
+
+    int isdir = FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
+
+    FindClose(hFind);
+
+    if (isdir)
+        return 1;
+
+    Debug_ErrorMsgArg("Not a directory, but a file: %s", path);
+    return 0;
+#else
     struct stat s;
     int err = stat(path, &s);
     if (err == -1)
@@ -209,6 +265,7 @@ int DirCheckExistence(char *path)
             return 0; // Exists but it isn't a directory
         }
     }
+#endif
 }
 
 int DirCreate(char *path)

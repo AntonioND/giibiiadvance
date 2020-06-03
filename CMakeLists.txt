@@ -18,14 +18,20 @@ set(C_STANDARD_REQUIRED ON)
 
 add_executable(giibiiadvance)
 
-# This isn't meant to be generic, it's only here to help during development.
-if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+# Some compiler-specific options
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
     target_compile_options(giibiiadvance
         PRIVATE
             -Wall
             -Wformat-truncation=0
             -Wextra
             -Wno-sign-compare
+    )
+elseif(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+    target_compile_definitions(giibiiadvance
+        PRIVATE
+            -D_USE_MATH_DEFINES
+            -D_CRT_SECURE_NO_WARNINGS
     )
 endif()
 
@@ -110,19 +116,30 @@ target_sources(giibiiadvance
 
 # libpng and SLD2 are required
 
-find_package(PNG REQUIRED)
 find_package(SDL2 REQUIRED)
 
-target_include_directories(giibiiadvance
-    PRIVATE
-        ${PNG_INCLUDE_DIRS}
-        ${SDL2_INCLUDE_DIRS}
-)
-target_link_libraries(giibiiadvance
-    PRIVATE
-        ${PNG_LIBRARIES}
-        ${SDL2_LIBRARIES}
-)
+if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+    find_package(libpng REQUIRED)
+
+    target_link_libraries(giibiiadvance
+        PRIVATE
+            png
+            SDL2::SDL2 SDL2::SDL2main
+    )
+else()
+    find_package(PNG REQUIRED)
+
+    target_include_directories(giibiiadvance
+        PRIVATE
+            ${PNG_INCLUDE_DIRS}
+            ${SDL2_INCLUDE_DIRS}
+    )
+    target_link_libraries(giibiiadvance
+        PRIVATE
+            ${PNG_LIBRARIES}
+            ${SDL2_LIBRARIES}
+    )
+endif()
 
 # OpenCV is optional. If found, let the user build with GB Camera emulation.
 
@@ -135,14 +152,21 @@ else()
 endif()
 
 if(ENABLE_CAMERA)
-    target_include_directories(giibiiadvance
-        PRIVATE
-            ${OpenCV_INCLUDE_DIRS}
-    )
-    target_link_libraries(giibiiadvance
-        PRIVATE
-            ${OpenCV_LIBRARIES}
-    )
+    if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+        target_link_libraries(giibiiadvance
+            PRIVATE
+                opencv_videoio
+        )
+    else()
+        target_include_directories(giibiiadvance
+            PRIVATE
+                ${OpenCV_INCLUDE_DIRS}
+        )
+        target_link_libraries(giibiiadvance
+            PRIVATE
+                ${OpenCV_LIBRARIES}
+        )
+    endif()
 else()
     target_compile_definitions(giibiiadvance
         PRIVATE
@@ -177,11 +201,14 @@ endif()
 
 # In x86 CPUs, replace part of the CPU interpreter by inline assembly.
 
-option(ENABLE_ASM_X86 "Compile with inline assembly" ON)
+if(NOT CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+    # This isn't compatible with MSVC
+    option(ENABLE_ASM_X86 "Compile with inline assembly" ON)
 
-if(ENABLE_ASM_X86)
-    target_compile_definitions(giibiiadvance
-        PRIVATE
-            -DENABLE_ASM_X86
-    )
+    if(ENABLE_ASM_X86)
+        target_compile_definitions(giibiiadvance
+            PRIVATE
+                -DENABLE_ASM_X86
+        )
+    endif()
 endif()

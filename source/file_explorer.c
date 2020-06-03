@@ -5,14 +5,20 @@
 // GiiBiiAdvance - GBA/GB emulator
 
 #include <ctype.h>
-#include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 
+#if defined(_MSC_VER)
+# include <windows.h>
+#else
+# include <dirent.h>
+#endif
+
 #include "build_options.h"
 #include "general_utils.h"
+#include "file_utils.h"
 
 static int _file_explorer_is_valid_rom_type(char *name)
 {
@@ -175,13 +181,70 @@ int FileExplorer_LoadFolder(void)
 
     FileExplorer_ListFree();
 
+#if defined(_MSC_VER)
+    HANDLE hFind;
+    WIN32_FIND_DATA FindFileData;
+
+    char exploring_regex[MAX_PATHLEN + 2];
+    s_strncpy(exploring_regex, exploring_path, sizeof(exploring_regex));
+    s_strncat(exploring_regex, "\\*", sizeof(exploring_regex));
+
+    // Get number of files...
+    unsigned int count = 0;
+
+    hFind = FindFirstFile(exploring_regex, &FindFileData);
+    if (hFind == INVALID_HANDLE_VALUE)
+    {
+        FileExplorer_ListInit(1);
+        FileExplorer_ListAdd("..", 1);
+        return 1;
+    }
+
+    do
+    {
+        count++;
+    }
+    while (FindNextFile(hFind, &FindFileData));
+
+    FindClose(hFind);
+
+    if (count == 0)
+    {
+        FileExplorer_ListInit(1);
+        FileExplorer_ListAdd("..", 1);
+        return 1;
+    }
+
+    hFind = FindFirstFile(exploring_regex, &FindFileData);
+    if (hFind == INVALID_HANDLE_VALUE)
+    {
+        FileExplorer_ListInit(1);
+        FileExplorer_ListAdd("..", 1);
+        return 1;
+    }
+
+    // Allocate enough space and get information...
+    FileExplorer_ListInit(count);
+    FileExplorer_ListAdd("..", 1); // Make it go always first
+
+    do
+    {
+        int isdir = FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
+        FileExplorer_ListAdd(FindFileData.cFileName, isdir != 0);
+    }
+    while (FindNextFile(hFind, &FindFileData));
+
+    FindClose(hFind);
+
+    return filenum;
+#else
     DIR *pdir;
 
     pdir = opendir(exploring_path);
     if (pdir == NULL)
     {
         FileExplorer_ListInit(1);
-        FileExplorer_ListAdd("..", 1); // HACK
+        FileExplorer_ListAdd("..", 1);
         return 1;
     }
 
@@ -202,7 +265,7 @@ int FileExplorer_LoadFolder(void)
     if (count == 0)
     {
         FileExplorer_ListInit(1);
-        FileExplorer_ListAdd("..", 1); // HACK
+        FileExplorer_ListAdd("..", 1);
         return 1;
     }
 
@@ -230,6 +293,7 @@ int FileExplorer_LoadFolder(void)
     closedir(pdir);
 
     return filenum;
+#endif
 }
 
 void FileExplorer_GoUp(void)
@@ -266,11 +330,8 @@ int FileExplorer_SelectEntry(char *file)
 
     char file_path[MAX_PATHLEN];
     snprintf(file_path, sizeof(file_path), "%s%s", exploring_path, file);
-    struct stat statbuf;
-    stat(file_path, &statbuf);
-    //Debug_DebugMsgArg("stat(%s)", file_path);
 
-    if (S_ISDIR(statbuf.st_mode))
+    if (PathIsDir(file_path))
     {
         char separator_str[2];
         separator_str[0] = GetFolderSeparator(exploring_path);

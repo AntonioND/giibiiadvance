@@ -18,7 +18,11 @@ typedef signed char s8;
 
 #define BIT(n) (1 << (n))
 
-#define unused__ __attribute__((unused))
+#if defined(_MSC_VER)
+# define unused__
+#else
+# define unused__ __attribute__((unused))
+#endif
 
 // Safe versions of strncpy and strncat that set a terminating character if
 // needed.

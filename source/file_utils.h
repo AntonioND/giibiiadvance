@@ -17,6 +17,8 @@ void FileLoad(const char *filename, void **buffer, unsigned int *size_);
 
 int FileExists(const char *filename); // Returns 1 if file exists
 
+int PathIsDir(char *path); // Returns 1 if path is a directory
+
 int DirCheckExistence(char *path);
 int DirCreate(char *path);
 

@@ -113,7 +113,7 @@ void closewavfile(void)
 
     //https://ccrma.stanford.edu/courses/422/projects/WaveFormat/
 
-    struct PACKED {
+    struct {
         u32 riff_;
         u32 size;
         u32 wave_;

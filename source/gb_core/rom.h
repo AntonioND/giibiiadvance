@@ -9,7 +9,8 @@
 
 #include "gameboy.h"
 
-typedef struct PACKED
+#pragma pack(push, 1)
+typedef struct
 {
     u8 padding[0x100];
     u8 entrypoint[4]; // Usually NOP + JP nn
@@ -58,6 +59,7 @@ typedef struct PACKED
     // checksum bytes). The Gameboy doesn't verify this checksum.
 
 } _GB_ROM_HEADER_;
+#pragma pack(pop)
 
 int GB_ShowConsoleRequested(void);
 int GB_CartridgeLoad(const u8 *pointer, const u32 rom_size);

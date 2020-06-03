@@ -93,10 +93,6 @@
 #define F_SUBTRACT  (1 << 6)
 #define F_ZERO      (1 << 7)
 
-#ifndef PACKED
-# define PACKED __attribute__ ((packed))
-#endif
-
 #define KEY_A       BIT(0)
 #define KEY_B       BIT(1)
 #define KEY_SELECT  BIT(2)
@@ -108,8 +104,9 @@
 
 #define KEY_SPEEDUP BIT(10)
 
+#pragma pack(push, 1)
 typedef union {
-    struct PACKED
+    struct
     {
         u8 F, A; // F can't be accesed by CPU in a normal way
         u8 dummy1[2];
@@ -124,7 +121,7 @@ typedef union {
         u8 PCL, PCH;
         u8 dummy6[2];
     } R8;
-    struct PACKED
+    struct
     {
         u32 AF;
         u32 BC;
@@ -133,7 +130,7 @@ typedef union {
         u32 SP; // Stack Pointer
         u32 PC; // Program Counter
     } R16;
-    struct PACKED
+    struct
     {
         u8   zero : 4;
         bool C    : 1; // carry
@@ -142,6 +139,7 @@ typedef union {
         bool Z    : 1; // zero
     } F;
 } _GB_CPU_;
+#pragma pack(pop)
 
 //------------------------------------------------------------------------------
 //--                                                                          --
@@ -149,18 +147,22 @@ typedef union {
 //--                                                                          --
 //------------------------------------------------------------------------------
 
-typedef struct PACKED
+#pragma pack(push, 1)
+typedef struct
 {
     u8 Y;
     u8 X;
     u8 Tile;
     u8 Info;
 } _GB_OAM_ENTRY_;
+#pragma pack(pop)
 
-typedef struct PACKED
+#pragma pack(push, 1)
+typedef struct
 {
     _GB_OAM_ENTRY_ Sprite[40];
 } _GB_OAM_;
+#pragma pack(pop)
 
 typedef void (*mapper_write_fn)(u32, u32); // address, value
 typedef u32 (*mapper_read_fn)(u32);

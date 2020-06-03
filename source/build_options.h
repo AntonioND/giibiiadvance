@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 //
-// Copyright (c) 2011-2015, 2019, Antonio Niño Díaz
+// Copyright (c) 2011-2015, 2019-2020, Antonio Niño Díaz
 //
 // GiiBiiAdvance - GBA/GB emulator
 
@@ -22,15 +22,17 @@
 #define GIIBIIADVANCE_VERSION_MAJOR (0)
 #define GIIBIIADVANCE_VERSION_MINOR (2)
 #define GIIBIIADVANCE_VERSION_PATCH (0)
-#define GIIBIIADVANCE_VERSION                                                 \
+#define GIIBIIADVANCE_VERSION \
     ((GIIBIIADVANCE_VERSION_MAJOR << 16) | (GIIBIIADVANCE_VERSION_MINOR << 8) \
      | (GIIBIIADVANCE_VERSION_PATCH))
 
 #define GIIBIIADVANCE_VERSION_STRING "0.2.X"
 
-#define GIIBIIADVANCE_COPYRIGHT_STRING "Copyright (C) 2011-2015 Antonio Niño Díaz (AntonioND)"
-#define GIIBIIADVANCE_COPYRIGHT_STRING_ASCII "Copyright (C) 2011-2015 Antonio Ni" STR_NTILDE_MINUS "o D" \
-                                                STR_IACUTE_MINUS "az (AntonioND)"
+#define GIIBIIADVANCE_COPYRIGHT_STRING \
+    "Copyright (C) 2011-2015, 2019-2020 Antonio Niño Díaz (AntonioND)"
+#define GIIBIIADVANCE_COPYRIGHT_STRING_ASCII \
+    "Copyright (C) 2011-2015, 2019-2020 Antonio Ni" STR_NTILDE_MINUS "o D" \
+    STR_IACUTE_MINUS "az (AntonioND)"
 
 //---------------------------------------------------------------
 //----------------------- EMULATOR DEFINES ----------------------

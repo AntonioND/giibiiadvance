@@ -61,7 +61,14 @@ int Save_PNG(const char *file_name, int width, int height, void *buffer,
 
     png_init_io(png_ptr, fp);
 
-    png_bytep row_pointers[height];
+    // This size should be more than enough for most cases
+#define MAX_ROWS (1024 * 1024)
+    if (height > MAX_ROWS)
+    {
+        Debug_LogMsgArg("%s: height is too big (%d)", __func__, height);
+        return 1;
+    }
+    png_bytep row_pointers[MAX_ROWS];
 
     if (save_alpha)
     {

@@ -426,7 +426,7 @@ static void _win_gba_sprviewer_zoomed_dump_btn_callback(void)
     int sx = spr_size[shape][size][0];
     int sy = spr_size[shape][size][1];
 
-    char buf[sx * sy * 4];
+    char buf[64 * 64 * 4]; // Max possible size of a sprite
     GBA_Debug_PrintZoomedSpriteAt(gba_sprview_selected_spr, 1, buf,
                                   sx, sy, 0, 0, sx, sy);
 

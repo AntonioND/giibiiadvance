@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #ifdef OPENGL_BLIT
 #include <SDL_opengl.h>
 #endif

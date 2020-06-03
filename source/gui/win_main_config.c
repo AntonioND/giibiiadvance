@@ -6,7 +6,7 @@
 
 #include <string.h>
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 #include "win_main.h"
 #include "win_main_config.h"

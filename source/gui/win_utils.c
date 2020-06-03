@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 #include "win_utils.h"
 #include "win_utils_draw.h"

@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 #include "debug_utils.h"
 #include "input_utils.h"

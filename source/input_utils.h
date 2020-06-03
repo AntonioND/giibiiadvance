@@ -7,7 +7,7 @@
 #ifndef INPUT_UTILS__
 #define INPUT_UTILS__
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 typedef enum
 {

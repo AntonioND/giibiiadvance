@@ -7,7 +7,7 @@
 #ifndef WIN_UTILS__
 #define WIN_UTILS__
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 #define GUI_CONSOLE_MAX_WIDTH 150
 #define GUI_CONSOLE_MAX_HEIGHT 80

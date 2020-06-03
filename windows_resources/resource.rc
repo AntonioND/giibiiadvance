@@ -36,9 +36,10 @@ FILETYPE VFT_APP
     }
     BLOCK "VarFileInfo"
     {
-        VALUE "Translation", 0x0809, 1252 // Language codes
+        VALUE "Translation", 0x0809, 1200 // Language codes
         // 0x0809 = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_UK) -- in <winnt.h>
         // 0x0409 = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US)
+        // 1200 = Unicode
         // 1252 = Windows ANSI codepage
     }
 }

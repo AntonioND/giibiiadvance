@@ -29,8 +29,8 @@ you have a webcam)! :) More information aobut the GB Camera hardware
 
 My website: www.skylyrac.net
 
-Build instructions (Linux)
---------------------------
+Build instructions for Linux
+----------------------------
 
 This program depends on CMake, SDL2, libpng and zlib.
 
@@ -38,7 +38,15 @@ This program depends on CMake, SDL2, libpng and zlib.
 
     sudo apt install cmake libsdl2-dev libpng-dev
 
-In order to built the program with the default set of options, type:
+If you want to build the emulator with GB Camera support, you need to install
+OpenCV 4 as well. If OpenCV is detected during the build process, it will be
+used. If not, the emulator won't have webcam support.
+
+.. code:: bash
+
+    sudo apt install libopencv-dev
+
+In order to build GiiBiiAdvance with the default set of options, type:
 
 .. code:: bash
 
@@ -53,15 +61,48 @@ To build it faster, do a parallel build with:
 
     make -j`nproc`
 
-If you want to build the emulator with GB Camera support, you need to install
-OpenCV 4 as well:
+Build instructions for Windows (Microsoft Visual Studio)
+--------------------------------------------------------
+
+In order to build with MinGW or Cygwin, you should use the Linux instructions.
+The following instructions have been tested with Microsoft Visual C++ 2019.
+
+You need to install `vcpkg`_. In short, open a PowerShell window and do:
 
 .. code:: bash
 
-    sudo apt install libopencv-dev
+    git clone https://github.com/Microsoft/vcpkg.git
+    cd vcpkg
+    .\bootstrap-vcpkg.bat
+    .\vcpkg integrate install --triplet x64-windows
 
-CMake will detect it during the build process and compile the emulator with Game
-Boy Camera support.
+This program depends on CMake, SDL2, libpng and zlib:
+
+.. code:: bash
+
+    .\vcpkg install SDL2 libpng --triplet x64-windows
+
+If you want to build the emulator with GB Camera support, you need to install
+OpenCV 4 as well. If OpenCV is detected during the build process, it will be
+used. If not, the emulator won't have webcam support.
+
+.. code:: bash
+
+    .\vcpkg install opencv4 --triplet x64-windows
+
+In order to build GiiBiiAdvance with the default set of options, type the
+following commands (replacing the path to the ``vcpkg`` folder by the one in
+your system):
+
+.. code:: bash
+
+    mkdir build
+    cd build
+    cmake .. -DCMAKE_TOOLCHAIN_FILE=C:\...\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows
+    msbuild GiiBiiAdvance.sln
+
+Instead of running msbuild from the command line, you can also open the solution
+file with Visual Studio and build it from the IDE.
 
 Planned features:
 -----------------
@@ -87,3 +128,5 @@ Planned features:
   - Fix broken x86 ASM instructions of GBA emulation in Linux. ``setc (%%ebx)``
     seems to be the problem...
   - HuC3, MMM01 and TAMA5 mappers for GB.
+
+.. _vcpkg: https://github.com/microsoft/vcpkg

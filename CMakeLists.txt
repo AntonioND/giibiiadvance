@@ -9,11 +9,11 @@ project(GiiBiiAdvance)
 enable_language(CXX C)
 
 set(CXX_STANDARD 14)
-set(CXX_EXTENSIONS ON)
+set(CXX_EXTENSIONS OFF)
 set(CXX_STANDARD_REQUIRED ON)
 
 set(C_STANDARD 11)
-set(C_EXTENSIONS ON)
+set(C_EXTENSIONS OFF)
 set(C_STANDARD_REQUIRED ON)
 
 add_executable(giibiiadvance)

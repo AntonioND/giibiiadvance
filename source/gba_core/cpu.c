@@ -128,6 +128,7 @@ void GBA_CPUChangeMode(u32 value)
             CPU.SPSR_und = CPU.SPSR;
             break;
         }
+        case CPU_MODE_NUMBER:
         default:
             return;
     }
@@ -220,6 +221,7 @@ void GBA_CPUChangeMode(u32 value)
             CPU.SPSR = CPU.SPSR_und;
             break;
         }
+        case CPU_MODE_NUMBER:
         default:
             return;
     }

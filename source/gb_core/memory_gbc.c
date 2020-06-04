@@ -784,10 +784,10 @@ void GB_MemWriteReg8_GBC(u32 address, u32 value)
 
             if (mem->IO_Ports[BCPS_REG - 0xFF00] & (1 << 7))
             {
-                u32 index = (mem->IO_Ports[BCPS_REG - 0xFF00] + 1) & 0x3F;
-                index |= (mem->IO_Ports[BCPS_REG - 0xFF00] & (1 << 7))
-                         | (1 << 6);
-                mem->IO_Ports[BCPS_REG - 0xFF00] = index;
+                u32 idx = (mem->IO_Ports[BCPS_REG - 0xFF00] + 1) & 0x3F;
+                idx |= (mem->IO_Ports[BCPS_REG - 0xFF00] & (1 << 7))
+                       | (1 << 6);
+                mem->IO_Ports[BCPS_REG - 0xFF00] = idx;
             }
             return;
         }
@@ -813,10 +813,10 @@ void GB_MemWriteReg8_GBC(u32 address, u32 value)
 
             if (mem->IO_Ports[OCPS_REG - 0xFF00] & (1 << 7))
             {
-                u32 index = (mem->IO_Ports[OCPS_REG - 0xFF00] + 1) & 0x3F;
-                index |= (mem->IO_Ports[OCPS_REG - 0xFF00] & (1 << 7))
-                         | (1 << 6);
-                mem->IO_Ports[OCPS_REG - 0xFF00] = index;
+                u32 idx = (mem->IO_Ports[OCPS_REG - 0xFF00] + 1) & 0x3F;
+                idx |= (mem->IO_Ports[OCPS_REG - 0xFF00] & (1 << 7))
+                       | (1 << 6);
+                mem->IO_Ports[OCPS_REG - 0xFF00] = idx;
             }
             return;
         }

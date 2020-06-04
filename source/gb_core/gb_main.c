@@ -54,7 +54,7 @@ int GB_ROMLoad(const char *rom_path)
     // Init after loading the cartridge to set the hardware type value and allow
     // GB_Screen_Init() choose the correct dimensions for the texture.
 
-    GB_Cardridge_Set_Filename((char *)rom_path);
+    GB_Cardridge_Set_Filename(rom_path);
 
     GB_SRAM_Load();
 

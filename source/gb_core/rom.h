@@ -65,7 +65,7 @@ int GB_ShowConsoleRequested(void);
 int GB_CartridgeLoad(const u8 *pointer, const u32 rom_size);
 void GB_Cartridge_Unload(void);
 
-void GB_Cardridge_Set_Filename(char *filename);
+void GB_Cardridge_Set_Filename(const char *filename);
 
 void GB_SRAM_Save(void);
 void GB_SRAM_Load(void);

@@ -15,7 +15,7 @@ extern "C"
 #include "gb_core/camera.h"
 }
 
-#if NO_CAMERA_EMULATION
+#ifdef NO_CAMERA_EMULATION
 
 extern "C" int Webcam_Init(void)
 {

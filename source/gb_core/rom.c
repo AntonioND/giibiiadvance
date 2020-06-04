@@ -132,9 +132,7 @@ int GB_CartridgeLoad(const u8 *pointer, const u32 rom_size)
 
     ConsoleReset();
 
-    _GB_ROM_HEADER_ *GB_Header;
-
-    GB_Header = (void *)pointer;
+    const _GB_ROM_HEADER_ *GB_Header = (const void *)pointer;
 
     ConsolePrint("Checking cartridge...\n");
 
@@ -699,7 +697,7 @@ void GB_Cartridge_Unload(void)
     free(GameBoy.Emulator.Rom_Pointer);
 }
 
-void GB_Cardridge_Set_Filename(char *filename)
+void GB_Cardridge_Set_Filename(const char *filename)
 {
     size_t len = strlen(filename);
 

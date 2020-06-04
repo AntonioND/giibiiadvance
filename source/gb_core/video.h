@@ -28,12 +28,12 @@ u32 GB_GameBoyGetGray(u32 number);
 u32 gbc_getbgpalcolor(int pal, int color);
 u32 gbc_getsprpalcolor(int pal, int color);
 
-void GB_ScreenDrawScanline(s32 y);
-void GBC_ScreenDrawScanline(s32 y);
-void GBC_GB_ScreenDrawScanline(s32 y); // GBC when switched to GB mode.
+void GB_ScreenDrawScanline(u32 y);
+void GBC_ScreenDrawScanline(u32 y);
+void GBC_GB_ScreenDrawScanline(u32 y); // GBC when switched to GB mode.
 
 void SGB_ScreenDrawBorder(void);
-void SGB_ScreenDrawScanline(s32 y);
+void SGB_ScreenDrawScanline(u32 y);
 
 //----------------------------------------------------
 

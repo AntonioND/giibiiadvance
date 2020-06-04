@@ -258,7 +258,7 @@ typedef struct
 typedef void (*gb_ppu_update_fn_ptr)(int); // increment clocks
 typedef int (*gb_ppu_clocks_to_event_fn_ptr)(void);
 
-typedef void (*draw_scanline_fn_ptr)(s32);
+typedef void (*draw_scanline_fn_ptr)(u32);
 
 typedef void (*serial_send_fn_ptr)(u32);
 typedef u32 (*serial_recv_fn_ptr)(void);

@@ -26,7 +26,6 @@ if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
             -Wall
             -Wformat-truncation=0
             -Wextra
-            -Wno-sign-compare
     )
 elseif(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
     target_compile_definitions(giibiiadvance

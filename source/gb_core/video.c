@@ -106,7 +106,7 @@ u32 GB_GameBoyGetGray(u32 number)
     return gbpalettes[number & 3];
 }
 
-void GB_ScreenDrawScanline(s32 y)
+void GB_ScreenDrawScanline(u32 y)
 {
     if (GB_HasToSkipFrame())
         return;
@@ -286,9 +286,10 @@ void GB_ScreenDrawScanline(s32 y)
 
                 drawsprite[a] = 0;
 
-                s32 real_y = GB_Sprite->Y - 16;
+                u32 spr_y = GB_Sprite->Y;
+                u32 off_y = y + 16;
 
-                if ((real_y <= y) && ((real_y + spriteheight) > y))
+                if ((spr_y <= off_y) && ((spr_y + spriteheight) > off_y))
                 {
                     if (spritesdrawn < 10)
                     {
@@ -310,15 +311,17 @@ void GB_ScreenDrawScanline(s32 y)
                 {
                     GB_Sprite = &GB_OAM->Sprite[a];
 
-                    s32 real_y = GB_Sprite->Y - 16;
+                    u32 spr_y = GB_Sprite->Y;
+                    u32 off_y = y + 16;
 
-                    if ((real_y <= y) && ((real_y + spriteheight) > y))
+                    if ((spr_y <= off_y) && ((spr_y + spriteheight) > off_y))
                     {
                         u32 tile = GB_Sprite->Tile & tilemask;
 
                         u8 *data = &mem->VideoRAM[tile << 4];
 
                         // Flip Y
+                        s32 real_y = GB_Sprite->Y - 16;
                         if (GB_Sprite->Info & (1 << 6))
                             data += (spriteheight - y + real_y - 1) * 2;
                         else
@@ -399,7 +402,7 @@ u32 gbc_getsprpalcolor(int pal, int color)
            | (GameBoy.Emulator.spr_pal[pal_ram_index + 1] << 8);
 }
 
-void GBC_ScreenDrawScanline(s32 y)
+void GBC_ScreenDrawScanline(u32 y)
 {
     if (GB_HasToSkipFrame())
         return;
@@ -596,9 +599,10 @@ void GBC_ScreenDrawScanline(s32 y)
 
                 drawsprite[a] = 0;
 
-                s32 real_y = GB_Sprite->Y - 16;
+                u32 spr_y = GB_Sprite->Y;
+                u32 off_y = y + 16;
 
-                if ((real_y <= y) && ((real_y + spriteheight) > y))
+                if ((spr_y <= off_y) && ((spr_y + spriteheight) > off_y))
                 {
                     if (spritesdrawn < 10)
                     {
@@ -615,9 +619,10 @@ void GBC_ScreenDrawScanline(s32 y)
 
                 GB_Sprite = &GB_OAM->Sprite[a];
 
-                s32 real_y = GB_Sprite->Y - 16;
+                u32 spr_y = GB_Sprite->Y;
+                u32 off_y = y + 16;
 
-                if ((real_y <= y) && ((real_y + spriteheight) > y))
+                if ((spr_y <= off_y) && ((spr_y + spriteheight) > off_y))
                 {
                     u32 tile = GB_Sprite->Tile & tilemask;
 
@@ -627,6 +632,7 @@ void GBC_ScreenDrawScanline(s32 y)
                         data += 0x2000;
 
                     // Flip Y
+                    s32 real_y = GB_Sprite->Y - 16;
                     if (GB_Sprite->Info & (1 << 6))
                         data += (spriteheight - y + real_y - 1) * 2;
                     else
@@ -706,7 +712,7 @@ void GBC_ScreenDrawScanline(s32 y)
         gb_cur_fb ^= 1;
 }
 
-void GBC_GB_ScreenDrawScanline(s32 y)
+void GBC_GB_ScreenDrawScanline(u32 y)
 {
     if (GB_HasToSkipFrame())
         return;
@@ -898,9 +904,10 @@ void GBC_GB_ScreenDrawScanline(s32 y)
 
                 drawsprite[a] = 0;
 
-                s32 real_y = GB_Sprite->Y - 16;
+                u32 spr_y = GB_Sprite->Y;
+                u32 off_y = y + 16;
 
-                if ((real_y <= y) && ((real_y + spriteheight) > y))
+                if ((spr_y <= off_y) && ((spr_y + spriteheight) > off_y))
                 {
                     if (spritesdrawn < 10)
                     {
@@ -923,15 +930,17 @@ void GBC_GB_ScreenDrawScanline(s32 y)
 
                 GB_Sprite = &GB_OAM->Sprite[a];
 
-                s32 real_y = GB_Sprite->Y - 16;
+                u32 spr_y = GB_Sprite->Y;
+                u32 off_y = y + 16;
 
-                if ((real_y <= y) && ((real_y + spriteheight) > y))
+                if ((spr_y <= off_y) && ((spr_y + spriteheight) > off_y))
                 {
                     u32 tile = GB_Sprite->Tile & tilemask;
 
                     u8 *data = &mem->VideoRAM[tile << 4];
 
                     // Flip Y
+                    s32 real_y = GB_Sprite->Y - 16;
                     if (GB_Sprite->Info & (1 << 6))
                         data += (spriteheight - y + real_y - 1) * 2;
                     else
@@ -1129,7 +1138,7 @@ void SGB_ScreenDrawBorderInside(void)
     }
 }
 
-void SGB_ScreenDrawScanline(s32 y)
+void SGB_ScreenDrawScanline(u32 y)
 {
     if (GB_HasToSkipFrame())
         return;
@@ -1352,9 +1361,10 @@ void SGB_ScreenDrawScanline(s32 y)
 
                 drawsprite[a] = 0;
 
-                s32 real_y = GB_Sprite->Y - 16;
+                u32 spr_y = GB_Sprite->Y;
+                u32 off_y = y + 16;
 
-                if ((real_y <= y) && ((real_y + spriteheight) > y))
+                if ((spr_y <= off_y) && ((spr_y + spriteheight) > off_y))
                 {
                     if (spritesdrawn < 10)
                     {
@@ -1377,15 +1387,17 @@ void SGB_ScreenDrawScanline(s32 y)
 
                 GB_Sprite = &GB_OAM->Sprite[a];
 
-                s32 real_y = (GB_Sprite->Y - 16);
+                u32 spr_y = GB_Sprite->Y;
+                u32 off_y = y + 16;
 
-                if ((real_y <= y) && ((real_y + spriteheight) > y))
+                if ((spr_y <= off_y) && ((spr_y + spriteheight) > off_y))
                 {
                     u32 tile = GB_Sprite->Tile & tilemask;
 
                     u8 *data = &mem->VideoRAM[tile << 4];
 
                     // Flip Y
+                    s32 real_y = (GB_Sprite->Y - 16);
                     if (GB_Sprite->Info & (1 << 6))
                         data += (spriteheight - y + real_y - 1) * 2;
                     else

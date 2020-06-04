@@ -1121,7 +1121,7 @@ static void Win_MainCloseAllSubwindows(void)
 
 void Win_MainChangeZoom(int newzoom)
 {
-    if ((newzoom < 2) && (newzoom > 4))
+    if ((newzoom < 2) || (newzoom > 4))
     {
         Debug_LogMsgArg("Win_MainChangeZoom(): Unsupported zoom level: %d",
                         newzoom);

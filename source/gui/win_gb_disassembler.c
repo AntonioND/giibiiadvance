@@ -148,7 +148,7 @@ void Win_GBDisassemblerUpdate(void)
 
             while (1) // To fix cursor at one line.
             {
-                int tempaddr = address, commands = 0;
+                u32 tempaddr = address, commands = 0;
                 while (tempaddr < GameBoy.CPU.R16.PC)
                 {
                     commands++;

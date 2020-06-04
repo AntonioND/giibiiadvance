@@ -187,7 +187,7 @@ static const _licensee_t gb_licensee[] = {
 
 const char *GB_GetLicenseeName(char byte1, char byte2)
 {
-    for (int i = 0; i < (sizeof(gb_licensee) / sizeof(_licensee_t)); i++)
+    for (size_t i = 0; i < ARRAY_NUM_ELEMENTS(gb_licensee); i++)
     {
         if (gb_licensee[i].code[0] == byte1 && gb_licensee[i].code[1] == byte2)
             return gb_licensee[i].name;

@@ -158,7 +158,7 @@ void GB_DMAUpdateClocksCounterReference(int reference_clocks)
 
         GameBoy.Emulator.OAM_DMA_clocks_elapsed += increment_clocks;
 
-        int last_destination_to_copy =
+        u32 last_destination_to_copy =
                 0xFE00 + (GameBoy.Emulator.OAM_DMA_clocks_elapsed / 4) - 2;
 
         while (GameBoy.Emulator.OAM_DMA_dst <= last_destination_to_copy)

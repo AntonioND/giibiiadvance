@@ -182,7 +182,7 @@ void GB_ScreenDrawScanline(s32 y)
         bool increase_win = false;
 
         // Draw BG + window
-        for (int x = 0; x < 160; x++)
+        for (u32 x = 0; x < 160; x++)
         {
             u32 color = bg_pal[0];
             bool window_draw = 0;
@@ -458,7 +458,7 @@ void GBC_ScreenDrawScanline(s32 y)
         bool increase_win = false;
 
         // Draw BG + window
-        for (int x = 0; x < 160; x++)
+        for (u32 x = 0; x < 160; x++)
         {
             u32 color = GB_RGB(31, 31, 31);
             bool window_draw = 0;
@@ -782,7 +782,7 @@ void GBC_GB_ScreenDrawScanline(s32 y)
         bool increase_win = false;
 
         // Draw BG + window
-        for (int x = 0; x < 160; x++)
+        for (u32 x = 0; x < 160; x++)
         {
             // This should only disable BG, but GBC in GB mode disables both
             // window and BG
@@ -1023,9 +1023,9 @@ void SGB_ScreenDrawBorder(void)
                 u32 xflip = info & (1 << 14);
                 u32 yflip = info & (1 << 15);
 
-                for (int y = 0; y < 8; y++)
+                for (u32 y = 0; y < 8; y++)
                 {
-                    for (int x = 0; x < 8; x++)
+                    for (u32 x = 0; x < 8; x++)
                     {
                         u32 *data = tile_ptr;
                         u32 *data2 = tile_ptr + 16;
@@ -1083,7 +1083,7 @@ void SGB_ScreenDrawBorderInside(void)
             u32 xflip = info & (1 << 14);
             u32 yflip = info & (1 << 15);
 
-            for (int y = 0; y < 8; y++)
+            for (u32 y = 0; y < 8; y++)
             {
                 u32 *data = tile_ptr;
                 u32 *data2 = tile_ptr + 16;
@@ -1101,7 +1101,7 @@ void SGB_ScreenDrawBorderInside(void)
 
                 //if (*data != 0 && *data2 != 0)
                 //{
-                    for (int x = 0; x < 8; x++)
+                    for (u32 x = 0; x < 8; x++)
                     {
                         u32 x_;
                         if (xflip)
@@ -1248,7 +1248,7 @@ void SGB_ScreenDrawScanline(s32 y)
         bool increase_win = false;
 
         // Draw BG + window
-        for (int x = 0; x < 160; x++)
+        for (u32 x = 0; x < 160; x++)
         {
             u32 color = SGB_GetPixelColor(x, y, bg_pal[0]);
             bool window_draw = 0;

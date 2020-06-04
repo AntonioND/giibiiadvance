@@ -242,7 +242,7 @@ static void SGB_ATTR_BLK(void)
     u32 curbyte = 2;
     u32 curpacket = 0;
 
-    for (int i = 0; i < sets; i++)
+    for (u32 i = 0; i < sets; i++)
     {
         u32 ctrl = SGBInfo.data[curpacket][curbyte];
         curbyte++;
@@ -309,12 +309,12 @@ static void SGB_ATTR_BLK(void)
             }
 
             // Draw lines...
-            for (int x = x1; x <= x2; x++)
+            for (u32 x = x1; x <= x2; x++)
             {
                 SGBInfo.ATF_list[SGBInfo.curr_ATF][(y1 * 20) + x] = pal;
                 SGBInfo.ATF_list[SGBInfo.curr_ATF][(y2 * 20) + x] = pal;
             }
-            for (int y = y1; y <= y2; y++)
+            for (u32 y = y1; y <= y2; y++)
             {
                 SGBInfo.ATF_list[SGBInfo.curr_ATF][(y * 20) + x1] = pal;
                 SGBInfo.ATF_list[SGBInfo.curr_ATF][(y * 20) + x2] = pal;
@@ -323,9 +323,9 @@ static void SGB_ATTR_BLK(void)
         if (ctrl & (1 << 0)) // Inside
         {
             u32 pal = palettes & 3;
-            for (int x = x1 + 1; x < x2; x++)
+            for (u32 x = x1 + 1; x < x2; x++)
             {
-                for (int y = y1 + 1; y < y2; y++)
+                for (u32 y = y1 + 1; y < y2; y++)
                 {
                     SGBInfo.ATF_list[SGBInfo.curr_ATF][(y * 20) + x] = pal;
                 }
@@ -334,9 +334,9 @@ static void SGB_ATTR_BLK(void)
         if (ctrl & (1 << 2)) // Outside
         {
             u32 pal = (palettes >> 4) & 3;
-            for (int x = 0; x < 20; x++)
+            for (u32 x = 0; x < 20; x++)
             {
-                for (int y = 0; y < 18; y++)
+                for (u32 y = 0; y < 18; y++)
                 {
                     if ((x < x1 || x > x2) && (y < y1 || y > y2))
                         SGBInfo.ATF_list[SGBInfo.curr_ATF][(y * 20) + x] = pal;
@@ -355,7 +355,7 @@ static void SGB_ATTR_LIN(void)
     u32 curbyte = 2;
     u32 curpacket = 0;
 
-    for (int i = 0; i < sets; i++)
+    for (u32 i = 0; i < sets; i++)
     {
         u32 data = SGBInfo.data[curpacket][curbyte];
         curbyte++;
@@ -403,9 +403,9 @@ static void SGB_ATTR_DIV(void)
 
         u32 y_ = SGBInfo.data[0][2];
 
-        for (int x = 0; x < 20; x++)
+        for (u32 x = 0; x < 20; x++)
         {
-            for (int y = 0; y < 18; y++)
+            for (u32 y = 0; y < 18; y++)
             {
                 u32 pal = pal_line;
                 if (y_ < y)
@@ -424,9 +424,9 @@ static void SGB_ATTR_DIV(void)
 
         u32 x_ = SGBInfo.data[0][2];
 
-        for (int x = 0; x < 20; x++)
+        for (u32 x = 0; x < 20; x++)
         {
-            for (int y = 0; y < 18; y++)
+            for (u32 y = 0; y < 18; y++)
             {
                 u32 pal = pal_line;
                 if (x_ < x)
@@ -454,7 +454,7 @@ static void SGB_ATTR_CHR(void)
     u32 curpacket = 0;
     u32 bit_shift = 6;
 
-    for (int i = 0; i < sets; i++)
+    for (u32 i = 0; i < sets; i++)
     {
         if (direction == 0)
         {
@@ -567,7 +567,7 @@ static void SGB_DATA_SND(void)
         if (SGBInfo.sgb_bank0_ram == NULL)
             SGBInfo.sgb_bank0_ram = malloc(0x2000);
 
-        for (int i = 0; i < numbytes; i++)
+        for (u32 i = 0; i < numbytes; i++)
         {
             SGBInfo.sgb_bank0_ram[address + i] = SGBInfo.data[0][5 + i];
         }
@@ -807,7 +807,7 @@ static void SGB_ExecuteCommand(void)
     Debug_DebugMsgArg("Unknown command: %02x, Packets: %02x",
                       SGBInfo.data[0][0] >> 3, SGBInfo.data[0][0] & 0x07);
 
-    for (int i = 0; i < (SGBInfo.data[0][0] & 0x07); i++)
+    for (u32 i = 0; i < (SGBInfo.data[0][0] & 0x07); i++)
     {
         Debug_DebugMsgArg("%02x%02x %02x%02x %02x%02x %02x%02x "
                           "%02x%02x %02x%02x %02x%02x %02x%02x",

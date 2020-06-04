@@ -17,7 +17,7 @@ void GBA_SoundRegWrite16(u32 address, u16 value);
 void GBA_SoundResetBufferPointers(void);
 void GBA_SoundEnd(void);
 void GBA_SoundCallback(void *buffer, long len);
-void GBA_SoundTimerCheck(int number);
+void GBA_SoundTimerCheck(u32 number);
 
 void GBA_SoundGetConfig(int *vol, int *chn_flags);
 void GBA_SoundSetConfig(int vol, int chn_flags);

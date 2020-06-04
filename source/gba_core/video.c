@@ -178,8 +178,8 @@ static void gba_sprites_draw_mode012(s32 ly)
 
             u16 shape = attr0 >> 14;
             u16 size = attr1 >> 14;
-            int hsx = spr_size[shape][size][0] >> 1; // Half size
-            int hsy = spr_size[shape][size][1] >> 1;
+            u32 hsx = spr_size[shape][size][0] >> 1; // Half size
+            u32 hsy = spr_size[shape][size][1] >> 1;
 
             int y = (attr0 & 0xFF);
             y |= (y < 160) ? 0 : 0xFFFFFF00;
@@ -547,8 +547,8 @@ static void gba_sprites_draw_mode345(s32 ly)
 
             u16 shape = attr0 >> 14;
             u16 size = attr1 >> 14;
-            int hsx = spr_size[shape][size][0] >> 1; // Half size
-            int hsy = spr_size[shape][size][1] >> 1;
+            u32 hsx = spr_size[shape][size][0] >> 1; // Half size
+            u32 hsy = spr_size[shape][size][1] >> 1;
 
             int y = (attr0 & 0xFF);
             y |= (y < 160) ? 0 : 0xFFFFFF00;
@@ -1772,7 +1772,7 @@ static void gba_blit_layers(int y)
 int win_coloreffect_enable[240];
 
 // bits 13-15 of DISPCNT
-static void gba_window_apply(int y, int win0, int win1, int winobj)
+static void gba_window_apply(u32 y, u32 win0, u32 win1, u32 winobj)
 {
     if (!(winobj || win1 || win0))
     {
@@ -1834,7 +1834,7 @@ static void gba_window_apply(int y, int win0, int win1, int winobj)
             {
                 if (y >= Win1Y1 && y <= Win1Y2)
                 {
-                    for (int i = Win1X1; i < Win1X2; i++)
+                    for (u32 i = Win1X1; i < Win1X2; i++)
                         win_show[i] = 1;
                 }
             }
@@ -1842,7 +1842,7 @@ static void gba_window_apply(int y, int win0, int win1, int winobj)
             {
                 if (y >= Win1Y1 && y <= Win1Y2)
                 {
-                    for (int i = Win1X1; i < Win1X2; i++)
+                    for (u32 i = Win1X1; i < Win1X2; i++)
                         win_show[i] = 0;
                 }
             }
@@ -1853,7 +1853,7 @@ static void gba_window_apply(int y, int win0, int win1, int winobj)
             {
                 if (y >= Win0Y1 && y <= Win0Y2)
                 {
-                    for (int i = Win0X1; i < Win0X2; i++)
+                    for (u32 i = Win0X1; i < Win0X2; i++)
                         win_show[i] = 1;
                 }
             }
@@ -1861,7 +1861,7 @@ static void gba_window_apply(int y, int win0, int win1, int winobj)
             {
                 if (y >= Win0Y1 && y <= Win0Y2)
                 {
-                    for (int i = Win0X1; i < Win0X2; i++)
+                    for (u32 i = Win0X1; i < Win0X2; i++)
                         win_show[i] = 0;
                 }
             }
@@ -1919,7 +1919,7 @@ static void gba_window_apply(int y, int win0, int win1, int winobj)
             {
                 if (y >= Win1Y1 && y <= Win1Y2)
                 {
-                    for (int i = Win1X1; i < Win1X2; i++)
+                    for (u32 i = Win1X1; i < Win1X2; i++)
                         win_show[i] = 1;
                 }
             }
@@ -1927,7 +1927,7 @@ static void gba_window_apply(int y, int win0, int win1, int winobj)
             {
                 if (y >= Win1Y1 && y <= Win1Y2)
                 {
-                    for (int i = Win1X1; i < Win1X2; i++)
+                    for (u32 i = Win1X1; i < Win1X2; i++)
                         win_show[i] = 0;
                 }
             }
@@ -1938,7 +1938,7 @@ static void gba_window_apply(int y, int win0, int win1, int winobj)
             {
                 if (y >= Win0Y1 && y <= Win0Y2)
                 {
-                    for (int i = Win0X1; i < Win0X2; i++)
+                    for (u32 i = Win0X1; i < Win0X2; i++)
                         win_show[i] = 1;
                 }
             }
@@ -1946,7 +1946,7 @@ static void gba_window_apply(int y, int win0, int win1, int winobj)
             {
                 if (y >= Win0Y1 && y <= Win0Y2)
                 {
-                    for (int i = Win0X1; i < Win0X2; i++)
+                    for (u32 i = Win0X1; i < Win0X2; i++)
                         win_show[i] = 0;
                 }
             }
@@ -2004,7 +2004,7 @@ static void gba_window_apply(int y, int win0, int win1, int winobj)
             {
                 if (y >= Win1Y1 && y <= Win1Y2)
                 {
-                    for (int i = Win1X1; i < Win1X2; i++)
+                    for (u32 i = Win1X1; i < Win1X2; i++)
                         win_show[i] = 1;
                 }
             }
@@ -2012,7 +2012,7 @@ static void gba_window_apply(int y, int win0, int win1, int winobj)
             {
                 if (y >= Win1Y1 && y <= Win1Y2)
                 {
-                    for (int i = Win1X1; i < Win1X2; i++)
+                    for (u32 i = Win1X1; i < Win1X2; i++)
                         win_show[i] = 0;
                 }
             }
@@ -2023,7 +2023,7 @@ static void gba_window_apply(int y, int win0, int win1, int winobj)
             {
                 if (y >= Win0Y1 && y <= Win0Y2)
                 {
-                    for (int i = Win0X1; i < Win0X2; i++)
+                    for (u32 i = Win0X1; i < Win0X2; i++)
                         win_show[i] = 1;
                 }
             }
@@ -2031,7 +2031,7 @@ static void gba_window_apply(int y, int win0, int win1, int winobj)
             {
                 if (y >= Win0Y1 && y <= Win0Y2)
                 {
-                    for (int i = Win0X1; i < Win0X2; i++)
+                    for (u32 i = Win0X1; i < Win0X2; i++)
                         win_show[i] = 0;
                 }
             }
@@ -2089,7 +2089,7 @@ static void gba_window_apply(int y, int win0, int win1, int winobj)
             {
                 if (y >= Win1Y1 && y <= Win1Y2)
                 {
-                    for (int i = Win1X1; i < Win1X2; i++)
+                    for (u32 i = Win1X1; i < Win1X2; i++)
                         win_show[i] = 1;
                 }
             }
@@ -2097,7 +2097,7 @@ static void gba_window_apply(int y, int win0, int win1, int winobj)
             {
                 if (y >= Win1Y1 && y <= Win1Y2)
                 {
-                    for (int i = Win1X1; i < Win1X2; i++)
+                    for (u32 i = Win1X1; i < Win1X2; i++)
                         win_show[i] = 0;
                 }
             }
@@ -2108,7 +2108,7 @@ static void gba_window_apply(int y, int win0, int win1, int winobj)
             {
                 if (y >= Win0Y1 && y <= Win0Y2)
                 {
-                    for (int i = Win0X1; i < Win0X2; i++)
+                    for (u32 i = Win0X1; i < Win0X2; i++)
                         win_show[i] = 1;
                 }
             }
@@ -2116,7 +2116,7 @@ static void gba_window_apply(int y, int win0, int win1, int winobj)
             {
                 if (y >= Win0Y1 && y <= Win0Y2)
                 {
-                    for (int i = Win0X1; i < Win0X2; i++)
+                    for (u32 i = Win0X1; i < Win0X2; i++)
                         win_show[i] = 0;
                 }
             }
@@ -2174,7 +2174,7 @@ static void gba_window_apply(int y, int win0, int win1, int winobj)
             {
                 if (y >= Win1Y1 && y <= Win1Y2)
                 {
-                    for (int i = Win1X1; i < Win1X2; i++)
+                    for (u32 i = Win1X1; i < Win1X2; i++)
                         win_show[i] = 1;
                 }
             }
@@ -2182,7 +2182,7 @@ static void gba_window_apply(int y, int win0, int win1, int winobj)
             {
                 if (y >= Win1Y1 && y <= Win1Y2)
                 {
-                    for (int i = Win1X1; i < Win1X2; i++)
+                    for (u32 i = Win1X1; i < Win1X2; i++)
                         win_show[i] = 0;
                 }
             }
@@ -2193,7 +2193,7 @@ static void gba_window_apply(int y, int win0, int win1, int winobj)
             {
                 if (y >= Win0Y1 && y <= Win0Y2)
                 {
-                    for (int i = Win0X1; i < Win0X2; i++)
+                    for (u32 i = Win0X1; i < Win0X2; i++)
                         win_show[i] = 1;
                 }
             }
@@ -2201,7 +2201,7 @@ static void gba_window_apply(int y, int win0, int win1, int winobj)
             {
                 if (y >= Win0Y1 && y <= Win0Y2)
                 {
-                    for (int i = Win0X1; i < Win0X2; i++)
+                    for (u32 i = Win0X1; i < Win0X2; i++)
                         win_show[i] = 0;
                 }
             }
@@ -2283,7 +2283,7 @@ static void gba_window_apply(int y, int win0, int win1, int winobj)
             {
                 if (y >= Win1Y1 && y <= Win1Y2)
                 {
-                    for (int i = Win1X1; i < Win1X2; i++)
+                    for (u32 i = Win1X1; i < Win1X2; i++)
                         win_show[i] = 1;
                 }
             }
@@ -2291,7 +2291,7 @@ static void gba_window_apply(int y, int win0, int win1, int winobj)
             {
                 if (y >= Win1Y1 && y <= Win1Y2)
                 {
-                    for (int i = Win1X1; i < Win1X2; i++)
+                    for (u32 i = Win1X1; i < Win1X2; i++)
                         win_show[i] = 0;
                 }
             }
@@ -2302,7 +2302,7 @@ static void gba_window_apply(int y, int win0, int win1, int winobj)
             {
                 if (y >= Win0Y1 && y <= Win0Y2)
                 {
-                    for (int i = Win0X1; i < Win0X2; i++)
+                    for (u32 i = Win0X1; i < Win0X2; i++)
                         win_show[i] = 1;
                 }
             }
@@ -2310,7 +2310,7 @@ static void gba_window_apply(int y, int win0, int win1, int winobj)
             {
                 if (y >= Win0Y1 && y <= Win0Y2)
                 {
-                    for (int i = Win0X1; i < Win0X2; i++)
+                    for (u32 i = Win0X1; i < Win0X2; i++)
                         win_show[i] = 0;
                 }
             }

@@ -483,8 +483,8 @@ static struct
     {NULL, 0}
 };
 
-int gb_dissasemble_add_io_register_name(int reg_address, char *dest,
-                                        int add_comment, int dest_size)
+static int gb_dissasemble_add_io_register_name(u32 reg_address, char *dest,
+                                               int add_comment, int dest_size)
 {
     int i = 0;
     while (1)

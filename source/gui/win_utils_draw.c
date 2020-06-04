@@ -6,6 +6,7 @@
 
 #include <string.h>
 
+#include "../general_utils.h"
 #include "../font_utils.h"
 
 #include "win_utils.h"
@@ -109,7 +110,7 @@ static void _gui_draw_menu(_gui_menu *menu, char *buffer, int w, int h)
         if (list == NULL)
             break;
 
-        int l = strlen(list->title);
+        size_t l = strlen(list->title);
 
         FU_PrintColor(buffer, w, h, x, 0, 0xFFE0E0E0, " ");
         x += FONT_WIDTH;
@@ -230,7 +231,7 @@ static void _gui_draw_inputwindow(_gui_inputwindow *win, char *buffer, int w,
                       x, x + GUI_INPUTWINDOW_WIDTH - 1,
                       y + FONT_HEIGHT + 2, y + GUI_INPUTWINDOW_HEIGHT - 1);
 
-    int text_width = strlen(win->window_caption) * FONT_WIDTH;
+    size_t text_width = strlen(win->window_caption) * FONT_WIDTH;
     int x_off = (GUI_INPUTWINDOW_WIDTH - text_width) / 2;
 
     FU_PrintColor(buffer, w, h, x + x_off, y, 0xFFE0E0E0, win->window_caption);
@@ -327,7 +328,7 @@ static void __gui_draw_element(_gui_element *e, char *buffer, int w, int h)
                           e->x, e->x + e->w - 1,
                           e->y, e->y + e->h - 1);
 
-        int namewidth = FONT_WIDTH * strlen(e->info.radiobutton.name);
+        size_t namewidth = FONT_WIDTH * strlen(e->info.radiobutton.name);
         int xoff = (e->w - namewidth) / 2;
         int yoff = (e->h - FONT_HEIGHT) / 2;
 
@@ -430,7 +431,7 @@ static void __gui_draw_element(_gui_element *e, char *buffer, int w, int h)
                           e->x, e->x + e->w - 1,
                           e->y + FONT_HEIGHT + 2, e->y + e->h - 1);
 
-        int text_width = strlen(e->info.messagebox.caption) * FONT_WIDTH;
+        size_t text_width = strlen(e->info.messagebox.caption) * FONT_WIDTH;
         int x_off = (e->w - text_width) / 2;
 
         FU_PrintColor(buffer, w, h, e->x + x_off, e->y, GUI_WINDOWBAR_GREY_RGBA,
@@ -464,10 +465,10 @@ static void __gui_draw_element(_gui_element *e, char *buffer, int w, int h)
                           e->x, e->x + e->w - 1,
                           e->y + FONT_HEIGHT + 2, e->y + e->h - 1);
 
-        int caption_width =
+        u32 caption_width =
                 strlen(e->info.scrollabletextwindow.caption) * FONT_WIDTH;
 
-        int x_off = (e->w - caption_width) / 2;
+        u32 x_off = (e->w - caption_width) / 2;
 
         int skipspaces = 0;
 

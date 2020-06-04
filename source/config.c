@@ -309,7 +309,7 @@ void Config_Load(void)
         tmp += strlen(CFG_OPENGL_FILTER) + 1;
 
         int result = 0;
-        for (int i = 0; i < ARRAY_NUM_ELEMENTS(oglfiltertype); i++)
+        for (size_t i = 0; i < ARRAY_NUM_ELEMENTS(oglfiltertype); i++)
             if (strncmp(tmp, oglfiltertype[i], strlen(oglfiltertype[i])) == 0)
                 result = i;
 
@@ -387,7 +387,7 @@ void Config_Load(void)
         tmp += strlen(CFG_HW_TYPE) + 1;
 
         int result = -1;
-        for (int i = 0; i < ARRAY_NUM_ELEMENTS(hwtype); i++)
+        for (size_t i = 0; i < ARRAY_NUM_ELEMENTS(hwtype); i++)
             if (strncmp(tmp, hwtype[i], strlen(hwtype[i])) == 0)
                 result = i;
 
@@ -400,7 +400,7 @@ void Config_Load(void)
         tmp += strlen(CFG_SERIAL_DEVICE) + 1;
 
         int result = 0;
-        for (int i = 0; i < ARRAY_NUM_ELEMENTS(serialdevice); i++)
+        for (size_t i = 0; i < ARRAY_NUM_ELEMENTS(serialdevice); i++)
             if (strncmp(tmp, serialdevice[i], strlen(serialdevice[i])) == 0)
                 result = i;
 
@@ -514,7 +514,7 @@ void Config_Load(void)
                 tmp += strlen(temp_str);
                 s_strncpy(temp_str, tmp, sizeof(temp_str));
 
-                for (int i = 0; i < sizeof(temp_str); i++)
+                for (size_t i = 0; i < sizeof(temp_str); i++)
                 {
                     if (temp_str[i] == ']')
                         temp_str[i] = '\0';

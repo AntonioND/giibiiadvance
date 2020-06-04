@@ -154,9 +154,9 @@ static void _win_gba_mapviewer_update_mapbuffer_from_temp_buffer(void)
     int scrollx = gba_mapview_scrollx * 8;
     int scrolly = gba_mapview_scrolly * 8;
 
-    for (int i = 0; i < GBA_MAP_BUFFER_WIDTH; i++)
+    for (u32 i = 0; i < GBA_MAP_BUFFER_WIDTH; i++)
     {
-        for (int j = 0; j < GBA_MAP_BUFFER_HEIGHT; j++)
+        for (u32 j = 0; j < GBA_MAP_BUFFER_HEIGHT; j++)
         {
             if ((i >= gba_mapview_sizex) || (j >= gba_mapview_sizey))
             {
@@ -715,9 +715,9 @@ static void _win_gba_mapviewer_dump_btn_callback(void)
     if (buf == NULL)
         return;
 
-    for (int j = 0; j < gba_mapview_sizey; j++)
+    for (u32 j = 0; j < gba_mapview_sizey; j++)
     {
-        for (int i = 0; i < gba_mapview_sizex; i++)
+        for (u32 i = 0; i < gba_mapview_sizex; i++)
         {
             int dst_index = (j * gba_mapview_sizex + i) * 4;
             int src_index = (j * 1024 + i) * 4;

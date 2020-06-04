@@ -253,7 +253,7 @@ static struct
     {NULL, 0}
 };
 
-static int gba_dissasemble_add_io_register_name(int reg_address, char *dest,
+static int gba_dissasemble_add_io_register_name(u32 reg_address, char *dest,
                                                 int add_comment, int dest_size)
 {
     int i = 0;

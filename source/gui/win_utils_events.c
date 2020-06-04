@@ -32,7 +32,7 @@ static int _gui_inputwindow_send_event(_gui_inputwindow *win, SDL_Event *e)
         if (((key >= SDLK_a) && (key <= SDLK_f))
             || ((key >= SDLK_0) && (key <= SDLK_9)))
         {
-            int l = strlen(win->input_text);
+            size_t l = strlen(win->input_text);
             if (l < (sizeof(win->input_text) - 1))
             {
                 win->input_text[l++] = toupper(key);
@@ -41,7 +41,7 @@ static int _gui_inputwindow_send_event(_gui_inputwindow *win, SDL_Event *e)
         }
         else if (key == SDLK_BACKSPACE)
         {
-            int l = strlen(win->input_text);
+            size_t l = strlen(win->input_text);
             if (l == 0)
             {
                 GUI_InputWindowClose(win);
@@ -51,7 +51,7 @@ static int _gui_inputwindow_send_event(_gui_inputwindow *win, SDL_Event *e)
         }
         else if (key == SDLK_RETURN)
         {
-            int l = strlen(win->input_text);
+            size_t l = strlen(win->input_text);
             if (win->callback)
                 win->callback(win->input_text, (l > 0) ? 1 : 0);
             win->enabled = 0;
@@ -85,7 +85,7 @@ static int _gui_menu_send_event(_gui_menu *menu, SDL_Event *e)
         if (list == NULL)
             break;
 
-        int l = strlen(list->title);
+        size_t l = strlen(list->title);
 
         x += FONT_WIDTH;
         if (menu->element_opened == i)
@@ -121,13 +121,13 @@ static int _gui_menu_send_event(_gui_menu *menu, SDL_Event *e)
 
     // Get longest string for this list
     i = 0;
-    int longest_string = 0;
+    size_t longest_string = 0;
     while (1)
     {
         if (entries[i] == NULL)
             break;
 
-        int l = strlen(entries[i]->text);
+        size_t l = strlen(entries[i]->text);
         if (longest_string < l)
             longest_string = l;
 

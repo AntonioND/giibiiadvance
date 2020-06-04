@@ -23,7 +23,7 @@
 static int _file_explorer_is_valid_rom_type(char *name)
 {
     char extension[4];
-    int len = strlen(name);
+    size_t len = strlen(name);
 
     extension[3] = '\0';
     extension[2] = toupper(name[len - 1]);
@@ -111,7 +111,7 @@ void FileExplorer_ListFree(void)
 
     if (filename)
     {
-        for (unsigned int i = 0; i < filenum; i++)
+        for (int i = 0; i < filenum; i++)
         {
             if (filename[i])
                 free(filename[i]);
@@ -154,7 +154,7 @@ void FileExplorer_ListAdd(char *name, int isdir)
         }
 
         list_isdir[filenum] = isdir;
-        int size = strlen(name) + 1;
+        size_t size = strlen(name) + 1;
         filename[filenum] = malloc(size);
         s_strncpy(filename[filenum], name, size);
         filenum++;
@@ -300,7 +300,7 @@ void FileExplorer_GoUp(void)
 {
     char separator = GetFolderSeparator(exploring_path);
     int first_separator = 1;
-    int l = strlen(exploring_path) - 1;
+    size_t l = strlen(exploring_path) - 1;
     while (l > 0)
     {
         if (exploring_path[l] == separator)

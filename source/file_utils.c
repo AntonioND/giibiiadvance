@@ -13,6 +13,7 @@
 #include <time.h>
 
 #if defined(_MSC_VER)
+# include <direct.h>
 # include <windows.h>
 #else
 # include <unistd.h>
@@ -34,7 +35,7 @@ void DirSetRunningPath(char *path)
 
     // Check the folder division character used by the OS and remove the last
     // one from the path, if there is any.
-    int l = strlen(running_path);
+    size_t l = strlen(running_path);
     while (l > 0)
     {
         if (running_path[l] == '/')

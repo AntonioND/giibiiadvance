@@ -11,13 +11,13 @@
 
 #include "general_utils.h"
 
-void s_strncpy(char *dest, const char *src, int _size)
+void s_strncpy(char *dest, const char *src, size_t _size)
 {
     strncpy(dest, src, _size);
     dest[_size - 1] = '\0';
 }
 
-void s_strncat(char *dest, const char *src, int _size)
+void s_strncat(char *dest, const char *src, size_t _size)
 {
     strncat(dest, src, _size);
     dest[_size - 1] = '\0';

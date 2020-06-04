@@ -1316,7 +1316,7 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
     }
 }
 
-void GBA_SoundTimerCheck(int number)
+void GBA_SoundTimerCheck(u32 number)
 {
     if (Sound.FifoA.timer == number)
     {

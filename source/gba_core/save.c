@@ -41,9 +41,9 @@ typedef enum
 } _sav_types_;
 
 // Returns 1 if equal (TODO: Replace by libc)
-static int str_cmp_len(const char *str1, const char *str2, int len)
+static int str_cmp_len(const char *str1, const char *str2, size_t len)
 {
-    for (int i = 0; i < len; i++)
+    for (size_t i = 0; i < len; i++)
     {
         if (str1[i] != str2[i])
             return 0;
@@ -58,13 +58,13 @@ int GBA_SaveIsEEPROM(void)
     return (SAVE_TYPE == SAV_EEPROM) || (SAVE_TYPE == SAV_AUTODETECT);
 }
 
-void GBA_DetectSaveType(u8 *romptr, int size)
+void GBA_DetectSaveType(u8 *romptr, size_t size)
 {
     for (int j = 0; j < SAV_TYPES; j++)
     {
-        for (int i = 0; i < size; i++)
+        for (size_t i = 0; i < size; i++)
         {
-            int len = strlen(save_type_strings[j]);
+            size_t len = strlen(save_type_strings[j]);
 
             // Avoid crashing if strangely there are some characters at the end
             // of the rom...
@@ -173,7 +173,7 @@ void GBA_SaveSetFilename(char *rom_path)
     }
 
     s_strncpy(SAVE_PATH, rom_path, sizeof(SAVE_PATH));
-    int cursor = strlen(SAVE_PATH);
+    size_t cursor = strlen(SAVE_PATH);
 
     // The path should end in ".gba" or ".bin"
     SAVE_PATH[cursor - 3] = 's';

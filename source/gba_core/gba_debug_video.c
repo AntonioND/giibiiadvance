@@ -562,9 +562,9 @@ void GBA_Debug_PrintBackgroundAlpha(char *buffer, int bufw, int bufh,
 
         if (control & BIT(7)) // 256 colors
         {
-            for (int i = 0; i < sizex; i++)
+            for (u32 i = 0; i < sizex; i++)
             {
-                for (int j = 0; j < sizey; j++)
+                for (u32 j = 0; j < sizey; j++)
                 {
                     u32 index = se_index(i / 8, j / 8, sizex / 8);
                     u16 SE = scrbaseblockptr[index];
@@ -593,9 +593,9 @@ void GBA_Debug_PrintBackgroundAlpha(char *buffer, int bufw, int bufh,
         }
         else // 16 colors
         {
-            for (int i = 0; i < sizex; i++)
+            for (u32 i = 0; i < sizex; i++)
             {
-                for (int j = 0; j < sizey; j++)
+                for (u32 j = 0; j < sizey; j++)
                 {
                     u32 index = se_index(i / 8, j / 8, sizex / 8);
                     u16 SE = scrbaseblockptr[index];
@@ -645,9 +645,9 @@ void GBA_Debug_PrintBackgroundAlpha(char *buffer, int bufw, int bufh,
 
         // Always 256 color
 
-        for (int i = 0; i < size; i++)
+        for (u32 i = 0; i < size; i++)
         {
-            for (int j = 0; j < size; j++)
+            for (u32 j = 0; j < size; j++)
             {
                 int _x = i & 7;
                 int _y = j & 7;

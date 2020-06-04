@@ -304,7 +304,7 @@ typedef struct
 
 typedef struct
 {
-    u32 selected_hardware; // HW_*** defines, -1 = auto
+    int selected_hardware; // HW_*** defines, -1 = auto
 
     u32 HardwareType; // HW_*** defines
     char Title[17];
@@ -354,12 +354,12 @@ typedef struct
     u32 gdma_dst;
     u32 gdma_bytes_left;
 
-    u32 hdma_last_ly_copied; // To limit to 0x10 bytes per HBlank
+    int hdma_last_ly_copied; // To limit to 0x10 bytes per HBlank
 
     // Other things
     u32 CPUHalt;
     u32 halt_bug;
-    u32 cpu_change_speed_clocks; // clocks needed to change speed
+    int cpu_change_speed_clocks; // clocks needed to change speed
     u32 DoubleSpeed;
 
     u32 SGBEnabled;
@@ -378,8 +378,8 @@ typedef struct
     u32 sys_clocks; // 16 bit register. The 8 most significant bits are DIV_REG
     u32 timer_overflow_mask;
     u32 timer_enabled;             // Enable TIMA to increment
-    u32 timer_irq_delay_active;    // To trigger IF flag
-    u32 timer_reload_delay_active; // To reload TIMA from TMA
+    int timer_irq_delay_active;    // To trigger IF flag
+    int timer_reload_delay_active; // To reload TIMA from TMA
     u32 tima_just_reloaded;
 
     // Serial

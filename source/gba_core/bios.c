@@ -467,7 +467,7 @@ static void GBA_SWI_LZ77UnCompWram(void)
     //                      ((header >> 4) & 7));
     //    return;
     //}
-    int size = (header >> 8) & 0x00FFFFFF;
+    u32 size = (header >> 8) & 0x00FFFFFF;
     u8 *buffer = malloc(size + 2);
     if (buffer == NULL)
     {
@@ -476,7 +476,7 @@ static void GBA_SWI_LZ77UnCompWram(void)
         return;
     }
     u8 *buffertmp = buffer;
-    int total = 0;
+    u32 total = 0;
     while (size > total)
     {
         u8 flag = GBA_MemoryRead8(src++);
@@ -536,7 +536,7 @@ static void GBA_SWI_LZ77UnCompVram(void)
     //                      ((header >> 4) & 7));
     //    return;
     //}
-    int size = (header >> 8) & 0x00FFFFFF;
+    u32 size = (header >> 8) & 0x00FFFFFF;
     u16 *buffer = malloc(size + 2);
     if (buffer == NULL)
     {
@@ -545,7 +545,7 @@ static void GBA_SWI_LZ77UnCompVram(void)
         return;
     }
     u8 *buffertmp = (u8 *)buffer;
-    int total = 0;
+    u32 total = 0;
     while (size > total)
     {
         u8 flag = GBA_MemoryRead8(src++);

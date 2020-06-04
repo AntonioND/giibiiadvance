@@ -941,7 +941,7 @@ void GB_SoundUpdateClocksCounterReference(int reference_clocks)
         if (Sound.samples_left_to_output >
                         Sound.samples_left_to_input - (GB_BUFFER_SAMPLES / 2))
         {
-            int clocks_ref = (191 + 4) << GameBoy.Emulator.DoubleSpeed;
+            u32 clocks_ref = (191 + 4) << GameBoy.Emulator.DoubleSpeed;
             if (Sound.nextsample_clocks > clocks_ref)
             {
                 Sound.nextsample_clocks -= clocks_ref;
@@ -950,7 +950,7 @@ void GB_SoundUpdateClocksCounterReference(int reference_clocks)
         }
         else
         {
-            int clocks_ref = (191 - 4) << GameBoy.Emulator.DoubleSpeed;
+            u32 clocks_ref = (191 - 4) << GameBoy.Emulator.DoubleSpeed;
             if (Sound.nextsample_clocks > clocks_ref)
             {
                 Sound.nextsample_clocks -= clocks_ref;
@@ -960,9 +960,11 @@ void GB_SoundUpdateClocksCounterReference(int reference_clocks)
     }
 
     // 4194304 Hz CPU / 256 Steps per second
-    if (Sound.clocks >= (16384 << GameBoy.Emulator.DoubleSpeed))
+    u32 clocks_per_sound_step = 16384 << GameBoy.Emulator.DoubleSpeed;
+
+    if (Sound.clocks >= clocks_per_sound_step)
     {
-        Sound.clocks -= 16384 << GameBoy.Emulator.DoubleSpeed;
+        Sound.clocks -= clocks_per_sound_step;
         if (Sound.master_enable)
         {
             if (Sound.Chn1.running) // Channel 1

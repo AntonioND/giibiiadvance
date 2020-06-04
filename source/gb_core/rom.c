@@ -361,8 +361,8 @@ int GB_CartridgeLoad(const u8 *pointer, const u32 rom_size)
         {
             if (DirGetBiosFolderPath())
             {
-                int size = strlen(DirGetBiosFolderPath())
-                           + strlen(boot_rom_filename) + 2;
+                size_t size = strlen(DirGetBiosFolderPath())
+                            + strlen(boot_rom_filename) + 2;
                 char *completepath = malloc(size);
                 snprintf(completepath, size, "%s%s", DirGetBiosFolderPath(),
                          boot_rom_filename);
@@ -701,7 +701,7 @@ void GB_Cartridge_Unload(void)
 
 void GB_Cardridge_Set_Filename(char *filename)
 {
-    u32 len = strlen(filename);
+    size_t len = strlen(filename);
 
     if (GameBoy.Emulator.save_filename)
     {
@@ -787,14 +787,14 @@ void GB_RTC_Save(FILE *savefile)
     else if (sizeof(time_t) == 8)
     {
         timestamp_low = current_time;
-        timestamp_hi = (current_time >> 32); // TODO: Remove warning?
+        timestamp_hi = (current_time >> 32);
     }
     else // ????
     {
         // TODO: Add assert
         //Debug_ErrorMsg("Invalid size of time_t.");
         timestamp_low = current_time;
-        timestamp_hi = (current_time >> 32); // TODO: Remove warning?
+        timestamp_hi = (current_time >> 32);
     }
 
     if (fwrite(&timestamp_low, 1, 4, savefile) != 4)
@@ -916,7 +916,7 @@ void GB_SRAM_Save(void)
     if ((GameBoy.Emulator.RAM_Banks == 0) || (GameBoy.Emulator.HasBattery == 0))
         return;
 
-    int size = strlen(GameBoy.Emulator.save_filename) + 5;
+    size_t size = strlen(GameBoy.Emulator.save_filename) + 5;
     char *name = malloc(size);
     snprintf(name, size, "%s.sav", GameBoy.Emulator.save_filename);
 
@@ -932,9 +932,9 @@ void GB_SRAM_Save(void)
     if (GameBoy.Emulator.MemoryController == MEM_MBC2)
     {
         // 512 * 4 bits
-        int n = fwrite(GameBoy.Memory.ExternRAM[0], 1, 512, savefile);
+        size_t n = fwrite(GameBoy.Memory.ExternRAM[0], 1, 512, savefile);
         if (n != 512)
-            Debug_ErrorMsgArg("Error while writing SRAM: %d bytes written.", n);
+            Debug_ErrorMsgArg("Error while writing SRAM: %zu bytes written.", n);
     }
     //else if (((_GB_ROM_HEADER_ *)GameBoy.Emulator.Rom_Pointer)->ram_size == 1)
     //{
@@ -944,11 +944,11 @@ void GB_SRAM_Save(void)
     else
     {
         // Complete banks
-        for (int a = 0; a < GameBoy.Emulator.RAM_Banks; a++)
+        for (u32 a = 0; a < GameBoy.Emulator.RAM_Banks; a++)
         {
-            int n = fwrite(GameBoy.Memory.ExternRAM[a], 1, 8 * 1024, savefile);
+            size_t n = fwrite(GameBoy.Memory.ExternRAM[a], 1, 8 * 1024, savefile);
             if (n != (8 * 1024))
-                Debug_ErrorMsgArg("Error while writing SRAM bank %d: %d bytes written",
+                Debug_ErrorMsgArg("Error while writing SRAM bank %u: %zu bytes written",
                                   a, n);
         }
     }
@@ -965,12 +965,12 @@ void GB_SRAM_Load(void)
         return;
 
     // Reset cartridge RAM in case there is no SAV
-    for (int i = 0; i < GameBoy.Emulator.RAM_Banks; i++)
+    for (u32 i = 0; i < GameBoy.Emulator.RAM_Banks; i++)
     {
         memset_rand(GameBoy.Memory.ExternRAM[i], 8 * 1024);
     }
 
-    int size = strlen(GameBoy.Emulator.save_filename) + 5;
+    size_t size = strlen(GameBoy.Emulator.save_filename) + 5;
     char *name = malloc(size);
     snprintf(name, size, "%s.sav", GameBoy.Emulator.save_filename);
 
@@ -987,7 +987,7 @@ void GB_SRAM_Load(void)
     if (GameBoy.Emulator.MemoryController == MEM_MBC2)
     {
         // 512 * 4 bits
-        int n = fread(GameBoy.Memory.ExternRAM[0], 1, 512, savefile);
+        size_t n = fread(GameBoy.Memory.ExternRAM[0], 1, 512, savefile);
 
         if (n != 512)
             ConsolePrint("Error while reading SRAM: %d bytes read", n);
@@ -999,11 +999,11 @@ void GB_SRAM_Load(void)
     //}
     else // Complete banks
     {
-        for (int a = 0; a < GameBoy.Emulator.RAM_Banks; a++)
+        for (u32 a = 0; a < GameBoy.Emulator.RAM_Banks; a++)
         {
-            int n = fread(GameBoy.Memory.ExternRAM[a], 1, 8 * 1024, savefile);
+            size_t n = fread(GameBoy.Memory.ExternRAM[a], 1, 8 * 1024, savefile);
             if (n != 8 * 1024)
-                ConsolePrint("Error while reading SRAM bank %d: %d bytes read",
+                ConsolePrint("Error while reading SRAM bank %d: %zu bytes read",
                              a, n);
         }
     }

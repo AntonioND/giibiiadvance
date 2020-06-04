@@ -11,7 +11,7 @@
 
 int GBA_SaveIsEEPROM(void);
 
-void GBA_DetectSaveType(u8 *romptr, int size);
+void GBA_DetectSaveType(u8 *romptr, size_t size);
 void GBA_ResetSaveBuffer(void);
 void GBA_SaveSetFilename(char *rom_path);
 

@@ -105,10 +105,10 @@ void GB_MemInit(void)
 
     mem->ROM_Base = (void *)GameBoy.Emulator.Rom_Pointer;
 
-    for (int i = 0; i < 512; i++)
+    for (u32 i = 0; i < 512; i++)
         mem->ROM_Switch[i] = NULL;
 
-    for (int i = 0; i < GameBoy.Emulator.ROM_Banks; i++)
+    for (u32 i = 0; i < GameBoy.Emulator.ROM_Banks; i++)
         mem->ROM_Switch[i] = (u8 *)GameBoy.Emulator.Rom_Pointer
                              + (16 * 1024 * i);
 

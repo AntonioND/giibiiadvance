@@ -166,7 +166,7 @@ extern "C" int Webcam_GetFrame(void)
         }
 
         // How much to jump from one element of a row to the next one
-        int step = convertedframe.elemSize();
+        size_t step = convertedframe.elemSize();
 
         for (int j = 0; j < GBCAM_SENSOR_H; j++)
         {

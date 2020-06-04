@@ -162,7 +162,7 @@ static void _win_gb_camera_viewer_render(void)
     if (GBCameraViewerCreated == 0)
         return;
 
-    char buffer[WIN_GB_CAMERAVIEWER_WIDTH * WIN_GB_CAMERAVIEWER_HEIGHT * 3];
+    static char buffer[WIN_GB_CAMERAVIEWER_WIDTH * WIN_GB_CAMERAVIEWER_HEIGHT * 3];
     GUI_Draw(&gb_camviewer_window_gui, buffer, WIN_GB_CAMERAVIEWER_WIDTH,
              WIN_GB_CAMERAVIEWER_HEIGHT, 1);
 

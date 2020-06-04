@@ -347,7 +347,7 @@ static int GB_PrinterChecksumIsCorrect(void)
     if (GB_Printer.size > 0)
     {
         result += (GB_Printer.size & 0xFF) + ((GB_Printer.size >> 8) & 0xFF);
-        for (int i = 0; i < GB_Printer.size; i++)
+        for (u32 i = 0; i < GB_Printer.size; i++)
             result += GB_Printer.data[i];
     }
 

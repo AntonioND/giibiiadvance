@@ -410,7 +410,7 @@ static s32 GBA_DMA0Update(s32 clocks)
         {
             if (DMA[0].copywords) // Copy words
             {
-                for (int i = 0; i < DMA[0].num_chunks; i++)
+                for (u32 i = 0; i < DMA[0].num_chunks; i++)
                 {
                     GBA_MemoryWrite32(DMA[0].dstaddr,
                                       GBA_MemoryRead32(DMA[0].srcaddr));
@@ -420,7 +420,7 @@ static s32 GBA_DMA0Update(s32 clocks)
             }
             else // Copy halfwords
             {
-                for (int i = 0; i < DMA[0].num_chunks; i++)
+                for (u32 i = 0; i < DMA[0].num_chunks; i++)
                 {
                     GBA_MemoryWrite16(DMA[0].dstaddr,
                                       GBA_MemoryRead16(DMA[0].srcaddr));
@@ -524,7 +524,7 @@ static s32 GBA_DMA1Update(s32 clocks)
         {
             if (DMA[1].copywords) // Copy words
             {
-                for (int i = 0; i < DMA[1].num_chunks; i++)
+                for (u32 i = 0; i < DMA[1].num_chunks; i++)
                 {
                     GBA_MemoryWrite32(DMA[1].dstaddr,
                                       GBA_MemoryRead32(DMA[1].srcaddr));
@@ -534,7 +534,7 @@ static s32 GBA_DMA1Update(s32 clocks)
             }
             else // Copy halfwords
             {
-                for (int i = 0; i < DMA[1].num_chunks; i++)
+                for (u32 i = 0; i < DMA[1].num_chunks; i++)
                 {
                     GBA_MemoryWrite16(DMA[1].dstaddr,
                                       GBA_MemoryRead16(DMA[1].srcaddr));
@@ -653,7 +653,7 @@ static s32 GBA_DMA2Update(s32 clocks)
         {
             if (DMA[2].copywords) // Copy words
             {
-                for (int i = 0; i < DMA[2].num_chunks; i++)
+                for (u32 i = 0; i < DMA[2].num_chunks; i++)
                 {
                     GBA_MemoryWrite32(DMA[2].dstaddr,
                                       GBA_MemoryRead32(DMA[2].srcaddr));
@@ -663,7 +663,7 @@ static s32 GBA_DMA2Update(s32 clocks)
             }
             else // Copy halfwords
             {
-                for (int i = 0; i < DMA[2].num_chunks; i++)
+                for (u32 i = 0; i < DMA[2].num_chunks; i++)
                 {
                     GBA_MemoryWrite16(DMA[2].dstaddr,
                                       GBA_MemoryRead16(DMA[2].srcaddr));
@@ -791,7 +791,7 @@ static s32 GBA_DMA3Update(s32 clocks)
 
             if (DMA[3].copywords) // Copy words
             {
-                for (int i = 0; i < DMA[3].num_chunks; i++)
+                for (u32 i = 0; i < DMA[3].num_chunks; i++)
                 {
                     GBA_MemoryWrite32(DMA[3].dstaddr,
                                       GBA_MemoryRead32(DMA[3].srcaddr));
@@ -801,7 +801,7 @@ static s32 GBA_DMA3Update(s32 clocks)
             }
             else // Copy halfwords
             {
-                for (int i = 0; i < DMA[3].num_chunks; i++)
+                for (u32 i = 0; i < DMA[3].num_chunks; i++)
                 {
                     GBA_MemoryWrite16(DMA[3].dstaddr,
                                       GBA_MemoryRead16(DMA[3].srcaddr));

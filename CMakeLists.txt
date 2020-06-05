@@ -4,7 +4,7 @@
 #
 # GiiBiiAdvance - GBA/GB emulator
 
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.13)
 project(GiiBiiAdvance)
 enable_language(CXX C)
 
@@ -23,10 +23,33 @@ add_executable(giibiiadvance)
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
     target_compile_options(giibiiadvance
         PRIVATE
-            -Wall
-            -Wformat-truncation=0
-            -Wextra
+            -fwrapv # Sane signed ints
+            -Wall -Wextra
+            -Wformat-truncation=0 # Disable this warning
     )
+
+    if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 9.3)
+        target_compile_options(giibiiadvance
+            PRIVATE
+                -Wformat-overflow=2
+                -Wformat=2 -Wno-format-nonliteral
+                -Wundef -Wunused -Wuninitialized -Wunknown-pragmas -Wshadow
+                -Wlogical-op -Wduplicated-cond -Wswitch-enum -Wfloat-equal
+                -Wcast-align -Walloc-zero -Winline
+                -Wstrict-overflow=5 -Wstringop-overflow=4
+                # TODO: Enable the following warnings?
+                #-Wpedantic -Wformat-truncation=1 -Wcast-qual
+                $<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes>
+                $<$<COMPILE_LANGUAGE:C>:-Wold-style-definition>
+                -fsanitize=undefined
+        )
+
+        target_link_options(giibiiadvance
+            PRIVATE
+                -fsanitize=undefined
+        )
+
+    endif()
 elseif(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
     target_compile_definitions(giibiiadvance
         PRIVATE

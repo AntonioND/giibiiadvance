@@ -85,10 +85,10 @@ char *DirGetScreenshotFolderPath(void)
 
 //-------------------------------------------------
 
-void FileLoad_NoError(const char *filename, void **buffer, unsigned int *size_)
+void FileLoad_NoError(const char *filename, void **buffer, size_t *size_)
 {
     FILE *f = fopen(filename, "rb");
-    unsigned int size;
+    size_t size;
 
     *buffer = NULL;
     if (size_)
@@ -127,10 +127,10 @@ void FileLoad_NoError(const char *filename, void **buffer, unsigned int *size_)
     fclose(f);
 }
 
-void FileLoad(const char *filename, void **buffer, unsigned int *size_)
+void FileLoad(const char *filename, void **buffer, size_t *size_)
 {
     FILE *f = fopen(filename, "rb");
-    unsigned int size;
+    size_t size;
 
     *buffer = NULL;
     if (size_)

@@ -329,7 +329,7 @@ static int _win_main_get_rom_type(char *name)
 
 static void *bios_buffer = NULL;
 static void *rom_buffer = NULL;
-static unsigned int rom_size;
+static size_t rom_size;
 
 static void _win_main_unload_rom(int save_data)
 {
@@ -439,7 +439,7 @@ static int _win_main_load_rom_autodetect(char *path)
         // There should be some error checking...
 
         char bios_path[MAX_PATHLEN];
-        unsigned int bios_size;
+        size_t bios_size;
         snprintf(bios_path, sizeof(bios_path), "%s" GBA_BIOS_FILENAME,
                  DirGetBiosFolderPath());
 

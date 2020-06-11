@@ -172,8 +172,8 @@ extern "C" int Webcam_GetFrame(void)
         {
             for (int i = 0; i < GBCAM_SENSOR_W; i++)
             {
-                int index = ((j * camera_zoomfactor) * w * step)
-                            + ((i * camera_zoomfactor) * 3);
+                size_t index = ((j * camera_zoomfactor) * w * step)
+                               + ((i * camera_zoomfactor) * 3);
 
                 int r = p[index + 0];
                 int g = p[index + 1];

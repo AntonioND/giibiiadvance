@@ -7,7 +7,7 @@
 #include "build_options.h"
 #include "font_utils.h"
 
-const char *readme_text = {
+const char *readme_text =
 "                --------------------------\n"
 "                -- GiiBiiAdvance v" GIIBIIADVANCE_VERSION_STRING " --\n"
 "                --------------------------\n"
@@ -125,10 +125,9 @@ const char *readme_text = {
 "\n"
 "You can contact me by email: antonio_nd (at) outlook (dot) com\n"
 "www.skylyrac.net\n"
-"\n"
-};
+"\n";
 
-const char *about_text = {
+const char *about_text =
 "        GiiBiiAdvance version " GIIBIIADVANCE_VERSION_STRING "\n"
 "    " GIIBIIADVANCE_COPYRIGHT_STRING_ASCII "\n"
 "\n"
@@ -198,10 +197,9 @@ const char *about_text = {
 "\n"
 "\n"
 "Special thanks to:\n"
-"-NightFox and JuDelCo\n"
-};
+"-NightFox and JuDelCo\n";
 
-const char *license_text = {
+const char *license_text =
 "                    GNU GENERAL PUBLIC LICENSE\n"
 "                       Version 2, June 1991\n"
 "\n"
@@ -474,5 +472,4 @@ const char *license_text = {
 "                     END OF TERMS AND CONDITIONS\n"
 "\n"
 "\n"
-"\n"
-};
+"\n";

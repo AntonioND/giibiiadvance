@@ -221,10 +221,10 @@ static void _sys_info_reset(void)
                      "GL_VERSION    = %s\n"
                      "GL_VENDOR     = %s\n"
                      "GL_EXTENSIONS = ",
-                     (char *)glGetString(GL_RENDERER),
-                     (char *)glGetString(GL_VERSION),
-                     (char *)glGetString(GL_VENDOR));
-    _sys_info_printf("%s\n", (char *)glGetString(GL_EXTENSIONS));
+                     (const char *)glGetString(GL_RENDERER),
+                     (const char *)glGetString(GL_VERSION),
+                     (const char *)glGetString(GL_VENDOR));
+    _sys_info_printf("%s\n", (const char *)glGetString(GL_EXTENSIONS));
 #endif
     _sys_info_printf("\nEND LOG\n");
 }

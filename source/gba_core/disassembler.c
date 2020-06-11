@@ -847,7 +847,7 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char *dest, int dest_size)
 
                 u32 shiftval = (opcode >> 7) & 0x1F;
                 u32 Rm = opcode & 0xF;
-                char *shift = (char *)arm_shift_type[(opcode >> 5) & 3];
+                const char *shift = (const char *)arm_shift_type[(opcode >> 5) & 3];
 
                 int canbenop = 0;
 
@@ -1185,7 +1185,7 @@ void GBA_DisassembleARM(u32 opcode, u32 address, char *dest, int dest_size)
 
             char shift_text[16];
             u32 shiftval = (opcode >> 7) & 0x1F;
-            char *shift = (char *)arm_shift_type[(opcode >> 5) & 3];
+            const char *shift = (const char *)arm_shift_type[(opcode >> 5) & 3];
 
             if (shiftval == 0)
             {

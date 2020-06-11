@@ -154,13 +154,13 @@ static void _gui_draw_menu(_gui_menu *menu, char *buffer, int w, int h)
 
     // Get longest string for this list
     i = 0;
-    int longest_string = 0;
+    size_t longest_string = 0;
     while (1)
     {
         if (entries[i] == NULL)
             break;
 
-        int l = strlen(entries[i]->text);
+        size_t l = strlen(entries[i]->text);
         if (longest_string < l)
             longest_string = l;
 

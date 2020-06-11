@@ -33,7 +33,7 @@ void GB_Input_Update(void);
 int GB_ROMLoad(const char *rom_path)
 {
     void *ptr;
-    u32 size;
+    size_t size;
 
     FileLoad(rom_path, &ptr, &size);
 

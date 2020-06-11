@@ -240,7 +240,7 @@ void Config_Load(void)
     }
 
     char *ini;
-    unsigned int size;
+    size_t size;
     FileLoad_NoError(path, (void *)&ini, &size);
     if (ini == NULL)
         return;

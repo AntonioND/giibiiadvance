@@ -83,7 +83,8 @@ static void _wh_set_window_icon(SDL_Window *window)
 {
     SDL_Surface *surface;
 
-    surface = SDL_CreateRGBSurfaceFrom((void *)icon_data, 32, 32, 32, 32 * 4,
+    surface = SDL_CreateRGBSurfaceFrom((void *)icon_data,
+                                       32, 32, 32, 32 * 4,
                                        0x000000FF, 0x0000FF00, 0x00FF0000,
                                        0xFF000000);
 
@@ -449,7 +450,8 @@ void WH_Render(int index, const char *buffer)
     if (w->mWindow == NULL)
         return;
 
-    SDL_UpdateTexture(w->mTexture, NULL, (void *)buffer, w->mTexWidth * 3);
+    SDL_UpdateTexture(w->mTexture, NULL, (const void *)buffer,
+                      w->mTexWidth * 3);
 
 #ifdef OPENGL_BLIT
     glEnable(GL_TEXTURE_2D);

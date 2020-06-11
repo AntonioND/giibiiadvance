@@ -101,6 +101,12 @@ the ``vcpkg`` folder by the one in your system):
     cmake .. -DCMAKE_TOOLCHAIN_FILE=C:\...\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows
     msbuild GiiBiiAdvance.sln
 
+In order to get a Release build, do:
+
+.. code:: bash
+
+    msbuild GiiBiiAdvance.sln /property:Configuration=Release
+
 Instead of running msbuild from the command line, you can also open the solution
 file with Visual Studio and build it from the IDE.
 

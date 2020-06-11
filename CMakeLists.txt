@@ -23,9 +23,10 @@ add_executable(giibiiadvance)
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
     target_compile_options(giibiiadvance
         PRIVATE
-            -fwrapv # Sane signed ints
+            -fwrapv # Consider all ints 2's complement
             -Wall -Wextra
             -Wformat-truncation=0 # Disable this warning
+            -fno-common # Force usage of extern for external variables
     )
 
     if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 9.3)
@@ -38,7 +39,8 @@ if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
                 -Wcast-align -Walloc-zero -Winline
                 -Wstrict-overflow=5 -Wstringop-overflow=4
                 # TODO: Enable the following warnings?
-                #-Wpedantic -Wformat-truncation=1 -Wcast-qual
+                #-Wpedantic -Wformat-truncation=1 -Wcast-qual -Wconversion
+                #-Wstack-usage=4096
                 $<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes>
                 $<$<COMPILE_LANGUAGE:C>:-Wold-style-definition>
                 -fsanitize=undefined
@@ -55,6 +57,10 @@ elseif(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
         PRIVATE
             -D_USE_MATH_DEFINES
             -D_CRT_SECURE_NO_WARNINGS
+    )
+    target_compile_options(giibiiadvance
+        PRIVATE
+            /MP # Enable parallel compilation
     )
 endif()
 

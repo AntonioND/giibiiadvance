@@ -61,14 +61,14 @@ int Save_PNG(const char *file_name, int width, int height, void *buffer,
 
     png_init_io(png_ptr, fp);
 
-    // This size should be more than enough for most cases
-#define MAX_ROWS (1024 * 1024)
-    if (height > MAX_ROWS)
+    png_bytep *row_pointers = malloc(sizeof(png_bytep) * height);
+    if (row_pointers == NULL)
     {
-        Debug_LogMsgArg("%s: height is too big (%d)", __func__, height);
+        Debug_LogMsgArg("%s(): Couldn't allocate row_pointers", __func__);
+        fclose(fp);
+        png_destroy_write_struct(&png_ptr, &info_ptr);
         return 1;
     }
-    png_bytep row_pointers[MAX_ROWS];
 
     if (save_alpha)
     {
@@ -125,6 +125,7 @@ int Save_PNG(const char *file_name, int width, int height, void *buffer,
 
     for (int k = 0; k < height; k++)
         free(row_pointers[k]);
+    free(row_pointers);
 
     fclose(fp);
 

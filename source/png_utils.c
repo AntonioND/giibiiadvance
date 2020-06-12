@@ -13,61 +13,61 @@
 
 static void png_warn_fn_(unused__ png_structp sp, png_const_charp cp)
 {
-    Debug_LogMsgArg("Save_PNG(): libpng warning: %s", cp);
+    Debug_LogMsgArg("libpng warning: %s", cp);
 }
 
 static void png_err_fn_(unused__ png_structp sp, png_const_charp cp)
 {
-    Debug_LogMsgArg("Save_PNG(): libpng error: %s", cp);
+    Debug_LogMsgArg("libpng error: %s", cp);
 }
 
 // Save a RGBA buffer into a PNG file
 int Save_PNG(const char *file_name, int width, int height, void *buffer,
              int save_alpha)
 {
-    FILE *fp = fopen(file_name, "wb");
+    int ret = -1;
+
+    FILE *fp = NULL;
+    png_structp png_ptr = NULL;
+    png_infop info_ptr = NULL;
+    png_bytep *row_pointers = NULL;
+
+    fp = fopen(file_name, "wb");
     if (fp == NULL)
     {
-        Debug_LogMsgArg("Save_PNG(): Couldn't open file for writing: %s",
-                        file_name);
-        return 1;
+        Debug_LogMsgArg("%s(): Can't open file for writing: %s",
+                        __func__, file_name);
+        goto cleanup;
     }
 
-    png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL,
-                                                  png_err_fn_, png_warn_fn_);
+    png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL,
+                                      png_err_fn_, png_warn_fn_);
     if (png_ptr == NULL)
     {
-        Debug_LogMsgArg("Save_PNG(): libpng error: png_ptr == NULL");
-        fclose(fp);
-        return 1;
+        Debug_LogMsgArg("%s(): png_ptr = NULL", __func__);
+        goto cleanup;
     }
 
-    png_infop info_ptr = png_create_info_struct(png_ptr);
+    info_ptr = png_create_info_struct(png_ptr);
     if (info_ptr == NULL)
     {
-        Debug_LogMsgArg("Save_PNG(): libpng error: info_ptr == NULL");
-        fclose(fp);
-        png_destroy_write_struct(&png_ptr, NULL);
-        return 1;
+        Debug_LogMsgArg("%s(): info_ptr = NULL", __func__);
+        goto cleanup;
     }
 
     if (setjmp(png_jmpbuf(png_ptr)))
     {
-        Debug_LogMsgArg("Save_PNG(): libpng error: setjmp(png_jmpbuf(png_ptr)) != 0");
-        fclose(fp);
-        png_destroy_write_struct(&png_ptr, &info_ptr);
-        return 1;
+        Debug_LogMsgArg("%s(): setjmp() error", __func__);
+        goto cleanup;
     }
 
     png_init_io(png_ptr, fp);
 
-    png_bytep *row_pointers = malloc(sizeof(png_bytep) * height);
+    row_pointers = calloc(height, sizeof(png_bytep));
     if (row_pointers == NULL)
     {
-        Debug_LogMsgArg("%s(): Couldn't allocate row_pointers", __func__);
-        fclose(fp);
-        png_destroy_write_struct(&png_ptr, &info_ptr);
-        return 1;
+        Debug_LogMsgArg("%s(): row_pointers = NULL", __func__);
+        goto cleanup;
     }
 
     if (save_alpha)
@@ -79,7 +79,14 @@ int Save_PNG(const char *file_name, int width, int height, void *buffer,
         png_write_info(png_ptr, info_ptr);
 
         for (int k = 0; k < height; k++)
-            row_pointers[k] = malloc(width * 4); // TODO: Error checking
+        {
+            row_pointers[k] = malloc(width * 4);
+            if (row_pointers[k] == NULL)
+            {
+                Debug_LogMsgArg("%s(): row_pointers[%d] = NULL", __func__, k);
+                goto cleanup;
+            }
+        }
 
         unsigned char *buf = (unsigned char *)buffer;
         for (int k = 0; k < height; k++)
@@ -102,7 +109,14 @@ int Save_PNG(const char *file_name, int width, int height, void *buffer,
         png_write_info(png_ptr, info_ptr);
 
         for (int k = 0; k < height; k++)
-            row_pointers[k] = malloc(width * 3); // TODO: Error checking
+        {
+            row_pointers[k] = malloc(width * 3);
+            if (row_pointers[k] == NULL)
+            {
+                Debug_LogMsgArg("%s(): row_pointers[%d] = NULL", __func__, k);
+                goto cleanup;
+            }
+        }
 
         unsigned char *buf = (unsigned char *)buffer;
         for (int k = 0; k < height; k++)
@@ -121,15 +135,26 @@ int Save_PNG(const char *file_name, int width, int height, void *buffer,
 
     png_write_end(png_ptr, info_ptr);
 
-    png_destroy_write_struct(&png_ptr, &info_ptr);
+    ret = 0;
 
-    for (int k = 0; k < height; k++)
-        free(row_pointers[k]);
-    free(row_pointers);
+cleanup:
 
-    fclose(fp);
+    if (row_pointers)
+    {
+        for (int i = 0; i < height; i++)
+            free(row_pointers[i]);
+        free(row_pointers);
+    }
 
-    return 0;
+    if (info_ptr)
+        png_destroy_write_struct(&png_ptr, &info_ptr);
+    else if (png_ptr)
+        png_destroy_write_struct(&png_ptr, NULL);
+
+    if (fp)
+        fclose(fp);
+
+    return ret;
 }
 
 // Load a PNG file into a RGBA buffer

@@ -18,70 +18,51 @@ set(C_STANDARD_REQUIRED ON)
 
 add_executable(giibiiadvance)
 
-# Some compiler-specific options
+# Compiler-specific options
+# -------------------------
 
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-    target_compile_options(giibiiadvance
-        PRIVATE
-            -fwrapv # Consider all ints 2's complement
-            -Wall -Wextra
-            -Wformat-truncation=0 # Disable this warning
-            -fno-common # Force usage of extern for external variables
+    target_compile_options(giibiiadvance PRIVATE
+        -fwrapv # Consider all ints 2's complement
+        -Wall -Wextra
+        -Wformat-truncation=0 # Disable this warning
+        -fno-common # Force usage of extern for external variables
     )
-
     if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 9.3)
-        target_compile_options(giibiiadvance
-            PRIVATE
-                -Wformat-overflow=2
-                -Wformat=2 -Wno-format-nonliteral
-                -Wundef -Wunused -Wuninitialized -Wunknown-pragmas -Wshadow
-                -Wlogical-op -Wduplicated-cond -Wswitch-enum -Wfloat-equal
-                -Wcast-align -Walloc-zero -Winline
-                -Wstrict-overflow=5 -Wstringop-overflow=4
-                # TODO: Enable the following warnings?
-                #-Wpedantic -Wformat-truncation=1 -Wcast-qual -Wconversion
-                #-Wstack-usage=4096
-                $<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes>
-                $<$<COMPILE_LANGUAGE:C>:-Wold-style-definition>
-                -fsanitize=undefined
+        target_compile_options(giibiiadvance PRIVATE
+            -Wformat-overflow=2 -Wformat=2 -Wno-format-nonliteral
+            -Wundef -Wunused -Wuninitialized -Wunknown-pragmas -Wshadow
+            -Wlogical-op -Wduplicated-cond -Wswitch-enum -Wfloat-equal
+            -Wcast-align -Walloc-zero -Winline
+            -Wstrict-overflow=5 -Wstringop-overflow=4
+            # TODO: Enable the following warnings?
+            #-Wpedantic -Wformat-truncation=1 -Wcast-qual -Wconversion
+            #-Wstack-usage=4096
+            $<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes>
+            $<$<COMPILE_LANGUAGE:C>:-Wold-style-definition>
+            -fsanitize=undefined
         )
-
-        target_link_options(giibiiadvance
-            PRIVATE
-                -fsanitize=undefined
+        target_link_options(giibiiadvance PRIVATE
+            -fsanitize=undefined
         )
-
     endif()
 elseif(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
-    target_compile_definitions(giibiiadvance
-        PRIVATE
-            -D_USE_MATH_DEFINES
-            -D_CRT_SECURE_NO_WARNINGS
+    target_compile_definitions(giibiiadvance PRIVATE
+        -D_USE_MATH_DEFINES
+        -D_CRT_SECURE_NO_WARNINGS
     )
-    target_compile_options(giibiiadvance
-        PRIVATE
-            /MP # Enable parallel compilation
+    target_compile_options(giibiiadvance PRIVATE
+        /MP # Enable parallel compilation
     )
 endif()
 
 # Add source code files
-
-if(WIN32)
-    target_sources(giibiiadvance
-        PRIVATE
-            windows_resources/resource.rc
-    )
-endif()
+# ---------------------
 
 # Macro that searches all the source files in the specified directory in 'dir'
 # and saves them in 'var'
 macro(search_source_files dir var)
-    file(GLOB ${var} CONFIGURE_DEPENDS
-        ${dir}/*.c
-        ${dir}/*.cpp
-        ${dir}/*.h
-        ${dir}/*.s
-    )
+    file(GLOB ${var} CONFIGURE_DEPENDS ${dir}/*.c ${dir}/*.cpp ${dir}/*.h)
 endmacro()
 
 search_source_files(source FILES_SOURCE)
@@ -89,38 +70,45 @@ search_source_files(source/gb_core FILES_SOURCE_GB_CORE)
 search_source_files(source/gba_core FILES_SOURCE_GBA_CORE)
 search_source_files(source/gui FILES_SOURCE_GUI)
 
-target_sources(giibiiadvance
-    PRIVATE
-        ${FILES_SOURCE}
-        ${FILES_SOURCE_GB_CORE}
-        ${FILES_SOURCE_GBA_CORE}
-        ${FILES_SOURCE_GUI}
+target_sources(giibiiadvance PRIVATE
+    ${FILES_SOURCE}
+    ${FILES_SOURCE_GB_CORE}
+    ${FILES_SOURCE_GBA_CORE}
+    ${FILES_SOURCE_GUI}
 )
+
+# Windows resources
+
+if(WIN32)
+    target_sources(giibiiadvance PRIVATE
+        windows_resources/resource.rc
+    )
+endif()
+
+# Link with libraries and check build options
+# -------------------------------------------
 
 # libpng and SLD2 are required
 
-find_package(SDL2 REQUIRED)
-
 if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
     find_package(libpng REQUIRED)
+    find_package(SDL2 REQUIRED)
 
-    target_link_libraries(giibiiadvance
-        PRIVATE
-            png
-            SDL2::SDL2 SDL2::SDL2main
+    target_link_libraries(giibiiadvance PRIVATE
+        png
+        SDL2::SDL2 SDL2::SDL2main
     )
 else()
     find_package(PNG REQUIRED)
+    find_package(SDL2 REQUIRED)
 
-    target_include_directories(giibiiadvance
-        PRIVATE
-            ${PNG_INCLUDE_DIRS}
-            ${SDL2_INCLUDE_DIRS}
+    target_include_directories(giibiiadvance PRIVATE
+        ${PNG_INCLUDE_DIRS}
+        ${SDL2_INCLUDE_DIRS}
     )
-    target_link_libraries(giibiiadvance
-        PRIVATE
-            ${PNG_LIBRARIES}
-            ${SDL2_LIBRARIES}
+    target_link_libraries(giibiiadvance PRIVATE
+        ${PNG_LIBRARIES}
+        ${SDL2_LIBRARIES}
     )
 endif()
 
@@ -136,25 +124,13 @@ endif()
 
 if(ENABLE_CAMERA)
     if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
-        target_link_libraries(giibiiadvance
-            PRIVATE
-                opencv_videoio
-        )
+        target_link_libraries(giibiiadvance PRIVATE opencv_videoio)
     else()
-        target_include_directories(giibiiadvance
-            PRIVATE
-                ${OpenCV_INCLUDE_DIRS}
-        )
-        target_link_libraries(giibiiadvance
-            PRIVATE
-                ${OpenCV_LIBRARIES}
-        )
+        target_include_directories(giibiiadvance PRIVATE ${OpenCV_INCLUDE_DIRS})
+        target_link_libraries(giibiiadvance PRIVATE ${OpenCV_LIBRARIES})
     endif()
 else()
-    target_compile_definitions(giibiiadvance
-        PRIVATE
-            -DNO_CAMERA_EMULATION
-    )
+    target_compile_definitions(giibiiadvance PRIVATE -DNO_CAMERA_EMULATION)
 endif()
 
 # OpenGL is optional. It can be used as library to output graphics.
@@ -168,18 +144,9 @@ else()
 endif()
 
 if(ENABLE_OPENGL)
-    target_compile_definitions(giibiiadvance
-        PRIVATE
-            -DENABLE_OPENGL
-    )
-    target_include_directories(giibiiadvance
-        PRIVATE
-            ${OPENGL_INCLUDE_DIRS}
-    )
-    target_link_libraries(giibiiadvance
-        PRIVATE
-            ${OPENGL_LIBRARIES}
-    )
+    target_compile_definitions(giibiiadvance PRIVATE -DENABLE_OPENGL)
+    target_include_directories(giibiiadvance PRIVATE ${OPENGL_INCLUDE_DIRS})
+    target_link_libraries(giibiiadvance PRIVATE ${OPENGL_LIBRARIES})
 endif()
 
 # In x86 CPUs, replace part of the CPU interpreter by inline assembly.
@@ -187,11 +154,10 @@ endif()
 if(NOT CMAKE_C_COMPILER_ID STREQUAL "MSVC")
     # This isn't compatible with MSVC
     option(ENABLE_ASM_X86 "Compile with inline assembly" ON)
+else()
+    set(ENABLE_ASM_X86 OFF)
+endif()
 
-    if(ENABLE_ASM_X86)
-        target_compile_definitions(giibiiadvance
-            PRIVATE
-                -DENABLE_ASM_X86
-        )
-    endif()
+if(ENABLE_ASM_X86)
+    target_compile_definitions(giibiiadvance PRIVATE -DENABLE_ASM_X86)
 endif()

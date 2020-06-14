@@ -160,59 +160,57 @@ cleanup:
 // Load a PNG file into a RGBA buffer
 int Read_PNG(const char *file_name, char **_buffer, int *_width, int *_height)
 {
-    int width, height;
+    int ret = -1;
+
+    FILE *fp;
+    png_structp png_ptr = NULL;
+    png_infop info_ptr = NULL;
+    png_bytep *row_pointers = NULL;
+    char *buffer = NULL;
+
+    int width = 0;
+    int height = 0;
     png_byte color_type;
     png_byte bit_depth;
 
-    png_structp png_ptr;
-    png_infop info_ptr;
-    png_bytep *row_pointers;
-
-    unsigned char header[8]; // 8 is the maximum size that can be checked
-
     // Open file and test for it being a png
-    FILE *fp = fopen(file_name, "rb");
-    if (!fp)
+    fp = fopen(file_name, "rb");
+    if (fp == NULL)
     {
-        Debug_LogMsgArg("Read_PNG(): File %s could not be opened for reading",
-                        file_name);
-        return 1;
+        Debug_LogMsgArg("%s(): Can't open file for reading: %s",
+                        __func__, file_name);
+        goto cleanup;
     }
 
+    unsigned char header[8]; // 8 is the maximum size that can be checked
     fread(header, 1, 8, fp);
     if (png_sig_cmp(header, 0, 8))
     {
-        fclose(fp);
-        Debug_LogMsgArg("Read_PNG(): File %s is not recognized as a PNG file",
-                        file_name);
-        return 1;
+        Debug_LogMsgArg("%s(): File %s is not recognized as a PNG file",
+                        __func__, file_name);
+        goto cleanup;
     }
 
     // Initialize structs
     png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, png_err_fn_,
                                      png_warn_fn_);
-    if (!png_ptr)
+    if (png_ptr == NULL)
     {
-        fclose(fp);
-        Debug_LogMsgArg("Read_PNG(): png_create_read_struct failed");
-        return 1;
+        Debug_LogMsgArg("%s(): png_create_read_struct failed", __func__);
+        goto cleanup;
     }
 
     info_ptr = png_create_info_struct(png_ptr);
-    if (!info_ptr)
+    if (info_ptr == NULL)
     {
-        png_destroy_read_struct(&png_ptr, NULL, NULL);
-        fclose(fp);
-        Debug_LogMsgArg("Read_PNG(): png_create_info_struct failed");
-        return 1;
+        Debug_LogMsgArg("%s(): png_create_info_struct failed", __func__);
+        goto cleanup;
     }
 
     if (setjmp(png_jmpbuf(png_ptr)))
     {
-        png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
-        fclose(fp);
-        Debug_LogMsgArg("Read_PNG(): Error during init_io");
-        return 1;
+        Debug_LogMsgArg("%s(): setjmp() error", __func__);
+        goto cleanup;
     }
 
     png_init_io(png_ptr, fp);
@@ -246,51 +244,34 @@ int Read_PNG(const char *file_name, char **_buffer, int *_width, int *_height)
     // Read file
     if (setjmp(png_jmpbuf(png_ptr)))
     {
-        png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
-        fclose(fp);
-        Debug_LogMsgArg("Read_PNG(): Error during read_image");
-        return 1;
+        Debug_LogMsgArg("%s(): setjmp() error", __func__);
+        goto cleanup;
     }
 
-    row_pointers = malloc(sizeof(png_bytep) * height);
+    row_pointers = calloc(height, sizeof(png_bytep));
     if (row_pointers == NULL)
     {
-        Debug_LogMsgArg("Read_PNG(): Couldn't allocate row_pointers");
-        png_read_end(png_ptr, NULL);
-        fclose(fp);
-        return 1;
+        Debug_LogMsgArg("%s(): row_pointers = NULL", __func__);
+        goto cleanup;
     }
 
     for (int y = 0; y < height; y++)
     {
-        row_pointers[y] = malloc(png_get_rowbytes(png_ptr, info_ptr));
+        row_pointers[y] = calloc(png_get_rowbytes(png_ptr, info_ptr), 1);
         if (row_pointers[y] == NULL)
         {
-            Debug_LogMsgArg("Read_PNG(): Couldn't allocate row_pointers[%d]",
-                            y);
-            png_read_end(png_ptr, NULL);
-            fclose(fp);
-            for (; y >= 0; y--)
-                free(row_pointers[y]);
-            free(row_pointers);
-            return 1;
+            Debug_LogMsgArg("%s(): row_pointers[%d] = NULL", __func__, y);
+            goto cleanup;
         }
     }
 
     png_read_image(png_ptr, row_pointers);
 
-    png_read_end(png_ptr, NULL);
-
-    fclose(fp);
-
-    char *buffer = malloc(width * height * 4);
+    buffer = malloc(width * height * 4);
     if (buffer == NULL)
     {
-        for (int y = 0; y < height; y++)
-            free(row_pointers[y]);
-        free(row_pointers);
-        Debug_LogMsgArg("Read_PNG(): Couldn't allocate buffer for image");
-        return 1;
+        Debug_LogMsgArg("%s(): buffer = NULL", __func__);
+        goto cleanup;
     }
 
     *_buffer = buffer;
@@ -308,9 +289,29 @@ int Read_PNG(const char *file_name, char **_buffer, int *_width, int *_height)
         }
     }
 
-    for (int y = 0; y < height; y++)
-        free(row_pointers[y]);
-    free(row_pointers);
+    png_read_end(png_ptr, NULL);
 
-    return 0;
+    ret = 0;
+
+cleanup:
+
+    if (png_ptr)
+    {
+        if (info_ptr)
+            png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+        else
+            png_destroy_read_struct(&png_ptr, NULL, NULL);
+    }
+
+    if (row_pointers)
+    {
+        for (int y = 0; y < height; y++)
+            free(row_pointers[y]);
+        free(row_pointers);
+    }
+
+    if (fp)
+        fclose(fp);
+
+    return ret;
 }

@@ -35,6 +35,8 @@ static int WinIDGBMapViewer;
 
 static int GBMapViewerCreated = 0;
 
+static char *gb_mapviewer_buffer = NULL;
+
 //------------------------------------------------------------------------------
 
 static u32 gb_mapview_selected_x = 0;
@@ -194,11 +196,10 @@ static void _win_gb_map_viewer_render(void)
     if (GBMapViewerCreated == 0)
         return;
 
-    char buffer[WIN_GB_MAPVIEWER_WIDTH * WIN_GB_MAPVIEWER_HEIGHT * 3];
-    GUI_Draw(&gb_mapviewer_window_gui, buffer, WIN_GB_MAPVIEWER_WIDTH,
-             WIN_GB_MAPVIEWER_HEIGHT, 1);
+    GUI_Draw(&gb_mapviewer_window_gui, gb_mapviewer_buffer,
+             WIN_GB_MAPVIEWER_WIDTH, WIN_GB_MAPVIEWER_HEIGHT, 1);
 
-    WH_Render(WinIDGBMapViewer, buffer);
+    WH_Render(WinIDGBMapViewer, gb_mapviewer_buffer);
 }
 
 static int _win_gb_map_viewer_callback(SDL_Event *e)
@@ -315,6 +316,14 @@ int Win_GBMapViewerCreate(void)
         return 0;
     }
 
+    gb_mapviewer_buffer = calloc(1, WIN_GB_MAPVIEWER_WIDTH *
+                                 WIN_GB_MAPVIEWER_HEIGHT * 3);
+    if (gb_mapviewer_buffer == NULL)
+    {
+        Debug_ErrorMsgArg("%s(): Not enough memory.");
+        return 0;
+    }
+
     GUI_SetLabel(&gb_mapview_tilebase_label, 6, 6, 9 * FONT_WIDTH, FONT_HEIGHT,
                  "Tile Base");
 
@@ -387,6 +396,9 @@ void Win_GBMapViewerClose(void)
 {
     if (GBMapViewerCreated == 0)
         return;
+
+    free(gb_mapviewer_buffer);
+    gb_mapviewer_buffer = NULL;
 
     GBMapViewerCreated = 0;
     WH_Close(WinIDGBMapViewer);

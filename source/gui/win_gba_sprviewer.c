@@ -32,6 +32,8 @@ static int WinIDGBASprViewer;
 
 static int GBASprViewerCreated = 0;
 
+static char *gba_sprviewer_buffer = NULL;
+
 //------------------------------------------------------------------------------
 
 static u32 gba_sprview_selected_spr = 0;
@@ -296,12 +298,10 @@ static void _win_gba_spr_viewer_render(void)
     if (GBASprViewerCreated == 0)
         return;
 
-    char buffer[WIN_GBA_SPRVIEWER_WIDTH * WIN_GBA_SPRVIEWER_HEIGHT * 3];
-
-    GUI_Draw(&gba_sprviewer_window_gui, buffer,
+    GUI_Draw(&gba_sprviewer_window_gui, gba_sprviewer_buffer,
              WIN_GBA_SPRVIEWER_WIDTH, WIN_GBA_SPRVIEWER_HEIGHT, 1);
 
-    WH_Render(WinIDGBASprViewer, buffer);
+    WH_Render(WinIDGBASprViewer, gba_sprviewer_buffer);
 }
 
 static int _win_gba_spr_viewer_callback(SDL_Event *e)
@@ -449,6 +449,14 @@ int Win_GBASprViewerCreate(void)
         return 0;
     }
 
+    gba_sprviewer_buffer = calloc(1, WIN_GBA_SPRVIEWER_WIDTH *
+                                  WIN_GBA_SPRVIEWER_HEIGHT * 3);
+    if (gba_sprviewer_buffer == NULL)
+    {
+        Debug_ErrorMsgArg("%s(): Not enough memory.");
+        return 0;
+    }
+
     GUI_SetTextBox(&gba_sprview_textbox, &gba_sprview_con,
                    668, 140, 21 * FONT_WIDTH, 12 * FONT_HEIGHT, NULL);
 
@@ -506,6 +514,9 @@ void Win_GBASprViewerClose(void)
 {
     if (GBASprViewerCreated == 0)
         return;
+
+    free(gba_sprviewer_buffer);
+    gba_sprviewer_buffer = NULL;
 
     GBASprViewerCreated = 0;
     WH_Close(WinIDGBASprViewer);

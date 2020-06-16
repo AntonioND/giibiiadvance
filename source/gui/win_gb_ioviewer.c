@@ -33,6 +33,8 @@ static int WinIDGBIOViewer;
 
 static int GBIOViewerCreated = 0;
 
+static char *gb_ioviewer_buffer = NULL;
+
 //------------------------------------------------------------------------------
 
 static _gui_console gb_ioview_screen_con;
@@ -346,11 +348,10 @@ void Win_GBIOViewerRender(void)
     if (GBIOViewerCreated == 0)
         return;
 
-    char buffer[WIN_GB_IOVIEWER_WIDTH * WIN_GB_IOVIEWER_HEIGHT * 3];
-    GUI_Draw(&gb_ioviewer_window_gui, buffer, WIN_GB_IOVIEWER_WIDTH,
-             WIN_GB_IOVIEWER_HEIGHT, 1);
+    GUI_Draw(&gb_ioviewer_window_gui, gb_ioviewer_buffer,
+             WIN_GB_IOVIEWER_WIDTH, WIN_GB_IOVIEWER_HEIGHT, 1);
 
-    WH_Render(WinIDGBIOViewer, buffer);
+    WH_Render(WinIDGBIOViewer, gb_ioviewer_buffer);
 }
 
 static int _win_gb_io_viewer_callback(SDL_Event *e)
@@ -410,6 +411,14 @@ int Win_GBIOViewerCreate(void)
     if (GBIOViewerCreated == 1)
     {
         WH_Focus(WinIDGBIOViewer);
+        return 0;
+    }
+
+    gb_ioviewer_buffer = calloc(1, WIN_GB_IOVIEWER_WIDTH *
+                                WIN_GB_IOVIEWER_HEIGHT * 3);
+    if (gb_ioviewer_buffer == NULL)
+    {
+        Debug_ErrorMsgArg("%s(): Not enough memory.");
         return 0;
     }
 
@@ -504,6 +513,9 @@ void Win_GBIOViewerClose(void)
 {
     if (GBIOViewerCreated == 0)
         return;
+
+    free(gb_ioviewer_buffer);
+    gb_ioviewer_buffer = NULL;
 
     GBIOViewerCreated = 0;
     WH_Close(WinIDGBIOViewer);

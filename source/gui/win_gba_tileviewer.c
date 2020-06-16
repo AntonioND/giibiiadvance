@@ -30,6 +30,8 @@ static int WinIDGBATileViewer;
 
 static int GBATileViewerCreated = 0;
 
+static char *gba_tileviewer_buffer = NULL;
+
 //------------------------------------------------------------------------------
 
 static u32 gba_tileview_selected_pal = 0;
@@ -192,11 +194,10 @@ static void _win_gba_tile_viewer_render(void)
     if (GBATileViewerCreated == 0)
         return;
 
-    char buffer[WIN_GBA_TILEVIEWER_WIDTH * WIN_GBA_TILEVIEWER_HEIGHT * 3];
-    GUI_Draw(&gba_tileviewer_window_gui, buffer,
+    GUI_Draw(&gba_tileviewer_window_gui, gba_tileviewer_buffer,
              WIN_GBA_TILEVIEWER_WIDTH, WIN_GBA_TILEVIEWER_HEIGHT, 1);
 
-    WH_Render(WinIDGBATileViewer, buffer);
+    WH_Render(WinIDGBATileViewer, gba_tileviewer_buffer);
 }
 
 static int _win_gba_tile_viewer_callback(SDL_Event *e)
@@ -286,6 +287,14 @@ int Win_GBATileViewerCreate(void)
         return 0;
     }
 
+    gba_tileviewer_buffer = calloc(1, WIN_GBA_TILEVIEWER_WIDTH *
+                                   WIN_GBA_TILEVIEWER_HEIGHT * 3);
+    if (gba_tileviewer_buffer == NULL)
+    {
+        Debug_ErrorMsgArg("%s(): Not enough memory.");
+        return 0;
+    }
+
     GUI_SetLabel(&gba_tileview_cbb_label, 6, 6, 20 * FONT_WIDTH, FONT_HEIGHT,
                  "Character Base Block");
     GUI_SetRadioButton(&gba_tileview_cbb_06000000_radbtn, 6, 24,
@@ -364,6 +373,9 @@ void Win_GBATileViewerClose(void)
 {
     if (GBATileViewerCreated == 0)
         return;
+
+    free(gba_tileviewer_buffer);
+    gba_tileviewer_buffer = NULL;
 
     GBATileViewerCreated = 0;
     WH_Close(WinIDGBATileViewer);

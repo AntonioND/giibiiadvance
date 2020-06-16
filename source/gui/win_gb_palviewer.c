@@ -31,6 +31,8 @@ static int WinIDGBPalViewer;
 
 static int GBPalViewerCreated = 0;
 
+static char *gb_palviewer_buffer = NULL;
+
 //------------------------------------------------------------------------------
 
 static u32 gb_palview_sprpal = 0; // 1 if selected a color from sprite palettes
@@ -170,11 +172,10 @@ static void _win_gb_pal_viewer_render(void)
     if (GBPalViewerCreated == 0)
         return;
 
-    char buffer[WIN_GB_PALVIEWER_WIDTH * WIN_GB_PALVIEWER_HEIGHT * 3];
-    GUI_Draw(&gb_palviewer_window_gui, buffer,
+    GUI_Draw(&gb_palviewer_window_gui, gb_palviewer_buffer,
              WIN_GB_PALVIEWER_WIDTH, WIN_GB_PALVIEWER_HEIGHT, 1);
 
-    WH_Render(WinIDGBPalViewer, buffer);
+    WH_Render(WinIDGBPalViewer, gb_palviewer_buffer);
 }
 
 static int _win_gb_pal_viewer_callback(SDL_Event *e)
@@ -302,6 +303,14 @@ int Win_GBPalViewerCreate(void)
         return 0;
     }
 
+    gb_palviewer_buffer = calloc(1, WIN_GB_PALVIEWER_WIDTH *
+                                 WIN_GB_PALVIEWER_HEIGHT * 3);
+    if (gb_palviewer_buffer == NULL)
+    {
+        Debug_ErrorMsgArg("%s(): Not enough memory.");
+        return 0;
+    }
+
     GUI_SetLabel(&gb_palview_bgpal_label, 32, 6,
                  GB_PAL_BUFFER_WIDTH, FONT_HEIGHT, "Background");
     GUI_SetLabel(&gb_palview_sprpal_label, 145, 6,
@@ -342,6 +351,9 @@ void Win_GBPalViewerClose(void)
 {
     if (GBPalViewerCreated == 0)
         return;
+
+    free(gb_palviewer_buffer);
+    gb_palviewer_buffer = NULL;
 
     GBPalViewerCreated = 0;
     WH_Close(WinIDGBPalViewer);

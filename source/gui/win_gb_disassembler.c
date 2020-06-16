@@ -31,6 +31,8 @@ static int WinIDGBDis;
 
 static int GBDisassemblerCreated = 0;
 
+static char *gb_disasm_buffer = NULL;
+
 //------------------------------------------------------------------------------
 
 extern _GB_CONTEXT_ GameBoy;
@@ -208,11 +210,10 @@ static void _win_gb_dissasembler_render(void)
     if (GBDisassemblerCreated == 0)
         return;
 
-    char buffer[WIN_GB_DISASSEMBLER_WIDTH * WIN_GB_DISASSEMBLER_HEIGHT * 3];
-    GUI_Draw(&gb_disassembler_window_gui, buffer,
+    GUI_Draw(&gb_disassembler_window_gui, gb_disasm_buffer,
              WIN_GB_DISASSEMBLER_WIDTH, WIN_GB_DISASSEMBLER_HEIGHT, 1);
 
-    WH_Render(WinIDGBDis, buffer);
+    WH_Render(WinIDGBDis, gb_disasm_buffer);
 }
 
 static int _win_gb_disassembler_callback(SDL_Event *e)
@@ -409,6 +410,14 @@ int Win_GBDisassemblerCreate(void)
         return 0;
     }
 
+    gb_disasm_buffer = calloc(1, WIN_GB_DISASSEMBLER_WIDTH *
+                              WIN_GB_DISASSEMBLER_HEIGHT * 3);
+    if (gb_disasm_buffer == NULL)
+    {
+        Debug_ErrorMsgArg("%s(): Not enough memory.");
+        return 0;
+    }
+
     GUI_SetTextBox(&gb_disassembly_textbox, &gb_disassembly_con,
                    6, 6, 51 * FONT_WIDTH,
                    CPU_DISASSEMBLER_MAX_INSTRUCTIONS * FONT_HEIGHT,
@@ -466,6 +475,9 @@ void Win_GBDisassemblerClose(void)
 {
     if (GBDisassemblerCreated == 0)
         return;
+
+    free(gb_disasm_buffer);
+    gb_disasm_buffer = NULL;
 
     GBDisassemblerCreated = 0;
     WH_Close(WinIDGBDis);

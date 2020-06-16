@@ -31,6 +31,8 @@ static int WinIDGBAMapViewer;
 
 static int GBAMapViewerCreated = 0;
 
+static char *gba_mapviewer_buffer = NULL;
+
 //------------------------------------------------------------------------------
 
 static u32 gba_mapview_selected_bg = 0;
@@ -648,11 +650,10 @@ static void _win_gba_map_viewer_render(void)
     if (GBAMapViewerCreated == 0)
         return;
 
-    char buffer[WIN_GBA_MAPVIEWER_WIDTH * WIN_GBA_MAPVIEWER_HEIGHT * 3];
-    GUI_Draw(&gba_mapviewer_window_gui, buffer,
+    GUI_Draw(&gba_mapviewer_window_gui, gba_mapviewer_buffer,
              WIN_GBA_MAPVIEWER_WIDTH, WIN_GBA_MAPVIEWER_HEIGHT, 1);
 
-    WH_Render(WinIDGBAMapViewer, buffer);
+    WH_Render(WinIDGBAMapViewer, gba_mapviewer_buffer);
 }
 
 static int _win_gba_map_viewer_callback(SDL_Event *e)
@@ -750,6 +751,14 @@ int Win_GBAMapViewerCreate(void)
         return 0;
     }
 
+    gba_mapviewer_buffer = calloc(1, WIN_GBA_MAPVIEWER_WIDTH *
+                                  WIN_GBA_MAPVIEWER_HEIGHT * 3);
+    if (gba_mapviewer_buffer == NULL)
+    {
+        Debug_ErrorMsgArg("%s(): Not enough memory.");
+        return 0;
+    }
+
     GUI_SetLabel(&gba_mapview_bg_label,
                  6, 6, 10 * FONT_WIDTH, FONT_HEIGHT,
                  "Background");
@@ -834,6 +843,9 @@ void Win_GBAMapViewerClose(void)
 {
     if (GBAMapViewerCreated == 0)
         return;
+
+    free(gba_mapviewer_buffer);
+    gba_mapviewer_buffer = NULL;
 
     GBAMapViewerCreated = 0;
     WH_Close(WinIDGBAMapViewer);

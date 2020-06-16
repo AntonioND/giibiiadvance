@@ -35,6 +35,8 @@ static int WinIDGBTileViewer;
 
 static int GBTileViewerCreated = 0;
 
+static char *gb_tileviewer_buffer = NULL;
+
 //------------------------------------------------------------------------------
 
 static u32 gb_tileview_selected_bank = 0;
@@ -209,11 +211,10 @@ static void _win_gb_tile_viewer_render(void)
     if (GBTileViewerCreated == 0)
         return;
 
-    char buffer[WIN_GB_TILEVIEWER_WIDTH * WIN_GB_TILEVIEWER_HEIGHT * 3];
-    GUI_Draw(&gb_tileviewer_window_gui, buffer,
+    GUI_Draw(&gb_tileviewer_window_gui, gb_tileviewer_buffer,
              WIN_GB_TILEVIEWER_WIDTH, WIN_GB_TILEVIEWER_HEIGHT, 1);
 
-    WH_Render(WinIDGBTileViewer, buffer);
+    WH_Render(WinIDGBTileViewer, gb_tileviewer_buffer);
 }
 
 static int _win_gb_tile_viewer_callback(SDL_Event *e)
@@ -335,6 +336,14 @@ int Win_GBTileViewerCreate(void)
         return 0;
     }
 
+    gb_tileviewer_buffer = calloc(1, WIN_GB_TILEVIEWER_WIDTH *
+                                  WIN_GB_TILEVIEWER_HEIGHT * 3);
+    if (gb_tileviewer_buffer == NULL)
+    {
+        Debug_ErrorMsgArg("%s(): Not enough memory.");
+        return 0;
+    }
+
     GUI_SetLabel(&gb_tileview_bank0_label,
                  117, 6, GB_TILE_BUFFER_WIDTH, FONT_HEIGHT, "Bank 0");
     GUI_SetLabel(&gb_tileview_bank1_label,
@@ -400,6 +409,9 @@ void Win_GBTileViewerClose(void)
 {
     if (GBTileViewerCreated == 0)
         return;
+
+    free(gb_tileviewer_buffer);
+    gb_tileviewer_buffer = NULL;
 
     GBTileViewerCreated = 0;
     WH_Close(WinIDGBTileViewer);

@@ -31,6 +31,8 @@ static int WinIDGBAIOViewer;
 
 static int GBAIOViewerCreated = 0;
 
+static char *gba_ioviewer_buffer = NULL;
+
 static int gba_ioview_selected_tab = 0;
 
 //------------------------------------------------------------------------------
@@ -1307,12 +1309,11 @@ void Win_GBAIOViewerRender(void)
     if (GBAIOViewerCreated == 0)
         return;
 
-    char buffer[WIN_GBA_IOVIEWER_WIDTH * WIN_GBA_IOVIEWER_HEIGHT * 3];
-
-    GUI_Draw(&(gba_ioviewer_page_gui[gba_ioview_selected_tab]), buffer,
+    GUI_Draw(&(gba_ioviewer_page_gui[gba_ioview_selected_tab]),
+             gba_ioviewer_buffer,
              WIN_GBA_IOVIEWER_WIDTH, WIN_GBA_IOVIEWER_HEIGHT, 1);
 
-    WH_Render(WinIDGBAIOViewer, buffer);
+    WH_Render(WinIDGBAIOViewer, gba_ioviewer_buffer);
 }
 
 static int _win_gba_io_viewer_callback(SDL_Event *e)
@@ -1374,6 +1375,14 @@ int Win_GBAIOViewerCreate(void)
     if (GBAIOViewerCreated == 1)
     {
         WH_Focus(WinIDGBAIOViewer);
+        return 0;
+    }
+
+    gba_ioviewer_buffer = calloc(1, WIN_GBA_IOVIEWER_WIDTH *
+                                 WIN_GBA_IOVIEWER_HEIGHT * 3);
+    if (gba_ioviewer_buffer == NULL)
+    {
+        Debug_ErrorMsgArg("%s(): Not enough memory.");
         return 0;
     }
 
@@ -1613,6 +1622,9 @@ void Win_GBAIOViewerClose(void)
 {
     if (GBAIOViewerCreated == 0)
         return;
+
+    free(gba_ioviewer_buffer);
+    gba_ioviewer_buffer = NULL;
 
     GBAIOViewerCreated = 0;
     WH_Close(WinIDGBAIOViewer);

@@ -31,6 +31,8 @@ static int WinIDGBSprViewer;
 
 static int GBSprViewerCreated = 0;
 
+static char *gb_sprviewer_buffer = NULL;
+
 //------------------------------------------------------------------------------
 
 extern _GB_CONTEXT_ GameBoy;
@@ -167,11 +169,10 @@ static void _win_gb_spr_viewer_render(void)
     if (GBSprViewerCreated == 0)
         return;
 
-    char buffer[WIN_GB_SPRVIEWER_WIDTH * WIN_GB_SPRVIEWER_HEIGHT * 3];
-    GUI_Draw(&gb_sprviewer_window_gui, buffer,
+    GUI_Draw(&gb_sprviewer_window_gui, gb_sprviewer_buffer,
              WIN_GB_SPRVIEWER_WIDTH, WIN_GB_SPRVIEWER_HEIGHT, 1);
 
-    WH_Render(WinIDGBSprViewer, buffer);
+    WH_Render(WinIDGBSprViewer, gb_sprviewer_buffer);
 }
 
 static int _win_gb_spr_viewer_callback(SDL_Event *e)
@@ -270,6 +271,14 @@ int Win_GBSprViewerCreate(void)
         return 0;
     }
 
+    gb_sprviewer_buffer = calloc(1, WIN_GB_SPRVIEWER_WIDTH *
+                                 WIN_GB_SPRVIEWER_HEIGHT * 3);
+    if (gb_sprviewer_buffer == NULL)
+    {
+        Debug_ErrorMsgArg("%s(): Not enough memory.");
+        return 0;
+    }
+
     GUI_SetTextBox(&gb_sprview_textbox, &gb_sprview_con,
                    268, 140, 13 * FONT_WIDTH, 5 * FONT_HEIGHT, NULL);
 
@@ -309,6 +318,9 @@ void Win_GBSprViewerClose(void)
 {
     if (GBSprViewerCreated == 0)
         return;
+
+    free(gb_sprviewer_buffer);
+    gb_sprviewer_buffer = NULL;
 
     GBSprViewerCreated = 0;
     WH_Close(WinIDGBSprViewer);

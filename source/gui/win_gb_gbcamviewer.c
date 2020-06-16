@@ -36,6 +36,8 @@ static int WinIDGBCameraViewer;
 
 static int GBCameraViewerCreated = 0;
 
+static char *gb_camviewer_buffer = NULL;
+
 //------------------------------------------------------------------------------
 
 static u32 gb_cameraview_selected_photo_index = 0;
@@ -162,11 +164,10 @@ static void _win_gb_camera_viewer_render(void)
     if (GBCameraViewerCreated == 0)
         return;
 
-    static char buffer[WIN_GB_CAMERAVIEWER_WIDTH * WIN_GB_CAMERAVIEWER_HEIGHT * 3];
-    GUI_Draw(&gb_camviewer_window_gui, buffer, WIN_GB_CAMERAVIEWER_WIDTH,
-             WIN_GB_CAMERAVIEWER_HEIGHT, 1);
+    GUI_Draw(&gb_camviewer_window_gui, gb_camviewer_buffer,
+             WIN_GB_CAMERAVIEWER_WIDTH, WIN_GB_CAMERAVIEWER_HEIGHT, 1);
 
-    WH_Render(WinIDGBCameraViewer, buffer);
+    WH_Render(WinIDGBCameraViewer, gb_camviewer_buffer);
 }
 
 static int _win_gb_map_viewer_callback(SDL_Event *e)
@@ -280,6 +281,14 @@ int Win_GB_GBCameraViewerCreate(void)
         return 0;
     }
 
+    gb_camviewer_buffer = calloc(1, WIN_GB_CAMERAVIEWER_WIDTH *
+                                 WIN_GB_CAMERAVIEWER_HEIGHT * 3);
+    if (gb_camviewer_buffer == NULL)
+    {
+        Debug_ErrorMsgArg("%s(): Not enough memory.");
+        return 0;
+    }
+
     //GUI_SetTextBox(&gb_camview_textbox, &gb_camview_con,
     //               6, 108, 19 * FONT_WIDTH, 6 * FONT_HEIGHT, NULL);
 
@@ -339,6 +348,9 @@ void Win_GB_GBCameraViewerClose(void)
 {
     if (GBCameraViewerCreated == 0)
         return;
+
+    free(gb_camviewer_buffer);
+    gb_camviewer_buffer = NULL;
 
     GBCameraViewerCreated = 0;
     WH_Close(WinIDGBCameraViewer);

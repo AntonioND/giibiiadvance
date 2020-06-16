@@ -31,6 +31,8 @@ static int WinIDGBADis;
 
 static int GBADisassemblerCreated = 0;
 
+static char *gba_disasm_buffer = NULL;
+
 //------------------------------------------------------------------------------
 
 #define CPU_DISASSEMBLER_MAX_INSTRUCTIONS (39)
@@ -241,12 +243,10 @@ static void _win_gba_disassembler_render(void)
     if (GBADisassemblerCreated == 0)
         return;
 
-    char buffer[WIN_GBA_DISASSEMBLER_WIDTH * WIN_GBA_DISASSEMBLER_HEIGHT * 3];
-
-    GUI_Draw(&gba_disassembler_window_gui, buffer,
+    GUI_Draw(&gba_disassembler_window_gui, gba_disasm_buffer,
              WIN_GBA_DISASSEMBLER_WIDTH, WIN_GBA_DISASSEMBLER_HEIGHT, 1);
 
-    WH_Render(WinIDGBADis, buffer);
+    WH_Render(WinIDGBADis, gba_disasm_buffer);
 }
 
 static int _win_gba_disassembler_callback(SDL_Event *e)
@@ -517,6 +517,14 @@ int Win_GBADisassemblerCreate(void)
         return 0;
     }
 
+    gba_disasm_buffer = calloc(1, WIN_GBA_DISASSEMBLER_WIDTH *
+                               WIN_GBA_DISASSEMBLER_HEIGHT * 3);
+    if (gba_disasm_buffer == NULL)
+    {
+        Debug_ErrorMsgArg("%s(): Not enough memory.");
+        return 0;
+    }
+
     GUI_SetTextBox(&gba_disassembly_textbox, &gba_disassembly_con, 6, 6,
             66 * FONT_WIDTH,CPU_DISASSEMBLER_MAX_INSTRUCTIONS * FONT_HEIGHT,
             _win_gba_disassembly_textbox_callback);
@@ -585,6 +593,9 @@ void Win_GBADisassemblerClose(void)
 {
     if (GBADisassemblerCreated == 0)
         return;
+
+    free(gba_disasm_buffer);
+    gba_disasm_buffer = NULL;
 
     GBADisassemblerCreated = 0;
     WH_Close(WinIDGBADis);

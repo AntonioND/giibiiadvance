@@ -37,6 +37,8 @@ static int WinIDGB_SGBViewer;
 
 static int GB_SGBViewerCreated = 0;
 
+static char *gb_sgbviewer_buffer = NULL;
+
 //------------------------------------------------------------------------------
 
 static char gb_sgb_border_buffer[256 * 256 * 3];
@@ -695,11 +697,10 @@ static void _win_gb_sgb_viewer_render(void)
     if (GB_SGBViewerCreated == 0)
         return;
 
-    char buffer[WIN_GB_SGBVIEWER_WIDTH * WIN_GB_SGBVIEWER_HEIGHT * 3];
-    GUI_Draw(&gb_sgbviewer_window_gui, buffer,
+    GUI_Draw(&gb_sgbviewer_window_gui, gb_sgbviewer_buffer,
              WIN_GB_SGBVIEWER_WIDTH, WIN_GB_SGBVIEWER_HEIGHT, 1);
 
-    WH_Render(WinIDGB_SGBViewer, buffer);
+    WH_Render(WinIDGB_SGBViewer, gb_sgbviewer_buffer);
 }
 
 static int _win_gb_sgb_viewer_callback(SDL_Event *e)
@@ -1060,6 +1061,14 @@ int Win_GB_SGBViewerCreate(void)
         return 0;
     }
 
+    gb_sgbviewer_buffer = calloc(1, WIN_GB_SGBVIEWER_WIDTH *
+                                 WIN_GB_SGBVIEWER_HEIGHT * 3);
+    if (gb_sgbviewer_buffer == NULL)
+    {
+        Debug_ErrorMsgArg("%s(): Not enough memory.");
+        return 0;
+    }
+
     // Border
 
     GUI_SetGroupBox(&gb_sgbview_border_groupbox, 6, 6, 268, 350, "Border");
@@ -1183,6 +1192,9 @@ void Win_GB_SGBViewerClose(void)
 {
     if (GB_SGBViewerCreated == 0)
         return;
+
+    free(gb_sgbviewer_buffer);
+    gb_sgbviewer_buffer = NULL;
 
     GB_SGBViewerCreated = 0;
     WH_Close(WinIDGB_SGBViewer);

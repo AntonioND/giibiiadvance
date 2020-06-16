@@ -28,6 +28,8 @@ static int WinIDGBMemViewer;
 
 static int GBMemViewerCreated = 0;
 
+static char *gb_memviwer_buffer = NULL;
+
 //------------------------------------------------------------------------------
 
 #define GB_MEMVIEWER_MAX_LINES          (20)
@@ -171,11 +173,10 @@ void Win_GBMemViewerRender(void)
     if (GBMemViewerCreated == 0)
         return;
 
-    char buffer[WIN_GB_MEMVIEWER_WIDTH * WIN_GB_MEMVIEWER_HEIGHT * 3];
-    GUI_Draw(&gb_memviewer_window_gui, buffer,
+    GUI_Draw(&gb_memviewer_window_gui, gb_memviwer_buffer,
              WIN_GB_MEMVIEWER_WIDTH, WIN_GB_MEMVIEWER_HEIGHT, 1);
 
-    WH_Render(WinIDGBMemViewer, buffer);
+    WH_Render(WinIDGBMemViewer, gb_memviwer_buffer);
 }
 
 static int _win_gba_mem_viewer_callback(SDL_Event *e)
@@ -382,6 +383,14 @@ int Win_GBMemViewerCreate(void)
         return 0;
     }
 
+    gb_memviwer_buffer = calloc(1, WIN_GB_MEMVIEWER_WIDTH *
+                                WIN_GB_MEMVIEWER_HEIGHT * 3);
+    if (gb_memviwer_buffer == NULL)
+    {
+        Debug_ErrorMsgArg("%s(): Not enough memory.");
+        return 0;
+    }
+
     GUI_SetRadioButton(&gb_memview_mode_8_radbtn,
                        6, 6, 9 * FONT_WIDTH, 24,
                        "8 bits", 0, GB_MEMVIEWER_8, 1,
@@ -423,6 +432,9 @@ void Win_GBMemViewerClose(void)
 {
     if (GBMemViewerCreated == 0)
         return;
+
+    free(gb_memviwer_buffer);
+    gb_memviwer_buffer = NULL;
 
     GBMemViewerCreated = 0;
     WH_Close(WinIDGBMemViewer);

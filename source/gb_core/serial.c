@@ -225,12 +225,16 @@ typedef struct
 
 _GB_PRINTER_ GB_Printer;
 
-int printer_file_number = 0;
-
 static void GB_PrinterPrint(void)
 {
-    char *endbuffer = malloc(20 * 18 * 16);
-    memset(endbuffer, 0, 20 * 18 * 16);
+    char *endbuffer = calloc(20 * 18 * 16, sizeof(char));
+    u32 *buf_temp = calloc(160 * 144, sizeof(u32));
+
+    if ((endbuffer == NULL) || (buf_temp == NULL))
+    {
+        Debug_ErrorMsgArg("%s(): Not enough memory.");
+        goto cleanup;
+    }
 
     char *ptr = endbuffer;
 
@@ -276,10 +280,6 @@ static void GB_PrinterPrint(void)
         }
     }
 
-    char *filename = FU_GetNewTimestampFilename("gb_printer");
-
-    u32 buf_temp[160 * 144 * 4];
-    memset(buf_temp, 0, sizeof(buf_temp));
     const u32 gb_pal_colors[4][3] = {
         { 255, 255, 255 }, { 168, 168, 168 }, { 80, 80, 80 }, { 0, 0, 0 }
     };
@@ -305,9 +305,13 @@ static void GB_PrinterPrint(void)
         }
     }
 
+    char *filename = FU_GetNewTimestampFilename("gb_printer");
+
     Save_PNG(filename, 160, 144, buf_temp, 0);
 
-    printer_file_number++;
+cleanup:
+    free(endbuffer);
+    free(buf_temp);
 }
 
 static void GB_PrinterReset(void)

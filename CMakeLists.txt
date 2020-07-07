@@ -52,16 +52,21 @@ if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
             # about it.
             -Wstack-usage=4096
 
-            # Enable Undefined Behaviour Sanitizer (UBSan)
-            -fsanitize=undefined
-
             # TODO: Enable the following warnings?
             #-Wpedantic -Wformat-truncation=1 -Wcast-qual -Wconversion
         )
-        target_link_options(giibiiadvance PRIVATE
-            # Enable Undefined Behaviour Sanitizer (UBSan)
-            -fsanitize=undefined
-        )
+
+        # Build option to enable Undefined Behaviour Sanitizer (UBSan)
+        # --------------------------------------------------------
+        #
+        # This should only be enabled in debug builds. It makes the code far
+        # slower, so it should only be used during development.
+        option(ENABLE_UBSAN "Compile with UBSan support (GCC)" OFF)
+
+        if(ENABLE_UBSAN)
+            target_compile_options(giibiiadvance PRIVATE -fsanitize=undefined)
+            target_link_options(giibiiadvance PRIVATE -fsanitize=undefined)
+        endif()
     endif()
 elseif(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
     target_compile_definitions(giibiiadvance PRIVATE

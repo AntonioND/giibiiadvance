@@ -200,8 +200,8 @@ static u32 GB_RecvNone(void)
 //------------------------------------------------------------------------------
 //                                GB PRINTER
 
-// Screen is 20x18 tiles -> 20x18x16 bytes -> 20x18x16 / 0x280 = 9 (+ 1 empty)
-#define GBPRINTER_NUMPACKETS (10)
+// Screen is 20x18 tiles -> 20x18x16 bytes -> 20x18x16 / 0x280 = 9 (+ 2 empty)
+#define GBPRINTER_NUMPACKETS (9 + 2)
 
 typedef struct
 {
@@ -242,8 +242,19 @@ static void GB_PrinterPrint(void)
     {
         if (GB_Printer.packetcompressed[i] == 0)
         {
-            memcpy(ptr, GB_Printer.packets[i], GB_Printer.packetsize[i]);
-            ptr += GB_Printer.packetsize[i];
+            if (GB_Printer.packets[i] != NULL)
+            {
+                memcpy(ptr, GB_Printer.packets[i], GB_Printer.packetsize[i]);
+                ptr += GB_Printer.packetsize[i];
+            }
+            else if (GB_Printer.packetsize[i] != 0)
+            {
+                Debug_DebugMsgArg("%s(): Printing packet with no data.");
+            }
+            else
+            {
+                // NULL packet with size 0. Maybe it's empty?
+            }
         }
         else
         {
@@ -327,12 +338,12 @@ static void GB_PrinterReset(void)
     for (int i = 0; i < GBPRINTER_NUMPACKETS; i++)
     {
         GB_Printer.packetsize[i] = 0;
+        GB_Printer.packetcompressed[i] = 0;
 
         if (GB_Printer.packets[i] != NULL)
         {
             free(GB_Printer.packets[i]);
             GB_Printer.packets[i] = NULL;
-            GB_Printer.packetcompressed[i] = 0;
         }
     }
 
@@ -388,8 +399,11 @@ static void GB_PrinterExecute(void)
             else
             {
                 GB_Printer.packets[GB_Printer.curpacket] = GB_Printer.data;
-                GB_Printer.packetsize[GB_Printer.curpacket++] = GB_Printer.size;
                 GB_Printer.data = NULL;
+
+                GB_Printer.packetsize[GB_Printer.curpacket] = GB_Printer.size;
+
+                GB_Printer.curpacket++;
             }
             break;
 

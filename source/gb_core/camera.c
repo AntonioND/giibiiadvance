@@ -144,9 +144,15 @@ static u32 gb_cam_matrix_process(u32 value, int x, int y)
 
 static void GB_CameraTakePicture(void)
 {
+    // Buffer for the image as seen after processed by the sensor
     int (*temp_buf)[GBCAM_SENSOR_W];
     temp_buf = calloc(GBCAM_SENSOR_W * GBCAM_SENSOR_H, sizeof(int));
-    if (temp_buf == NULL)
+
+    // Buffer after controller matrix
+    int (*fourcolorsbuffer)[GBCAM_W];
+    fourcolorsbuffer = calloc(GBCAM_W * GBCAM_H, sizeof(int));
+
+    if ((temp_buf == NULL) || (fourcolorsbuffer == NULL))
     {
         Debug_ErrorMsgArg("%s(): Not enough memory.");
         goto cleanup;
@@ -404,8 +410,6 @@ static void GB_CameraTakePicture(void)
     // Controller handling
     // -------------------
 
-    int fourcolorsbuffer[GBCAM_H][GBCAM_W]; // Buffer after controller matrix
-
     // Convert to Game Boy colors using the controller matrix
     for (int j = 0; j < GBCAM_H; j++)
     {
@@ -442,6 +446,7 @@ static void GB_CameraTakePicture(void)
 
 cleanup:
     free(temp_buf);
+    free(fourcolorsbuffer);
 }
 
 int GB_CameraReadRegister(int address)

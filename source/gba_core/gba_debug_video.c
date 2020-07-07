@@ -23,7 +23,7 @@ static u32 rgb16to32(u16 color)
     return (b << 16) | (g << 8) | r;
 }
 
-static int min(int a, int b)
+static int min__(int a, int b)
 {
     return (a < b) ? a : b;
 }
@@ -150,7 +150,7 @@ void GBA_Debug_PrintZoomedSpriteAt(int spritenum, int buf_has_alpha_channel,
     }
 
     // Expand/copy to real buffer
-    int factor = min(sizex / sx, sizey / sy);
+    int factor = min__(sizex / sx, sizey / sy);
 
     if (buf_has_alpha_channel)
     {

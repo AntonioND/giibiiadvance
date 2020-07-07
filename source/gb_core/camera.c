@@ -404,7 +404,7 @@ static void GB_CameraTakePicture(void)
     // Controller handling
     // -------------------
 
-    int fourcolorsbuffer[GBCAM_W][GBCAM_H]; // Buffer after controller matrix
+    int fourcolorsbuffer[GBCAM_H][GBCAM_W]; // Buffer after controller matrix
 
     // Convert to Game Boy colors using the controller matrix
     for (int j = 0; j < GBCAM_H; j++)
@@ -413,7 +413,7 @@ static void GB_CameraTakePicture(void)
         {
             int v;
             v = gb_cam_retina_output_buf[i][j + (GBCAM_SENSOR_EXTRA_LINES / 2)];
-            fourcolorsbuffer[i][j] = gb_cam_matrix_process(v, i, j);
+            fourcolorsbuffer[j][i] = gb_cam_matrix_process(v, i, j);
         }
     }
 
@@ -424,7 +424,7 @@ static void GB_CameraTakePicture(void)
     {
         for (int i = 0; i < GBCAM_W; i++)
         {
-            u8 outcolor = 3 - (fourcolorsbuffer[i][j] >> 6);
+            u8 outcolor = 3 - (fourcolorsbuffer[j][i] >> 6);
 
             u8 *tile_base = finalbuffer[j >> 3][i >> 3];
             tile_base = &tile_base[(j & 7) * 2];

@@ -101,26 +101,35 @@ typedef struct {
     // General Internal Memory
     u8 *rom_bios;         // 00000000-00003FFF | BIOS - (ROM)  | 16 KB
                           // 00004000-01FFFFFF | Not used      |
+    ALIGNED(4)
     u8 ewram[256 * 1024]; // 02000000-0203FFFF | On-board WRAM | 256 KB (2 Wait)
                           // 02040000-02FFFFFF | Not used      |
+    ALIGNED(4)
     u8 iwram[32 * 1024];  // 03000000-03007FFF | In-chip WRAM  | 32 KB
                           // 03008000-03FFFFFF | Not used      |
+    ALIGNED(4)
     u8 io_regs[0x3FF];    // 04000000-040003FE | I/O Registers |
                           // 04000400-04FFFFFF | Not used      |
-    // Internal Display Memory                 |
+
+    // Internal Display Memory
+    ALIGNED(4)
     u8 pal_ram[1024];     // 05000000-050003FF | BG/OBJ Palette RAM   | 1 KB
                           // 05000400-05FFFFFF | Not used             |
+    ALIGNED(4)
     u8 vram[128 * 1024];  // 06000000-06017FFF | VRAM - Video RAM     | 96 KB
-    // To fix bitmasks    // 06018000-06FFFFFF | Not used             |
+    // 128K to fix masks  // 06018000-06FFFFFF | Not used             |a
+    ALIGNED(4)
     u8 oam[1024];         // 07000000-070003FF | OAM - OBJ Attributes | 1 KB
                           // 07000400-07FFFFFF | Not used             |
-    // External Memory (Game Pak)              |
+
+    // External Memory (Game Pak)
     u8 *rom_wait0;        // 08000000-09FFFFFF | Cart ROM  | 32 MB | Wait State 0
     u8 *rom_wait1;        // 0A000000-0BFFFFFF | Cart ROM  | 32 MB | Wait State 1
     u8 *rom_wait2;        // 0C000000-0DFFFFFF | Cart ROM  | 32 MB | Wait State 2
     //u8 sram[64 * 1024]; // 0E000000-0E00FFFF | Cart SRAM | 64 KB | 8-bit Bus
                           // 0E010000-0FFFFFFF | Not used  |
-    // Unused Memory Area                      |           |
+
+    // Unused Memory Area
                           // 10000000-FFFFFFFF | Not used  |
 } _mem_t;
 

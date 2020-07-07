@@ -27,6 +27,12 @@ typedef int8_t s8;
 # define unused__ __attribute__((unused))
 #endif
 
+#if defined(_MSC_VER)
+# define ALIGNED(x) __declspec(align(x))
+#else
+# define ALIGNED(x) __attribute__((aligned(x)))
+#endif
+
 // Safe versions of strncpy and strncat that set a terminating character if
 // needed.
 void s_strncpy(char *dest, const char *src, size_t _size);

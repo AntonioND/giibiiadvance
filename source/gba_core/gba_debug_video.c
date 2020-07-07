@@ -4,8 +4,10 @@
 //
 // GiiBiiAdvance - GBA/GB emulator
 
+#include <stdlib.h>
 #include <string.h>
 
+#include "../debug_utils.h"
 #include "../general_utils.h"
 
 #include "gba.h"
@@ -32,10 +34,15 @@ void GBA_Debug_PrintZoomedSpriteAt(int spritenum, int buf_has_alpha_channel,
                                    char *buffer, int bufw, unused__ int bufh,
                                    int posx, int posy, int sizex, int sizey)
 {
-    // Temp buffer
-    int sprbuffer[64 * 64];
-    int sprbuffer_vis[64 * 64];
-    memset(sprbuffer_vis, 0, sizeof(sprbuffer_vis));
+    // Temp buffers
+    int *sprbuffer = calloc(64 * 64, sizeof(int));
+    int *sprbuffer_vis = calloc(64 * 64, sizeof(int));
+
+    if ((sprbuffer == NULL) || (sprbuffer_vis == NULL))
+    {
+        Debug_ErrorMsgArg("%s(): Not enough memory.");
+        goto cleanup;
+    }
 
     static const int spr_size[4][4][2] = { // Shape, Size, (x,y)
         { { 8, 8 }, { 16, 16 }, { 32, 32 }, { 64, 64 } }, // Square
@@ -207,6 +214,10 @@ void GBA_Debug_PrintZoomedSpriteAt(int spritenum, int buf_has_alpha_channel,
             }
         }
     }
+
+cleanup:
+    free(sprbuffer);
+    free(sprbuffer_vis);
 }
 
 // Starting sprite number = page * 64

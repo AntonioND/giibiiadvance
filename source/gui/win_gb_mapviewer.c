@@ -272,14 +272,6 @@ static void _win_gb_mapviewer_dump_btn_callback(void)
     if (Win_MainRunningGB() == 0)
         return;
 
-    char *buffer_temp = calloc(GB_MAP_BUFFER_WIDTH * GB_MAP_BUFFER_HEIGHT * 4,
-                               sizeof(char));
-    if (buffer_temp == NULL)
-    {
-        Debug_ErrorMsgArg("%s(): Not enough memory.");
-        return;
-    }
-
     if (gb_map_zoomed_tile_is_pal == 0)
     {
         GB_Debug_MapPrintBW(gb_map_buffer, GB_MAP_BUFFER_WIDTH,
@@ -293,22 +285,10 @@ static void _win_gb_mapviewer_dump_btn_callback(void)
                           gb_mapview_selected_tilebase);
     }
 
-    char *src = gb_map_buffer;
-    char *dst = buffer_temp;
-    for (int i = 0; i < GB_MAP_BUFFER_WIDTH * GB_MAP_BUFFER_HEIGHT; i++)
-    {
-        *dst++ = *src++;
-        *dst++ = *src++;
-        *dst++ = *src++;
-        *dst++ = 0xFF;
-    }
-
     char *name = FU_GetNewTimestampFilename("gb_map");
-    Save_PNG(name, GB_MAP_BUFFER_WIDTH, GB_MAP_BUFFER_HEIGHT, buffer_temp, 0);
+    Save_PNG(name, gb_map_buffer, GB_MAP_BUFFER_WIDTH, GB_MAP_BUFFER_HEIGHT, 0);
 
     Win_GBMapViewerUpdate();
-
-    free(buffer_temp);
 }
 
 //----------------------------------------------------------------

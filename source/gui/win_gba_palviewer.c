@@ -244,14 +244,6 @@ static void _win_gba_palviewer_dump_btn_callback(void)
     if (Win_MainRunningGBA() == 0)
         return;
 
-    char *buffer_temp = calloc(GBA_PAL_BUFFER_SIDE * GBA_PAL_BUFFER_SIDE * 4,
-                               sizeof(char));
-    if (buffer_temp == NULL)
-    {
-        Debug_ErrorMsgArg("%s(): Not enough memory.");
-        return;
-    }
-
     memset(gba_pal_bg_buffer, 192, sizeof(gba_pal_bg_buffer));
     memset(gba_pal_spr_buffer, 192, sizeof(gba_pal_spr_buffer));
 
@@ -274,36 +266,15 @@ static void _win_gba_palviewer_dump_btn_callback(void)
                           1 + ((i / 16) * 10), 9 + ((i / 16) * 10));
     }
 
-    char *src = gba_pal_bg_buffer;
-    char *dst = buffer_temp;
-    for (int i = 0; i < GBA_PAL_BUFFER_SIDE * GBA_PAL_BUFFER_SIDE; i++)
-    {
-        *dst++ = *src++;
-        *dst++ = *src++;
-        *dst++ = *src++;
-        *dst++ = 0xFF;
-    }
-
     char *name_bg = FU_GetNewTimestampFilename("gba_palette_bg");
-    Save_PNG(name_bg, GBA_PAL_BUFFER_SIDE, GBA_PAL_BUFFER_SIDE, buffer_temp, 0);
-
-    src = gba_pal_spr_buffer;
-    dst = buffer_temp;
-    for (int i = 0; i < GBA_PAL_BUFFER_SIDE * GBA_PAL_BUFFER_SIDE; i++)
-    {
-        *dst++ = *src++;
-        *dst++ = *src++;
-        *dst++ = *src++;
-        *dst++ = 0xFF;
-    }
+    Save_PNG(name_bg, gba_pal_bg_buffer,
+             GBA_PAL_BUFFER_SIDE, GBA_PAL_BUFFER_SIDE, 0);
 
     char *name_spr = FU_GetNewTimestampFilename("gba_palette_spr");
-    Save_PNG(name_spr, GBA_PAL_BUFFER_SIDE, GBA_PAL_BUFFER_SIDE,
-             buffer_temp, 0);
+    Save_PNG(name_spr, gba_pal_spr_buffer,
+             GBA_PAL_BUFFER_SIDE, GBA_PAL_BUFFER_SIDE, 0);
 
     Win_GBAPalViewerUpdate();
-
-    free(buffer_temp);
 }
 
 //----------------------------------------------------------------

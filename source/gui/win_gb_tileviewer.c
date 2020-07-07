@@ -273,16 +273,6 @@ static void _win_gb_tileviewer_dump_btn_callback(void)
     if (Win_MainRunningGB() == 0)
         return;
 
-    char *buf0 = calloc(GB_TILE_BUFFER_WIDTH * GB_TILE_BUFFER_HEIGHT * 4,
-                        sizeof(char));
-    char *buf1 = calloc(GB_TILE_BUFFER_WIDTH * GB_TILE_BUFFER_HEIGHT * 4,
-                        sizeof(char));
-    if ((buf0 == NULL) || (buf1 == NULL))
-    {
-        Debug_ErrorMsgArg("%s(): Not enough memory.");
-        goto cleanup;
-    }
-
     if (gb_tile_zoomed_tile_is_pal == 0)
     {
         GB_Debug_TileVRAMDraw(gb_tile_bank0_buffer,
@@ -302,36 +292,18 @@ static void _win_gb_tileviewer_dump_btn_callback(void)
                                       gb_tile_zoomed_tile_is_pal == 2);
     }
 
-    for (int i = 0; i < (GB_TILE_BUFFER_WIDTH * GB_TILE_BUFFER_HEIGHT); i++)
-    {
-        buf0[i * 4 + 0] = gb_tile_bank0_buffer[i * 3 + 0];
-        buf0[i * 4 + 1] = gb_tile_bank0_buffer[i * 3 + 1];
-        buf0[i * 4 + 2] = gb_tile_bank0_buffer[i * 3 + 2];
-        buf0[i * 4 + 3] = 255;
-    }
-
     char *name_b0 = FU_GetNewTimestampFilename("gb_tiles_bank0");
-    Save_PNG(name_b0, GB_TILE_BUFFER_WIDTH, GB_TILE_BUFFER_HEIGHT, buf0, 0);
+    Save_PNG(name_b0, gb_tile_bank0_buffer,
+             GB_TILE_BUFFER_WIDTH, GB_TILE_BUFFER_HEIGHT, 0);
 
     if (GameBoy.Emulator.CGBEnabled)
     {
-        for (int i = 0; i < (GB_TILE_BUFFER_WIDTH * GB_TILE_BUFFER_HEIGHT); i++)
-        {
-            buf1[i * 4 + 0] = gb_tile_bank1_buffer[i * 3 + 0];
-            buf1[i * 4 + 1] = gb_tile_bank1_buffer[i * 3 + 1];
-            buf1[i * 4 + 2] = gb_tile_bank1_buffer[i * 3 + 2];
-            buf1[i * 4 + 3] = 255;
-        }
-
         char *name_b1 = FU_GetNewTimestampFilename("gb_tiles_bank1");
-        Save_PNG(name_b1, GB_TILE_BUFFER_WIDTH, GB_TILE_BUFFER_HEIGHT, buf1, 0);
+        Save_PNG(name_b1, gb_tile_bank1_buffer,
+                 GB_TILE_BUFFER_WIDTH, GB_TILE_BUFFER_HEIGHT, 0);
     }
 
     Win_GBTileViewerUpdate();
-
-cleanup:
-    free(buf0);
-    free(buf1);
 }
 
 //----------------------------------------------------------------

@@ -142,10 +142,18 @@ void GBA_HandleInput(int a, int b, int l, int r, int st, int se,
 
 void GBA_Screenshot(void)
 {
+    unsigned char *buffer = malloc(240 * 160 * 3);
+    if (buffer == NULL)
+    {
+        Debug_ErrorMsgArg("%s(): Not enough memory.");
+        return;
+    }
+
+    GBA_ConvertScreenBufferTo24RGB(buffer);
+
     char *name = FU_GetNewTimestampFilename("gba_screenshot");
-    u32 *buffer = malloc(240 * 160 * 4);
-    GBA_ConvertScreenBufferTo32RGB(buffer);
-    Save_PNG(name, 240, 160, buffer, 0);
+    Save_PNG(name, buffer, 240, 160, 0);
+
     free(buffer);
 }
 

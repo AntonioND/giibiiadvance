@@ -227,8 +227,8 @@ _GB_PRINTER_ GB_Printer;
 
 static void GB_PrinterPrint(void)
 {
-    char *endbuffer = calloc(20 * 18 * 16, sizeof(char));
-    u32 *buf_temp = calloc(160 * 144, sizeof(u32));
+    char *endbuffer = calloc(20 * 18 * 16, 1);
+    unsigned char *buf_temp = calloc(160 * 144 * 3, 1);
 
     if ((endbuffer == NULL) || (buf_temp == NULL))
     {
@@ -309,16 +309,16 @@ static void GB_PrinterPrint(void)
 
             int color =
                     ((*tileptr >> x_) & 1) | ((((*(tileptr + 1)) >> x_) << 1) & 2);
-
-            buf_temp[y * 160 + x] = (gb_pal_colors[color][0] << 16)
-                                    | (gb_pal_colors[color][1] << 8)
-                                    | gb_pal_colors[color][2];
+            int index = (y * 160 + x) * 3;
+            buf_temp[index + 0] = gb_pal_colors[color][0];
+            buf_temp[index + 1] = gb_pal_colors[color][1];
+            buf_temp[index + 2] = gb_pal_colors[color][2];
         }
     }
 
     char *filename = FU_GetNewTimestampFilename("gb_printer");
 
-    Save_PNG(filename, 160, 144, buf_temp, 0);
+    Save_PNG(filename, buf_temp, 160, 144, 0);
 
 cleanup:
     free(endbuffer);

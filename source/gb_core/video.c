@@ -1716,7 +1716,7 @@ void GB_Screenshot(void)
         height = 144;
     }
 
-    u32 *buf_temp = calloc(width * height * 4, 1);
+    unsigned char *buf_temp = calloc(width * height * 3, 1);
     int last_fb = gb_cur_fb ^ 1;
 
     for (int y = 0; y < height; y++)
@@ -1724,11 +1724,13 @@ void GB_Screenshot(void)
         for (int x = 0; x < width; x++)
         {
             u32 data = gb_framebuffer[last_fb][y * 256 + x];
-            buf_temp[y * width + x] = ((data & 0x1F) << 3)
-                                      | ((((data >> 5) & 0x1F) << 3) << 8)
-                                      | ((((data >> 10) & 0x1F) << 3) << 16);
+
+            int index = (y * width + x) * 3;
+            buf_temp[index + 0] = (data & 0x1F) << 3;
+            buf_temp[index + 1] = ((data >> 5) & 0x1F) << 3;
+            buf_temp[index + 2] = ((data >> 10) & 0x1F) << 3;
         }
     }
-    Save_PNG(name, width, height, buf_temp, 0);
+    Save_PNG(name, buf_temp, width, height, 0);
     free(buf_temp);
 }

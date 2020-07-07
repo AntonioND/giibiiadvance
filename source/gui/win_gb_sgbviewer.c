@@ -762,9 +762,12 @@ static void _win_gb_sgbviewer_border_dump_btn_callback(void)
     if (GB_EmulatorIsEnabledSGB() == 0)
         return;
 
-    char *border_buff = malloc(256 * 256 * 4);
+    unsigned char *border_buff = malloc(256 * 256 * 4);
     if (border_buff == NULL)
+    {
+        Debug_ErrorMsgArg("%s(): Not enough memory.");
         return;
+    }
 
     for (int i = 0; i < 32; i++)
     {
@@ -851,7 +854,7 @@ static void _win_gb_sgbviewer_border_dump_btn_callback(void)
     }
 
     char *name = FU_GetNewTimestampFilename("gb_sgb_border");
-    Save_PNG(name, 256, 256, border_buff, 1);
+    Save_PNG(name, border_buff, 256, 256, 1);
 
     free(border_buff);
 
@@ -866,9 +869,12 @@ static void _win_gb_sgbviewer_tiles_dump_btn_callback(void)
     if (GB_EmulatorIsEnabledSGB() == 0)
         return;
 
-    char *tiles_buff = malloc(128 * 128 * 4);
+    unsigned char *tiles_buff = malloc(128 * 128 * 3);
     if (tiles_buff == NULL)
+    {
+        Debug_ErrorMsgArg("%s(): Not enough memory.");
         return;
+    }
 
     for (int i = 0; i < 16; i++)
     {
@@ -900,17 +906,16 @@ static void _win_gb_sgbviewer_tiles_dump_btn_callback(void)
 
                     int r, g, b;
                     rgb16to32(color, &r, &g, &b);
-                    tiles_buff[temp * 4 + 0] = r;
-                    tiles_buff[temp * 4 + 1] = g;
-                    tiles_buff[temp * 4 + 2] = b;
-                    tiles_buff[temp * 4 + 3] = 0xFF;
+                    tiles_buff[temp * 3 + 0] = r;
+                    tiles_buff[temp * 3 + 1] = g;
+                    tiles_buff[temp * 3 + 2] = b;
                 }
             }
         }
     }
 
     char *name = FU_GetNewTimestampFilename("gb_sgb_tiles");
-    Save_PNG(name, 128, 128, tiles_buff, 0);
+    Save_PNG(name, tiles_buff, 128, 128, 0);
 
     free(tiles_buff);
 
@@ -925,9 +930,12 @@ static void _win_gb_sgbviewer_atf_dump_btn_callback(void)
     if (GB_EmulatorIsEnabledSGB() == 0)
         return;
 
-    char *buf = calloc(161 * 145 * 4, 1);
+    unsigned char *buf = calloc(161 * 145 * 3, 1);
     if (buf == NULL)
+    {
+        Debug_ErrorMsgArg("%s(): Not enough memory.");
         return;
+    }
 
     for (int i = 0; i < 20; i++)
     {
@@ -964,10 +972,9 @@ static void _win_gb_sgbviewer_atf_dump_btn_callback(void)
 
                         int r, g, b;
                         rgb16to32(color, &r, &g, &b);
-                        buf[temp * 4 + 0] = r;
-                        buf[temp * 4 + 1] = g;
-                        buf[temp * 4 + 2] = b;
-                        buf[temp * 4 + 3] = 0xFF;
+                        buf[temp * 3 + 0] = r;
+                        buf[temp * 3 + 1] = g;
+                        buf[temp * 3 + 2] = b;
                     }
                 }
             }
@@ -975,7 +982,7 @@ static void _win_gb_sgbviewer_atf_dump_btn_callback(void)
     }
 
     char *name = FU_GetNewTimestampFilename("gb_sgb_atf");
-    Save_PNG(name, 161, 145, buf, 0);
+    Save_PNG(name, buf, 161, 145, 0);
 
     free(buf);
 
@@ -990,9 +997,12 @@ static void _win_gb_sgbviewer_pal_dump_btn_callback(void)
     if (GB_EmulatorIsEnabledSGB() == 0)
         return;
 
-    char *buf = malloc(160 * 80 * 4);
+    unsigned char *buf = malloc(160 * 80 * 3);
     if (buf == NULL)
+    {
+        Debug_ErrorMsgArg("%s(): Not enough memory.");
         return;
+    }
 
     // Draw as normal
     memset(gb_sgb_pal_buffer, 192, 160 * 80 * 3);
@@ -1031,14 +1041,13 @@ static void _win_gb_sgbviewer_pal_dump_btn_callback(void)
 
     for (int i = 0; i < 160 * 80; i++)
     {
-        buf[i * 4 + 0] = gb_sgb_pal_buffer[i * 3 + 0];
-        buf[i * 4 + 1] = gb_sgb_pal_buffer[i * 3 + 1];
-        buf[i * 4 + 2] = gb_sgb_pal_buffer[i * 3 + 2];
-        buf[i * 4 + 3] = 0xFF;
+        buf[i * 3 + 0] = gb_sgb_pal_buffer[i * 3 + 0];
+        buf[i * 3 + 1] = gb_sgb_pal_buffer[i * 3 + 1];
+        buf[i * 3 + 2] = gb_sgb_pal_buffer[i * 3 + 2];
     }
 
     char *name = FU_GetNewTimestampFilename("gb_sgb_pal");
-    Save_PNG(name, 160, 80, buf, 0);
+    Save_PNG(name, buf, 160, 80, 0);
 
     free(buf);
 

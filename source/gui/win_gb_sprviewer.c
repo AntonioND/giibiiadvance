@@ -231,8 +231,8 @@ static void _win_gb_sprviewer_allspr_dump_btn_callback(void)
     if (Win_MainRunningGB() == 0)
         return;
 
-    char *allbuf = calloc(GB_SPR_ALLSPR_BUFFER_WIDTH *
-                          GB_SPR_ALLSPR_BUFFER_HEIGHT * 4, sizeof(char));
+    unsigned char *allbuf = calloc(GB_SPR_ALLSPR_BUFFER_WIDTH *
+                                   GB_SPR_ALLSPR_BUFFER_HEIGHT * 4, 1);
     if (allbuf == NULL)
     {
         Debug_ErrorMsgArg("%s(): Not enough memory.");
@@ -242,8 +242,8 @@ static void _win_gb_sprviewer_allspr_dump_btn_callback(void)
     GB_Debug_PrintSpritesAlpha(allbuf);
 
     char *name = FU_GetNewTimestampFilename("gb_sprite_all");
-    Save_PNG(name, GB_SPR_ALLSPR_BUFFER_WIDTH, GB_SPR_ALLSPR_BUFFER_HEIGHT,
-             allbuf, 1);
+    Save_PNG(name, allbuf,
+             GB_SPR_ALLSPR_BUFFER_WIDTH, GB_SPR_ALLSPR_BUFFER_HEIGHT, 1);
 
     Win_GBSprViewerUpdate();
 
@@ -255,14 +255,14 @@ static void _win_gb_sprviewer_zoomed_dump_btn_callback(void)
     if (Win_MainRunningGB() == 0)
         return;
 
-    char buf[8 * 16 * 4];
+    unsigned char buf[8 * 16 * 4];
     GB_Debug_PrintSpriteAlpha(buf, gb_sprview_selected_spr);
 
     _GB_MEMORY_ *mem = &GameBoy.Memory;
     int sy = 8 << ((mem->IO_Ports[LCDC_REG - 0xFF00] & (1 << 2)) != 0);
 
     char *name = FU_GetNewTimestampFilename("gb_sprite");
-    Save_PNG(name, 8, sy, buf, 1);
+    Save_PNG(name, buf, 8, sy, 1);
 
     Win_GBSprViewerUpdate();
 }

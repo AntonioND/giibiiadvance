@@ -256,9 +256,13 @@ static void _win_gba_tileviewer_dump_btn_callback(void)
     if (Win_MainRunningGBA() == 0)
         return;
 
-    char *buf = malloc(GBA_TILE_BUFFER_WIDTH * GBA_TILE_BUFFER_HEIGHT * 4);
+    unsigned char *buf =
+        malloc(GBA_TILE_BUFFER_WIDTH * GBA_TILE_BUFFER_HEIGHT * 4);
     if (buf == NULL)
+    {
+        Debug_ErrorMsgArg("%s(): Not enough memory.");
         return;
+    }
 
     GBA_Debug_PrintTilesAlpha(buf,
                               GBA_TILE_BUFFER_WIDTH, GBA_TILE_BUFFER_HEIGHT,
@@ -267,7 +271,7 @@ static void _win_gba_tileviewer_dump_btn_callback(void)
                               gba_tileview_selected_pal);
 
     char *name = FU_GetNewTimestampFilename("gba_tiles");
-    Save_PNG(name, GBA_TILE_BUFFER_WIDTH, GBA_TILE_BUFFER_HEIGHT, buf, 1);
+    Save_PNG(name, buf, GBA_TILE_BUFFER_WIDTH, GBA_TILE_BUFFER_HEIGHT, 1);
 
     free(buf);
 

@@ -31,7 +31,8 @@ static int min__(int a, int b)
 //----------------------------------------------------------------
 
 void GBA_Debug_PrintZoomedSpriteAt(int spritenum, int buf_has_alpha_channel,
-                                   char *buffer, int bufw, unused__ int bufh,
+                                   unsigned char *buffer,
+                                   int bufw, unused__ int bufh,
                                    int posx, int posy, int sizex, int sizey)
 {
     // Temp buffers
@@ -222,7 +223,7 @@ cleanup:
 
 // Starting sprite number = page * 64
 void GBA_Debug_PrintSpritesPage(int page, int buf_has_alpha_channel,
-                                char *buffer, int bufw, int bufh)
+                                unsigned char *buffer, int bufw, int bufh)
 {
     if (buf_has_alpha_channel)
     {
@@ -357,7 +358,8 @@ void GBA_Debug_PrintTiles(char *buffer, int bufw, unused__ int bufh, int cbb,
     }
 }
 
-void GBA_Debug_PrintTilesAlpha(char *buffer, int bufw, int bufh, int cbb,
+void GBA_Debug_PrintTilesAlpha(unsigned char *buffer,
+                               int bufw, int bufh, int cbb,
                                int colors, int palette)
 {
     memset(buffer, 0, bufw * bufh * 4);

@@ -234,14 +234,6 @@ static void _win_gb_palviewer_dump_btn_callback(void)
     if (Win_MainRunningGB() == 0)
         return;
 
-    char *buffer_temp = calloc(GB_PAL_BUFFER_WIDTH * GB_PAL_BUFFER_HEIGHT * 4,
-                               sizeof(char));
-    if (buffer_temp == NULL)
-    {
-        Debug_ErrorMsgArg("%s(): Not enough memory.");
-        return;
-    }
-
     memset(gb_pal_bg_buffer, 192, sizeof(gb_pal_bg_buffer));
     memset(gb_pal_spr_buffer, 192, sizeof(gb_pal_spr_buffer));
 
@@ -265,37 +257,15 @@ static void _win_gb_palviewer_dump_btn_callback(void)
                           1 + ((i / 4) * 20), 19 + ((i / 4) * 20));
     }
 
-    char *src = gb_pal_bg_buffer;
-    char *dst = buffer_temp;
-    for (int i = 0; i < GB_PAL_BUFFER_WIDTH * GB_PAL_BUFFER_HEIGHT; i++)
-    {
-        *dst++ = *src++;
-        *dst++ = *src++;
-        *dst++ = *src++;
-        *dst++ = 0xFF;
-    }
-
     char *name_bg = FU_GetNewTimestampFilename("gb_palette_bg");
-    Save_PNG(name_bg, GB_PAL_BUFFER_WIDTH, GB_PAL_BUFFER_HEIGHT,
-             buffer_temp, 0);
-
-    src = gb_pal_spr_buffer;
-    dst = buffer_temp;
-    for (int i = 0; i < GB_PAL_BUFFER_WIDTH * GB_PAL_BUFFER_HEIGHT; i++)
-    {
-        *dst++ = *src++;
-        *dst++ = *src++;
-        *dst++ = *src++;
-        *dst++ = 0xFF;
-    }
+    Save_PNG(name_bg, gb_pal_bg_buffer,
+             GB_PAL_BUFFER_WIDTH, GB_PAL_BUFFER_HEIGHT, 0);
 
     char *name_spr = FU_GetNewTimestampFilename("gb_palette_spr");
-    Save_PNG(name_spr, GB_PAL_BUFFER_WIDTH, GB_PAL_BUFFER_HEIGHT,
-             buffer_temp, 0);
+    Save_PNG(name_spr, gb_pal_spr_buffer,
+             GB_PAL_BUFFER_WIDTH, GB_PAL_BUFFER_HEIGHT, 0);
 
     Win_GBPalViewerUpdate();
-
-    free(buffer_temp);
 }
 
 //----------------------------------------------------------------

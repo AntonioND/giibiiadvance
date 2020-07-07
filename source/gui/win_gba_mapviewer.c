@@ -712,9 +712,12 @@ static void _win_gba_mapviewer_dump_btn_callback(void)
     if (Win_MainRunningGBA() == 0)
         return;
 
-    char *buf = malloc(gba_mapview_sizex * gba_mapview_sizey * 4);
+    unsigned char *buf = malloc(gba_mapview_sizex * gba_mapview_sizey * 4);
     if (buf == NULL)
+    {
+        Debug_ErrorMsgArg("%s(): Not enough memory.");
         return;
+    }
 
     for (u32 j = 0; j < gba_mapview_sizey; j++)
     {
@@ -731,7 +734,7 @@ static void _win_gba_mapviewer_dump_btn_callback(void)
     }
 
     char *name = FU_GetNewTimestampFilename("gba_map");
-    Save_PNG(name, gba_mapview_sizex, gba_mapview_sizey, buf, 1);
+    Save_PNG(name, buf, gba_mapview_sizex, gba_mapview_sizey, 1);
 
     free(buf);
 

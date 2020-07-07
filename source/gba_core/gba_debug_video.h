@@ -10,16 +10,17 @@
 #include "gba.h"
 
 void GBA_Debug_PrintZoomedSpriteAt(int spritenum, int buf_has_alpha_channel,
-                                   char *buffer, int bufw, int bufh,
+                                   unsigned char *buffer, int bufw, int bufh,
                                    int posx, int posy, int sizex, int sizey);
 
 // starting sprite number = page * 64
 void GBA_Debug_PrintSpritesPage(int page, int buf_has_alpha_channel,
-                                char *buffer, int bufw, int bufh);
+                                unsigned char *buffer, int bufw, int bufh);
 
 void GBA_Debug_PrintTiles(char *buffer, int bufw, int bufh, int cbb,
                           int colors, int palette);
-void GBA_Debug_PrintTilesAlpha(char *buffer, int bufw, int bufh, int cbb,
+void GBA_Debug_PrintTilesAlpha(unsigned char *buffer,
+                               int bufw, int bufh, int cbb,
                                int colors, int palette);
 
 void GBA_Debug_TilePrint64x64(char *buffer, int bufw, int bufh, int cbb,

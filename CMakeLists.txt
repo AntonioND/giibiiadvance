@@ -35,11 +35,14 @@ if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
             -Wlogical-op -Wduplicated-cond -Wswitch-enum -Wfloat-equal
             -Wcast-align -Walloc-zero -Winline
             -Wstrict-overflow=5 -Wstringop-overflow=4
-            # TODO: Enable the following warnings?
-            #-Wpedantic -Wformat-truncation=1 -Wcast-qual -Wconversion
-            #-Wstack-usage=4096
             $<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes>
             $<$<COMPILE_LANGUAGE:C>:-Wold-style-definition>
+
+            # Make sure we don't use too much stack. Windows doesn't like it
+            # when the stack usage is too high, even when Linux doesn't complain
+            # about it.
+            -Wstack-usage=4096
+
             -fsanitize=undefined
         )
         target_link_options(giibiiadvance PRIVATE

@@ -23,13 +23,22 @@ add_executable(giibiiadvance)
 
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
     target_compile_options(giibiiadvance PRIVATE
-        -fwrapv # Consider all ints 2's complement
+        # Force all integers to be 2's complement to prevent the compiler from
+        # doing optimizations because of undefined behaviour.
+        -fwrapv
+
+        # Force usage of extern for external variables
+        -fno-common
+
+        # Enable most common warnings
         -Wall -Wextra
-        -Wformat-truncation=0 # Disable this warning
-        -fno-common # Force usage of extern for external variables
+
+        # Disable this warning, which is enabled by default
+        -Wformat-truncation=0
     )
     if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 9.3)
         target_compile_options(giibiiadvance PRIVATE
+            # Enable a bunch of warnings that aren't enabled with Wall or Wextra
             -Wformat-overflow=2 -Wformat=2 -Wno-format-nonliteral
             -Wundef -Wunused -Wuninitialized -Wunknown-pragmas -Wshadow
             -Wlogical-op -Wduplicated-cond -Wswitch-enum -Wfloat-equal
@@ -43,19 +52,26 @@ if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
             # about it.
             -Wstack-usage=4096
 
+            # Enable Undefined Behaviour Sanitizer (UBSan)
             -fsanitize=undefined
+
+            # TODO: Enable the following warnings?
+            #-Wpedantic -Wformat-truncation=1 -Wcast-qual -Wconversion
         )
         target_link_options(giibiiadvance PRIVATE
+            # Enable Undefined Behaviour Sanitizer (UBSan)
             -fsanitize=undefined
         )
     endif()
 elseif(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
     target_compile_definitions(giibiiadvance PRIVATE
+        # Silence warnings
         -D_USE_MATH_DEFINES
         -D_CRT_SECURE_NO_WARNINGS
     )
     target_compile_options(giibiiadvance PRIVATE
-        /MP # Enable parallel compilation
+        # Enable parallel compilation
+        /MP
     )
 endif()
 

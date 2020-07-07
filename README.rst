@@ -66,6 +66,15 @@ To build it faster, do a parallel build with:
 
     make -j`nproc`
 
+For a release build:
+
+.. code:: bash
+
+    mkdir build
+    cd build
+    cmake .. -DCMAKE_BUILD_TYPE=Release
+    make -j`nproc`
+
 Build instructions for Windows (Microsoft Visual Studio)
 --------------------------------------------------------
 

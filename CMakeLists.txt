@@ -115,7 +115,7 @@ endif()
 # libpng and SLD2 are required
 
 if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
-    find_package(libpng REQUIRED)
+    find_package(libpng REQUIRED 1.6)
     find_package(SDL2 REQUIRED)
 
     target_link_libraries(giibiiadvance PRIVATE
@@ -123,7 +123,7 @@ if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
         SDL2::SDL2 SDL2::SDL2main
     )
 else()
-    find_package(PNG REQUIRED)
+    find_package(PNG REQUIRED 1.6)
     find_package(SDL2 REQUIRED)
 
     target_include_directories(giibiiadvance PRIVATE

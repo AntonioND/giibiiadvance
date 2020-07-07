@@ -144,6 +144,14 @@ static u32 gb_cam_matrix_process(u32 value, int x, int y)
 
 static void GB_CameraTakePicture(void)
 {
+    int (*temp_buf)[GBCAM_SENSOR_W];
+    temp_buf = calloc(GBCAM_SENSOR_W * GBCAM_SENSOR_H, sizeof(int));
+    if (temp_buf == NULL)
+    {
+        Debug_ErrorMsgArg("%s(): Not enough memory.");
+        goto cleanup;
+    }
+
     _GB_CAMERA_CART_ *cam = &GameBoy.Emulator.CAM;
 
     //------------------------------------------------
@@ -247,8 +255,6 @@ static void GB_CameraTakePicture(void)
         }
     }
 
-    int temp_buf[GBCAM_SENSOR_W][GBCAM_SENSOR_H];
-
     u32 filtering_mode = (N_bit << 3) | (VH_bits << 1) | E3_bit;
     switch (filtering_mode)
     {
@@ -259,7 +265,7 @@ static void GB_CameraTakePicture(void)
             {
                 for (int i = 0; i < GBCAM_SENSOR_W; i++)
                 {
-                    temp_buf[i][j] = gb_cam_retina_output_buf[i][j];
+                    temp_buf[j][i] = gb_cam_retina_output_buf[i][j];
                 }
             }
 
@@ -267,8 +273,8 @@ static void GB_CameraTakePicture(void)
             {
                 for (int i = 0; i < GBCAM_SENSOR_W; i++)
                 {
-                    int ms = temp_buf[i][gb_min_int(j + 1, GBCAM_SENSOR_H - 1)];
-                    int px = temp_buf[i][j];
+                    int ms = temp_buf[gb_min_int(j + 1, GBCAM_SENSOR_H - 1)][i];
+                    int px = temp_buf[j][i];
 
                     int value = 0;
                     if (P_bits & BIT(0))
@@ -298,7 +304,7 @@ static void GB_CameraTakePicture(void)
                             [gb_min_int(i + 1, GBCAM_SENSOR_W - 1)][j];
                     int px = gb_cam_retina_output_buf[i][j];
 
-                    temp_buf[i][j] = gb_clamp_int(0,
+                    temp_buf[j][i] = gb_clamp_int(0,
                             px + ((2 * px - mw - me) * EDGE_alpha),
                             255);
                 }
@@ -307,8 +313,8 @@ static void GB_CameraTakePicture(void)
             {
                 for (int i = 0; i < GBCAM_SENSOR_W; i++)
                 {
-                    int ms = temp_buf[i][gb_min_int(j + 1, GBCAM_SENSOR_H - 1)];
-                    int px = temp_buf[i][j];
+                    int ms = temp_buf[gb_min_int(j + 1, GBCAM_SENSOR_H - 1)][i];
+                    int px = temp_buf[j][i];
 
                     int value = 0;
                     if (P_bits & BIT(0))
@@ -341,7 +347,7 @@ static void GB_CameraTakePicture(void)
                             [gb_min_int(i + 1, GBCAM_SENSOR_W - 1)][j];
                     int px = gb_cam_retina_output_buf[i][j];
 
-                    temp_buf[i][j] = gb_clamp_int(-128,
+                    temp_buf[j][i] = gb_clamp_int(-128,
                             px + ((4 * px - mw - me - mn - ms) * EDGE_alpha),
                             127);
                 }
@@ -350,7 +356,7 @@ static void GB_CameraTakePicture(void)
             {
                 for (int i = 0; i < GBCAM_SENSOR_W; i++)
                 {
-                    gb_cam_retina_output_buf[i][j] = temp_buf[i][j];
+                    gb_cam_retina_output_buf[i][j] = temp_buf[j][i];
                 }
             }
             break;
@@ -433,6 +439,9 @@ static void GB_CameraTakePicture(void)
     // Copy to cart ram...
     memcpy(&(GameBoy.Memory.ExternRAM[0][0xA100 - 0xA000]), finalbuffer,
            sizeof(finalbuffer));
+
+cleanup:
+    free(temp_buf);
 }
 
 int GB_CameraReadRegister(int address)

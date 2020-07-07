@@ -31,8 +31,8 @@ extern _GB_CONTEXT_ GameBoy;
 
 static int WinIDGBCameraViewer;
 
-#define WIN_GB_CAMERAVIEWER_WIDTH  700
-#define WIN_GB_CAMERAVIEWER_HEIGHT 500
+#define WIN_GB_CAMERAVIEWER_WIDTH  552
+#define WIN_GB_CAMERAVIEWER_HEIGHT 378
 
 static int GBCameraViewerCreated = 0;
 
@@ -295,7 +295,8 @@ int Win_GB_GBCameraViewerCreate(void)
     //-------------------------------------------------------------------
 
     GUI_SetGroupBox(&gb_camview_photos_groupbox, 6, 6,
-                    6 + GB_CAMERA_ALLPHOTOS_BUFFER_WIDTH + 6 + 128 + 6, 300,
+                    6 + GB_CAMERA_ALLPHOTOS_BUFFER_WIDTH + 6 + 128 + 6,
+                    6 + GB_CAMERA_ALLPHOTOS_BUFFER_HEIGHT + 12,
                     "Photos");
 
     GUI_SetBitmap(&gb_camview_photos_all_bmp, 12, 18,
@@ -308,7 +309,8 @@ int Win_GB_GBCameraViewerCreate(void)
                   gb_photo_zoomed_buffer, NULL);
 
     GUI_SetButton(&gb_camview_dumpbtn,
-                  12 + GB_CAMERA_ALLPHOTOS_BUFFER_WIDTH + 6, 238,
+                  12 + GB_CAMERA_ALLPHOTOS_BUFFER_WIDTH + 6,
+                  18 + 112 + 6,
                   FONT_WIDTH * 6, FONT_HEIGHT * 2, "Dump",
                   _win_gb_mapviewer_dump_btn_callback);
 

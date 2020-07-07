@@ -25,7 +25,7 @@ extern const uint8_t fnt_data[]; // in font_data.c
 
 //------------------------------------------------------------------------------
 
-int FU_Print(char *buffer, int bufw, int bufh, int tx, int ty,
+int FU_Print(unsigned char *buffer, int bufw, int bufh, int tx, int ty,
              const char *txt, ...)
 {
     char txtbuffer[300];
@@ -62,7 +62,7 @@ int FU_Print(char *buffer, int bufw, int bufh, int tx, int ty,
 
         for (int y = 0; y < FONT_HEIGHT; y++)
         {
-            char *bufcopy = &(buffer[buf_offset]);
+            unsigned char *bufcopy = &(buffer[buf_offset]);
             const u8 *texcopy = &(fnt_data[tex_offset]);
 
             for (int x = 0; x < FONT_WIDTH; x++)
@@ -97,8 +97,8 @@ int FU_Print(char *buffer, int bufw, int bufh, int tx, int ty,
     return ret;
 }
 
-int FU_PrintColor(char *buffer, int bufw, int bufh, int tx, int ty, int color,
-                  const char *txt, ...)
+int FU_PrintColor(unsigned char *buffer, int bufw, int bufh, int tx, int ty,
+                  int color, const char *txt, ...)
 {
     char txtbuffer[300];
 
@@ -134,7 +134,7 @@ int FU_PrintColor(char *buffer, int bufw, int bufh, int tx, int ty, int color,
 
         for (int y = 0; y < FONT_HEIGHT; y++)
         {
-            char *bufcopy = &(buffer[buf_offset]);
+            unsigned char *bufcopy = &(buffer[buf_offset]);
             const u8 *texcopy = &(fnt_data[tex_offset]);
 
             for (int x = 0; x < FONT_WIDTH; x++)
@@ -158,7 +158,7 @@ int FU_PrintColor(char *buffer, int bufw, int bufh, int tx, int ty, int color,
     return ret;
 }
 
-int FU_PrintChar(char *buffer, int bufw, int bufh, int tx, int ty,
+int FU_PrintChar(unsigned char *buffer, int bufw, int bufh, int tx, int ty,
                  unsigned char c, int color)
 {
     if ((tx < 0) || (ty < 0))
@@ -181,7 +181,7 @@ int FU_PrintChar(char *buffer, int bufw, int bufh, int tx, int ty,
 
     for (int y = 0; y < FONT_HEIGHT; y++)
     {
-        char *bufcopy = &(buffer[buf_offset]);
+        unsigned char *bufcopy = &(buffer[buf_offset]);
         const u8 *texcopy = &(fnt_data[tex_offset]);
 
         for (int x = 0; x < FONT_WIDTH; x++)

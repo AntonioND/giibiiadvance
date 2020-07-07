@@ -31,7 +31,7 @@ static int WinIDGBAIOViewer;
 
 static int GBAIOViewerCreated = 0;
 
-static char *gba_ioviewer_buffer = NULL;
+static unsigned char *gba_ioviewer_buffer = NULL;
 
 static int gba_ioview_selected_tab = 0;
 

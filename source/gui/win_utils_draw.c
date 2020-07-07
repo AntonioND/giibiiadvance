@@ -27,7 +27,8 @@ void GUI_Draw_SetDrawingColor(int r, int g, int b)
     _gui_b = b;
 }
 
-void GUI_Draw_HorizontalLine(char *buffer, int w, int h, int x1, int x2, int y)
+void GUI_Draw_HorizontalLine(unsigned char *buffer, int w, int h,
+                             int x1, int x2, int y)
 {
     if (y > h)
         return;
@@ -39,7 +40,7 @@ void GUI_Draw_HorizontalLine(char *buffer, int w, int h, int x1, int x2, int y)
     if (x2 >= w)
         x2 = w - 1;
 
-    char *dst = &(buffer[(y * w + x1) * 3]);
+    unsigned char *dst = &(buffer[(y * w + x1) * 3]);
 
     while (x1 <= x2)
     {
@@ -51,7 +52,8 @@ void GUI_Draw_HorizontalLine(char *buffer, int w, int h, int x1, int x2, int y)
     }
 }
 
-void GUI_Draw_VerticalLine(char *buffer, int w, int h, int x, int y1, int y2)
+void GUI_Draw_VerticalLine(unsigned char *buffer, int w, int h,
+                           int x, int y1, int y2)
 {
     if (x > w)
         return;
@@ -63,7 +65,7 @@ void GUI_Draw_VerticalLine(char *buffer, int w, int h, int x, int y1, int y2)
     if (y2 >= h)
         y2 = h - 1;
 
-    char *dst = &(buffer[(y1 * w + x) * 3]);
+    unsigned char *dst = &(buffer[(y1 * w + x) * 3]);
 
     while (y1 <= y2)
     {
@@ -76,7 +78,8 @@ void GUI_Draw_VerticalLine(char *buffer, int w, int h, int x, int y1, int y2)
     }
 }
 
-void GUI_Draw_Rect(char *buffer, int w, int h, int x1, int x2, int y1, int y2)
+void GUI_Draw_Rect(unsigned char *buffer, int w, int h,
+                   int x1, int x2, int y1, int y2)
 {
     GUI_Draw_HorizontalLine(buffer, w, h, x1, x2, y1);
     GUI_Draw_VerticalLine(buffer, w, h, x1, y1, y2);
@@ -84,8 +87,8 @@ void GUI_Draw_Rect(char *buffer, int w, int h, int x1, int x2, int y1, int y2)
     GUI_Draw_VerticalLine(buffer, w, h, x2, y1, y2);
 }
 
-void GUI_Draw_FillRect(char *buffer, int w, int h, int x1, int x2, int y1,
-                       int y2)
+void GUI_Draw_FillRect(unsigned char *buffer, int w, int h,
+                       int x1, int x2, int y1, int y2)
 {
     for (int y = y1; y <= y2; y++)
         GUI_Draw_HorizontalLine(buffer, w, h, x1, x2, y);
@@ -93,7 +96,7 @@ void GUI_Draw_FillRect(char *buffer, int w, int h, int x1, int x2, int y1,
 
 //------------------------------------------------------------------------------
 
-static void _gui_draw_menu(_gui_menu *menu, char *buffer, int w, int h)
+static void _gui_draw_menu(_gui_menu *menu, unsigned char *buffer, int w, int h)
 {
     if (menu == NULL)
         return;
@@ -200,8 +203,8 @@ static void _gui_draw_menu(_gui_menu *menu, char *buffer, int w, int h)
 
 //------------------------------------------------------------------------------
 
-static void _gui_draw_inputwindow(_gui_inputwindow *win, char *buffer, int w,
-                                  int h)
+static void _gui_draw_inputwindow(_gui_inputwindow *win, unsigned char *buffer,
+                                  int w, int h)
 {
     if (win == NULL)
         return;
@@ -242,14 +245,15 @@ static void _gui_draw_inputwindow(_gui_inputwindow *win, char *buffer, int w,
 
 //------------------------------------------------------------------------------
 
-static void __gui_draw_init_buffer(char *buffer, int w, int h)
+static void __gui_draw_init_buffer(unsigned char *buffer, int w, int h)
 {
     GUI_Draw_SetDrawingColor(GUI_BACKGROUND_GREY, GUI_BACKGROUND_GREY,
                              GUI_BACKGROUND_GREY);
     GUI_Draw_FillRect(buffer, w, h, 0, w - 1, 0, h - 1);
 }
 
-static void __gui_draw_element(_gui_element *e, char *buffer, int w, int h)
+static void __gui_draw_element(_gui_element *e, unsigned char *buffer,
+                               int w, int h)
 {
     if (e->element_type == GUI_TYPE_TEXTBOX)
     {
@@ -366,8 +370,8 @@ static void __gui_draw_element(_gui_element *e, char *buffer, int w, int h)
         {
             for (int x = 0; x < e->w; x++)
             {
-                char *src = &(e->info.bitmap.bitmap[(y * e->w + x) * 3]);
-                char *dst = &(buffer[((e->y + y) * w + (e->x + x)) * 3]);
+                unsigned char *src = &(e->info.bitmap.bitmap[(y * e->w + x) * 3]);
+                unsigned char *dst = &(buffer[((e->y + y) * w + (e->x + x)) * 3]);
                 *dst++ = *src++;
                 *dst++ = *src++;
                 *dst++ = *src++;
@@ -799,7 +803,7 @@ static void __gui_draw_element(_gui_element *e, char *buffer, int w, int h)
     }
 }
 
-void GUI_Draw(_gui *gui, char *buffer, int w, int h, int clean)
+void GUI_Draw(_gui *gui, unsigned char *buffer, int w, int h, int clean)
 {
     if (gui == NULL)
         return;

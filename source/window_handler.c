@@ -441,7 +441,7 @@ void WH_SetCaption(int index, const char *caption)
     SDL_SetWindowTitle(w->mWindow, caption);
 }
 
-void WH_Render(int index, const char *buffer)
+void WH_Render(int index, const unsigned char *buffer)
 {
     WindowHandle *w = _wh_get_from_index(index);
 

@@ -157,9 +157,12 @@ static int WIN_MAIN_SCREEN_TYPE;
 
 static int WIN_MAIN_MENU_ENABLED = 0;
 static int WIN_MAIN_MENU_HAS_TO_UPDATE = 0;
-static char WIN_MAIN_GAME_MENU_BUFFER[256 * CONFIG_ZOOM_MAX * 224
-                                      * CONFIG_ZOOM_MAX * 4];
-static char WIN_MAIN_GAME_SCREEN_BUFFER[256 * 224 * 3]; // Max size = SGB
+
+static unsigned char WIN_MAIN_GAME_MENU_BUFFER[256 * CONFIG_ZOOM_MAX * 224
+                                               * CONFIG_ZOOM_MAX * 4];
+
+// Max size = SGB
+static unsigned char WIN_MAIN_GAME_SCREEN_BUFFER[256 * 224 * 3];
 
 static int _win_main_get_game_screen_texture_width(void)
 {
@@ -1400,7 +1403,7 @@ int Win_MainCreate(char *rom_path)
     return 0;
 }
 
-static char _win_main_buffer_when_menu[256 * 4 * 224 * 4 * 3];
+static unsigned char _win_main_buffer_when_menu[256 * 4 * 224 * 4 * 3];
 
 void Win_MainRender(void)
 {

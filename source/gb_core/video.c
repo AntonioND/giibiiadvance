@@ -1480,7 +1480,7 @@ int GB_Screen_Init(void)
     return 0;
 }
 
-static void GB_Screen_WritePixel(char *buffer, int x, int y,
+static void GB_Screen_WritePixel(unsigned char *buffer, int x, int y,
                                  int r, int g, int b)
 {
     u8 *p = (u8 *)buffer + (y * 160 + x) * 3;
@@ -1489,7 +1489,7 @@ static void GB_Screen_WritePixel(char *buffer, int x, int y,
     *p = b;
 }
 
-static void GB_Screen_WritePixelSGB(char *buffer, int x, int y,
+static void GB_Screen_WritePixelSGB(unsigned char *buffer, int x, int y,
                                     int r, int g, int b)
 {
     u8 *p = (u8 *)buffer + (y * (160 + 96) + x) * 3;
@@ -1498,7 +1498,7 @@ static void GB_Screen_WritePixelSGB(char *buffer, int x, int y,
     *p = b;
 }
 
-static void gb_scr_writebuffer_sgb(char *buffer)
+static void gb_scr_writebuffer_sgb(unsigned char *buffer)
 {
     int last_fb = gb_cur_fb ^ 1;
     for (int i = 0; i < 256; i++)
@@ -1514,7 +1514,7 @@ static void gb_scr_writebuffer_sgb(char *buffer)
     }
 }
 
-static void gb_scr_writebuffer_dmg_cgb(char *buffer)
+static void gb_scr_writebuffer_dmg_cgb(unsigned char *buffer)
 {
     int last_fb = gb_cur_fb ^ 1;
     for (int i = 0; i < 160; i++)
@@ -1530,7 +1530,7 @@ static void gb_scr_writebuffer_dmg_cgb(char *buffer)
     }
 }
 
-static void gb_scr_writebuffer_dmg_cgb_blur(char *buffer)
+static void gb_scr_writebuffer_dmg_cgb_blur(unsigned char *buffer)
 {
     for (int i = 0; i < 160; i++)
     {
@@ -1558,7 +1558,7 @@ static void gb_scr_writebuffer_dmg_cgb_blur(char *buffer)
 // G = ((g * 3 + b) << 1)
 // B = ((r * 3 + g * 2 + b * 11) >> 1)
 
-static void gb_scr_writebuffer_dmg_cgb_realcolors(char *buffer)
+static void gb_scr_writebuffer_dmg_cgb_realcolors(unsigned char *buffer)
 {
     int last_fb = gb_cur_fb ^ 1;
     for (int i = 0; i < 160; i++)
@@ -1578,7 +1578,7 @@ static void gb_scr_writebuffer_dmg_cgb_realcolors(char *buffer)
     }
 }
 
-static void gb_scr_writebuffer_dmg_cgb_blur_realcolors(char *buffer)
+static void gb_scr_writebuffer_dmg_cgb_blur_realcolors(unsigned char *buffer)
 {
     for (int i = 0; i < 160; i++)
     {
@@ -1603,9 +1603,9 @@ static void gb_scr_writebuffer_dmg_cgb_blur_realcolors(char *buffer)
     }
 }
 
-typedef void (*draw_to_buf_fn)(char *);
+typedef void (*draw_to_buf_fn)(unsigned char *);
 
-void GB_Screen_WriteBuffer_24RGB(char *buffer)
+void GB_Screen_WriteBuffer_24RGB(unsigned char *buffer)
 {
     draw_to_buf_fn draw_fn = NULL;
 
@@ -1660,7 +1660,7 @@ void GB_Screen_WriteBuffer_24RGB(char *buffer)
             h = 144;
         }
 
-        char *buf = malloc(w * h * 3);
+        unsigned char *buf = malloc(w * h * 3);
         if (buf == NULL)
             return;
         draw_fn(buf);

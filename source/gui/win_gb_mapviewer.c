@@ -35,7 +35,7 @@ static int WinIDGBMapViewer;
 
 static int GBMapViewerCreated = 0;
 
-static char *gb_mapviewer_buffer = NULL;
+static unsigned char *gb_mapviewer_buffer = NULL;
 
 //------------------------------------------------------------------------------
 
@@ -48,9 +48,10 @@ static u32 gb_mapview_selected_mapbase = 0;
 #define GB_MAP_BUFFER_WIDTH  (32 * 8)
 #define GB_MAP_BUFFER_HEIGHT (32 * 8)
 
-static char gb_map_buffer[GB_MAP_BUFFER_WIDTH * GB_MAP_BUFFER_HEIGHT * 3];
+static unsigned char gb_map_buffer[GB_MAP_BUFFER_WIDTH *
+                                   GB_MAP_BUFFER_HEIGHT * 3];
 
-static char gb_map_zoomed_tile_buffer[64 * 64 * 3];
+static unsigned char gb_map_zoomed_tile_buffer[64 * 64 * 3];
 
 static int gb_map_zoomed_tile_is_pal = 1;
 

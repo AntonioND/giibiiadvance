@@ -28,7 +28,7 @@ static int WinIDGBAMemViewer;
 
 static int GBAMemViewerCreated = 0;
 
-static char *gba_memviwer_buffer = NULL;
+static unsigned char *gba_memviwer_buffer = NULL;
 
 //------------------------------------------------------------------------------
 

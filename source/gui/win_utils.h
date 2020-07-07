@@ -25,9 +25,12 @@ void GUI_ConsoleReset(_gui_console *con, int screen_width, int screen_height);
 void GUI_ConsoleClear(_gui_console *con);
 int GUI_ConsoleModePrintf(_gui_console *con, int x, int y, const char *txt, ...);
 int GUI_ConsoleColorizeLine(_gui_console *con, int y, int color);
+
 // The buffer is 24 bit per pixel
-void GUI_ConsoleDraw(_gui_console *con, char *buffer, int buf_w, int buf_h);
-void GUI_ConsoleDrawAt(_gui_console *con, char *buffer, int buf_w, int buf_h,
+void GUI_ConsoleDraw(_gui_console *con, unsigned char *buffer,
+                     int buf_w, int buf_h);
+void GUI_ConsoleDrawAt(_gui_console *con, unsigned char *buffer,
+                       int buf_w, int buf_h,
                        int scrx, int scry, int scrw, int scrh);
 
 //------------------------------------------------------------------------------
@@ -85,7 +88,7 @@ typedef struct
         } label;
         struct
         {
-            char *bitmap;
+            unsigned char *bitmap;
             _gui_int_arg_int_int_fn callback;
         } bitmap;
         struct
@@ -152,8 +155,8 @@ void GUI_SetLabel(_gui_element *e, int x, int y, int w, int h,
                   const char *label);
 
 // Bitmap is 24 bit. return 1 from callback to redraw GUI
-void GUI_SetBitmap(_gui_element *e, int x, int y, int w, int h, char *bitmap,
-                   _gui_int_arg_int_int_fn callback);
+void GUI_SetBitmap(_gui_element *e, int x, int y, int w, int h,
+                   unsigned char *bitmap, _gui_int_arg_int_int_fn callback);
 
 // gui is a _gui pointer
 void GUI_SetWindow(_gui_element *e, int x, int y, int w, int h, void *gui,

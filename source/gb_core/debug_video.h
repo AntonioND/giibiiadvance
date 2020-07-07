@@ -9,12 +9,12 @@
 
 // buffer is 24 bit
 void GB_Debug_GetSpriteInfo(int sprnum, u8 *x, u8 *y, u8 *tile, u8 *info);
-void GB_Debug_PrintSprites(char *buf);
-void GB_Debug_PrintZoomedSprite(char *buf, int sprite);
+void GB_Debug_PrintSprites(unsigned char *buf);
+void GB_Debug_PrintZoomedSprite(unsigned char *buf, int sprite);
 
 // buffer is 32 bit
-void GB_Debug_PrintSpritesAlpha(char *buf);
-void GB_Debug_PrintSpriteAlpha(char *buf, int sprite);
+void GB_Debug_PrintSpritesAlpha(unsigned char *buf);
+void GB_Debug_PrintSpriteAlpha(unsigned char *buf, int sprite);
 
 //------------------------------------------------------------------------------
 
@@ -23,33 +23,38 @@ void GB_Debug_GetPalette(int is_sprite, int num, int color,
 
 //------------------------------------------------------------------------------
 
-void GB_Debug_TileVRAMDraw(char *buffer0, int bufw0, int bufh0,
-                           char *buffer1, int bufw1, int bufh1);
-void GB_Debug_TileVRAMDrawPaletted(char *buffer0, int bufw0, int bufh0,
-                                   char *buffer1, int bufw1, int bufh1,
+void GB_Debug_TileVRAMDraw(unsigned char *buffer0, int bufw0, int bufh0,
+                           unsigned char *buffer1, int bufw1, int bufh1);
+void GB_Debug_TileVRAMDrawPaletted(unsigned char *buffer0, int bufw0, int bufh0,
+                                   unsigned char *buffer1, int bufw1, int bufh1,
                                    int pal, int pal_is_spr);
-void GB_Debug_TileDrawZoomed64x64(char *buffer, int tile, int bank);
-void GB_Debug_TileDrawZoomedPaletted64x64(char *buffer, int tile, int bank,
-                                          int palette, int is_sprite_palette);
+void GB_Debug_TileDrawZoomed64x64(unsigned char *buffer, int tile, int bank);
+void GB_Debug_TileDrawZoomedPaletted64x64(unsigned char *buffer, int tile,
+                                          int bank, int palette,
+                                          int is_sprite_palette);
 
 //------------------------------------------------------------------------------
 
-void GB_Debug_MapPrint(char *buffer, int bufw, int bufh, int map, int tile_base);
-void GB_Debug_MapPrintBW(char *buffer, int bufw, int bufh, int map,
+void GB_Debug_MapPrint(unsigned char *buffer, int bufw, int bufh, int map,
+                       int tile_base);
+void GB_Debug_MapPrintBW(unsigned char *buffer, int bufw, int bufh, int map,
                          int tile_base); // Black and white
 
 //------------------------------------------------------------------------------
 
 // index: 0-29
-void GB_Debug_GBCameraMiniPhotoPrint(char *buffer, int bufw, int bufh,
+void GB_Debug_GBCameraMiniPhotoPrint(unsigned char *buffer, int bufw, int bufh,
                                      int posx, int posy, int index);
 
 // index: 0-29. if index == -1, get current camera output
-void GB_Debug_GBCameraPhotoPrint(char *buffer, int bufw, int bufh, int index);
+void GB_Debug_GBCameraPhotoPrint(unsigned char *buffer, int bufw, int bufh,
+                                 int index);
 
-void GB_Debug_GBCameraMiniPhotoPrintAll(char *buf);
+void GB_Debug_GBCameraMiniPhotoPrintAll(unsigned char *buf);
 
-void GB_Debug_GBCameraWebcamOutputPrint(char *buffer, int bufw, int bufh);
-void GB_Debug_GBCameraRetinaProcessedPrint(char *buffer, int bufw, int bufh);
+void GB_Debug_GBCameraWebcamOutputPrint(unsigned char *buffer,
+                                        int bufw, int bufh);
+void GB_Debug_GBCameraRetinaProcessedPrint(unsigned char *buffer,
+                                           int bufw, int bufh);
 
 #endif // GB_DEBUG_VIDEO__

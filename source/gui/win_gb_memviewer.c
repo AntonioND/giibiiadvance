@@ -28,7 +28,7 @@ static int WinIDGBMemViewer;
 
 static int GBMemViewerCreated = 0;
 
-static char *gb_memviwer_buffer = NULL;
+static unsigned char *gb_memviwer_buffer = NULL;
 
 //------------------------------------------------------------------------------
 

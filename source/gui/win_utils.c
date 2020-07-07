@@ -102,7 +102,8 @@ int GUI_ConsoleColorizeLine(_gui_console *con, int y, int color)
 }
 
 // buffer is 24 bit per pixel
-void GUI_ConsoleDraw(_gui_console *con, char *buffer, int buf_w, int buf_h)
+void GUI_ConsoleDraw(_gui_console *con, unsigned char *buffer,
+                     int buf_w, int buf_h)
 {
     for (int y = 0; y < con->__console_chars_h; y++)
     {
@@ -123,7 +124,8 @@ void GUI_ConsoleDraw(_gui_console *con, char *buffer, int buf_w, int buf_h)
     }
 }
 
-void GUI_ConsoleDrawAt(_gui_console *con, char *buffer, int buf_w, int buf_h,
+void GUI_ConsoleDrawAt(_gui_console *con, unsigned char *buffer,
+                       int buf_w, int buf_h,
                        int scrx, int scry, unused__ int scrw, unused__ int scrh)
 {
     for (int y = 0; y < con->__console_chars_h; y++)
@@ -253,8 +255,8 @@ void GUI_SetLabel(_gui_element *e, int x, int y, int w, int h,
 }
 
 // 24-bit buffer
-void GUI_SetBitmap(_gui_element *e, int x, int y, int w, int h, char *bitmap,
-                   _gui_int_arg_int_int_fn callback)
+void GUI_SetBitmap(_gui_element *e, int x, int y, int w, int h,
+                   unsigned char *bitmap, _gui_int_arg_int_int_fn callback)
 {
     if (e == NULL)
         return;

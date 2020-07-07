@@ -33,7 +33,7 @@ static int WinIDGBIOViewer;
 
 static int GBIOViewerCreated = 0;
 
-static char *gb_ioviewer_buffer = NULL;
+static unsigned char *gb_ioviewer_buffer = NULL;
 
 //------------------------------------------------------------------------------
 

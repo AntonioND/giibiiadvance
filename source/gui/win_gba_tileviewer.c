@@ -30,7 +30,7 @@ static int WinIDGBATileViewer;
 
 static int GBATileViewerCreated = 0;
 
-static char *gba_tileviewer_buffer = NULL;
+static unsigned char *gba_tileviewer_buffer = NULL;
 
 //------------------------------------------------------------------------------
 
@@ -42,9 +42,10 @@ static u32 gba_tileview_selected_index = 0;
 #define GBA_TILE_BUFFER_WIDTH  (32 * 8)
 #define GBA_TILE_BUFFER_HEIGHT (32 * 8)
 
-static char gba_tile_buffer[GBA_TILE_BUFFER_WIDTH * GBA_TILE_BUFFER_HEIGHT * 3];
+static unsigned char
+    gba_tile_buffer[GBA_TILE_BUFFER_WIDTH * GBA_TILE_BUFFER_HEIGHT * 3];
 
-static char gba_tile_zoomed_tile_buffer[64 * 64 * 3];
+static unsigned char gba_tile_zoomed_tile_buffer[64 * 64 * 3];
 
 //------------------------------------------------------------------------------
 

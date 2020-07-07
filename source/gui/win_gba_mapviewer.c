@@ -31,7 +31,7 @@ static int WinIDGBAMapViewer;
 
 static int GBAMapViewerCreated = 0;
 
-static char *gba_mapviewer_buffer = NULL;
+static unsigned char *gba_mapviewer_buffer = NULL;
 
 //------------------------------------------------------------------------------
 
@@ -54,10 +54,11 @@ static int gba_mapview_scrolly_max = 0;
 #define GBA_MAP_BUFFER_HEIGHT (32 * 8)
 
 // The complete map is copied to gba_map_buffer[] as needed
-static char gba_complete_map_buffer[1024 * 1024 * 4];
-static char gba_map_buffer[GBA_MAP_BUFFER_WIDTH * GBA_MAP_BUFFER_HEIGHT * 3];
+static unsigned char gba_complete_map_buffer[1024 * 1024 * 4];
+static unsigned char gba_map_buffer[GBA_MAP_BUFFER_WIDTH *
+                                    GBA_MAP_BUFFER_HEIGHT * 3];
 
-static char gba_map_zoomed_tile_buffer[64 * 64 * 3];
+static unsigned char gba_map_zoomed_tile_buffer[64 * 64 * 3];
 
 //------------------------------------------------------------------------------
 

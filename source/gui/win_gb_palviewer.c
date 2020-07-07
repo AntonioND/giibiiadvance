@@ -31,7 +31,7 @@ static int WinIDGBPalViewer;
 
 static int GBPalViewerCreated = 0;
 
-static char *gb_palviewer_buffer = NULL;
+static unsigned char *gb_palviewer_buffer = NULL;
 
 //------------------------------------------------------------------------------
 
@@ -41,8 +41,10 @@ static u32 gb_palview_selectedindex = 0;
 #define GB_PAL_BUFFER_WIDTH ((20 * 4) + 1)
 #define GB_PAL_BUFFER_HEIGHT ((20 * 8) + 1)
 
-static char gb_pal_bg_buffer[GB_PAL_BUFFER_WIDTH * GB_PAL_BUFFER_HEIGHT * 3];
-static char gb_pal_spr_buffer[GB_PAL_BUFFER_WIDTH * GB_PAL_BUFFER_HEIGHT * 3];
+static unsigned char
+    gb_pal_bg_buffer[GB_PAL_BUFFER_WIDTH * GB_PAL_BUFFER_HEIGHT * 3];
+static unsigned char
+    gb_pal_spr_buffer[GB_PAL_BUFFER_WIDTH * GB_PAL_BUFFER_HEIGHT * 3];
 
 //------------------------------------------------------------------------------
 
@@ -145,7 +147,7 @@ void Win_GBPalViewerUpdate(void)
 
     GUI_Draw_SetDrawingColor(255, 0, 0);
 
-    char *buf;
+    unsigned char *buf;
     if (gb_palview_sprpal == 0)
         buf = gb_pal_bg_buffer;
     else

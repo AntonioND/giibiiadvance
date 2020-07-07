@@ -257,7 +257,8 @@ void GBA_Debug_PrintSpritesPage(int page, int buf_has_alpha_channel,
 
 //----------------------------------------------------------------
 
-void GBA_Debug_PrintTiles(char *buffer, int bufw, unused__ int bufh, int cbb,
+void GBA_Debug_PrintTiles(unsigned char *buffer,
+                          int bufw, unused__ int bufh, int cbb,
                           int colors, int palette)
 {
     u8 *charbaseblockptr = (u8 *)&Mem.vram[cbb - 0x06000000];
@@ -455,7 +456,7 @@ void GBA_Debug_PrintTilesAlpha(unsigned char *buffer,
     }
 }
 
-void GBA_Debug_TilePrint64x64(char *buffer, unused__ int bufw,
+void GBA_Debug_TilePrint64x64(unsigned char *buffer, unused__ int bufw,
                               unused__ int bufh, int cbb, int tile,
                               int palcolors, int selected_pal)
 {
@@ -551,7 +552,7 @@ static u32 se_index_affine(u32 tx, u32 ty, u32 tpitch)
 }
 
 // bgmode => 1 = text, 2 = affine, 3,4,5 = bmp mode 3,4,5
-void GBA_Debug_PrintBackgroundAlpha(char *buffer, int bufw, int bufh,
+void GBA_Debug_PrintBackgroundAlpha(unsigned char *buffer, int bufw, int bufh,
                                     u16 control, int bgmode, int page)
 {
     if (bgmode == 0) // Shouldn't happen

@@ -46,7 +46,8 @@ u64 asciihex_to_int(const char *text);
 // Converts a decimal number in an ASCII string into integer
 u64 asciidec_to_int(const char *text);
 
-void ScaleImage24RGB(int zoom, char *srcbuf, int srcw, int srch, char *dstbuf,
-                     int dstw, int dsth);
+void ScaleImage24RGB(int zoom,
+                     unsigned char *srcbuf, int srcw, int srch,
+                     unsigned char *dstbuf, int dstw, int dsth);
 
 #endif // GENERAL_UTILS__

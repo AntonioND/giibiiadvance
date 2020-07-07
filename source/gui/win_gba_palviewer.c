@@ -30,7 +30,7 @@ static int WinIDGBAPalViewer;
 
 static int GBAPalViewerCreated = 0;
 
-static char *gba_palviewer_buffer = NULL;
+static unsigned char *gba_palviewer_buffer = NULL;
 
 //------------------------------------------------------------------------------
 
@@ -41,8 +41,10 @@ static u32 gba_palview_selectedindex = 0;
 
 #define GBA_PAL_BUFFER_SIDE ((10 * 16) + 1)
 
-static char gba_pal_bg_buffer[GBA_PAL_BUFFER_SIDE * GBA_PAL_BUFFER_SIDE * 3];
-static char gba_pal_spr_buffer[GBA_PAL_BUFFER_SIDE * GBA_PAL_BUFFER_SIDE * 3];
+static unsigned char
+    gba_pal_bg_buffer[GBA_PAL_BUFFER_SIDE * GBA_PAL_BUFFER_SIDE * 3];
+static unsigned char
+    gba_pal_spr_buffer[GBA_PAL_BUFFER_SIDE * GBA_PAL_BUFFER_SIDE * 3];
 
 //------------------------------------------------------------------------------
 
@@ -157,7 +159,7 @@ void Win_GBAPalViewerUpdate(void)
 
     GUI_Draw_SetDrawingColor(255, 0, 0);
 
-    char *buf;
+    unsigned char *buf;
     if (gba_palview_sprpal == 0)
         buf = gba_pal_bg_buffer;
     else

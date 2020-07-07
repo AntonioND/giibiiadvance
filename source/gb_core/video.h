@@ -38,7 +38,7 @@ void SGB_ScreenDrawScanline(u32 y);
 //----------------------------------------------------
 
 // Write to buffer in 24 bit format
-void GB_Screen_WriteBuffer_24RGB(char *buffer);
+void GB_Screen_WriteBuffer_24RGB(unsigned char *buffer);
 void GB_Screenshot(void);
 
 #endif // GB_VIDEO__

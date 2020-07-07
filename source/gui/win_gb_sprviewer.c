@@ -31,7 +31,7 @@ static int WinIDGBSprViewer;
 
 static int GBSprViewerCreated = 0;
 
-static char *gb_sprviewer_buffer = NULL;
+static unsigned char *gb_sprviewer_buffer = NULL;
 
 //------------------------------------------------------------------------------
 
@@ -44,14 +44,14 @@ static u32 gb_sprview_selected_spr = 0;
 #define GB_SPR_ALLSPR_BUFFER_WIDTH  (256)
 #define GB_SPR_ALLSPR_BUFFER_HEIGHT (256)
 
-static char gb_spr_allspr_buffer[GB_SPR_ALLSPR_BUFFER_WIDTH
-                                 * GB_SPR_ALLSPR_BUFFER_HEIGHT * 3];
+static unsigned char gb_spr_allspr_buffer[GB_SPR_ALLSPR_BUFFER_WIDTH
+                                          * GB_SPR_ALLSPR_BUFFER_HEIGHT * 3];
 
 #define GB_SPR_ZOOMED_BUFFER_WIDTH  (8 * 8)
 #define GB_SPR_ZOOMED_BUFFER_HEIGHT (16 * 8)
 
-static char gb_spr_zoomed_buffer[GB_SPR_ZOOMED_BUFFER_WIDTH
-                                 * GB_SPR_ZOOMED_BUFFER_HEIGHT * 3];
+static unsigned char gb_spr_zoomed_buffer[GB_SPR_ZOOMED_BUFFER_WIDTH
+                                          * GB_SPR_ZOOMED_BUFFER_HEIGHT * 3];
 
 //------------------------------------------------------------------------------
 

@@ -37,26 +37,26 @@ static int WinIDGB_SGBViewer;
 
 static int GB_SGBViewerCreated = 0;
 
-static char *gb_sgbviewer_buffer = NULL;
+static unsigned char *gb_sgbviewer_buffer = NULL;
 
 //------------------------------------------------------------------------------
 
-static char gb_sgb_border_buffer[256 * 256 * 3];
+static unsigned char gb_sgb_border_buffer[256 * 256 * 3];
 static int gb_sgb_border_tilex;
 static int gb_sgb_border_tiley;
-static char gb_sgb_border_zoomed_tile_buffer[64 * 64 * 3];
+static unsigned char gb_sgb_border_zoomed_tile_buffer[64 * 64 * 3];
 
-static char gb_sgb_tiles_buffer[128 * 128 * 3];
+static unsigned char gb_sgb_tiles_buffer[128 * 128 * 3];
 static int gb_sgb_tiles_selected_index;
 static int gb_sgb_tiles_selected_pal;
-static char gb_sgb_tiles_zoomed_tile_buffer[64 * 64 * 3];
+static unsigned char gb_sgb_tiles_zoomed_tile_buffer[64 * 64 * 3];
 
-static char gb_sgb_atf_buffer[(160 + 1) * (144 + 1) * 3];
+static unsigned char gb_sgb_atf_buffer[(160 + 1) * (144 + 1) * 3];
 static int gb_sgb_atf_selected_index; // 0 ~ 0x2D-1
 static int gb_sgb_atf_selected_x;
 static int gb_sgb_atf_selected_y;
 
-static char gb_sgb_pal_buffer[160 * 80 * 3];
+static unsigned char gb_sgb_pal_buffer[160 * 80 * 3];
 static int gb_sgb_pal_selected_pal;
 static int gb_sgb_pal_selected_color;
 

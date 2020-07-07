@@ -103,11 +103,11 @@
 #define FONT_WIDTH          (7)
 #define FONT_HEIGHT         (12)
 
-int FU_Print(char *buffer, int bufw, int bufh, int tx, int ty,
+int FU_Print(unsigned char *buffer, int bufw, int bufh, int tx, int ty,
              const char *txt, ...);
-int FU_PrintChar(char *buffer, int bufw, int bufh, int tx, int ty,
+int FU_PrintChar(unsigned char *buffer, int bufw, int bufh, int tx, int ty,
                  unsigned char c, int color);
-int FU_PrintColor(char *buffer, int bufw, int bufh, int tx, int ty, int color,
-                  const char *txt, ...);
+int FU_PrintColor(unsigned char *buffer, int bufw, int bufh, int tx, int ty,
+                  int color, const char *txt, ...);
 
 #endif // FONT_UTILS__

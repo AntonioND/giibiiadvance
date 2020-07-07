@@ -35,7 +35,7 @@ static int WinIDGBTileViewer;
 
 static int GBTileViewerCreated = 0;
 
-static char *gb_tileviewer_buffer = NULL;
+static unsigned char *gb_tileviewer_buffer = NULL;
 
 //------------------------------------------------------------------------------
 
@@ -45,12 +45,12 @@ static u32 gb_tileview_selected_index = 0;
 #define GB_TILE_BUFFER_WIDTH  (16 * 8)
 #define GB_TILE_BUFFER_HEIGHT (24 * 8)
 
-static char gb_tile_bank0_buffer[GB_TILE_BUFFER_WIDTH
-                                 * GB_TILE_BUFFER_HEIGHT * 3];
-static char gb_tile_bank1_buffer[GB_TILE_BUFFER_WIDTH
-                                 * GB_TILE_BUFFER_HEIGHT * 3];
+static unsigned char gb_tile_bank0_buffer[GB_TILE_BUFFER_WIDTH
+                                          * GB_TILE_BUFFER_HEIGHT * 3];
+static unsigned char gb_tile_bank1_buffer[GB_TILE_BUFFER_WIDTH
+                                          * GB_TILE_BUFFER_HEIGHT * 3];
 
-static char gb_tile_zoomed_tile_buffer[64 * 64 * 3];
+static unsigned char gb_tile_zoomed_tile_buffer[64 * 64 * 3];
 
 static int gb_tile_zoomed_tile_is_pal = 1;
 static int gb_tile_zoomed_tile_sel_pal = 0; // 0 = b/w ; 1 = bg ; 2 = spr
@@ -156,7 +156,7 @@ void Win_GBTileViewerUpdate(void)
     GUI_SetLabelCaption(&gb_tileview_zoomed_tile_pal_label, text);
 
     GUI_Draw_SetDrawingColor(255, 0, 0);
-    char *buf;
+    unsigned char *buf;
     if (gb_tileview_selected_bank == 0)
         buf = gb_tile_bank0_buffer;
     else

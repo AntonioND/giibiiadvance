@@ -31,7 +31,7 @@ static int WinIDGBADis;
 
 static int GBADisassemblerCreated = 0;
 
-static char *gba_disasm_buffer = NULL;
+static unsigned char *gba_disasm_buffer = NULL;
 
 //------------------------------------------------------------------------------
 

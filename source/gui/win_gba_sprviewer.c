@@ -32,7 +32,7 @@ static int WinIDGBASprViewer;
 
 static int GBASprViewerCreated = 0;
 
-static char *gba_sprviewer_buffer = NULL;
+static unsigned char *gba_sprviewer_buffer = NULL;
 
 //------------------------------------------------------------------------------
 
@@ -42,14 +42,14 @@ static u32 gba_sprview_selected_page = 0;
 #define GBA_SPR_ALLSPR_BUFFER_WIDTH  ((64 + 16) * 8 + 16)
 #define GBA_SPR_ALLSPR_BUFFER_HEIGHT ((64 + 16) * 8 + 16)
 
-static char gba_spr_allspr_buffer[GBA_SPR_ALLSPR_BUFFER_WIDTH *
-                                  GBA_SPR_ALLSPR_BUFFER_HEIGHT * 3];
+static unsigned char gba_spr_allspr_buffer[GBA_SPR_ALLSPR_BUFFER_WIDTH *
+                                           GBA_SPR_ALLSPR_BUFFER_HEIGHT * 3];
 
 #define GBA_SPR_ZOOMED_BUFFER_WIDTH  (64 * 2)
 #define GBA_SPR_ZOOMED_BUFFER_HEIGHT (64 * 2)
 
-static char gba_spr_zoomed_buffer[GBA_SPR_ZOOMED_BUFFER_WIDTH *
-                                  GBA_SPR_ZOOMED_BUFFER_HEIGHT * 3];
+static unsigned char gba_spr_zoomed_buffer[GBA_SPR_ZOOMED_BUFFER_WIDTH *
+                                           GBA_SPR_ZOOMED_BUFFER_HEIGHT * 3];
 
 static u32 gba_sprview_selected_matrix = 0;
 

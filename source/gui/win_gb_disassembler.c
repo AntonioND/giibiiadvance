@@ -31,7 +31,7 @@ static int WinIDGBDis;
 
 static int GBDisassemblerCreated = 0;
 
-static char *gb_disasm_buffer = NULL;
+static unsigned char *gb_disasm_buffer = NULL;
 
 //------------------------------------------------------------------------------
 

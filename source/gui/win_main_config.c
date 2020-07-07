@@ -89,7 +89,7 @@ static _gui_element mainwindow_configwin_gameboy_pal_r_scrollbar,
                     mainwindow_configwin_gameboy_pal_b_scrollbar;
 static _gui_element mainwindow_configwin_gameboy_palette_bitmap;
 
-static char gameboy_palette[32 * 32 * 3];
+static unsigned char gameboy_palette[32 * 32 * 3];
 
 //------------------------
 

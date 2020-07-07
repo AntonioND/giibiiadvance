@@ -36,7 +36,7 @@ static int WinIDGBCameraViewer;
 
 static int GBCameraViewerCreated = 0;
 
-static char *gb_camviewer_buffer = NULL;
+static unsigned char *gb_camviewer_buffer = NULL;
 
 //------------------------------------------------------------------------------
 
@@ -45,14 +45,14 @@ static u32 gb_cameraview_selected_photo_index = 0;
 #define GB_CAMERA_ALLPHOTOS_BUFFER_WIDTH  (248)
 #define GB_CAMERA_ALLPHOTOS_BUFFER_HEIGHT (208)
 
-static char gb_allphotos_buffer[GB_CAMERA_ALLPHOTOS_BUFFER_WIDTH
-                                * GB_CAMERA_ALLPHOTOS_BUFFER_HEIGHT * 3];
+static unsigned char gb_allphotos_buffer[GB_CAMERA_ALLPHOTOS_BUFFER_WIDTH
+                                         * GB_CAMERA_ALLPHOTOS_BUFFER_HEIGHT * 3];
 
-static char gb_photo_zoomed_buffer[128 * 112 * 3];
+static unsigned char gb_photo_zoomed_buffer[128 * 112 * 3];
 
-static char gb_camera_webcam_output_buffer[128 * 112 * 3];
-static char gb_camera_retina_processed_buffer[128 * 112 * 3];
-static char gb_camera_scratch_photo_buffer[128 * 112 * 3];
+static unsigned char gb_camera_webcam_output_buffer[128 * 112 * 3];
+static unsigned char gb_camera_retina_processed_buffer[128 * 112 * 3];
+static unsigned char gb_camera_scratch_photo_buffer[128 * 112 * 3];
 
 //------------------------------------------------------------------------------
 

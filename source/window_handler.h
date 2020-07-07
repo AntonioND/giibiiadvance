@@ -28,7 +28,7 @@ void WH_HandleEvents(void);
 
 void WH_SetCaption(int index, const char *caption);
 
-void WH_Render(int index, const char *buffer);
+void WH_Render(int index, const unsigned char *buffer);
 
 void WH_Close(int index);
 void WH_CloseAllBut(int index);

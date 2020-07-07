@@ -234,6 +234,14 @@ static void _win_gb_palviewer_dump_btn_callback(void)
     if (Win_MainRunningGB() == 0)
         return;
 
+    char *buffer_temp = calloc(GB_PAL_BUFFER_WIDTH * GB_PAL_BUFFER_HEIGHT * 4,
+                               sizeof(char));
+    if (buffer_temp == NULL)
+    {
+        Debug_ErrorMsgArg("%s(): Not enough memory.");
+        return;
+    }
+
     memset(gb_pal_bg_buffer, 192, sizeof(gb_pal_bg_buffer));
     memset(gb_pal_spr_buffer, 192, sizeof(gb_pal_spr_buffer));
 
@@ -256,8 +264,6 @@ static void _win_gb_palviewer_dump_btn_callback(void)
                           1 + ((i % 4) * 20), 19 + ((i % 4) * 20),
                           1 + ((i / 4) * 20), 19 + ((i / 4) * 20));
     }
-
-    char buffer_temp[GB_PAL_BUFFER_WIDTH * GB_PAL_BUFFER_HEIGHT * 4];
 
     char *src = gb_pal_bg_buffer;
     char *dst = buffer_temp;
@@ -288,6 +294,8 @@ static void _win_gb_palviewer_dump_btn_callback(void)
              buffer_temp, 0);
 
     Win_GBPalViewerUpdate();
+
+    free(buffer_temp);
 }
 
 //----------------------------------------------------------------

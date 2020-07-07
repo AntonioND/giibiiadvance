@@ -244,6 +244,14 @@ static void _win_gba_palviewer_dump_btn_callback(void)
     if (Win_MainRunningGBA() == 0)
         return;
 
+    char *buffer_temp = calloc(GBA_PAL_BUFFER_SIDE * GBA_PAL_BUFFER_SIDE * 4,
+                               sizeof(char));
+    if (buffer_temp == NULL)
+    {
+        Debug_ErrorMsgArg("%s(): Not enough memory.");
+        return;
+    }
+
     memset(gba_pal_bg_buffer, 192, sizeof(gba_pal_bg_buffer));
     memset(gba_pal_spr_buffer, 192, sizeof(gba_pal_spr_buffer));
 
@@ -265,8 +273,6 @@ static void _win_gba_palviewer_dump_btn_callback(void)
                           1 + ((i % 16) * 10), 9 + ((i % 16) * 10),
                           1 + ((i / 16) * 10), 9 + ((i / 16) * 10));
     }
-
-    char buffer_temp[GBA_PAL_BUFFER_SIDE * GBA_PAL_BUFFER_SIDE * 4];
 
     char *src = gba_pal_bg_buffer;
     char *dst = buffer_temp;
@@ -296,6 +302,8 @@ static void _win_gba_palviewer_dump_btn_callback(void)
              buffer_temp, 0);
 
     Win_GBAPalViewerUpdate();
+
+    free(buffer_temp);
 }
 
 //----------------------------------------------------------------

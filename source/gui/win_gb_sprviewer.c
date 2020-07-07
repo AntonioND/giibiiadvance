@@ -231,7 +231,14 @@ static void _win_gb_sprviewer_allspr_dump_btn_callback(void)
     if (Win_MainRunningGB() == 0)
         return;
 
-    char allbuf[GB_SPR_ALLSPR_BUFFER_WIDTH * GB_SPR_ALLSPR_BUFFER_HEIGHT * 4];
+    char *allbuf = calloc(GB_SPR_ALLSPR_BUFFER_WIDTH *
+                          GB_SPR_ALLSPR_BUFFER_HEIGHT * 4, sizeof(char));
+    if (allbuf == NULL)
+    {
+        Debug_ErrorMsgArg("%s(): Not enough memory.");
+        return;
+    }
+
     GB_Debug_PrintSpritesAlpha(allbuf);
 
     char *name = FU_GetNewTimestampFilename("gb_sprite_all");
@@ -239,6 +246,8 @@ static void _win_gb_sprviewer_allspr_dump_btn_callback(void)
              allbuf, 1);
 
     Win_GBSprViewerUpdate();
+
+    free(allbuf);
 }
 
 static void _win_gb_sprviewer_zoomed_dump_btn_callback(void)

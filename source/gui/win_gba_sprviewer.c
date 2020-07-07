@@ -360,7 +360,13 @@ static void _win_gba_sprviewer_page_dump_btn_callback(void)
     if (Win_MainRunningGBA() == 0)
         return;
 
-    char pagebuf[GBA_SPR_ALLSPR_BUFFER_WIDTH * GBA_SPR_ALLSPR_BUFFER_HEIGHT * 4];
+    char *pagebuf = malloc(GBA_SPR_ALLSPR_BUFFER_WIDTH *
+                           GBA_SPR_ALLSPR_BUFFER_HEIGHT * 4);
+    if (pagebuf == NULL)
+    {
+        Debug_ErrorMsgArg("%s(): Not enough memory.");
+        return;
+    }
 
     GBA_Debug_PrintSpritesPage(gba_sprview_selected_page, 1, pagebuf,
                                GBA_SPR_ALLSPR_BUFFER_WIDTH,
@@ -373,6 +379,7 @@ static void _win_gba_sprviewer_page_dump_btn_callback(void)
     Save_PNG(name, GBA_SPR_ALLSPR_BUFFER_WIDTH, GBA_SPR_ALLSPR_BUFFER_HEIGHT,
              pagebuf, 1);
 
+    free(pagebuf);
     //Win_GBASprViewerUpdate();
 }
 
@@ -384,7 +391,10 @@ static void _win_gba_sprviewer_allspr_dump_btn_callback(void)
     char *allbuf = malloc(GBA_SPR_ALLSPR_BUFFER_WIDTH
                           * ((GBA_SPR_ALLSPR_BUFFER_HEIGHT * 2) - 16) * 4);
     if (allbuf == NULL)
+    {
+        Debug_ErrorMsgArg("%s(): Not enough memory.");
         return;
+    }
 
     GBA_Debug_PrintSpritesPage(0, 1, allbuf,
                                GBA_SPR_ALLSPR_BUFFER_WIDTH,
@@ -426,12 +436,20 @@ static void _win_gba_sprviewer_zoomed_dump_btn_callback(void)
     int sx = spr_size[shape][size][0];
     int sy = spr_size[shape][size][1];
 
-    char buf[64 * 64 * 4]; // Max possible size of a sprite
+    char *buf = malloc(sx * sy * 4);
+    if (buf == NULL)
+    {
+        Debug_ErrorMsgArg("%s(): Not enough memory.");
+        return;
+    }
+
     GBA_Debug_PrintZoomedSpriteAt(gba_sprview_selected_spr, 1, buf,
                                   sx, sy, 0, 0, sx, sy);
 
     char *name = FU_GetNewTimestampFilename("gba_sprite");
     Save_PNG(name, sx, sy, buf, 1);
+
+    free(buf);
 
     //Win_GBASprViewerUpdate();
 }

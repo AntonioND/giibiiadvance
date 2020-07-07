@@ -273,6 +273,16 @@ static void _win_gb_tileviewer_dump_btn_callback(void)
     if (Win_MainRunningGB() == 0)
         return;
 
+    char *buf0 = calloc(GB_TILE_BUFFER_WIDTH * GB_TILE_BUFFER_HEIGHT * 4,
+                        sizeof(char));
+    char *buf1 = calloc(GB_TILE_BUFFER_WIDTH * GB_TILE_BUFFER_HEIGHT * 4,
+                        sizeof(char));
+    if ((buf0 == NULL) || (buf1 == NULL))
+    {
+        Debug_ErrorMsgArg("%s(): Not enough memory.");
+        goto cleanup;
+    }
+
     if (gb_tile_zoomed_tile_is_pal == 0)
     {
         GB_Debug_TileVRAMDraw(gb_tile_bank0_buffer,
@@ -291,9 +301,6 @@ static void _win_gb_tileviewer_dump_btn_callback(void)
                                       gb_tile_zoomed_tile_sel_pal,
                                       gb_tile_zoomed_tile_is_pal == 2);
     }
-
-    char buf0[GB_TILE_BUFFER_WIDTH * GB_TILE_BUFFER_HEIGHT * 4];
-    char buf1[GB_TILE_BUFFER_WIDTH * GB_TILE_BUFFER_HEIGHT * 4];
 
     for (int i = 0; i < (GB_TILE_BUFFER_WIDTH * GB_TILE_BUFFER_HEIGHT); i++)
     {
@@ -321,6 +328,10 @@ static void _win_gb_tileviewer_dump_btn_callback(void)
     }
 
     Win_GBTileViewerUpdate();
+
+cleanup:
+    free(buf0);
+    free(buf1);
 }
 
 //----------------------------------------------------------------

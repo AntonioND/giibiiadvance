@@ -5,13 +5,18 @@ Another GB, GBC and GBA cross-platform emulator writen in C. By Antonio Niño
 Díaz (AntonioND). It's licensed under the GPL v2 license. The source code is
 available `in GitHub <https://github.com/AntonioND/giibiiadvance>`_.
 
-This is an emulator I started several years ago. I didn't release any version in
-a few years after 0.1.0. At some point I did some changes that improved
-compatibility a lot, and ported the original Win32 GUI to SDL2.  The objective
+This is an emulator I started several years ago. I didn't release any version
+for a few years after 0.1.0. At some point I did some changes that improved
+compatibility a lot, and ported the original Win32 GUI to SDL2. The objective
 was to make it as portable as possible. Everything you need to play is in the
 main window. The debugger needs additiona windows, but that's not needed to
 play. If your machine doesn't have a windows manager, all the changes that are
 needed are to disable the debugger.
+
+A few years later I decided to clean up the code and release 0.3.0. It has a lot
+of improvements of the months after 0.2.0. It also has some bugfixes added
+during a few years. Finally, the code has been cleaned up and a new build system
+has been added so that it can finally be built in Windows easily.
 
 This emulator isn't meant to be used for playing. It is perfectly
 capable of emulating most GB/GBC games pretty accurately, and most GBA games

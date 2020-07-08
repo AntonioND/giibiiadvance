@@ -7,6 +7,8 @@
 #ifndef FONT_UTILS__
 #define FONT_UTILS__
 
+#include <stdint.h>
+
 //------------------------------------------------------------------------------
 
 #define CHR_MUSIC           14
@@ -108,6 +110,6 @@ int FU_Print(unsigned char *buffer, int bufw, int bufh, int tx, int ty,
 int FU_PrintChar(unsigned char *buffer, int bufw, int bufh, int tx, int ty,
                  unsigned char c, int color);
 int FU_PrintColor(unsigned char *buffer, int bufw, int bufh, int tx, int ty,
-                  int color, const char *txt, ...);
+                  uint32_t color, const char *txt, ...);
 
 #endif // FONT_UTILS__

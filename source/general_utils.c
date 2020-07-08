@@ -25,7 +25,7 @@ void s_strncat(char *dest, const char *src, size_t _size)
 
 //------------------------------------------------------------------------------
 
-void memset_rand(u8 *start, u32 _size)
+void memset_rand(u8 *start, size_t _size)
 {
     while (_size--)
         *start++ = rand();

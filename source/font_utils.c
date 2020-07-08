@@ -45,7 +45,7 @@ int FU_Print(unsigned char *buffer, int bufw, int bufh, int tx, int ty,
     int i = 0;
     while (1)
     {
-        unsigned char c = txtbuffer[i++];
+        char c = txtbuffer[i++];
 
         if (c == '\0')
             break;
@@ -98,7 +98,7 @@ int FU_Print(unsigned char *buffer, int bufw, int bufh, int tx, int ty,
 }
 
 int FU_PrintColor(unsigned char *buffer, int bufw, int bufh, int tx, int ty,
-                  int color, const char *txt, ...)
+                  uint32_t color, const char *txt, ...)
 {
     char txtbuffer[300];
 
@@ -117,7 +117,7 @@ int FU_PrintColor(unsigned char *buffer, int bufw, int bufh, int tx, int ty,
     int i = 0;
     while (1)
     {
-        unsigned char c = txtbuffer[i++];
+        char c = txtbuffer[i++];
 
         if (c == '\0')
             break;
@@ -139,9 +139,9 @@ int FU_PrintColor(unsigned char *buffer, int bufw, int bufh, int tx, int ty,
 
             for (int x = 0; x < FONT_WIDTH; x++)
             {
-                int r = (uint8_t)(*texcopy++);
-                int g = (uint8_t)(*texcopy++);
-                int b = (uint8_t)(*texcopy++);
+                uint32_t r = (uint8_t)(*texcopy++);
+                uint32_t g = (uint8_t)(*texcopy++);
+                uint32_t b = (uint8_t)(*texcopy++);
 
                 *bufcopy++ = (r * (color & 0xFF)) >> 8;
                 *bufcopy++ = (g * ((color >> 8) & 0xFF)) >> 8;

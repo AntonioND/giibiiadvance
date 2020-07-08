@@ -38,7 +38,7 @@ typedef int8_t s8;
 void s_strncpy(char *dest, const char *src, size_t _size);
 void s_strncat(char *dest, const char *src, size_t _size);
 
-void memset_rand(u8 *start, u32 _size);
+void memset_rand(u8 *start, size_t _size);
 
 // Converts an hexadecimal number in an ASCII string into integer
 u64 asciihex_to_int(const char *text);

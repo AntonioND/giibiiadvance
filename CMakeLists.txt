@@ -47,13 +47,17 @@ if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
             $<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes>
             $<$<COMPILE_LANGUAGE:C>:-Wold-style-definition>
 
+            # Enable Wpedantic but disable warning about having strings that are
+            # too long
+            -Wpedantic -Wno-overlength-strings
+
             # Make sure we don't use too much stack. Windows doesn't like it
             # when the stack usage is too high, even when Linux doesn't complain
             # about it.
             -Wstack-usage=4096
 
             # TODO: Enable the following warnings?
-            #-Wpedantic -Wformat-truncation=1 -Wcast-qual -Wconversion
+            #-Wformat-truncation=1 -Wcast-qual -Wconversion
         )
 
         # Build option to enable Undefined Behaviour Sanitizer (UBSan)

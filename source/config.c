@@ -201,7 +201,7 @@ void Config_Save(void)
         {
             for (int key = 0; key < P_NUM_KEYS; key++)
             {
-                SDL_Scancode code = Input_ControlsGetKey(player, key);
+                SDL_KeyCode code = Input_ControlsGetKey(player, key);
                 fprintf(ini_file, "P%d_%s=%d\n", player + 1, GBKeyNames[key],
                         code);
             }

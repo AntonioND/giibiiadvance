@@ -36,8 +36,8 @@ typedef enum
 extern const char *GBKeyNames[P_NUM_KEYS];
 
 void Input_ControlsSetKey(int player, _key_config_enum_ keyindex,
-                          SDL_Scancode keyscancode);
-SDL_Scancode Input_ControlsGetKey(int player, _key_config_enum_ keyindex);
+                          SDL_KeyCode keyscancode);
+SDL_KeyCode Input_ControlsGetKey(int player, _key_config_enum_ keyindex);
 
 // The index is the number of the joystick. The keyboard is -1.
 void Input_PlayerSetController(int player, int index);

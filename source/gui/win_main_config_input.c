@@ -374,7 +374,7 @@ static int _win_main_config_input_inputget_callback(SDL_Event *e)
         // Keyboard
         if (e->type == SDL_KEYDOWN)
         {
-            SDL_Scancode scancode; // scancode name
+            SDL_KeyCode scancode; // scancode name
 
             scancode = SDL_GetKeyFromScancode(e->key.keysym.scancode);
 

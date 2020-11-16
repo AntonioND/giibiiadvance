@@ -47,7 +47,7 @@ static _controller_player_info_ ControllerPlayerInfo[4] = {
 
 // Default to keyboard the first player, the rest to unused
 
-static SDL_Scancode _player_key_[4][P_NUM_KEYS] = {
+static SDL_KeyCode _player_key_[4][P_NUM_KEYS] = {
     // This is the default configuration, changed when loading the config file
     // (if it exists). Each value can be a SDLK_* define or a joystick button
     // number
@@ -60,7 +60,7 @@ static SDL_Scancode _player_key_[4][P_NUM_KEYS] = {
     { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }
 };
 
-static SDL_Scancode player_key_speedup = SDLK_SPACE;
+static SDL_KeyCode player_key_speedup = SDLK_SPACE;
 
 const char *GBKeyNames[P_NUM_KEYS] = {
     "A", "B", "L", "R", "Up", "Right", "Down", "Left", "Start", "Select"
@@ -114,7 +114,7 @@ int Input_PlayerGetEnabled(int player)
 //----------------------------
 
 void Input_ControlsSetKey(int player, _key_config_enum_ keyindex,
-                          SDL_Scancode keyscancode)
+                          SDL_KeyCode keyscancode)
 {
     if (keyindex == P_KEY_NONE)
         return;
@@ -127,7 +127,7 @@ void Input_ControlsSetKey(int player, _key_config_enum_ keyindex,
         _player_key_[player][keyindex] = keyscancode;
 }
 
-SDL_Scancode Input_ControlsGetKey(int player, _key_config_enum_ keyindex)
+SDL_KeyCode Input_ControlsGetKey(int player, _key_config_enum_ keyindex)
 {
     if (keyindex == P_KEY_NONE)
         return 0;
@@ -154,8 +154,9 @@ int Input_IsGameBoyKeyPressed(int player, _key_config_enum_ keyindex)
         if (key == 0)
             return 0;
 
-        SDL_Scancode code = Input_ControlsGetKey(player, keyindex);
-        return state[SDL_GetScancodeFromKey(code)];
+        SDL_KeyCode code = Input_ControlsGetKey(player, keyindex);
+        SDL_Scancode scancode = SDL_GetScancodeFromKey(code);
+        return state[scancode];
     }
     else // Joystick
     {

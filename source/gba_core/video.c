@@ -1511,7 +1511,7 @@ static void gba_bg2drawbitmapmode3(unused__ s32 y)
     for (int i = 0; i < 240; i++)
     {
         u32 _x = (currx >> 8);
-        s32 _y = (curry >> 8);
+        u32 _y = (curry >> 8);
         if (!((_x > 239) || (_y > 159)))
         {
             *fb = srcptr[_x + 240 * _y];
@@ -1543,7 +1543,7 @@ static void gba_bg2drawbitmapmode4(unused__ s32 y)
     for (int i = 0; i < 240; i++)
     {
         u32 _x = (currx >> 8);
-        s32 _y = (curry >> 8);
+        u32 _y = (curry >> 8);
         if (!((_x > 239) || (_y > 159)))
         {
             *fb = ((u16 *)Mem.pal_ram)[srcptr[_x + 240 * _y]];
@@ -1575,7 +1575,7 @@ static void gba_bg2drawbitmapmode5(unused__ s32 y)
     for (int i = 0; i < 240; i++)
     {
         u32 _x = (currx >> 8);
-        s32 _y = (curry >> 8);
+        u32 _y = (curry >> 8);
         if (!((_x > 159) || (_y > 127)))
         {
             *fb = (u16)srcptr[_x + 160 * _y];

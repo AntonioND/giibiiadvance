@@ -1400,6 +1400,10 @@ int Win_MainCreate(char *rom_path)
         }
     }
 
+    // Initialize state
+    Input_Update_GB();
+    Input_Update_GBA();
+
     return 0;
 }
 

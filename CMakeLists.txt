@@ -140,6 +140,27 @@ else()
     )
 endif()
 
+# Add Lua as a required library temporarily
+
+if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+    include(FindLua)
+    find_package(lua REQUIRED 5.2)
+else()
+    find_package(Lua REQUIRED 5.2)
+endif()
+
+if(Lua_FOUND)
+    option(ENABLE_LUA "Enable Lua scripting support" ON)
+else()
+    set(ENABLE_LUA OFF)
+endif()
+
+if(ENABLE_LUA)
+    target_link_libraries(giibiiadvance PRIVATE ${LUA_LIBRARIES})
+    target_include_directories(giibiiadvance PRIVATE ${LUA_INCLUDE_DIR})
+    target_compile_definitions(giibiiadvance PRIVATE ENABLE_LUA)
+endif()
+
 # OpenCV is optional. If found, let the user build with GB Camera emulation.
 
 find_package(OpenCV 4)

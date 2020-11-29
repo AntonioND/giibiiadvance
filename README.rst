@@ -51,6 +51,14 @@ used. If not, the emulator won't have webcam support.
 
     sudo apt install libopencv-dev
 
+If you want to support Lua scripts, you need to install Lua 5.2 or higher as
+well. If it is detected during the build process, it will be used. If not, the
+emulator won't have Lua scripts support. For example:
+
+.. code:: bash
+
+    sudo apt install liblua5.3-dev
+
 In order to build GiiBiiAdvance with the default set of options, type:
 
 .. code:: bash
@@ -103,6 +111,14 @@ used. If not, the emulator won't have webcam support.
 .. code:: bash
 
     .\vcpkg install opencv4 --triplet x64-windows
+
+If you want to support Lua scripts, you need to install Lua 5.2 or higher as
+well. If it is detected during the build process, it will be used. If not, the
+emulator won't have Lua scripts support.
+
+.. code:: bash
+
+    .\vcpkg install liblua --triplet x64-windows
 
 In order to build GiiBiiAdvance with the default set of options, type the
 following commands in a Visual Studio command line shell (replacing the path to

@@ -13,6 +13,7 @@
 #include "file_utils.h"
 #include "font_utils.h"
 #include "input_utils.h"
+#include "lua_handler.h"
 #include "sound_utils.h"
 #include "window_handler.h"
 
@@ -101,6 +102,22 @@ int main(int argc, char *argv[])
     if (Init() != 0)
         return 1;
 
+    // Check if the user provided a script
+
+    if (argc > 2)
+    {
+        if (strcmp(argv[1], "--lua") == 0)
+        {
+            // Remove argv[1] and argv[2]
+
+            for (int i = 1; i < argc - 2; i++)
+                argv[i] = argv[i + 2];
+
+            argc = argc - 2;
+
+            Script_RunLua(argv[2]);
+        }
+    }
 
     // Load main window with the ROM provided as argument
 

@@ -22,6 +22,7 @@
 #include "../font_utils.h"
 #include "../general_utils.h"
 #include "../input_utils.h"
+#include "../lua_handler.h"
 #include "../sound_utils.h"
 #include "../window_handler.h"
 
@@ -1482,8 +1483,11 @@ void Win_MainLoopHandle(void)
 
             GBA_SkipFrame(_win_main_has_to_frameskip());
 
-            Input_Update_GBA();
-            GBA_RunForOneFrame();
+            if (!Script_IsRunning())
+            {
+                Input_Update_GBA();
+                GBA_RunForOneFrame();
+            }
 
             if (_win_main_has_to_frameskip() == 0)
                 GBA_ConvertScreenBufferTo24RGB(WIN_MAIN_GAME_SCREEN_BUFFER);
@@ -1505,12 +1509,14 @@ void Win_MainLoopHandle(void)
 
             GB_SkipFrame(_win_main_has_to_frameskip());
 
-            Input_Update_GB();
-
             if (GB_RumbleEnabled())
                 Input_RumbleEnable();
 
-            GB_RunForOneFrame();
+            if (!Script_IsRunning())
+            {
+                GB_RunForOneFrame();
+            }
+
             if (_win_main_has_to_frameskip() == 0)
                 GB_Screen_WriteBuffer_24RGB(WIN_MAIN_GAME_SCREEN_BUFFER);
 

@@ -101,18 +101,10 @@ int main(int argc, char *argv[])
     if (Init() != 0)
         return 1;
 
+
+    // Load main window with the ROM provided as argument
+
     Win_MainCreate((argc > 1) ? argv[1] : NULL);
-
-    //if (argc > 0)
-    //    Debug_LogMsgArg("argv[0] = %s", argv[0]);
-    //if (argc > 1)
-    //    Debug_LogMsgArg("argv[1] = %s", argv[1]);
-    //Debug_LogMsgArg(DirGetRunningPath());
-    //Debug_LogMsgArg(DirGetBiosFolderPath());
-    //Debug_LogMsgArg(DirGetScreenshotFolderPath());
-
-    //if (argc > 1)
-    //    LOAD_GAME(argv[1]);
 
     double waitforticks = 0;
 

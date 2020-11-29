@@ -168,6 +168,7 @@ void GBA_RunFor_ExecutionBreak(void);
 
 void GBA_HandleInput(int a, int b, int l, int r, int st, int se,
                      int dr, int dl, int du, int dd);
+void GBA_HandleInputFlags(u16 flags);
 
 u32 GBA_RunFor(s32 totalclocks);
 

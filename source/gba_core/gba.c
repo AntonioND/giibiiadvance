@@ -140,6 +140,11 @@ void GBA_HandleInput(int a, int b, int l, int r, int st, int se,
     REG_KEYINPUT = input;
 }
 
+void GBA_HandleInputFlags(u16 flags)
+{
+    REG_KEYINPUT = 0x3FF & ~flags;
+}
+
 void GBA_Screenshot(const char *path)
 {
     unsigned char *buffer = malloc(240 * 160 * 3);

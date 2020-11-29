@@ -161,7 +161,7 @@ void GBA_Reset(void);
 
 _cpu_t *GBA_CPUGet(void); // For the disassembler
 
-void GBA_Screenshot(void);
+void GBA_Screenshot(const char *path);
 
 void GBA_RunForOneFrame(void);
 void GBA_RunFor_ExecutionBreak(void);

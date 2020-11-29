@@ -699,7 +699,7 @@ static void _win_main_menu_close_no_save(void)
 static void _win_main_screenshot(void)
 {
     if (Win_MainRunningGBA())
-        GBA_Screenshot();
+        GBA_Screenshot(NULL);
     if (Win_MainRunningGB())
         GB_Screenshot();
 }

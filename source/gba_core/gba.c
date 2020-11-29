@@ -140,7 +140,7 @@ void GBA_HandleInput(int a, int b, int l, int r, int st, int se,
     REG_KEYINPUT = input;
 }
 
-void GBA_Screenshot(void)
+void GBA_Screenshot(const char *path)
 {
     unsigned char *buffer = malloc(240 * 160 * 3);
     if (buffer == NULL)
@@ -151,8 +151,15 @@ void GBA_Screenshot(void)
 
     GBA_ConvertScreenBufferTo24RGB(buffer);
 
-    char *name = FU_GetNewTimestampFilename("gba_screenshot");
-    Save_PNG(name, buffer, 240, 160, 0);
+    if (path)
+    {
+        Save_PNG(path, buffer, 240, 160, 0);
+    }
+    else
+    {
+        char *name = FU_GetNewTimestampFilename("gba_screenshot");
+        Save_PNG(name, buffer, 240, 160, 0);
+    }
 
     free(buffer);
 }

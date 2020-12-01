@@ -20,8 +20,8 @@ has been added so that it can finally be built in Windows easily.
 
 This emulator isn't meant to be used for playing. It is perfectly
 capable of emulating most GB/GBC games pretty accurately, and most GBA games
-with reasonable accuracy. However, there are several emulators that may be a
-probably a better idea than GiiBiiAdvance due to their better user support.
+with reasonable accuracy. However, there are several emulators that probably are
+a better idea than GiiBiiAdvance due to their better support.
 
 - `mGBA <https://mgba.io/>`_
 - `no$gba <http://problemkaputt.de/gba.htm>`_
@@ -31,6 +31,10 @@ probably a better idea than GiiBiiAdvance due to their better user support.
 However, this is the first emulator that emulated completely the GB Camera (if
 you have a webcam)! :) More information aobut the GB Camera hardware
 `here <https://github.com/AntonioND/gbcam-rev-engineer>`_.
+
+It's also what I used to implement the PC simulation side of
+`ugba <https://github.com/AntonioND/ugba>`_, my GBA library. For example, all
+the video simulation and BIOS services.
 
 My website: www.skylyrac.net
 

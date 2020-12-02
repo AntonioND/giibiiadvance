@@ -191,6 +191,7 @@ static void thumb_tst(u16 Rd, u16 Rs)
 
 static void thumb_neg(u16 Rd, u16 Rs)
 {
+    // TODO: Check flags
     u32 tmp = CPU.R[Rs];
     CPU.R[Rd] = -(s32)tmp;
     CPU.CPSR &= ~(F_Z | F_C | F_N | F_V);
@@ -214,7 +215,7 @@ static void thumb_cmp(u16 Rd, u16 Rs)
 
 static void thumb_cmn(u16 Rd, u16 Rs)
 {
-#ifdef ENABLE_ASM_X86
+#if defined(ENABLE_ASM_X86)
     u8 carry, overflow;
     asm("add %3,%2 \n\t"
         "setc %%al \n\t"
@@ -225,7 +226,7 @@ static void thumb_cmn(u16 Rd, u16 Rs)
     CPU.CPSR |= (CPU.R[Rd] ? 0 : F_Z)
                 | (CPU.R[Rd] & F_N)
                 | (carry ? F_C : 0)
-                | (overflow ? F_V : 0);
+                | (overflow ? F_V : 0); // TODO: V flag is incorrect
 #else
     u64 temp = (u64)CPU.R[Rd] + (u64)CPU.R[Rs];
     CPU.CPSR &= ~(F_Z | F_C | F_N | F_V);
@@ -369,28 +370,14 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                 u16 Rd = opcode & 7;
                 u16 Rs = (opcode >> 3) & 7;
                 u16 Rn = (opcode >> 6) & 7;
-#ifdef ENABLE_ASM_X86
-                u8 carry, overflow;
-                asm("add %4,%3 \n\t"
-                    "mov %3,%0 \n\t"
-                    "setc %%al \n\t"
-                    "seto %%bl \n\t"
-                    : "=r"(CPU.R[Rd]), "=a"(carry), "=b"(overflow)
-                    : "r"(CPU.R[Rs]), "r"(CPU.R[Rn]));
-                CPU.CPSR &= ~(F_Z | F_C | F_N | F_V);
-                CPU.CPSR |= (CPU.R[Rd] ? 0 : F_Z) | (CPU.R[Rd] & F_N)
-                            | (carry ? F_C : 0) | (overflow ? F_V : 0);
-#else
-                u64 temp = (u64)CPU.R[Rs] + (u64)CPU.R[Rn];
+                u32 a = CPU.R[Rs];
+                u32 b = CPU.R[Rn];
+                u64 temp = (u64)a + (u64)b;
                 CPU.R[Rd] = (u32)temp;
                 CPU.CPSR &= ~(F_Z | F_C | F_N | F_V);
                 CPU.CPSR |= ((temp & 0xFFFFFFFF00000000ULL) ? F_C : 0)
                             | (CPU.R[Rd] ? 0 : F_Z) | (CPU.R[Rd] & F_N)
-                            | (ADD_OVERFLOW(CPU.R[Rs], CPU.R[Rn],
-                                            CPU.R[Rd])
-                                       ? F_V
-                                       : 0);
-#endif
+                            | (ADD_OVERFLOW(a, b, CPU.R[Rd]) ? F_V : 0);
                 clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]);
                 // 1S cycle
                 break;
@@ -402,16 +389,14 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                 u16 Rd = opcode & 7;
                 u16 Rs = (opcode >> 3) & 7;
                 u16 Rn = (opcode >> 6) & 7;
-                u64 addval = 1ULL + (u64)(u32)~CPU.R[Rn];
-                u64 temp = (u64)CPU.R[Rs] + (u64)addval;
+                u32 a = CPU.R[Rs];
+                u32 b = ~CPU.R[Rn];
+                u64 temp = (u64)a + 1ULL + (u64)b;
                 CPU.R[Rd] = (u32)temp;
                 CPU.CPSR &= ~(F_Z | F_C | F_N | F_V);
                 CPU.CPSR |= ((temp & 0xFFFFFFFF00000000ULL) ? F_C : 0)
                             | (CPU.R[Rd] ? 0 : F_Z) | (CPU.R[Rd] & F_N)
-                            | (ADD_OVERFLOW(CPU.R[Rs], (u32)(addval - 1),
-                                            CPU.R[Rd])
-                                       ? F_V
-                                       : 0);
+                            | (ADD_OVERFLOW(a, b, CPU.R[Rd]) ? F_V : 0);
                 clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]);
                 // 1S cycle
                 break;
@@ -423,28 +408,13 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                 u16 Rd = opcode & 7;
                 u16 Rs = (opcode >> 3) & 7;
                 u32 immed = (opcode >> 6) & 0x7;
-#ifdef ENABLE_ASM_X86
-                u8 carry, overflow;
-                asm("add %4,%3 \n\t"
-                    "mov %3,%0 \n\t"
-                    "setc %%al \n\t"
-                    "seto %%bl \n\t"
-                    : "=r"(CPU.R[Rd]), "=a"(carry), "=b"(overflow)
-                    : "r"(CPU.R[Rs]), "r"(immed));
-                CPU.CPSR &= ~(F_Z | F_C | F_N | F_V);
-                CPU.CPSR |= (CPU.R[Rd] ? 0 : F_Z) | (CPU.R[Rd] & F_N)
-                            | (carry ? F_C : 0) | (overflow ? F_V : 0);
-#else
-                u64 temp = (u64)CPU.R[Rs] + (u64)immed;
+                u32 a = CPU.R[Rs];
+                u64 temp = (u64)a + (u64)immed;
                 CPU.R[Rd] = (u32)temp;
                 CPU.CPSR &= ~(F_Z | F_C | F_N | F_V);
                 CPU.CPSR |= ((temp & 0xFFFFFFFF00000000ULL) ? F_C : 0)
                             | (CPU.R[Rd] ? 0 : F_Z) | (CPU.R[Rd] & F_N)
-                            | (ADD_OVERFLOW(CPU.R[Rs], immed,
-                                            CPU.R[Rd])
-                                       ? F_V
-                                       : 0);
-#endif
+                            | (ADD_OVERFLOW(a, immed, temp) ? F_V : 0);
                 clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]);
                 // 1S cycle
                 break;
@@ -455,16 +425,14 @@ s32 GBA_ExecuteTHUMB(s32 clocks)
                 // SUB Rd,Rs,#nn
                 u16 Rd = opcode & 7;
                 u16 Rs = (opcode >> 3) & 7;
-                u64 immed = 1ULL + (u64)(u32) ~((opcode >> 6) & 0x7);
-                u64 temp = (u64)CPU.R[Rs] + (u64)immed;
+                u32 immed = ~((opcode >> 6) & 0x7);
+                u32 a = CPU.R[Rs];
+                u64 temp = (u64)a + 1ULL + (u64)immed;
                 CPU.R[Rd] = (u32)temp;
                 CPU.CPSR &= ~(F_Z | F_C | F_N | F_V);
                 CPU.CPSR |= ((temp & 0xFFFFFFFF00000000ULL) ? F_C : 0)
                             | (CPU.R[Rd] ? 0 : F_Z) | (CPU.R[Rd] & F_N)
-                            | (ADD_OVERFLOW(CPU.R[Rs], (u32)(immed - 1),
-                                            CPU.R[Rd])
-                                       ? F_V
-                                       : 0);
+                            | (ADD_OVERFLOW(a, immed, temp) ? F_V : 0);
                 clocks -= GBA_MemoryGetAccessCycles(PCseq, 0, CPU.R[R_PC]);
                 // 1S cycle
                 break;

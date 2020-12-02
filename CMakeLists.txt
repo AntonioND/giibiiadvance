@@ -202,7 +202,7 @@ endif()
 
 if(NOT CMAKE_C_COMPILER_ID STREQUAL "MSVC")
     # This isn't compatible with MSVC
-    option(ENABLE_ASM_X86 "Compile with inline assembly" ON)
+    option(ENABLE_ASM_X86 "Compile with inline assembly" OFF)
 else()
     set(ENABLE_ASM_X86 OFF)
 endif()

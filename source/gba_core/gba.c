@@ -83,6 +83,11 @@ int GBA_InitRom(void *bios_ptr, void *rom_ptr, u32 romsize)
 
     inited = 1;
 
+    if (GBA_BiosIsLoaded() == 0)
+        ConsolePrint("Using emulated BIOS...");
+    else
+        ConsolePrint("Using real BIOS...");
+
     // BIOS switch to GBC mode - Never used in real hardware
     //GBA_DebugAddBreakpoint(0x1954);
 

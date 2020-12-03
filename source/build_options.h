@@ -52,8 +52,8 @@
 #define SGB_ROM_FILENAME "sgb_rom.bin"
 #define SGB2_ROM_FILENAME "sgb2_rom.bin"
 #define CGB_ROM_FILENAME "cgb_rom.bin"
-#define AGB_ROM_FILENAME "agb_rom.bin"
-#define AGS_ROM_FILENAME "ags_rom.bin"
+#define AGB_ROM_FILENAME "agb_rom.bin" // GBA ROM for GBC mode!
+#define AGS_ROM_FILENAME "ags_rom.bin" // GBA SP ROM for GBC mode!
 
 //-------------------------------------------------
 //----------- GAMEBOY ADVANCE EMULATION -----------

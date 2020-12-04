@@ -1130,6 +1130,20 @@ void GBA_Swi(u8 number)
         case 0x2A: // SoundGetJumpList
             break;
 
+        case 0xFF: // Visual Boy Advance debug print
+        {
+            uint32_t ptr = CPU.R[0];
+
+            while (1)
+            {
+                char c = GBA_MemoryRead8(ptr++);
+                if (c == '\0')
+                    break;
+                ConsolePrint("%c", c);
+            }
+            return;
+        }
+
         default:
             break;
     }

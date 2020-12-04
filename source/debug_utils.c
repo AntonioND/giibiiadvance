@@ -117,7 +117,7 @@ void Debug_ErrorMsg(const char *msg)
 
 //------------------------------------------------------------------------------
 
-static char console_buffer[5000];
+static char console_buffer[20 * 1024];
 
 void ConsoleReset(void)
 {

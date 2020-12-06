@@ -919,6 +919,86 @@ static void GBA_SWI_Diff16bitUnFilter(void)
     }
 }
 
+static u32 GBA_SWI_ArcTan(u32 r0)
+{
+    // This is what the BIOS does... Not accurate at the bounds.
+    s32 r1 = -((((s32)r0) * ((s32)r0)) >> 14);
+    s32 r3 = ((((s32)0xA9) * r1) >> 14) + 0x390;
+    r3 = ((r1 * r3) >> 14) + 0x91C;
+    r3 = ((r1 * r3) >> 14) + 0xFB6;
+    r3 = ((r1 * r3) >> 14) + 0x16AA;
+    r3 = ((r1 * r3) >> 14) + 0x2081;
+    r3 = ((r1 * r3) >> 14) + 0x3651;
+    r3 = ((r1 * r3) >> 14) + 0xA259;
+    return (((s32)r0) * r3) >> 16;
+
+    // Emulated: Accurate always
+    // r0: Tan, 16bit: 1bit sign, 1bit integral part, 14bit decimal part
+    // Return: "-PI/2 < THETA < PI/2" in a range of C000h-4000h.
+    // CPU.R[0] = (s32)(atan(((float)(s16)(u16)CPU.R[0])
+    //                       / (float)(1 << 14))
+    //                  * (((float)0x4000) / ((float)M_PI_2)));
+}
+
+static u32 GBA_SWI_ArcTan2(u32 x, u32 y)
+{
+    int32_t x_ = x;
+    int32_t y_ = y;
+
+    if (y_ == 0)
+    {
+        if (x_ < 0)
+            return 0x8000;
+
+        return 0;
+    }
+
+    if (x_ == 0)
+    {
+        if (y_ < 0)
+            return 0xC000;
+
+        return 0x4000;
+    }
+
+    if (y_ >= 0)
+    {
+        if (x_ >= 0)
+        {
+            if (x_ < y_)
+                return 0x4000 - GBA_SWI_ArcTan((x_ << 14) / y_);
+
+            return GBA_SWI_ArcTan((y_ << 14) / x_);
+        }
+
+        if (-x_ < y_)
+            return 0x4000 - GBA_SWI_ArcTan((x_ << 14) / y_);
+
+        return 0x8000 + GBA_SWI_ArcTan((y_ << 14) / x_);
+    }
+
+    if (x_ > 0)
+    {
+        if (x_ < -y_)
+            return 0xC000 - GBA_SWI_ArcTan((x_ << 14) / y_);
+
+        return 0x10000 + GBA_SWI_ArcTan((y_ << 14) / x_);
+    }
+
+    if (-x_ > -y_)
+        return 0x8000 + GBA_SWI_ArcTan((y_ << 14) / x_);
+
+    return 0xC000 - GBA_SWI_ArcTan((x_ << 14) / y_);
+
+    // Emulated: Accurate always
+    // float x_ = ((float)x) / (float)(1 << 14);
+    // float y_ = ((float)y) / (float)(1 << 14);
+    // Return: 0000h-FFFFh for 0 <= THETA < 2PI.
+    // int16_t result =
+    //             (int32_t)(atan2(y_, x_) * (((float)0xFFFF) / (2.0 * M_PI)));
+    // return result;
+}
+
 //------------------------------------------------------------------------------
 
 void GBA_Swi(u8 number)
@@ -990,32 +1070,12 @@ void GBA_Swi(u8 number)
         }
         case 0x09: // ArcTan
         {
-            // This is what the BIOS does... Not accurate at the bounds.
-            s32 r1 = -((((s32)CPU.R[0]) * ((s32)CPU.R[0])) >> 14);
-            s32 r3 = ((((s32)0xA9) * r1) >> 14) + 0x390;
-            r3 = ((r1 * r3) >> 14) + 0x91C;
-            r3 = ((r1 * r3) >> 14) + 0xFB6;
-            r3 = ((r1 * r3) >> 14) + 0x16AA;
-            r3 = ((r1 * r3) >> 14) + 0x2081;
-            r3 = ((r1 * r3) >> 14) + 0x3651;
-            r3 = ((r1 * r3) >> 14) + 0xA259;
-            CPU.R[0] = (((s32)CPU.R[0]) * r3) >> 16;
-
-            // Emulated: Accurate always
-            // r0: Tan, 16bit: 1bit sign, 1bit integral part, 14bit decimal part
-            // Return: "-PI/2 < THETA < PI/2" in a range of C000h-4000h.
-            // CPU.R[0] = (s32)(atan(((float)(s16)(u16)CPU.R[0])
-            //                       / (float)(1 << 14))
-            //                  * (((float)0x4000) / ((float)M_PI_2)));
+            CPU.R[0] = GBA_SWI_ArcTan(CPU.R[0]);
             return;
         }
         case 0x0A: // ArcTan2
         {
-            float x = ((float)(s16)CPU.R[0]) / (float)(1 << 14);
-            float y = ((float)(s16)CPU.R[1]) / (float)(1 << 14);
-            CPU.R[0] = (u32)(u16)(s16)(s32)
-                (atan2(y, x) * (((float)0xFFFF) / ((float)2.0 * (float)M_PI)));
-            // Return: 0000h-FFFFh for 0 <= THETA < 2PI.
+            CPU.R[0] = GBA_SWI_ArcTan2(CPU.R[0], CPU.R[1]);
             return;
         }
         case 0x0B: // CpuSet

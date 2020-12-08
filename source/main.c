@@ -108,14 +108,14 @@ int main(int argc, char *argv[])
     {
         if (strcmp(argv[1], "--lua") == 0)
         {
+            Script_RunLua(argv[2]);
+
             // Remove argv[1] and argv[2]
 
             for (int i = 1; i < argc - 2; i++)
                 argv[i] = argv[i + 2];
 
             argc = argc - 2;
-
-            Script_RunLua(argv[2]);
         }
     }
 

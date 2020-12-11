@@ -386,12 +386,15 @@ static void GBA_SWI_BitUnPack(void)
     u8 srcdata = 0;
     u32 dstdata = 0;
 
-    while (srcsize > 0)
+    while (1)
     {
         u32 data = 0;
 
         if (src_bitindex == 0)
         {
+            if (srcsize == 0)
+                break;
+
             srcdata = GBA_MemoryRead8(src);
             src++;
             srcsize--;

@@ -1514,6 +1514,7 @@ void Win_MainLoopHandle(void)
 
             if (!Script_IsRunning())
             {
+                Input_Update_GB();
                 GB_RunForOneFrame();
             }
 

@@ -12,6 +12,7 @@
 #include "../config.h"
 #include "../debug_utils.h"
 #include "../general_utils.h"
+#include "../wav_utils.h"
 
 #include "debug.h"
 #include "gameboy.h"
@@ -227,6 +228,10 @@ size_t GB_SoundGetSamplesFrame(void *buffer, size_t buffer_size)
                        available_size : buffer_size;
 
     memcpy(buffer, Sound.buffer, copy_size);
+
+    // Save all available samples to a WAV file if a recording is active
+    if (WAV_FileIsOpen())
+        WAV_FileStream(Sound.buffer, available_size);
 
     // Reset pointer
     Sound.buffer_write_ptr = 0;

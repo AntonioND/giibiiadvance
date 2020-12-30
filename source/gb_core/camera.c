@@ -37,9 +37,21 @@ int GB_CameraInit(void)
     return Webcam_Init();
 }
 
+static int webcam_frame_delay = 0;
+
 void GB_CameraWebcamCapture(void)
 {
-    Webcam_GetFrame();
+    if (webcam_frame_delay == 0)
+    {
+        Webcam_GetFrame();
+        webcam_frame_delay = 5;
+    }
+}
+
+void GB_CameraWebcamDelayDecrease(void)
+{
+    if (webcam_frame_delay > 0)
+        webcam_frame_delay--;
 }
 
 //----------------------------------------------------------------

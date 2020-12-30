@@ -70,6 +70,11 @@ static void Sound_Callback(unused__ void *userdata, Uint8 *buffer, int len)
     }
 }
 
+void Sound_ClearBuffer(void)
+{
+    SDL_AudioStreamClear(stream);
+}
+
 static void Sound_End(void)
 {
      SDL_FreeAudioStream(stream);
@@ -117,6 +122,14 @@ void Sound_Init(void)
 int Sound_IsBufferOverThreshold(void)
 {
     if (SDL_AudioStreamAvailable(stream) > SDL_BUFFER_SAMPLES_THRESHOLD)
+        return 1;
+
+    return 0;
+}
+
+int Sound_IsBufferTooBig(void)
+{
+    if (SDL_AudioStreamAvailable(stream) > SDL_BUFFER_SAMPLES_THRESHOLD * 2)
         return 1;
 
     return 0;

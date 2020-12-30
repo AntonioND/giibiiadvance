@@ -33,6 +33,8 @@ void GB_CameraWriteRegister(int address, int value);
 // Returns 1 if mapper is the GB Camera
 int GB_MapperIsGBCamera(void);
 
+void GB_CameraWebcamDelayDecrease(void);
+
 //----------------------------------------------------------------
 
 void GB_CameraClockCounterReset(void);

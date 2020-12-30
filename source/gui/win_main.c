@@ -1498,7 +1498,11 @@ void Win_MainLoopHandle(void)
             {
                 size_t size = GBA_SoundGetSamplesFrame(samples, sizeof(samples));
 
-                if (Sound_IsBufferOverThreshold())
+                if (Sound_IsBufferTooBig())
+                {
+                    Sound_ClearBuffer();
+                }
+                else if (Sound_IsBufferOverThreshold())
                 {
                     if (size > 8) // This should always be true
                         size -= 8;
@@ -1527,6 +1531,7 @@ void Win_MainLoopHandle(void)
             {
                 Input_Update_GB();
                 GB_RunForOneFrame();
+                GB_CameraWebcamDelayDecrease();
             }
 
             if (_win_main_has_to_frameskip() == 0)
@@ -1541,7 +1546,11 @@ void Win_MainLoopHandle(void)
             {
                 size_t size = GB_SoundGetSamplesFrame(samples, sizeof(samples));
 
-                if (Sound_IsBufferOverThreshold())
+                if (Sound_IsBufferTooBig())
+                {
+                    Sound_ClearBuffer();
+                }
+                else if (Sound_IsBufferOverThreshold())
                 {
                     if (size > 8) // This should always be true
                         size -= 8;

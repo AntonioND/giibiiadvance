@@ -26,9 +26,11 @@ static SDL_AudioStream *stream;
 
 static void Sound_Callback(unused__ void *userdata, Uint8 *buffer, int len)
 {
+    if (sound_enabled == 0)
+        return;
+
     // Don't play audio during speedup or if it is disabled in the configuration
-    if ((sound_enabled == 0) || EmulatorConfig.snd_mute
-        || Input_Speedup_Enabled())
+    if (EmulatorConfig.snd_mute || Input_Speedup_Enabled())
     {
         // Output silence
         memset(buffer, 0, len);

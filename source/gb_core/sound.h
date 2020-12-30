@@ -16,6 +16,7 @@ void GB_SoundUpdate(u32 clocks);
 void GB_SoundRegWrite(u32 address, u32 value);
 void GB_SoundResetBufferPointers(void);
 void GB_SoundEnd(void);
+void GB_SoundSaveToWAV(void);
 size_t GB_SoundGetSamplesFrame(void *buffer, size_t buffer_size);
 void GB_SoundResetBufferPointers(void);
 

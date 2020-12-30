@@ -14,6 +14,7 @@ int GBA_SoundHardwareIsOn(void);
 void GB_ToggleSound(void);
 u32 GBA_SoundUpdate(u32 clocks);
 void GBA_SoundRegWrite16(u32 address, u16 value);
+void GBA_SoundSaveToWAV(void);
 size_t GBA_SoundGetSamplesFrame(void *buffer, size_t buffer_size);
 void GBA_SoundResetBufferPointers(void);
 void GBA_SoundEnd(void);

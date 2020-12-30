@@ -13,6 +13,7 @@
 #endif
 
 #include "gba_core/gba.h"
+#include "gba_core/sound.h"
 
 #include "gui/win_main.h"
 
@@ -50,7 +51,11 @@ static int lua_run_frames_and_pause(lua_State *L)
     for (int i = 0; i < frames; i++)
     {
         if (Win_MainRunningGBA())
+        {
+            GBA_SoundResetBufferPointers();
             GBA_RunForOneFrame();
+            GBA_SoundSaveToWAV();
+        }
     }
 
     // Number of results

@@ -313,21 +313,26 @@ void GBA_SoundPowerOn(void)
     //GBA_SoundRegWrite16(SOUNDBIAS, 0);
 }
 
+void GBA_SoundSaveToWAV(void)
+{
+    size_t available_size = Sound.buffer_write_ptr * sizeof(s16);
+
+    // Save all available samples to a WAV file if a recording is active
+    if (WAV_FileIsOpen())
+        WAV_FileStream(Sound.buffer, available_size);
+}
+
 // This function is supposed to return all the samples taken during a frame. If
 // the destination buffer isn't big enough, it will clear the source buffer
 // anyway, to prepare it for next frame.
 size_t GBA_SoundGetSamplesFrame(void *buffer, size_t buffer_size)
 {
-    size_t available_size = Sound.buffer_write_ptr * 2;
+    size_t available_size = Sound.buffer_write_ptr * sizeof(s16);
 
     size_t copy_size = (available_size < buffer_size) ?
                        available_size : buffer_size;
 
     memcpy(buffer, Sound.buffer, copy_size);
-
-    // Save all available samples to a WAV file if a recording is active
-    if (WAV_FileIsOpen())
-        WAV_FileStream(Sound.buffer, available_size);
 
     // Reset pointer
     Sound.buffer_write_ptr = 0;

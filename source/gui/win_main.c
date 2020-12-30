@@ -1494,7 +1494,7 @@ void Win_MainLoopHandle(void)
             WinMain_frames_drawn++;
 
             // Get audio output
-            if (!speedup)
+            if (!speedup && !Script_IsRunning())
             {
                 size_t size = GBA_SoundGetSamplesFrame(samples, sizeof(samples));
 
@@ -1537,7 +1537,7 @@ void Win_MainLoopHandle(void)
             WinMain_frames_drawn++;
 
             // Get audio output
-            if (!speedup)
+            if (!speedup && !Script_IsRunning())
             {
                 size_t size = GB_SoundGetSamplesFrame(samples, sizeof(samples));
 

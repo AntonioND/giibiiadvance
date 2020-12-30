@@ -7,14 +7,19 @@
 #ifndef SOUND_UTILS__
 #define SOUND_UTILS__
 
+#define GB_SAMPLERATE       (32 * 1024)
+#define GBA_SAMPLERATE      (32 * 1024)
+#define SDL_SAMPLERATE      (44100)
+
 typedef void(Sound_CallbackPointer)(void *, long);
 
 void Sound_Init(void);
 
-void Sound_SetCallback(Sound_CallbackPointer *fn);
-
 void Sound_Enable(void);
 void Sound_Disable(void);
+
+int Sound_IsBufferOverThreshold(void);
+void Sound_SendSamples(int16_t *buffer, int len);
 
 void Sound_SetVolume(int vol);
 

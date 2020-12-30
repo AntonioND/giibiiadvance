@@ -25,6 +25,8 @@
 #define GBA_BUFFER_SIZE     (16384)
 #define GBA_BUFFER_SAMPLES  (GBA_BUFFER_SIZE / 2)
 
+#define GBA_SAMPLE_RATE     (32 * 1024)
+
 static const s8 GBA_SquareWave[4][32] = {
     { -128, -128, -128, -128, -128, -128, -128, -128,
        127, 127, -128, -128, -128, -128, -128, -128,
@@ -208,11 +210,9 @@ typedef struct
     int PSG_master_volume;
 
     u32 nextsample_clocks;
-    s16 buffer[GBA_BUFFER_SIZE / 2];
-    u32 buffer_next_input_sample;
-    u32 buffer_next_output_sample;
-    int samples_left_to_input;
-    int samples_left_to_output;
+
+    s16 buffer[GBA_SAMPLE_RATE];
+    u32 buffer_write_ptr;
 
     // Some temporary variables to avoid doing the same calculations every time
     // a sample is going to be generated:
@@ -312,42 +312,27 @@ void GBA_SoundPowerOn(void)
     //GBA_SoundRegWrite16(SOUNDBIAS, 0);
 }
 
-void GBA_SoundCallback(void *buffer, long len)
+// This function is supposed to return all the samples taken during a frame. If
+// the destination buffer isn't big enough, it will clear the source buffer
+// anyway, to prepare it for next frame.
+size_t GBA_SoundGetSamplesFrame(void *buffer, size_t buffer_size)
 {
-    if (output_enabled == 0)
-    {
-        memset(buffer, 0, len);
-        return;
-    }
+    size_t available_size = Sound.buffer_write_ptr * 2;
 
-    // Should print: (GBA_BUFFER_SAMPLES / 3 * 2) - (GBA_BUFFER_SAMPLES / 3)
-    //Debug_LogMsgArg("%d, %d - %d %s", len,
-    //    Sound.samples_left_to_input, Sound.samples_left_to_output,
-    //    Sound.samples_left_to_output
-    //        > Sound.samples_left_to_input - (GBA_BUFFER_SAMPLES / 2) ?
-    //            "SLOW" : "FAST");
+    size_t copy_size = (available_size < buffer_size) ?
+                       available_size : buffer_size;
 
-    s16 *writebuffer = (s16 *)buffer;
+    memcpy(buffer, Sound.buffer, copy_size);
 
-    if (Sound.samples_left_to_output < len / 4)
-        return;
+    // Reset pointer
+    Sound.buffer_write_ptr = 0;
 
-    Sound.samples_left_to_input += len / 4;
-    Sound.samples_left_to_output -= len / 4;
-
-    for (int i = 0; i < len / 2; i++)
-    {
-        writebuffer[i] = Sound.buffer[Sound.buffer_next_output_sample++];
-        Sound.buffer_next_output_sample &= GBA_BUFFER_SAMPLES - 1;
-    }
+    return copy_size;
 }
 
 void GBA_SoundResetBufferPointers(void)
 {
-    Sound.buffer_next_input_sample = 0;
-    Sound.buffer_next_output_sample = 0;
-    Sound.samples_left_to_input = GBA_BUFFER_SAMPLES;
-    Sound.samples_left_to_output = 0;
+    Sound.buffer_write_ptr = 0;
 }
 
 void GBA_SoundInit(void)
@@ -464,17 +449,10 @@ void GBA_SoundMix(void)
     if (EmulatorConfig.snd_mute)
         return;
 
-    if (Sound.samples_left_to_input < 1)
-        return;
-
-    Sound.samples_left_to_input--;
-    Sound.samples_left_to_output++;
-
     if (Sound.master_enable == 0)
     {
-        Sound.buffer[Sound.buffer_next_input_sample++] = 0;
-        Sound.buffer[Sound.buffer_next_input_sample++] = 0;
-        Sound.buffer_next_input_sample &= GBA_BUFFER_SAMPLES - 1;
+        Sound.buffer[Sound.buffer_write_ptr++] = 0;
+        Sound.buffer[Sound.buffer_write_ptr++] = 0;
         return;
     }
 
@@ -565,14 +543,14 @@ void GBA_SoundMix(void)
     outvalue_left >>= 1;
     outvalue_right >>= 1;
 
-    Sound.buffer[Sound.buffer_next_input_sample++] =
-            (outvalue_left * EmulatorConfig.volume) / 128;
-    Sound.buffer[Sound.buffer_next_input_sample++] =
-            (outvalue_right * EmulatorConfig.volume) / 128;
-    Sound.buffer_next_input_sample &= GBA_BUFFER_SAMPLES - 1;
+    outvalue_left = (outvalue_left * EmulatorConfig.volume) / 128;
+    outvalue_right = (outvalue_right * EmulatorConfig.volume) / 128;
+
+    Sound.buffer[Sound.buffer_write_ptr++] = outvalue_left;
+    Sound.buffer[Sound.buffer_write_ptr++] = outvalue_right;
 }
 
-// Every 65535 clocks update hardware, every ~512 generate output
+// Every 65535 clocks update hardware, every 512 generate sample
 u32 GBA_SoundUpdate(u32 clocks)
 {
     Sound.clocks += clocks;
@@ -581,28 +559,12 @@ u32 GBA_SoundUpdate(u32 clocks)
     {
         Sound.nextsample_clocks += clocks;
 
-        // 16777216 Hz?
+        // 16777216 Hz CPU / 32768 Hz sound output = 512
 
-        // 16.78 MHz CPU / 22050 = 761
-        // 16.78 MHz CPU / 32768 Hz sound output = 512
-
-        //This is an ugly hack to make sound buffer not overflow or underflow...
-        if (Sound.samples_left_to_output
-            > Sound.samples_left_to_input - (GBA_BUFFER_SAMPLES / 2))
+        if (Sound.nextsample_clocks > 512)
         {
-            if (Sound.nextsample_clocks > (761 + 10))
-            {
-                Sound.nextsample_clocks -= (761 + 10);
-                GBA_SoundMix();
-            }
-        }
-        else
-        {
-            if (Sound.nextsample_clocks > (761 - 10))
-            {
-                Sound.nextsample_clocks -= (761 - 10);
-                GBA_SoundMix();
-            }
+            Sound.nextsample_clocks -= 512;
+            GBA_SoundMix();
         }
     }
 

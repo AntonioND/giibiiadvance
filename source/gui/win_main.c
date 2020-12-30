@@ -371,8 +371,6 @@ static void _win_main_unload_rom(int save_data)
 
     WIN_MAIN_RUNNING = RUNNING_NONE;
 
-    Sound_SetCallback(NULL);
-
     _win_main_switch_to_menu();
 
     WIN_MAIN_MENU_HAS_TO_UPDATE = 1;
@@ -430,8 +428,6 @@ static int _win_main_load_rom_autodetect(char *path)
 
             WIN_MAIN_RUNNING = RUNNING_GB;
 
-            Sound_SetCallback(GB_SoundCallback);
-
             _win_main_switch_to_game_delayed();
 
             return 1;
@@ -460,8 +456,6 @@ static int _win_main_load_rom_autodetect(char *path)
         GBA_InitRom(bios_buffer, rom_buffer, rom_size);
 
         WIN_MAIN_RUNNING = RUNNING_GBA;
-
-        Sound_SetCallback(GBA_SoundCallback);
 
         _win_main_set_game_screen(SCREEN_GBA);
 
@@ -1442,6 +1436,9 @@ int Win_MainRunningGB(void)
     return (WIN_MAIN_RUNNING == RUNNING_GB);
 }
 
+
+static int16_t samples[32 * 1024];
+
 void Win_MainLoopHandle(void)
 {
     int speedup = Input_Speedup_Enabled();
@@ -1495,6 +1492,20 @@ void Win_MainLoopHandle(void)
             _win_main_update_frameskip();
 
             WinMain_frames_drawn++;
+
+            // Get audio output
+            if (!speedup)
+            {
+                size_t size = GBA_SoundGetSamplesFrame(samples, sizeof(samples));
+
+                if (Sound_IsBufferOverThreshold())
+                {
+                    if (size > 8) // This should always be true
+                        size -= 8;
+                }
+
+                Sound_SendSamples(samples, size);
+            }
         }
         else if (WIN_MAIN_RUNNING == RUNNING_GB)
         {
@@ -1524,6 +1535,20 @@ void Win_MainLoopHandle(void)
             _win_main_update_frameskip();
 
             WinMain_frames_drawn++;
+
+            // Get audio output
+            if (!speedup)
+            {
+                size_t size = GB_SoundGetSamplesFrame(samples, sizeof(samples));
+
+                if (Sound_IsBufferOverThreshold())
+                {
+                    if (size > 8) // This should always be true
+                        size -= 8;
+                }
+
+                Sound_SendSamples(samples, size);
+            }
         }
     }
     else

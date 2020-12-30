@@ -26,6 +26,8 @@
 #define GB_BUFFER_SIZE      (16384)
 #define GB_BUFFER_SAMPLES   (GB_BUFFER_SIZE / 2)
 
+#define GB_SAMPLE_RATE      (32 * 1024)
+
 extern _GB_CONTEXT_ GameBoy;
 
 static const s8 GB_SquareWave[4][32] = {
@@ -165,11 +167,9 @@ typedef struct
     u32 clocks;
 
     u32 nextsample_clocks;
-    s16 buffer[GB_BUFFER_SIZE / 2];
-    u32 buffer_next_input_sample;
-    u32 buffer_next_output_sample;
-    int samples_left_to_input;
-    int samples_left_to_output;
+
+    s16 buffer[GB_SAMPLE_RATE];
+    u32 buffer_write_ptr;
 
     // Some temporary variables to avoid doing the same calculations every time
     // a sample is going to be generated:
@@ -216,42 +216,27 @@ void GB_SoundPowerOn(void)
     Sound.Chn4.seed = 0xFF;
 }
 
-void GB_SoundCallback(void *buffer, long len)
+// This function is supposed to return all the samples taken during a frame. If
+// the destination buffer isn't big enough, it will clear the source buffer
+// anyway, to prepare it for next frame.
+size_t GB_SoundGetSamplesFrame(void *buffer, size_t buffer_size)
 {
-    if (output_enabled == 0)
-    {
-        memset(buffer, 0, len);
-        return;
-    }
+    size_t available_size = Sound.buffer_write_ptr * 2;
 
-    //Should print: (GB_BUFFER_SAMPLES / 3 * 2) - (GB_BUFFER_SAMPLES / 3)
-    //Debug_LogMsgArg("%d, %d - %d %s", len, Sound.samples_left_to_input,
-    //    Sound.samples_left_to_output,
-    //    Sound.samples_left_to_output
-    //        > Sound.samples_left_to_input - (GB_BUFFER_SAMPLES / 2) ?
-    //            "SLOW" : "FAST");
+    size_t copy_size = (available_size < buffer_size) ?
+                       available_size : buffer_size;
 
-    s16 *writebuffer = (s16 *)buffer;
+    memcpy(buffer, Sound.buffer, copy_size);
 
-    if (Sound.samples_left_to_output < len / 4)
-        return;
+    // Reset pointer
+    Sound.buffer_write_ptr = 0;
 
-    Sound.samples_left_to_input += len / 4;
-    Sound.samples_left_to_output -= len / 4;
-
-    for (int i = 0; i < len / 2; i++)
-    {
-        writebuffer[i] = Sound.buffer[Sound.buffer_next_output_sample++];
-        Sound.buffer_next_output_sample &= GB_BUFFER_SAMPLES - 1;
-    }
+    return copy_size;
 }
 
 void GB_SoundResetBufferPointers(void)
 {
-    Sound.buffer_next_input_sample = 0;
-    Sound.buffer_next_output_sample = 0;
-    Sound.samples_left_to_input = GB_BUFFER_SAMPLES;
-    Sound.samples_left_to_output = 0;
+    Sound.buffer_write_ptr = 0;
 }
 
 void GB_SoundInit(void)
@@ -397,17 +382,10 @@ void GB_SoundMix(void)
     if (EmulatorConfig.snd_mute)
         return;
 
-    if (Sound.samples_left_to_input < 1)
-        return;
-
-    Sound.samples_left_to_input--;
-    Sound.samples_left_to_output++;
-
     if (Sound.master_enable == 0)
     {
-        Sound.buffer[Sound.buffer_next_input_sample++] = 0;
-        Sound.buffer[Sound.buffer_next_input_sample++] = 0;
-        Sound.buffer_next_input_sample &= GB_BUFFER_SAMPLES - 1;
+        Sound.buffer[Sound.buffer_write_ptr++] = 0;
+        Sound.buffer[Sound.buffer_write_ptr++] = 0;
         return;
     }
 #if 0
@@ -436,7 +414,7 @@ void GB_SoundMix(void)
     if (Sound.Chn1.running && (EmulatorConfig.chn_flags & 0x1))
     {
         int index = (((Sound.Chn1.samplecount++) * ((Sound.Chn1.outfreq)
-                  * (32 / 2))) / 22050) & 31;
+                  * (32 / 2))) / GB_SAMPLE_RATE) & 31;
         int out_1 = (int)GB_SquareWave[Sound.Chn1.duty][index];
         outvalue_left += out_1 * Sound.leftvol_1;
         outvalue_right += out_1 * Sound.rightvol_1;
@@ -444,7 +422,7 @@ void GB_SoundMix(void)
     if (Sound.Chn2.running && (EmulatorConfig.chn_flags & 0x2))
     {
         int index = (((Sound.Chn2.samplecount++) * ((Sound.Chn2.outfreq)
-                  * (32 / 2))) / 22050) & 31;
+                  * (32 / 2))) / GB_SAMPLE_RATE) & 31;
 
         int out_2 = (int)GB_SquareWave[Sound.Chn2.duty][index];
         outvalue_left += out_2 * Sound.leftvol_2;
@@ -453,7 +431,7 @@ void GB_SoundMix(void)
     if (Sound.Chn3.running && (EmulatorConfig.chn_flags & 0x4))
     {
         int index = (((Sound.Chn3.samplecount++) * ((Sound.Chn3.outfreq)
-                  * (32 / 2))) / 22050) & 31;
+                  * (32 / 2))) / GB_SAMPLE_RATE) & 31;
         int out_3 = (int)GB_WavePattern[index];
         outvalue_left += out_3 * Sound.leftvol_3;
         outvalue_right += out_3 * Sound.rightvol_3;
@@ -461,7 +439,7 @@ void GB_SoundMix(void)
     if (Sound.Chn4.running && (EmulatorConfig.chn_flags & 0x8))
     {
         int out_4;
-        int value = ((Sound.Chn4.samplecount++) * Sound.Chn4.outfreq / 2) / 22050;
+        int value = ((Sound.Chn4.samplecount++) * Sound.Chn4.outfreq / 2) / GB_SAMPLE_RATE;
 
         if (Sound.Chn4.width_7) // 7 bit
         {
@@ -488,17 +466,15 @@ void GB_SoundMix(void)
     else if (outvalue_right < (-32768))
         outvalue_right = -32768;
 
-    Sound.buffer[Sound.buffer_next_input_sample++] =
-            (outvalue_left * EmulatorConfig.volume) / 128;
-    Sound.buffer[Sound.buffer_next_input_sample++] =
-            (outvalue_right * EmulatorConfig.volume) / 128;
-    Sound.buffer_next_input_sample &= GB_BUFFER_SAMPLES - 1;
+    outvalue_left = (outvalue_left * EmulatorConfig.volume) / 128;
+    outvalue_right = (outvalue_right * EmulatorConfig.volume) / 128;
+
+    Sound.buffer[Sound.buffer_write_ptr++] = outvalue_left;
+    Sound.buffer[Sound.buffer_write_ptr++] = outvalue_right;
 }
 
 void GB_SoundRegWrite(u32 address, u32 value)
 {
-    //fprintf(stdout, "%04x - %02x\r\n", address, value);
-
     _GB_MEMORY_ *mem = &GameBoy.Memory;
 
     if (Sound.master_enable == 0)
@@ -927,7 +903,7 @@ void GB_SoundUpdateClocksCounterReference(int reference_clocks)
 
     int increment_clocks = reference_clocks - GB_SoundClockCounterGet();
 
-    // Every 16384 clocks update hardware, every ~190 generate output
+    // Every 16384 clocks update hardware, every 128 generate sample
 
     Sound.clocks += increment_clocks;
 
@@ -935,27 +911,13 @@ void GB_SoundUpdateClocksCounterReference(int reference_clocks)
     {
         Sound.nextsample_clocks += increment_clocks;
 
-        // This is an ugly hack to make sound buffer not overflow or underflow
+        // 4194304 Hz CPU / 32768 Hz sound output = 128
 
-        // 4194304 Hz CPU / 22050 Hz sound output.
-        if (Sound.samples_left_to_output >
-                        Sound.samples_left_to_input - (GB_BUFFER_SAMPLES / 2))
+        u32 clocks_ref = 128 << GameBoy.Emulator.DoubleSpeed;
+        if (Sound.nextsample_clocks > clocks_ref)
         {
-            u32 clocks_ref = (191 + 4) << GameBoy.Emulator.DoubleSpeed;
-            if (Sound.nextsample_clocks > clocks_ref)
-            {
-                Sound.nextsample_clocks -= clocks_ref;
-                GB_SoundMix();
-            }
-        }
-        else
-        {
-            u32 clocks_ref = (191 - 4) << GameBoy.Emulator.DoubleSpeed;
-            if (Sound.nextsample_clocks > clocks_ref)
-            {
-                Sound.nextsample_clocks -= clocks_ref;
-                GB_SoundMix();
-            }
+            Sound.nextsample_clocks -= clocks_ref;
+            GB_SoundMix();
         }
     }
 

@@ -14,74 +14,127 @@
 #include "input_utils.h"
 #include "sound_utils.h"
 
-#define SDL_BUFFER_SAMPLES (1 * 1024)
+#define SDL_BUFFER_SAMPLES  (1 * 1024)
 
-static Sound_CallbackPointer *_sound_callback;
-static int _sound_enabled = 0;
+// Number of samples to have as max in the SDL sound buffer.
+#define SDL_BUFFER_SAMPLES_THRESHOLD   (SDL_BUFFER_SAMPLES * 6)
+
+static int sound_enabled = 0;
+
 static SDL_AudioSpec obtained_spec;
+static SDL_AudioStream *stream;
 
-static void __sound_callback(unused__ void *userdata, Uint8 *buffer, int len)
+static void Sound_Callback(unused__ void *userdata, Uint8 *buffer, int len)
 {
     // Don't play audio during speedup or if it is disabled in the configuration
-    if ((_sound_enabled == 0) || EmulatorConfig.snd_mute
+    if ((sound_enabled == 0) || EmulatorConfig.snd_mute
         || Input_Speedup_Enabled())
     {
-        // Nothing
+        // Output silence
+        memset(buffer, 0, len);
+        SDL_AudioStreamClear(stream);
     }
     else
     {
-        if (_sound_callback)
-        {
-            _sound_callback(buffer, len);
-            return;
-        }
-    }
+        int available = SDL_AudioStreamAvailable(stream);
 
-    memset(buffer, 0, len);
+        if (available < len)
+        {
+            memset(buffer, 0, len);
+        }
+        else
+        {
+            int obtained = SDL_AudioStreamGet(stream, buffer, len);
+            if (obtained == -1)
+            {
+                Debug_LogMsgArg("Failed to get converted data: %s",
+                                SDL_GetError());
+            }
+            else
+            {
+                if (obtained != len)
+                {
+                    Debug_LogMsgArg("%s: Obtained = %d, Requested = %d",
+                                    __func__, obtained, len);
+                    // Clear the rest of the buffer
+                    memset(&(buffer[obtained]), 0, len - obtained);
+                }
+            }
+        }
+
+        //Debug_LogMsgArg("Available: %d/%d",
+        //                SDL_AudioStreamAvailable(stream),
+        //                obtained_spec.samples);
+    }
+}
+
+static void Sound_End(void)
+{
+     SDL_FreeAudioStream(stream);
+
+     sound_enabled = 0;
 }
 
 void Sound_Init(void)
 {
-    _sound_enabled = 1;
+    sound_enabled = 0;
 
     SDL_AudioSpec desired_spec;
 
-    desired_spec.freq = 22050;
+    desired_spec.freq = SDL_SAMPLERATE;
     desired_spec.format = AUDIO_S16SYS;
     desired_spec.channels = 2;
     desired_spec.samples = SDL_BUFFER_SAMPLES;
-    desired_spec.callback = __sound_callback;
+    desired_spec.callback = Sound_Callback;
     desired_spec.userdata = NULL;
 
     if (SDL_OpenAudio(&desired_spec, &obtained_spec) < 0)
     {
         Debug_ErrorMsgArg("Couldn't open audio: %s\n", SDL_GetError());
-        _sound_enabled = 0;
         return;
     }
 
-    //Debug_DebugMsgArg("Freq: %d\nChannels: %d\nSamples: %d",
-    //                  obtained_spec.freq, obtained_spec.channels,
-    //                  obtained_spec.samples);
+    // Input format is int16_t, dual, 32 * 1024 Hz
+    // Output format is whatever SDL_OpenAudio() returned
+    stream = SDL_NewAudioStream(AUDIO_S16, 2, GBA_SAMPLERATE,
+                                obtained_spec.format, obtained_spec.channels,
+                                obtained_spec.freq);
+    if (stream == NULL) {
+        Debug_ErrorMsgArg("Failed to create audio stream: %s", SDL_GetError());
+        return;
+    }
 
-    // Prepare memory...
+    // Cleanup everything on exit of the program
+    atexit(Sound_End);
 
     SDL_PauseAudio(0);
+
+    sound_enabled = 1;
 }
 
-void Sound_SetCallback(Sound_CallbackPointer *fn)
+int Sound_IsBufferOverThreshold(void)
 {
-    _sound_callback = fn;
+    if (SDL_AudioStreamAvailable(stream) > SDL_BUFFER_SAMPLES_THRESHOLD)
+        return 1;
+
+    return 0;
+}
+
+void Sound_SendSamples(int16_t *buffer, int len)
+{
+    int rc = SDL_AudioStreamPut(stream, buffer, len);
+    if (rc == -1)
+        Debug_LogMsgArg("Failed to send samples to stream: %s", SDL_GetError());
 }
 
 void Sound_Enable(void)
 {
-    _sound_enabled = 1;
+    sound_enabled = 1;
 }
 
 void Sound_Disable(void)
 {
-    _sound_enabled = 0;
+    sound_enabled = 0;
 }
 
 void Sound_SetVolume(int vol)
@@ -103,64 +156,3 @@ void Sound_SetEnabledChannels(int flags)
 {
     EmulatorConfig.chn_flags = flags & 0x3F;
 }
-
-#if 0
-FILE *f = NULL;
-void closewavfile(void)
-{
-    fseek(f, 0, SEEK_END);
-    u32 size = ftell(f);
-
-    //https://ccrma.stanford.edu/courses/422/projects/WaveFormat/
-
-    struct {
-        u32 riff_;
-        u32 size;
-        u32 wave_;
-
-        u32 fmt__;
-        u32 format;
-        u16 format2;
-        u16 channels;
-        u32 samplerate;
-        u32 byterate;
-        u16 blckalign;
-        u16 bitspersample;
-
-        u32 data_;
-        u32 numsamples;
-        //u32 data[..];
-    } wavfile = {
-        (*(u32 *)"RIFF"),
-        size - 8, // filesize - 8
-        (*(u32 *)"WAVE"),
-
-        (*(u32 *)"fmt "),
-        16,    // 16 = PCM
-        1,     // 1 = PCM...
-        2,     // 2 channels
-        22050, // Sample rate
-        22050 * 2 * (16 / 8), // Byte rate = samplerate * channels * bytes per sample
-        2 * (16/8), // Block align = channels * bytes per sample
-        16,         // Bits per sample
-
-        (*(u32 *)"data"),
-        size - 44 // Size of the following data...
-     };
-
-    fseek(f, 0, SEEK_SET);
-    fwrite(&wavfile, sizeof(wavfile), 1, f);
-
-    fclose(f);
-}
-
-void createwavheader(void)
-{
-    atexit(closewavfile);
-
-    f = fopen("music.wav", "wb");
-
-    char dummy_header[44];
-    fwrite(dummy_header, sizeof(dummy_header), 1, f);
-}
-#endif

@@ -41,7 +41,8 @@ My website: www.skylyrac.net
 Build instructions for Linux
 ----------------------------
 
-This program depends on CMake, SDL2, libpng and zlib.
+This program depends on CMake, SDL2 (at least version 2.0.7), libpng (at least
+version 1.6) and zlib.
 
 .. code:: bash
 

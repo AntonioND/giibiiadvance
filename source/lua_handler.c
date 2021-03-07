@@ -69,7 +69,7 @@ static int lua_screenshot(lua_State *L)
     if (narg == 0)
     {
         Debug_LogMsgArg("%s()", __func__);
-        GBA_Screenshot(NULL);
+        GBA_Screenshot("screenshot.png");
     }
     else if (narg == 1)
     {

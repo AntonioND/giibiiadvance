@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 //
-// Copyright (c) 2011-2015, 2019-2020, Antonio Niño Díaz
+// Copyright (c) 2011-2015, 2019-2021, Antonio Niño Díaz
 //
 // GiiBiiAdvance - GBA/GB emulator
 
@@ -90,39 +90,48 @@ static int WIN_MAIN_RUNNING = RUNNING_NONE;
 
 //------------------------------------------------------------------
 
-static int WinMain_FPS;
-static int WinMain_frames_drawn = 0;
-static SDL_TimerID WinMain_FPS_timer;
+static int current_fps, old_fps;
+static int frames_drawn = 0;
+static SDL_TimerID fps_timer;
 
-static Uint32 _fps_callback_function(Uint32 interval, unused__ void *param)
+static Uint32 fps_callback_function(Uint32 interval, unused__ void *param)
 {
     if (WIN_MAIN_RUNNING == RUNNING_GB)
         GB_HandleRTC();
 
-    WinMain_FPS = WinMain_frames_drawn;
-    WinMain_frames_drawn = 0;
-    char caption[60];
-    if (_win_main_frameskip > 0)
-    {
-        snprintf(caption, sizeof(caption),
-                 "GiiBiiAdvance: %d fps - %.2f%% - (%d)", WinMain_FPS,
-                 (float)WinMain_FPS * 10.0f / 6.0f, _win_main_frameskip);
-    }
-    else
-    {
-        snprintf(caption, sizeof(caption),
-                 "GiiBiiAdvance: %d fps - %.2f%%", WinMain_FPS,
-                 (float)WinMain_FPS * 10.0f / 6.0f);
-    }
-    WH_SetCaption(WinIDMain, caption);
+    current_fps = frames_drawn;
+    frames_drawn = 0;
 
     return interval;
 }
 
+static void fps_update_caption(void)
+{
+    if (old_fps == current_fps)
+        return;
+
+    old_fps = current_fps;
+
+    char caption[60];
+    if (_win_main_frameskip > 0)
+    {
+        snprintf(caption, sizeof(caption),
+                 "GiiBiiAdvance: %d fps - %.2f%% - (%d)", current_fps,
+                 (float)current_fps * 10.0f / 6.0f, _win_main_frameskip);
+    }
+    else
+    {
+        snprintf(caption, sizeof(caption),
+                 "GiiBiiAdvance: %d fps - %.2f%%", current_fps,
+                 (float)current_fps * 10.0f / 6.0f);
+    }
+    WH_SetCaption(WinIDMain, caption);
+}
+
 static void FPS_TimerInit(void)
 {
-    WinMain_FPS_timer = SDL_AddTimer(1000, _fps_callback_function, NULL);
-    if (WinMain_FPS_timer == 0)
+    fps_timer = SDL_AddTimer(1000, fps_callback_function, NULL);
+    if (fps_timer == 0)
     {
         Debug_LogMsgArg("FPS_TimerInit(): SDL_AddTimer() failed: %s",
                         SDL_GetError());
@@ -133,7 +142,7 @@ static void FPS_TimerInit(void)
 
 static void FPS_TimerEnd(void)
 {
-    SDL_RemoveTimer(WinMain_FPS_timer);
+    SDL_RemoveTimer(fps_timer);
 }
 
 //------------------------------------------------------------------
@@ -1491,7 +1500,9 @@ void Win_MainLoopHandle(void)
 
             _win_main_update_frameskip();
 
-            WinMain_frames_drawn++;
+            frames_drawn++;
+
+            fps_update_caption();
 
             // Get audio output
             if (!speedup && !Script_IsRunning())
@@ -1539,7 +1550,9 @@ void Win_MainLoopHandle(void)
 
             _win_main_update_frameskip();
 
-            WinMain_frames_drawn++;
+            frames_drawn++;
+
+            fps_update_caption();
 
             // Get audio output
             if (!speedup && !Script_IsRunning())

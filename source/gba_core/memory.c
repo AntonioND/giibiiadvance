@@ -907,7 +907,6 @@ void GBA_RegisterWrite16(u32 address, u16 data)
         case WAVE_RAM + 10 - REG_BASE:
         case WAVE_RAM + 12 - REG_BASE:
         case WAVE_RAM + 14 - REG_BASE:
-            REG_16(address) = data;
             GBA_SoundRegWrite16(address, data);
             return;
 
@@ -987,6 +986,21 @@ u16 GBA_RegisterRead16(u32 address)
 {
     if (address & 0x00FFFC00) // >= 4000400
         return 0;
+
+    switch (address & 0x3FF)
+    {
+        case WAVE_RAM + 0 - REG_BASE:
+        case WAVE_RAM + 2 - REG_BASE:
+        case WAVE_RAM + 4 - REG_BASE:
+        case WAVE_RAM + 6 - REG_BASE:
+        case WAVE_RAM + 8 - REG_BASE:
+        case WAVE_RAM + 10 - REG_BASE:
+        case WAVE_RAM + 12 - REG_BASE:
+        case WAVE_RAM + 14 - REG_BASE:
+            return GBA_SoundRegRead16(address);
+        default:
+            break;
+    }
 
     if (gbaregister_canread_16[(address & 0x3FF) >> 1])
         return REG_16(address);

@@ -398,7 +398,7 @@ void GBA_SoundInit(void)
     for (int i = 0; i < 16; i += 2)
     {
         Sound.Chn3.wave_ram_buffer[0][i] = 0x00;
-        Sound.Chn3.wave_ram_buffer[0][i + 1] = 0xFF;
+        Sound.Chn3.wave_ram_buffer[0][i + 1] = 0x00;
 
         Sound.Chn3.wave_ram_buffer[1][i] = 0x00;
         Sound.Chn3.wave_ram_buffer[1][i + 1] = 0xFF;
@@ -815,6 +815,84 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
 {
     GBA_ExecutionBreak();
 
+    switch (address)
+    {
+        case WAVE_RAM + 0:
+        {
+            int index = Sound.Chn3.buffer_playing ^ 1;
+            if (Sound.master_enable == 0)
+                index = 1;
+            Sound.Chn3.wave_ram_buffer[index][0] = value & 0xFF;
+            Sound.Chn3.wave_ram_buffer[index][1] = (value >> 8) & 0xFF;
+            return;
+        }
+        case WAVE_RAM + 2:
+        {
+            int index = Sound.Chn3.buffer_playing ^ 1;
+            if (Sound.master_enable == 0)
+                index = 1;
+            Sound.Chn3.wave_ram_buffer[index][2] = value & 0xFF;
+            Sound.Chn3.wave_ram_buffer[index][3] = (value >> 8) & 0xFF;
+            return;
+        }
+        case WAVE_RAM + 4:
+        {
+            int index = Sound.Chn3.buffer_playing ^ 1;
+            if (Sound.master_enable == 0)
+                index = 1;
+            Sound.Chn3.wave_ram_buffer[index][4] = value & 0xFF;
+            Sound.Chn3.wave_ram_buffer[index][5] = (value >> 8) & 0xFF;
+            return;
+        }
+        case WAVE_RAM + 6:
+        {
+            int index = Sound.Chn3.buffer_playing ^ 1;
+            if (Sound.master_enable == 0)
+                index = 1;
+            Sound.Chn3.wave_ram_buffer[index][6] = value & 0xFF;
+            Sound.Chn3.wave_ram_buffer[index][7] = (value >> 8) & 0xFF;
+            return;
+        }
+        case WAVE_RAM + 8:
+        {
+            int index = Sound.Chn3.buffer_playing ^ 1;
+            if (Sound.master_enable == 0)
+                index = 1;
+            Sound.Chn3.wave_ram_buffer[index][8] = value & 0xFF;
+            Sound.Chn3.wave_ram_buffer[index][9] = (value >> 8) & 0xFF;
+            return;
+        }
+        case WAVE_RAM + 10:
+        {
+            int index = Sound.Chn3.buffer_playing ^ 1;
+            if (Sound.master_enable == 0)
+                index = 1;
+            Sound.Chn3.wave_ram_buffer[index][10] = value & 0xFF;
+            Sound.Chn3.wave_ram_buffer[index][11] = (value >> 8) & 0xFF;
+            return;
+        }
+        case WAVE_RAM + 12:
+        {
+            int index = Sound.Chn3.buffer_playing ^ 1;
+            if (Sound.master_enable == 0)
+                index = 1;
+            Sound.Chn3.wave_ram_buffer[index][12] = value & 0xFF;
+            Sound.Chn3.wave_ram_buffer[index][13] = (value >> 8) & 0xFF;
+            return;
+        }
+        case WAVE_RAM + 14:
+        {
+            int index = Sound.Chn3.buffer_playing ^ 1;
+            if (Sound.master_enable == 0)
+                index = 1;
+            Sound.Chn3.wave_ram_buffer[index][14] = value & 0xFF;
+            Sound.Chn3.wave_ram_buffer[index][15] = (value >> 8) & 0xFF;
+            return;
+        }
+        default:
+            break;
+    }
+
     if (Sound.master_enable == 0)
     {
         if ((address == SOUNDCNT_X) && (value & (1 << 7)))
@@ -1184,63 +1262,6 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
             }
             return;
 
-        case WAVE_RAM + 0:
-        {
-            int index = Sound.Chn3.buffer_playing ^ 1;
-            Sound.Chn3.wave_ram_buffer[index][0] = value & 0xFF;
-            Sound.Chn3.wave_ram_buffer[index][1] = (value >> 8) & 0xFF;
-            return;
-        }
-        case WAVE_RAM + 2:
-        {
-            int index = Sound.Chn3.buffer_playing ^ 1;
-            Sound.Chn3.wave_ram_buffer[index][2] = value & 0xFF;
-            Sound.Chn3.wave_ram_buffer[index][3] = (value >> 8) & 0xFF;
-            return;
-        }
-        case WAVE_RAM + 4:
-        {
-            int index = Sound.Chn3.buffer_playing ^ 1;
-            Sound.Chn3.wave_ram_buffer[index][4] = value & 0xFF;
-            Sound.Chn3.wave_ram_buffer[index][5] = (value >> 8) & 0xFF;
-            return;
-        }
-        case WAVE_RAM + 6:
-        {
-            int index = Sound.Chn3.buffer_playing ^ 1;
-            Sound.Chn3.wave_ram_buffer[index][6] = value & 0xFF;
-            Sound.Chn3.wave_ram_buffer[index][7] = (value >> 8) & 0xFF;
-            return;
-        }
-        case WAVE_RAM + 8:
-        {
-            int index = Sound.Chn3.buffer_playing ^ 1;
-            Sound.Chn3.wave_ram_buffer[index][8] = value & 0xFF;
-            Sound.Chn3.wave_ram_buffer[index][9] = (value >> 8) & 0xFF;
-            return;
-        }
-        case WAVE_RAM + 10:
-        {
-            int index = Sound.Chn3.buffer_playing ^ 1;
-            Sound.Chn3.wave_ram_buffer[index][10] = value & 0xFF;
-            Sound.Chn3.wave_ram_buffer[index][11] = (value >> 8) & 0xFF;
-            return;
-        }
-        case WAVE_RAM + 12:
-        {
-            int index = Sound.Chn3.buffer_playing ^ 1;
-            Sound.Chn3.wave_ram_buffer[index][12] = value & 0xFF;
-            Sound.Chn3.wave_ram_buffer[index][13] = (value >> 8) & 0xFF;
-            return;
-        }
-        case WAVE_RAM + 14:
-        {
-            int index = Sound.Chn3.buffer_playing ^ 1;
-            Sound.Chn3.wave_ram_buffer[index][14] = value & 0xFF;
-            Sound.Chn3.wave_ram_buffer[index][15] = (value >> 8) & 0xFF;
-            return;
-        }
-
         case FIFO_A + 0:
         {
             int index = Sound.FifoA.cursamplewrite;
@@ -1286,6 +1307,92 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
             GBA_ExecutionBreak();
             return;
     }
+}
+
+u16 GBA_SoundRegRead16(u32 address)
+{
+    switch (address)
+    {
+        case WAVE_RAM + 0:
+        {
+            int index = Sound.Chn3.buffer_playing ^ 1;
+            if (Sound.master_enable == 0)
+                index = 1;
+            u16 low = Sound.Chn3.wave_ram_buffer[index][0];
+            u16 high = Sound.Chn3.wave_ram_buffer[index][1];
+            return (high << 8) | low;
+        }
+        case WAVE_RAM + 2:
+        {
+            int index = Sound.Chn3.buffer_playing ^ 1;
+            if (Sound.master_enable == 0)
+                index = 1;
+            u16 low = Sound.Chn3.wave_ram_buffer[index][2];
+            u16 high = Sound.Chn3.wave_ram_buffer[index][3];
+            return (high << 8) | low;
+        }
+        case WAVE_RAM + 4:
+        {
+            int index = Sound.Chn3.buffer_playing ^ 1;
+            if (Sound.master_enable == 0)
+                index = 1;
+            u16 low = Sound.Chn3.wave_ram_buffer[index][4];
+            u16 high = Sound.Chn3.wave_ram_buffer[index][5];
+            return (high << 8) | low;
+        }
+        case WAVE_RAM + 6:
+        {
+            int index = Sound.Chn3.buffer_playing ^ 1;
+            if (Sound.master_enable == 0)
+                index = 1;
+            u16 low = Sound.Chn3.wave_ram_buffer[index][6];
+            u16 high = Sound.Chn3.wave_ram_buffer[index][7];
+            return (high << 8) | low;
+        }
+        case WAVE_RAM + 8:
+        {
+            int index = Sound.Chn3.buffer_playing ^ 1;
+            if (Sound.master_enable == 0)
+                index = 1;
+            u16 low = Sound.Chn3.wave_ram_buffer[index][8];
+            u16 high = Sound.Chn3.wave_ram_buffer[index][9];
+            return (high << 8) | low;
+        }
+        case WAVE_RAM + 10:
+        {
+            int index = Sound.Chn3.buffer_playing ^ 1;
+            if (Sound.master_enable == 0)
+                index = 1;
+            u16 low = Sound.Chn3.wave_ram_buffer[index][10];
+            u16 high = Sound.Chn3.wave_ram_buffer[index][11];
+            return (high << 8) | low;
+        }
+        case WAVE_RAM + 12:
+        {
+            int index = Sound.Chn3.buffer_playing ^ 1;
+            if (Sound.master_enable == 0)
+                index = 1;
+            u16 low = Sound.Chn3.wave_ram_buffer[index][12];
+            u16 high = Sound.Chn3.wave_ram_buffer[index][13];
+            return (high << 8) | low;
+        }
+        case WAVE_RAM + 14:
+        {
+            int index = Sound.Chn3.buffer_playing ^ 1;
+            if (Sound.master_enable == 0)
+                index = 1;
+            u16 low = Sound.Chn3.wave_ram_buffer[index][14];
+            u16 high = Sound.Chn3.wave_ram_buffer[index][15];
+            return (high << 8) | low;
+        }
+        default:
+            // This shouldn't happen
+            Debug_DebugMsgArg("GBA Sound: Read [%08x] (?)\n", address);
+            GBA_ExecutionBreak();
+            return 0;
+    }
+
+    return 0;
 }
 
 void GBA_SoundTimerCheck(u32 number)

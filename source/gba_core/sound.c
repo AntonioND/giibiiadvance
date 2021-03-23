@@ -401,7 +401,7 @@ void GBA_SoundInit(void)
         Sound.Chn3.wave_ram_buffer[0][i + 1] = 0x00;
 
         Sound.Chn3.wave_ram_buffer[1][i] = 0x00;
-        Sound.Chn3.wave_ram_buffer[1][i + 1] = 0xFF;
+        Sound.Chn3.wave_ram_buffer[1][i + 1] = 0x00;
     }
 }
 

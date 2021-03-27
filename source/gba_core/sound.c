@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 //
-// Copyright (c) 2011-2015, 2019-2020, Antonio Niño Díaz
+// Copyright (c) 2011-2015, 2019-2021, Antonio Niño Díaz
 //
 // GiiBiiAdvance - GBA/GB emulator
 
@@ -29,39 +29,39 @@
 #define GBA_SAMPLE_RATE     (32 * 1024)
 
 static const s8 GBA_SquareWave[4][32] = {
-    { -128, -128, -128, -128, -128, -128, -128, -128,
-       127, 127, -128, -128, -128, -128, -128, -128,
-      -128, -128, -128, -128, -128, -128, -128, -128,
-       127, 127, -128, -128, -128, -128, -128, -128 },
-
-    { -128, -128, -128, -128, -128, -128, -128, -128,
-       127, 127, 127, 127, -128, -128, -128, -128,
-      -128, -128, -128, -128, -128, -128, -128, -128,
-       127, 127, 127, 127, -128, -128, -128, -128 },
-
-    { -128, -128, -128, -128, 127, 127, 127, 127,
-       127, 127, 127, 127, -128, -128, -128, -128,
-      -128, -128, -128, -128, 127, 127, 127, 127,
-       127, 127, 127, 127, -128, -128, -128, -128 },
-
-    { 127, 127, 127, 127, 127, 127, 127, 127,
-     -128, -128, -128, -128, 127, 127, 127, 127,
-      127, 127, 127, 127, 127, 127, 127, 127,
-     -128, -128, -128, -128, 127, 127, 127, 127 }
+    {
+        -128, -128, -128, -128, -128, -128, -128, -128,
+         127,  127, -128, -128, -128, -128, -128, -128,
+        -128, -128, -128, -128, -128, -128, -128, -128,
+         127,  127, -128, -128, -128, -128, -128, -128
+    },
+    {
+        -128, -128, -128, -128, -128, -128, -128, -128,
+         127,  127,  127,  127, -128, -128, -128, -128,
+        -128, -128, -128, -128, -128, -128, -128, -128,
+         127,  127,  127,  127, -128, -128, -128, -128
+    },
+    {
+        -128, -128, -128, -128,  127,  127,  127,  127,
+         127,  127,  127,  127, -128, -128, -128, -128,
+        -128, -128, -128, -128,  127,  127,  127,  127,
+         127,  127,  127,  127, -128, -128, -128, -128
+    },
+    {
+         127,  127,  127,  127,  127,  127,  127,  127,
+        -128, -128, -128, -128,  127,  127,  127,  127,
+         127,  127,  127,  127,  127,  127,  127,  127,
+        -128, -128, -128, -128,  127,  127,  127,  127
+    }
 };
 
 static s8 GBA_WavePattern[64];
-
-extern const u8 gb_noise_7[16]; // See gb_core/noise.c
-extern const u8 gb_noise_15[4096];
 
 typedef struct
 {
     struct // Tone & Sweep
     {
         u16 reg[3];
-
-        s32 freq;
 
         u32 sweepstepsleft;
         u32 sweeptime; // If 0, not active
@@ -83,9 +83,14 @@ typedef struct
         u32 speakerright;
         u32 speakerleft;
 
-        u32 running;
-        u32 outfreq;
+        u32 frequency;
+        u32 frequency_steps;
+
         u32 samplecount;
+
+        int out_sample;
+
+        u32 running;
     } Chn1;
 
     struct // Tone
@@ -107,18 +112,21 @@ typedef struct
         u32 speakerright;
         u32 speakerleft;
 
-        u32 running;
-        u32 outfreq;
+        u32 frequency;
+        u32 frequency_steps;
+
         u32 samplecount;
+
+        int out_sample;
+
+        u32 running;
     } Chn2;
 
     struct // Wave Output
     {
-        u16 reg[5];
+        u16 reg[3];
 
         u32 playing;
-
-        s32 freq;
 
         u32 vol;
 
@@ -132,18 +140,22 @@ typedef struct
         int buffer_playing; // 0 - 1
         u8 wave_ram_buffer[2][16];
 
-        u32 running;
-        u32 outfreq;
+        u32 frequency;
+        u32 frequency_steps;
+
         u32 samplecount;
+
+        int out_sample;
+
+        u32 running;
     } Chn3;
 
     struct // Noise
     {
         u16 reg[5];
 
-        u32 shift;
-        u32 width_7;
-        s32 freq_ratio;
+        u32 counter_width;
+        u32 lfsr_state;
 
         u32 vol;
         u32 envactive; // If != 0, activate
@@ -159,9 +171,12 @@ typedef struct
 
         int seed;
 
+        u32 frequency;
+        u32 frequency_steps;
+
+        int out_sample;
+
         u32 running;
-        u32 outfreq;
-        u32 samplecount;
     } Chn4;
 
 #define FIFO_BUFFER_SIZE 128
@@ -206,9 +221,13 @@ typedef struct
 
     u32 leftvol;
     u32 rightvol;
-    u32 clocks;
+
+    u32 step_clocks;
 
     int PSG_master_volume;
+
+    u32 nextfreq_clocks;
+    u32 nextfreq_ch4_clocks;
 
     u32 nextsample_clocks;
 
@@ -310,7 +329,7 @@ void GBA_SoundPowerOn(void)
     GBA_SoundRegWrite16(SOUNDCNT_L, 0);
     //GBA_RegisterWrite16(SOUNDCNT_H, 0);
     //GBA_SoundRegWrite16(SOUNDCNT_X, 0);
-    //GBA_SoundRegWrite16(SOUNDBIAS, 0);
+    GBA_SoundRegWrite16(SOUNDBIAS, 0x200);
 }
 
 u16 *GBA_SoundGetWaveRAMTwoBuffers(void)
@@ -388,7 +407,7 @@ void GBA_SoundInit(void)
     GBA_RegisterWrite16(SOUNDCNT_H, 0x880E);
     GBA_SoundRegWrite16(SOUNDCNT_X, 0);
 
-    GBA_SoundRegWrite16(SOUNDBIAS, 0);
+    GBA_SoundRegWrite16(SOUNDBIAS, 0x200);
 
     GBA_SoundPowerOn();
 
@@ -475,49 +494,24 @@ void GBA_SoundMix(void)
 
     if (Sound.Chn1.running && (EmulatorConfig.chn_flags & 0x1))
     {
-        int index = (((Sound.Chn1.samplecount++)
-                     * ((Sound.Chn1.outfreq) * (32 / 2))) / 22050) & 31;
-        int out_1 = (int)GBA_SquareWave[Sound.Chn1.duty][index];
-        outvalue_left += out_1 * Sound.leftvol_1;
-        outvalue_right += out_1 * Sound.rightvol_1;
+        outvalue_left += Sound.Chn1.out_sample * Sound.leftvol_1;
+        outvalue_right += Sound.Chn1.out_sample * Sound.rightvol_1;
     }
     if (Sound.Chn2.running && (EmulatorConfig.chn_flags & 0x2))
     {
-        int index = (((Sound.Chn2.samplecount++)
-                     * ((Sound.Chn2.outfreq) * (32 / 2))) / 22050) & 31;
-        int out_2 = (int)GBA_SquareWave[Sound.Chn2.duty][index];
-        outvalue_left += out_2 * Sound.leftvol_2;
-        outvalue_right += out_2 * Sound.rightvol_2;
+        outvalue_left += Sound.Chn2.out_sample * Sound.leftvol_2;
+        outvalue_right += Sound.Chn2.out_sample * Sound.rightvol_2;
     }
     if (Sound.Chn3.running && (EmulatorConfig.chn_flags & 0x4))
     {
-        int index = (((Sound.Chn3.samplecount++)
-                     * ((Sound.Chn3.outfreq) * (32 / 2))) / 22050) & 63;
-        int out_3 = (int)GBA_WavePattern[index];
-        outvalue_left += out_3 * Sound.leftvol_3;
-        outvalue_right += out_3 * Sound.rightvol_3;
+        outvalue_left += Sound.Chn3.out_sample * Sound.leftvol_3;
+        outvalue_right += Sound.Chn3.out_sample * Sound.rightvol_3;
     }
     if (Sound.Chn4.running && (EmulatorConfig.chn_flags & 0x8))
     {
-        int out_4;
-        int value = (((Sound.Chn4.samplecount++)
-                     * Sound.Chn4.outfreq / 2) / 22050);
-
-        if (Sound.Chn4.width_7) // 7 bit
-        {
-            out_4 = gb_noise_7[(value / 8) & 15] >> (7 - (value & 7));
-        }
-        else // 15 bit
-        {
-            out_4 = gb_noise_15[(value / 8) & 4095] >> (7 - (value & 7));
-        }
-
-        out_4 &= 1;
-        out_4 = ((out_4 * 2) - 1) * 127;
-        outvalue_left += out_4 * Sound.leftvol_4;
-        outvalue_right += out_4 * Sound.rightvol_4;
+        outvalue_left += Sound.Chn4.out_sample * Sound.leftvol_4;
+        outvalue_right += Sound.Chn4.out_sample * Sound.rightvol_4;
     }
-
     // PSG_master_volume = 0..2
     outvalue_left = (outvalue_left * Sound.PSG_master_volume) >> 1;
     outvalue_right = (outvalue_right * Sound.PSG_master_volume) >> 1;
@@ -565,255 +559,365 @@ void GBA_SoundMix(void)
     Sound.buffer[Sound.buffer_write_ptr++] = outvalue_right;
 }
 
-// Every 65535 clocks update hardware, every 512 generate sample
+static u32 min4(u32 a, u32 b, u32 c, u32 d)
+{
+    u32 x = (a < b) ? a : b;
+    u32 y = (c < d) ? c : d;
+    return (x < y) ? x : y;
+}
+
 u32 GBA_SoundUpdate(u32 clocks)
 {
-    Sound.clocks += clocks;
-
-    if (output_enabled)
+    while (1)
     {
-        Sound.nextsample_clocks += clocks;
+        u32 next_step_clocks = 65536 - Sound.step_clocks;
+        u32 next_sample_clocks = 512 - Sound.nextsample_clocks;
+        u32 next_freq_clocks = 8 - Sound.nextfreq_clocks;
+        u32 next_freq_ch4_clocks = 16 - Sound.nextfreq_ch4_clocks;
 
-        // 16777216 Hz CPU / 32768 Hz sound output = 512
+        u32 next_clocks = min4(next_step_clocks, next_sample_clocks,
+                               next_freq_clocks, next_freq_ch4_clocks);
 
-        if (Sound.nextsample_clocks > 512)
+        if (next_clocks > clocks)
         {
-            Sound.nextsample_clocks -= 512;
-            GBA_SoundMix();
+            Sound.step_clocks += clocks;
+            Sound.nextsample_clocks += clocks;
+            Sound.nextfreq_clocks += clocks;
+            Sound.nextfreq_ch4_clocks += clocks;
+
+            // Return clocks to next envelope/sweep/length event
+            return 65536 - Sound.step_clocks;
         }
-    }
 
-    // 16.78 MHz CPU / 256 Steps per second (aprox)
-    if (Sound.clocks > 65535)
-        Sound.clocks -= 65536;
-    else
-        return 65536 - Sound.clocks;
+        clocks -= next_clocks;
 
-    if (Sound.master_enable == 0)
-        return 65536 - Sound.clocks;
+        Sound.step_clocks += next_clocks;
+        Sound.nextsample_clocks += next_clocks;
+        Sound.nextfreq_clocks += next_clocks;
+        Sound.nextfreq_ch4_clocks += next_clocks;
 
-    // Channel 1
-    if (Sound.Chn1.running)
-    {
-        if (Sound.Chn1.limittime)
+        // Step event for all channels
+
+        if (Sound.step_clocks >= 65536)
         {
-            if (Sound.Chn1.stepsleft > 0)
-            {
-                Sound.Chn1.stepsleft--;
-            }
-            else
-            {
-                Sound.Chn1.running = 0;
-                Sound.Chn1.envactive = 0;
-                REG_SOUNDCNT_X &= ~(1 << 0);
-            }
-        }
-        if (Sound.Chn1.envactive && Sound.Chn1.envelope)
-        {
-            if (Sound.Chn1.envstepstochange == 0)
-            {
-                Sound.Chn1.envstepstochange = Sound.Chn1.envelope << 2;
+            Sound.step_clocks = 0;
 
-                if (Sound.Chn1.envincrease)
+            // Channel 1
+            if (Sound.Chn1.running)
+            {
+                if (Sound.Chn1.limittime)
                 {
-                    if (Sound.Chn1.vol < 0x0F)
+                    if (Sound.Chn1.stepsleft > 0)
                     {
-                        Sound.Chn1.vol++;
-                        Sound.leftvol_1 = Sound.Chn1.speakerleft ?
-                                        (Sound.Chn1.vol * Sound.leftvol) : 0;
-                        Sound.rightvol_1 = Sound.Chn1.speakerright ?
-                                        (Sound.Chn1.vol * Sound.rightvol) : 0;
+                        Sound.Chn1.stepsleft--;
                     }
                     else
                     {
+                        Sound.Chn1.running = 0;
                         Sound.Chn1.envactive = 0;
+                        REG_SOUNDCNT_X &= ~(1 << 0);
                     }
                 }
-                else
+                if (Sound.Chn1.envactive && Sound.Chn1.envelope)
                 {
-                    if (Sound.Chn1.vol > 0)
+                    if (Sound.Chn1.envstepstochange == 0)
                     {
-                        Sound.Chn1.vol--;
-                        Sound.leftvol_1 = Sound.Chn1.speakerleft ?
+                        Sound.Chn1.envstepstochange = Sound.Chn1.envelope << 2;
+
+                        if (Sound.Chn1.envincrease)
+                        {
+                            if (Sound.Chn1.vol < 0x0F)
+                            {
+                                Sound.Chn1.vol++;
+                                Sound.leftvol_1 = Sound.Chn1.speakerleft ?
                                         (Sound.Chn1.vol * Sound.leftvol) : 0;
-                        Sound.rightvol_1 = Sound.Chn1.speakerright ?
+                                Sound.rightvol_1 = Sound.Chn1.speakerright ?
                                         (Sound.Chn1.vol * Sound.rightvol) : 0;
+                            }
+                            else
+                            {
+                                Sound.Chn1.envactive = 0;
+                            }
+                        }
+                        else
+                        {
+                            if (Sound.Chn1.vol > 0)
+                            {
+                                Sound.Chn1.vol--;
+                                Sound.leftvol_1 = Sound.Chn1.speakerleft ?
+                                        (Sound.Chn1.vol * Sound.leftvol) : 0;
+                                Sound.rightvol_1 = Sound.Chn1.speakerright ?
+                                        (Sound.Chn1.vol * Sound.rightvol) : 0;
+                            }
+                            else
+                            {
+                                Sound.Chn1.envactive = 0;
+                            }
+                        }
                     }
                     else
                     {
-                        Sound.Chn1.envactive = 0;
+                        Sound.Chn1.envstepstochange--;
                     }
                 }
-            }
-            else
-            {
-                Sound.Chn1.envstepstochange--;
-            }
-        }
-        if (Sound.Chn1.sweeptime > 0)
-        {
-            if (Sound.Chn1.sweepstepsleft == 0)
-            {
-                Sound.Chn1.sweepstepsleft = Sound.Chn1.sweeptime << 1;
-
-                if (Sound.Chn1.sweepinc)
+                if (Sound.Chn1.sweeptime > 0)
                 {
-                    Sound.Chn1.sweepfreq += Sound.Chn1.sweepfreq
-                                            / (1 << Sound.Chn1.sweepshift);
-                }
-                else
-                {
-                    Sound.Chn1.sweepfreq -= Sound.Chn1.sweepfreq
-                                            / (1 << Sound.Chn1.sweepshift);
-                }
-
-                // This isn't correct, but it prevents a division by zero
-                Sound.Chn1.sweepfreq &= 2047;
-
-                Sound.Chn1.outfreq = 131072 / (2048 - Sound.Chn1.sweepfreq);
-            }
-            else
-            {
-                Sound.Chn1.sweepstepsleft--;
-            }
-        }
-    }
-
-    // Channel 2
-    if (Sound.Chn2.running)
-    {
-        if (Sound.Chn2.limittime)
-        {
-            if (Sound.Chn2.stepsleft > 0)
-            {
-                Sound.Chn2.stepsleft--;
-            }
-            else
-            {
-                Sound.Chn2.running = 0;
-                Sound.Chn2.envactive = 0;
-                REG_SOUNDCNT_X &= ~(1 << 1);
-            }
-        }
-        if (Sound.Chn2.envactive && Sound.Chn2.envelope)
-        {
-            if (Sound.Chn2.envstepstochange == 0)
-            {
-                Sound.Chn2.envstepstochange = Sound.Chn2.envelope << 2;
-
-                if (Sound.Chn2.envincrease)
-                {
-                    if (Sound.Chn2.vol < 0x0F)
+                    if (Sound.Chn1.sweepstepsleft == 0)
                     {
-                        Sound.Chn2.vol++;
-                        Sound.leftvol_2 = Sound.Chn2.speakerleft ?
-                                        (Sound.Chn2.vol * Sound.leftvol) : 0;
-                        Sound.rightvol_2 = Sound.Chn2.speakerright ?
-                                        (Sound.Chn2.vol * Sound.rightvol) : 0;
+                        Sound.Chn1.sweepstepsleft = Sound.Chn1.sweeptime << 1;
+
+                        if (Sound.Chn1.sweepinc)
+                        {
+                            Sound.Chn1.sweepfreq += Sound.Chn1.sweepfreq
+                                                  / (1 << Sound.Chn1.sweepshift);
+                        }
+                        else
+                        {
+                            Sound.Chn1.sweepfreq -= Sound.Chn1.sweepfreq
+                                                  / (1 << Sound.Chn1.sweepshift);
+                        }
+
+                        Sound.Chn1.frequency = Sound.Chn1.sweepfreq;
                     }
                     else
                     {
+                        Sound.Chn1.sweepstepsleft--;
+                    }
+                }
+            }
+
+            // Channel 2
+            if (Sound.Chn2.running)
+            {
+                if (Sound.Chn2.limittime)
+                {
+                    if (Sound.Chn2.stepsleft > 0)
+                    {
+                        Sound.Chn2.stepsleft--;
+                    }
+                    else
+                    {
+                        Sound.Chn2.running = 0;
                         Sound.Chn2.envactive = 0;
+                        REG_SOUNDCNT_X &= ~(1 << 1);
                     }
                 }
-                else
+                if (Sound.Chn2.envactive && Sound.Chn2.envelope)
                 {
-                    if (Sound.Chn2.vol > 0)
+                    if (Sound.Chn2.envstepstochange == 0)
                     {
-                        Sound.Chn2.vol--;
-                        Sound.leftvol_2 = Sound.Chn2.speakerleft ?
+                        Sound.Chn2.envstepstochange = Sound.Chn2.envelope << 2;
+
+                        if (Sound.Chn2.envincrease)
+                        {
+                            if (Sound.Chn2.vol < 0x0F)
+                            {
+                                Sound.Chn2.vol++;
+                                Sound.leftvol_2 = Sound.Chn2.speakerleft ?
                                         (Sound.Chn2.vol * Sound.leftvol) : 0;
-                        Sound.rightvol_2 = Sound.Chn2.speakerright ?
+                                Sound.rightvol_2 = Sound.Chn2.speakerright ?
                                         (Sound.Chn2.vol * Sound.rightvol) : 0;
+                            }
+                            else
+                            {
+                                Sound.Chn2.envactive = 0;
+                            }
+                        }
+                        else
+                        {
+                            if (Sound.Chn2.vol > 0)
+                            {
+                                Sound.Chn2.vol--;
+                                Sound.leftvol_2 = Sound.Chn2.speakerleft ?
+                                        (Sound.Chn2.vol * Sound.leftvol) : 0;
+                                Sound.rightvol_2 = Sound.Chn2.speakerright ?
+                                        (Sound.Chn2.vol * Sound.rightvol) : 0;
+                            }
+                            else
+                            {
+                                Sound.Chn2.envactive = 0;
+                            }
+                        }
                     }
                     else
                     {
-                        Sound.Chn2.envactive = 0;
+                        Sound.Chn2.envstepstochange--;
                     }
                 }
             }
-            else
-            {
-                Sound.Chn2.envstepstochange--;
-            }
-        }
-    }
 
-    // Channel 3
-    if (Sound.Chn3.running)
-    {
-        if (Sound.Chn3.stepsleft > 0)
-        {
-            Sound.Chn3.stepsleft--;
-        }
-        else if (Sound.Chn3.limittime)
-        {
-            Sound.Chn3.running = 0;
-            REG_SOUNDCNT_X &= ~(1 << 2);
-        }
-    }
-
-    // Channel 4
-    if (Sound.Chn4.running)
-    {
-        if (Sound.Chn4.limittime)
-        {
-            if (Sound.Chn4.stepsleft > 0)
+            // Channel 3
+            if (Sound.Chn3.running)
             {
-                Sound.Chn4.stepsleft--;
-            }
-            else
-            {
-                Sound.Chn4.running = 0;
-                Sound.Chn4.envactive = 0;
-                REG_SOUNDCNT_X &= ~(1 << 3);
-            }
-        }
-        if (Sound.Chn4.envactive && Sound.Chn4.envelope)
-        {
-            if (Sound.Chn4.envstepstochange == 0)
-            {
-                Sound.Chn4.envstepstochange = Sound.Chn4.envelope << 2;
-
-                if (Sound.Chn4.envincrease)
+                if (Sound.Chn3.stepsleft > 0)
                 {
-                    if (Sound.Chn4.vol < 0x0F)
+                    Sound.Chn3.stepsleft--;
+                }
+                else if (Sound.Chn3.limittime)
+                {
+                    Sound.Chn3.running = 0;
+                    REG_SOUNDCNT_X &= ~(1 << 2);
+                }
+            }
+
+            // Channel 4
+            if (Sound.Chn4.running)
+            {
+                if (Sound.Chn4.limittime)
+                {
+                    if (Sound.Chn4.stepsleft > 0)
                     {
-                        Sound.Chn4.vol++;
-                        Sound.leftvol_4 = Sound.Chn4.speakerleft ?
-                                        (Sound.Chn4.vol * Sound.leftvol) : 0;
-                        Sound.rightvol_4 = Sound.Chn4.speakerright ?
-                                        (Sound.Chn4.vol * Sound.rightvol) : 0;
+                        Sound.Chn4.stepsleft--;
                     }
                     else
                     {
+                        Sound.Chn4.running = 0;
                         Sound.Chn4.envactive = 0;
+                        REG_SOUNDCNT_X &= ~(1 << 3);
                     }
+                }
+                if (Sound.Chn4.envactive && Sound.Chn4.envelope)
+                {
+                    if (Sound.Chn4.envstepstochange == 0)
+                    {
+                        Sound.Chn4.envstepstochange = Sound.Chn4.envelope << 2;
+
+                        if (Sound.Chn4.envincrease)
+                        {
+                            if (Sound.Chn4.vol < 0x0F)
+                            {
+                                Sound.Chn4.vol++;
+                                Sound.leftvol_4 = Sound.Chn4.speakerleft ?
+                                        (Sound.Chn4.vol * Sound.leftvol) : 0;
+                                Sound.rightvol_4 = Sound.Chn4.speakerright ?
+                                        (Sound.Chn4.vol * Sound.rightvol) : 0;
+                            }
+                            else
+                            {
+                                Sound.Chn4.envactive = 0;
+                            }
+                        }
+                        else
+                        {
+                            if (Sound.Chn4.vol > 0)
+                            {
+                                Sound.Chn4.vol--;
+                                Sound.leftvol_4 = Sound.Chn4.speakerleft ?
+                                        (Sound.Chn4.vol * Sound.leftvol) : 0;
+                                Sound.rightvol_4 = Sound.Chn4.speakerright ?
+                                        (Sound.Chn4.vol * Sound.rightvol) : 0;
+                            }
+                            else
+                            {
+                                Sound.Chn4.envactive = 0;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Sound.Chn4.envstepstochange--;
+                    }
+                }
+            }
+        }
+
+        // Frequency change of channels 1, 2 and 3
+
+        if (Sound.nextfreq_clocks >= 8)
+        {
+            Sound.nextfreq_clocks = 0;
+
+            // Channel 1
+
+            Sound.Chn1.frequency_steps++;
+            if (Sound.Chn1.frequency <= Sound.Chn1.frequency_steps)
+            {
+                Sound.Chn1.frequency_steps = 0;
+
+                Sound.Chn1.out_sample =
+                    GBA_SquareWave[Sound.Chn1.duty][Sound.Chn1.samplecount];
+
+                Sound.Chn1.samplecount++;
+                Sound.Chn1.samplecount %= 32;
+            }
+
+            // Channel 2
+
+            Sound.Chn2.frequency_steps++;
+            if (Sound.Chn2.frequency <= Sound.Chn2.frequency_steps)
+            {
+                Sound.Chn2.frequency_steps = 0;
+
+                Sound.Chn2.out_sample =
+                    GBA_SquareWave[Sound.Chn2.duty][Sound.Chn2.samplecount];
+
+                Sound.Chn2.samplecount++;
+                Sound.Chn2.samplecount %= 32;
+            }
+
+            // Channel 3
+
+            Sound.Chn3.frequency_steps++;
+            if (Sound.Chn3.frequency <= Sound.Chn3.frequency_steps)
+            {
+                Sound.Chn3.frequency_steps = 0;
+
+                Sound.Chn3.out_sample = GBA_WavePattern[Sound.Chn3.samplecount];
+
+                Sound.Chn3.samplecount++;
+                Sound.Chn3.samplecount %= 64;
+            }
+        }
+
+        // Frequency change of channel 4
+
+        if (Sound.nextfreq_ch4_clocks >= 16)
+        {
+            Sound.nextfreq_ch4_clocks = 0;
+
+            // Channel 4
+
+            if (Sound.Chn4.counter_width == 7)
+            {
+                if (Sound.Chn4.lfsr_state & 1)
+                {
+                    Sound.Chn4.lfsr_state >>= 1;
+                    Sound.Chn4.lfsr_state ^= 0x60;
+                    Sound.Chn4.out_sample = 127;
                 }
                 else
                 {
-                    if (Sound.Chn4.vol > 0)
-                    {
-                        Sound.Chn4.vol--;
-                        Sound.leftvol_4 = Sound.Chn4.speakerleft ?
-                                        (Sound.Chn4.vol * Sound.leftvol) : 0;
-                        Sound.rightvol_4 = Sound.Chn4.speakerright ?
-                                        (Sound.Chn4.vol * Sound.rightvol) : 0;
-                    }
-                    else
-                    {
-                        Sound.Chn4.envactive = 0;
-                    }
+                    Sound.Chn4.lfsr_state >>= 1;
+                    Sound.Chn4.out_sample = -128;
                 }
             }
-            else
+            else if (Sound.Chn4.counter_width == 15)
             {
-                Sound.Chn4.envstepstochange--;
+                if (Sound.Chn4.lfsr_state & 1)
+                {
+                    Sound.Chn4.lfsr_state >>= 1;
+                    Sound.Chn4.lfsr_state ^= 0x6000;
+                    Sound.Chn4.out_sample = 127;
+                }
+                else
+                {
+                    Sound.Chn4.lfsr_state >>= 1;
+                    Sound.Chn4.out_sample = -128;
+                }
+            }
+        }
+
+        // Mix samples
+
+        if (output_enabled)
+        {
+            if (Sound.nextsample_clocks >= 512)
+            {
+                Sound.nextsample_clocks = 0;
+                GBA_SoundMix();
             }
         }
     }
-
-    return 65536 - Sound.clocks;
 }
 
 void GBA_SoundRegWrite16(u32 address, u16 value)
@@ -928,7 +1032,7 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
         case SOUND1CNT_H:
             Sound.Chn1.reg[1] = value;
 
-            Sound.Chn1.stepsleft = (64 - (value & 0x3F)) << 2;
+            Sound.Chn1.stepsleft = 64 - (value & 0x3F);
             Sound.Chn1.duty = (value >> 6) & 3;
 
             // Don't update envelope yet...
@@ -946,11 +1050,14 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
             }
             return;
         case SOUND1CNT_X:
-            Sound.Chn1.freq = value & 0x07FF;
-            Sound.Chn1.outfreq = 131072 / (2048 - Sound.Chn1.freq);
+            Sound.Chn1.frequency = 2048 - (value & 0x07FF);
+            Sound.Chn1.frequency_steps = 0;
+
             Sound.Chn1.limittime = (value & (1 << 14));
             if (value & (1 << 15))
             {
+                Sound.Chn1.samplecount = 0;
+
                 Sound.Chn1.running = 1;
 
                 // Update sweep
@@ -958,7 +1065,7 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
                 Sound.Chn1.sweepstepsleft = Sound.Chn1.sweeptime << 1;
                 Sound.Chn1.sweepinc = ((Sound.Chn1.reg[0] & (1 << 3)) == 0);
                 Sound.Chn1.sweepshift = Sound.Chn1.reg[0] & 0x07;
-                Sound.Chn1.sweepfreq = Sound.Chn1.freq;
+                Sound.Chn1.sweepfreq = Sound.Chn1.frequency;
 
                 // Update envelope
                 Sound.Chn1.vol = (Sound.Chn1.reg[1] >> 12);
@@ -983,7 +1090,7 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
         case SOUND2CNT_L:
             Sound.Chn2.reg[1] = value;
 
-            Sound.Chn2.stepsleft = (64 - (value & 0x3F)) << 2;
+            Sound.Chn2.stepsleft = 64 - (value & 0x3F);
             Sound.Chn2.duty = (value >> 6) & 3;
 
             // Don't update envelope yet...
@@ -1002,11 +1109,14 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
             return;
 
         case SOUND2CNT_H:
-            Sound.Chn2.freq = value & 0x07FF;
-            Sound.Chn2.outfreq = 131072 / (2048 - Sound.Chn2.freq);
+            Sound.Chn2.frequency = 2048 - (value & 0x07FF);
+            Sound.Chn2.frequency_steps = 0;
+
             Sound.Chn2.limittime = (value & (1 << 14));
             if (value & (1 << 15))
             {
+                Sound.Chn2.samplecount = 0;
+
                 Sound.Chn2.running = 1;
 
                 // Update envelope
@@ -1040,7 +1150,6 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
                 REG_SOUNDCNT_X |= (1 << 2);
                 GBA_SoundLoadWave();
                 Sound.Chn3.samplecount = 0;
-                Sound.Chn3.outfreq = 131072 / (2048 - Sound.Chn3.freq);
                 Sound.Chn3.playing = 1;
             }
             else
@@ -1054,7 +1163,7 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
         case SOUND3CNT_H:
             Sound.Chn3.reg[1] = value;
 
-            Sound.Chn3.stepsleft = (256 - value) << 2;
+            Sound.Chn3.stepsleft = 256 - (value & 0xFF);
 
             if (value & BIT(15))
             {
@@ -1088,17 +1197,18 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
         case SOUND3CNT_X:
             Sound.Chn3.reg[2] = value;
 
-            Sound.Chn3.freq = value & 0x07FF;
-
             if (Sound.Chn3.playing)
             {
-                Sound.Chn3.outfreq = 131072 / (2048 - Sound.Chn3.freq);
+                Sound.Chn3.frequency = 2048 - (value & 0x07FF);
+                Sound.Chn3.frequency_steps = 0;
             }
 
             Sound.Chn3.limittime = (value & (1 << 6));
 
             if (Sound.Chn3.playing) // ?
             {
+                Sound.Chn3.samplecount = 0;
+
                 if (value & (1 << 15))
                 {
                     //Sound.Chn3.playing = 1; // ?
@@ -1114,7 +1224,7 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
         case SOUND4CNT_L:
             Sound.Chn4.reg[1] = value;
 
-            Sound.Chn4.stepsleft = (64 - (value & 0x3F)) << 2;
+            Sound.Chn4.stepsleft = 64 - (value & 0x3F);
 
             // Don't update envelope yet...
 
@@ -1123,31 +1233,34 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
             return;
 
         case SOUND4CNT_H:
+        {
             Sound.Chn4.reg[2] = value;
 
-            Sound.Chn4.shift = (value >> 4) & 0x0F;
-            Sound.Chn4.width_7 = value & (1 << 3);
-            Sound.Chn4.freq_ratio = value & 0x07;
-
-            if (Sound.Chn4.shift > 13)
+            if (value & (1 << 3))
             {
-                Sound.Chn4.outfreq = 0;
+                Sound.Chn4.counter_width = 7;
+                Sound.Chn4.lfsr_state = 0x7F;
+            }
+            else
+            {
+                Sound.Chn4.counter_width = 15;
+                Sound.Chn4.lfsr_state = 0x7FFF;
+            }
+
+            int freq_div = (value >> 4) & 0xF;
+            int div_ratio = value & 0x7;
+
+            if (freq_div > 13)
+            {
+                Sound.Chn4.running = 0;
                 return;
             }
 
-            //const s32 NoiseFreqRatio[8] = {
-            //    1048576, 524288, 370728, 262144, 220436, 185364, 155872,
-            //    131072
-            //};
-            const s32 NoiseFreqRatio[8] = {
-                1048576, 524288, 262144, 174763, 131072, 104858, 87381, 74898
-            };
+            if (div_ratio > 0) // For div_ratio = 0 assume 0.5 instead
+                div_ratio <<= 1;
 
-            Sound.Chn4.outfreq = NoiseFreqRatio[Sound.Chn4.freq_ratio]
-                                 >> (Sound.Chn4.shift + 1);
-
-            if (Sound.Chn4.outfreq > (1 << 18))
-                Sound.Chn4.outfreq = 1 << 18;
+            Sound.Chn4.frequency = div_ratio * (1 << (freq_div + 1));
+            Sound.Chn4.frequency_steps = 0;
 
             Sound.Chn4.limittime = (value & (1 << 14));
 
@@ -1173,6 +1286,7 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
                 //REG_SOUNDCNT_X &= ~(1 << 3);
             }
             return;
+        }
 
         // Control
         case SOUNDCNT_L:

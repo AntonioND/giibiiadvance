@@ -14,6 +14,8 @@ int GBA_SoundHardwareIsOn(void);
 void GB_ToggleSound(void);
 u32 GBA_SoundUpdate(u32 clocks);
 
+u16 *GBA_SoundGetWaveRAMTwoBuffers(void);
+
 void GBA_SoundRegWrite16(u32 address, u16 value);
 u16 GBA_SoundRegRead16(u32 address);
 

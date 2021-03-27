@@ -313,6 +313,11 @@ void GBA_SoundPowerOn(void)
     //GBA_SoundRegWrite16(SOUNDBIAS, 0);
 }
 
+u16 *GBA_SoundGetWaveRAMTwoBuffers(void)
+{
+    return (u16 *)&Sound.Chn3.wave_ram_buffer[0][0];
+}
+
 void GBA_SoundSaveToWAV(void)
 {
     size_t available_size = Sound.buffer_write_ptr * sizeof(s16);

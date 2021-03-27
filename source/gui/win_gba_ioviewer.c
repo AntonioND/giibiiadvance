@@ -1203,13 +1203,22 @@ void Win_GBAIOViewerUpdate(void)
                 }
             }
 
-            u16 *wav = (u16 *)REG_WAVE_RAM;
+            u16 *wav = GBA_SoundGetWaveRAMTwoBuffers();
+
             GUI_ConsoleModePrintf(&gba_ioview_sound_waveram_con, 0, 0,
                     "[%c] %04X|%04X|%04X|%04X",
                     CHECK(en_0), wav[0], wav[1], wav[2], wav[3]);
             GUI_ConsoleModePrintf(&gba_ioview_sound_waveram_con, 0, 1,
+                    "    %04X|%04X|%04X|%04X",
+                    wav[4], wav[5], wav[6], wav[7]);
+
+            GUI_ConsoleModePrintf(&gba_ioview_sound_waveram_con, 0, 2,
                     "[%c] %04X|%04X|%04X|%04X",
-                    CHECK(en_1), wav[4], wav[5], wav[6], wav[7]);
+                    CHECK(en_1), wav[8], wav[9], wav[10], wav[11]);
+            GUI_ConsoleModePrintf(&gba_ioview_sound_waveram_con, 0, 3,
+                    "    %04X|%04X|%04X|%04X",
+                    wav[12], wav[13], wav[14], wav[15]);
+
 
             // PWM Control
 
@@ -1548,7 +1557,7 @@ int Win_GBAIOViewerCreate(void)
                  -1, FONT_HEIGHT, "Channel 2");
     GUI_SetTextBox(&gba_ioview_sound_chn2_textbox, &gba_ioview_sound_chn2_con,
                    6, 42 + 8 * FONT_HEIGHT + 6 + 18,
-                   25 * FONT_WIDTH, 8 * FONT_HEIGHT, NULL);
+                   25 * FONT_WIDTH, 6 * FONT_HEIGHT, NULL);
 
     GUI_SetLabel(&gba_ioview_sound_chn3_label,
                  6 + 25 * FONT_WIDTH + 6, 24,
@@ -1562,7 +1571,7 @@ int Win_GBAIOViewerCreate(void)
                  -1, FONT_HEIGHT, "Channel 4");
     GUI_SetTextBox(&gba_ioview_sound_chn4_textbox, &gba_ioview_sound_chn4_con,
                    6 + 25 * FONT_WIDTH + 6, 42 + 8 * FONT_HEIGHT + 6 + 18,
-                   25 * FONT_WIDTH, 8 * FONT_HEIGHT, NULL);
+                   25 * FONT_WIDTH, 6 * FONT_HEIGHT, NULL);
 
     GUI_SetLabel(&gba_ioview_sound_control_label,
                  6 + 50 * FONT_WIDTH + 12, 24,
@@ -1573,12 +1582,12 @@ int Win_GBAIOViewerCreate(void)
                    31 * FONT_WIDTH, 22 * FONT_HEIGHT, NULL);
 
     GUI_SetLabel(&gba_ioview_sound_waveram_label,
-                 6, 42 + 16 * FONT_HEIGHT + 12 + 18,
+                 6, 42 + 14 * FONT_HEIGHT + 12 + 18,
                  -1, FONT_HEIGHT, "090h Wave RAM");
     GUI_SetTextBox(&gba_ioview_sound_waveram_textbox,
                    &gba_ioview_sound_waveram_con,
-                   6, 42 + 16 * FONT_HEIGHT + 12 + 36,
-                   25 * FONT_WIDTH, 2 * FONT_HEIGHT, NULL);
+                   6, 42 + 14 * FONT_HEIGHT + 12 + 36,
+                   25 * FONT_WIDTH, 4 * FONT_HEIGHT, NULL);
 
     GUI_SetLabel(&gba_ioview_sound_pwm_label,
                  6 + 25 * FONT_WIDTH + 6, 42 + 16 * FONT_HEIGHT + 12 + 18,

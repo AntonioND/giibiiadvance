@@ -478,8 +478,6 @@ void GBA_ToggleSound(void)
 
 void GBA_SoundMix(void)
 {
-    //if (output_enabled == 0)
-    //return;
     if (EmulatorConfig.snd_mute)
         return;
 
@@ -1150,6 +1148,7 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
                 REG_SOUNDCNT_X |= (1 << 2);
                 GBA_SoundLoadWave();
                 Sound.Chn3.samplecount = 0;
+                Sound.Chn3.frequency_steps = 0;
                 Sound.Chn3.playing = 1;
             }
             else

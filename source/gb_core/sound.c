@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 //
-// Copyright (c) 2011-2015, 2019-2020, Antonio Niño Díaz
+// Copyright (c) 2011-2015, 2019-2021, Antonio Niño Díaz
 //
 // GiiBiiAdvance - GBA/GB emulator
 
@@ -32,39 +32,39 @@
 extern _GB_CONTEXT_ GameBoy;
 
 static const s8 GB_SquareWave[4][32] = {
-    { -128, -128, -128, -128, -128, -128, -128, -128,
-       127, 127, -128, -128, -128, -128, -128, -128,
-      -128, -128, -128, -128, -128, -128, -128, -128,
-       127, 127, -128, -128, -128, -128, -128, -128 },
-
-    { -128, -128, -128, -128, -128, -128, -128, -128,
-       127, 127, 127, 127, -128, -128, -128, -128,
-      -128, -128, -128, -128, -128, -128, -128, -128,
-       127, 127, 127, 127, -128, -128, -128, -128 },
-
-    { -128, -128, -128, -128, 127, 127, 127, 127,
-       127, 127, 127, 127, -128, -128, -128, -128,
-      -128, -128, -128, -128, 127, 127, 127, 127,
-       127, 127, 127, 127, -128, -128, -128, -128 },
-
-    { 127, 127, 127, 127, 127, 127, 127, 127,
-     -128, -128, -128, -128, 127, 127, 127, 127,
-      127, 127, 127, 127, 127, 127, 127, 127,
-     -128, -128, -128, -128, 127, 127, 127, 127 }
+    {
+        -128, -128, -128, -128, -128, -128, -128, -128,
+         127,  127, -128, -128, -128, -128, -128, -128,
+        -128, -128, -128, -128, -128, -128, -128, -128,
+         127,  127, -128, -128, -128, -128, -128, -128
+    },
+    {
+        -128, -128, -128, -128, -128, -128, -128, -128,
+         127,  127,  127,  127, -128, -128, -128, -128,
+        -128, -128, -128, -128, -128, -128, -128, -128,
+         127,  127,  127,  127, -128, -128, -128, -128
+    },
+    {
+        -128, -128, -128, -128,  127,  127,  127,  127,
+         127,  127,  127,  127, -128, -128, -128, -128,
+        -128, -128, -128, -128,  127,  127,  127,  127,
+         127,  127,  127,  127, -128, -128, -128, -128
+    },
+    {
+         127,  127,  127,  127,  127,  127,  127,  127,
+        -128, -128, -128, -128,  127,  127,  127,  127,
+         127,  127,  127,  127,  127,  127,  127,  127,
+        -128, -128, -128, -128,  127,  127,  127,  127
+    }
 };
 
 static s8 GB_WavePattern[32];
-
-extern const u8 gb_noise_7[16];    // In file noise.c
-extern const u8 gb_noise_15[4096]; // In file noise.c
 
 typedef struct
 {
     struct // Tone & Sweep
     {
-        u8 reg[5];
-
-        s32 freq;
+        u16 reg[5];
 
         u32 sweepstepsleft;
         u32 sweeptime; // If 0, not active
@@ -80,20 +80,25 @@ typedef struct
         u32 envincrease;
         u32 envstepstochange;
 
-        u32 stepsleft; // Each step is 1 / 256 sec
+        u32 stepsleft; // Each step is 1/256 sec
         u32 limittime; // Activates "stepsleft"
 
         u32 speakerright;
         u32 speakerleft;
 
-        u32 running;
-        u32 outfreq;
+        u32 frequency;
+        u32 frequency_steps;
+
         u32 samplecount;
+
+        int out_sample;
+
+        u32 running;
     } Chn1;
 
     struct // Tone
     {
-        u8 reg[5];
+        u16 reg[5];
 
         s32 freq;
         u32 duty;
@@ -104,45 +109,56 @@ typedef struct
         u32 envincrease;
         u32 envstepstochange;
 
-        u32 stepsleft; // Each step is 1 / 256 sec
+        u32 stepsleft; // Each step is 1/256 sec
         u32 limittime; // Activates "stepsleft"
 
         u32 speakerright;
         u32 speakerleft;
 
-        u32 running;
-        u32 outfreq;
+        u32 frequency;
+        u32 frequency_steps;
+
         u32 samplecount;
+
+        int out_sample;
+
+        u32 running;
     } Chn2;
 
     struct // Wave Output
     {
-        u8 reg[5];
+        u16 reg[5];
 
         u32 playing;
 
-        s32 freq;
-
         u32 vol;
 
-        u32 stepsleft; // Each step is 1 / 256 sec
+        u32 stepsleft; // Each step is 1/256 sec
         u32 limittime; // Activates "stepsleft"
 
         u32 speakerright;
         u32 speakerleft;
 
-        u32 running;
-        u32 outfreq;
+        int doublesize;     // 0 - 1
+        int buffer_playing; // 0 - 1
+        u8 wave_ram_buffer[2][16];
+
+        u32 frequency;
+        u32 frequency_steps;
+
         u32 samplecount;
+
+        int out_sample;
+
+        u32 running;
     } Chn3;
 
     struct // Noise
     {
-        u8 reg[5];
+        u16 reg[5];
 
-        u32 shift;
-        u32 width_7;
-        s32 freq_ratio;
+        u32 counter_width;
+        u32 lfsr_state;
 
         u32 vol;
         u32 envactive; // If != 0, activate
@@ -150,7 +166,7 @@ typedef struct
         u32 envincrease;
         u32 envstepstochange;
 
-        u32 stepsleft; // Each step is 1 / 256 sec
+        u32 stepsleft; // Each step is 1/256 sec
         u32 limittime; // Activates "stepsleft"
 
         u32 speakerright;
@@ -158,14 +174,21 @@ typedef struct
 
         int seed;
 
+        u32 frequency;
+        u32 frequency_steps;
+
+        int out_sample;
+
         u32 running;
-        u32 outfreq;
-        u32 samplecount;
     } Chn4;
 
     u32 leftvol;
     u32 rightvol;
-    u32 clocks;
+
+    u32 step_clocks;
+
+    u32 nextfreq_clocks;
+    u32 nextfreq_ch4_clocks;
 
     u32 nextsample_clocks;
 
@@ -386,9 +409,6 @@ void GB_ToggleSound(void)
 
 void GB_SoundMix(void)
 {
-    //if (output_enabled == 0)
-    //    return; // Not needed here
-
     if (EmulatorConfig.snd_mute)
         return;
 
@@ -418,63 +438,41 @@ void GB_SoundMix(void)
     Sound.rightvol_4 = Sound.Chn4.speakerright ?
                     (Sound.Chn4.vol * Sound.rightvol) : 0;
 #endif
-    int outvalue_left = 0;
-    int outvalue_right = 0;
+    s32 outvalue_left = 0, outvalue_right = 0;
 
     if (Sound.Chn1.running && (EmulatorConfig.chn_flags & 0x1))
     {
-        int index = (((Sound.Chn1.samplecount++) * ((Sound.Chn1.outfreq)
-                  * (32 / 2))) / GB_SAMPLE_RATE) & 31;
-        int out_1 = (int)GB_SquareWave[Sound.Chn1.duty][index];
-        outvalue_left += out_1 * Sound.leftvol_1;
-        outvalue_right += out_1 * Sound.rightvol_1;
+        outvalue_left += Sound.Chn1.out_sample * Sound.leftvol_1;
+        outvalue_right += Sound.Chn1.out_sample * Sound.rightvol_1;
     }
     if (Sound.Chn2.running && (EmulatorConfig.chn_flags & 0x2))
     {
-        int index = (((Sound.Chn2.samplecount++) * ((Sound.Chn2.outfreq)
-                  * (32 / 2))) / GB_SAMPLE_RATE) & 31;
-
-        int out_2 = (int)GB_SquareWave[Sound.Chn2.duty][index];
-        outvalue_left += out_2 * Sound.leftvol_2;
-        outvalue_right += out_2 * Sound.rightvol_2;
+        outvalue_left += Sound.Chn2.out_sample * Sound.leftvol_2;
+        outvalue_right += Sound.Chn2.out_sample * Sound.rightvol_2;
     }
     if (Sound.Chn3.running && (EmulatorConfig.chn_flags & 0x4))
     {
-        int index = (((Sound.Chn3.samplecount++) * ((Sound.Chn3.outfreq)
-                  * (32 / 2))) / GB_SAMPLE_RATE) & 31;
-        int out_3 = (int)GB_WavePattern[index];
-        outvalue_left += out_3 * Sound.leftvol_3;
-        outvalue_right += out_3 * Sound.rightvol_3;
+        outvalue_left += Sound.Chn3.out_sample * Sound.leftvol_3;
+        outvalue_right += Sound.Chn3.out_sample * Sound.rightvol_3;
     }
     if (Sound.Chn4.running && (EmulatorConfig.chn_flags & 0x8))
     {
-        int out_4;
-        int value = ((Sound.Chn4.samplecount++) * Sound.Chn4.outfreq / 2) / GB_SAMPLE_RATE;
-
-        if (Sound.Chn4.width_7) // 7 bit
-        {
-            out_4 = gb_noise_7[(value / 8) & 15] >> (7 - (value & 7));
-        }
-        else // 15 bit
-        {
-            out_4 = gb_noise_15[(value / 8) & 4095] >> (7 - (value & 7));
-        }
-
-        out_4 &= 1;
-        out_4 = ((out_4 * 2) - 1) * 127;
-        outvalue_left += out_4 * Sound.leftvol_4;
-        outvalue_right += out_4 * Sound.rightvol_4;
+        outvalue_left += Sound.Chn4.out_sample * Sound.leftvol_4;
+        outvalue_right += Sound.Chn4.out_sample * Sound.rightvol_4;
     }
 
-    if (outvalue_left > 32767)
-        outvalue_left = 32767;
-    else if (outvalue_left < (-32768))
-        outvalue_left = -32768;
+    if (outvalue_left > 65535)
+        outvalue_left = 65535;
+    else if (outvalue_left < (-65536))
+        outvalue_left = -65536;
 
-    if (outvalue_right > 32767)
-        outvalue_right = 32767;
-    else if (outvalue_right < (-32768))
-        outvalue_right = -32768;
+    if (outvalue_right > 65535)
+        outvalue_right = 65535;
+    else if (outvalue_right < (-65536))
+        outvalue_right = -65536;
+
+    outvalue_left >>= 1;
+    outvalue_right >>= 1;
 
     outvalue_left = (outvalue_left * EmulatorConfig.volume) / 128;
     outvalue_right = (outvalue_right * EmulatorConfig.volume) / 128;
@@ -534,19 +532,16 @@ void GB_SoundRegWrite(u32 address, u32 value)
             return;
         case NR13_REG:
             Sound.Chn1.reg[3] = value;
-
-            Sound.Chn1.freq &= 0x0700;
-            Sound.Chn1.freq |= Sound.Chn1.reg[3];
-
-            Sound.Chn1.outfreq = 131072 / (2048 - Sound.Chn1.freq);
             return;
         case NR14_REG:
+        {
             Sound.Chn1.reg[4] = value;
 
-            Sound.Chn1.freq &= 0xFF;
-            Sound.Chn1.freq |= (Sound.Chn1.reg[4] & 0x07) << 8;
+            u16 freq = (u16)Sound.Chn1.reg[3]
+                     | ((u16)Sound.Chn1.reg[4] & 0x07) << 8;
 
-            Sound.Chn1.outfreq = 131072 / (2048 - Sound.Chn1.freq);
+            Sound.Chn1.frequency = 2048 - freq;
+            Sound.Chn1.frequency_steps = 0;
 
             Sound.Chn1.limittime = (Sound.Chn1.reg[4] & (1 << 6));
 
@@ -559,7 +554,7 @@ void GB_SoundRegWrite(u32 address, u32 value)
                 Sound.Chn1.sweepstepsleft = Sound.Chn1.sweeptime << 1;
                 Sound.Chn1.sweepinc = ((Sound.Chn1.reg[0] & (1 << 3)) == 0);
                 Sound.Chn1.sweepshift = Sound.Chn1.reg[0] & 0x07;
-                Sound.Chn1.sweepfreq = Sound.Chn1.freq;
+                Sound.Chn1.sweepfreq = Sound.Chn1.frequency;
 
                 // Update envelope
                 Sound.Chn1.vol = (Sound.Chn1.reg[2] >> 4);
@@ -579,6 +574,7 @@ void GB_SoundRegWrite(u32 address, u32 value)
                 //mem->IO_Ports[NR52_REG - 0xFF00] &= ~(1 << 0);
             }
             return;
+        }
 
         // Voice 2
         // -------
@@ -612,19 +608,16 @@ void GB_SoundRegWrite(u32 address, u32 value)
 
         case NR23_REG:
             Sound.Chn2.reg[3] = value;
-
-            Sound.Chn2.freq &= 0x0700;
-            Sound.Chn2.freq |= value;
-
-            Sound.Chn2.outfreq = 131072 / (2048 - Sound.Chn2.freq);
             return;
         case NR24_REG:
+        {
             Sound.Chn2.reg[4] = value;
 
-            Sound.Chn2.freq &= 0xFF;
-            Sound.Chn2.freq |= (value & 0x07) << 8;
+            u16 freq = (u16)Sound.Chn2.reg[3]
+                     | ((u16)Sound.Chn2.reg[4] & 0x07) << 8;
 
-            Sound.Chn2.outfreq = 131072 / (2048 - Sound.Chn2.freq);
+            Sound.Chn2.frequency = 2048 - freq;
+            Sound.Chn2.frequency_steps = 0;
 
             Sound.Chn2.limittime = (value & (1 << 6));
 
@@ -650,6 +643,7 @@ void GB_SoundRegWrite(u32 address, u32 value)
                 //mem->IO_Ports[NR52_REG - 0xFF00] &= ~(1 << 1);
             }
             return;
+        }
 
         // Voice 3
         // -------
@@ -664,7 +658,7 @@ void GB_SoundRegWrite(u32 address, u32 value)
                 GB_SoundLoadWave();
 
                 Sound.Chn3.samplecount = 0;
-                Sound.Chn3.outfreq = 131072 / (2048 - Sound.Chn3.freq);
+                Sound.Chn3.frequency_steps = 0;
                 Sound.Chn3.playing = 1;
             }
             else
@@ -705,22 +699,16 @@ void GB_SoundRegWrite(u32 address, u32 value)
             return;
         case NR33_REG:
             Sound.Chn3.reg[3] = value;
-
-            Sound.Chn3.freq &= 0x0700;
-            Sound.Chn3.freq |= value;
-
-            if (Sound.Chn3.playing)
-            {
-                Sound.Chn3.outfreq = 131072 / (2048 - Sound.Chn3.freq);
-            }
             return;
         case NR34_REG:
+        {
             Sound.Chn3.reg[4] = value;
 
-            Sound.Chn3.freq &= 0xFF;
-            Sound.Chn3.freq |= (value & 0x07) << 8;
+            u16 freq = (u16)Sound.Chn3.reg[3]
+                     | ((u16)Sound.Chn3.reg[4] & 0x07) << 8;
 
-            Sound.Chn3.outfreq = 131072 / (2048 - Sound.Chn3.freq);
+            Sound.Chn3.frequency = 2048 - freq;
+            Sound.Chn3.frequency_steps = 0;
 
             Sound.Chn3.limittime = (value & (1 << 6));
 
@@ -736,6 +724,7 @@ void GB_SoundRegWrite(u32 address, u32 value)
                 }
             }
             return;
+        }
 
         // Voice 4
         // -------
@@ -768,31 +757,36 @@ void GB_SoundRegWrite(u32 address, u32 value)
 #endif
             return;
         case NR43_REG:
+        {
             Sound.Chn4.reg[3] = value;
 
-            Sound.Chn4.shift = (value >> 4) & 0x0F;
-            Sound.Chn4.width_7 = value & (1 << 3);
-            Sound.Chn4.freq_ratio = value & 0x07;
-
-            if (Sound.Chn4.shift > 13)
+            if (value & (1 << 3))
             {
-                Sound.Chn4.outfreq = 0;
+                Sound.Chn4.counter_width = 7;
+                Sound.Chn4.lfsr_state = 0x7F;
+            }
+            else
+            {
+                Sound.Chn4.counter_width = 15;
+                Sound.Chn4.lfsr_state = 0x7FFF;
+            }
+
+            int freq_div = (value >> 4) & 0xF;
+            int div_ratio = value & 0x7;
+
+            if (freq_div > 13)
+            {
+                Sound.Chn4.running = 0;
                 return;
             }
 
-            //const s32 NoiseFreqRatio[8] = {
-            //    1048576, 524288, 370728, 262144, 220436, 185364, 155872,
-            //    131072
-            //};
-            const s32 NoiseFreqRatio[8] = {
-                1048576, 524288, 262144, 174763, 131072, 104858, 87381, 74898
-            };
+            if (div_ratio > 0) // For div_ratio = 0 assume 0.5 instead
+                div_ratio <<= 1;
 
-            Sound.Chn4.outfreq = NoiseFreqRatio[Sound.Chn4.freq_ratio]
-                                 >> (Sound.Chn4.shift + 1);
-            if (Sound.Chn4.outfreq > (1 << 18))
-                Sound.Chn4.outfreq = 1 << 18;
+            Sound.Chn4.frequency = div_ratio * (1 << (freq_div + 1));
+            Sound.Chn4.frequency_steps = 0;
             return;
+        }
         case NR44_REG:
             Sound.Chn4.reg[4] = value;
 
@@ -907,39 +901,61 @@ static void GB_SoundClockCounterSet(int new_reference_clocks)
     gb_sound_clock_counter = new_reference_clocks;
 }
 
+static u32 min4(u32 a, u32 b, u32 c, u32 d)
+{
+    u32 x = (a < b) ? a : b;
+    u32 y = (c < d) ? c : d;
+    return (x < y) ? x : y;
+}
+
 void GB_SoundUpdateClocksCounterReference(int reference_clocks)
 {
     _GB_MEMORY_ *mem = &GameBoy.Memory;
 
-    int increment_clocks = reference_clocks - GB_SoundClockCounterGet();
+    if (reference_clocks < GB_SoundClockCounterGet())
+        return;
+
+    u32 clocks = reference_clocks - GB_SoundClockCounterGet();
 
     // Every 16384 clocks update hardware, every 128 generate sample
 
-    Sound.clocks += increment_clocks;
-
-    if (output_enabled)
+    while (1)
     {
-        Sound.nextsample_clocks += increment_clocks;
+        u32 next_step_clocks = 16384 - Sound.step_clocks;
+        u32 next_sample_clocks = 128 - Sound.nextsample_clocks;
+        u32 next_freq_clocks = 2 - Sound.nextfreq_clocks;
+        u32 next_freq_ch4_clocks = 4 - Sound.nextfreq_ch4_clocks;
 
-        // 4194304 Hz CPU / 32768 Hz sound output = 128
+        u32 next_clocks = min4(next_step_clocks, next_sample_clocks,
+                               next_freq_clocks, next_freq_ch4_clocks);
 
-        u32 clocks_ref = 128 << GameBoy.Emulator.DoubleSpeed;
-        if (Sound.nextsample_clocks > clocks_ref)
+        if (next_clocks > clocks)
         {
-            Sound.nextsample_clocks -= clocks_ref;
-            GB_SoundMix();
+            Sound.step_clocks += clocks;
+            Sound.nextsample_clocks += clocks;
+            Sound.nextfreq_clocks += clocks;
+            Sound.nextfreq_ch4_clocks += clocks;
+
+            GB_SoundClockCounterSet(reference_clocks);
+
+            return;
         }
-    }
 
-    // 4194304 Hz CPU / 256 Steps per second
-    u32 clocks_per_sound_step = 16384 << GameBoy.Emulator.DoubleSpeed;
+        clocks -= next_clocks;
 
-    if (Sound.clocks >= clocks_per_sound_step)
-    {
-        Sound.clocks -= clocks_per_sound_step;
-        if (Sound.master_enable)
+        Sound.step_clocks += next_clocks;
+        Sound.nextsample_clocks += next_clocks;
+        Sound.nextfreq_clocks += next_clocks;
+        Sound.nextfreq_ch4_clocks += next_clocks;
+
+        // Step event for all channels
+
+        if (Sound.step_clocks >= 16384)
         {
-            if (Sound.Chn1.running) // Channel 1
+            Sound.step_clocks = 0;
+
+            // Channel 1
+            if (Sound.Chn1.running)
             {
                 if (Sound.Chn1.limittime)
                 {
@@ -1005,19 +1021,15 @@ void GB_SoundUpdateClocksCounterReference(int reference_clocks)
                         if (Sound.Chn1.sweepinc)
                         {
                             Sound.Chn1.sweepfreq += Sound.Chn1.sweepfreq
-                                                    / (1 << Sound.Chn1.sweepshift);
+                                                  / (1 << Sound.Chn1.sweepshift);
                         }
                         else
                         {
                             Sound.Chn1.sweepfreq -= Sound.Chn1.sweepfreq
-                                                    / (1 << Sound.Chn1.sweepshift);
+                                                  / (1 << Sound.Chn1.sweepshift);
                         }
 
-                        // Incorrect, to prevent a "divide by zero" exception
-                        Sound.Chn1.sweepfreq &= 2047;
-
-                        Sound.Chn1.outfreq = 131072
-                                             / (2048 - Sound.Chn1.sweepfreq);
+                        Sound.Chn1.frequency = Sound.Chn1.sweepfreq;
                     }
                     else
                     {
@@ -1026,7 +1038,8 @@ void GB_SoundUpdateClocksCounterReference(int reference_clocks)
                 }
             }
 
-            if (Sound.Chn2.running) // Channel 2
+            // Channel 2
+            if (Sound.Chn2.running)
             {
                 if (Sound.Chn2.limittime)
                 {
@@ -1085,7 +1098,8 @@ void GB_SoundUpdateClocksCounterReference(int reference_clocks)
                 }
             }
 
-            if (Sound.Chn3.running) // Channel 3
+            // Channel 3
+            if (Sound.Chn3.running)
             {
                 if (Sound.Chn3.stepsleft > 0)
                 {
@@ -1098,7 +1112,8 @@ void GB_SoundUpdateClocksCounterReference(int reference_clocks)
                 }
             }
 
-            if (Sound.Chn4.running) // Channel 4
+            // Channel 4
+            if (Sound.Chn4.running)
             {
                 if (Sound.Chn4.limittime)
                 {
@@ -1157,9 +1172,104 @@ void GB_SoundUpdateClocksCounterReference(int reference_clocks)
                 }
             }
         }
-    }
 
-    GB_SoundClockCounterSet(reference_clocks);
+        // Frequency change of channels 1, 2 and 3
+
+        if (Sound.nextfreq_clocks >= 2)
+        {
+            Sound.nextfreq_clocks = 0;
+
+            // Channel 1
+
+            Sound.Chn1.frequency_steps++;
+            if (Sound.Chn1.frequency <= Sound.Chn1.frequency_steps)
+            {
+                Sound.Chn1.frequency_steps = 0;
+
+                Sound.Chn1.out_sample =
+                    GB_SquareWave[Sound.Chn1.duty][Sound.Chn1.samplecount];
+
+                Sound.Chn1.samplecount++;
+                Sound.Chn1.samplecount %= 32;
+            }
+
+            // Channel 2
+
+            Sound.Chn2.frequency_steps++;
+            if (Sound.Chn2.frequency <= Sound.Chn2.frequency_steps)
+            {
+                Sound.Chn2.frequency_steps = 0;
+
+                Sound.Chn2.out_sample =
+                    GB_SquareWave[Sound.Chn2.duty][Sound.Chn2.samplecount];
+
+                Sound.Chn2.samplecount++;
+                Sound.Chn2.samplecount %= 32;
+            }
+
+            // Channel 3
+
+            Sound.Chn3.frequency_steps++;
+            if (Sound.Chn3.frequency <= Sound.Chn3.frequency_steps)
+            {
+                Sound.Chn3.frequency_steps = 0;
+
+                Sound.Chn3.out_sample = GB_WavePattern[Sound.Chn3.samplecount];
+
+                Sound.Chn3.samplecount++;
+                Sound.Chn3.samplecount %= 32;
+            }
+        }
+
+        // Frequency change of channel 4
+
+        if (Sound.nextfreq_ch4_clocks >= 4)
+        {
+            Sound.nextfreq_ch4_clocks = 0;
+
+            // Channel 4
+
+            if (Sound.Chn4.counter_width == 7)
+            {
+                if (Sound.Chn4.lfsr_state & 1)
+                {
+                    Sound.Chn4.lfsr_state >>= 1;
+                    Sound.Chn4.lfsr_state ^= 0x60;
+                    Sound.Chn4.out_sample = 127;
+                }
+                else
+                {
+                    Sound.Chn4.lfsr_state >>= 1;
+                    Sound.Chn4.out_sample = -128;
+                }
+            }
+            else if (Sound.Chn4.counter_width == 15)
+            {
+                if (Sound.Chn4.lfsr_state & 1)
+                {
+                    Sound.Chn4.lfsr_state >>= 1;
+                    Sound.Chn4.lfsr_state ^= 0x6000;
+                    Sound.Chn4.out_sample = 127;
+                }
+                else
+                {
+                    Sound.Chn4.lfsr_state >>= 1;
+                    Sound.Chn4.out_sample = -128;
+                }
+            }
+        }
+
+        // Mix samples
+
+        if (output_enabled)
+        {
+            if (Sound.nextsample_clocks >= 128)
+            {
+                Sound.nextsample_clocks = 0;
+                GB_SoundMix();
+            }
+        }
+    }
 }
 
 int GB_SoundGetClocksToNextEvent(void)

@@ -664,15 +664,20 @@ u32 GBA_SoundUpdate(u32 clocks)
                     {
                         Sound.Chn1.sweepstepsleft = Sound.Chn1.sweeptime << 1;
 
+                        int val = Sound.Chn1.sweepfreq >> Sound.Chn1.sweepshift;
+
                         if (Sound.Chn1.sweepinc)
                         {
-                            Sound.Chn1.sweepfreq += Sound.Chn1.sweepfreq
-                                                  / (1 << Sound.Chn1.sweepshift);
+                            Sound.Chn1.sweepfreq += val;
+                            if (Sound.Chn1.sweepfreq > 2047)
+                            {
+                                Sound.Chn1.running = 0;
+                                REG_SOUNDCNT_X &= ~(1 << 0);
+                            }
                         }
                         else
                         {
-                            Sound.Chn1.sweepfreq -= Sound.Chn1.sweepfreq
-                                                  / (1 << Sound.Chn1.sweepshift);
+                            Sound.Chn1.sweepfreq -= val;
                         }
 
                         Sound.Chn1.frequency = Sound.Chn1.sweepfreq;

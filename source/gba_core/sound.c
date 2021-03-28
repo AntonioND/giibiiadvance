@@ -828,9 +828,9 @@ u32 GBA_SoundUpdate(u32 clocks)
             // Channel 1
 
             Sound.Chn1.frequency_steps++;
-            if (Sound.Chn1.frequency <= Sound.Chn1.frequency_steps)
+            if (Sound.Chn1.frequency_steps >= 2048)
             {
-                Sound.Chn1.frequency_steps = 0;
+                Sound.Chn1.frequency_steps = Sound.Chn1.frequency;
 
                 Sound.Chn1.out_sample =
                     GBA_SquareWave[Sound.Chn1.duty][Sound.Chn1.samplecount];
@@ -842,9 +842,9 @@ u32 GBA_SoundUpdate(u32 clocks)
             // Channel 2
 
             Sound.Chn2.frequency_steps++;
-            if (Sound.Chn2.frequency <= Sound.Chn2.frequency_steps)
+            if (Sound.Chn2.frequency_steps >= 2048)
             {
-                Sound.Chn2.frequency_steps = 0;
+                Sound.Chn2.frequency_steps = Sound.Chn2.frequency;
 
                 Sound.Chn2.out_sample =
                     GBA_SquareWave[Sound.Chn2.duty][Sound.Chn2.samplecount];
@@ -856,9 +856,9 @@ u32 GBA_SoundUpdate(u32 clocks)
             // Channel 3
 
             Sound.Chn3.frequency_steps++;
-            if (Sound.Chn3.frequency <= Sound.Chn3.frequency_steps)
+            if (Sound.Chn3.frequency_steps >= 2048)
             {
-                Sound.Chn3.frequency_steps = 0;
+                Sound.Chn3.frequency_steps = Sound.Chn3.frequency;
 
                 Sound.Chn3.out_sample = GBA_WavePattern[Sound.Chn3.samplecount];
 
@@ -1048,8 +1048,8 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
             }
             return;
         case SOUND1CNT_X:
-            Sound.Chn1.frequency = 2048 - (value & 0x07FF);
-            Sound.Chn1.frequency_steps = 0;
+            Sound.Chn1.frequency = value & 0x07FF;
+            Sound.Chn1.frequency_steps = Sound.Chn1.frequency;
 
             Sound.Chn1.limittime = (value & (1 << 14));
             if (value & (1 << 15))
@@ -1107,8 +1107,8 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
             return;
 
         case SOUND2CNT_H:
-            Sound.Chn2.frequency = 2048 - (value & 0x07FF);
-            Sound.Chn2.frequency_steps = 0;
+            Sound.Chn2.frequency = value & 0x07FF;
+            Sound.Chn2.frequency_steps = Sound.Chn2.frequency;
 
             Sound.Chn2.limittime = (value & (1 << 14));
             if (value & (1 << 15))
@@ -1146,9 +1146,6 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
             if (value & (1 << 7))
             {
                 REG_SOUNDCNT_X |= (1 << 2);
-                GBA_SoundLoadWave();
-                Sound.Chn3.samplecount = 0;
-                Sound.Chn3.frequency_steps = 0;
                 Sound.Chn3.playing = 1;
             }
             else
@@ -1198,8 +1195,8 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
 
             if (Sound.Chn3.playing)
             {
-                Sound.Chn3.frequency = 2048 - (value & 0x07FF);
-                Sound.Chn3.frequency_steps = 0;
+                Sound.Chn3.frequency = value & 0x07FF;
+                Sound.Chn3.frequency_steps = Sound.Chn3.frequency;
             }
 
             Sound.Chn3.limittime = (value & (1 << 6));

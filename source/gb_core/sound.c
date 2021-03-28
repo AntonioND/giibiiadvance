@@ -540,8 +540,8 @@ void GB_SoundRegWrite(u32 address, u32 value)
             u16 freq = (u16)Sound.Chn1.reg[3]
                      | ((u16)Sound.Chn1.reg[4] & 0x07) << 8;
 
-            Sound.Chn1.frequency = 2048 - freq;
-            Sound.Chn1.frequency_steps = 0;
+            Sound.Chn1.frequency = freq;
+            Sound.Chn1.frequency_steps = freq;
 
             Sound.Chn1.limittime = (Sound.Chn1.reg[4] & (1 << 6));
 
@@ -616,8 +616,8 @@ void GB_SoundRegWrite(u32 address, u32 value)
             u16 freq = (u16)Sound.Chn2.reg[3]
                      | ((u16)Sound.Chn2.reg[4] & 0x07) << 8;
 
-            Sound.Chn2.frequency = 2048 - freq;
-            Sound.Chn2.frequency_steps = 0;
+            Sound.Chn2.frequency = freq;
+            Sound.Chn2.frequency_steps = freq;
 
             Sound.Chn2.limittime = (value & (1 << 6));
 
@@ -707,8 +707,8 @@ void GB_SoundRegWrite(u32 address, u32 value)
             u16 freq = (u16)Sound.Chn3.reg[3]
                      | ((u16)Sound.Chn3.reg[4] & 0x07) << 8;
 
-            Sound.Chn3.frequency = 2048 - freq;
-            Sound.Chn3.frequency_steps = 0;
+            Sound.Chn3.frequency = freq;
+            Sound.Chn3.frequency_steps = freq;
 
             Sound.Chn3.limittime = (value & (1 << 6));
 
@@ -1182,9 +1182,9 @@ void GB_SoundUpdateClocksCounterReference(int reference_clocks)
             // Channel 1
 
             Sound.Chn1.frequency_steps++;
-            if (Sound.Chn1.frequency <= Sound.Chn1.frequency_steps)
+            if (Sound.Chn1.frequency_steps >= 2048)
             {
-                Sound.Chn1.frequency_steps = 0;
+                Sound.Chn1.frequency_steps = Sound.Chn1.frequency;
 
                 Sound.Chn1.out_sample =
                     GB_SquareWave[Sound.Chn1.duty][Sound.Chn1.samplecount];
@@ -1196,9 +1196,9 @@ void GB_SoundUpdateClocksCounterReference(int reference_clocks)
             // Channel 2
 
             Sound.Chn2.frequency_steps++;
-            if (Sound.Chn2.frequency <= Sound.Chn2.frequency_steps)
+            if (Sound.Chn2.frequency_steps >= 2048)
             {
-                Sound.Chn2.frequency_steps = 0;
+                Sound.Chn2.frequency_steps = Sound.Chn2.frequency;
 
                 Sound.Chn2.out_sample =
                     GB_SquareWave[Sound.Chn2.duty][Sound.Chn2.samplecount];
@@ -1210,9 +1210,9 @@ void GB_SoundUpdateClocksCounterReference(int reference_clocks)
             // Channel 3
 
             Sound.Chn3.frequency_steps++;
-            if (Sound.Chn3.frequency <= Sound.Chn3.frequency_steps)
+            if (Sound.Chn3.frequency_steps >= 2048)
             {
-                Sound.Chn3.frequency_steps = 0;
+                Sound.Chn3.frequency_steps = Sound.Chn3.frequency;
 
                 Sound.Chn3.out_sample = GB_WavePattern[Sound.Chn3.samplecount];
 

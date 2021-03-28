@@ -873,34 +873,44 @@ u32 GBA_SoundUpdate(u32 clocks)
         {
             Sound.nextfreq_ch4_clocks = 0;
 
-            // Channel 4
+            if (Sound.Chn4.running)
+            {
+                Sound.Chn4.frequency_steps++;
 
-            if (Sound.Chn4.counter_width == 7)
-            {
-                if (Sound.Chn4.lfsr_state & 1)
+                if (Sound.Chn4.frequency_steps >= Sound.Chn4.frequency)
                 {
-                    Sound.Chn4.lfsr_state >>= 1;
-                    Sound.Chn4.lfsr_state ^= 0x60;
-                    Sound.Chn4.out_sample = 127;
-                }
-                else
-                {
-                    Sound.Chn4.lfsr_state >>= 1;
-                    Sound.Chn4.out_sample = -128;
-                }
-            }
-            else if (Sound.Chn4.counter_width == 15)
-            {
-                if (Sound.Chn4.lfsr_state & 1)
-                {
-                    Sound.Chn4.lfsr_state >>= 1;
-                    Sound.Chn4.lfsr_state ^= 0x6000;
-                    Sound.Chn4.out_sample = 127;
-                }
-                else
-                {
-                    Sound.Chn4.lfsr_state >>= 1;
-                    Sound.Chn4.out_sample = -128;
+                    Sound.Chn4.frequency_steps = 0;
+
+                    // Channel 4
+
+                    if (Sound.Chn4.counter_width == 7)
+                    {
+                        if (Sound.Chn4.lfsr_state & 1)
+                        {
+                            Sound.Chn4.lfsr_state >>= 1;
+                            Sound.Chn4.lfsr_state ^= 0x60;
+                            Sound.Chn4.out_sample = 127;
+                        }
+                        else
+                        {
+                            Sound.Chn4.lfsr_state >>= 1;
+                            Sound.Chn4.out_sample = -128;
+                        }
+                    }
+                    else if (Sound.Chn4.counter_width == 15)
+                    {
+                        if (Sound.Chn4.lfsr_state & 1)
+                        {
+                            Sound.Chn4.lfsr_state >>= 1;
+                            Sound.Chn4.lfsr_state ^= 0x6000;
+                            Sound.Chn4.out_sample = 127;
+                        }
+                        else
+                        {
+                            Sound.Chn4.lfsr_state >>= 1;
+                            Sound.Chn4.out_sample = -128;
+                        }
+                    }
                 }
             }
         }

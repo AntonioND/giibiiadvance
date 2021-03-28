@@ -44,7 +44,6 @@ Game Boy Advance
 ----------------
 
 - ARM undefined opcodes
-- Sound glitches. (Buffer underflow or something?)
 - Sprite limit (normal or affine) (with or without free HBL interval).
 - The NDS7 and GBA allow to access CP14 (unlike as for CP0..CP13 & CP15, access
   to CP14 doesn't generate any exceptions)

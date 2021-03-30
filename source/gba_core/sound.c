@@ -752,14 +752,17 @@ u32 GBA_SoundUpdate(u32 clocks)
             // Channel 3
             if (Sound.Chn3.running)
             {
-                if (Sound.Chn3.stepsleft > 0)
+                if (Sound.Chn3.limittime)
                 {
-                    Sound.Chn3.stepsleft--;
-                }
-                else if (Sound.Chn3.limittime)
-                {
-                    Sound.Chn3.running = 0;
-                    REG_SOUNDCNT_X &= ~(1 << 2);
+                    if (Sound.Chn3.stepsleft > 0)
+                    {
+                        Sound.Chn3.stepsleft--;
+                    }
+                    else
+                    {
+                        Sound.Chn3.running = 0;
+                        REG_SOUNDCNT_X &= ~(1 << 2);
+                    }
                 }
             }
 
@@ -1208,26 +1211,22 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
         case SOUND3CNT_X:
             Sound.Chn3.reg[2] = value;
 
-            if (Sound.Chn3.playing)
-            {
-                Sound.Chn3.frequency = value & 0x07FF;
-                Sound.Chn3.frequency_steps = Sound.Chn3.frequency;
-            }
+            Sound.Chn3.frequency = value & 0x07FF;
+            Sound.Chn3.frequency_steps = Sound.Chn3.frequency;
 
-            Sound.Chn3.limittime = (value & (1 << 6));
+            Sound.Chn3.limittime = (value & (1 << 14));
 
-            if (Sound.Chn3.playing) // ?
+            if (Sound.Chn3.playing && (value & (1 << 15)))
             {
                 Sound.Chn3.samplecount = 0;
-
-                if (value & (1 << 15))
-                {
-                    //Sound.Chn3.playing = 1; // ?
-                    Sound.Chn3.samplecount = 0;
-                    REG_SOUNDCNT_X |= (1 << 2);
-                    GBA_SoundLoadWave();
-                    Sound.Chn3.running = 1;
-                }
+                REG_SOUNDCNT_X |= (1 << 2);
+                GBA_SoundLoadWave();
+                Sound.Chn3.running = 1;
+            }
+            else
+            {
+                Sound.Chn3.running = 0;
+                REG_SOUNDCNT_X &= ~(1 << 2);
             }
             return;
 

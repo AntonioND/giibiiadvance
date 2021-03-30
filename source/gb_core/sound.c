@@ -543,7 +543,7 @@ void GB_SoundRegWrite(u32 address, u32 value)
             Sound.Chn1.frequency = freq;
             Sound.Chn1.frequency_steps = freq;
 
-            Sound.Chn1.limittime = (Sound.Chn1.reg[4] & (1 << 6));
+            Sound.Chn1.limittime = (value & (1 << 6));
 
             if (value & (1 << 7))
             {
@@ -712,16 +712,17 @@ void GB_SoundRegWrite(u32 address, u32 value)
 
             Sound.Chn3.limittime = (value & (1 << 6));
 
-            if (Sound.Chn3.playing) // ?
+            if (Sound.Chn3.playing && (value & (1 << 7)))
             {
-                if (value & (1 << 7))
-                {
-                    //Sound.Chn3.playing = 1; // ?
-                    Sound.Chn3.samplecount = 0;
-                    mem->IO_Ports[NR52_REG - 0xFF00] |= (1 << 2);
-                    GB_SoundLoadWave();
-                    Sound.Chn3.running = 1;
-                }
+                Sound.Chn3.samplecount = 0;
+                mem->IO_Ports[NR52_REG - 0xFF00] |= (1 << 2);
+                GB_SoundLoadWave();
+                Sound.Chn3.running = 1;
+            }
+            else
+            {
+                Sound.Chn3.running = 0;
+                mem->IO_Ports[NR52_REG - 0xFF00] &= ~(1 << 2);
             }
             return;
         }
@@ -1107,14 +1108,17 @@ void GB_SoundUpdateClocksCounterReference(int reference_clocks)
             // Channel 3
             if (Sound.Chn3.running)
             {
-                if (Sound.Chn3.stepsleft > 0)
+                if (Sound.Chn3.limittime)
                 {
-                    Sound.Chn3.stepsleft--;
-                }
-                else if (Sound.Chn3.limittime)
-                {
-                    Sound.Chn3.running = 0;
-                    mem->IO_Ports[NR52_REG - 0xFF00] &= ~(1 << 2);
+                    if (Sound.Chn3.stepsleft > 0)
+                    {
+                        Sound.Chn3.stepsleft--;
+                    }
+                    else
+                    {
+                        Sound.Chn3.running = 0;
+                        mem->IO_Ports[NR52_REG - 0xFF00] &= ~(1 << 2);
+                    }
                 }
             }
 

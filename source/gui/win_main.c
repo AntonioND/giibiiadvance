@@ -1404,12 +1404,9 @@ int Win_MainCreate(char *rom_path)
         }
     }
 
-    if (!Script_IsRunning())
-    {
-        // Initialize state
-        Input_Update_GB();
-        Input_Update_GBA();
-    }
+    // Initialize state
+    Input_Update_GB();
+    Input_Update_GBA();
 
     return 0;
 }

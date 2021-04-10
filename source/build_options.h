@@ -20,18 +20,18 @@
 //---------------------------------------------------------------
 
 #define GIIBIIADVANCE_VERSION_MAJOR (0)
-#define GIIBIIADVANCE_VERSION_MINOR (3)
+#define GIIBIIADVANCE_VERSION_MINOR (4)
 #define GIIBIIADVANCE_VERSION_PATCH (0)
 #define GIIBIIADVANCE_VERSION \
     ((GIIBIIADVANCE_VERSION_MAJOR << 16) | (GIIBIIADVANCE_VERSION_MINOR << 8) \
      | (GIIBIIADVANCE_VERSION_PATCH))
 
-#define GIIBIIADVANCE_VERSION_STRING "0.3.0"
+#define GIIBIIADVANCE_VERSION_STRING "0.4.0"
 
 #define GIIBIIADVANCE_COPYRIGHT_STRING \
-    "Copyright (C) 2011-2015, 2019-2020 Antonio Niño Díaz (AntonioND)"
+    "Copyright (C) 2011-2015, 2019-2021 Antonio Niño Díaz (AntonioND)"
 #define GIIBIIADVANCE_COPYRIGHT_STRING_ASCII \
-    "Copyright (C) 2011-2015, 2019-2020 Antonio Ni" STR_NTILDE_MINUS "o D" \
+    "Copyright (C) 2011-2015, 2019-2021 Antonio Ni" STR_NTILDE_MINUS "o D" \
     STR_IACUTE_MINUS "az (AntonioND)"
 
 //---------------------------------------------------------------

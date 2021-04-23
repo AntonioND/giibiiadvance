@@ -157,7 +157,7 @@ void GBA_DMA1Setup(void)
         DMA[1].num_chunks = 0x4000;
     DMA[1].copywords = REG_DMA1CNT_H & BIT(10);
 
-    DMA[1].srcaddr = REG_DMA1SAD & (DMA[1].copywords ? 0x07FFFFFC : 0x07FFFFFE);
+    DMA[1].srcaddr = REG_DMA1SAD & (DMA[1].copywords ? 0x0FFFFFFC : 0x0FFFFFFE);
     DMA[1].dstaddr = REG_DMA1DAD & (DMA[1].copywords ? 0x07FFFFFC : 0x07FFFFFE);
 
     if (DMA[1].copywords)
@@ -219,8 +219,8 @@ void GBA_DMA2Setup(void)
         DMA[2].num_chunks = 0x4000;
     DMA[2].copywords = REG_DMA2CNT_H & BIT(10);
 
-    DMA[2].srcaddr = REG_DMA2SAD & (DMA[2].copywords ? ~3 : ~1);
-    DMA[2].dstaddr = REG_DMA2DAD & (DMA[2].copywords ? ~3 : ~1);
+    DMA[2].srcaddr = REG_DMA2SAD & (DMA[2].copywords ? 0x0FFFFFFC : 0x0FFFFFFE);
+    DMA[2].dstaddr = REG_DMA2DAD & (DMA[2].copywords ? 0x07FFFFFC : 0x07FFFFFE);
 
     if (DMA[2].copywords)
     {

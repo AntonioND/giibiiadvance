@@ -439,8 +439,8 @@ void Win_GBAMapViewerUpdate(void)
 
     //--------------------------------------------------
 
-    gba_mapview_scrollx_max = ((((int)gba_mapview_sizex) - 256) / 8) - 1;
-    gba_mapview_scrolly_max = ((((int)gba_mapview_sizey) - 256) / 8) - 1;
+    gba_mapview_scrollx_max = (((int)gba_mapview_sizex) - 256) / 8;
+    gba_mapview_scrolly_max = (((int)gba_mapview_sizey) - 256) / 8;
 
     if (gba_mapview_scrollx_max < 0)
         gba_mapview_scrollx_max = 0;

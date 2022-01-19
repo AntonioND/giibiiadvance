@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 #
-# Copyright (c) 2020-2021, Antonio Niño Díaz
+# Copyright (c) 2020-2022, Antonio Niño Díaz
 #
 # GiiBiiAdvance - GBA/GB emulator
 
@@ -8,13 +8,13 @@ cmake_minimum_required(VERSION 3.13)
 project(GiiBiiAdvance)
 enable_language(CXX C)
 
-set(CXX_STANDARD 14)
-set(CXX_EXTENSIONS OFF)
-set(CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(C_STANDARD 11)
-set(C_EXTENSIONS OFF)
-set(C_STANDARD_REQUIRED ON)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_EXTENSIONS OFF)
+set(CMAKE_C_STANDARD_REQUIRED ON)
 
 add_executable(giibiiadvance)
 

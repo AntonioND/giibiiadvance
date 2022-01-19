@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 //
-// Copyright (c) 2011-2015, 2019-2020, Antonio Niño Díaz
+// Copyright (c) 2011-2015, 2019-2020, 2022 Antonio Niño Díaz
 //
 // GiiBiiAdvance - GBA/GB emulator
 
@@ -15,6 +15,10 @@
 #include "dma.h"
 #include "memory.h"
 #include "sound.h"
+
+#ifndef M_PI
+#define M_PI (3.14159265358979323846)
+#endif
 
 //------------------------------------------------------------------------------
 

@@ -104,7 +104,7 @@ BIOS_START:
 	cmp		r0,#0					@ |-see if we can avoid halting the cpu 
 	blne	.handle_flags			@ | if r0 != 0 when SWI was called
 .wait_IRQ:
-	@mov	r12,#0x04000000			@ base reg ---- BUG, REAL BIOS SHOULD HAVE THIS !!!
+	mov		r12,#0x04000000			@ base reg ---- BUG, REAL BIOS SHOULD HAVE THIS !!!
 	strb	r3,[r12,#+0x301]		@ halt
 	bl		.handle_flags
 	beq		.wait_IRQ				@ if Z = 0 (no IRQ checked) wait

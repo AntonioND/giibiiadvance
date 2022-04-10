@@ -600,6 +600,11 @@ void WH_Focus(int index)
 
     // Move window forward
     SDL_RaiseWindow(w->mWindow);
+
+    // Force the window manager to set the input focus on the target window.
+    // TODO: Check if this returns an error? There is nothing to do at that
+    // point, so does it make sense to check?
+    SDL_SetWindowInputFocus(w->mWindow);
 }
 
 int WH_GetWidth(int index)

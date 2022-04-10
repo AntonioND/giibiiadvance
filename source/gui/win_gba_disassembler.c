@@ -580,13 +580,11 @@ int Win_GBADisassemblerCreate(void)
 
 void Win_GBADisassemblerSetFocus(void)
 {
-    if (GBADisassemblerCreated == 1)
-    {
-        WH_Focus(WinIDGBADis);
-        return;
-    }
+    if (GBADisassemblerCreated == 0)
+        Win_GBADisassemblerCreate();
 
-    Win_GBADisassemblerCreate();
+    WH_Focus(WinIDGBADis);
+    Win_GBADisassemblerUpdate();
 }
 
 void Win_GBADisassemblerClose(void)

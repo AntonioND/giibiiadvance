@@ -462,13 +462,11 @@ int Win_GBDisassemblerCreate(void)
 
 void Win_GBDisassemblerSetFocus(void)
 {
-    if (GBDisassemblerCreated == 1)
-    {
-        WH_Focus(WinIDGBDis);
-        return;
-    }
+    if (GBDisassemblerCreated == 0)
+        Win_GBDisassemblerCreate();
 
-    Win_GBDisassemblerCreate();
+    WH_Focus(WinIDGBDis);
+    Win_GBDisassemblerUpdate();
 }
 
 void Win_GBDisassemblerClose(void)

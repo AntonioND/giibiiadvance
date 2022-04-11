@@ -1300,8 +1300,10 @@ void GBA_SoundRegWrite16(u32 address, u16 value)
 
         // Control
         case SOUNDCNT_L:
-            Sound.rightvol = value & 0x7;
-            Sound.leftvol = (value >> 4) & 0x7;
+            // The values are never 0
+            Sound.rightvol = (value & 0x7) + 1;
+            Sound.leftvol = ((value >> 4) & 0x7) + 1;
+
             Sound.leftvol_1 = Sound.Chn1.speakerleft ?
                                         (Sound.Chn1.vol * Sound.leftvol) : 0;
             Sound.rightvol_1 = Sound.Chn1.speakerright ?

@@ -203,7 +203,6 @@ static void GBA_SWI_RegisterRamReset(void)
 static void GBA_SWI_CpuSet(void)
 {
     int count = CPU.R[2] & 0x001FFFFF;
-    CPU.R[2] &= ~0x001FFFFF;
 
     if (CPU.R[2] & BIT(26)) // 32 bit
     {
@@ -257,28 +256,31 @@ static void GBA_SWI_CpuSet(void)
 
 static void GBA_SWI_CpuFastSet(void)
 {
-    int count = CPU.R[2] & 0x001FFFF8; // Must be a multiple of 8 words
-    CPU.R[2] &= ~0x001FFFFF;
-
-    CPU.R[0] &= ~3;
-    CPU.R[1] &= ~3;
+    uint32_t size = (CPU.R[2] & 0x001FFFFF) * sizeof(uint32_t);
+    uint32_t end_address = CPU.R[1] + size;
 
     if (CPU.R[2] & BIT(24)) // Fill
     {
         u32 fill = GBA_MemoryRead32(CPU.R[0]);
-        while (count--)
+        while (CPU.R[1] < end_address)
         {
-            GBA_MemoryWrite32(CPU.R[1], fill);
-            CPU.R[1] += 4;
+            for (int i = 0; i < 8; i++)
+            {
+                GBA_MemoryWrite32(CPU.R[1], fill);
+                CPU.R[1] += 4;
+            }
         }
     }
     else // Copy
     {
-        while (count--)
+        while (CPU.R[1] < end_address)
         {
-            GBA_MemoryWrite32(CPU.R[1], GBA_MemoryRead32(CPU.R[0]));
-            CPU.R[1] += 4;
-            CPU.R[0] += 4;
+            for (int i = 0; i < 8; i++)
+            {
+                GBA_MemoryWrite32(CPU.R[1], GBA_MemoryRead32(CPU.R[0]));
+                CPU.R[1] += 4;
+                CPU.R[0] += 4;
+            }
         }
     }
 }

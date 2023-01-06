@@ -1987,41 +1987,33 @@ s32 GBA_ExecuteARM(s32 clocks)
                             case 0x12: // MSR{cond} cpsr{_field},Rm
                             {
                                 u32 value = CPU.R[opcode & 0xF];
-                                u32 result = 0;
                                 if (opcode & BIT(19))
                                 {
-                                    result |= value & 0xFF000000;
                                     CPU.CPSR &= 0x00FFFFFF;
+                                    CPU.CPSR |= value & 0xFF000000;
                                 }
-                                if (CPU.MODE != CPU_USER)
-                                {
+                                if (CPU.MODE != CPU_USER) {
                                     if (opcode & BIT(18))
                                     {
-                                        result |= value & 0x00FF0000;
                                         CPU.CPSR &= 0xFF00FFFF;
+                                        CPU.CPSR |= value & 0x00FF0000;
                                     }
                                     if (opcode & BIT(17))
                                     {
-                                        result |= value & 0x0000FF00;
                                         CPU.CPSR &= 0xFFFF00FF;
+                                        CPU.CPSR |= value & 0x0000FF00;
                                     }
-                                    if (opcode & BIT(16))
-                                    {
-                                        result |= value & 0x000000FF;
-                                        CPU.CPSR &= 0xFFFFFF00;
-                                        CPU.CPSR |= result;
-                                        GBA_CPUChangeMode(result & 0x1F);
-                                    }
-                                    else
-                                    {
-                                        CPU.CPSR |= result;
-                                    }
-                                    GBA_ExecutionBreak();
                                 }
-                                else
+                                if (opcode & BIT(16))
                                 {
-                                    CPU.CPSR |= result;
+                                    // In user mode we are allowed to change the Thumb state
+                                    u32 msk = (CPU.MODE != CPU_USER) ? 0xFF : 0x20;
+                                    CPU.CPSR &= ~msk;
+                                    // Seems that the 4th bit is always set?
+                                    CPU.CPSR |= (value & msk) | 0x10;
+                                    GBA_CPUChangeMode(CPU.CPSR & 0x1F);
                                 }
+                                GBA_ExecutionBreak();
                                 // 1S cycle
                                 clocks -= GBA_MemoryGetAccessCycles(PCseq, 1, CPU.R[R_PC]);
                                 break;

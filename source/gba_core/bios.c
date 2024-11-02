@@ -525,7 +525,7 @@ static void GBA_SWI_LZ77UnCompWram(void)
             flag <<= 1;
         }
     }
-    // Copy to VRAM in 16 bit blocks
+    // Copy to destination in 8 bit blocks
     u8 *dstbuf = buffer;
     while (size--)
         GBA_MemoryWrite8(dst++, *dstbuf++);
@@ -594,7 +594,7 @@ static void GBA_SWI_LZ77UnCompVram(void)
             flag <<= 1;
         }
     }
-    // Copy to VRAM in 16 bit blocks
+    // Copy to destination in 16 bit blocks
     u16 *dstbuf = buffer;
     while (size > 0)
     {
